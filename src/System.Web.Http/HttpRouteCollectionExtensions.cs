@@ -1,7 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel;
+using System.Globalization;
+using System.Linq;
 using System.Net.Http;
+using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.Routing;
 
 namespace System.Web.Http
@@ -73,6 +77,44 @@ namespace System.Web.Http
             IHttpRoute route = routes.CreateRoute(routeTemplate, defaultsDictionary, constraintsDictionary, dataTokens: null, handler: handler);
             routes.Add(name, route);
             return route;
+        }
+
+        public static void MapHttpAttributeRoutes(this HttpRouteCollection routes)
+        {
+            // Configuration only used to retrieve the assembly resolver and controller type resolver
+            using (HttpConfiguration config = new HttpConfiguration())
+            {
+                MapHttpAttributeRoutes(routes, new DefaultHttpControllerSelector(config), new ApiControllerActionSelector());
+            }
+        }
+
+        public static void MapHttpAttributeRoutes(this HttpRouteCollection routes, IHttpControllerSelector controllerSelector, IHttpActionSelector actionSelector)
+        {
+            foreach (HttpControllerDescriptor controllerDescriptor in controllerSelector.GetControllerMapping().Values)
+            {
+                foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionSelector.GetActionMapping(controllerDescriptor))
+                {
+                    int routeSuffix = 1;
+                    foreach (ReflectedHttpActionDescriptor actionDescriptor in actionGrouping.OfType<ReflectedHttpActionDescriptor>())
+                    {
+                        foreach (IHttpRouteProvider routeProvider in actionDescriptor.MethodInfo.GetCustomAttributes(false).OfType<IHttpRouteProvider>())
+                        {
+                            // TODO: Improve default route name
+                            string routeName = routeProvider.RouteName ??
+                                String.Format(CultureInfo.InvariantCulture, "{0}.{1}{2}", controllerDescriptor.ControllerName, actionGrouping.Key, routeSuffix);
+
+                            // TODO: Improve HTTP method constraint. Current implementation is very inefficient since it matches before running the constraint.
+                            routes.MapHttpRoute(
+                                routeName,
+                                routeProvider.RouteTemplate,
+                                new { controller = controllerDescriptor.ControllerName, action = actionDescriptor.ActionName },
+                                new { methodConstraint = new HttpMethodConstraint(routeProvider.HttpMethods.ToArray()) });
+
+                            routeSuffix++;
+                        }
+                    }
+                }
+            }
         }
     }
 }

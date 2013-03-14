@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
+using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http
 {
@@ -102,6 +106,28 @@ namespace System.Web.Http
             Assert.Equal(1, route.Defaults.Count);
             Assert.Equal("C1", route.Constraints["c1"]);
             Assert.Same(route, routes["name"]);
+        }
+
+        [Fact]
+        public void MapHttpAttributeRoutes_AddsRoutesFromAttributes()
+        {
+            // Arrange
+            HttpRouteCollection routes = new HttpRouteCollection();
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor() { ControllerName = "Controller" };
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(AttributedController).GetMethod("Get"));
+
+            Mock<IHttpControllerSelector> controllerSelector = new Mock<IHttpControllerSelector>();
+            controllerSelector.Setup(c => c.GetControllerMapping()).Returns(new Dictionary<string, HttpControllerDescriptor>() { { "Controller", controllerDescriptor } });
+
+            Mock<IHttpActionSelector> actionSelector = new Mock<IHttpActionSelector>();
+            actionSelector.Setup(a => a.GetActionMapping(controllerDescriptor)).Returns(new[] { actionDescriptor }.ToLookup(ad => ad.ActionName));
+
+            // Act
+            routes.MapHttpAttributeRoutes(controllerSelector.Object, actionSelector.Object);
+
+            // Assert
+            IHttpRoute route = Assert.Single(routes);
+            Assert.Equal("Controller/{id}", route.RouteTemplate);
         }
     }
 }

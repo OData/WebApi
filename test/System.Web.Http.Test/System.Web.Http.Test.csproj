@@ -105,6 +105,7 @@
     </Compile>
     <Compile Include="ModelBinding\FormDataCollectionExtensionsTest.cs" />
     <Compile Include="ModelBinding\ModelBinderAttributeTest.cs" />
+    <Compile Include="Routing\AttributeRoutingTest.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />

@@ -1,9 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Routing;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.ValueProviders.Providers
 {
@@ -20,7 +23,9 @@ namespace System.Web.Http.ValueProviders.Providers
         [Fact]
         public void GetValueProvider_ReturnsQueryStringValueProviderInstaceWithInvariantCulture()
         {
-            var controllerContext = new HttpControllerContext() { Request = new HttpRequestMessage() };
+            var routeData = new Mock<IHttpRouteData>();
+            routeData.Setup(r => r.Values).Returns(() => new Dictionary<string, object>());
+            var controllerContext = new HttpControllerContext() { Request = new HttpRequestMessage(), RouteData = routeData.Object };
             var context = new HttpActionContext() { ControllerContext = controllerContext };
 
             IValueProvider result = _factory.GetValueProvider(context);

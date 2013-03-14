@@ -10,7 +10,7 @@ namespace System.Web.Http.ValueProviders.Providers
     public class RouteDataValueProvider : NameValuePairsValueProvider
     {
         public RouteDataValueProvider(HttpActionContext actionContext, CultureInfo culture)
-            : base(() => GetRoutes(actionContext.ControllerContext.RouteData), culture)
+            : base(GetRoutes(actionContext.ControllerContext.RouteData), culture)
         {
         }
 

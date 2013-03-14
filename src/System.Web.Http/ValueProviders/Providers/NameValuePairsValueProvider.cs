@@ -4,23 +4,29 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Threading;
 
 namespace System.Web.Http.ValueProviders.Providers
 {
     public class NameValuePairsValueProvider : IEnumerableValueProvider
     {
         private readonly CultureInfo _culture;
-        private readonly Lazy<PrefixContainer> _prefixContainer;
-        private readonly Lazy<Dictionary<string, object>> _values;
+        private PrefixContainer _prefixContainer;
+        private Dictionary<string, object> _values;
+        private Func<IEnumerable<KeyValuePair<string, string>>> _valuesFactory;
+        private object _valuesLock;
+        private bool _valuesInitialized;
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Represents a collection of name/value pairs, cannot use NameValueCollection because it performs poorly")]
         public NameValuePairsValueProvider(IEnumerable<KeyValuePair<string, string>> values, CultureInfo culture)
-            : this(() => values, culture)
         {
             if (values == null)
             {
                 throw Error.ArgumentNull("values");
             }
+
+            _values = InitializeValues(values);
+            _culture = culture;
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Represents a collection of name/value pairs, cannot use NameValueCollection because it performs poorly")]
@@ -31,9 +37,8 @@ namespace System.Web.Http.ValueProviders.Providers
                 throw Error.ArgumentNull("valuesFactory");
             }
 
-            _values = new Lazy<Dictionary<string, object>>(() => InitializeValues(valuesFactory()), isThreadSafe: true);
+            _valuesFactory = valuesFactory;
             _culture = culture;
-            _prefixContainer = new Lazy<PrefixContainer>(() => new PrefixContainer(_values.Value.Keys), isThreadSafe: true);
         }
 
         // For unit testing purposes
@@ -42,6 +47,34 @@ namespace System.Web.Http.ValueProviders.Providers
             get
             {
                 return _culture;
+            }
+        }
+
+        private PrefixContainer PrefixContainer
+        {
+            get
+            {
+                PrefixContainer prefixContainer = Volatile.Read(ref _prefixContainer);
+                if (prefixContainer == null)
+                {
+                    // Initialization race is OK providing data remains read-only and object identity is not significant
+                    prefixContainer = new PrefixContainer(Values.Keys);
+                    Volatile.Write(ref _prefixContainer, prefixContainer);
+                }
+                return prefixContainer;
+            }
+        }
+
+        private Dictionary<string, object> Values
+        {
+            get
+            {
+                Dictionary<string, object> values = Volatile.Read(ref _values);
+                if (values == null)
+                {
+                    return InitializeValuesThreadSafe();
+                }
+                return values;
             }
         }
 
@@ -88,9 +121,14 @@ namespace System.Web.Http.ValueProviders.Providers
             return values;
         }
 
+        private Dictionary<string, object> InitializeValuesThreadSafe()
+        {
+            return LazyInitializer.EnsureInitialized(ref _values, ref _valuesInitialized, ref _valuesLock, () => InitializeValues(_valuesFactory()));
+        }
+
         public virtual bool ContainsPrefix(string prefix)
         {
-            return _prefixContainer.Value.ContainsPrefix(prefix);
+            return PrefixContainer.ContainsPrefix(prefix);
         }
 
         public virtual IDictionary<string, string> GetKeysFromPrefix(string prefix)
@@ -100,7 +138,7 @@ namespace System.Web.Http.ValueProviders.Providers
                 throw Error.ArgumentNull("prefix");
             }
 
-            return _prefixContainer.Value.GetKeysFromPrefix(prefix);
+            return PrefixContainer.GetKeysFromPrefix(prefix);
         }
 
         public virtual ValueProviderResult GetValue(string key)
@@ -111,7 +149,7 @@ namespace System.Web.Http.ValueProviders.Providers
             }
 
             object value;
-            if (_values.Value.TryGetValue(key, out value))
+            if (Values.TryGetValue(key, out value))
             {
                 return new ValueProviderResult(value, GetAttemptedValue(value), _culture);
             }

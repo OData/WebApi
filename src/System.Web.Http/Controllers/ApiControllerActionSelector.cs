@@ -185,7 +185,7 @@ namespace System.Web.Http.Controllers
                 }
 
                 // Make sure the action parameter matches the route and query parameters. Overload resolution logic is applied when needed.
-                IEnumerable<ReflectedHttpActionDescriptor> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, actionsFoundByHttpMethods, useActionName);
+                List<ReflectedHttpActionDescriptor> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, actionsFoundByHttpMethods, useActionName);
 
                 List<ReflectedHttpActionDescriptor> selectedActions = RunSelectionFilters(controllerContext, actionsFoundByParams);
                 actionsFoundByHttpMethods = null;
@@ -213,7 +213,7 @@ namespace System.Web.Http.Controllers
                 return new LookupAdapter() { Source = _actionNameMapping };
             }
 
-            private IEnumerable<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, ReflectedHttpActionDescriptor[] actionsFound, bool hasActionRouteKey)
+            private List<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, ReflectedHttpActionDescriptor[] actionsFound, bool hasActionRouteKey)
             {
                 IDictionary<string, object> routeValues = controllerContext.RouteData.Values;
                 HashSet<string> routeParameterNames = new HashSet<string>(routeValues.Keys, StringComparer.OrdinalIgnoreCase);
@@ -287,7 +287,7 @@ namespace System.Web.Http.Controllers
                 return true;
             }
 
-            private static List<ReflectedHttpActionDescriptor> RunSelectionFilters(HttpControllerContext controllerContext, IEnumerable<HttpActionDescriptor> descriptorsFound)
+            private static List<ReflectedHttpActionDescriptor> RunSelectionFilters(HttpControllerContext controllerContext, List<ReflectedHttpActionDescriptor> descriptorsFound)
             {
                 // remove all methods which are opting out of this request
                 // to opt out, at least one attribute defined on the method must return false
@@ -295,8 +295,9 @@ namespace System.Web.Http.Controllers
                 List<ReflectedHttpActionDescriptor> matchesWithSelectionAttributes = null;
                 List<ReflectedHttpActionDescriptor> matchesWithoutSelectionAttributes = new List<ReflectedHttpActionDescriptor>();
 
-                foreach (ReflectedHttpActionDescriptor actionDescriptor in descriptorsFound)
+                for (int i = 0; i < descriptorsFound.Count; i++)
                 {
+                    ReflectedHttpActionDescriptor actionDescriptor = descriptorsFound[i];
                     IActionMethodSelector[] attrs = actionDescriptor.CacheAttrsIActionMethodSelector;
                     if (attrs.Length == 0)
                     {
@@ -305,9 +306,9 @@ namespace System.Web.Http.Controllers
                     else
                     {
                         bool match = true;
-                        for (int i = 0; i < attrs.Length; i++)
+                        for (int j = 0; j < attrs.Length; j++)
                         {
-                            IActionMethodSelector selector = attrs[i];
+                            IActionMethodSelector selector = attrs[j];
                             if (!selector.IsValidForRequest(controllerContext, actionDescriptor.MethodInfo))
                             {
                                 match = false;

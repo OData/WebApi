@@ -23,6 +23,7 @@ namespace System.Web.Http.WebHost
     /// An <see cref="HttpTaskAsyncHandler"/> that uses an <see cref="HttpServer"/> to process ASP.NET requests asynchronously.
     /// </summary>
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "This class is a coordinator, so this coupling is expected.")]
+    [SuppressMessage("Microsoft.Design", "CA1001:Implement IDisposable", Justification = "HttpMessageInvoker doesn’t have any resources of its own to dispose.")]
     public class HttpControllerHandler : HttpTaskAsyncHandler
     {
         internal static readonly string HttpContextBaseKey = "MS_HttpContext";
@@ -40,44 +41,56 @@ namespace System.Web.Http.WebHost
                     return httpContext => httpContext.Response.SuppressFormsAuthenticationRedirect = true;
                 });
 
-        private static readonly Lazy<HttpMessageInvoker> _server =
-            new Lazy<HttpMessageInvoker>(
-                () =>
-                {
-                    HttpServer server = new HttpServer(GlobalConfiguration.Configuration, GlobalConfiguration.DefaultHandler);
-                    return new HttpMessageInvoker(server);
-                });
-
         private static readonly Lazy<IHostBufferPolicySelector> _bufferPolicySelector =
             new Lazy<IHostBufferPolicySelector>(() => GlobalConfiguration.Configuration.Services.GetHostBufferPolicySelector());
 
         private static readonly Func<HttpRequestMessage, X509Certificate2> _retrieveClientCertificate = new Func<HttpRequestMessage, X509Certificate2>(RetrieveClientCertificate);
 
-        private IHttpRouteData _routeData;
+        private readonly IHttpRouteData _routeData;
+        private readonly HttpMessageInvoker _server;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpControllerHandler"/> class.
         /// </summary>
         /// <param name="routeData">The route data.</param>
         public HttpControllerHandler(RouteData routeData)
+            : this(routeData, GlobalConfiguration.DefaultServer)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpControllerHandler"/> class.
+        /// </summary>
+        /// <param name="routeData">The route data.</param>
+        /// <param name="handler">The message handler to dispatch requests to.</param>
+        public HttpControllerHandler(RouteData routeData, HttpMessageHandler handler)
         {
             if (routeData == null)
             {
                 throw Error.ArgumentNull("routeData");
             }
+            if (handler == null)
+            {
+                throw Error.ArgumentNull("handler");
+            }
 
             _routeData = new HostedHttpRouteData(routeData);
+            _server = new HttpMessageInvoker(handler);
         }
 
-        public override async Task ProcessRequestAsync(HttpContext context)
+        public override Task ProcessRequestAsync(HttpContext context)
         {
-            HttpContextBase contextBase = new HttpContextWrapper(context);
+            return ProcessRequestAsyncCore(new HttpContextWrapper(context));
+        }
+
+        internal async Task ProcessRequestAsyncCore(HttpContextBase contextBase)
+        {
             HttpRequestMessage request = contextBase.GetHttpRequestMessage() ?? ConvertRequest(contextBase);
 
             // Add route data
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = _routeData;
 
-            HttpResponseMessage response = await _server.Value.SendAsync(request, CancellationToken.None);
+            HttpResponseMessage response = await _server.SendAsync(request, contextBase.Request.TimedOutToken);
             await ConvertResponse(contextBase, response, request);
         }
 

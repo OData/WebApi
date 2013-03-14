@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
 using System.Threading;
@@ -22,12 +21,10 @@ namespace System.Web.Http
     public abstract class ApiController : IHttpController, IDisposable
     {
         private bool _disposed;
-        private HttpRequestMessage _request;
         private ModelStateDictionary _modelState;
-        private HttpConfiguration _configuration;
         private HttpControllerContext _controllerContext;
-        private UrlHelper _urlHelper;
         private IHostPrincipalService _principalService;
+        private bool _initialized;
 
         /// <summary>
         /// Gets the <see name="HttpRequestMessage"/> of the current ApiController.
@@ -36,7 +33,7 @@ namespace System.Web.Http
         /// </summary>
         public HttpRequestMessage Request
         {
-            get { return _request; }
+            get { return ControllerContext.Request; }
             set
             {
                 if (value == null)
@@ -44,7 +41,7 @@ namespace System.Web.Http
                     throw Error.PropertyNull();
                 }
 
-                _request = value;
+                ControllerContext.Request = value;
             }
         }
 
@@ -55,7 +52,10 @@ namespace System.Web.Http
         /// </summary>
         public HttpConfiguration Configuration
         {
-            get { return _configuration; }
+            get
+            {
+                return ControllerContext.Configuration;
+            }
             set
             {
                 if (value == null)
@@ -63,7 +63,7 @@ namespace System.Web.Http
                     throw Error.PropertyNull();
                 }
 
-                _configuration = value;
+                ControllerContext.Configuration = value;
             }
         }
 
@@ -74,7 +74,16 @@ namespace System.Web.Http
         /// </summary>
         public HttpControllerContext ControllerContext
         {
-            get { return _controllerContext; }
+            get
+            {
+                // unit test only.
+                if (_controllerContext == null)
+                {
+                    _controllerContext = new HttpControllerContext();
+                }
+
+                return _controllerContext;
+            }
             set
             {
                 if (value == null)
@@ -113,12 +122,11 @@ namespace System.Web.Http
         {
             get
             {
-                if (_urlHelper == null)
+                if (Request == null)
                 {
-                    _urlHelper = Request.GetUrlHelper();
+                    return null;
                 }
-
-                return _urlHelper;
+                return Request.GetUrlHelper();
             }
 
             set
@@ -128,7 +136,25 @@ namespace System.Web.Http
                     throw Error.PropertyNull();
                 }
 
-                _urlHelper = value;
+                ThrowIfRequestIsNull();
+                Request.SetUrlHelper(value);
+            }
+        }
+
+        public IHttpRouteData RouteData
+        {
+            get
+            {
+                return ControllerContext.RouteData;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                ControllerContext.RouteData = value;
             }
         }
 
@@ -144,7 +170,7 @@ namespace System.Web.Http
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "This method is a coordinator, so this coupling is expected.")]
         public virtual Task<HttpResponseMessage> ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)
         {
-            if (_request != null)
+            if (_initialized)
             {
                 // if user has registered a controller factory which produces the same controller instance, we should throw here
                 throw Error.InvalidOperation(SRResources.CannotSupportSingletonInstance, typeof(ApiController).Name, typeof(IHttpControllerActivator).Name);
@@ -154,18 +180,18 @@ namespace System.Web.Http
 
             // We can't be reused, and we know we're disposable, so make sure we go away when
             // the request has been completed.
-            if (_request != null)
+            if (Request != null)
             {
-                _request.RegisterForDispose(this);
+                Request.RegisterForDispose(this);
             }
 
             HttpControllerDescriptor controllerDescriptor = controllerContext.ControllerDescriptor;
             ServicesContainer controllerServices = controllerDescriptor.Configuration.Services;
             HttpActionDescriptor actionDescriptor = controllerServices.GetActionSelector().SelectAction(controllerContext);
 
-            if (_request != null)
+            if (Request != null)
             {
-                _request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor;
+                Request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor;
             }
 
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
@@ -209,11 +235,9 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("controllerContext");
             }
 
-            ControllerContext = controllerContext;
-
-            _request = controllerContext.Request;
-            _configuration = controllerContext.Configuration;
-            _principalService = _configuration.Services.GetHostPrincipalService();
+            _initialized = true;
+            _controllerContext = controllerContext;
+            _principalService = Configuration.Services.GetHostPrincipalService();
 
             if (_principalService == null)
             {
@@ -380,6 +404,14 @@ namespace System.Web.Http
         }
 
         #endregion IDisposable
+
+        private void ThrowIfRequestIsNull()
+        {
+            if (ControllerContext.Request == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestIsNull, GetType().Name);
+            }
+        }
 
         /// <summary>
         /// Quickly split filters into different types

@@ -50,6 +50,24 @@ namespace System.Net.Http
         }
 
         [Fact]
+        public void SetConfiguration_ThrowsArgumentNull_Request()
+        {
+            HttpRequestMessage request = null;
+
+            Assert.ThrowsArgumentNull(
+                () => request.SetConfiguration(_config),
+                "request");
+        }
+
+        [Fact]
+        public void SetConfiguration_ThrowsArgumentNull_Configuration()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _request.SetConfiguration(null),
+                "configuration");
+        }
+
+        [Fact]
         public void GetSynchronizationContextThrowsOnNull()
         {
             HttpRequestMessage request = null;
@@ -93,6 +111,24 @@ namespace System.Net.Http
 
             // Act
             Assert.ThrowsArgumentNull(() => request.GetRouteData(), "request");
+        }
+
+        [Fact]
+        public void SetRouteData_ThrowsArgumentNull_Request()
+        {
+            HttpRequestMessage request = null;
+
+            Assert.ThrowsArgumentNull(
+                () => request.SetRouteData(routeData: new HttpRouteData(new HttpRoute())),
+                "request");
+        }
+
+        [Fact]
+        public void SetRouteData_ThrowsArgumentNull_RouteData()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _request.SetRouteData(null),
+                "routeData");
         }
 
         [Fact]
@@ -460,6 +496,32 @@ namespace System.Net.Http
 
             Assert.NotNull(urlHelper);
             Assert.Same(request, urlHelper.Request);
+        }
+
+        [Fact]
+        public void GetUrlHelper_Caches_UrlHelperInstance()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+
+            UrlHelper urlHelper1 = request.GetUrlHelper();
+            UrlHelper urlHelper2 = request.GetUrlHelper();
+
+            Assert.NotNull(urlHelper1);
+            Assert.Same(urlHelper1, urlHelper2);
+        }
+
+        [Fact]
+        public void SetUrlHelper_AndThen_GetUrlHelper_ReturnsConsistentResult()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            UrlHelper urlHelper = new UrlHelper();
+
+            request.SetUrlHelper(urlHelper);
+            var retrievedUrlHelper = request.GetUrlHelper();
+
+            Assert.Same(urlHelper, retrievedUrlHelper);
         }
 
         [Fact]

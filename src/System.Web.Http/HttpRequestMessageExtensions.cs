@@ -40,6 +40,25 @@ namespace System.Net.Http
         }
 
         /// <summary>
+        /// Sets the <see cref="HttpConfiguration"/> for the given request.
+        /// </summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <param name="configuration">The <see cref="HttpConfiguration"/> to set.</param>
+        public static void SetConfiguration(this HttpRequestMessage request, HttpConfiguration configuration)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+        }
+
+        /// <summary>
         /// Gets the dependency resolver scope associated with this <see cref="HttpRequestMessage"/>.
         /// Services which are retrieved from this scope will be released when the request is
         /// cleaned up by the framework.
@@ -130,6 +149,25 @@ namespace System.Net.Http
             }
 
             return request.GetProperty<IHttpRouteData>(HttpPropertyKeys.HttpRouteDataKey);
+        }
+
+        /// <summary>
+        /// Sets the <see cref="System.Web.Http.Routing.IHttpRouteData"/> for the given request.
+        /// </summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <param name="routeData">The HTTP route data.</param>
+        public static void SetRouteData(this HttpRequestMessage request, IHttpRouteData routeData)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+            if (routeData == null)
+            {
+                throw Error.ArgumentNull("routeData");
+            }
+
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
         }
 
         /// <summary>
@@ -646,6 +684,11 @@ namespace System.Net.Http
             return queryString;
         }
 
+        /// <summary>
+        /// Retrieves the <see cref="UrlHelper"/> instance associated with this request.
+        /// </summary>
+        /// <param name="request">The <see cref="HttpRequestMessage"/>.</param>
+        /// <returns>The <see cref="UrlHelper"/> instance associated with this request.</returns>
         public static UrlHelper GetUrlHelper(this HttpRequestMessage request)
         {
             if (request == null)
@@ -653,7 +696,34 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
-            return new UrlHelper(request);
+            UrlHelper urlHelper;
+            if (!request.Properties.TryGetValue<UrlHelper>(HttpPropertyKeys.UrlHelperKey, out urlHelper))
+            {
+                urlHelper = new UrlHelper(request);
+                request.Properties.Add(HttpPropertyKeys.UrlHelperKey, urlHelper);
+            }
+
+            return urlHelper;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="UrlHelper"/> instance associated with this request.
+        /// </summary>
+        /// <param name="request">The <see cref="HttpRequestMessage"/>.</param>
+        /// <param name="urlHelper">The <see cref="UrlHelper"/></param>
+        /// <returns>The <see cref="UrlHelper"/> instance associated with this request.</returns>
+        public static void SetUrlHelper(this HttpRequestMessage request, UrlHelper urlHelper)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+            if (urlHelper == null)
+            {
+                throw Error.ArgumentNull("urlHelper");
+            }
+
+            request.Properties[HttpPropertyKeys.UrlHelperKey] = urlHelper;
         }
     }
 }

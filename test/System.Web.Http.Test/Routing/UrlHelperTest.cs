@@ -39,6 +39,12 @@ namespace System.Web.Http.Routing
         }
 
         [Fact]
+        public void EmptyCtor_MeantForUnitTesting_DoesntThrow()
+        {
+            Assert.DoesNotThrow(() => new UrlHelper());
+        }
+
+        [Fact]
         public void UrlHelper_CtorThrows_WithNullContext()
         {
             Assert.ThrowsArgumentNull(

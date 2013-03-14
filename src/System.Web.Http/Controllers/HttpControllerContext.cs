@@ -49,7 +49,10 @@ namespace System.Web.Http.Controllers
 
         public HttpConfiguration Configuration
         {
-            get { return _configuration; }
+            get
+            {
+                return _configuration ?? (_request == null ? null : _request.GetConfiguration());
+            }
             set
             {
                 if (value == null)
@@ -58,6 +61,7 @@ namespace System.Web.Http.Controllers
                 }
 
                 _configuration = value;
+                SyncWithRequest();
             }
         }
 
@@ -72,12 +76,16 @@ namespace System.Web.Http.Controllers
                 }
 
                 _request = value;
+                SyncWithRequest();
             }
         }
 
         public IHttpRouteData RouteData
         {
-            get { return _routeData; }
+            get
+            {
+                return _routeData ?? (_request == null ? null : _request.GetRouteData());
+            }
             set
             {
                 if (value == null)
@@ -86,6 +94,7 @@ namespace System.Web.Http.Controllers
                 }
 
                 _routeData = value;
+                SyncWithRequest();
             }
         }
 
@@ -126,6 +135,27 @@ namespace System.Web.Http.Controllers
                 }
 
                 _controller = value;
+            }
+        }
+
+        // unit test only. syncs data on the controller context with the request.
+        private void SyncWithRequest()
+        {
+            if (_request != null)
+            {
+                if (_configuration != null)
+                {
+                    _request.SetConfiguration(_configuration);
+                }
+
+                if (_routeData != null)
+                {
+                    _request.SetRouteData(_routeData);
+                }
+
+                // fall back to data from request.
+                _routeData = null;
+                _configuration = null;
             }
         }
     }

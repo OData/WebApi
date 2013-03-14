@@ -22,6 +22,11 @@ namespace System.Web.Http.Hosting
         public static readonly string HttpRouteDataKey = "MS_HttpRouteData";
 
         /// <summary>
+        /// Provides a key for the <see cref="UrlHelper"/> instance associated with this request.
+        /// </summary>
+        public static readonly string UrlHelperKey = "MS_UrlHelper";
+
+        /// <summary>
         /// Provides a key for the <see cref="System.Web.Http.Controllers.HttpActionDescriptor"/> associated with this request.
         /// </summary>
         public static readonly string HttpActionDescriptorKey = "MS_HttpActionDescriptor";

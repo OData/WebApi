@@ -73,7 +73,6 @@
     <Compile Include="Helpers\AntiXsrf\TokenValidator.cs" />
     <Compile Include="Helpers\AntiXsrf\ITokenValidator.cs" />
     <Compile Include="Helpers\AntiXsrf\IClaimUidExtractor.cs" />
-    <Compile Include="Helpers\AntiXsrf\MachineKey40CryptoSystem.cs" />
     <Compile Include="Helpers\AntiXsrf\ICryptoSystem.cs" />
     <Compile Include="Helpers\Claims\Claim.cs" />
     <Compile Include="Helpers\Claims\ClaimsIdentity.cs" />

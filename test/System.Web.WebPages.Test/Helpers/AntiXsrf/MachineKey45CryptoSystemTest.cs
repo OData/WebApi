@@ -10,48 +10,32 @@ namespace System.Web.Helpers.AntiXsrf.Test
         public void Protect()
         {
             // Arrange
-            byte[] expectedInputBytes = new byte[] { 1, 2, 3, 4, 5 };
-            byte[] expectedOutputBytes = new byte[] { 6, 7, 8, 9, 10 };
-            string expectedOutputString = HttpServerUtility.UrlTokenEncode(expectedOutputBytes);
+            byte[] unprotectedBytes = new byte[] { 1, 2, 3, 4, 5 };
+            string unprotectedString = HttpServerUtility.UrlTokenEncode(unprotectedBytes);
 
-            Func<byte[], string[], byte[]> protectThunk = (input, purposes) =>
-            {
-                Assert.Equal(expectedInputBytes, input);
-                Assert.Equal(new string[] { "System.Web.Helpers.AntiXsrf.AntiForgeryToken.v1" }, purposes);
-                return expectedOutputBytes;
-            };
-
-            MachineKey45CryptoSystem cryptoSystem = new MachineKey45CryptoSystem(protectThunk, null);
+            MachineKey45CryptoSystem cryptoSystem = new MachineKey45CryptoSystem();
 
             // Act
-            string output = cryptoSystem.Protect(expectedInputBytes);
+            string protectedString = cryptoSystem.Protect(unprotectedBytes);
 
             // Assert
-            Assert.Equal(expectedOutputString, output);
+            Assert.NotEqual(unprotectedString, protectedString);
         }
 
         [Fact]
         public void Unprotect()
         {
             // Arrange
-            byte[] expectedInputBytes = new byte[] { 1, 2, 3, 4, 5 };
-            string expectedInputString = HttpServerUtility.UrlTokenEncode(expectedInputBytes);
-            byte[] expectedOutputBytes = new byte[] { 6, 7, 8, 9, 10 };
+            byte[] unprotectedBytes = new byte[] { 1, 2, 3, 4, 5 };
 
-            Func<byte[], string[], byte[]> unprotectThunk = (input, purposes) =>
-            {
-                Assert.Equal(expectedInputBytes, input);
-                Assert.Equal(new string[] { "System.Web.Helpers.AntiXsrf.AntiForgeryToken.v1" }, purposes);
-                return expectedOutputBytes;
-            };
-
-            MachineKey45CryptoSystem cryptoSystem = new MachineKey45CryptoSystem(null, unprotectThunk);
+            MachineKey45CryptoSystem cryptoSystem = new MachineKey45CryptoSystem();
 
             // Act
-            byte[] output = cryptoSystem.Unprotect(expectedInputString);
+            string protectedString = cryptoSystem.Protect(unprotectedBytes);
+            byte[] output = cryptoSystem.Unprotect(protectedString);
 
             // Assert
-            Assert.Equal(expectedOutputBytes, output);
+            Assert.Equal(unprotectedBytes, output);
         }
     }
 }

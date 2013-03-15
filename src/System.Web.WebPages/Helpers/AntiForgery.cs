@@ -21,17 +21,8 @@ namespace System.Web.Helpers
         {
             // initialize the dependency chain
 
-            // The 'Instance' property can return null, in which case we should fall back to using
-            // the 4.0 crypto code paths. We need to use an 'if' block rather than the null coalescing
-            // operator due to a CLR bug (DevDiv #424203).
-            ICryptoSystem cryptoSystem = MachineKey45CryptoSystem.Instance;
-            if (cryptoSystem == null)
-            {
-                cryptoSystem = new MachineKey40CryptoSystem();
-            }
-
             IAntiForgeryConfig config = new AntiForgeryConfigWrapper();
-            IAntiForgeryTokenSerializer serializer = new AntiForgeryTokenSerializer(cryptoSystem);
+            IAntiForgeryTokenSerializer serializer = new AntiForgeryTokenSerializer(MachineKey45CryptoSystem.Instance);
             ITokenStore tokenStore = new AntiForgeryTokenStore(config, serializer);
             IClaimUidExtractor claimUidExtractor = new ClaimUidExtractor(config, ClaimsIdentityConverter.Default);
             ITokenValidator tokenValidator = new TokenValidator(config, claimUidExtractor);

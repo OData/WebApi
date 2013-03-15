@@ -48,7 +48,6 @@
     <Compile Include="Helpers\AntiXsrf\MockableClaimUidExtractor.cs" />
     <Compile Include="Helpers\AntiXsrf\MockableCryptoSystem.cs" />
     <Compile Include="Helpers\AntiXsrf\HexUtil.cs" />
-    <Compile Include="Helpers\AntiXsrf\MachineKey40CryptoSystemTest.cs" />
     <Compile Include="Helpers\Claims\ClaimTest.cs" />
     <Compile Include="Helpers\Claims\ClaimsIdentityTest.cs" />
     <Compile Include="Helpers\Claims\ClaimsIdentityConverterTest.cs" />

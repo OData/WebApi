@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -61,10 +62,8 @@ namespace System.Web.Http.Services
     [SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Although this class is not sealed, end users cannot set instances of it so in practice it is sealed.")]
     public class DefaultServices : ServicesContainer
     {
-        // This lock protects both caches (and _lastKnownDependencyResolver is updated under it as well)
-        private readonly ReaderWriterLockSlim _cacheLock = new ReaderWriterLockSlim();
-        private readonly Dictionary<Type, object[]> _cacheMulti = new Dictionary<Type, object[]>();
-        private readonly Dictionary<Type, object> _cacheSingle = new Dictionary<Type, object>();
+        private ConcurrentDictionary<Type, object[]> _cacheMulti = new ConcurrentDictionary<Type, object[]>();
+        private ConcurrentDictionary<Type, object> _cacheSingle = new ConcurrentDictionary<Type, object>();
         private readonly HttpConfiguration _configuration;
 
         // Mutation operations delegate (throw if applied to wrong set)
@@ -162,14 +161,6 @@ namespace System.Web.Http.Services
             return _serviceTypesSingle.Contains(serviceType);
         }
 
-        /// <inheritdoc/>
-        [SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Although this class is not sealed, end users cannot set instances of it so in practice it is sealed.")]
-        [SuppressMessage("Microsoft.Usage", "CA1816:CallGCSuppressFinalizeCorrectly", Justification = "Although this class is not sealed, end users cannot set instances of it so in practice it is sealed.")]
-        public override void Dispose()
-        {
-            _cacheLock.Dispose();
-        }
-
         /// <summary>
         /// Try to get a service of the given type.
         /// </summary>
@@ -177,13 +168,10 @@ namespace System.Web.Http.Services
         /// <returns>The first instance of the service, or null if the service is not found.</returns>
         public override object GetService(Type serviceType)
         {
+            // Cached read case is very performance-sensitive
             if (serviceType == null)
             {
                 throw Error.ArgumentNull("serviceType");
-            }
-            if (!_serviceTypesSingle.Contains(serviceType))
-            {
-                throw Error.Argument("serviceType", SRResources.DefaultServices_InvalidServiceType, serviceType.Name);
             }
 
             // Invalidate the cache if the dependency scope has switched
@@ -194,38 +182,28 @@ namespace System.Web.Http.Services
 
             object result;
 
-            _cacheLock.EnterReadLock();
-            try
+            if (_cacheSingle.TryGetValue(serviceType, out result))
             {
-                if (_cacheSingle.TryGetValue(serviceType, out result))
-                {
-                    return result;
-                }
-            }
-            finally
-            {
-                _cacheLock.ExitReadLock();
-            }
-
-            // Get the service from DI, outside of the lock. If we're coming up hot, this might
-            // mean we end up creating the service more than once.
-            object dependencyService = _configuration.DependencyResolver.GetService(serviceType);
-
-            _cacheLock.EnterWriteLock();
-            try
-            {
-                if (!_cacheSingle.TryGetValue(serviceType, out result))
-                {
-                    result = dependencyService ?? _defaultServicesSingle[serviceType];
-                    _cacheSingle[serviceType] = result;
-                }
-
                 return result;
             }
-            finally
+
+            // Check input after initial read attempt for performance.
+            if (!_serviceTypesSingle.Contains(serviceType))
             {
-                _cacheLock.ExitWriteLock();
+                throw Error.Argument("serviceType", SRResources.DefaultServices_InvalidServiceType, serviceType.Name);
             }
+
+            // Get the service from DI. If we're coming up hot, this might
+            // mean we end up creating the service more than once.
+            object dependencyService = _lastKnownDependencyResolver.GetService(serviceType);
+
+            if (!_cacheSingle.TryGetValue(serviceType, out result))
+            {
+                result = dependencyService ?? _defaultServicesSingle[serviceType];
+                _cacheSingle.TryAdd(serviceType, result);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -236,13 +214,10 @@ namespace System.Web.Http.Services
         /// service is not found. </returns>
         public override IEnumerable<object> GetServices(Type serviceType)
         {
+            // Cached read case is very performance-sensitive
             if (serviceType == null)
             {
                 throw Error.ArgumentNull("serviceType");
-            }
-            if (!_serviceTypesMulti.Contains(serviceType))
-            {
-                throw Error.Argument("serviceType", SRResources.DefaultServices_InvalidServiceType, serviceType.Name);
             }
 
             // Invalidate the cache if the dependency scope has switched
@@ -253,40 +228,30 @@ namespace System.Web.Http.Services
 
             object[] result;
 
-            _cacheLock.EnterReadLock();
-            try
+            if (_cacheMulti.TryGetValue(serviceType, out result))
             {
-                if (_cacheMulti.TryGetValue(serviceType, out result))
-                {
-                    return result;
-                }
-            }
-            finally
-            {
-                _cacheLock.ExitReadLock();
-            }
-
-            // Get the service from DI, outside of the lock. If we're coming up hot, this might
-            // mean we end up creating the service more than once.
-            IEnumerable<object> dependencyServices = _configuration.DependencyResolver.GetServices(serviceType);
-
-            _cacheLock.EnterWriteLock();
-            try
-            {
-                if (!_cacheMulti.TryGetValue(serviceType, out result))
-                {
-                    result = dependencyServices.Where(s => s != null)
-                                               .Concat(_defaultServicesMulti[serviceType])
-                                               .ToArray();
-                    _cacheMulti[serviceType] = result;
-                }
-
                 return result;
             }
-            finally
+
+            // Check input after initial read attempt for performance.
+            if (!_serviceTypesMulti.Contains(serviceType))
             {
-                _cacheLock.ExitWriteLock();
+                throw Error.Argument("serviceType", SRResources.DefaultServices_InvalidServiceType, serviceType.Name);
             }
+
+            // Get the service from DI. If we're coming up hot, this might
+            // mean we end up creating the service more than once.
+            IEnumerable<object> dependencyServices = _lastKnownDependencyResolver.GetServices(serviceType);
+
+            if (!_cacheMulti.TryGetValue(serviceType, out result))
+            {
+                result = dependencyServices.Where(s => s != null)
+                                            .Concat(_defaultServicesMulti[serviceType])
+                                            .ToArray();
+                _cacheMulti.TryAdd(serviceType, result);
+            }
+
+            return result;
         }
 
         // Returns the List<object> for the given service type. Also validates serviceType is in the known service type list.
@@ -322,33 +287,19 @@ namespace System.Web.Http.Services
         // has changed since the last time we made a request.
         private void ResetCache()
         {
-            _cacheLock.EnterWriteLock();
-            try
-            {
-                _cacheSingle.Clear();
-                _cacheMulti.Clear();
-                _lastKnownDependencyResolver = _configuration.DependencyResolver;
-            }
-            finally
-            {
-                _cacheLock.ExitWriteLock();
-            }
+            _cacheSingle = new ConcurrentDictionary<Type, object>();
+            _cacheMulti = new ConcurrentDictionary<Type, object[]>();
+            _lastKnownDependencyResolver = _configuration.DependencyResolver;
         }
 
         // Removes the cached values for a single service type. Called whenever the user manipulates
         // the local service list for a given service type.
         protected override void ResetCache(Type serviceType)
         {
-            _cacheLock.EnterWriteLock();
-            try
-            {
-                _cacheSingle.Remove(serviceType);
-                _cacheMulti.Remove(serviceType);
-            }
-            finally
-            {
-                _cacheLock.ExitWriteLock();
-            }
+            object single;
+            _cacheSingle.TryRemove(serviceType, out single);
+            object[] multiple;
+            _cacheMulti.TryRemove(serviceType, out multiple);
         }
     }
 }

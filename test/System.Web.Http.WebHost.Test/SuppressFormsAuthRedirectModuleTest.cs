@@ -154,13 +154,6 @@ namespace System.Web.Http.WebHost
         {
             Assert.Equal(expected, SuppressFormsAuthRedirectModule.GetEnabled(new NameValueCollection() { { SuppressFormsAuthRedirectModule.AppSettingsSuppressFormsAuthenticationRedirectKey, setting } }));
         }
-
-
-        [Fact]
-        public void PreApplicationStartCode_IsValid()
-        {
-            PreAppStartTestHelper.TestPreAppStartClass(typeof(PreApplicationStartCode));
-        }
     }
 
     internal class DisableRedirectStub : SuppressFormsAuthRedirectModule.IDisableRedirect

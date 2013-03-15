@@ -17,8 +17,6 @@ namespace System.Web.Http.WebHost
     /// </summary>
     internal class SuppressFormsAuthRedirectModule : IHttpModule
     {
-        internal static readonly string SuppressFormsAuthenticationRedirectPropertyName = "SuppressFormsAuthenticationRedirect";
-
         internal static readonly string AppSettingsSuppressFormsAuthenticationRedirectKey = "webapi:EnableSuppressRedirect";
 
         internal static readonly object DisableAuthenticationRedirectKey = new Object();
@@ -92,41 +90,6 @@ namespace System.Web.Http.WebHost
 
         public void Dispose()
         {
-        }
-
-        /// <summary>
-        /// Registers the module if necessary.
-        /// </summary>
-        /// <remarks>
-        /// We do not want the module to be registered if:
-        /// - Running on .NET 4.5 because there is a standard way to prevent the redirection
-        /// - The behavior is explicitly disabled using the appSettings flag
-        /// - The module <see cref="T:System.Web.Security.FormsAuthenticationModule"/> is not enabled
-        /// </remarks>
-        public static void Register()
-        {
-            // If FormsAuthentication is not enabled, this module is not needed
-            if (!FormsAuthentication.IsEnabled)
-            {
-                return;
-            }
-
-            // If explicitly requested, don't enable the module
-            if (!GetEnabled(WebConfigurationManager.AppSettings))
-            {
-                return;
-            }
-
-            PropertyInfo suppressRedirect = typeof(HttpResponseBase).GetProperty(SuppressFormsAuthenticationRedirectPropertyName, BindingFlags.Instance | BindingFlags.Public);
-
-            // Don't enable the module if hosted on .NET 4.5 or later. In this case the automatic 
-            // redirection will be disabled using the specific API call
-            if (suppressRedirect != null)
-            {
-                return;
-            }
-
-            Microsoft.Web.Infrastructure.DynamicModuleHelper.DynamicModuleUtility.RegisterModule(typeof(SuppressFormsAuthRedirectModule));
         }
 
         /// <summary>

@@ -37,17 +37,7 @@ namespace System.Web.Http.WebHost
                         return httpContext => { };
                     }
 
-                    var srPropertyInfo = typeof(HttpResponseBase).GetProperty(SuppressFormsAuthRedirectModule.SuppressFormsAuthenticationRedirectPropertyName, BindingFlags.Instance | BindingFlags.Public);
-
-                    // Use the property in .NET 4.5 if available
-                    if (srPropertyInfo != null)
-                    {
-                        Action<HttpResponseBase, bool> setter = (Action<HttpResponseBase, bool>)Delegate.CreateDelegate(typeof(Action<HttpResponseBase, bool>), srPropertyInfo.GetSetMethod(), throwOnBindFailure: false);
-                        return httpContext => setter(httpContext.Response, true);
-                    }
-
-                    // Use SuppressFormsAuthRedirectModule to revert the redirection on .NET 4.0
-                    return httpContext => SuppressFormsAuthRedirectModule.DisableAuthenticationRedirect(httpContext);
+                    return httpContext => httpContext.Response.SuppressFormsAuthenticationRedirect = true;
                 });
 
         private static readonly Lazy<HttpMessageInvoker> _server =

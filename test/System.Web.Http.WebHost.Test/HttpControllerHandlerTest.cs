@@ -194,22 +194,11 @@ namespace System.Web.Http.WebHost
             contextMock.SetupGet(hcb => hcb.Response.StatusCode).Returns(200);
             contextMock.SetupGet(hcb => hcb.Items).Returns(contextItems);
 
-            PropertyInfo suppressRedirect = typeof(HttpResponseBase).GetProperty(SuppressFormsAuthRedirectModule.SuppressFormsAuthenticationRedirectPropertyName, BindingFlags.Instance | BindingFlags.Public);
-
             // Act
             HttpControllerHandler.EnsureSuppressFormsAuthenticationRedirect(contextMock.Object);
 
             // Assert
-            if (suppressRedirect == null)
-            {
-                // .NET 4.0
-                Assert.False(contextItems.Contains(SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey));
-            }
-            else
-            {
-                // .NET 4.5
-                Assert.False((bool)suppressRedirect.GetValue(contextMock.Object.Response, null));
-            }
+            Assert.False(contextMock.Object.Response.SuppressFormsAuthenticationRedirect);
         }
 
         [Fact]
@@ -221,23 +210,11 @@ namespace System.Web.Http.WebHost
             contextMock.SetupGet(hcb => hcb.Response.StatusCode).Returns(401);
             contextMock.SetupGet(hcb => hcb.Items).Returns(contextItems);
 
-            PropertyInfo suppressRedirect = typeof(HttpResponseBase).GetProperty(SuppressFormsAuthRedirectModule.SuppressFormsAuthenticationRedirectPropertyName, BindingFlags.Instance | BindingFlags.Public);
-
             // Act
             HttpControllerHandler.EnsureSuppressFormsAuthenticationRedirect(contextMock.Object);
 
             // Assert
-            if (suppressRedirect == null)
-            {
-                // .NET 4.0
-                Assert.True(contextItems.Contains(SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey));
-                Assert.True((bool)contextItems[SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey]);
-            }
-            else
-            {
-                // .NET 4.5
-                Assert.True((bool)suppressRedirect.GetValue(contextMock.Object.Response, null));
-            }
+            Assert.True(contextMock.Object.Response.SuppressFormsAuthenticationRedirect);
         }
 
         [Fact]

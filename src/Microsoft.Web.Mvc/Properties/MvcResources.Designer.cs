@@ -358,15 +358,6 @@ namespace Microsoft.Web.Mvc.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The data being serialized is corrupt..
-        /// </summary>
-        internal static string MvcSerializer_MagicHeaderCheckFailed {
-            get {
-                return ResourceManager.GetString("MvcSerializer_MagicHeaderCheckFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error dispatching on controller {0}, conflicting actions matched: {1}..
         /// </summary>
         internal static string ResourceControllerFactory_ConflictingActions {

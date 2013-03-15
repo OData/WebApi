@@ -231,7 +231,4 @@
   <data name="UrlAttribute_Invalid" xml:space="preserve">
     <value>The {0} field is not a valid fully-qualified http, https, or ftp URL.</value>
   </data>
-  <data name="MvcSerializer_MagicHeaderCheckFailed" xml:space="preserve">
-    <value>The data being serialized is corrupt.</value>
-  </data>
 </root>

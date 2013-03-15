@@ -157,7 +157,6 @@
     <Compile Include="DeserializeAttribute.cs" />
     <Compile Include="ScriptExtensions.cs" />
     <Compile Include="SerializationExtensions.cs" />
-    <Compile Include="SerializationMode.cs" />
     <Compile Include="MvcSerializer.cs" />
     <Compile Include="AjaxOnlyAttribute.cs" />
     <Compile Include="CachedExpressionCompiler.cs" />

@@ -10,40 +10,30 @@ namespace Microsoft.Web.Mvc
     {
         public static MvcHtmlString Serialize(this HtmlHelper htmlHelper, string name)
         {
-            return Serialize(htmlHelper, name, MvcSerializer.DefaultSerializationMode);
+            return SerializeInternal(htmlHelper, name, null, useViewData: true);
         }
 
-        public static MvcHtmlString Serialize(this HtmlHelper htmlHelper, string name, SerializationMode mode)
+        internal static MvcHtmlString Serialize(this HtmlHelper htmlHelper, string name, MvcSerializer serializer)
         {
-            return SerializeInternal(htmlHelper, name, null, mode, true /* useViewData */);
-        }
-
-        internal static MvcHtmlString Serialize(this HtmlHelper htmlHelper, string name, SerializationMode mode, MvcSerializer serializer)
-        {
-            return SerializeInternal(htmlHelper, name, null, mode, true /* useViewData */, serializer);
+            return SerializeInternal(htmlHelper, name, null, useViewData: true, serializer: serializer);
         }
 
         public static MvcHtmlString Serialize(this HtmlHelper htmlHelper, string name, object data)
         {
-            return Serialize(htmlHelper, name, data, MvcSerializer.DefaultSerializationMode);
+            return SerializeInternal(htmlHelper, name, data, useViewData: false);
         }
 
-        public static MvcHtmlString Serialize(this HtmlHelper htmlHelper, string name, object data, SerializationMode mode)
+        internal static MvcHtmlString Serialize(this HtmlHelper htmlHelper, string name, object data, MvcSerializer serializer)
         {
-            return SerializeInternal(htmlHelper, name, data, mode, false /* useViewData */);
+            return SerializeInternal(htmlHelper, name, data, useViewData: false, serializer: serializer);
         }
 
-        internal static MvcHtmlString Serialize(this HtmlHelper htmlHelper, string name, object data, SerializationMode mode, MvcSerializer serializer)
+        private static MvcHtmlString SerializeInternal(HtmlHelper htmlHelper, string name, object data, bool useViewData)
         {
-            return SerializeInternal(htmlHelper, name, data, mode, false /* useViewData */, serializer);
+            return SerializeInternal(htmlHelper, name, data, useViewData, null);
         }
 
-        private static MvcHtmlString SerializeInternal(HtmlHelper htmlHelper, string name, object data, SerializationMode mode, bool useViewData)
-        {
-            return SerializeInternal(htmlHelper, name, data, mode, useViewData, null);
-        }
-
-        private static MvcHtmlString SerializeInternal(HtmlHelper htmlHelper, string name, object data, SerializationMode mode, bool useViewData, MvcSerializer serializer)
+        private static MvcHtmlString SerializeInternal(HtmlHelper htmlHelper, string name, object data, bool useViewData, MvcSerializer serializer)
         {
             if (htmlHelper == null)
             {
@@ -61,7 +51,7 @@ namespace Microsoft.Web.Mvc
                 data = htmlHelper.ViewData.Eval(name);
             }
 
-            string serializedData = (serializer ?? new MvcSerializer()).Serialize(data, mode);
+            string serializedData = (serializer ?? new MvcSerializer()).Serialize(data);
 
             TagBuilder builder = new TagBuilder("input");
             builder.Attributes["type"] = "hidden";

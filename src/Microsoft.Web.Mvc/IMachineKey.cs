@@ -8,7 +8,7 @@ namespace Microsoft.Web.Mvc
 
     internal interface IMachineKey
     {
-        byte[] Decode(string encodedData, MachineKeyProtection protectionOption);
-        string Encode(byte[] data, MachineKeyProtection protectionOption);
+        byte[] Unprotect(string protectedData, params string[] purposes);
+        string Protect(byte[] userData, params string[] purposes);
     }
 }

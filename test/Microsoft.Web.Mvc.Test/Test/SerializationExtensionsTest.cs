@@ -20,10 +20,10 @@ namespace Microsoft.Web.Mvc.Test
             HtmlHelper helper = MvcHelper.GetHtmlHelper(vdd);
 
             Mock<MvcSerializer> mockSerializer = new Mock<MvcSerializer>();
-            mockSerializer.Setup(o => o.Serialize("Hello!", SerializationMode.Signed)).Returns("some-value");
+            mockSerializer.Setup(o => o.Serialize("Hello!")).Returns("some-value");
 
             // Act
-            MvcHtmlString htmlString = helper.Serialize("someKey", "Hello!", SerializationMode.Signed, mockSerializer.Object);
+            MvcHtmlString htmlString = helper.Serialize("someKey", "Hello!", mockSerializer.Object);
 
             // Assert
             Assert.Equal(@"<input name=""someKey"" type=""hidden"" value=""some-value"" />", htmlString.ToHtmlString());
@@ -40,10 +40,10 @@ namespace Microsoft.Web.Mvc.Test
             HtmlHelper helper = MvcHelper.GetHtmlHelper(vdd);
 
             Mock<MvcSerializer> mockSerializer = new Mock<MvcSerializer>();
-            mockSerializer.Setup(o => o.Serialize(42, SerializationMode.EncryptedAndSigned)).Returns("some-other-value");
+            mockSerializer.Setup(o => o.Serialize(42)).Returns("some-other-value");
 
             // Act
-            MvcHtmlString htmlString = helper.Serialize("someKey", SerializationMode.EncryptedAndSigned, mockSerializer.Object);
+            MvcHtmlString htmlString = helper.Serialize("someKey", mockSerializer.Object);
 
             // Assert
             Assert.Equal(@"<input name=""someKey"" type=""hidden"" value=""some-other-value"" />", htmlString.ToHtmlString());

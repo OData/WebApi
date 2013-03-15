@@ -141,9 +141,6 @@
   <data name="MvcSerializer_DeserializationFailed" xml:space="preserve">
     <value>Deserialization failed. Verify that the data is being deserialized using the same SerializationMode with which it was serialized. Otherwise see the inner exception.</value>
   </data>
-  <data name="MvcSerializer_InvalidSerializationMode" xml:space="preserve">
-    <value>The provided SerializationMode is invalid.</value>
-  </data>
   <data name="Resources_UnsupportedMediaType" xml:space="preserve">
     <value>Unsupported Media Type: '{0}'.</value>
   </data>

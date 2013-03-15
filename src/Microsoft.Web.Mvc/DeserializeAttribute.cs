@@ -10,32 +10,22 @@ namespace Microsoft.Web.Mvc
     public sealed class DeserializeAttribute : CustomModelBinderAttribute
     {
         public DeserializeAttribute()
-            : this(MvcSerializer.DefaultSerializationMode)
         {
         }
-
-        public DeserializeAttribute(SerializationMode mode)
-        {
-            Mode = mode;
-        }
-
-        public SerializationMode Mode { get; private set; }
 
         internal MvcSerializer Serializer { get; set; }
 
         public override IModelBinder GetBinder()
         {
-            return new DeserializingModelBinder(Mode, Serializer);
+            return new DeserializingModelBinder(Serializer);
         }
 
         private sealed class DeserializingModelBinder : IModelBinder
         {
-            private readonly SerializationMode _mode;
             private readonly MvcSerializer _serializer;
 
-            public DeserializingModelBinder(SerializationMode mode, MvcSerializer serializer)
+            public DeserializingModelBinder(MvcSerializer serializer)
             {
-                _mode = mode;
                 _serializer = serializer ?? new MvcSerializer();
             }
 
@@ -55,7 +45,7 @@ namespace Microsoft.Web.Mvc
                 }
 
                 string serializedValue = (string)valueProviderResult.ConvertTo(typeof(string));
-                return _serializer.Deserialize(serializedValue, _mode);
+                return _serializer.Deserialize(serializedValue);
             }
         }
     }

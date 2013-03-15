@@ -16,8 +16,8 @@ namespace Microsoft.Web.Mvc.Test
         {
             // Arrange
             Mock<MvcSerializer> mockSerializer = new Mock<MvcSerializer>();
-            mockSerializer.Setup(o => o.Deserialize("some-value", SerializationMode.EncryptedAndSigned)).Returns(42);
-            DeserializeAttribute attr = new DeserializeAttribute(SerializationMode.EncryptedAndSigned) { Serializer = mockSerializer.Object };
+            mockSerializer.Setup(o => o.Deserialize("some-value")).Returns(42);
+            DeserializeAttribute attr = new DeserializeAttribute() { Serializer = mockSerializer.Object };
 
             IModelBinder binder = attr.GetBinder();
             ModelBindingContext mbContext = new ModelBindingContext
@@ -72,7 +72,7 @@ namespace Microsoft.Web.Mvc.Test
         {
             // Arrange
             Mock<MvcSerializer> mockSerializer = new Mock<MvcSerializer>();
-            mockSerializer.Setup(o => o.Deserialize(It.IsAny<string>(), It.IsAny<SerializationMode>())).Throws(new SerializationException());
+            mockSerializer.Setup(o => o.Deserialize(It.IsAny<string>())).Throws(new SerializationException());
             DeserializeAttribute attr = new DeserializeAttribute { Serializer = mockSerializer.Object };
 
             IModelBinder binder = attr.GetBinder();
@@ -88,19 +88,6 @@ namespace Microsoft.Web.Mvc.Test
             // Act & assert
             Exception exception = Assert.Throws<SerializationException>(
                 delegate { binder.BindModel(null, mbContext); });
-        }
-
-        [Fact]
-        public void ModeDefaultsToSigned()
-        {
-            // Arrange
-            DeserializeAttribute attr = new DeserializeAttribute();
-
-            // Act
-            SerializationMode defaultMode = attr.Mode;
-
-            // Assert
-            Assert.Equal(SerializationMode.Signed, defaultMode);
         }
     }
 }

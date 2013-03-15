@@ -8,7 +8,7 @@ namespace System.Web.Http.Routing.Constraints
     /// <summary>
     /// Constrains a url parameter to be a long with a minimum value.
     /// </summary>
-    public class MinHttpRouteConstraint : IHttpRouteConstraint
+    public class MinHttpRouteConstraint : IHttpRouteConstraint, IInlineRouteConstraint
     {
         public MinHttpRouteConstraint(string min)
         {

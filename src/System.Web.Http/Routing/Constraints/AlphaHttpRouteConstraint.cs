@@ -5,8 +5,10 @@ namespace System.Web.Http.Routing.Constraints
     /// <summary>
     /// Constrains a url parameter to contain only letters from the alphabet.
     /// </summary>
-    public class AlphaHttpRouteConstraintBase : RegexHttpRouteConstraint
+    public class AlphaHttpRouteConstraint : RegexHttpRouteConstraint
     {
-        public AlphaHttpRouteConstraintBase() : base(@"^[A-Za-z]*$") {}
+        public AlphaHttpRouteConstraint() : base(@"^[A-Za-z]*$")
+        {
+        }
     }
 }

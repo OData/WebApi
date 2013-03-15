@@ -8,7 +8,7 @@ namespace System.Web.Http.Routing.Constraints
     /// <summary>
     /// Constrains a url parameter to be a string with a maximum length.
     /// </summary>
-    public class MaxLengthHttpRouteConstraint : IHttpRouteConstraint
+    public class MaxLengthHttpRouteConstraint : IHttpRouteConstraint, IInlineRouteConstraint
     {
         public MaxLengthHttpRouteConstraint(string maxLength)
         {

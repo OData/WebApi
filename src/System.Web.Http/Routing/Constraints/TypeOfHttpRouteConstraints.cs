@@ -8,7 +8,7 @@ namespace System.Web.Http.Routing.Constraints
     /// <summary>
     /// Constrains a url parameter to be parsable as the given type.
     /// </summary>
-    public class TypeOfHttpRouteConstraint<T> : IHttpRouteConstraint
+    public abstract class TypeOfHttpRouteConstraint<T> : IHttpRouteConstraint, IInlineRouteConstraint
         where T : struct
     {
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
@@ -22,13 +22,4 @@ namespace System.Web.Http.Routing.Constraints
             return value.Parse<T>().HasValue;
         }
     }
-
-    public class BoolHttpRouteConstraint : TypeOfHttpRouteConstraint<bool> { }
-    public class IntHttpRouteConstraint : TypeOfHttpRouteConstraint<int> { }
-    public class LongHttpRouteConstraint : TypeOfHttpRouteConstraint<long> { }
-    public class FloatHttpRouteConstraint : TypeOfHttpRouteConstraint<float> { }
-    public class DoubleHttpRouteConstraint : TypeOfHttpRouteConstraint<double> { }
-    public class DecimalHttpRouteConstraint : TypeOfHttpRouteConstraint<decimal> { }
-    public class GuidHttpRouteConstraint : TypeOfHttpRouteConstraint<Guid> { }
-    public class DateTimeHttpRouteConstraint : TypeOfHttpRouteConstraint<DateTime> { }
 }

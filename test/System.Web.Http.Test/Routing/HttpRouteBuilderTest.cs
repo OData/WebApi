@@ -3,10 +3,8 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Controllers;
 using System.Web.Http.Routing.Constraints;
 using Microsoft.TestCommon;
-using Moq;
 
 namespace System.Web.Http.Routing
 {
@@ -15,7 +13,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_ChainedConstraintAndDefault()
         {
-            var route = BuildRoute(@"hello/{param:regex(\d+)=8675309}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\d+)=8675309}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             
@@ -28,7 +26,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_ChainedConstraintAndOptional()
         {
-            var route = BuildRoute(@"hello/{param:regex(\d+)?}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\d+)?}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             
@@ -42,12 +40,12 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_ChainedConstraints()
         {
-            var route = BuildRoute(@"hello/{param:regex(\d+):regex(\w+)}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\d+):regex(\w+)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             
             Assert.IsType<CompoundHttpRouteConstraint>(route.Constraints["param"]);
-            var constraint = (CompoundHttpRouteConstraint)route.Constraints["param"];
+            CompoundHttpRouteConstraint constraint = (CompoundHttpRouteConstraint)route.Constraints["param"];
             Assert.Equal(@"\d+", ((RegexHttpRouteConstraint)constraint.Constraints.ElementAt(0)).Pattern);
             Assert.Equal(@"\w+", ((RegexHttpRouteConstraint)constraint.Constraints.ElementAt(1)).Pattern);
         }
@@ -55,7 +53,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_Constraint()
         {
-            var route = BuildRoute(@"hello/{param:regex(\d+)}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\d+)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
@@ -66,7 +64,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_ConstraintsDefaultsAndOptionalsInMultipleSections()
         {
-            var route = BuildRoute(@"some/url-{p1:regex(\d+):regex(\w+)=hello}/{p2=abc}/{p3?}");
+            IHttpRoute route = BuildRoute(@"some/url-{p1:regex(\d+):regex(\w+)=hello}/{p2=abc}/{p3?}");
 
             Assert.Equal("some/url-{p1}/{p2}/{p3}", route.RouteTemplate);
             
@@ -75,7 +73,7 @@ namespace System.Web.Http.Routing
             Assert.Equal(RouteParameter.Optional, route.Defaults["p3"]);
 
             Assert.IsType<CompoundHttpRouteConstraint>(route.Constraints["p1"]);
-            var constraint = (CompoundHttpRouteConstraint)route.Constraints["p1"];
+            CompoundHttpRouteConstraint constraint = (CompoundHttpRouteConstraint)route.Constraints["p1"];
             Assert.Equal(@"\d+", ((RegexHttpRouteConstraint)constraint.Constraints.ElementAt(0)).Pattern);
             Assert.Equal(@"\w+", ((RegexHttpRouteConstraint)constraint.Constraints.ElementAt(1)).Pattern);
         }
@@ -83,7 +81,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_NoTokens()
         {
-            var route = BuildRoute("hello/world");
+            IHttpRoute route = BuildRoute("hello/world");
 
             Assert.Equal("hello/world", route.RouteTemplate);
         }
@@ -91,7 +89,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_OptionalParam()
         {
-            var route = BuildRoute("hello/{param?}");
+            IHttpRoute route = BuildRoute("hello/{param?}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             Assert.Equal(RouteParameter.Optional, route.Defaults["param"]);
@@ -100,7 +98,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_ParamDefault()
         {
-            var route = BuildRoute("hello/{param=world}");
+            IHttpRoute route = BuildRoute("hello/{param=world}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             Assert.Equal("world", route.Defaults["param"]);
@@ -109,7 +107,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_RegexConstraintWithClosingBraceInPattern()
         {
-            var route = BuildRoute(@"hello/{param:regex(\})}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\})}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
@@ -120,7 +118,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_RegexConstraintWithClosingParenInPattern()
         {
-            var route = BuildRoute(@"hello/{param:regex(\))}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\))}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
@@ -131,7 +129,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_RegexConstraintWithColonInPattern()
         {
-            var route = BuildRoute(@"hello/{param:regex(:)}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(:)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
@@ -142,7 +140,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_RegexConstraintWithEqualsSignInPattern()
         {
-            var route = BuildRoute(@"hello/{param:regex(=)}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(=)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
@@ -155,7 +153,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_RegexConstraintWithOpenBraceInPattern()
         {
-            var route = BuildRoute(@"hello/{param:regex(\{)}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\{)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
@@ -166,7 +164,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_RegexConstraintWithOpenParenInPattern()
         {
-            var route = BuildRoute(@"hello/{param:regex(\()}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\()}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
@@ -177,7 +175,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_RegexConstraintWithQuestionMarkInPattern()
         {
-            var route = BuildRoute(@"hello/{param:regex(\?)}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\?)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
@@ -190,11 +188,10 @@ namespace System.Web.Http.Routing
         private static IHttpRoute BuildRoute(string routeTemplate)
         {
             // Arrange
-            var builder = new HttpRouteBuilder();
-            var provider = new FakeRouteProvider(routeTemplate);
+            IHttpRouteProvider provider = new FakeRouteProvider(routeTemplate);
 
             // Act
-            var route = builder.BuildHttpRoute(provider, "FakeController", "FakeAction");
+            IHttpRoute route = HttpRouteBuilder.BuildHttpRoute(provider, "FakeController", "FakeAction");
 
             // Assertions for default, unspecified behavior:
             Assert.NotNull(route);

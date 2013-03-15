@@ -8,7 +8,7 @@ namespace System.Web.Http.Routing.Constraints
     /// <summary>
     /// Constraints a url parameter to be a long within a given range of values.
     /// </summary>
-    public class RangeHttpRouteConstraint : IHttpRouteConstraint
+    public class RangeHttpRouteConstraint : IHttpRouteConstraint, IInlineRouteConstraint
     {
         // These must be set from the ctor of implementors.
         private readonly MinHttpRouteConstraint _minConstraint;

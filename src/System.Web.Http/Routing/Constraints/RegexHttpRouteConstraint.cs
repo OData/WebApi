@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace System.Web.Http.Routing.Constraints
 {
-    public class RegexHttpRouteConstraint : IHttpRouteConstraint
+    public class RegexHttpRouteConstraint : IHttpRouteConstraint, IInlineRouteConstraint
     {
         private readonly Regex _regex;
 

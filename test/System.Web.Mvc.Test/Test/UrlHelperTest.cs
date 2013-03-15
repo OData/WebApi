@@ -307,6 +307,19 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void ActionWithProtocolAndRouteValueDictionary()
+        {
+            // Arrange
+            UrlHelper urlHelper = GetUrlHelper();
+
+            // Act
+            string url = urlHelper.Action("newaction", "home2", new RouteValueDictionary(new { id = "someid" }), "https");
+
+            // Assert
+            Assert.Equal("https://localhost" + MvcHelper.AppPathModifier + "/app/home2/newaction/someid", url);
+        }
+
+        [Fact]
         public void ContentWithAbsolutePath()
         {
             // Arrange

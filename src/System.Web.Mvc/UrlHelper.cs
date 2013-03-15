@@ -73,7 +73,12 @@ namespace System.Web.Mvc
         {
             return GenerateUrl(null /* routeName */, actionName, controllerName, routeValues);
         }
-
+        
+        public string Action(string actionName, string controllerName, RouteValueDictionary routeValues, string protocol)
+        {
+            return GenerateUrl(null /* routeName */, actionName, controllerName, protocol, null /* hostName */, null /* fragment */, routeValues, RouteCollection, RequestContext, true /* includeImplicitMvcValues */);
+        }
+        
         public string Action(string actionName, string controllerName, object routeValues, string protocol)
         {
             return GenerateUrl(null /* routeName */, actionName, controllerName, protocol, null /* hostName */, null /* fragment */, new RouteValueDictionary(routeValues), RouteCollection, RequestContext, true /* includeImplicitMvcValues */);

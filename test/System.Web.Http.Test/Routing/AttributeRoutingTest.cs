@@ -9,37 +9,24 @@ namespace System.Web.Http.Routing
 {
     public class AttributeRoutingTest
     {
-        [Fact]
-        public void Routing_BindsIdParameter()
+        [Theory]
+        [InlineData("GET", "Controller/42", "Get42")]
+        [InlineData("PUT", "Controller/42", "Put42")]
+        [InlineData("GET", "Optional/1/2", "Optional12")]
+        [InlineData("GET", "Optional/1", "Optional1")]
+        [InlineData("GET", "Optional", "Optional")]
+        [InlineData("GET", "Default/1/2", "Default12")]
+        [InlineData("GET", "Default/1", "Default1D2")]
+        [InlineData("GET", "Default", "DefaultD1D2")]
+        [InlineData("GET", "Wildcard/a/b/c", "a/b/c")]
+        public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Controller/42");
+            var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
 
             var response = SubmitRequest(request);
 
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("Get42", GetContentValue<string>(response));
-        }
-
-        [Fact]
-        public void Routing_ConstrainsRoutesToHttpMethod()
-        {
-            var request = new HttpRequestMessage(HttpMethod.Put, "http://localhost/Controller/42");
-
-            var response = SubmitRequest(request);
-
-            Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("Put42", GetContentValue<string>(response));
-        }
-
-        [Fact]
-        public void WildcardParameters_GetBound()
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Wildcard/a/b/c");
-
-            var response = SubmitRequest(request);
-
-            Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("a/b/c", GetContentValue<string>(response));
+            Assert.Equal(responseBody, GetContentValue<string>(response));
         }
 
         private static HttpResponseMessage SubmitRequest(HttpRequestMessage request)
@@ -74,6 +61,18 @@ namespace System.Web.Http.Routing
         public string Put(string id)
         {
             return "Put" + id;
+        }
+
+        [HttpGet("Optional/{opt1?}/{opt2?}")]
+        public string Optional(string opt1 = null, string opt2 = null)
+        {
+            return "Optional" + opt1 + opt2;
+        }
+
+        [HttpGet("Default/{default1=D1}/{default2=D2}")]
+        public string Default(string default1, string default2)
+        {
+            return "Default" + default1 + default2;
         }
 
         [HttpGet("Wildcard/{*wildcard}")]

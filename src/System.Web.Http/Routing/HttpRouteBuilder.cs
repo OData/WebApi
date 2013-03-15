@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -10,27 +11,27 @@ using System.Web.Http.Routing.Constraints;
 
 namespace System.Web.Http.Routing
 {
-    public class HttpRouteBuilder
+    public static class HttpRouteBuilder
     {
         private static readonly Regex _constraintDefinitionsRegex = new Regex(@"(\:(?<key>\w*)(\((?<parameters>.*?)\)(?=[\}:=?]))?)");
 
-        public IHttpRoute BuildHttpRoute(IHttpRouteProvider provider, HttpActionDescriptor actionDescriptor)
+        public static IHttpRoute BuildHttpRoute(IHttpRouteProvider provider, string controllerName, string actionName)
         {
-            var defaults = new Dictionary<string, object>
+            HttpRouteValueDictionary defaults = new HttpRouteValueDictionary
             {
-                { "controller", actionDescriptor.ControllerDescriptor.ControllerName },
-                { "action", actionDescriptor.ActionName }
+                { "controller", controllerName },
+                { "action", actionName }
             };
 
-            var constraints = new Dictionary<string, object>
+            HttpRouteValueDictionary constraints = new HttpRouteValueDictionary
             {
                 // TODO: Improve HTTP method constraint. Current implementation is very inefficient since it matches before running the constraint.
                 { "methodConstraint", new HttpMethodConstraint(provider.HttpMethods.ToArray()) }
             };
             
-            var routeTemplate = ParseRouteTemplate(provider.RouteTemplate, defaults, constraints);
+            string routeTemplate = ParseRouteTemplate(provider.RouteTemplate, defaults, constraints);
             
-            return new HttpRoute(routeTemplate, new HttpRouteValueDictionary(defaults), new HttpRouteValueDictionary(constraints));
+            return new HttpRoute(routeTemplate, defaults, constraints);
         }
 
         /// <summary>
@@ -40,28 +41,23 @@ namespace System.Web.Http.Routing
         /// <param name="defaults">Dictionary for collecting defaults parsed from the route template.</param>
         /// <param name="constraints">Dictionary for collecting constraints parsed from the route template.</param>
         /// <returns>The route template with all default and constraint definitions removed.</returns>
-        private static string ParseRouteTemplate(string routeTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints)
+        private static string ParseRouteTemplate(string routeTemplate, HttpRouteValueDictionary defaults, HttpRouteValueDictionary constraints)
         {
+            Contract.Assert(defaults != null);
+            Contract.Assert(constraints != null);
+
             if (String.IsNullOrWhiteSpace(routeTemplate))
             {
                 return routeTemplate;
             }
-            if (defaults == null)
-            {
-                throw new ArgumentNullException("defaults");
-            }
-            if (constraints == null)
-            {
-                throw new ArgumentNullException("constraints");
-            }
 
-            var cleanRouteTemplate = new StringBuilder();
-            var parameterName = "";
-            var constraintDefinitions = _constraintDefinitionsRegex.Matches(routeTemplate);
+            StringBuilder cleanRouteTemplate = new StringBuilder();
+            string parameterName = "";
+            MatchCollection constraintDefinitions = _constraintDefinitionsRegex.Matches(routeTemplate);
 
-            for (var i = 0; i < routeTemplate.Length; i++)
+            for (int i = 0; i < routeTemplate.Length; i++)
             {
-                var c = routeTemplate[i];
+                char c = routeTemplate[i];
                 
                 if (c == '{')
                 {
@@ -73,7 +69,7 @@ namespace System.Web.Http.Routing
                     // - update the clean route template.
                     // - position the loop index and continue.
 
-                    var iNextTokenOrClosingBrace = routeTemplate.IndexOfAny(new[] { ':', '=', '?', '}' }, i);
+                    int iNextTokenOrClosingBrace = routeTemplate.IndexOfAny(new[] { ':', '=', '?', '}' }, i);
                     if (iNextTokenOrClosingBrace == -1)
                     {
                         // TODO: Throw malformed parameter exception
@@ -111,14 +107,14 @@ namespace System.Web.Http.Routing
                         
                         if (constraintDefinition.Index == i)
                         {
-                            var key = constraintDefinition.Groups["key"].Value;
+                            string key = constraintDefinition.Groups["key"].Value;
                             
                             // Parse constraint parameters.
-                            var parameters = new List<object>();
-                            var parametersGroup = constraintDefinition.Groups["parameters"];
+                            List<object> parameters = new List<object>();
+                            Group parametersGroup = constraintDefinition.Groups["parameters"];
                             if (parametersGroup.Success)
                             {
-                                var parametersValue = parametersGroup.Value;
+                                string parametersValue = parametersGroup.Value;
 
                                 // In the case of regex constraints, take the full parameter content as a single value.
                                 // This ensures we don't get fooled by characters that are route template tokens: {}()=?.
@@ -129,15 +125,16 @@ namespace System.Web.Http.Routing
                                 }
                                 else
                                 {
-                                    var cleanParametersValue = parametersValue.Replace(" ", "").Trim(',');
+                                    string cleanParametersValue = parametersValue.Replace(" ", "").Trim(',');
                                     parameters.AddRange(cleanParametersValue.Split(','));
                                 }
                             }
 
                             // TODO: Resolve the constraint type from the key.
                             // Build the constraint object.
-                            var constraintType = typeof(RegexHttpRouteConstraint);
-                            var constraint = (IHttpRouteConstraint)Activator.CreateInstance(constraintType, parameters.ToArray());
+                            Type constraintType = typeof(RegexHttpRouteConstraint);
+                            // TODO: throw reasonable error if constraint isn't of type IHttpRouteConstraint
+                            IHttpRouteConstraint constraint = (IHttpRouteConstraint)Activator.CreateInstance(constraintType, parameters.ToArray());
                             parameterConstraints.Add(constraint);
 
                             // Advance the outer loop index just beyond the current constraint definition.
@@ -183,13 +180,13 @@ namespace System.Web.Http.Routing
                     // - add a default for the current parameter,
                     // - position the loop index and continue.
 
-                    var iClosingBrace = routeTemplate.IndexOf('}', i);
+                    int iClosingBrace = routeTemplate.IndexOf('}', i);
                     if (iClosingBrace == -1)
                     {
                         // TODO: Throw malformed parameter exception
                     }
 
-                    var value = routeTemplate.Substring(i + 1, iClosingBrace - i - 1);
+                    string value = routeTemplate.Substring(i + 1, iClosingBrace - i - 1);
                     defaults.AddIfNew(parameterName, value);
                     i = iClosingBrace - 1;
                     continue;

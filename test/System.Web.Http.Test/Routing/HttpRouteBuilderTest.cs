@@ -193,13 +193,8 @@ namespace System.Web.Http.Routing
             var builder = new HttpRouteBuilder();
             var provider = new FakeRouteProvider(routeTemplate);
 
-            var controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "FakeController", typeof(ApiController));
-            
-            var actionDescriptorMock = new Mock<HttpActionDescriptor>(controllerDescriptor);
-            actionDescriptorMock.Setup(x => x.ActionName).Returns("FakeAction");
-
             // Act
-            var route = builder.BuildHttpRoute(provider, actionDescriptorMock.Object);
+            var route = builder.BuildHttpRoute(provider, "FakeController", "FakeAction");
 
             // Assertions for default, unspecified behavior:
             Assert.NotNull(route);

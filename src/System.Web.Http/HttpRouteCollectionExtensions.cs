@@ -90,8 +90,6 @@ namespace System.Web.Http
 
         public static void MapHttpAttributeRoutes(this HttpRouteCollection routes, IHttpControllerSelector controllerSelector, IHttpActionSelector actionSelector)
         {
-            var routeBuilder = new HttpRouteBuilder();
-
             foreach (HttpControllerDescriptor controllerDescriptor in controllerSelector.GetControllerMapping().Values)
             {
                 foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionSelector.GetActionMapping(controllerDescriptor))
@@ -101,11 +99,14 @@ namespace System.Web.Http
                     {
                         foreach (IHttpRouteProvider routeProvider in actionDescriptor.MethodInfo.GetCustomAttributes(false).OfType<IHttpRouteProvider>())
                         {
+                            string controllerName = controllerDescriptor.ControllerName;
+                            string actionName = actionDescriptor.ActionName;
+
                             // TODO: Improve default route name and make it configurable. AR was using a strategy pattern.
                             string routeName = routeProvider.RouteName ??
-                                String.Format(CultureInfo.InvariantCulture, "{0}.{1}{2}", controllerDescriptor.ControllerName, actionGrouping.Key, routeSuffix);
+                                String.Format(CultureInfo.InvariantCulture, "{0}.{1}{2}", controllerName, actionName, routeSuffix);
 
-                            var route = routeBuilder.BuildHttpRoute(routeProvider, actionDescriptor);
+                            IHttpRoute route = HttpRouteBuilder.BuildHttpRoute(routeProvider, controllerName, actionName);
                             routes.Add(routeName, route);
 
                             routeSuffix++;

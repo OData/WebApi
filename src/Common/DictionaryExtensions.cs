@@ -44,6 +44,17 @@ namespace System.Web.Http
             return false;
         }
 
+        /// <summary>
+        /// Adds the given key/value pair if it doesn't already exist.
+        /// </summary>
+        internal static void AddIfNew<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+        {
+            if (!dictionary.ContainsKey(key))
+            {
+                dictionary.Add(key, value);
+            }
+        }
+
         internal static IEnumerable<KeyValuePair<string, TValue>> FindKeysWithPrefix<TValue>(this IDictionary<string, TValue> dictionary, string prefix)
         {
             if (dictionary == null)

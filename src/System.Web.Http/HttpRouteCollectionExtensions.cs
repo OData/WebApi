@@ -90,6 +90,8 @@ namespace System.Web.Http
 
         public static void MapHttpAttributeRoutes(this HttpRouteCollection routes, IHttpControllerSelector controllerSelector, IHttpActionSelector actionSelector)
         {
+            var routeBuilder = new HttpRouteBuilder();
+
             foreach (HttpControllerDescriptor controllerDescriptor in controllerSelector.GetControllerMapping().Values)
             {
                 foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionSelector.GetActionMapping(controllerDescriptor))
@@ -99,16 +101,12 @@ namespace System.Web.Http
                     {
                         foreach (IHttpRouteProvider routeProvider in actionDescriptor.MethodInfo.GetCustomAttributes(false).OfType<IHttpRouteProvider>())
                         {
-                            // TODO: Improve default route name
+                            // TODO: Improve default route name and make it configurable. AR was using a strategy pattern.
                             string routeName = routeProvider.RouteName ??
                                 String.Format(CultureInfo.InvariantCulture, "{0}.{1}{2}", controllerDescriptor.ControllerName, actionGrouping.Key, routeSuffix);
 
-                            // TODO: Improve HTTP method constraint. Current implementation is very inefficient since it matches before running the constraint.
-                            routes.MapHttpRoute(
-                                routeName,
-                                routeProvider.RouteTemplate,
-                                new { controller = controllerDescriptor.ControllerName, action = actionDescriptor.ActionName },
-                                new { methodConstraint = new HttpMethodConstraint(routeProvider.HttpMethods.ToArray()) });
+                            var route = routeBuilder.BuildHttpRoute(routeProvider, actionDescriptor);
+                            routes.Add(routeName, route);
 
                             routeSuffix++;
                         }

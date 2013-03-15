@@ -7,16 +7,6 @@ namespace System.Web.Http.Internal
 {
     internal static class ParameterInfoExtensions
     {
-        public static TAttribute[] GetCustomAttributes<TAttribute>(this ParameterInfo parameterInfo, bool inherit) where TAttribute : class
-        {
-            if (parameterInfo == null)
-            {
-                throw Error.ArgumentNull("parameterInfo");
-            }
-
-            return (TAttribute[])parameterInfo.GetCustomAttributes(typeof(TAttribute), inherit);
-        }
-
         public static bool TryGetDefaultValue(this ParameterInfo parameterInfo, out object value)
         {
             if (parameterInfo == null)

@@ -10,40 +10,36 @@ namespace System.Web.Http.Routing
     public static class HttpRouteConstraintBuilder
     {
         private static readonly Regex _routeConstraintKeyRegex = new Regex(@"HttpRouteConstraint$");
-        private static readonly IDictionary<string, Type> _inlineRouteConstraintMap = new Dictionary<string, Type>();
-
-        static HttpRouteConstraintBuilder()
-        {
-            RegisterDefaultInlineRouteConstraints();
-        }
+        private static readonly IDictionary<string, Type> _inlineRouteConstraintMap = GetDefaultInlineRouteConstraints();
 
         public static IHttpRouteConstraint BuildInlineRouteConstraint(string constraintKey, params object[] args)
         {
             // Make sure the key exists in the key/Type map.
-            string loweredConstraintKey = constraintKey.ToLowerInvariant();
-            if (!_inlineRouteConstraintMap.ContainsKey(loweredConstraintKey))
+            string upperCasedConstraintKey = constraintKey.ToUpperInvariant();
+            if (!_inlineRouteConstraintMap.ContainsKey(upperCasedConstraintKey))
             {
                 // TODO: Throw via the Error helper.
                 throw new KeyNotFoundException(
-                    String.Format("Could not resolve a route constraint for the key '{0}'.", constraintKey));
+                    Error.Format("Could not resolve a route constraint for the key '{0}'.", constraintKey));
             }
 
             Type httpRouteConstraintType = typeof(IHttpRouteConstraint);
-            Type type = _inlineRouteConstraintMap[loweredConstraintKey];
+            Type type = _inlineRouteConstraintMap[upperCasedConstraintKey];
             
             // Make sure the type is an IHttpRouteConstraint.
             if (!httpRouteConstraintType.IsAssignableFrom(type))
             {
                 // TODO: Throw via Error helper.
-                throw new InvalidOperationException(
-                    String.Format("The type '{0}' must implement '{1}'", type.FullName, httpRouteConstraintType.FullName));
+                throw Error.InvalidOperation(
+                    "The type '{0}' must implement '{1}'", type.FullName, httpRouteConstraintType.FullName);
             }
 
             return (IHttpRouteConstraint)Activator.CreateInstance(type, args);
         }
 
-        private static void RegisterDefaultInlineRouteConstraints()
+        private static IDictionary<string, Type> GetDefaultInlineRouteConstraints()
         {
+            Dictionary<string, Type> defaultInlineRouteConstraints = new Dictionary<string, Type>();
             Type inlineRouteConstraintType = typeof(IInlineRouteConstraint);
             
             IEnumerable<Type> types = from t in typeof(IInlineRouteConstraint).Assembly.GetTypes()
@@ -53,9 +49,10 @@ namespace System.Web.Http.Routing
 
             foreach (var type in types)
             {
-                var key = _routeConstraintKeyRegex.Replace(type.Name, String.Empty).ToLowerInvariant();
-                _inlineRouteConstraintMap.Add(key, type);
+                var key = _routeConstraintKeyRegex.Replace(type.Name, String.Empty).ToUpperInvariant();
+                defaultInlineRouteConstraints.Add(key, type);
             }
+            return defaultInlineRouteConstraints;
         }
     }
 }

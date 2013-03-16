@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using System.Web.Http.Routing.Constraints;
 
@@ -10,15 +11,15 @@ namespace System.Web.Http.Routing
     {
         private readonly IDictionary<string, Type> _inlineRouteConstraintMap = GetDefaultInlineRouteConstraints();
 
-        public IHttpRouteConstraint ResolveConstraint(string constraintDefinition)
+        public IHttpRouteConstraint ResolveConstraint(string inlineConstraint)
         {
             string constraintKey;
             string[] arguments;
-            int indexOfFirstOpenParens = constraintDefinition.IndexOf('(');
-            if (indexOfFirstOpenParens >= 0 && constraintDefinition.EndsWith(")", StringComparison.Ordinal))
+            int indexOfFirstOpenParens = inlineConstraint.IndexOf('(');
+            if (indexOfFirstOpenParens >= 0 && inlineConstraint.EndsWith(")", StringComparison.Ordinal))
             {
-                string argumentString = constraintDefinition.Substring(indexOfFirstOpenParens + 1, constraintDefinition.Length - indexOfFirstOpenParens - 2);
-                constraintKey = constraintDefinition.Substring(0, indexOfFirstOpenParens);
+                string argumentString = inlineConstraint.Substring(indexOfFirstOpenParens + 1, inlineConstraint.Length - indexOfFirstOpenParens - 2);
+                constraintKey = inlineConstraint.Substring(0, indexOfFirstOpenParens);
                 
                 // If this is a regex constraint, don't split on commas that might be part of the pattern.
                 if (constraintKey == "regex")
@@ -32,7 +33,7 @@ namespace System.Web.Http.Routing
             }
             else
             {
-                constraintKey = constraintDefinition;
+                constraintKey = inlineConstraint;
                 arguments = new string[0];
             }
 
@@ -49,15 +50,7 @@ namespace System.Web.Http.Routing
                     "Could not resolve a route constraint for the key '{0}'.", constraintKey);
             }
 
-            Type httpRouteConstraintType = typeof(IHttpRouteConstraint);
             Type type = _inlineRouteConstraintMap[constraintKey];
-
-            // Make sure the type is an IHttpRouteConstraint.
-            if (!httpRouteConstraintType.IsAssignableFrom(type))
-            {
-                throw Error.InvalidOperation(
-                    "The type '{0}' must implement '{1}'", type.FullName, httpRouteConstraintType.FullName);
-            }
 
             // Convert the args to the types expected by the relevant constraint ctor.
             List<object> convertedArguments = new List<object>(arguments);
@@ -72,7 +65,7 @@ namespace System.Web.Http.Routing
                     {
                         ParameterInfo parameter = parameters[i];
                         Type parameterType = parameter.ParameterType;
-                        object convertedValue = Convert.ChangeType(convertedArguments[i], parameterType);
+                        object convertedValue = Convert.ChangeType(convertedArguments[i], parameterType, CultureInfo.InvariantCulture);
                         convertedArguments[i] = convertedValue;
                     }
             

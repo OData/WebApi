@@ -6,6 +6,6 @@ namespace System.Web.Http.Routing
 {
     public interface IInlineRouteConstraintResolver
     {
-        IHttpRouteConstraint ResolveConstraint(string constraintKey);
+        IHttpRouteConstraint ResolveConstraint(string inlineConstraint);
     }
 }

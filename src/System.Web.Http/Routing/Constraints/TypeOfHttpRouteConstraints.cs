@@ -8,7 +8,7 @@ namespace System.Web.Http.Routing.Constraints
     /// <summary>
     /// Constrains a url parameter to be parsable as the given type.
     /// </summary>
-    public abstract class TypeOfHttpRouteConstraint<T> : IHttpRouteConstraint, IInlineRouteConstraint
+    public abstract class TypeOfHttpRouteConstraint<T> : IHttpRouteConstraint
         where T : struct
     {
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)

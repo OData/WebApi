@@ -197,7 +197,7 @@ namespace System.Web.Http.Routing
             Assert.NotNull(route);
             Assert.Equal("FakeController", route.Defaults["controller"]);
             Assert.Equal("FakeAction", route.Defaults["action"]);
-            Assert.IsType<HttpMethodConstraint>(route.Constraints["methodConstraint"]);
+            Assert.IsType<HttpMethodConstraint>(route.Constraints["httpMethod"]);
 
             return route;
         }

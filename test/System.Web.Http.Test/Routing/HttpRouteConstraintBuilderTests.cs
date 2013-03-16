@@ -187,9 +187,9 @@ namespace System.Web.Http.Routing
             Assert.Throws<KeyNotFoundException>(() => BuildInlineConstraint("typeof"));
         }
 
-        private IHttpRouteConstraint BuildInlineConstraint(string constraintKey, params object[] args)
+        private IHttpRouteConstraint BuildInlineConstraint(string constraintKey, params string[] args)
         {
-            IHttpRouteConstraint constraint = HttpRouteConstraintBuilder.BuildInlineRouteConstraint(constraintKey, args);
+            IHttpRouteConstraint constraint = new DefaultInlineRouteConstraintResolver().ResolveConstraint(constraintKey, args);
 
             Assert.NotNull(constraint);
 

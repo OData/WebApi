@@ -9,7 +9,7 @@ namespace System.Web.Http.Routing.Constraints
     /// Constrains a url parameter to be a string of a given length 
     /// or within a given range of lengths if two params are given.
     /// </summary>
-    public class LengthHttpRouteConstraint : IHttpRouteConstraint, IInlineRouteConstraint
+    public class LengthHttpRouteConstraint : IHttpRouteConstraint
     {
         private readonly MinLengthHttpRouteConstraint _minLengthHttpConstraint;
         private readonly MaxLengthHttpRouteConstraint _maxLengthHttpConstraint;

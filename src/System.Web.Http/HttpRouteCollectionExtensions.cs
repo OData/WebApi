@@ -94,23 +94,31 @@ namespace System.Web.Http
             {
                 foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionSelector.GetActionMapping(controllerDescriptor))
                 {
-                    int routeSuffix = 1;
-                    foreach (ReflectedHttpActionDescriptor actionDescriptor in actionGrouping.OfType<ReflectedHttpActionDescriptor>())
+                    MapHttpAttributeRoutes(routes, controllerDescriptor, actionGrouping);
+                }
+            }
+        }
+
+        private static void MapHttpAttributeRoutes(HttpRouteCollection routes, HttpControllerDescriptor controllerDescriptor, IGrouping<string, HttpActionDescriptor> actionGrouping)
+        {
+            int routeSuffix = 1;
+            foreach (ReflectedHttpActionDescriptor actionDescriptor in actionGrouping.OfType<ReflectedHttpActionDescriptor>())
+            {
+                foreach (IHttpRouteProvider routeProvider in actionDescriptor.MethodInfo.GetCustomAttributes(false).OfType<IHttpRouteProvider>())
+                {
+                    if (routeProvider.RouteTemplate != null)
                     {
-                        foreach (IHttpRouteProvider routeProvider in actionDescriptor.MethodInfo.GetCustomAttributes(false).OfType<IHttpRouteProvider>())
-                        {
-                            string controllerName = controllerDescriptor.ControllerName;
-                            string actionName = actionDescriptor.ActionName;
+                        string controllerName = controllerDescriptor.ControllerName;
+                        string actionName = actionDescriptor.ActionName;
 
-                            // TODO: Improve default route name and make it configurable. AR was using a strategy pattern.
-                            string routeName = routeProvider.RouteName ??
-                                String.Format(CultureInfo.InvariantCulture, "{0}.{1}{2}", controllerName, actionName, routeSuffix);
+                        // TODO: Improve default route name and make it configurable. AR was using a strategy pattern.
+                        string routeName = routeProvider.RouteName ??
+                            String.Format(CultureInfo.InvariantCulture, "{0}.{1}{2}", controllerName, actionName, routeSuffix);
 
-                            IHttpRoute route = HttpRouteBuilder.BuildHttpRoute(routeProvider, controllerName, actionName);
-                            routes.Add(routeName, route);
+                        IHttpRoute route = HttpRouteBuilder.BuildHttpRoute(routeProvider, controllerName, actionName);
+                        routes.Add(routeName, route);
 
-                            routeSuffix++;
-                        }
+                        routeSuffix++;
                     }
                 }
             }

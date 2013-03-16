@@ -13,11 +13,24 @@ namespace System.Web.Http.Routing
 
         public IHttpRouteConstraint ResolveConstraint(string inlineConstraint)
         {
+            string[] arguments;
+            int indexOfFirstOpenParens = inlineConstraint.IndexOf('(');
+            if (indexOfFirstOpenParens >= 0 && inlineConstraint.EndsWith(")", StringComparison.Ordinal))
+            {
+                string argumentString = inlineConstraint.Substring(indexOfFirstOpenParens + 1, inlineConstraint.Length - indexOfFirstOpenParens - 2);
+                inlineConstraint = inlineConstraint.Substring(0, indexOfFirstOpenParens);
+                arguments = argumentString.Split(',');
+            }
+            else
+            {
+                arguments = new string[0];
+            }
+
             // TODO: parse parameters
-            return ResolveConstraint(inlineConstraint, Enumerable.Empty<string>());
+            return ResolveConstraint(inlineConstraint, arguments);
         }
 
-        public IHttpRouteConstraint ResolveConstraint(string constraintKey, IEnumerable<string> args)
+        internal IHttpRouteConstraint ResolveConstraint(string constraintKey, string[] arguments)
         {
             // Make sure the key exists in the key/Type map.
             if (!_inlineRouteConstraintMap.ContainsKey(constraintKey))
@@ -29,35 +42,7 @@ namespace System.Web.Http.Routing
             Type httpRouteConstraintType = typeof(IHttpRouteConstraint);
             Type type = _inlineRouteConstraintMap[constraintKey];
 
-            // Make sure the type is an IHttpRouteConstraint.
-            if (!httpRouteConstraintType.IsAssignableFrom(type))
-            {
-                throw Error.InvalidOperation(
-                    "The type '{0}' must implement '{1}'", type.FullName, httpRouteConstraintType.FullName);
-            }
-
-            // Convert the args to the types expected by the relevant constraint ctor.
-            List<object> typedArgs = new List<object>(args);
-            foreach (ConstructorInfo constructor in type.GetConstructors())
-            {
-                // Find the ctor with the correct number of args.
-                var parameters = constructor.GetParameters();
-                if (parameters.Length == typedArgs.Count)
-                {
-                    // Convert the given string args to the correct type.
-                    for (int i = 0; i < parameters.Length; i++)
-                    {
-                        ParameterInfo parameter = parameters[i];
-                        Type parameterType = parameter.ParameterType;
-                        object convertedValue = Convert.ChangeType(typedArgs[i], parameterType);
-                        typedArgs[i] = convertedValue;
-                    }
-
-                    break;
-                }
-            }
-
-            return (IHttpRouteConstraint)Activator.CreateInstance(type, typedArgs.ToArray());
+            return (IHttpRouteConstraint)Activator.CreateInstance(type, arguments.ToArray<object>());
         }
 
         private static IDictionary<string, Type> GetDefaultInlineRouteConstraints()

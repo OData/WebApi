@@ -20,16 +20,7 @@ namespace System.Web.Http.Routing
             {
                 string argumentString = inlineConstraint.Substring(indexOfFirstOpenParens + 1, inlineConstraint.Length - indexOfFirstOpenParens - 2);
                 constraintKey = inlineConstraint.Substring(0, indexOfFirstOpenParens);
-                
-                // If this is a regex constraint, don't split on commas that might be part of the pattern.
-                if (constraintKey == "regex")
-                {
-                    arguments = new[] { argumentString };
-                }
-                else
-                {
-                    arguments = argumentString.Split(',');                    
-                }
+                arguments = argumentString.Split(',');
             }
             else
             {
@@ -50,14 +41,26 @@ namespace System.Web.Http.Routing
                     "Could not resolve a route constraint for the key '{0}'.", constraintKey);
             }
 
-            Type type = _inlineRouteConstraintMap[constraintKey];
+            Type constraintType = _inlineRouteConstraintMap[constraintKey];
 
-            // Convert the args to the types expected by the relevant constraint ctor.
+            // Convert the given arguments to the types expected by the constructor before invoking.
             List<object> convertedArguments = new List<object>(arguments);
-            foreach (ConstructorInfo constructor in type.GetConstructors())
+            ConstructorInfo[] constructors = constraintType.GetConstructors();
+            foreach (ConstructorInfo constructor in constructors)
             {
-                // Find the ctor with the correct number of args.
-                var parameters = constructor.GetParameters();
+                ParameterInfo[] parameters = constructor.GetParameters();
+                
+                // If there is only one constructor and it has a single parameter,
+                // join multiple arguments to pass a single value into the constructor.
+                // This is necessary for the RegexHttpRouteConstraint to ensure that
+                // patterns are not split on commas.
+                if (constructors.Length == 1 && parameters.Length == 1 && arguments.Length > 1)
+                {
+                    convertedArguments.Clear();
+                    convertedArguments.Add(String.Join(",", arguments));
+                }
+
+                // Use this constructor if it has the expected number of arguments.
                 if (parameters.Length == convertedArguments.Count)
                 {
                     // Convert the given string args to the correct type.
@@ -68,12 +71,11 @@ namespace System.Web.Http.Routing
                         object convertedValue = Convert.ChangeType(convertedArguments[i], parameterType, CultureInfo.InvariantCulture);
                         convertedArguments[i] = convertedValue;
                     }
-            
                     break;
                 }
             }
 
-            return (IHttpRouteConstraint)Activator.CreateInstance(type, convertedArguments.ToArray());
+            return (IHttpRouteConstraint)Activator.CreateInstance(constraintType, convertedArguments.ToArray());
         }
 
         private static IDictionary<string, Type> GetDefaultInlineRouteConstraints()

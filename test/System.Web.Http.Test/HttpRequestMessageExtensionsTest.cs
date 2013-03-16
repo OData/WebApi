@@ -546,5 +546,54 @@ namespace System.Net.Http
             Assert.Equal(HttpStatusCode.RequestedRangeNotSatisfiable, response.StatusCode);
             Assert.Same(expectedContentRange, response.Content.Headers.ContentRange);
         }
+
+        [Fact]
+        public void IsLocal_When_Request_From_Local_Address()
+        {
+            // Arrange
+            _request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
+
+            // Act
+            bool isLocal = _request.IsLocal();
+
+            // Assert
+            Assert.True(isLocal);
+        }
+
+        [Fact]
+        public void IsLocal_When_Request_Not_From_Local_Address()
+        {
+            // Arrange
+            _request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => false));
+
+            // Act
+            bool isLocal = _request.IsLocal();
+
+            // Assert
+            Assert.False(isLocal);
+        }
+
+        [Fact]
+        public void IsLocal_With_Property_Value_Null_Returns_False()
+        {
+            // Arrange
+            _request.Properties.Add(HttpPropertyKeys.IsLocalKey, null);
+
+            // Act
+            bool isLocal = _request.IsLocal();
+
+            // Assert
+            Assert.False(isLocal);
+        }
+
+        [Fact]
+        public void IsLocal_WhenRequestIsNull_Throws()
+        {
+            // Arrange
+            HttpRequestMessage request = null;
+
+            // Act and Assert
+            Assert.ThrowsArgumentNull(() => request.IsLocal(), "request");
+        }
     }
 }

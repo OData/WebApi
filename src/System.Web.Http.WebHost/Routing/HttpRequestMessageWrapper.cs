@@ -71,15 +71,7 @@ namespace System.Web.Http.WebHost.Routing
 
         public override bool IsLocal
         {
-            get
-            {
-                Lazy<bool> isLocal;
-                if (_httpRequest.Properties.TryGetValue<Lazy<bool>>(HttpPropertyKeys.IsLocalKey, out isLocal))
-                {
-                    return isLocal.Value;
-                }
-                return false;
-            }
+            get { return _httpRequest.IsLocal(); }
         }
 
         public override string Path

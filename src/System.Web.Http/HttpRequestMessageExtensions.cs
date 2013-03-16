@@ -725,5 +725,26 @@ namespace System.Net.Http
 
             request.Properties[HttpPropertyKeys.UrlHelperKey] = urlHelper;
         }
+        
+        /// <summary>
+        /// Gets a value indicating whether the request originates from a local address or not.
+        /// </summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <returns><see langword="true"/> if the request originates from a local address; otherwise, <see langword="false"/>.</returns>
+        public static bool IsLocal(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            Lazy<bool> isLocal;
+            if (request.Properties.TryGetValue<Lazy<bool>>(HttpPropertyKeys.IsLocalKey, out isLocal))
+            {
+                return isLocal.Value;
+            }
+
+            return false;
+        }
     }
 }

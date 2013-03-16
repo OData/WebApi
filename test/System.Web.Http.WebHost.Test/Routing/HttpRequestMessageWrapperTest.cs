@@ -2,6 +2,7 @@
 
 using System.Collections.Specialized;
 using System.Net.Http;
+using System.Web.Http.Hosting;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.WebHost.Routing
@@ -250,6 +251,35 @@ namespace System.Web.Http.WebHost.Routing
 
             // Assert
             Assert.Equal(requestUri.PathAndQuery, actualRawUrl);
+        }
+
+        [Fact]
+        public void IsLocal_Call_To_HttpRequestMessageExtension_Method()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
+            HttpRequestMessageWrapper wrapper = new HttpRequestMessageWrapper("/", request);
+
+            // Act
+            bool isLocal = wrapper.IsLocal;
+
+            // Assert
+            Assert.True(isLocal);
+        }
+
+        [Fact]
+        public void IsLocal_Call_To_HttpRequestMessageExtension_Method_With_NoPropertyValue()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpRequestMessageWrapper wrapper = new HttpRequestMessageWrapper("/", request);
+
+            // Act
+            bool isLocal = wrapper.IsLocal;
+
+            // Assert
+            Assert.False(isLocal);
         }
     }
 }

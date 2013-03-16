@@ -98,11 +98,9 @@
     <Compile Include="Routing\Constraints\MaxHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\MinLengthHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\MinHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\ParsingExtensions.cs" />
     <Compile Include="Routing\Constraints\RangeRouteConstraintBase.cs" />
     <Compile Include="Routing\Constraints\RegexHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\OptionalHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\TypeOfHttpRouteConstraints.cs" />
     <Compile Include="Routing\HttpRouteBuilder.cs" />
     <Compile Include="Routing\IHttpRouteProvider.cs" />
     <Compile Include="Routing\IInlineRouteConstraintResolver.cs" />

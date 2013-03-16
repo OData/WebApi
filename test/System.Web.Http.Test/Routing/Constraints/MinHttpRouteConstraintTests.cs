@@ -9,7 +9,7 @@ namespace System.Web.Http.Routing.Constraints
         [Fact]
         public void Match_FailsWhenValueIsLessThanMin()
         {
-            MinHttpRouteConstraint constraint = new MinHttpRouteConstraint("3");
+            MinHttpRouteConstraint constraint = new MinHttpRouteConstraint(3);
             bool match = TestValue(constraint, 2);
             Assert.False(match);
         }
@@ -17,7 +17,7 @@ namespace System.Web.Http.Routing.Constraints
         [Fact]
         public void Match_SucceedsWhenValueIsEqualToMin()
         {
-            MinHttpRouteConstraint constraint = new MinHttpRouteConstraint("3");
+            MinHttpRouteConstraint constraint = new MinHttpRouteConstraint(3);
             bool match = TestValue(constraint, 3);
             Assert.True(match);
         }
@@ -25,7 +25,7 @@ namespace System.Web.Http.Routing.Constraints
         [Fact]
         public void Match_SucceedsWhenValueIsGreaterThanMin()
         {
-            MinHttpRouteConstraint constraint = new MinHttpRouteConstraint("3");
+            MinHttpRouteConstraint constraint = new MinHttpRouteConstraint(3);
             bool match = TestValue(constraint, 5);
             Assert.True(match);
         }

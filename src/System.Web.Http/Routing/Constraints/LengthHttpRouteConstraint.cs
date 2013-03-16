@@ -18,15 +18,9 @@ namespace System.Web.Http.Routing.Constraints
         /// Constrains a url parameter to be a string of a given length.
         /// </summary>
         /// <param name="length">The length of the string</param>
-        public LengthHttpRouteConstraint(string length)
+        public LengthHttpRouteConstraint(int length)
         {
-            var parsedLength = length.ParseInt();
-            if (!parsedLength.HasValue)
-            {
-                throw new ArgumentOutOfRangeException("length", length);
-            }
-
-            Length = parsedLength;
+            Length = length;
         }
 
         /// <summary>
@@ -34,7 +28,7 @@ namespace System.Web.Http.Routing.Constraints
         /// </summary>
         /// <param name="minLength">The minimum length of the string.</param>
         /// <param name="maxLength">The maximum length of the string.</param>
-        public LengthHttpRouteConstraint(string minLength, string maxLength)
+        public LengthHttpRouteConstraint(int minLength, int maxLength)
         {
             _minLengthHttpConstraint = new MinLengthHttpRouteConstraint(minLength);
             _maxLengthHttpConstraint = new MaxLengthHttpRouteConstraint(maxLength);
@@ -65,7 +59,7 @@ namespace System.Web.Http.Routing.Constraints
         {
             if (Length.HasValue)
             {
-                var value = values[parameterName];
+                object value = values[parameterName];
                 if (value == null)
                 {
                     return true;

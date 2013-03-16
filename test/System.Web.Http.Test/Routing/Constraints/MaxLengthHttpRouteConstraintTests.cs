@@ -9,7 +9,7 @@ namespace System.Web.Http.Routing.Constraints
         [Fact]
         public void Match_FailsWhenValueLengthIsGreaterThanMaxLength()
         {
-            MaxLengthHttpRouteConstraint constraint = new MaxLengthHttpRouteConstraint("3");
+            MaxLengthHttpRouteConstraint constraint = new MaxLengthHttpRouteConstraint(3);
             bool match = TestValue(constraint, "1234");
             Assert.False(match);
         }
@@ -17,7 +17,7 @@ namespace System.Web.Http.Routing.Constraints
         [Fact]
         public void Match_SucceedsWhenValueLengthIsLessThanMaxLength()
         {
-            MaxLengthHttpRouteConstraint constraint = new MaxLengthHttpRouteConstraint("3");
+            MaxLengthHttpRouteConstraint constraint = new MaxLengthHttpRouteConstraint(3);
             bool match = TestValue(constraint, "1");
             Assert.True(match);
         }
@@ -25,7 +25,7 @@ namespace System.Web.Http.Routing.Constraints
         [Fact]
         public void Match_SucceedsWhenValueLengthIsEqualToMaxLength()
         {
-            MaxLengthHttpRouteConstraint constraint = new MaxLengthHttpRouteConstraint("3");
+            MaxLengthHttpRouteConstraint constraint = new MaxLengthHttpRouteConstraint(3);
             bool match = TestValue(constraint, "123");
             Assert.True(match);
         }

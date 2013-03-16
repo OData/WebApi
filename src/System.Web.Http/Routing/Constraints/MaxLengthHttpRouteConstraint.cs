@@ -10,15 +10,9 @@ namespace System.Web.Http.Routing.Constraints
     /// </summary>
     public class MaxLengthHttpRouteConstraint : IHttpRouteConstraint
     {
-        public MaxLengthHttpRouteConstraint(string maxLength)
+        public MaxLengthHttpRouteConstraint(int maxLength)
         {
-            var parsedMaxLength = maxLength.ParseInt();
-            if (!parsedMaxLength.HasValue)
-            {
-                throw new ArgumentOutOfRangeException("maxLength", maxLength);
-            }
-
-            MaxLength = parsedMaxLength.Value;
+            MaxLength = maxLength;
         }
 
         /// <summary>
@@ -28,7 +22,7 @@ namespace System.Web.Http.Routing.Constraints
 
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
-            var value = values[parameterName];
+            object value = values[parameterName];
             if (value == null)
             {
                 return true;

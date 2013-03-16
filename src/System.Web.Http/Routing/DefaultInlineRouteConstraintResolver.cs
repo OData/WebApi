@@ -2,13 +2,14 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Web.Http.Routing.Constraints;
 
 namespace System.Web.Http.Routing
 {
     public class DefaultInlineRouteConstraintResolver : IInlineRouteConstraintResolver
     {
-        private IDictionary<string, Type> _inlineRouteConstraintMap = GetDefaultInlineRouteConstraints();
+        private readonly IDictionary<string, Type> _inlineRouteConstraintMap = GetDefaultInlineRouteConstraints();
 
         public IHttpRouteConstraint ResolveConstraint(string inlineConstraint)
         {
@@ -21,9 +22,8 @@ namespace System.Web.Http.Routing
             // Make sure the key exists in the key/Type map.
             if (!_inlineRouteConstraintMap.ContainsKey(constraintKey))
             {
-                // TODO: Throw via the Error helper.
-                throw new KeyNotFoundException(
-                    Error.Format("Could not resolve a route constraint for the key '{0}'.", constraintKey));
+                throw Error.KeyNotFound(
+                    "Could not resolve a route constraint for the key '{0}'.", constraintKey);
             }
 
             Type httpRouteConstraintType = typeof(IHttpRouteConstraint);
@@ -36,7 +36,28 @@ namespace System.Web.Http.Routing
                     "The type '{0}' must implement '{1}'", type.FullName, httpRouteConstraintType.FullName);
             }
 
-            return (IHttpRouteConstraint)Activator.CreateInstance(type, args.ToArray<object>());
+            // Convert the args to the types expected by the relevant constraint ctor.
+            List<object> typedArgs = new List<object>(args);
+            foreach (ConstructorInfo constructor in type.GetConstructors())
+            {
+                // Find the ctor with the correct number of args.
+                var parameters = constructor.GetParameters();
+                if (parameters.Length == typedArgs.Count)
+                {
+                    // Convert the given string args to the correct type.
+                    for (int i = 0; i < parameters.Length; i++)
+                    {
+                        ParameterInfo parameter = parameters[i];
+                        Type parameterType = parameter.ParameterType;
+                        object convertedValue = Convert.ChangeType(typedArgs[i], parameterType);
+                        typedArgs[i] = convertedValue;
+                    }
+
+                    break;
+                }
+            }
+
+            return (IHttpRouteConstraint)Activator.CreateInstance(type, typedArgs.ToArray());
         }
 
         private static IDictionary<string, Type> GetDefaultInlineRouteConstraints()

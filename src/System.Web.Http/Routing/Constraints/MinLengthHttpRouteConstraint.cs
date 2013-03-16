@@ -10,15 +10,9 @@ namespace System.Web.Http.Routing.Constraints
     /// </summary>
     public class MinLengthHttpRouteConstraint : IHttpRouteConstraint
     {
-        public MinLengthHttpRouteConstraint(string minLength)
+        public MinLengthHttpRouteConstraint(int minLength)
         {
-            var parsedMinLength = minLength.ParseInt();
-            if (!parsedMinLength.HasValue)
-            {
-                throw new ArgumentOutOfRangeException("minLength", minLength);
-            }
-
-            MinLength = parsedMinLength.Value;
+            MinLength = minLength;
         }
 
         /// <summary>
@@ -28,7 +22,7 @@ namespace System.Web.Http.Routing.Constraints
 
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
-            var value = values[parameterName];
+            object value = values[parameterName];
             if (value == null)
             {
                 return true;

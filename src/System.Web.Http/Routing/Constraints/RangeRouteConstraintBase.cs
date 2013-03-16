@@ -19,7 +19,7 @@ namespace System.Web.Http.Routing.Constraints
         /// </summary>
         /// <param name="min">The minimum value.</param>
         /// <param name="max">The maximum value.</param>
-        public RangeHttpRouteConstraint(string min, string max)
+        public RangeHttpRouteConstraint(long min, long max)
         {
             _minConstraint = new MinHttpRouteConstraint(min);
             _maxConstraint = new MaxHttpRouteConstraint(max);

@@ -10,15 +10,9 @@ namespace System.Web.Http.Routing.Constraints
     /// </summary>
     public class MinHttpRouteConstraint : IHttpRouteConstraint
     {
-        public MinHttpRouteConstraint(string min)
+        public MinHttpRouteConstraint(long min)
         {
-            var parsedMin = min.ParseLong();
-            if (!parsedMin.HasValue)
-            {
-                throw new ArgumentOutOfRangeException("min", min);
-            }
-
-            Min = parsedMin.Value;
+            Min = min;
         }
 
         /// <summary>
@@ -28,19 +22,19 @@ namespace System.Web.Http.Routing.Constraints
 
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
-            var value = values[parameterName];
+            object value = values[parameterName];
             if (value == null)
             {
                 return true;
             }
 
-            var parsedValue = value.ParseLong();
-            if (!parsedValue.HasValue)
+            long longValue;
+            if (!Int64.TryParse(value.ToString(), out longValue))
             {
                 return false;
             }
 
-            return parsedValue.Value >= Min;
+            return longValue >= Min;
         }
     }
 }

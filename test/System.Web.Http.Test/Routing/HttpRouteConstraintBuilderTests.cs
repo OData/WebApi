@@ -181,12 +181,6 @@ namespace System.Web.Http.Routing
             Assert.Equal("abcdefg", regexConstraint.Pattern);
         }
 
-        [Fact]
-        public void BuildInlineRouteConstraint_TypeOfConstraintIsNotRegistered()
-        {
-            Assert.Throws<KeyNotFoundException>(() => BuildInlineConstraint("typeof"));
-        }
-
         private IHttpRouteConstraint BuildInlineConstraint(string constraintKey, params string[] args)
         {
             IHttpRouteConstraint constraint = new DefaultInlineRouteConstraintResolver().ResolveConstraint(constraintKey, args);

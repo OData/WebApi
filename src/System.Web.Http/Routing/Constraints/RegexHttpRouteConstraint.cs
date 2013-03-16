@@ -24,7 +24,7 @@ namespace System.Web.Http.Routing.Constraints
 
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
-            var value = values[parameterName];
+            object value = values[parameterName];
             if (value == null)
             {
                 return true;

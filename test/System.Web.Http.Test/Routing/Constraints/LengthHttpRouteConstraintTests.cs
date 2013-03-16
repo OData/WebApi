@@ -9,7 +9,7 @@ namespace System.Web.Http.Routing.Constraints
         [Fact]
         public void Match_FailsWhenValueIsNotCorrectLength()
         {
-            LengthHttpRouteConstraint constraint = new LengthHttpRouteConstraint("3");
+            LengthHttpRouteConstraint constraint = new LengthHttpRouteConstraint(3);
             bool match = TestValue(constraint, "1234");
             Assert.False(match);
         }
@@ -17,7 +17,7 @@ namespace System.Web.Http.Routing.Constraints
         [Fact]
         public void Match_SucceedsWhenValueIsCorrectLength()
         {
-            LengthHttpRouteConstraint constraint = new LengthHttpRouteConstraint("3");
+            LengthHttpRouteConstraint constraint = new LengthHttpRouteConstraint(3);
             bool match = TestValue(constraint, "123");
             Assert.True(match);
         }

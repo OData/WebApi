@@ -16,13 +16,13 @@ namespace System.Web.Http.Routing.Constraints
 
         public EnumValueHttpRouteConstraint()
         {
-            var valueType = Enum.GetUnderlyingType(typeof(TEnum));
+            Type valueType = Enum.GetUnderlyingType(typeof(TEnum));
             _converter = TypeDescriptor.GetConverter(valueType);
         }
 
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
-            var value = values[parameterName];
+            object value = values[parameterName];
             if (value == null)
             {
                 return true;
@@ -33,7 +33,7 @@ namespace System.Web.Http.Routing.Constraints
                 return false;
             }
 
-            var convertedValue = _converter.ConvertFrom(value);
+            object convertedValue = _converter.ConvertFrom(value);
             if (convertedValue == null)
             {
                 return false;

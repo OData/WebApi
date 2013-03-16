@@ -12,7 +12,7 @@ namespace System.Web.Http.Routing.Constraints
             IHttpRouteConstraint[] innerConstraints = new IHttpRouteConstraint[]
             {
                 new AlphaHttpRouteConstraint(), 
-                new LengthHttpRouteConstraint("3")
+                new LengthHttpRouteConstraint(3)
             };
 
             CompoundHttpRouteConstraint constraint = new CompoundHttpRouteConstraint(innerConstraints);
@@ -26,7 +26,7 @@ namespace System.Web.Http.Routing.Constraints
             IHttpRouteConstraint[] innerConstraints = new IHttpRouteConstraint[]
             {
                 new AlphaHttpRouteConstraint(), 
-                new LengthHttpRouteConstraint("3"), 
+                new LengthHttpRouteConstraint(3)
             };
 
             CompoundHttpRouteConstraint constraint = new CompoundHttpRouteConstraint(innerConstraints);

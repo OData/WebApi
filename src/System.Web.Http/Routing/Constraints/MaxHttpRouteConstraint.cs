@@ -10,15 +10,9 @@ namespace System.Web.Http.Routing.Constraints
     /// </summary>
     public class MaxHttpRouteConstraint : IHttpRouteConstraint
     {
-        public MaxHttpRouteConstraint(string max)
+        public MaxHttpRouteConstraint(long max)
         {
-            var parsedMax = max.ParseLong();
-            if (!parsedMax.HasValue)
-            {
-                throw new ArgumentOutOfRangeException("max", max);
-            }
-
-            Max = parsedMax.Value;
+            Max = max;
         }
 
         /// <summary>
@@ -28,19 +22,19 @@ namespace System.Web.Http.Routing.Constraints
 
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
-            var value = values[parameterName];
+            object value = values[parameterName];
             if (value == null)
             {
                 return true;
             }
 
-            var parsedValue = value.ParseLong();
-            if (!parsedValue.HasValue)
+            long longValue;
+            if (!Int64.TryParse(value.ToString(), out longValue))
             {
                 return false;
             }
 
-            return parsedValue.Value <= Max;
+            return longValue <= Max;
         }
     }
 }

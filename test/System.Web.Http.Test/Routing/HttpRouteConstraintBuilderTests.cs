@@ -6,7 +6,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing
 {
-    public class HttpRouteConstraintBuilderTest
+    public class HttpRouteConstraintBuilderTests
     {
         [Fact]
         public void BuildInlineRouteConstraint_AlphaConstraint()

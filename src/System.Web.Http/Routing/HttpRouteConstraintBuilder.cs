@@ -47,11 +47,12 @@ namespace System.Web.Http.Routing
                                             inlineRouteConstraintType.IsAssignableFrom(t)
                                       select t;
 
-            foreach (var type in types)
+            foreach (Type type in types)
             {
-                var key = _routeConstraintKeyRegex.Replace(type.Name, String.Empty).ToUpperInvariant();
+                string key = _routeConstraintKeyRegex.Replace(type.Name, String.Empty).ToUpperInvariant();
                 defaultInlineRouteConstraints.Add(key, type);
             }
+
             return defaultInlineRouteConstraints;
         }
     }

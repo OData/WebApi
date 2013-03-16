@@ -8,7 +8,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing
 {
-    public class HttpRouteBuilderTest
+    public class HttpRouteBuilderTests
     {
         [Fact]
         public void BuildHttpRoute_ChainedConstraintAndDefault()

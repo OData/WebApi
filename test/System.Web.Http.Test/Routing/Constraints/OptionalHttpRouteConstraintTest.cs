@@ -4,7 +4,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing.Constraints
 {
-    public class OptionalHttpRouteConstraintTests : HttpRouteConstraintTestBase
+    public class OptionalHttpRouteConstraintTest : HttpRouteConstraintTestBase
     {
         [Fact]
         public void Match_FailsWhenValueIsAvailableAndInnerConstraintFails()

@@ -4,7 +4,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing.Constraints
 {
-    public class BoolHttpRouteConstraintTests : HttpRouteConstraintTestBase
+    public class BoolHttpRouteConstraintTest : HttpRouteConstraintTestBase
     {
         [Fact]
         public void Match_FailsWhenValueIsNotBool()

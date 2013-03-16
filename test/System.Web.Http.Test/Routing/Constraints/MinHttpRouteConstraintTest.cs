@@ -4,7 +4,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing.Constraints
 {
-    public class MinHttpRouteConstraintTests : HttpRouteConstraintTestBase
+    public class MinHttpRouteConstraintTest : HttpRouteConstraintTestBase
     {
         [Fact]
         public void Match_FailsWhenValueIsLessThanMin()

@@ -4,7 +4,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing.Constraints
 {
-    public class DoubleHttpRouteConstraintTests : HttpRouteConstraintTestBase
+    public class DoubleHttpRouteConstraintTest : HttpRouteConstraintTestBase
     {
         [Fact]
         public void Match_FailsWhenValueIsNotDouble()

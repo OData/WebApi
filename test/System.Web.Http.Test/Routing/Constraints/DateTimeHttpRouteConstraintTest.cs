@@ -4,7 +4,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing.Constraints
 {
-    public class DateTimeHttpRouteConstraintTests : HttpRouteConstraintTestBase
+    public class DateTimeHttpRouteConstraintTest : HttpRouteConstraintTestBase
     {
         [Fact]
         public void Match_FailsWhenValueIsNotDateTime()

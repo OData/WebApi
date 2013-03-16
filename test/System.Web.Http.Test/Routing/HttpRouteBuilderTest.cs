@@ -8,12 +8,12 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing
 {
-    public class HttpRouteBuilderTests
+    public class HttpRouteBuilderTest
     {
         [Fact]
         public void BuildHttpRoute_ChainedConstraintAndDefault()
         {
-            IHttpRoute route = BuildRoute(@"hello/{param=8675309:regex(\d+)}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\d+)=8675309}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             
@@ -26,7 +26,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_ChainedConstraintAndOptional()
         {
-            IHttpRoute route = BuildRoute(@"hello/{param?:regex(\d+)}");
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\d+)?}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             
@@ -64,7 +64,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_ConstraintsDefaultsAndOptionalsInMultipleSections()
         {
-            IHttpRoute route = BuildRoute(@"some/url-{p1=hello:alpha:length(3)}/{p2=abc}/{p3?}");
+            IHttpRoute route = BuildRoute(@"some/url-{p1:alpha:length(3)=hello}/{p2=abc}/{p3?}");
 
             Assert.Equal("some/url-{p1}/{p2}/{p3}", route.RouteTemplate);
             

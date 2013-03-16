@@ -10,11 +10,21 @@ namespace System.Web.Http.Routing
 {
     public static class HttpRouteBuilder
     {
+        // One or more characters, matches "id"
         private const string ParameterNameRegex = @"(?<parameterName>.+?)";
-        private const string OptionalRegex = @"(?<optional>\?)?";
-        private const string DefaultValueRegex = @"(=(?<defaultValue>.*?))?";
+
+        // Zero or more inline constraints that start with a colon followed by zero or more characters
+        // Optionally the constraint can have arguments within parentheses - necessary to capture characters like ":" and "}"
+        // Matches ":int", ":length(2)", ":regex(\})", ":regex(:)" zero or more times
         private const string ConstraintRegex = @"(:(?<constraint>.*?(\(.*?\))?))*";
-        private static readonly Regex _parameterRegex = new Regex("{" + ParameterNameRegex + OptionalRegex + DefaultValueRegex + ConstraintRegex + "}", RegexOptions.Compiled);
+
+        // Optional "?" for optional parameters or default value with an equal sign followed by zero or more characters
+        // Matches "?", "=", "=abc"
+        private const string OptionalOrDefaultValueRegex = @"((?<optional>\?)|(=(?<defaultValue>.*?)))?";
+
+        private static readonly Regex _parameterRegex = new Regex(
+            "{" + ParameterNameRegex + ConstraintRegex + OptionalOrDefaultValueRegex + "}",
+            RegexOptions.Compiled);
 
         public static IHttpRoute BuildHttpRoute(IHttpRouteProvider provider, string controllerName, string actionName)
         {
@@ -65,7 +75,7 @@ namespace System.Web.Http.Routing
                 }
 
                 List<IHttpRouteConstraint> parameterConstraints = new List<IHttpRouteConstraint>();
-                IInlineRouteConstraintResolver inlineConstraintResolver = new DefaultInlineRouteConstraintResolver();
+                IInlineConstraintResolver inlineConstraintResolver = new DefaultInlineConstraintResolver();
                 foreach (Capture constraintCapture in match.Groups["constraint"].Captures)
                 {
                     IHttpRouteConstraint constraint = inlineConstraintResolver.ResolveConstraint(constraintCapture.Value);
@@ -85,6 +95,8 @@ namespace System.Web.Http.Routing
                 }
             }                 
             
+            // Replaces parameter matches with just the parameter name in braces
+            // Strips out the optional '?', default value, inline constraints
             return _parameterRegex.Replace(routeTemplate, @"{${parameterName}}");
         }
     }

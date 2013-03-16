@@ -6,7 +6,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing
 {
-    public class DefaultInlineRouteConstraintResolverTests
+    public class DefaultInlineConstraintResolverTest
     {
         [Fact]
         public void BuildInlineRouteConstraint_AlphaConstraint()
@@ -183,7 +183,7 @@ namespace System.Web.Http.Routing
 
         private IHttpRouteConstraint ResolveConstraint(string constraintDefinition)
         {
-            IHttpRouteConstraint constraint = new DefaultInlineRouteConstraintResolver().ResolveConstraint(constraintDefinition);
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint(constraintDefinition);
 
             Assert.NotNull(constraint);
 

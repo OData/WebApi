@@ -4,7 +4,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing.Constraints
 {
-    public class MaxLengthHttpRouteConstraintTests : HttpRouteConstraintTestBase
+    public class MaxLengthHttpRouteConstraintTest : HttpRouteConstraintTestBase
     {
         [Fact]
         public void Match_FailsWhenValueLengthIsGreaterThanMaxLength()

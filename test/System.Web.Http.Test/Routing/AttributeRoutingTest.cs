@@ -11,14 +11,20 @@ namespace System.Web.Http.Routing
     {
         [Theory]
         [InlineData("GET", "Controller/42", "Get42")]
+        // Tests inline route constraints
+        [InlineData("GET", "Controller/Ethan", "GetByNameEthan")]
+        // Tests the HTTP method constraint
         [InlineData("PUT", "Controller/42", "Put42")]
+        // Tests optional parameters
         [InlineData("GET", "Optional/1/2", "Optional12")]
         [InlineData("GET", "Optional/1", "Optional1")]
         [InlineData("GET", "Optional", "Optional")]
+        // Tests default values
         [InlineData("GET", "Default/1/2", "Default12")]
         [InlineData("GET", "Default/1", "Default1D2")]
         [InlineData("GET", "Default", "DefaultD1D2")]
-        [InlineData("GET", "Wildcard/a/b/c", "a/b/c")]
+        // Test wildcard parameters
+        [InlineData("GET", "Wildcard/a/b/c", "Wildcarda/b/c")]
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -51,10 +57,16 @@ namespace System.Web.Http.Routing
 
     public class AttributedController : ApiController
     {
-        [HttpGet("Controller/{id}")]
-        public string Get(string id)
+        [HttpGet("Controller/{id:int}")]
+        public string Get(int id)
         {
             return "Get" + id;
+        }
+
+        [HttpGet("Controller/{name}")]
+        public string GetByName(string name)
+        {
+            return "GetByName" + name;
         }
 
         [HttpPut("Controller/{id}")]
@@ -78,7 +90,7 @@ namespace System.Web.Http.Routing
         [HttpGet("Wildcard/{*wildcard}")]
         public string Wildcard(string wildcard)
         {
-            return wildcard;
+            return "Wildcard" + wildcard;
         }
     }
 }

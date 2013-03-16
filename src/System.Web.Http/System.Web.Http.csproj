@@ -85,7 +85,7 @@
     <Compile Include="Routing\Constraints\CompoundHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\DateTimeHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\DecimalHttpRouteConstraint.cs" />
-    <Compile Include="Routing\DefaultInlineRouteConstraintResolver.cs" />
+    <Compile Include="Routing\DefaultInlineConstraintResolver.cs" />
     <Compile Include="Routing\Constraints\DoubleHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\EnumNameHttpRouteConstraintOfTEnum.cs" />
     <Compile Include="Routing\Constraints\EnumValueHttpRouteConstraintOfTEnum.cs" />
@@ -103,7 +103,7 @@
     <Compile Include="Routing\Constraints\OptionalHttpRouteConstraint.cs" />
     <Compile Include="Routing\HttpRouteBuilder.cs" />
     <Compile Include="Routing\IHttpRouteProvider.cs" />
-    <Compile Include="Routing\IInlineRouteConstraintResolver.cs" />
+    <Compile Include="Routing\IInlineConstraintResolver.cs" />
     <Compile Include="Tracing\TraceLevelHelper.cs" />
     <Compile Include="Tracing\TraceKindHelper.cs" />
     <Compile Include="Validation\IModelValidatorCache.cs" />

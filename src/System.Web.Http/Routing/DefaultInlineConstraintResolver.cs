@@ -7,9 +7,9 @@ using System.Web.Http.Routing.Constraints;
 
 namespace System.Web.Http.Routing
 {
-    public class DefaultInlineRouteConstraintResolver : IInlineRouteConstraintResolver
+    public class DefaultInlineConstraintResolver : IInlineConstraintResolver
     {
-        private readonly IDictionary<string, Type> _inlineRouteConstraintMap = GetDefaultInlineRouteConstraints();
+        private readonly IDictionary<string, Type> _inlineRouteConstraintMap = GetDefaultInlineConstraints();
 
         public IHttpRouteConstraint ResolveConstraint(string inlineConstraint)
         {
@@ -78,7 +78,7 @@ namespace System.Web.Http.Routing
             return (IHttpRouteConstraint)Activator.CreateInstance(constraintType, convertedArguments.ToArray());
         }
 
-        private static IDictionary<string, Type> GetDefaultInlineRouteConstraints()
+        private static IDictionary<string, Type> GetDefaultInlineConstraints()
         {
             return new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase)
             {

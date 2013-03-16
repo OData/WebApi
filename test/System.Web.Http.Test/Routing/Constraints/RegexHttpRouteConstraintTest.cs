@@ -4,7 +4,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing.Constraints
 {
-    public class RegexHttpRouteConstraintTests : HttpRouteConstraintTestBase
+    public class RegexHttpRouteConstraintTest : HttpRouteConstraintTestBase
     {
         [Fact]
         public void Match_FailsWhenPatternIsNotMatched()

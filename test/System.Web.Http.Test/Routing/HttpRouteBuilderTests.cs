@@ -64,7 +64,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_ConstraintsDefaultsAndOptionalsInMultipleSections()
         {
-            IHttpRoute route = BuildRoute(@"some/url-{p1=hello:regex(\d+):regex(\w+)}/{p2=abc}/{p3?}");
+            IHttpRoute route = BuildRoute(@"some/url-{p1=hello:alpha:length(3)}/{p2=abc}/{p3?}");
 
             Assert.Equal("some/url-{p1}/{p2}/{p3}", route.RouteTemplate);
             
@@ -74,8 +74,8 @@ namespace System.Web.Http.Routing
 
             Assert.IsType<CompoundHttpRouteConstraint>(route.Constraints["p1"]);
             CompoundHttpRouteConstraint constraint = (CompoundHttpRouteConstraint)route.Constraints["p1"];
-            Assert.Equal(@"\d+", ((RegexHttpRouteConstraint)constraint.Constraints.ElementAt(0)).Pattern);
-            Assert.Equal(@"\w+", ((RegexHttpRouteConstraint)constraint.Constraints.ElementAt(1)).Pattern);
+            Assert.IsType<AlphaHttpRouteConstraint>(constraint.Constraints.ElementAt(0));
+            Assert.IsType<LengthHttpRouteConstraint>(constraint.Constraints.ElementAt(1));
         }
 
         [Fact]
@@ -135,6 +135,17 @@ namespace System.Web.Http.Routing
 
             Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
             Assert.Equal(@":", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+        }
+
+        [Fact]
+        public void BuildHttpRoute_RegexConstraintWithCommaInPattern()
+        {
+            IHttpRoute route = BuildRoute(@"hello/{param:regex(\w,\w)}");
+
+            Assert.Equal("hello/{param}", route.RouteTemplate);
+
+            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@"\w,\w", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]

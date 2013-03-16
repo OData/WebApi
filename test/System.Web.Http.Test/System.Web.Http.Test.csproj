@@ -130,7 +130,7 @@
     <Compile Include="Routing\Constraints\RangeHttpRouteConstraintTests.cs" />
     <Compile Include="Routing\Constraints\RegexHttpRouteConstraintTests.cs" />
     <Compile Include="Routing\HttpRouteBuilderTests.cs" />
-    <Compile Include="Routing\HttpRouteConstraintBuilderTests.cs" />
+    <Compile Include="Routing\DefaultInlineRouteConstraintResolverTests.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />

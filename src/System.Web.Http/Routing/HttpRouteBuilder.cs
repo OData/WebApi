@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Web.Http.Properties;
 using System.Web.Http.Routing.Constraints;
 
 namespace System.Web.Http.Routing
 {
-    public static class HttpRouteBuilder
+    /// <summary>
+    /// Builds <see cref="IHttpRoute"/> instances based on route information.
+    /// </summary>
+    public class HttpRouteBuilder
     {
         // One or more characters, matches "id"
         private const string ParameterNameRegex = @"(?<parameterName>.+?)";
@@ -18,16 +22,62 @@ namespace System.Web.Http.Routing
         // Matches ":int", ":length(2)", ":regex(\})", ":regex(:)" zero or more times
         private const string ConstraintRegex = @"(:(?<constraint>.*?(\(.*?\))?))*";
 
-        // Optional "?" for optional parameters or default value with an equal sign followed by zero or more characters
+        // Optional "?" for optional parameters or a default value with an equal sign followed by zero or more characters
         // Matches "?", "=", "=abc"
-        private const string OptionalOrDefaultValueRegex = @"((?<optional>\?)|(=(?<defaultValue>.*?)))?";
+        private const string DefaultValueRegex = @"(?<defaultValue>\?|(=.*?))?";
 
         private static readonly Regex _parameterRegex = new Regex(
-            "{" + ParameterNameRegex + ConstraintRegex + OptionalOrDefaultValueRegex + "}",
+            "{" + ParameterNameRegex + ConstraintRegex + DefaultValueRegex + "}",
             RegexOptions.Compiled);
 
-        public static IHttpRoute BuildHttpRoute(IHttpRouteProvider provider, string controllerName, string actionName)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpRouteBuilder" /> class using the default inline constraint resolver.
+        /// </summary>
+        public HttpRouteBuilder()
+            : this(new DefaultInlineConstraintResolver())
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpRouteBuilder" /> class.
+        /// </summary>
+        /// <param name="constraintResolver">The <see cref="IInlineConstraintResolver"/> to use for resolving inline constraints.</param>
+        public HttpRouteBuilder(IInlineConstraintResolver constraintResolver)
+        {
+            if (constraintResolver == null)
+            {
+                throw Error.ArgumentNull("constraintResolver");
+            }
+
+            ConstraintResolver = constraintResolver;
+        }
+
+        public IInlineConstraintResolver ConstraintResolver { get; private set; }
+
+        /// <summary>
+        /// Builds an <see cref="IHttpRoute"/> based on the specified route info provider.
+        /// </summary>
+        /// <param name="provider">The provider used to determine the route name and the route template.</param>
+        /// <param name="controllerName">The name of the associated controller.</param>
+        /// <param name="actionName">The name of the associated action.</param>
+        /// <returns>The generated <see cref="IHttpRoute"/>.</returns>
+        public virtual IHttpRoute BuildHttpRoute(IHttpRouteInfoProvider provider, string controllerName, string actionName)
+        {
+            if (provider == null)
+            {
+                throw Error.ArgumentNull("provider");
+            }
+
+            if (controllerName == null)
+            {
+                throw Error.ArgumentNull("controllerName");
+            }
+
+            if (actionName == null)
+            {
+                throw Error.ArgumentNull("actionName");
+            }
+
             HttpRouteValueDictionary defaults = new HttpRouteValueDictionary
             {
                 { "controller", controllerName },
@@ -36,68 +86,111 @@ namespace System.Web.Http.Routing
 
             HttpRouteValueDictionary constraints = new HttpRouteValueDictionary
             {
-                // TODO: Improve HTTP method constraint. Current implementation is very inefficient since it matches before running the constraint.
+                // Current method constraint implementation is inefficient since it matches before running the constraint.
+                // Consider checking the HTTP method first in a custom route as a performance optimization.
                 { "httpMethod", new HttpMethodConstraint(provider.HttpMethods.ToArray()) }
             };
 
             string routeTemplate = ParseRouteTemplate(provider.RouteTemplate, defaults, constraints);
 
-            return new HttpRoute(routeTemplate, defaults, constraints);
+            return BuildHttpRoute(defaults, constraints, routeTemplate);
         }
 
         /// <summary>
-        /// Parses defaults and constraints from the given route template and returns a detokenized route template.
+        /// Builds an <see cref="IHttpRoute"/>.
         /// </summary>
-        /// <param name="routeTemplate">The tokenized route template to parse.</param>
-        /// <param name="defaults">Dictionary for collecting defaults parsed from the route template.</param>
-        /// <param name="constraints">Dictionary for collecting constraints parsed from the route template.</param>
-        /// <returns>The route template with all default and constraint definitions removed.</returns>
-        private static string ParseRouteTemplate(string routeTemplate, HttpRouteValueDictionary defaults, HttpRouteValueDictionary constraints)
+        /// <param name="defaults">The route defaults.</param>
+        /// <param name="constraints">The route constraints.</param>
+        /// <param name="routeTemplate">The detokenized route template.</param>
+        /// <returns>The generated <see cref="IHttpRoute"/>.</returns>
+        public virtual IHttpRoute BuildHttpRoute(HttpRouteValueDictionary defaults, HttpRouteValueDictionary constraints, string routeTemplate)
+        {
+            return new HttpRoute(routeTemplate, defaults, constraints);
+        }
+
+        private string ParseRouteTemplate(string routeTemplate, HttpRouteValueDictionary defaults, HttpRouteValueDictionary constraints)
         {
             Contract.Assert(defaults != null);
             Contract.Assert(constraints != null);
 
-            MatchCollection matches = _parameterRegex.Matches(routeTemplate);
+            MatchCollection parameterMatches = _parameterRegex.Matches(routeTemplate);
 
-            foreach (Match match in matches)
+            foreach (Match parameterMatch in parameterMatches)
             {
-                string parameterName = match.Groups["parameterName"].Value;
-                bool isOptional = match.Groups["optional"].Success;
-                Group defaultValueGroup = match.Groups["defaultValue"];
+                string parameterName = parameterMatch.Groups["parameterName"].Value;
 
-                if (defaultValueGroup.Success)
+                // Add the default value if present
+                Group defaultValueGroup = parameterMatch.Groups["defaultValue"];
+                object defaultValue = GetDefaultValue(defaultValueGroup);
+                if (defaultValue != null)
                 {
-                    defaults.AddIfNew(parameterName, defaultValueGroup.Value);
-                }
-                else if (isOptional)
-                {
-                    defaults.AddIfNew(parameterName, RouteParameter.Optional);
+                    defaults.Add(parameterName, defaultValue);
                 }
 
-                List<IHttpRouteConstraint> parameterConstraints = new List<IHttpRouteConstraint>();
-                IInlineConstraintResolver inlineConstraintResolver = new DefaultInlineConstraintResolver();
-                foreach (Capture constraintCapture in match.Groups["constraint"].Captures)
+                // Register inline constraints if present
+                Group constraintGroup = parameterMatch.Groups["constraint"];
+                bool isOptional = defaultValue == RouteParameter.Optional;
+                IHttpRouteConstraint constraint = GetInlineConstraint(constraintGroup, isOptional);
+                if (constraint != null)
                 {
-                    IHttpRouteConstraint constraint = inlineConstraintResolver.ResolveConstraint(constraintCapture.Value);
-                    parameterConstraints.Add(constraint);
-                }
-
-                if (parameterConstraints.Count > 0)
-                {
-                    IHttpRouteConstraint constraint = parameterConstraints.Count == 1 ? parameterConstraints[0] : new CompoundHttpRouteConstraint(parameterConstraints);
-
-                    if (isOptional)
-                    {
-                        constraint = new OptionalHttpRouteConstraint(constraint);
-                    }
-
-                    constraints.AddIfNew(parameterName, constraint);
+                    constraints.Add(parameterName, constraint);
                 }
             }                 
             
             // Replaces parameter matches with just the parameter name in braces
             // Strips out the optional '?', default value, inline constraints
             return _parameterRegex.Replace(routeTemplate, @"{${parameterName}}");
+        }
+
+        private static object GetDefaultValue(Group defaultValueGroup)
+        {
+            if (defaultValueGroup.Success)
+            {
+                string defaultValueMatch = defaultValueGroup.Value;
+                if (defaultValueMatch == "?")
+                {
+                    return RouteParameter.Optional;
+                }
+                else
+                {
+                    // Strip out the equal sign at the beginning
+                    Contract.Assert(defaultValueMatch.StartsWith("="));
+                    return defaultValueMatch.Substring(1);
+                }
+            }
+            return null;
+        }
+
+        private IHttpRouteConstraint GetInlineConstraint(Group constraintGroup, bool isOptional)
+        {
+            List<IHttpRouteConstraint> parameterConstraints = new List<IHttpRouteConstraint>();
+            foreach (Capture constraintCapture in constraintGroup.Captures)
+            {
+                string inlineConstraint = constraintCapture.Value;
+                IHttpRouteConstraint constraint = ConstraintResolver.ResolveConstraint(inlineConstraint);
+                if (constraint == null)
+                {
+                    throw Error.InvalidOperation(SRResources.HttpRouteBuilder_CouldNotResolveConstraint, ConstraintResolver.GetType().Name, inlineConstraint);
+                }
+                parameterConstraints.Add(constraint);
+            }
+
+            if (parameterConstraints.Count > 0)
+            {
+                IHttpRouteConstraint constraint = parameterConstraints.Count == 1 ?
+                    parameterConstraints[0] :
+                    new CompoundHttpRouteConstraint(parameterConstraints);
+
+                if (isOptional)
+                {
+                    // Constraints should match RouteParameter.Optional if the parameter is optional
+                    // This prevents contraining when there's no value specified
+                    constraint = new OptionalHttpRouteConstraint(constraint);
+                }
+
+                return constraint;
+            }
+            return null;
         }
     }
 }

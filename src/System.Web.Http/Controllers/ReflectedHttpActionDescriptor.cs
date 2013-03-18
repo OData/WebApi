@@ -38,7 +38,8 @@ namespace System.Web.Http.Controllers
         // Furthermore, many different services may call to ask for different attributes, so we have multiple callers. 
         // That means there's not a single cache for the callers, which means there's some value caching here.
         // This cache can be a 2x speedup in some benchmarks.
-        private object[] _attrCached;
+        private object[] _attributeCache;
+        private object[] _declaredOnlyAttributeCache;
 
         private static readonly HttpMethod[] _supportedHttpMethodsByConvention = 
         { 
@@ -108,11 +109,10 @@ namespace System.Web.Http.Controllers
             get { return _returnType; }
         }
 
-        public override Collection<T> GetCustomAttributes<T>()
+        public override Collection<T> GetCustomAttributes<T>(bool inherit)
         {
-            Contract.Assert(_methodInfo != null); // can't get attributes without the method set!
-            Contract.Assert(_attrCached != null); // setting the method should build the attribute cache
-            return new Collection<T>(TypeHelper.OfType<T>(_attrCached));
+            object[] attributes = inherit ? _attributeCache : _declaredOnlyAttributeCache;
+            return new Collection<T>(TypeHelper.OfType<T>(attributes));
         }
 
         /// <inheritdoc/>
@@ -150,10 +150,11 @@ namespace System.Web.Http.Controllers
             _methodInfo = methodInfo;
             _returnType = GetReturnType(methodInfo);
             _actionExecutor = new Lazy<ActionExecutor>(() => InitializeActionExecutor(_methodInfo));
-            _attrCached = _methodInfo.GetCustomAttributes(inherit: true);
-            CacheAttrsIActionMethodSelector = _attrCached.OfType<IActionMethodSelector>().ToArray();
-            _actionName = GetActionName(_methodInfo, _attrCached);
-            _supportedHttpMethods = GetSupportedHttpMethods(_methodInfo, _attrCached);
+            _declaredOnlyAttributeCache = _methodInfo.GetCustomAttributes(inherit: false);
+            _attributeCache = _methodInfo.GetCustomAttributes(inherit: true);
+            CacheAttrsIActionMethodSelector = _attributeCache.OfType<IActionMethodSelector>().ToArray();
+            _actionName = GetActionName(_methodInfo, _attributeCache);
+            _supportedHttpMethods = GetSupportedHttpMethods(_methodInfo, _attributeCache);
         }
 
         internal static Type GetReturnType(MethodInfo methodInfo)

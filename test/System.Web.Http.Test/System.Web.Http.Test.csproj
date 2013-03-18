@@ -112,9 +112,6 @@
     <Compile Include="Routing\Constraints\DateTimeHttpRouteConstraintTest.cs" />
     <Compile Include="Routing\Constraints\DecimalHttpRouteConstraintTest.cs" />
     <Compile Include="Routing\Constraints\DoubleHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\EnumNameHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\EnumValueHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\FakeEnum.cs" />
     <Compile Include="Routing\Constraints\FloatHttpRouteConstraintTest.cs" />
     <Compile Include="Routing\Constraints\GuidHttpRouteConstraintTest.cs" />
     <Compile Include="Routing\Constraints\HttpRouteConstraintTestBase.cs" />

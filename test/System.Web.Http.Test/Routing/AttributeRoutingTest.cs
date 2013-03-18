@@ -19,6 +19,7 @@ namespace System.Web.Http.Routing
         [InlineData("GET", "Optional/1/2", "Optional12")]
         [InlineData("GET", "Optional/1", "Optional1")]
         [InlineData("GET", "Optional", "Optional")]
+        [InlineData("GET", "OptionalWithConstraint", "OptionalWithConstraint")]
         // Tests default values
         [InlineData("GET", "Default/1/2", "Default12")]
         [InlineData("GET", "Default/1", "Default1D2")]
@@ -38,7 +39,7 @@ namespace System.Web.Http.Routing
         private static HttpResponseMessage SubmitRequest(HttpRequestMessage request)
         {
             HttpConfiguration config = new HttpConfiguration();
-            config.Routes.MapHttpAttributeRoutes();
+            config.MapHttpAttributeRoutes();
 
             HttpServer server = new HttpServer(config);
             using (HttpMessageInvoker client = new HttpMessageInvoker(server))
@@ -69,6 +70,13 @@ namespace System.Web.Http.Routing
             return "GetByName" + name;
         }
 
+        [HttpGet("Controller/Get1")]
+        [HttpGet("Controller/Get2")]
+        public string MultipleGet()
+        {
+            return "MultipleGet";
+        }
+
         [HttpPut("Controller/{id}")]
         public string Put(string id)
         {
@@ -79,6 +87,12 @@ namespace System.Web.Http.Routing
         public string Optional(string opt1 = null, string opt2 = null)
         {
             return "Optional" + opt1 + opt2;
+        }
+
+        [HttpGet("OptionalWithConstraint/{opt:int?}")]
+        public string OptionalWithConstraint(string opt = null)
+        {
+            return "OptionalWithConstraint" + opt;
         }
 
         [HttpGet("Default/{default1=D1}/{default2=D2}")]

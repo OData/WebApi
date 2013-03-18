@@ -9,100 +9,100 @@ namespace System.Web.Http.Routing
     public class DefaultInlineConstraintResolverTest
     {
         [Fact]
-        public void BuildInlineRouteConstraint_AlphaConstraint()
+        public void ResolveConstraint_AlphaConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("alpha");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("alpha");
 
             Assert.IsType<AlphaHttpRouteConstraint>(constraint);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_BoolConstraint()
+        public void ResolveConstraint_BoolConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("bool");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("bool");
 
             Assert.IsType<BoolHttpRouteConstraint>(constraint);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_CompoundConstraintIsNotRegistered()
+        public void ResolveConstraint_CompoundConstraintIsNotRegistered()
         {
-            Assert.Throws<KeyNotFoundException>(() => ResolveConstraint("compound"));
+            Assert.Null(new DefaultInlineConstraintResolver().ResolveConstraint("compound"));
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_DateTimeConstraint()
+        public void ResolveConstraint_DateTimeConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("datetime");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("datetime");
 
             Assert.IsType<DateTimeHttpRouteConstraint>(constraint);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_DecimalConstraint()
+        public void ResolveConstraint_DecimalConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("decimal");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("decimal");
 
             Assert.IsType<DecimalHttpRouteConstraint>(constraint);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_DoubleConstraint()
+        public void ResolveConstraint_DoubleConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("double");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("double");
 
             Assert.IsType<DoubleHttpRouteConstraint>(constraint);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_EnumNameConstraintIsNotRegistered()
+        public void ResolveConstraint_EnumNameConstraintIsNotRegistered()
         {
-            Assert.Throws<KeyNotFoundException>(() => ResolveConstraint("enumname"));
+            Assert.Null(new DefaultInlineConstraintResolver().ResolveConstraint("enumname"));
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_EnumValueConstraintIsNotRegistered()
+        public void ResolveConstraint_EnumValueConstraintIsNotRegistered()
         {
-            Assert.Throws<KeyNotFoundException>(() => ResolveConstraint("enumvalue"));
+            Assert.Null(new DefaultInlineConstraintResolver().ResolveConstraint("enumvalue"));
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_FloatConstraint()
+        public void ResolveConstraint_FloatConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("float");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("float");
 
             Assert.IsType<FloatHttpRouteConstraint>(constraint);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_GuidConstraint()
+        public void ResolveConstraint_GuidConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("guid");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("guid");
 
             Assert.IsType<GuidHttpRouteConstraint>(constraint);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_IntConstraint()
+        public void ResolveConstraint_IntConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("int");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("int");
 
             Assert.IsType<IntHttpRouteConstraint>(constraint);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_LengthConstraint()
+        public void ResolveConstraint_LengthConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("length(5)");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("length(5)");
 
             Assert.IsType<LengthHttpRouteConstraint>(constraint);
             Assert.Equal(5, ((LengthHttpRouteConstraint)constraint).Length);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_LengthRangeConstraint()
+        public void ResolveConstraint_LengthRangeConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("length(5, 10)");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("length(5, 10)");
 
             Assert.IsType<LengthHttpRouteConstraint>(constraint);
             LengthHttpRouteConstraint lengthConstraint = (LengthHttpRouteConstraint)constraint;
@@ -111,59 +111,59 @@ namespace System.Web.Http.Routing
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_LongRangeConstraint()
+        public void ResolveConstraint_LongRangeConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("long");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("long");
 
             Assert.IsType<LongHttpRouteConstraint>(constraint);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_MaxConstraint()
+        public void ResolveConstraint_MaxConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("max(10)");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("max(10)");
 
             Assert.IsType<MaxHttpRouteConstraint>(constraint);
             Assert.Equal(10, ((MaxHttpRouteConstraint)constraint).Max);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_MaxLengthConstraint()
+        public void ResolveConstraint_MaxLengthConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("maxlength(10)");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("maxlength(10)");
 
             Assert.IsType<MaxLengthHttpRouteConstraint>(constraint);
             Assert.Equal(10, ((MaxLengthHttpRouteConstraint)constraint).MaxLength);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_MinConstraint()
+        public void ResolveConstraint_MinConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("min(3)");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("min(3)");
 
             Assert.IsType<MinHttpRouteConstraint>(constraint);
             Assert.Equal(3, ((MinHttpRouteConstraint)constraint).Min);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_MinLengthConstraint()
+        public void ResolveConstraint_MinLengthConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("minlength(3)");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("minlength(3)");
 
             Assert.IsType<MinLengthHttpRouteConstraint>(constraint);
             Assert.Equal(3, ((MinLengthHttpRouteConstraint)constraint).MinLength);
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_OptionalConstraintIsNotRegistered()
+        public void ResolveConstraint_OptionalConstraintIsNotRegistered()
         {
-            Assert.Throws<KeyNotFoundException>(() => ResolveConstraint("optional"));
+            Assert.Null(new DefaultInlineConstraintResolver().ResolveConstraint("optional"));
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_RangeConstraint()
+        public void ResolveConstraint_RangeConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("range(5, 10)");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("range(5, 10)");
 
             Assert.IsType<RangeHttpRouteConstraint>(constraint);
             RangeHttpRouteConstraint rangeConstraint = (RangeHttpRouteConstraint)constraint;
@@ -172,22 +172,43 @@ namespace System.Web.Http.Routing
         }
 
         [Fact]
-        public void BuildInlineRouteConstraint_RegexConstraint()
+        public void ResolveConstraint_RegexConstraint()
         {
-            IHttpRouteConstraint constraint = ResolveConstraint("regex(abc,defg)");
+            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint("regex(abc,defg)");
 
             Assert.IsType<RegexHttpRouteConstraint>(constraint);
             RegexHttpRouteConstraint regexConstraint = (RegexHttpRouteConstraint)constraint;
             Assert.Equal("abc,defg", regexConstraint.Pattern);
         }
 
-        private IHttpRouteConstraint ResolveConstraint(string constraintDefinition)
+        [Fact]
+        public void ResolveConstraint_IntConstraintWithArgument_Throws()
         {
-            IHttpRouteConstraint constraint = new DefaultInlineConstraintResolver().ResolveConstraint(constraintDefinition);
+            Assert.Throws<InvalidOperationException>(
+                () => new DefaultInlineConstraintResolver().ResolveConstraint("int(5)"),
+               "Could not find a constructor for constraint type 'IntHttpRouteConstraint' with the following number of parameters: 1.");
+        }
 
-            Assert.NotNull(constraint);
+        [Fact]
+        public void ResolveConstraint_SupportsCustomConstraints()
+        {
+            var resolver = new DefaultInlineConstraintResolver();
+            resolver.ConstraintMap.Add("custom", typeof(IntHttpRouteConstraint));
 
-            return constraint;
+            IHttpRouteConstraint constraint = resolver.ResolveConstraint("custom");
+
+            Assert.IsType<IntHttpRouteConstraint>(constraint);
+        }
+
+        [Fact]
+        public void ResolveConstraint_CustomConstraintThatDoesNotImplementIHttpRouteConstraint_Throws()
+        {
+            var resolver = new DefaultInlineConstraintResolver();
+            resolver.ConstraintMap.Add("custom", typeof(string));
+
+            Assert.Throws<InvalidOperationException>(
+                () => resolver.ResolveConstraint("custom"),
+               "The constraint type 'String' which is mapped to constraint key 'custom' must implement the IHttpRouteConstraint interface.");
         }
     }
 }

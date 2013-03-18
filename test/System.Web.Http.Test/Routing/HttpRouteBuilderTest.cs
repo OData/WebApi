@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Routing.Constraints;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.Routing
 {
@@ -13,12 +14,20 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_ChainedConstraintAndDefault()
         {
+            IHttpRoute route = BuildRoute(@"hello/{param:int=8675309}");
+
+            Assert.Equal("hello/{param}", route.RouteTemplate);
+            Assert.Equal("8675309", route.Defaults["param"]);
+            Assert.IsType<IntHttpRouteConstraint>(route.Constraints["param"]);
+        }
+
+        [Fact]
+        public void BuildHttpRoute_ChainedConstraintWithArgumentsAndDefault()
+        {
             IHttpRoute route = BuildRoute(@"hello/{param:regex(\d+)=8675309}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-            
             Assert.Equal("8675309", route.Defaults["param"]);
-            
             Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
             Assert.Equal(@"\d+", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
         }
@@ -26,12 +35,26 @@ namespace System.Web.Http.Routing
         [Fact]
         public void BuildHttpRoute_ChainedConstraintAndOptional()
         {
+            IHttpRoute route = BuildRoute(@"hello/{param:int?}");
+
+            Assert.Equal("hello/{param}", route.RouteTemplate);
+
+            Assert.Equal(RouteParameter.Optional, route.Defaults["param"]);
+
+            Assert.IsType<OptionalHttpRouteConstraint>(route.Constraints["param"]);
+            var constraint = (OptionalHttpRouteConstraint)route.Constraints["param"];
+            Assert.IsType<IntHttpRouteConstraint>(constraint.InnerConstraint);
+        }
+
+        [Fact]
+        public void BuildHttpRoute_ChainedConstraintWithArgumentsAndOptional()
+        {
             IHttpRoute route = BuildRoute(@"hello/{param:regex(\d+)?}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-            
+
             Assert.Equal(RouteParameter.Optional, route.Defaults["param"]);
-            
+
             Assert.IsType<OptionalHttpRouteConstraint>(route.Constraints["param"]);
             var constraint = (OptionalHttpRouteConstraint)route.Constraints["param"];
             Assert.Equal(@"\d+", ((RegexHttpRouteConstraint)constraint.InnerConstraint).Pattern);
@@ -132,7 +155,6 @@ namespace System.Web.Http.Routing
             IHttpRoute route = BuildRoute(@"hello/{param:regex(:)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-
             Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
             Assert.Equal(@":", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
         }
@@ -143,7 +165,6 @@ namespace System.Web.Http.Routing
             IHttpRoute route = BuildRoute(@"hello/{param:regex(\w,\w)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-
             Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
             Assert.Equal(@"\w,\w", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
         }
@@ -156,7 +177,6 @@ namespace System.Web.Http.Routing
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
             Assert.DoesNotContain("param", route.Defaults.Keys);
-
             Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
             Assert.Equal(@"=", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
         }
@@ -167,7 +187,6 @@ namespace System.Web.Http.Routing
             IHttpRoute route = BuildRoute(@"hello/{param:regex(\{)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-
             Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
             Assert.Equal(@"\{", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
         }
@@ -178,7 +197,6 @@ namespace System.Web.Http.Routing
             IHttpRoute route = BuildRoute(@"hello/{param:regex(\()}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-
             Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
             Assert.Equal(@"\(", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
         }
@@ -189,20 +207,43 @@ namespace System.Web.Http.Routing
             IHttpRoute route = BuildRoute(@"hello/{param:regex(\?)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-
             Assert.DoesNotContain("param", route.Defaults.Keys);
-            
             Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
             Assert.Equal(@"\?", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
-        private static IHttpRoute BuildRoute(string routeTemplate)
+        [Fact]
+        public void BuildHttpRoute_Throws_WhenConstraintResolverReturnsNull()
+        {
+            Mock<IInlineConstraintResolver> constraintResolver = new Mock<IInlineConstraintResolver>();
+            constraintResolver.Setup(r => r.ResolveConstraint("constraint")).Returns<IHttpRouteConstraint>(null);
+
+            Assert.Throws<InvalidOperationException>(
+                () => BuildRoute(@"hello/{param:constraint}", constraintResolver: constraintResolver.Object),
+                "The inline constraint resolver of type 'IInlineConstraintResolverProxy' was unable to resolve the following inline constraint: 'constraint'.");
+        }
+
+        [Fact]
+        public void BuildHttpRoute_ResolvesConstraintUsingConstraintResolver()
+        {
+            IHttpRouteConstraint routeConstraint = new Mock<IHttpRouteConstraint>().Object;
+            Mock<IInlineConstraintResolver> constraintResolver = new Mock<IInlineConstraintResolver>();
+            constraintResolver.Setup(r => r.ResolveConstraint("constraint")).Returns(routeConstraint);
+
+            var route = BuildRoute(@"hello/{param:constraint}", constraintResolver: constraintResolver.Object);
+
+            Assert.Equal("hello/{param}", route.RouteTemplate);
+            Assert.Equal(routeConstraint, route.Constraints["param"]);
+        }
+
+        private static IHttpRoute BuildRoute(string routeTemplate, IInlineConstraintResolver constraintResolver = null)
         {
             // Arrange
-            IHttpRouteProvider provider = new FakeRouteProvider(routeTemplate);
+            IHttpRouteInfoProvider provider = new FakeRouteProvider(routeTemplate);
 
             // Act
-            IHttpRoute route = HttpRouteBuilder.BuildHttpRoute(provider, "FakeController", "FakeAction");
+            HttpRouteBuilder routeBuilder = new HttpRouteBuilder(constraintResolver ?? new DefaultInlineConstraintResolver());
+            IHttpRoute route = routeBuilder.BuildHttpRoute(provider, "FakeController", "FakeAction");
 
             // Assertions for default, unspecified behavior:
             Assert.NotNull(route);
@@ -213,7 +254,7 @@ namespace System.Web.Http.Routing
             return route;
         }
 
-        private class FakeRouteProvider : IHttpRouteProvider
+        private class FakeRouteProvider : IHttpRouteInfoProvider
         {
             public FakeRouteProvider(string routeTemplate)
             {

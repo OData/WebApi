@@ -1,9 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ModelBinding.Binders;
+using System.Web.Http.Routing;
 
 namespace System.Web.Http
 {
@@ -41,6 +45,85 @@ namespace System.Web.Http
             // Without this, the parameter binding system may see the parameter type is complex and choose
             // to use formatters instead, in which case it would ignore the registered model binders. 
             configuration.ParameterBindingRules.Insert(0, type, param => param.BindWithModelBinding(binder));
+        }
+
+        /// <summary>
+        /// Maps the attribute-defined routes for the application.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        public static void MapHttpAttributeRoutes(this HttpConfiguration configuration)
+        {
+            configuration.MapHttpAttributeRoutes(new HttpRouteBuilder());
+        }
+
+        /// <summary>
+        /// Maps the attribute-defined routes for the application.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="routeBuilder">The <see cref="HttpRouteBuilder"/> to use for generating attribute routes.</param>
+        public static void MapHttpAttributeRoutes(this HttpConfiguration configuration, HttpRouteBuilder routeBuilder)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (routeBuilder == null)
+            {
+                throw Error.ArgumentNull("routeBuilder");
+            }
+
+            IHttpControllerSelector controllerSelector = configuration.Services.GetHttpControllerSelector();
+            IHttpActionSelector actionSelector = configuration.Services.GetActionSelector();
+            foreach (HttpControllerDescriptor controllerDescriptor in controllerSelector.GetControllerMapping().Values)
+            {
+                foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionSelector.GetActionMapping(controllerDescriptor))
+                {
+                    MapHttpAttributeRoutes(configuration.Routes, controllerDescriptor, actionGrouping, routeBuilder);
+                }
+            }
+        }
+
+        private static void MapHttpAttributeRoutes(HttpRouteCollection routes, HttpControllerDescriptor controllerDescriptor,
+            IGrouping<string, HttpActionDescriptor> actionGrouping, HttpRouteBuilder routeBuilder)
+        {
+            List<IHttpRoute> namelessAttributeRoutes = new List<IHttpRoute>();
+            string controllerName = controllerDescriptor.ControllerName;
+            string actionName = actionGrouping.Key;
+
+            foreach (HttpActionDescriptor actionDescriptor in actionGrouping)
+            {
+                foreach (IHttpRouteInfoProvider routeProvider in actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false))
+                {
+                    if (routeProvider.RouteTemplate != null)
+                    {
+                        IHttpRoute route = routeBuilder.BuildHttpRoute(routeProvider, controllerName, actionName);
+                        if (routeProvider.RouteName == null)
+                        {
+                            namelessAttributeRoutes.Add(route);
+                        }
+                        else
+                        {
+                            routes.Add(routeProvider.RouteName, route);
+                        }
+                    }
+                }
+            }
+
+            // Only use a route suffix to disambiguate between multiple routes without a specified route name
+            if (namelessAttributeRoutes.Count == 1)
+            {
+                routes.Add(controllerName + "." + actionName, namelessAttributeRoutes[0]);
+            }
+            else if (namelessAttributeRoutes.Count > 1)
+            {
+                int routeSuffix = 1;
+                foreach (IHttpRoute namelessAttributeRoute in namelessAttributeRoutes)
+                {
+                    routes.Add(controllerName + "." + actionName + routeSuffix, namelessAttributeRoute);
+                    routeSuffix++;
+                }
+            }
         }
     }
 }

@@ -3,11 +3,14 @@
 namespace System.Web.Http.Routing.Constraints
 {
     /// <summary>
-    /// Constrains a url parameter to contain only letters from the alphabet.
+    /// Constrains a route parameter to contain only lowercase or uppercase letters A through Z in the English alphabet.
     /// </summary>
     public class AlphaHttpRouteConstraint : RegexHttpRouteConstraint
     {
-        public AlphaHttpRouteConstraint() : base(@"^[A-Za-z]*$")
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AlphaHttpRouteConstraint" /> class.
+        /// </summary>
+        public AlphaHttpRouteConstraint() : base(@"^[a-z]*$")
         {
         }
     }

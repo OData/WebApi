@@ -1,40 +1,60 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 
 namespace System.Web.Http.Routing.Constraints
 {
     /// <summary>
-    /// Constrains a url parameter to be a long with a maximum value.
+    /// Constrains a route parameter to be an integer with a maximum value.
     /// </summary>
     public class MaxHttpRouteConstraint : IHttpRouteConstraint
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MaxHttpRouteConstraint" /> class.
+        /// </summary>
+        /// <param name="max">The maximum value of the route parameter.</param>
         public MaxHttpRouteConstraint(long max)
         {
             Max = max;
         }
 
         /// <summary>
-        /// Maximum value of the parameter.
+        /// Gets the maximum value of the route parameter.
         /// </summary>
         public long Max { get; private set; }
 
+        /// <inheritdoc />
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
-            object value = values[parameterName];
-            if (value == null)
+            if (parameterName == null)
             {
-                return true;
+                throw Error.ArgumentNull("parameterName");
             }
 
-            long longValue;
-            if (!Int64.TryParse(value.ToString(), out longValue))
+            if (values == null)
             {
-                return false;
+                throw Error.ArgumentNull("values");
             }
 
-            return longValue <= Max;
+            object value;
+            if (values.TryGetValue(parameterName, out value) && value != null)
+            {
+                long longValue;
+                if (value is long)
+                {
+                    longValue = (long)value;
+                    return longValue <= Max;
+                }
+
+                string valueString = Convert.ToString(value, CultureInfo.InvariantCulture);
+                if (Int64.TryParse(valueString, NumberStyles.Integer, CultureInfo.InvariantCulture, out longValue))
+                {
+                    return longValue <= Max;
+                }
+            }
+            return false;
         }
     }
 }

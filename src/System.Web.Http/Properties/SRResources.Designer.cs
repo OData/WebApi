@@ -232,6 +232,33 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The constructor to use for activating the constraint type &apos;{0}&apos; is ambiguous. Multiple constructors were found with the following number of parameters: {1}..
+        /// </summary>
+        internal static string DefaultInlineConstraintResolver_AmbiguousCtors {
+            get {
+                return ResourceManager.GetString("DefaultInlineConstraintResolver_AmbiguousCtors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find a constructor for constraint type &apos;{0}&apos; with the following number of parameters: {1}..
+        /// </summary>
+        internal static string DefaultInlineConstraintResolver_CouldNotFindCtor {
+            get {
+                return ResourceManager.GetString("DefaultInlineConstraintResolver_CouldNotFindCtor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The constraint type &apos;{0}&apos; which is mapped to constraint key &apos;{1}&apos; must implement the IHttpRouteConstraint interface..
+        /// </summary>
+        internal static string DefaultInlineConstraintResolver_TypeNotConstraint {
+            get {
+                return ResourceManager.GetString("DefaultInlineConstraintResolver_TypeNotConstraint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The service type {0} is not supported..
         /// </summary>
         internal static string DefaultServices_InvalidServiceType {
@@ -309,6 +336,15 @@ namespace System.Web.Http.Properties {
         internal static string HttpResponseExceptionMessage {
             get {
                 return ResourceManager.GetString("HttpResponseExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The inline constraint resolver of type &apos;{0}&apos; was unable to resolve the following inline constraint: &apos;{1}&apos;..
+        /// </summary>
+        internal static string HttpRouteBuilder_CouldNotResolveConstraint {
+            get {
+                return ResourceManager.GetString("HttpRouteBuilder_CouldNotResolveConstraint", resourceCulture);
             }
         }
         

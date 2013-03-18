@@ -1,27 +1,42 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 
 namespace System.Web.Http.Routing.Constraints
 {
+    /// <summary>
+    /// Constrains a route parameter to represent only Boolean values.
+    /// </summary>
     public class BoolHttpRouteConstraint : IHttpRouteConstraint
     {
+        /// <inheritdoc />
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
-            object value = values[parameterName];
-            if (value == null)
+            if (parameterName == null)
             {
-                return false;
+                throw Error.ArgumentNull("parameterName");
             }
 
-            if (value is bool)
+            if (values == null)
             {
-                return true;
+                throw Error.ArgumentNull("values");
             }
 
-            bool result;
-            return Boolean.TryParse(value.ToString(), out result);
+            object value;
+            if (values.TryGetValue(parameterName, out value) && value != null)
+            {
+                if (value is bool)
+                {
+                    return true;
+                }
+
+                bool result;
+                string valueString = Convert.ToString(value, CultureInfo.InvariantCulture);
+                return Boolean.TryParse(valueString, out result);
+            }
+            return false;
         }
     }
 }

@@ -18,7 +18,7 @@ namespace System.Web.Http.Routing.Constraints
         public void Match_SucceedsWhenPatternIsMatched()
         {
             RegexHttpRouteConstraint constraint = new RegexHttpRouteConstraint(@"^\d{3}-\d{3}-\d{4}$");
-            bool match = TestValue(constraint, "406-555-1212");
+            bool match = TestValue(constraint, "406-555-0123");
             Assert.True(match);
         }
     }

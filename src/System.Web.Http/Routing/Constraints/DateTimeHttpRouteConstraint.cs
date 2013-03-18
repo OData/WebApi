@@ -1,27 +1,42 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 
 namespace System.Web.Http.Routing.Constraints
 {
+    /// <summary>
+    /// Constrains a route parameter to represent only <see cref="DateTime"/> values.
+    /// </summary>
     public class DateTimeHttpRouteConstraint : IHttpRouteConstraint
     {
+        /// <inheritdoc />
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
-            object value = values[parameterName];
-            if (value == null)
+            if (parameterName == null)
             {
-                return false;
+                throw Error.ArgumentNull("parameterName");
             }
 
-            if (value is DateTime)
+            if (values == null)
             {
-                return true;
+                throw Error.ArgumentNull("values");
             }
 
-            DateTime result;
-            return DateTime.TryParse(value.ToString(), out result);
+            object value;
+            if (values.TryGetValue(parameterName, out value) && value != null)
+            {
+                if (value is DateTime)
+                {
+                    return true;
+                }
+
+                DateTime result;
+                string valueString = Convert.ToString(value, CultureInfo.InvariantCulture);
+                return DateTime.TryParse(valueString, CultureInfo.InvariantCulture, DateTimeStyles.None, out result);
+            }
+            return false;
         }
     }
 }

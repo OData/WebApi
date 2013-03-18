@@ -1,75 +1,96 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 
 namespace System.Web.Http.Routing.Constraints
 {
     /// <summary>
-    /// Constrains a url parameter to be a string of a given length 
-    /// or within a given range of lengths if two params are given.
+    /// Constrains a route parameter to be a string of a given length or within a given range of lengths.
     /// </summary>
     public class LengthHttpRouteConstraint : IHttpRouteConstraint
     {
-        private readonly MinLengthHttpRouteConstraint _minLengthHttpConstraint;
-        private readonly MaxLengthHttpRouteConstraint _maxLengthHttpConstraint;
-
         /// <summary>
-        /// Constrains a url parameter to be a string of a given length.
+        /// Initializes a new instance of the <see cref="LengthHttpRouteConstraint" /> class that constrains
+        /// a route parameter to be a string of a given length.
         /// </summary>
-        /// <param name="length">The length of the string</param>
+        /// <param name="length">The length of the route parameter.</param>
         public LengthHttpRouteConstraint(int length)
         {
+            if (length < 0)
+            {
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("length", length, 0);
+            }
+
             Length = length;
         }
 
         /// <summary>
-        /// Constrains a url parameter to be a string with a length in the given range.
+        /// Initializes a new instance of the <see cref="LengthHttpRouteConstraint" /> class that constrains
+        /// a route parameter to be a string within the given range of lengths.
         /// </summary>
-        /// <param name="minLength">The minimum length of the string.</param>
-        /// <param name="maxLength">The maximum length of the string.</param>
+        /// <param name="minLength">The minimum length of the route parameter.</param>
+        /// <param name="maxLength">The maximum length of the route parameter.</param>
         public LengthHttpRouteConstraint(int minLength, int maxLength)
         {
-            _minLengthHttpConstraint = new MinLengthHttpRouteConstraint(minLength);
-            _maxLengthHttpConstraint = new MaxLengthHttpRouteConstraint(maxLength);
-        }
-
-        /// <summary>
-        /// Length of the string.
-        /// </summary>
-        public int? Length { get; set; }
-
-        /// <summary>
-        /// Minimum length of the string.
-        /// </summary>
-        public int? MinLength 
-        {
-            get { return _minLengthHttpConstraint != null ? _minLengthHttpConstraint.MinLength : (int?)null; }
-        }
-
-        /// <summary>
-        /// Minimum length of the string.
-        /// </summary>
-        public int? MaxLength
-        {
-            get { return _maxLengthHttpConstraint.MaxLength; }
-        }
-
-        public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
-        {
-            if (Length.HasValue)
+            if (minLength < 0)
             {
-                object value = values[parameterName];
-                if (value == null)
-                {
-                    return true;
-                }
-
-                return value.ToString().Length == Length.Value;
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("minLength", minLength, 0);
             }
 
-            return _minLengthHttpConstraint.Match(request, route, parameterName, values, routeDirection) &&
-                   _maxLengthHttpConstraint.Match(request, route, parameterName, values, routeDirection);
+            if (maxLength < 0)
+            {
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxLength", maxLength, 0);
+            }
+
+            MinLength = minLength;
+            MaxLength = maxLength;
+        }
+
+        /// <summary>
+        /// Gets the length of the route parameter, if one is set.
+        /// </summary>
+        public int? Length { get; private set; }
+
+        /// <summary>
+        /// Gets the minimum length of the route parameter, if one is set.
+        /// </summary>
+        public int? MinLength { get; private set; }
+
+        /// <summary>
+        /// Gets the maximum length of the route parameter, if one is set.
+        /// </summary>
+        public int? MaxLength { get; private set; }
+
+        /// <inheritdoc />
+        public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
+        {
+            if (parameterName == null)
+            {
+                throw Error.ArgumentNull("parameterName");
+            }
+
+            if (values == null)
+            {
+                throw Error.ArgumentNull("values");
+            }
+
+            object value;
+            if (values.TryGetValue(parameterName, out value) && value != null)
+            {
+                string valueString = Convert.ToString(value, CultureInfo.InvariantCulture);
+                int length = valueString.Length;
+                if (Length.HasValue)
+                {
+                    return length == Length.Value;
+                }
+                else
+                {
+                    return length >= MinLength.Value && length <= MaxLength.Value;
+                }
+            }
+            return false;
         }
     }
 }

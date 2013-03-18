@@ -79,7 +79,6 @@
     <Compile Include="Filters\OverrideAuthenticationAttribute.cs" />
     <Compile Include="Filters\OverrideAuthorizationAttribute.cs" />
     <Compile Include="Filters\OverrideExceptionFiltersAttribute.cs" />
-    <Compile Include="Routing\Constraints\AlphaRouteConstraintBase.cs" />
     <Compile Include="Routing\Constraints\AlphaHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\BoolHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\CompoundHttpRouteConstraint.cs" />
@@ -87,8 +86,6 @@
     <Compile Include="Routing\Constraints\DecimalHttpRouteConstraint.cs" />
     <Compile Include="Routing\DefaultInlineConstraintResolver.cs" />
     <Compile Include="Routing\Constraints\DoubleHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\EnumNameHttpRouteConstraintOfTEnum.cs" />
-    <Compile Include="Routing\Constraints\EnumValueHttpRouteConstraintOfTEnum.cs" />
     <Compile Include="Routing\Constraints\FloatHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\GuidHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\IntHttpRouteConstraint.cs" />
@@ -102,7 +99,7 @@
     <Compile Include="Routing\Constraints\RegexHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\OptionalHttpRouteConstraint.cs" />
     <Compile Include="Routing\HttpRouteBuilder.cs" />
-    <Compile Include="Routing\IHttpRouteProvider.cs" />
+    <Compile Include="Routing\IHttpRouteInfoProvider.cs" />
     <Compile Include="Routing\IInlineConstraintResolver.cs" />
     <Compile Include="Tracing\TraceLevelHelper.cs" />
     <Compile Include="Tracing\TraceKindHelper.cs" />

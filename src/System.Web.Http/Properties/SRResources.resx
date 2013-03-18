@@ -426,4 +426,16 @@
   <data name="RequestIsNull" xml:space="preserve">
     <value>The property 'Request' on '{0}' is null. The property must be initialized with a non-null value.</value>
   </data>
+  <data name="DefaultInlineConstraintResolver_CouldNotFindCtor" xml:space="preserve">
+    <value>Could not find a constructor for constraint type '{0}' with the following number of parameters: {1}.</value>
+  </data>
+  <data name="DefaultInlineConstraintResolver_TypeNotConstraint" xml:space="preserve">
+    <value>The constraint type '{0}' which is mapped to constraint key '{1}' must implement the IHttpRouteConstraint interface.</value>
+  </data>
+  <data name="HttpRouteBuilder_CouldNotResolveConstraint" xml:space="preserve">
+    <value>The inline constraint resolver of type '{0}' was unable to resolve the following inline constraint: '{1}'.</value>
+  </data>
+  <data name="DefaultInlineConstraintResolver_AmbiguousCtors" xml:space="preserve">
+    <value>The constructor to use for activating the constraint type '{0}' is ambiguous. Multiple constructors were found with the following number of parameters: {1}.</value>
+  </data>
 </root>

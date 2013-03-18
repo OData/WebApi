@@ -62,7 +62,6 @@ namespace System.Web.Http
             ParameterBindingRules = DefaultActionValueBinder.GetDefaultParameterBinders();
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We're registering the ValidationCache to be disposed by the HttpConfiguration.")]
         private HttpConfiguration(HttpConfiguration configuration, HttpControllerSettings settings)
         {
             _routes = configuration.Routes;
@@ -86,7 +85,6 @@ namespace System.Web.Http
                 !settings.Services.GetModelValidatorProviders().SequenceEqual(configuration.Services.GetModelValidatorProviders()))
             {
                 ModelValidatorCache validatorCache = new ModelValidatorCache(new Lazy<IEnumerable<ModelValidatorProvider>>(() => Services.GetModelValidatorProviders()));
-                RegisterForDispose(validatorCache);
                 settings.Services.Replace(typeof(IModelValidatorCache), validatorCache);
             }
         }

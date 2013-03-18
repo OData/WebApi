@@ -93,7 +93,6 @@ namespace System.Web.Http.Services
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class needs references to large number of types.")]
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We're registering the ValidationCache to be disposed by the HttpConfiguration.")]
         public DefaultServices(HttpConfiguration configuration)
         {
             if (configuration == null)
@@ -144,7 +143,6 @@ namespace System.Web.Http.Services
                                            new RouteDataValueProviderFactory());
 
             ModelValidatorCache validatorCache = new ModelValidatorCache(new Lazy<IEnumerable<ModelValidatorProvider>>(() => this.GetModelValidatorProviders()));
-            configuration.RegisterForDispose(validatorCache);
             SetSingle<IModelValidatorCache>(validatorCache);
 
             SetSingle<IHostPrincipalService>(new ThreadPrincipalService());

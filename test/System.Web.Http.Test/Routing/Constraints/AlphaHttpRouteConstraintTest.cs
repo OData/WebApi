@@ -7,18 +7,18 @@ namespace System.Web.Http.Routing.Constraints
     public class AlphaHttpRouteConstraintTest : HttpRouteConstraintTestBase
     {
         [Fact]
-        public void Match_FailsWhenValueContainsNumber()
+        public void Match_FailsWhenValueContainsNonAlphaNum()
         {
             AlphaHttpRouteConstraint constraint = new AlphaHttpRouteConstraint();
-            bool match = TestValue(constraint, "abc123");
+            bool match = TestValue(constraint, "abc_");
             Assert.False(match);
         }
 
         [Fact]
-        public void Match_SucceedsWhenValueContainsNonAlphaNum()
+        public void Match_FailsWhenValueContainsNumber()
         {
             AlphaHttpRouteConstraint constraint = new AlphaHttpRouteConstraint();
-            bool match = TestValue(constraint, "abc_");
+            bool match = TestValue(constraint, "abc123");
             Assert.False(match);
         }
 

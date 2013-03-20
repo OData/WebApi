@@ -42,12 +42,18 @@ namespace System.Web.Mvc
 
         public IValueProvider GetValueProvider(ControllerContext controllerContext)
         {
-            var valueProviders = from factory in CombinedItems
-                                 let valueProvider = factory.GetValueProvider(controllerContext)
-                                 where valueProvider != null
-                                 select valueProvider;
-
-            return new ValueProviderCollection(valueProviders.ToList());
+            ValueProviderFactory[] current = CombinedItems;
+            List<IValueProvider> providers = new List<IValueProvider>(current.Length);
+            for (int i = 0; i < current.Length; i++)
+            {
+                ValueProviderFactory factory = current[i];
+                IValueProvider provider = factory.GetValueProvider(controllerContext);
+                if (provider != null)
+                {
+                    providers.Add(provider);
+                }
+            }
+            return new ValueProviderCollection(providers);
         }
 
         protected override void InsertItem(int index, ValueProviderFactory item)

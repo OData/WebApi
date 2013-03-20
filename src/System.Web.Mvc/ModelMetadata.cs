@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -31,6 +33,7 @@ namespace System.Web.Mvc
         private Func<object> _modelAccessor;
         private int _order = DefaultOrder;
         private IEnumerable<ModelMetadata> _properties;
+        private ModelMetadata[] _propertiesInternal;
         private Type _realModelType;
         private bool _requestValidationEnabled = true;
         private bool _showForDisplay = true;
@@ -143,9 +146,26 @@ namespace System.Web.Mvc
             {
                 if (_properties == null)
                 {
-                    _properties = Provider.GetMetadataForProperties(Model, RealModelType).OrderBy(m => m.Order);
+                    IEnumerable<ModelMetadata> originalProperties = Provider.GetMetadataForProperties(Model, RealModelType);
+                    // This will be returned as a copied out array in the common case, so reuse the returned array for performance.
+                    _propertiesInternal = SortProperties(originalProperties.AsArray());
+                    _properties = new ReadOnlyCollection<ModelMetadata>(_propertiesInternal);
                 }
                 return _properties;
+            }
+        }
+
+        internal ModelMetadata[] PropertiesAsArray 
+        {
+            get
+            {
+                IEnumerable<ModelMetadata> virtualProperties = Properties;
+                if (Object.ReferenceEquals(virtualProperties, _properties))
+                {
+                    Contract.Assert(_propertiesInternal != null);
+                    return _propertiesInternal;
+                }
+                return virtualProperties.AsArray();
             }
         }
 
@@ -404,6 +424,30 @@ namespace System.Web.Mvc
         public virtual IEnumerable<ModelValidator> GetValidators(ControllerContext context)
         {
             return ModelValidatorProviders.Providers.GetValidators(this, context);
+        }
+
+        private static ModelMetadata[] SortProperties(ModelMetadata[] properties)
+        {
+            // Performance-senstive
+            // Common case is that properties do not need sorting
+            int? previousOrder = null;
+            bool needSort = false;
+            for (int i = 0; i < properties.Length; i++)
+            {
+                ModelMetadata metadata = properties[i];
+                if (previousOrder != null && previousOrder > metadata.Order)
+                {
+                    needSort = true;
+                    break;
+                }
+                previousOrder = metadata.Order;
+            }
+            if (!needSort)
+            {
+                return properties;
+            }
+            // For compatibility the sort must be stable so use OrderBy rather than Array.Sort
+            return properties.OrderBy(m => m.Order).ToArray();
         }
     }
 }

@@ -41,16 +41,18 @@ namespace System.Web.Mvc
                 throw new ArgumentNullException("containerType");
             }
 
-            return GetMetadataForPropertiesImpl(container, containerType);
-        }
+            PropertyDescriptorCollection properties = GetTypeDescriptor(containerType).GetProperties();
 
-        private IEnumerable<ModelMetadata> GetMetadataForPropertiesImpl(object container, Type containerType)
-        {
-            foreach (PropertyDescriptor property in GetTypeDescriptor(containerType).GetProperties())
+            // The return value is sorted from the ModelMetadata type, so returning as an array is best for performance
+            ModelMetadata[] metadata = new ModelMetadata[properties.Count];
+            for (int i = 0; i < properties.Count; i++)
             {
+                PropertyDescriptor property = properties[i];
                 Func<object> modelAccessor = container == null ? null : GetPropertyValueAccessor(container, property);
-                yield return GetMetadataForProperty(modelAccessor, containerType, property);
+                ModelMetadata propertyMetadata = GetMetadataForProperty(modelAccessor, containerType, property);
+                metadata[i] = propertyMetadata;
             }
+            return metadata;
         }
 
         public override ModelMetadata GetMetadataForProperty(Func<object> modelAccessor, Type containerType, string propertyName)

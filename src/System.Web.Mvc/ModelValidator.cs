@@ -52,22 +52,31 @@ namespace System.Web.Mvc
             {
             }
 
+            private static ModelValidationResult CreateSubPropertyResult(ModelMetadata propertyMetadata, ModelValidationResult propertyResult)
+            {
+                return new ModelValidationResult
+                {
+                    MemberName = DefaultModelBinder.CreateSubPropertyName(propertyMetadata.PropertyName, propertyResult.MemberName),
+                    Message = propertyResult.Message
+                };
+            }
+
             public override IEnumerable<ModelValidationResult> Validate(object container)
             {
                 bool propertiesValid = true;
 
-                foreach (ModelMetadata propertyMetadata in Metadata.Properties)
+                ModelMetadata[] properties = Metadata.PropertiesAsArray;
+
+                // Performance sensitive loops
+                for (int propertyIndex = 0; propertyIndex < properties.Length; propertyIndex++)
                 {
+                    ModelMetadata propertyMetadata = properties[propertyIndex];
                     foreach (ModelValidator propertyValidator in propertyMetadata.GetValidators(ControllerContext))
                     {
                         foreach (ModelValidationResult propertyResult in propertyValidator.Validate(Metadata.Model))
                         {
                             propertiesValid = false;
-                            yield return new ModelValidationResult
-                            {
-                                MemberName = DefaultModelBinder.CreateSubPropertyName(propertyMetadata.PropertyName, propertyResult.MemberName),
-                                Message = propertyResult.Message
-                            };
+                            yield return CreateSubPropertyResult(propertyMetadata, propertyResult);
                         }
                     }
                 }

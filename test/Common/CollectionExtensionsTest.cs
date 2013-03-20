@@ -196,5 +196,27 @@ namespace System.Collections.Generic
 
             Assert.Throws<InvalidOperationException>(() => multipleMatch.SingleOfTypeDefaultOrError<object, string, object>(errorAction, errorArgument));
         }
+
+        [Fact]
+        public void ToArrayWithoutNullsICollectionNoNullsCopies()
+        {
+            ICollection<object> noNulls = new object[] { new object(), new object() };
+
+            object[] noNullsresult = noNulls.ToArrayWithoutNulls();
+
+            Assert.Equal(noNulls, noNullsresult);
+        }
+
+        [Fact]
+        public void ToArrayWithoutNullsICollectionHasNullsRemovesNulls()
+        {
+            IList<object> hasNulls = new List<object>() { new object(), null, new object() };
+
+            object[] hasNullsResult = ((ICollection<object>)hasNulls).ToArrayWithoutNulls();
+
+            Assert.Equal(2, hasNullsResult.Length);
+            Assert.Equal(hasNulls[0], hasNullsResult[0]);
+            Assert.Equal(hasNulls[2], hasNullsResult[1]);
+        }
     }
 }

@@ -80,7 +80,7 @@ namespace System.Web.Mvc
 
         protected virtual ModelMetadata GetMetadataForProperty(Func<object> modelAccessor, Type containerType, PropertyDescriptor propertyDescriptor)
         {
-            IEnumerable<Attribute> attributes = FilterAttributes(containerType, propertyDescriptor, propertyDescriptor.Attributes.Cast<Attribute>());
+            IEnumerable<Attribute> attributes = FilterAttributes(containerType, propertyDescriptor, new AttributeList(propertyDescriptor.Attributes));
             ModelMetadata result = CreateMetadata(attributes, containerType, modelAccessor, propertyDescriptor.PropertyType, propertyDescriptor.Name);
             ApplyMetadataAwareAttributes(attributes, result);
             return result;
@@ -93,7 +93,7 @@ namespace System.Web.Mvc
                 throw new ArgumentNullException("modelType");
             }
 
-            IEnumerable<Attribute> attributes = GetTypeDescriptor(modelType).GetAttributes().Cast<Attribute>();
+            AttributeList attributes = new AttributeList(GetTypeDescriptor(modelType).GetAttributes());
             ModelMetadata result = CreateMetadata(attributes, null /* containerType */, modelAccessor, modelType, null /* propertyName */);
             ApplyMetadataAwareAttributes(attributes, result);
             return result;

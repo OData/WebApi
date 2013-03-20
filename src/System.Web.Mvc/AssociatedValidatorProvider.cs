@@ -49,13 +49,12 @@ namespace System.Web.Mvc
                         metadata.ContainerType.FullName, metadata.PropertyName),
                     "metadata");
             }
-
-            return GetValidators(metadata, context, property.Attributes.OfType<Attribute>());
+            return GetValidators(metadata, context, new AttributeList(property.Attributes));
         }
 
         private IEnumerable<ModelValidator> GetValidatorsForType(ModelMetadata metadata, ControllerContext context)
         {
-            return GetValidators(metadata, context, GetTypeDescriptor(metadata.ModelType).GetAttributes().Cast<Attribute>());
+            return GetValidators(metadata, context, new AttributeList(GetTypeDescriptor(metadata.ModelType).GetAttributes()));
         }
     }
 }

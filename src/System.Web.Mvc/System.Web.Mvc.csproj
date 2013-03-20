@@ -40,6 +40,9 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\Common\AttributeList.cs">
+      <Link>Common\AttributeList.cs</Link>
+    </Compile>
     <Compile Include="..\Common\EnsureStackHelper.cs">
       <Link>Common\EnsureStackHelper.cs</Link>
     </Compile>

@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-namespace System.Web.Mvc
+namespace System.Web.Mvc.Filters
 {
     public class AuthenticationChallengeContext : ControllerContext
     {
@@ -30,7 +30,7 @@ namespace System.Web.Mvc
             _result = result;
         }
 
-        public virtual ActionDescriptor ActionDescriptor
+        public ActionDescriptor ActionDescriptor
         {
             get
             {
@@ -42,7 +42,7 @@ namespace System.Web.Mvc
             }
         }
 
-        public virtual ActionResult Result
+        public ActionResult Result
         {
             get
             {

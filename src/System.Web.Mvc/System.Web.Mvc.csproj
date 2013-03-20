@@ -60,8 +60,8 @@
     <Compile Include="ActionDescriptorHelper.cs" />
     <Compile Include="Async\TaskAsyncActionDescriptor.cs" />
     <Compile Include="Async\TaskWrapperAsyncResult.cs" />
-    <Compile Include="AuthenticationChallengeContext.cs" />
-    <Compile Include="AuthenticationContext.cs" />
+    <Compile Include="Filters\AuthenticationChallengeContext.cs" />
+    <Compile Include="Filters\AuthenticationContext.cs" />
     <Compile Include="BuildManagerCompiledView.cs" />
     <Compile Include="BuildManagerViewEngine.cs" />
     <Compile Include="CachedAssociatedMetadataProvider.cs" />
@@ -73,8 +73,8 @@
     <Compile Include="CompareAttributeAdapter.cs" />
     <Compile Include="DataTypeAttributeAdapter.cs" />
     <Compile Include="FileExtensionsAttributeAdapter.cs" />
-    <Compile Include="IAuthenticationFilter.cs" />
-    <Compile Include="IOverrideFilter.cs" />
+    <Compile Include="Filters\IAuthenticationFilter.cs" />
+    <Compile Include="Filters\IOverrideFilter.cs" />
     <Compile Include="MembershipPasswordAttributeAdapter.cs" />
     <Compile Include="CompareAttribute.cs" />
     <Compile Include="ChildActionValueProvider.cs" />

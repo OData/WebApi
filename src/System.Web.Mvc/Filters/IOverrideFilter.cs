@@ -2,7 +2,7 @@
 
 using System;
 
-namespace System.Web.Mvc
+namespace System.Web.Mvc.Filters
 {
     public interface IOverrideFilter
     {

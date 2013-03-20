@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading;
+using System.Web.Mvc.Filters;
 
 namespace System.Web.Mvc.Async
 {
@@ -37,12 +38,19 @@ namespace System.Web.Mvc.Async
                 {
                     try
                     {
-                        AuthenticationContext authenticationContext = InvokeAuthenticationFilters(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor);
+                        AuthenticationContext authenticationContext = InvokeAuthenticationFilters(controllerContext,
+                            filterInfo.AuthenticationFilters, actionDescriptor);
 
                         if (authenticationContext.Result != null)
                         {
-                            // the authentication filter signaled that we should let it short-circuit the request
-                            continuation = () => InvokeActionResult(controllerContext, authenticationContext.Result);
+                            // An authentication filter signaled that we should short-circuit the request. Let all
+                            // authentication filters contribute to an action result (to combine authentication
+                            // challenges). Then, run this action result.
+                            AuthenticationChallengeContext challengeContext =
+                                InvokeAuthenticationFiltersChallenge(controllerContext,
+                                filterInfo.AuthenticationFilters, actionDescriptor, authenticationContext.Result);
+                            continuation = () => InvokeActionResult(controllerContext,
+                                challengeContext.Result ?? authenticationContext.Result);
                         }
                         else
                         {
@@ -57,12 +65,14 @@ namespace System.Web.Mvc.Async
                             AuthorizationContext authorizationContext = InvokeAuthorizationFilters(controllerContext, filterInfo.AuthorizationFilters, actionDescriptor);
                             if (authorizationContext.Result != null)
                             {
-                                // the authorization filter signaled that we should let it short-circuit the request
-                                // let any authentication filters turn the result into an authentication challenge; then run it
+                                // An authorization filter signaled that we should short-circuit the request. Let all
+                                // authentication filters contribute to an action result (to combine authentication
+                                // challenges). Then, run this action result.
                                 AuthenticationChallengeContext challengeContext =
                                     InvokeAuthenticationFiltersChallenge(controllerContext,
                                     filterInfo.AuthenticationFilters, actionDescriptor, authorizationContext.Result);
-                                continuation = () => InvokeActionResult(controllerContext, challengeContext.Result);
+                                continuation = () => InvokeActionResult(controllerContext, challengeContext.Result ??
+                                    authorizationContext.Result);
                             }
                             else
                             {
@@ -76,7 +86,15 @@ namespace System.Web.Mvc.Async
                                 continuation = () =>
                                 {
                                     ActionExecutedContext postActionContext = EndInvokeActionMethodWithFilters(asyncResult);
-                                    InvokeActionResultWithFilters(controllerContext, filterInfo.ResultFilters, postActionContext.Result);
+                                    // The action succeeded. Let all authentication filters contribute to an action
+                                    // result (to combine authentication challenges; some authentication filters need
+                                    // to do negotiation even on a successful result). Then, run this action result.
+                                    AuthenticationChallengeContext challengeContext =
+                                        InvokeAuthenticationFiltersChallenge(controllerContext,
+                                        filterInfo.AuthenticationFilters, actionDescriptor,
+                                        postActionContext.Result);
+                                    InvokeActionResultWithFilters(controllerContext, filterInfo.ResultFilters,
+                                        challengeContext.Result ?? postActionContext.Result);
                                 };
                                 return asyncResult;
                             }

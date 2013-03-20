@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading;
+using System.Web.Mvc.Filters;
 using System.Web.Mvc.Properties;
 using Microsoft.Web.Infrastructure.DynamicValidationHelper;
 
@@ -160,8 +161,13 @@ namespace System.Web.Mvc
 
                     if (authenticationContext.Result != null)
                     {
-                        // the authentication filter signaled that we should let it short-circuit the request
-                        InvokeActionResult(controllerContext, authenticationContext.Result);
+                        // An authentication filter signaled that we should short-circuit the request. Let all
+                        // authentication filters contribute to an action result (to combine authentication
+                        // challenges). Then, run this action result.
+                        AuthenticationChallengeContext challengeContext =
+                            InvokeAuthenticationFiltersChallenge(controllerContext, filterInfo.AuthenticationFilters,
+                            actionDescriptor, authenticationContext.Result);
+                        InvokeActionResult(controllerContext, challengeContext.Result ?? authenticationContext.Result);
                     }
                     else
                     {
@@ -176,11 +182,14 @@ namespace System.Web.Mvc
                         AuthorizationContext authorizationContext = InvokeAuthorizationFilters(controllerContext, filterInfo.AuthorizationFilters, actionDescriptor);
                         if (authorizationContext.Result != null)
                         {
-                            // the authorization filter signaled that we should let it short-circuit the request
-                            // let any authentication filters turn the result into an authentication challenge; then run it
+                            // An authorization filter signaled that we should short-circuit the request. Let all
+                            // authentication filters contribute to an action result (to combine authentication
+                            // challenges). Then, run this action result.
                             AuthenticationChallengeContext challengeContext =
-                                InvokeAuthenticationFiltersChallenge(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor, authorizationContext.Result);
-                            InvokeActionResult(controllerContext, challengeContext.Result ?? authorizationContext.Result);
+                                InvokeAuthenticationFiltersChallenge(controllerContext,
+                                filterInfo.AuthenticationFilters, actionDescriptor, authorizationContext.Result);
+                            InvokeActionResult(controllerContext, challengeContext.Result ??
+                                authorizationContext.Result);
                         }
                         else
                         {
@@ -191,7 +200,15 @@ namespace System.Web.Mvc
 
                             IDictionary<string, object> parameters = GetParameterValues(controllerContext, actionDescriptor);
                             ActionExecutedContext postActionContext = InvokeActionMethodWithFilters(controllerContext, filterInfo.ActionFilters, actionDescriptor, parameters);
-                            InvokeActionResultWithFilters(controllerContext, filterInfo.ResultFilters, postActionContext.Result);
+
+                            // The action succeeded. Let all authentication filters contribute to an action result (to
+                            // combine authentication challenges; some authentication filters need to do negotiation
+                            // even on a successful result). Then, run this action result.
+                            AuthenticationChallengeContext challengeContext =
+                                InvokeAuthenticationFiltersChallenge(controllerContext,
+                                filterInfo.AuthenticationFilters, actionDescriptor, postActionContext.Result);
+                            InvokeActionResultWithFilters(controllerContext, filterInfo.ResultFilters,
+                                challengeContext.Result ?? postActionContext.Result);
                         }
                     }
                 }
@@ -348,14 +365,8 @@ namespace System.Web.Mvc
             foreach (IAuthenticationFilter filter in filters)
             {
                 filter.OnAuthentication(context);
-                // short-circuit evaluation
+                // short-circuit evaluation when an error occurs
                 if (context.Result != null)
-                {
-                    break;
-                }
-
-                // short-circuit evaluation
-                if (context.Principal != null)
                 {
                     break;
                 }
@@ -385,7 +396,7 @@ namespace System.Web.Mvc
             foreach (IAuthorizationFilter filter in filters)
             {
                 filter.OnAuthorization(context);
-                // short-circuit evaluation
+                // short-circuit evaluation when an error occurs
                 if (context.Result != null)
                 {
                     break;

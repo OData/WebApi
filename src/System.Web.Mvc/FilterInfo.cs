@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Mvc.Filters;
 
 namespace System.Web.Mvc
 {
@@ -24,11 +25,11 @@ namespace System.Web.Mvc
 
             var overrides = cache.Where(f => f.Instance is IOverrideFilter);
 
-            FilterScope actionOverride = SelectLastScope<IActionFilter>(overrides);
-            FilterScope authenticationOverride = SelectLastScope<IAuthenticationFilter>(overrides);
-            FilterScope authorizationOverride = SelectLastScope<IAuthorizationFilter>(overrides);
-            FilterScope exceptionOverride = SelectLastScope<IExceptionFilter>(overrides);
-            FilterScope resultOverride = SelectLastScope<IResultFilter>(overrides);
+            FilterScope actionOverride = SelectLastOverrideScope<IActionFilter>(overrides);
+            FilterScope authenticationOverride = SelectLastOverrideScope<IAuthenticationFilter>(overrides);
+            FilterScope authorizationOverride = SelectLastOverrideScope<IAuthorizationFilter>(overrides);
+            FilterScope exceptionOverride = SelectLastOverrideScope<IExceptionFilter>(overrides);
+            FilterScope resultOverride = SelectLastOverrideScope<IResultFilter>(overrides);
 
             _actionFilters.AddRange(SelectAvailable<IActionFilter>(cache, actionOverride));
             _authenticationFilters.AddRange(SelectAvailable<IAuthenticationFilter>(cache, authenticationOverride));
@@ -64,15 +65,26 @@ namespace System.Web.Mvc
 
         private static IEnumerable<T> SelectAvailable<T>(List<Filter> filters, FilterScope overrideFiltersBeforeScope)
         {
+            // Determine which filters are available for this filter type, given the current overrides in place.
+            // A filter should be processed if:
+            //  1. It implements the appropriate interface for this filter type.
+            //  2. It has not been overridden (its scope is not before the scope of the last override for this type).
             return filters.Where(f => f.Scope >= overrideFiltersBeforeScope && (f.Instance is T)).Select(
                 f => (T)f.Instance);
         }
 
-        private static FilterScope SelectLastScope<T>(IEnumerable<Filter> overrideFilters)
+        private static FilterScope SelectLastOverrideScope<T>(IEnumerable<Filter> overrideFilters)
         {
+            // A filter type (such as action filter) can be overridden, which means every filter of that type at an
+            // earlier scope must be ignored. Determine the scope of the last override filter (if any). Only filters at
+            // this scope or later will be processed.
+
             Filter lastOverride = overrideFilters.Where(
                 f => ((IOverrideFilter)f.Instance).FiltersToOverride == typeof(T)).LastOrDefault();
 
+            // If no override is present, the filter is not overridden (and filters at any scope, starting with First
+            // are processed). Not overriding a filter is equivalent to placing an override at the First filter scope
+            // (since there's nothing before First to override).
             if (lastOverride == null)
             {
                 return FilterScope.First;

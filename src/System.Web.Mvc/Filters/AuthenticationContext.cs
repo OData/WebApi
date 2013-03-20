@@ -2,7 +2,7 @@
 
 using System.Security.Principal;
 
-namespace System.Web.Mvc
+namespace System.Web.Mvc.Filters
 {
     public class AuthenticationContext : ControllerContext
     {
@@ -24,7 +24,7 @@ namespace System.Web.Mvc
             _actionDescriptor = actionDescriptor;
         }
 
-        public virtual ActionDescriptor ActionDescriptor
+        public ActionDescriptor ActionDescriptor
         {
             get
             {
@@ -36,8 +36,8 @@ namespace System.Web.Mvc
             }
         }
 
-        public virtual IPrincipal Principal { get; set; }
+        public IPrincipal Principal { get; set; }
 
-        public virtual ActionResult Result { get; set; }
+        public ActionResult Result { get; set; }
     }
 }

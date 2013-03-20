@@ -6,6 +6,7 @@ using System.IO;
 using System.Security.Principal;
 using System.Text;
 using System.Web.Mvc.Async;
+using System.Web.Mvc.Filters;
 using System.Web.Mvc.Properties;
 using System.Web.Profile;
 using System.Web.Routing;
@@ -13,7 +14,7 @@ using System.Web.Routing;
 namespace System.Web.Mvc
 {
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class complexity dictated by public surface area")]
-    public abstract class Controller : ControllerBase, IActionFilter, IAuthorizationFilter, IDisposable, IExceptionFilter, IResultFilter, IAsyncController, IAsyncManagerContainer
+    public abstract class Controller : ControllerBase, IActionFilter, IAuthenticationFilter, IAuthorizationFilter, IDisposable, IExceptionFilter, IResultFilter, IAsyncController, IAsyncManagerContainer
     {
         private static readonly object _executeTag = new object();
         private static readonly object _executeCoreTag = new object();
@@ -323,6 +324,14 @@ namespace System.Web.Mvc
         }
 
         protected virtual void OnActionExecuted(ActionExecutedContext filterContext)
+        {
+        }
+
+        protected virtual void OnAuthentication(AuthenticationContext filterContext)
+        {
+        }
+
+        protected virtual void OnAuthenticationChallenge(AuthenticationChallengeContext filterContext)
         {
         }
 
@@ -883,6 +892,20 @@ namespace System.Web.Mvc
         void IActionFilter.OnActionExecuted(ActionExecutedContext filterContext)
         {
             OnActionExecuted(filterContext);
+        }
+
+        #endregion
+
+        #region IAuthenticationFilter Members
+
+        void IAuthenticationFilter.OnAuthentication(AuthenticationContext filterContext)
+        {
+            OnAuthentication(filterContext);
+        }
+
+        void IAuthenticationFilter.OnAuthenticationChallenge(AuthenticationChallengeContext filterContext)
+        {
+            OnAuthenticationChallenge(filterContext);
         }
 
         #endregion

@@ -3,6 +3,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Mvc.Filters;
+using System.Web.Mvc.Properties;
 
 namespace System.Web.Mvc
 {
@@ -51,7 +53,8 @@ namespace System.Web.Mvc
             return _filters.GetEnumerator();
         }
 
-        IEnumerable<Filter> IFilterProvider.GetFilters(ControllerContext controllerContext, ActionDescriptor actionDescriptor)
+        IEnumerable<Filter> IFilterProvider.GetFilters(ControllerContext controllerContext,
+            ActionDescriptor actionDescriptor)
         {
             return this;
         }
@@ -63,10 +66,14 @@ namespace System.Web.Mvc
 
         private static void ValidateFilterInstance(object instance)
         {
-            if (instance != null &&
-                !(instance is IActionFilter || instance is IAuthorizationFilter || instance is IExceptionFilter || instance is IResultFilter))
+            if (instance != null && !(
+                instance is IActionFilter ||
+                instance is IAuthorizationFilter ||
+                instance is IExceptionFilter ||
+                instance is IResultFilter ||
+                instance is IAuthenticationFilter))
             {
-                throw new InvalidOperationException(Properties.MvcResources.GlobalFilterCollection_UnsupportedFilterInstance);
+                throw new InvalidOperationException(MvcResources.GlobalFilterCollection_UnsupportedFilterInstance);
             }
         }
     }

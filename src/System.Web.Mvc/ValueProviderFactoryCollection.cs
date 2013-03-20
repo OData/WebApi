@@ -8,28 +8,41 @@ namespace System.Web.Mvc
 {
     public class ValueProviderFactoryCollection : Collection<ValueProviderFactory>
     {
-        private IResolver<IEnumerable<ValueProviderFactory>> _serviceResolver;
+        private ValueProviderFactory[] _combinedItems;
+        private IDependencyResolver _dependencyResolver;
 
         public ValueProviderFactoryCollection()
         {
-            _serviceResolver = new MultiServiceResolver<ValueProviderFactory>(() => Items);
         }
 
         public ValueProviderFactoryCollection(IList<ValueProviderFactory> list)
             : base(list)
         {
-            _serviceResolver = new MultiServiceResolver<ValueProviderFactory>(() => Items);
         }
 
-        internal ValueProviderFactoryCollection(IResolver<IEnumerable<ValueProviderFactory>> serviceResolver, params ValueProviderFactory[] valueProviderFactories)
-            : base(valueProviderFactories)
+        internal ValueProviderFactoryCollection(IList<ValueProviderFactory> list, IDependencyResolver dependencyResolver)
+            : base(list)
         {
-            _serviceResolver = serviceResolver ?? new MultiServiceResolver<ValueProviderFactory>(() => Items);
+            _dependencyResolver = dependencyResolver;
+        }
+
+        internal ValueProviderFactory[] CombinedItems
+        {
+            get
+            {
+                ValueProviderFactory[] combinedItems = _combinedItems;
+                if (combinedItems == null)
+                {
+                    combinedItems = MultiServiceResolver.GetCombined<ValueProviderFactory>(Items, _dependencyResolver);
+                    _combinedItems = combinedItems;
+                }
+                return combinedItems;
+            }
         }
 
         public IValueProvider GetValueProvider(ControllerContext controllerContext)
         {
-            var valueProviders = from factory in _serviceResolver.Current
+            var valueProviders = from factory in CombinedItems
                                  let valueProvider = factory.GetValueProvider(controllerContext)
                                  where valueProvider != null
                                  select valueProvider;
@@ -43,7 +56,14 @@ namespace System.Web.Mvc
             {
                 throw new ArgumentNullException("item");
             }
+            _combinedItems = null;
             base.InsertItem(index, item);
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            _combinedItems = null;
+            base.RemoveItem(index);
         }
 
         protected override void SetItem(int index, ValueProviderFactory item)
@@ -52,6 +72,7 @@ namespace System.Web.Mvc
             {
                 throw new ArgumentNullException("item");
             }
+            _combinedItems = null;
             base.SetItem(index, item);
         }
     }

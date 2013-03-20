@@ -5,37 +5,16 @@ using System.Linq;
 
 namespace System.Web.Mvc
 {
-    internal class MultiServiceResolver<TService> : IResolver<IEnumerable<TService>>
-        where TService : class
+    internal static class MultiServiceResolver        
     {
-        private Lazy<IEnumerable<TService>> _itemsFromService;
-        private Func<IEnumerable<TService>> _itemsThunk;
-        private Func<IDependencyResolver> _resolverThunk;
-
-        public MultiServiceResolver(Func<IEnumerable<TService>> itemsThunk)
-        {
-            if (itemsThunk == null)
+        internal static TService[] GetCombined<TService>(IList<TService> items, IDependencyResolver resolver = null) where TService : class
+        {           
+            if (resolver == null)
             {
-                throw new ArgumentNullException("itemsThunk");
+                resolver = DependencyResolver.Current;
             }
-
-            _itemsThunk = itemsThunk;
-            _resolverThunk = () => DependencyResolver.Current;
-            _itemsFromService = new Lazy<IEnumerable<TService>>(() => _resolverThunk().GetServices<TService>());
-        }
-
-        internal MultiServiceResolver(Func<IEnumerable<TService>> itemsThunk, IDependencyResolver resolver)
-            : this(itemsThunk)
-        {
-            if (resolver != null)
-            {
-                _resolverThunk = () => resolver;
-            }
-        }
-
-        public IEnumerable<TService> Current
-        {
-            get { return _itemsFromService.Value.Concat(_itemsThunk()); }
-        }
+            IEnumerable<TService> services = resolver.GetServices<TService>();
+            return services.Concat(items).ToArray();
+        } 
     }
 }

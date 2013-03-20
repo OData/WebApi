@@ -57,6 +57,49 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void ModelValidatorProviderCollectionCombinedItemsCaches()
+        {
+            // Arrange
+            var providers = new ModelValidatorProvider[] 
+            {
+                new Mock<ModelValidatorProvider>(MockBehavior.Strict).Object, 
+                new Mock<ModelValidatorProvider>(MockBehavior.Strict).Object
+            };
+            var collection = new ModelValidatorProviderCollection(providers);
+
+            // Act
+            var combined1 = collection.CombinedItems;
+            var combined2 = collection.CombinedItems;
+
+            // Assert
+            Assert.Equal(providers, combined1);
+            Assert.Same(combined1, combined2);
+        }
+
+        [Fact]
+        public void ModelBinderValidatorCollectionCombinedItemsDelegatesToResolver()
+        {
+            // Arrange
+            var firstProvider = new Mock<ModelValidatorProvider>();
+            var secondProvider = new Mock<ModelValidatorProvider>();
+            var thirdProvider = new Mock<ModelValidatorProvider>();
+            var dependencyProviders = new ModelValidatorProvider[] { firstProvider.Object, secondProvider.Object };
+            var collectionProviders = new ModelValidatorProvider[] { thirdProvider.Object };
+            var expectedProviders = new ModelValidatorProvider[] { firstProvider.Object, secondProvider.Object, thirdProvider.Object };
+
+            var resolver = new Mock<IDependencyResolver>();
+            resolver.Setup(r => r.GetServices(typeof(ModelValidatorProvider))).Returns(dependencyProviders);
+
+            var providers = new ModelValidatorProviderCollection(collectionProviders, resolver.Object);
+
+            // Act
+            ModelValidatorProvider[] combined = providers.CombinedItems;
+
+            // Assert
+            Assert.Equal(expectedProviders, combined);
+        }
+
+        [Fact]
         public void SetItem()
         {
             // Arrange
@@ -152,10 +195,10 @@ namespace System.Web.Mvc.Test
                 allValidators[2], allValidators[3]
             });
 
-            Resolver<IEnumerable<ModelValidatorProvider>> resolver = new Resolver<IEnumerable<ModelValidatorProvider>>();
-            resolver.Current = new ModelValidatorProvider[] { resolverProvider1.Object, resolverprovider2.Object };
+            var resolver = new Mock<IDependencyResolver>();
+            resolver.Setup(r => r.GetServices(typeof(ModelValidatorProvider))).Returns(new ModelValidatorProvider[] { resolverProvider1.Object, resolverprovider2.Object });
 
-            ModelValidatorProviderCollection collection = new ModelValidatorProviderCollection(resolver);
+            ModelValidatorProviderCollection collection = new ModelValidatorProviderCollection(new ModelValidatorProvider[0], resolver.Object);
 
             // Act
             IEnumerable<ModelValidator> returnedValidators = collection.GetValidators(metadata, controllerContext);

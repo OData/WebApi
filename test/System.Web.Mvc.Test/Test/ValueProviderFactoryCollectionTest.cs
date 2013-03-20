@@ -30,7 +30,7 @@ namespace System.Web.Mvc.Test
         {
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                delegate { new ValueProviderFactoryCollection(null, null); },
+                delegate { new ValueProviderFactoryCollection(null); },
                 "list");
         }
 
@@ -54,6 +54,49 @@ namespace System.Web.Mvc.Test
             Assert.ThrowsArgumentNull(
                 delegate { collection.Add(null); },
                 "item");
+        }
+
+        [Fact]
+        public void ValueProviderFactoryCollectionCombinedItemsCaches()
+        {
+            // Arrange
+            var factories = new ValueProviderFactory[] 
+            {
+                new Mock<ValueProviderFactory>(MockBehavior.Strict).Object, 
+                new Mock<ValueProviderFactory>(MockBehavior.Strict).Object
+            };
+            var collection = new ValueProviderFactoryCollection(factories);
+
+            // Act
+            var combined1 = collection.CombinedItems;
+            var combined2 = collection.CombinedItems;
+
+            // Assert
+            Assert.Equal(factories, combined1);
+            Assert.Same(combined1, combined2);
+        }
+
+        [Fact]
+        public void ValueProviderFactoryCollectionCombinedItemsDelegatesToResolver()
+        {
+            // Arrange
+            var firstFactory = new Mock<ValueProviderFactory>();
+            var secondFactory = new Mock<ValueProviderFactory>();
+            var thirdFactory = new Mock<ValueProviderFactory>();
+            var dependencyFactories = new ValueProviderFactory[] { firstFactory.Object, secondFactory.Object };
+            var collectionFactories = new ValueProviderFactory[] { thirdFactory.Object };
+            var expectedFactories = new ValueProviderFactory[] { firstFactory.Object, secondFactory.Object, thirdFactory.Object };
+
+            var resolver = new Mock<IDependencyResolver>();
+            resolver.Setup(r => r.GetServices(typeof(ValueProviderFactory))).Returns(dependencyFactories);
+
+            var factories = new ValueProviderFactoryCollection(collectionFactories, resolver.Object);
+
+            // Act
+            ValueProviderFactory[] combined = factories.CombinedItems;
+
+            // Assert
+            Assert.Equal(expectedFactories, combined);
         }
 
         [Fact]
@@ -88,7 +131,7 @@ namespace System.Web.Mvc.Test
         [Fact]
         public void GetValueProviderDelegatesToResolver()
         {
-            //Arrange
+            // Arrange
             ControllerContext controllerContext = new ControllerContext();
             IValueProvider[] expectedValueProviders = new[]
             {
@@ -101,8 +144,9 @@ namespace System.Web.Mvc.Test
             Mock<ValueProviderFactory> mockFactory2 = new Mock<ValueProviderFactory>();
             mockFactory2.Setup(o => o.GetValueProvider(controllerContext)).Returns(expectedValueProviders[1]);
 
-            Resolver<IEnumerable<ValueProviderFactory>> resolver = new Resolver<IEnumerable<ValueProviderFactory>> { Current = new[] { mockFactory1.Object, mockFactory2.Object } };
-            ValueProviderFactoryCollection factories = new ValueProviderFactoryCollection(resolver);
+            var resolver = new Mock<IDependencyResolver>();
+            resolver.Setup(r => r.GetServices(typeof(ValueProviderFactory))).Returns(new[] { mockFactory1.Object, mockFactory2.Object });
+            ValueProviderFactoryCollection factories = new ValueProviderFactoryCollection(new ValueProviderFactory[0], resolver.Object);
 
             // Act
             ValueProviderCollection valueProviders = (ValueProviderCollection)factories.GetValueProvider(controllerContext);

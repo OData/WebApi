@@ -9,28 +9,36 @@ namespace System.Web.Mvc
 {
     public class ViewEngineCollection : Collection<IViewEngine>
     {
-        private IResolver<IEnumerable<IViewEngine>> _serviceResolver;
+        private IViewEngine[] _combinedItems;
+        private IDependencyResolver _dependencyResolver;
 
         public ViewEngineCollection()
         {
-            _serviceResolver = new MultiServiceResolver<IViewEngine>(() => Items);
         }
 
         public ViewEngineCollection(IList<IViewEngine> list)
             : base(list)
         {
-            _serviceResolver = new MultiServiceResolver<IViewEngine>(() => Items);
         }
 
-        internal ViewEngineCollection(IResolver<IEnumerable<IViewEngine>> serviceResolver, params IViewEngine[] engines)
-            : base(engines)
+        internal ViewEngineCollection(IList<IViewEngine> list, IDependencyResolver dependencyResolver)
+            : base(list)
         {
-            _serviceResolver = serviceResolver ?? new MultiServiceResolver<IViewEngine>(() => Items);
+            _dependencyResolver = dependencyResolver;
         }
 
-        private IEnumerable<IViewEngine> CombinedItems
+        internal IViewEngine[] CombinedItems
         {
-            get { return _serviceResolver.Current; }
+            get
+            {
+                IViewEngine[] combinedItems = _combinedItems;
+                if (combinedItems == null)
+                {
+                    combinedItems = MultiServiceResolver.GetCombined<IViewEngine>(Items, _dependencyResolver);
+                    _combinedItems = combinedItems;
+                }
+                return combinedItems;
+            }
         }
 
         protected override void InsertItem(int index, IViewEngine item)
@@ -39,7 +47,14 @@ namespace System.Web.Mvc
             {
                 throw new ArgumentNullException("item");
             }
+            _combinedItems = null;
             base.InsertItem(index, item);
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            _combinedItems = null;
+            base.RemoveItem(index);
         }
 
         protected override void SetItem(int index, IViewEngine item)
@@ -48,6 +63,7 @@ namespace System.Web.Mvc
             {
                 throw new ArgumentNullException("item");
             }
+            _combinedItems = null;
             base.SetItem(index, item);
         }
 

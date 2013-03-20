@@ -8,28 +8,36 @@ namespace System.Web.Mvc
 {
     public class ModelBinderProviderCollection : Collection<IModelBinderProvider>
     {
-        private IResolver<IEnumerable<IModelBinderProvider>> _serviceResolver;
+        private IModelBinderProvider[] _combinedItems;
+        private IDependencyResolver _dependencyResolver;
 
         public ModelBinderProviderCollection()
         {
-            _serviceResolver = new MultiServiceResolver<IModelBinderProvider>(() => Items);
         }
 
         public ModelBinderProviderCollection(IList<IModelBinderProvider> list)
             : base(list)
         {
-            _serviceResolver = new MultiServiceResolver<IModelBinderProvider>(() => Items);
         }
 
-        internal ModelBinderProviderCollection(IResolver<IEnumerable<IModelBinderProvider>> resolver, params IModelBinderProvider[] providers)
-            : base(providers)
+        internal ModelBinderProviderCollection(IList<IModelBinderProvider> list, IDependencyResolver dependencyResolver)
+            : base(list)
         {
-            _serviceResolver = resolver ?? new MultiServiceResolver<IModelBinderProvider>(() => Items);
+            _dependencyResolver = dependencyResolver;
         }
 
-        private IEnumerable<IModelBinderProvider> CombinedItems
+        internal IModelBinderProvider[] CombinedItems
         {
-            get { return _serviceResolver.Current; }
+            get
+            {
+                IModelBinderProvider[] combinedItems = _combinedItems;
+                if (combinedItems == null)
+                {
+                    combinedItems = MultiServiceResolver.GetCombined<IModelBinderProvider>(Items, _dependencyResolver);
+                    _combinedItems = combinedItems;
+                }
+                return combinedItems;
+            }
         }
 
         protected override void InsertItem(int index, IModelBinderProvider item)
@@ -38,7 +46,14 @@ namespace System.Web.Mvc
             {
                 throw new ArgumentNullException("item");
             }
+            _combinedItems = null;
             base.InsertItem(index, item);
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            _combinedItems = null;
+            base.RemoveItem(index);
         }
 
         protected override void SetItem(int index, IModelBinderProvider item)
@@ -47,6 +62,7 @@ namespace System.Web.Mvc
             {
                 throw new ArgumentNullException("item");
             }
+            _combinedItems = null;
             base.SetItem(index, item);
         }
 

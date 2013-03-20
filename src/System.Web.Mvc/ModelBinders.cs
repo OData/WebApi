@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Linq;
 using System.Linq;
@@ -17,42 +18,23 @@ namespace System.Web.Mvc
             get { return _binders; }
         }
 
-        internal static IModelBinder GetBinderFromAttributes(Type type, Func<string> errorMessageAccessor)
+        internal static IModelBinder GetBinderFromAttributes(Type type, Action<Type> errorAction)
         {
-            AttributeCollection allAttrs = TypeDescriptorHelper.Get(type).GetAttributes();
-            CustomModelBinderAttribute[] filteredAttrs = allAttrs.OfType<CustomModelBinderAttribute>().ToArray();
-            return GetBinderFromAttributesImpl(filteredAttrs, errorMessageAccessor);
+            AttributeList allAttrs = new AttributeList(TypeDescriptorHelper.Get(type).GetAttributes());
+            CustomModelBinderAttribute binder = allAttrs.SingleOfTypeDefaultOrError<Attribute, CustomModelBinderAttribute, Type>(errorAction, type);
+            return binder == null ? null : binder.GetBinder();
         }
 
-        internal static IModelBinder GetBinderFromAttributes(ICustomAttributeProvider element, Func<string> errorMessageAccessor)
+        internal static IModelBinder GetBinderFromAttributes(ICustomAttributeProvider element, Action<ICustomAttributeProvider> errorAction)
         {
             CustomModelBinderAttribute[] attrs = (CustomModelBinderAttribute[])element.GetCustomAttributes(typeof(CustomModelBinderAttribute), true /* inherit */);
-            return GetBinderFromAttributesImpl(attrs, errorMessageAccessor);
-        }
-
-        private static IModelBinder GetBinderFromAttributesImpl(CustomModelBinderAttribute[] attrs, Func<string> errorMessageAccessor)
-        {
-            // this method is used to get a custom binder based on the attributes of the element passed to it.
-            // it will return null if a binder cannot be detected based on the attributes alone.
-
+            // For compatibility, return null if no attributes.
             if (attrs == null)
-            {
+            {                
                 return null;
             }
-
-            switch (attrs.Length)
-            {
-                case 0:
-                    return null;
-
-                case 1:
-                    IModelBinder binder = attrs[0].GetBinder();
-                    return binder;
-
-                default:
-                    string errorMessage = errorMessageAccessor();
-                    throw new InvalidOperationException(errorMessage);
-            }
+            CustomModelBinderAttribute binder = attrs.SingleDefaultOrError(errorAction, element);
+            return binder == null ? null : binder.GetBinder();
         }
 
         private static ModelBinderDictionary CreateDefaultBinderDictionary()

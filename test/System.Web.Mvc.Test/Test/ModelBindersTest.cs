@@ -2,8 +2,10 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Data.Linq;
+using System.Reflection;
 using System.Threading;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Mvc.Test
 {
@@ -40,11 +42,28 @@ namespace System.Web.Mvc.Test
         [Fact]
         public void GetBindersFromAttributes_ReadsModelBinderAttributeFromBuddyClass()
         {
+            Action<Type> errorAction = (Type t) => { throw new InvalidOperationException(); };
             // Act
-            IModelBinder binder = ModelBinders.GetBinderFromAttributes(typeof(SampleModel), null);
+            IModelBinder binder = ModelBinders.GetBinderFromAttributes(typeof(SampleModel), errorAction);
 
             // Assert
             Assert.IsType<SampleModelBinder>(binder);
+        }
+
+        [Fact]
+        public void GetBindersFromAttributes_NullIfGetCustomAttributesReturnsNull()
+        {
+            // Arrange
+            var provider = new Mock<ICustomAttributeProvider>(MockBehavior.Strict);
+            bool inherit = true;
+            provider.Setup(p => p.GetCustomAttributes(typeof(CustomModelBinderAttribute), inherit)).Returns((object[])null);
+            Action<ICustomAttributeProvider> errorAction = (ICustomAttributeProvider t) => { throw new InvalidOperationException(); };
+
+            // Act
+            IModelBinder binder = ModelBinders.GetBinderFromAttributes(provider.Object, errorAction);
+
+            // Assert
+            Assert.Null(binder);
         }
 
         [MetadataType(typeof(SampleModel_Buddy))]

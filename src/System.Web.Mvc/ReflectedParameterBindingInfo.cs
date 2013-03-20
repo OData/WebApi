@@ -25,9 +25,18 @@ namespace System.Web.Mvc
         {
             get
             {
-                IModelBinder binder = ModelBinders.GetBinderFromAttributes(_parameterInfo,
-                                                                           () => String.Format(CultureInfo.CurrentCulture, MvcResources.ReflectedParameterBindingInfo_MultipleConverterAttributes,
-                                                                                               _parameterInfo.Name, _parameterInfo.Member));
+                IModelBinder binder = ModelBinders.GetBinderFromAttributes(
+                    _parameterInfo,
+                    (ICustomAttributeProvider errorArg) =>
+                    {
+                        ParameterInfo parameterInfo = (ParameterInfo)errorArg;
+                        throw new InvalidOperationException(
+                            String.Format(
+                                CultureInfo.CurrentCulture,
+                                MvcResources.ReflectedParameterBindingInfo_MultipleConverterAttributes,
+                                parameterInfo.Name,
+                                parameterInfo.Member));
+                    });
 
                 return binder;
             }

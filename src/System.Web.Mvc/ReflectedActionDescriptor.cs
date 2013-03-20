@@ -88,10 +88,15 @@ namespace System.Web.Mvc
                 throw new ArgumentNullException("parameters");
             }
 
+            // Performance sensitive so avoid Linq or delegates.
             ParameterInfo[] parameterInfos = MethodInfo.GetParameters();
-            var rawParameterValues = from parameterInfo in parameterInfos
-                                     select ExtractParameterFromDictionary(parameterInfo, parameters, MethodInfo);
-            object[] parametersArray = rawParameterValues.ToArray();
+            object[] parametersArray = new object[parameterInfos.Length];
+            for (int i = 0; i < parameterInfos.Length; i++)
+            {
+                ParameterInfo parameterInfo = parameterInfos[i];
+                object parameter = ExtractParameterFromDictionary(parameterInfo, parameters, MethodInfo);
+                parametersArray[i] = parameter;
+            }
 
             ActionMethodDispatcher dispatcher = DispatcherCache.GetDispatcher(MethodInfo);
             object actionReturnValue = dispatcher.Execute(controllerContext.Controller, parametersArray);

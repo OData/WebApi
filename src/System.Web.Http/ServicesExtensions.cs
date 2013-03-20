@@ -138,14 +138,14 @@ namespace System.Web.Http
             return services.GetServices<IFilterProvider>();
         }
 
-        public static IPrincipalProvider GetPrincipalProvider(this ServicesContainer services)
+        public static IHostPrincipalService GetHostPrincipalService(this ServicesContainer services)
         {
             if (services == null)
             {
                 throw new ArgumentNullException("services");
             }
 
-            return services.GetService<IPrincipalProvider>();
+            return services.GetService<IHostPrincipalService>();
         }
 
         public static ITraceManager GetTraceManager(this ServicesContainer services)

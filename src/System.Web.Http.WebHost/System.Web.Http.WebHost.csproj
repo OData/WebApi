@@ -80,7 +80,7 @@
     <Compile Include="HttpControllerRouteHandler.cs" />
     <Compile Include="RouteCollectionExtensions.cs" />
     <Compile Include="TaskWrapperAsyncResult.cs" />
-    <Compile Include="WebHostPrincipalProvider.cs" />
+    <Compile Include="WebHostPrincipalService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Common\CommonWebApiResources.Designer.cs">

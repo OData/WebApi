@@ -27,7 +27,7 @@ namespace System.Web.Http
         private HttpConfiguration _configuration;
         private HttpControllerContext _controllerContext;
         private UrlHelper _urlHelper;
-        private IPrincipalProvider _principalProvider;
+        private IHostPrincipalService _principalService;
 
         /// <summary>
         /// Gets the <see name="HttpRequestMessage"/> of the current ApiController.
@@ -179,12 +179,11 @@ namespace System.Web.Http
             IEnumerable<IAuthorizationFilter> authorizationFilters = filterGrouping.AuthorizationFilters;
             IEnumerable<IExceptionFilter> exceptionFilters = filterGrouping.ExceptionFilters;
 
-            Task<HttpResponseMessage> result = InvokeActionWithAuthenticationFilters(actionContext, cancellationToken, authenticationFilters, () =>
-                // Func<Task<HttpResponseMessage>>
-                InvokeActionWithAuthorizationFilters(actionContext, cancellationToken, authorizationFilters, authenticationFilters, () =>
+            Func<Task<HttpResponseMessage>> result = InvokeActionWithAuthenticationFilters(actionContext, cancellationToken, authenticationFilters,
+                InvokeActionWithAuthorizationFilters(actionContext, cancellationToken, authorizationFilters, () =>
                     {
                         return ExecuteAction(actionDescriptor.ActionBinding, actionContext, cancellationToken, actionFilters, controllerServices);
-                    })());
+                    }));
 
             return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
         }
@@ -214,17 +213,17 @@ namespace System.Web.Http
 
             _request = controllerContext.Request;
             _configuration = controllerContext.Configuration;
-            _principalProvider = _configuration.Services.GetPrincipalProvider();
+            _principalService = _configuration.Services.GetHostPrincipalService();
 
-            if (_principalProvider == null)
+            if (_principalService == null)
             {
-                throw new InvalidOperationException(SRResources.ServicesContainerIPrincipalProviderRequired);
+                throw new InvalidOperationException(SRResources.ServicesContainerIHostPrincipalServiceRequired);
             }
         }
 
-        internal static async Task<HttpResponseMessage> InvokeActionWithExceptionFilters(Task<HttpResponseMessage> actionTask, HttpActionContext actionContext, CancellationToken cancellationToken, IEnumerable<IExceptionFilter> filters)
+        internal static async Task<HttpResponseMessage> InvokeActionWithExceptionFilters(Func<Task<HttpResponseMessage>> innerAction, HttpActionContext actionContext, CancellationToken cancellationToken, IEnumerable<IExceptionFilter> filters)
         {
-            Contract.Assert(actionTask != null);
+            Contract.Assert(innerAction != null);
             Contract.Assert(actionContext != null);
             Contract.Assert(filters != null);
 
@@ -232,7 +231,7 @@ namespace System.Web.Http
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                return await actionTask;
+                return await innerAction();
             }
             catch (Exception e)
             {
@@ -264,7 +263,15 @@ namespace System.Web.Http
             }
         }
 
-        internal async Task<HttpResponseMessage> InvokeActionWithAuthenticationFilters(
+        internal Func<Task<HttpResponseMessage>> InvokeActionWithAuthenticationFilters(
+            HttpActionContext actionContext, CancellationToken cancellationToken,
+            IEnumerable<IAuthenticationFilter> filters, Func<Task<HttpResponseMessage>> innerAction)
+        {
+            return () => InvokeActionWithAuthenticationFiltersAsync(actionContext, cancellationToken, filters,
+                innerAction);
+        }
+
+        internal async Task<HttpResponseMessage> InvokeActionWithAuthenticationFiltersAsync(
             HttpActionContext actionContext, CancellationToken cancellationToken,
             IEnumerable<IAuthenticationFilter> filters, Func<Task<HttpResponseMessage>> innerAction)
         {
@@ -272,56 +279,54 @@ namespace System.Web.Http
             Contract.Assert(filters != null);
             Contract.Assert(innerAction != null);
 
+            IHttpActionResult innerResult = new ContinuationResult(innerAction);
+            HttpAuthenticationContext authenticationContext = new HttpAuthenticationContext(actionContext);
+            authenticationContext.Principal = _principalService.CurrentPrincipal;
+
             foreach (IAuthenticationFilter filter in filters)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                IAuthenticationResult result = await filter.AuthenticateAsync(actionContext, cancellationToken);
+                IAuthenticationResult result = await filter.AuthenticateAsync(authenticationContext,
+                    cancellationToken);
 
                 if (result != null)
                 {
                     IHttpActionResult error = result.ErrorResult;
 
+                    // Short-circuit on the first authentication filter to provide an error result.
                     if (error != null)
                     {
-                        // The first authentication filter to provide an error result or principal wins.
-
-                        foreach (IAuthenticationFilter errorFilter in filters)
-                        {
-                            if (errorFilter != filter)
-                            {
-                                // But, on error, the other authentication filters still collaborate to provide the
-                                // authentication challenge.
-                                cancellationToken.ThrowIfCancellationRequested();
-                                error = await errorFilter.ChallengeAsync(actionContext, error, cancellationToken);
-                            }
-                        }
-
-                        cancellationToken.ThrowIfCancellationRequested();
-                        return await error.ExecuteAsync(cancellationToken);
+                        innerResult = error;
+                        break;
                     }
 
                     IPrincipal principal = result.Principal;
 
                     if (principal != null)
                     {
-                        // The first authentication filter to provide an error result or principal wins.
-                        _principalProvider.CurrentPrincipal = principal;
-                        break;
+                        authenticationContext.Principal = principal;
+                        _principalService.CurrentPrincipal = principal;
                     }
                 }
             }
 
-            return await innerAction();
+            foreach (IAuthenticationFilter filter in filters)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                innerResult = await filter.ChallengeAsync(actionContext, innerResult, cancellationToken) ??
+                    innerResult;
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            return await innerResult.ExecuteAsync(cancellationToken);
         }
 
         internal static Func<Task<HttpResponseMessage>> InvokeActionWithAuthorizationFilters(
             HttpActionContext actionContext, CancellationToken cancellationToken,
-            IEnumerable<IAuthorizationFilter> filters, IEnumerable<IAuthenticationFilter> authenticationFilters,
-            Func<Task<HttpResponseMessage>> innerAction)
+            IEnumerable<IAuthorizationFilter> filters, Func<Task<HttpResponseMessage>> innerAction)
         {
             Contract.Assert(actionContext != null);
             Contract.Assert(filters != null);
-            Contract.Assert(authenticationFilters != null);
             Contract.Assert(innerAction != null);
 
             // Because the continuation gets built from the inside out we need to reverse the filter list
@@ -330,47 +335,10 @@ namespace System.Web.Http
 
             Func<Task<HttpResponseMessage>> result = filters.Aggregate(innerAction, (continuation, filter) =>
             {
-                return () => InvokeActionWithAuthorizationFilter(filter, actionContext, cancellationToken, authenticationFilters, continuation);
+                return () => filter.ExecuteAuthorizationFilterAsync(actionContext, cancellationToken, continuation);
             });
 
             return result;
-        }
-
-        internal static async Task<HttpResponseMessage> InvokeActionWithAuthorizationFilter(
-            IAuthorizationFilter filter, HttpActionContext actionContext, CancellationToken cancellationToken,
-            IEnumerable<IAuthenticationFilter> authenticationFilters, Func<Task<HttpResponseMessage>> innerAction)
-        {
-            Contract.Assert(filter != null);
-            Contract.Assert(actionContext != null);
-            Contract.Assert(authenticationFilters != null);
-            Contract.Assert(innerAction != null);
-
-            cancellationToken.ThrowIfCancellationRequested();
-            HttpResponseMessage response = await filter.ExecuteAuthorizationFilterAsync(actionContext,
-                cancellationToken, innerAction);
-
-            // NOTE: Unlike MVC, there's no way to tell if an authorization filter failed. So we have to rely on the
-            // status code and do filter-layer authentication even if not doing filter-layer authorization. Consider a
-            // new authorization filter type in Web API with MVC-like action result semantics to resolve this
-            // discrepancy.
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                IHttpActionResult currentResult = new MessageResult(response);
-
-                foreach (IAuthenticationFilter authenticationFilter in authenticationFilters)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    currentResult = await authenticationFilter.ChallengeAsync(actionContext, currentResult,
-                        cancellationToken);
-                }
-
-                return await currentResult.ExecuteAsync(cancellationToken);
-            }
-            else
-            {
-                return response;
-            }
         }
 
         internal static Func<Task<HttpResponseMessage>> InvokeActionWithActionFilters(HttpActionContext actionContext, CancellationToken cancellationToken, IEnumerable<IActionFilter> filters, Func<Task<HttpResponseMessage>> innerAction)
@@ -431,10 +399,10 @@ namespace System.Web.Http
 
                 var overrides = cache.Where(f => f.Instance is IOverrideFilter);
 
-                FilterScope actionOverride = SelectLastScope<IActionFilter>(overrides);
-                FilterScope authenticationOverride = SelectLastScope<IAuthenticationFilter>(overrides);
-                FilterScope authorizationOverride = SelectLastScope<IAuthorizationFilter>(overrides);
-                FilterScope exceptionOverride = SelectLastScope<IExceptionFilter>(overrides);
+                FilterScope actionOverride = SelectLastOverrideScope<IActionFilter>(overrides);
+                FilterScope authenticationOverride = SelectLastOverrideScope<IAuthenticationFilter>(overrides);
+                FilterScope authorizationOverride = SelectLastOverrideScope<IAuthorizationFilter>(overrides);
+                FilterScope exceptionOverride = SelectLastOverrideScope<IExceptionFilter>(overrides);
 
                 _actionFilters.AddRange(SelectAvailable<IActionFilter>(cache, actionOverride));
                 _authenticationFilters.AddRange(SelectAvailable<IAuthenticationFilter>(cache, authenticationOverride));
@@ -465,15 +433,27 @@ namespace System.Web.Http
             private static IEnumerable<T> SelectAvailable<T>(List<FilterInfo> filters,
                 FilterScope overrideFiltersBeforeScope)
             {
+                // Determine which filters are available for this filter type, given the current overrides in place.
+                // A filter should be processed if:
+                //  1. It implements the appropriate interface for this filter type.
+                //  2. It has not been overridden (its scope is not before the scope of the last override for this
+                //     type).
                 return filters.Where(f => f.Scope >= overrideFiltersBeforeScope
                     && (f.Instance is T)).Select(f => (T)f.Instance);
             }
 
-            private static FilterScope SelectLastScope<T>(IEnumerable<FilterInfo> overrideFilters)
+            private static FilterScope SelectLastOverrideScope<T>(IEnumerable<FilterInfo> overrideFilters)
             {
+                // A filter type (such as action filter) can be overridden, which means every filter of that type at an
+                // earlier scope must be ignored. Determine the scope of the last override filter (if any). Only
+                // filters at this scope or later will be processed.
+
                 FilterInfo lastOverride = overrideFilters.Where(
                     f => ((IOverrideFilter)f.Instance).FiltersToOverride == typeof(T)).LastOrDefault();
 
+                // If no override is present, the filter is not overridden (and filters at any scope, starting with
+                // First are processed). Not overriding a filter is equivalent to placing an override at the First
+                // filter scope (since there's nothing before First to override).
                 if (lastOverride == null)
                 {
                     return FilterScope.Global;

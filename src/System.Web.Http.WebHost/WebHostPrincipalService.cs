@@ -2,19 +2,21 @@
 
 using System.Security.Principal;
 using System.Threading;
+using System.Web.Http.Controllers;
 
-namespace System.Web.Http.Controllers
+namespace System.Web.Http.WebHost
 {
-    public class ThreadPrincipalProvider : IPrincipalProvider
+    public class WebHostPrincipalService : IHostPrincipalService
     {
         public IPrincipal CurrentPrincipal
         {
             get
             {
-                return Thread.CurrentPrincipal;
+                return HttpContext.Current.User;
             }
             set
             {
+                HttpContext.Current.User = value;
                 Thread.CurrentPrincipal = value;
             }
         }

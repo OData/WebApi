@@ -524,10 +524,9 @@ namespace System.Web.Http
                 globalFilterMock.Object,
                 actionFilterMock.Object,
             };
-            List<IAuthenticationFilter> authenticationFilters = new List<IAuthenticationFilter>();
 
             // Act
-            var result = ApiController.InvokeActionWithAuthorizationFilters(_actionContextInstance, CancellationToken.None, filters, authenticationFilters, innerAction);
+            var result = ApiController.InvokeActionWithAuthorizationFilters(_actionContextInstance, CancellationToken.None, filters, innerAction);
 
             // Assert
             Assert.NotNull(result);
@@ -554,7 +553,7 @@ namespace System.Web.Http
             var filters = new[] { exceptionFilterMock.Object };
 
             // Act
-            var result = ApiController.InvokeActionWithExceptionFilters(actionTask, _actionContextInstance, CancellationToken.None, filters);
+            var result = ApiController.InvokeActionWithExceptionFilters(() => actionTask, _actionContextInstance, CancellationToken.None, filters);
 
             // Assert
             Assert.NotNull(result);
@@ -578,7 +577,7 @@ namespace System.Web.Http
             var filters = new[] { exceptionFilterMock.Object };
 
             // Act
-            var result = ApiController.InvokeActionWithExceptionFilters(actionTask, _actionContextInstance, CancellationToken.None, filters);
+            var result = ApiController.InvokeActionWithExceptionFilters(() => actionTask, _actionContextInstance, CancellationToken.None, filters);
 
             // Assert
             Assert.NotNull(result);
@@ -604,7 +603,7 @@ namespace System.Web.Http
             var filters = new[] { exceptionFilterMock.Object };
 
             // Act
-            var result = ApiController.InvokeActionWithExceptionFilters(actionTask, _actionContextInstance, CancellationToken.None, filters);
+            var result = ApiController.InvokeActionWithExceptionFilters(() => actionTask, _actionContextInstance, CancellationToken.None, filters);
 
             // Assert
             Assert.NotNull(result);
@@ -641,7 +640,7 @@ namespace System.Web.Http
             var filters = new[] { globalFilterMock.Object, actionFilterMock.Object };
 
             // Act
-            var result = ApiController.InvokeActionWithExceptionFilters(actionTask, _actionContextInstance, CancellationToken.None, filters);
+            var result = ApiController.InvokeActionWithExceptionFilters(() => actionTask, _actionContextInstance, CancellationToken.None, filters);
 
             // Assert
             Assert.NotNull(result);

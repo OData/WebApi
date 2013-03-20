@@ -66,10 +66,12 @@
     <Compile Include="Controllers\IActionResultConverter.cs" />
     <Compile Include="Controllers\HttpActionContext.cs" />
     <Compile Include="Controllers\IControllerConfiguration.cs" />
-    <Compile Include="Controllers\IPrincipalProvider.cs" />
+    <Compile Include="Controllers\IHostPrincipalService.cs" />
     <Compile Include="Controllers\IHttpActionResult.cs" />
-    <Compile Include="Controllers\MessageResult.cs" />
-    <Compile Include="Controllers\ThreadPrincipalProvider.cs" />
+    <Compile Include="ContinuationResult.cs" />
+    <Compile Include="Filters\HttpAuthenticationContext.cs" />
+    <Compile Include="MessageResult.cs" />
+    <Compile Include="Controllers\ThreadPrincipalService.cs" />
     <Compile Include="Filters\IAuthenticationFilter.cs" />
     <Compile Include="Filters\IAuthenticationResult.cs" />
     <Compile Include="Filters\IOverrideFilter.cs" />

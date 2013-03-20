@@ -2,11 +2,10 @@
 
 using System.Security.Principal;
 using System.Threading;
-using System.Web.Http.Controllers;
 
-namespace System.Web.Http.WebHost
+namespace System.Web.Http.Controllers
 {
-    public class WebHostPrincipalProvider : IPrincipalProvider
+    public class ThreadPrincipalService : IHostPrincipalService
     {
         public IPrincipal CurrentPrincipal
         {
@@ -17,7 +16,6 @@ namespace System.Web.Http.WebHost
             set
             {
                 Thread.CurrentPrincipal = value;
-                HttpContext.Current.User = value;
             }
         }
     }

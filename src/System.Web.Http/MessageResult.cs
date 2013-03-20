@@ -3,8 +3,9 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 
-namespace System.Web.Http.Controllers
+namespace System.Web.Http
 {
     public class MessageResult : IHttpActionResult
     {

@@ -655,11 +655,11 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ServicesContainer must have an IPrincipalProvider..
+        ///   Looks up a localized string similar to ServicesContainer must have an IHostPrincipalService..
         /// </summary>
-        internal static string ServicesContainerIPrincipalProviderRequired {
+        internal static string ServicesContainerIHostPrincipalServiceRequired {
             get {
-                return ResourceManager.GetString("ServicesContainerIPrincipalProviderRequired", resourceCulture);
+                return ResourceManager.GetString("ServicesContainerIHostPrincipalServiceRequired", resourceCulture);
             }
         }
         

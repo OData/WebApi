@@ -4,7 +4,7 @@ using System.Security.Principal;
 
 namespace System.Web.Http.Controllers
 {
-    public interface IPrincipalProvider
+    public interface IHostPrincipalService
     {
         IPrincipal CurrentPrincipal { get; set; }
     }

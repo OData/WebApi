@@ -8,7 +8,8 @@ namespace System.Web.Http.Filters
 {
     public interface IAuthenticationFilter : IFilter
     {
-        Task<IAuthenticationResult> AuthenticateAsync(HttpActionContext context, CancellationToken cancellationToken);
+        Task<IAuthenticationResult> AuthenticateAsync(HttpAuthenticationContext context,
+            CancellationToken cancellationToken);
 
         Task<IHttpActionResult> ChallengeAsync(HttpActionContext context, IHttpActionResult result,
             CancellationToken cancellationToken);

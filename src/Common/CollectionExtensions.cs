@@ -65,8 +65,8 @@ namespace System.Collections.Generic
         }
         
         /// <summary>
-        /// Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
-        /// Avoid mutating the return value.
+        /// Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T 
+        /// or a ListWrapperCollection of T. Avoid mutating the return value.
         /// </summary>
         public static List<T> AsList<T>(this IEnumerable<T> enumerable)
         {
@@ -76,6 +76,11 @@ namespace System.Collections.Generic
             if (list != null)
             {
                 return list;
+            }
+            ListWrapperCollection<T> listWrapper = enumerable as ListWrapperCollection<T>;
+            if (listWrapper != null)
+            {
+                return listWrapper.ItemsList;
             }
             return new List<T>(enumerable);
         }

@@ -49,6 +49,9 @@
     <Compile Include="..\Common\EnsureStackHelper.cs">
       <Link>Common\EnsureStackHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Common\ListWrapperCollection.cs">
+      <Link>Common\ListWrapperCollection.cs</Link>
+    </Compile>
     <Compile Include="..\Common\PrefixContainer.cs">
       <Link>Common\PrefixContainer.cs</Link>
     </Compile>

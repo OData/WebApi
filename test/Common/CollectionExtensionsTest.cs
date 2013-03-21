@@ -107,6 +107,16 @@ namespace System.Collections.Generic
             Assert.NotSame(array, arrayAsList);
         }
 
+        public void AsList_ListWrapperCollection_ReturnsSameInstance()
+        {
+            List<object> list = new List<object> { new object(), new object() };
+            ListWrapperCollection<object> listWrapper = new ListWrapperCollection<object>(list);
+
+            List<object> listWrapperAsList = ((IEnumerable<object>)listWrapper).AsList();
+
+            Assert.Same(list, listWrapperAsList);
+        }
+
         [Fact]
         public void SingleDefaultOrErrorIListEmptyReturnsNull()
         {

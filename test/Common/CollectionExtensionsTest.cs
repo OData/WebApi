@@ -1,11 +1,112 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.ObjectModel;
+using System.Linq;
 using Microsoft.TestCommon;
 
 namespace System.Collections.Generic
 {
     public class CollectionExtensionsTest
     {
+        [Fact]
+        public void AsArray_Array_ReturnsSameInstance()
+        {
+            object[] array = new object[] { new object(), new object() };
+
+            object[] arrayAsArray = ((IEnumerable<object>)array).AsArray();
+
+            Assert.Same(array, arrayAsArray);
+        }
+
+        [Fact]
+        public void AsArray_Enumerable_Copies()
+        {
+            IList<object> list = new List<object>() { new object(), new object() };
+            object[] listToArray = list.ToArray();
+
+            object[] listAsArray = ((IEnumerable<object>)list).AsArray();
+
+            Assert.Equal(listToArray, listAsArray);
+        }
+
+        [Fact]
+        public void AsCollection_Collection_ReturnsSameInstance()
+        {
+            Collection<object> collection = new Collection<object>() { new object(), new object() };
+
+            Collection<object> collectionAsCollection = ((IEnumerable<object>)collection).AsCollection();
+
+            Assert.Same(collection, collectionAsCollection);
+        }
+
+        [Fact]
+        public void AsCollection_Enumerable_Copies()
+        {
+            IEnumerable<object> enumerable = new LinkedList<object>(new object[] { new object(), new object() });
+
+            Collection<object> enumerableAsCollection = ((IEnumerable<object>)enumerable).AsCollection();
+
+            Assert.Equal(enumerable, ((IEnumerable<object>)enumerableAsCollection));
+        }
+
+        [Fact]
+        public void AsCollection_IList_Wraps()
+        {
+            IList<object> list = new List<object>() { new object(), new object() };
+
+            Collection<object> listAsCollection = list.AsCollection();
+            list.Add(new object());
+
+            Assert.Equal(list, listAsCollection.ToList());
+        }
+
+        [Fact]
+        public void AsIList_IList_ReturnsSameInstance()
+        {
+            List<object> list = new List<object> { new object(), new object() };
+
+            IList<object> listAsIList = ((IEnumerable<object>)list).AsIList();
+
+            Assert.Same(list, listAsIList);
+        }
+
+        [Fact]
+        public void AsIList_Enumerable_Copies()
+        {
+            LinkedList<object> enumerable = new LinkedList<object>();
+            enumerable.AddLast(new object());
+            enumerable.AddLast(new object());
+            List<object> expected = enumerable.ToList();
+
+            IList<object> enumerableAsIList = ((IEnumerable<object>)enumerable).AsIList();
+
+            Assert.Equal(expected, enumerableAsIList);
+            Assert.NotSame(expected, enumerableAsIList);
+        }
+        
+        [Fact]
+        public void AsList_List_ReturnsSameInstance()
+        {
+            List<object> list = new List<object> { new object(), new object() };
+
+            List<object> listAsList = ((IEnumerable<object>)list).AsList();
+
+            Assert.Same(list, listAsList);
+        }
+
+        [Fact]
+        public void AsList_Enumerable_Copies()
+        {
+            List<object> list = new List<object>() { new object(), new object() };
+            object[] array = list.ToArray();
+
+            List<object> arrayAsList = ((IEnumerable<object>)array).AsList();
+
+            Assert.Equal(list, arrayAsList);
+            Assert.NotSame(list, arrayAsList);
+            Assert.NotSame(array, arrayAsList);
+        }
+
         [Fact]
         public void SingleDefaultOrErrorIListEmptyReturnsNull()
         {

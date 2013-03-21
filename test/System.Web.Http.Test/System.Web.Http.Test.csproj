@@ -42,6 +42,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Common\CollectionExtensionsTest.cs">
+      <Link>Common\CollectionExtensionsTest.cs</Link>
+    </Compile>
     <Compile Include="..\Common\DictionaryExtensionsTest.cs">
       <Link>Common\DictionaryExtensionsTest.cs</Link>
     </Compile>

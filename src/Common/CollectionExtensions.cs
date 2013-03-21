@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace System.Collections.Generic
 {
@@ -9,6 +11,75 @@ namespace System.Collections.Generic
     /// </summary>
     internal static class CollectionExtensions
     {
+        /// <summary>
+        /// Return the enumerable as an Array, copying if required. Optimized for common case where it is an Array. 
+        /// Avoid mutating the return value.
+        /// </summary>
+        public static T[] AsArray<T>(this IEnumerable<T> values)
+        {
+            Contract.Assert(values != null);
+
+            T[] array = values as T[];
+            if (array == null)
+            {
+                array = values.ToArray();
+            }
+            return array;
+        }
+
+        /// <summary>
+        /// Return the enumerable as a Collection of T, copying if required. Optimized for the common case where it is 
+        /// a Collection of T and avoiding a copy if it implements IList of T. Avoid mutating the return value.
+        /// </summary>
+        public static Collection<T> AsCollection<T>(this IEnumerable<T> enumerable)
+        {
+            Contract.Assert(enumerable != null);
+
+            Collection<T> collection = enumerable as Collection<T>;
+            if (collection != null)
+            {
+                return collection;
+            }
+            // Check for IList so that collection can wrap it instead of copying
+            IList<T> list = enumerable as IList<T>;
+            if (list == null)
+            {
+                list = new List<T>(enumerable);
+            }
+            return new Collection<T>(list);
+        }
+
+        /// <summary>
+        /// Return the enumerable as a IList of T, copying if required. Avoid mutating the return value.
+        /// </summary>
+        public static IList<T> AsIList<T>(this IEnumerable<T> enumerable)
+        {
+            Contract.Assert(enumerable != null);
+
+            IList<T> list = enumerable as IList<T>;
+            if (list != null)
+            {
+                return list;
+            }
+            return new List<T>(enumerable);
+        }
+        
+        /// <summary>
+        /// Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
+        /// Avoid mutating the return value.
+        /// </summary>
+        public static List<T> AsList<T>(this IEnumerable<T> enumerable)
+        {
+            Contract.Assert(enumerable != null);
+
+            List<T> list = enumerable as List<T>;
+            if (list != null)
+            {
+                return list;
+            }
+            return new List<T>(enumerable);
+        }
+
         /// <summary>
         /// Return the only value from list, the type's default value if empty, or call the errorAction for 2 or more.
         /// </summary>

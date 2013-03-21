@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
+using SelectExpandClause = Microsoft.Data.OData.Query.SemanticAst.SelectExpandClause;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -52,5 +53,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Gets or sets the metadata level of the response.
         /// </summary>
         public ODataMetadataLevel MetadataLevel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="SelectExpandClause"/>.
+        /// </summary>
+        public SelectExpandClause SelectExpandClause { get; set; }
     }
 }

@@ -75,8 +75,9 @@ namespace System.Web.Http.OData.Formatter
                     context.EntitySet))));
                 people.HasIdLink(context =>
                     {
-                        return context.Url.ODataLink(new EntitySetPathSegment(context.EntitySet),
-                            new KeyValuePathSegment((context.EntityInstance as FormatterPerson).PerId.ToString()));
+                        return context.Url.ODataLink(
+                            new EntitySetPathSegment(context.EntitySet),
+                            new KeyValuePathSegment(context.GetPropertyValue("PerId").ToString()));
                     },
                     followsConventions: false);
 

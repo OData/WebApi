@@ -2,9 +2,8 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.Routing;
+using System.Web.Http.OData.Formatter.Serialization;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -31,16 +30,10 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.SetConfiguration(configuration);
             request.SetODataRouteName(routeName);
 
-            Uri link = ActionLinkGenerationConvention.GenerateActionLink(
-                new EntityInstanceContext()
-                {
-                    EdmModel = model,
-                    EntitySet = carsEdmSet,
-                    EntityType = carsEdmSet.ElementType,
-                    Url = request.GetUrlHelper(),
-                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
-                },
-                paintAction);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = carsEdmSet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carsEdmSet.ElementType.AsReference(), new Car { Model = 2009, Name = "Accord" });
+
+            Uri link = ActionLinkGenerationConvention.GenerateActionLink(entityContext, paintAction);
 
             Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')/Paint", link.AbsoluteUri);
         }
@@ -64,17 +57,11 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.SetConfiguration(configuration);
             request.SetODataRouteName(routeName);
 
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = carsEdmSet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carsEdmSet.ElementType.AsReference(), new Car { Model = 2009, Name = "Accord" });
+
             // Act
-            Uri link = ActionLinkGenerationConvention.GenerateActionLink(
-                new EntityInstanceContext()
-                {
-                    EdmModel = model,
-                    EntitySet = carsEdmSet,
-                    EntityType = carsEdmSet.ElementType,
-                    Url = request.GetUrlHelper(),
-                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
-                },
-                paintAction);
+            Uri link = ActionLinkGenerationConvention.GenerateActionLink(entityContext, paintAction);
 
             Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')/Paint", link.AbsoluteUri);
         }
@@ -99,16 +86,10 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.SetConfiguration(configuration);
             request.SetODataRouteName(routeName);
 
-            Uri link = ActionLinkGenerationConvention.GenerateActionLink(
-                new EntityInstanceContext()
-                {
-                    EdmModel = model,
-                    EntitySet = vehiclesEdmSet,
-                    EntityType = carEdmType,
-                    Url = request.GetUrlHelper(),
-                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
-                },
-                paintAction);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehiclesEdmSet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carEdmType.AsReference(), new Car { Model = 2009, Name = "Accord" });
+
+            Uri link = ActionLinkGenerationConvention.GenerateActionLink(entityContext, paintAction);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car/Paint", link.AbsoluteUri);
         }
@@ -138,17 +119,11 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(paintEdmAction);
 
-            Uri link = actionLinkBuilder.BuildActionLink(new EntityInstanceContext()
-            {
-                EdmModel = model,
-                EntitySet = vehiclesEdmSet,
-                EntityType = carEdmType,
-                Url = request.GetUrlHelper(),
-                EntityInstance = new Car { Model = 2009, Name = "Accord" }
-            });
-            Assert.Equal(
-                "http://localhost/ActionTestWorks",
-                link.AbsoluteUri);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehiclesEdmSet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carEdmType.AsReference(), new Car { Model = 2009, Name = "Accord" });
+
+            Uri link = actionLinkBuilder.BuildActionLink(entityContext);
+            Assert.Equal("http://localhost/ActionTestWorks", link.AbsoluteUri);
         }
 
         [Fact]

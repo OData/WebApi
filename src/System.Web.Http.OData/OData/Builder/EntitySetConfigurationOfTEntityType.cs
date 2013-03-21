@@ -550,7 +550,12 @@ namespace System.Web.Http.OData.Builder
 
         private static EntityInstanceContext<TEntityType> UpCastEntityInstanceContext(EntityInstanceContext context)
         {
-            return new EntityInstanceContext<TEntityType>(context.SerializerContext, context.EntityType, context.EntityInstance as TEntityType);
+            return new EntityInstanceContext<TEntityType>
+            {
+                SerializerContext = context.SerializerContext,
+                EdmObject = context.EdmObject,
+                EntityType = context.EntityType
+            };
         }
     }
 }

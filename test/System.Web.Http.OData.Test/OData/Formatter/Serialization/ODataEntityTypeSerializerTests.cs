@@ -10,6 +10,8 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Annotations;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
+using Microsoft.Data.OData.Query;
+using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -17,12 +19,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
 {
     public class ODataEntityTypeSerializerTests
     {
-        IEdmModel _model;
-        IEdmEntitySet _customerSet;
-        Customer _customer;
-        ODataEntityTypeSerializer _serializer;
-        ODataSerializerContext _writeContext;
-        EntityInstanceContext _entityInstanceContext;
+        private IEdmModel _model;
+        private IEdmEntitySet _customerSet;
+        private Customer _customer;
+        private ODataEntityTypeSerializer _serializer;
+        private ODataSerializerContext _writeContext;
+        private EntityInstanceContext _entityInstanceContext;
+        private ODataSerializerProvider _serializerProvider;
 
         public ODataEntityTypeSerializerTests()
         {
@@ -39,12 +42,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 ID = 10,
             };
 
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            _serializerProvider = new DefaultODataSerializerProvider();
             _serializer = new ODataEntityTypeSerializer(
                 new EdmEntityTypeReference(_customerSet.ElementType, isNullable: false),
-                serializerProvider);
+                _serializerProvider);
             _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, Model = _model };
-            _entityInstanceContext = new EntityInstanceContext { EdmModel = _model, EntitySet = _customerSet, EntityInstance = _customer };
+            _entityInstanceContext = new EntityInstanceContext(_writeContext, _customerSet.ElementType.AsReference(), _customer);
         }
 
         [Fact]
@@ -139,30 +142,39 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void WriteObjectInline_Calls_CreateSelectExpandNode()
+        {
+            // Arrange
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
+            ODataWriter writer = new Mock<ODataWriter>().Object;
+
+            serializer.Setup(s => s.CreateSelectExpandNode(It.Is<EntityInstanceContext>(e => Verify(e, _customer, _writeContext)))).Verifiable();
+            serializer.CallBase = true;
+
+            // Act
+            serializer.Object.WriteObjectInline(_customer, writer, _writeContext);
+
+            // Assert
+            serializer.Verify();
+        }
+
+        [Fact]
         public void WriteObjectInline_Calls_CreateEntry()
         {
             // Arrange
-            var entityInstance = new object();
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            SelectExpandNode selectExpandNode = new SelectExpandNode();
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             ODataWriter writer = new Mock<ODataWriter>().Object;
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, serializerProvider);
+
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
+            serializer.Setup(s => s.CreateEntry(selectExpandNode, It.Is<EntityInstanceContext>(e => Verify(e, _customer, _writeContext)))).Verifiable();
             serializer.CallBase = true;
-            _writeContext.Request = new HttpRequestMessage();
-            _writeContext.Url = new UrlHelper(_writeContext.Request);
-            serializer
-                .Setup(s => s.CreateEntry(It.IsAny<EntityInstanceContext>(), _writeContext))
-                .Callback((EntityInstanceContext instanceContext, ODataSerializerContext writeContext) =>
-                    {
-                        VerifyEntityInstanceContext(instanceContext, writeContext);
-                        Assert.Equal(entityInstance, instanceContext.EntityInstance);
-                        Assert.Equal(serializer.Object.EdmType.Definition, instanceContext.EntityType);
-                    });
 
             // Act
-            serializer.Object.WriteObjectInline(entityInstance, writer, _writeContext);
+            serializer.Object.WriteObjectInline(_customer, writer, _writeContext);
 
             // Assert
-            serializer.VerifyAll();
+            serializer.Verify();
         }
 
         [Fact]
@@ -170,175 +182,283 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             ODataEntry entry = new ODataEntry();
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             Mock<ODataWriter> writer = new Mock<ODataWriter>();
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, new DefaultODataSerializerProvider());
+
+            serializer.Setup(s => s.CreateEntry(It.IsAny<SelectExpandNode>(), It.IsAny<EntityInstanceContext>())).Returns(entry);
+            serializer.CallBase = true;
 
             writer.Setup(s => s.WriteStart(entry)).Verifiable();
-            serializer.Setup(s => s.CreateEntry(It.IsAny<EntityInstanceContext>(), _writeContext)).Returns(entry);
-            serializer.CallBase = true;
 
             // Act
-            serializer.Object.WriteObjectInline(new object(), writer.Object, _writeContext);
+            serializer.Object.WriteObjectInline(_customer, writer.Object, _writeContext);
 
             // Assert
             writer.Verify();
         }
 
         [Fact]
-        public void WriteObjectInline_Calls_CreateNavigationLinks()
+        public void WriteObjectInline_Calls_CreateNavigationLink_ForEachSelectedNavigationProperty()
         {
             // Arrange
-            var entityInstance = new object();
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
-            ODataWriter writer = new Mock<ODataWriter>().Object;
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, serializerProvider);
-            serializer.CallBase = true;
-            _writeContext.Request = new HttpRequestMessage();
-            _writeContext.Url = new UrlHelper(_writeContext.Request);
-            serializer.Setup(s => s.CreateEntry(It.IsAny<EntityInstanceContext>(), _writeContext)).Returns(new ODataEntry());
-            serializer
-                .Setup(s => s.CreateNavigationLinks(It.IsAny<EntityInstanceContext>(), _writeContext))
-                .Callback((EntityInstanceContext instanceContext, ODataSerializerContext writeContext) =>
-                {
-                    VerifyEntityInstanceContext(instanceContext, writeContext);
-                    Assert.Equal(entityInstance, instanceContext.EntityInstance);
-                    Assert.Equal(serializer.Object.EdmType.Definition, instanceContext.EntityType);
-                });
-
-            // Act
-            serializer.Object.WriteObjectInline(entityInstance, writer, _writeContext);
-
-            // Assert
-            serializer.VerifyAll();
-        }
-
-        [Fact]
-        public void WriteObjectInline_WritesODataNavigationLinksFrom_CreateNavigationLinks()
-        {
-            // Arrange
-            ODataNavigationLink[] navigationLinks = new[] { new ODataNavigationLink(), new ODataNavigationLink() };
-            ODataEntry entry = new ODataEntry();
-            Mock<ODataWriter> writer = new Mock<ODataWriter>();
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, new DefaultODataSerializerProvider());
-
-            writer.Setup(s => s.WriteStart(navigationLinks[0])).Verifiable();
-            writer.Setup(s => s.WriteStart(navigationLinks[1])).Verifiable();
-            serializer.Setup(s => s.CreateEntry(It.IsAny<EntityInstanceContext>(), _writeContext)).Returns(new ODataEntry());
-            serializer.Setup(s => s.CreateNavigationLinks(It.IsAny<EntityInstanceContext>(), _writeContext)).Returns(navigationLinks);
-            serializer.CallBase = true;
-
-            // Act
-            serializer.Object.WriteObjectInline(new object(), writer.Object, _writeContext);
-
-            // Assert
-            writer.Verify();
-        }
-
-        [Fact]
-        public void CreateEntry_Calls_CreateStructuralPropertyBag()
-        {
-            // Arrange
-            ODataProperty[] properties = new ODataProperty[] { new ODataProperty(), new ODataProperty() };
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext();
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, new DefaultODataSerializerProvider());
-
-            serializer.CallBase = true;
-            serializer.Setup(s => s.CreateODataActions(entityInstanceContext, _writeContext)).Returns(Enumerable.Empty<ODataAction>());
-            serializer.Setup(s => s.CreateStructuralPropertyBag(entityInstanceContext, _writeContext)).Returns(properties).Verifiable();
-
-            // Act
-            ODataEntry entry = serializer.Object.CreateEntry(entityInstanceContext, _writeContext);
-
-            // Assert
-            serializer.Verify();
-            Assert.Same(properties, entry.Properties);
-        }
-
-        [Fact]
-        public void CreateEntry_Calls_CreateODataActions()
-        {
-            // Arrange
-            ODataAction[] actions = new ODataAction[] { new ODataAction(), new ODataAction() };
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext();
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, new DefaultODataSerializerProvider());
-
-            serializer.CallBase = true;
-            serializer.Setup(s => s.CreateODataActions(entityInstanceContext, _writeContext)).Returns(actions).Verifiable();
-            serializer.Setup(s => s.CreateStructuralPropertyBag(entityInstanceContext, _writeContext));
-
-            // Act
-            ODataEntry entry = serializer.Object.CreateEntry(entityInstanceContext, _writeContext);
-
-            // Assert
-            serializer.Verify();
-            Assert.Same(actions, entry.Actions);
-        }
-
-        [Fact]
-        public void CreateNavigationLinks_ThrowsArgumentNull_WriteContext()
-        {
-            Assert.ThrowsArgumentNull(
-                () => _serializer.CreateNavigationLinks(entityInstanceContext: null, writeContext: null).GetEnumerator().MoveNext(),
-                "writeContext");
-        }
-
-        [Fact]
-        public void CreateNavigationLinks_Returns_NavigationLinkForEachNaviagationProperty()
-        {
-            // Arrange
-            IEdmNavigationProperty property1 = CreateFakeNavigationProperty("Property1", _serializer.EntityType);
-            IEdmNavigationProperty property2 = CreateFakeNavigationProperty("Property2", _serializer.EntityType);
-            Mock<IEdmEntityType> entityType = new Mock<IEdmEntityType>();
-            entityType.Setup(e => e.DeclaredProperties).Returns(new[] { property1, property2 });
-
-            var serializer = new ODataEntityTypeSerializer(new EdmEntityTypeReference(entityType.Object, isNullable: false), new DefaultODataSerializerProvider());
-
-            MockEntitySetLinkBuilderAnnotation linkBuilder = new MockEntitySetLinkBuilderAnnotation
+            SelectExpandNode selectExpandNode = new SelectExpandNode
             {
-                NavigationLinkBuilder = (ctxt, property, metadataLevel) => new Uri(property.Name, UriKind.Relative)
+                SelectedNavigationProperties =
+                {
+                    new Mock<IEdmNavigationProperty>().Object,
+                    new Mock<IEdmNavigationProperty>().Object
+                }
             };
-            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkBuilder);
+            Mock<ODataWriter> writer = new Mock<ODataWriter>();
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
+            serializer.CallBase = true;
+
+            serializer.Setup(s => s.CreateNavigationLink(selectExpandNode.SelectedNavigationProperties.ElementAt(0), It.IsAny<EntityInstanceContext>())).Verifiable();
+            serializer.Setup(s => s.CreateNavigationLink(selectExpandNode.SelectedNavigationProperties.ElementAt(1), It.IsAny<EntityInstanceContext>())).Verifiable();
 
             // Act
-            IEnumerable<ODataNavigationLink> links = serializer.CreateNavigationLinks(new EntityInstanceContext(), _writeContext);
+            serializer.Object.WriteObjectInline(_customer, writer.Object, _writeContext);
 
             // Assert
-            Assert.Equal(new[] { "Property1", "Property2" }, links.Select(l => l.Name));
-            Assert.Equal(new[] { "Property1", "Property2" }, links.Select(l => l.Url.ToString()));
-            Assert.Equal(new bool?[] { false, false }, links.Select(l => l.IsCollection));
+            serializer.Verify();
         }
 
         [Fact]
-        public void CreateStructuralPropertyBag_ThrowsArgumentNull_EntityInstanceContext()
+        public void WriteObjectInline_WritesNavigationLinksReturnedBy_CreateNavigationLink_ForEachSelectedNavigationProperty()
+        {
+            // Arrange
+            SelectExpandNode selectExpandNode = new SelectExpandNode
+            {
+                SelectedNavigationProperties =
+                {
+                    new Mock<IEdmNavigationProperty>().Object,
+                    new Mock<IEdmNavigationProperty>().Object
+                }
+            };
+            ODataNavigationLink[] navigationLinks = new[]
+            {
+                new ODataNavigationLink(),
+                new ODataNavigationLink()
+            };
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
+            serializer
+                .Setup(s => s.CreateNavigationLink(selectExpandNode.SelectedNavigationProperties.ElementAt(0), It.IsAny<EntityInstanceContext>()))
+                .Returns(navigationLinks[0]);
+            serializer
+                .Setup(s => s.CreateNavigationLink(selectExpandNode.SelectedNavigationProperties.ElementAt(1), It.IsAny<EntityInstanceContext>()))
+                .Returns(navigationLinks[1]);
+            serializer.CallBase = true;
+
+            Mock<ODataWriter> writer = new Mock<ODataWriter>();
+            writer.Setup(w => w.WriteStart(navigationLinks[0])).Verifiable();
+            writer.Setup(w => w.WriteStart(navigationLinks[1])).Verifiable();
+
+            // Act
+            serializer.Object.WriteObjectInline(_customer, writer.Object, _writeContext);
+
+            // Assert
+            writer.Verify();
+        }
+
+        [Fact]
+        public void WriteObjectInline_Calls_CreateNavigationLink_ForEachExpandedNavigationProperty()
+        {
+            // Arrange
+            SelectExpandNode selectExpandNode = new SelectExpandNode
+            {
+                ExpandedNavigationProperties =
+                {
+                    { new Mock<IEdmNavigationProperty>().Object, null },
+                    { new Mock<IEdmNavigationProperty>().Object, null }
+                }
+            };
+            Mock<ODataWriter> writer = new Mock<ODataWriter>();
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
+            var expandedNavigationProperties = selectExpandNode.ExpandedNavigationProperties.ToList();
+
+            serializer.Setup(s => s.CreateNavigationLink(expandedNavigationProperties[0].Key, It.IsAny<EntityInstanceContext>())).Verifiable();
+            serializer.Setup(s => s.CreateNavigationLink(expandedNavigationProperties[1].Key, It.IsAny<EntityInstanceContext>())).Verifiable();
+            serializer.CallBase = true;
+
+            // Act
+            serializer.Object.WriteObjectInline(_customer, writer.Object, _writeContext);
+
+            // Assert
+            serializer.Verify();
+        }
+
+        [Fact]
+        public void WriteObjectInline_ExpandsUsingInnerSerializerUsingRightContext_ExpandedNavigationProperties()
+        {
+            // Arrange
+            IEdmEntityType customerType = _customerSet.ElementType;
+            IEdmNavigationProperty ordersProperty = customerType.NavigationProperties().Single(p => p.Name == "Orders");
+            SelectExpandClause selectExpandClause = ODataUriParser.ParseSelectAndExpand("Orders", "Orders", _model, customerType, _customerSet);
+            SelectExpandNode selectExpandNode = new SelectExpandNode
+            {
+                ExpandedNavigationProperties = 
+                { 
+                    { ordersProperty, selectExpandClause.Expansion.ExpandItems.Single().SelectExpandOption }
+                }
+            };
+            Mock<ODataWriter> writer = new Mock<ODataWriter>();
+
+            Mock<ODataEdmTypeSerializer> innerSerializer = new Mock<ODataEdmTypeSerializer>(_serializer.EdmType, ODataPayloadKind.Entry);
+            innerSerializer
+                .Setup(s => s.WriteObjectInline(_customer.Orders, writer.Object, _writeContext))
+                .Callback((object o, ODataWriter w, ODataSerializerContext context) =>
+                    {
+                        Assert.Same(_writeContext.EntitySet.Name, "Orders");
+                        Assert.Same(_writeContext.SelectExpandClause, selectExpandNode.ExpandedNavigationProperties.Single().Value);
+                    })
+                .Verifiable();
+
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
+            serializerProvider.Setup(p => p.GetODataPayloadSerializer(_model, _customer.Orders.GetType())).Returns(innerSerializer.Object);
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, serializerProvider.Object);
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
+            serializer.CallBase = true;
+            _writeContext.SelectExpandClause = selectExpandClause;
+
+            // Act
+            serializer.Object.WriteObjectInline(_customer, writer.Object, _writeContext);
+
+            // Assert
+            innerSerializer.Verify();
+            // check that the context is rolled back
+            Assert.Same(_writeContext.EntitySet.Name, "Customers");
+            Assert.Same(_writeContext.SelectExpandClause, selectExpandClause);
+        }
+
+        [Fact]
+        public void WriteObjectInline_CanExpandNavigationProperty_ContainingEdmObject()
+        {
+            // Arrange
+            IEdmEntityType customerType = _customerSet.ElementType;
+            IEdmNavigationProperty ordersProperty = customerType.NavigationProperties().Single(p => p.Name == "Orders");
+
+            Mock<IEdmObject> orders = new Mock<IEdmObject>();
+            orders.Setup(o => o.GetEdmType()).Returns(ordersProperty.Type);
+            object ordersValue = orders.Object;
+
+            Mock<IEdmStructuredObject> customer = new Mock<IEdmStructuredObject>();
+            customer.Setup(c => c.TryGetValue("Orders", out ordersValue)).Returns(true);
+            customer.Setup(c => c.GetEdmType()).Returns(customerType.AsReference());
+
+            SelectExpandClause selectExpandClause = ODataUriParser.ParseSelectAndExpand("Orders", "Orders", _model, customerType, _customerSet);
+            SelectExpandNode selectExpandNode = new SelectExpandNode();
+            selectExpandNode.ExpandedNavigationProperties[ordersProperty] = selectExpandClause.Expansion.ExpandItems.Single().SelectExpandOption;
+
+            Mock<ODataWriter> writer = new Mock<ODataWriter>();
+
+            Mock<ODataEdmTypeSerializer> ordersSerializer = new Mock<ODataEdmTypeSerializer>(_serializer.EdmType, ODataPayloadKind.Entry);
+            ordersSerializer.Setup(s => s.WriteObjectInline(ordersValue, writer.Object, _writeContext)).Verifiable();
+
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
+            serializerProvider.Setup(p => p.GetEdmTypeSerializer(ordersProperty.Type)).Returns(ordersSerializer.Object);
+
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, serializerProvider.Object);
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
+            serializer.CallBase = true;
+
+            // Act
+            serializer.Object.WriteObjectInline(customer.Object, writer.Object, _writeContext);
+
+            //Assert
+            ordersSerializer.Verify();
+        }
+
+        [Fact]
+        public void CreateEntry_ThrowsArgumentNull_SelectExpandNode()
         {
             Assert.ThrowsArgumentNull(
-                () => _serializer.CreateStructuralPropertyBag(entityInstanceContext: null, writeContext: null),
+                () => _serializer.CreateEntry(selectExpandNode: null, entityInstanceContext: _entityInstanceContext),
+                "selectExpandNode");
+        }
+
+        [Fact]
+        public void CreateEntry_ThrowsArgumentNull_EntityInstanceContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateEntry(new SelectExpandNode(), entityInstanceContext: null),
                 "entityInstanceContext");
         }
 
         [Fact]
-        public void CreateStructuralPropertyBag_Calls_CreateStructuralProperty_ForAllStructuralProperties()
+        public void CreateEntry_Calls_CreateStructuralProperty_ForEachSelectedStructuralProperty()
         {
             // Arrange
-            var instance = new object();
-            IEdmStructuralProperty[] structuralProperties = new[] { new Mock<IEdmStructuralProperty>().Object, new Mock<IEdmStructuralProperty>().Object };
-            ODataProperty[] oDataProperties = new[] { new ODataProperty(), new ODataProperty() };
-            ODataAction[] actions = new ODataAction[] { new ODataAction(), new ODataAction() };
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext { EntityInstance = instance };
-            Mock<IEdmEntityType> entityType = new Mock<IEdmEntityType>();
-            entityType.Setup(e => e.DeclaredProperties).Returns(structuralProperties);
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(
-                new EdmEntityTypeReference(entityType.Object, isNullable: false),
-                new DefaultODataSerializerProvider());
+            SelectExpandNode selectExpandNode = new SelectExpandNode
+            {
+                SelectedStructuralProperties = { new Mock<IEdmStructuralProperty>().Object, new Mock<IEdmStructuralProperty>().Object }
+            };
+            ODataProperty[] properties = new ODataProperty[] { new ODataProperty(), new ODataProperty() };
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             serializer.CallBase = true;
 
-            serializer.Setup(s => s.CreateStructuralProperty(structuralProperties[0], instance, _writeContext)).Returns(oDataProperties[0]).Verifiable();
-            serializer.Setup(s => s.CreateStructuralProperty(structuralProperties[1], instance, _writeContext)).Returns(oDataProperties[1]).Verifiable();
+            serializer
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), _entityInstanceContext))
+                .Returns(properties[0])
+                .Verifiable();
+            serializer
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), _entityInstanceContext))
+                .Returns(properties[1])
+                .Verifiable();
 
             // Act
-            IEnumerable<ODataProperty> propertyValues = serializer.Object.CreateStructuralPropertyBag(entityInstanceContext, _writeContext);
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
 
             // Assert
+            serializer.Verify();
+            Assert.Equal(properties, entry.Properties);
+        }
+
+        [Fact]
+        public void CreateEntry_IgnoresProperty_IfCreateStructuralPropertyReturnsNull()
+        {
+            // Arrange
+            SelectExpandNode selectExpandNode = new SelectExpandNode
+            {
+                SelectedStructuralProperties = { new Mock<IEdmStructuralProperty>().Object }
+            };
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
+            serializer.CallBase = true;
+
+            serializer
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), _entityInstanceContext))
+                .Returns<ODataProperty>(null);
+
+            // Act
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
+
+            // Assert
+            serializer.Verify();
+            Assert.Empty(entry.Properties);
+        }
+
+        [Fact]
+        public void CreateEntry_Calls_CreateODataAction_ForEachSelectAction()
+        {
+            // Arrange
+            ODataAction[] actions = new ODataAction[] { new ODataAction(), new ODataAction() };
+            SelectExpandNode selectExpandNode = new SelectExpandNode
+            {
+                SelectedActions = { new Mock<IEdmFunctionImport>().Object, new Mock<IEdmFunctionImport>().Object }
+            };
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
+            serializer.CallBase = true;
+
+            serializer.Setup(s => s.CreateODataAction(selectExpandNode.SelectedActions.ElementAt(0), _entityInstanceContext)).Returns(actions[0]).Verifiable();
+            serializer.Setup(s => s.CreateODataAction(selectExpandNode.SelectedActions.ElementAt(1), _entityInstanceContext)).Returns(actions[1]).Verifiable();
+
+            // Act
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
+
+            // Assert
+            Assert.Equal(actions, entry.Actions);
             serializer.Verify();
         }
 
@@ -346,18 +466,18 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateStructuralProperty_ThrowsArgumentNull_StructuralProperty()
         {
             Assert.ThrowsArgumentNull(
-                () => _serializer.CreateStructuralProperty(structuralProperty: null, entityInstance: 42, writeContext: null),
+                () => _serializer.CreateStructuralProperty(structuralProperty: null, entityInstanceContext: null),
                 "structuralProperty");
         }
 
         [Fact]
-        public void CreateStructuralProperty_ThrowsArgumentNull_EntityInstance()
+        public void CreateStructuralProperty_ThrowsArgumentNull_EntityInstanceContext()
         {
             Mock<IEdmStructuralProperty> property = new Mock<IEdmStructuralProperty>();
 
             Assert.ThrowsArgumentNull(
-                () => _serializer.CreateStructuralProperty(property.Object, entityInstance: null, writeContext: null),
-                "entityInstance");
+                () => _serializer.CreateStructuralProperty(property.Object, entityInstanceContext: null),
+                "entityInstanceContext");
         }
 
         [Fact]
@@ -368,7 +488,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             propertyType.Setup(t => t.Definition).Returns(new EdmEntityType("Namespace", "Name"));
             Mock<IEdmStructuralProperty> property = new Mock<IEdmStructuralProperty>();
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
-            object entity = new object();
+            IEdmStructuredObject entity = new Mock<IEdmStructuredObject>().Object;
             property.Setup(p => p.Type).Returns(propertyType.Object);
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(propertyType.Object)).Returns<ODataEdmTypeSerializer>(null);
 
@@ -376,12 +496,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             // Act & Assert
             Assert.Throws<SerializationException>(
-                () => serializer.CreateStructuralProperty(property.Object, entity, new ODataSerializerContext()),
+                () => serializer.CreateStructuralProperty(property.Object, new EntityInstanceContext { EdmObject = entity }),
                 "'Namespace.Name' cannot be serialized using the ODataMediaTypeFormatter.");
         }
 
         [Fact]
-        public void CreateStructuralProperty_Calls_CreateCreateODataValueOnInnerSerializer()
+        public void CreateStructuralProperty_Calls_CreateODataValueOnInnerSerializer()
         {
             // Arrange
             Mock<IEdmTypeReference> propertyType = new Mock<IEdmTypeReference>();
@@ -389,7 +509,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Mock<IEdmStructuralProperty> property = new Mock<IEdmStructuralProperty>();
             property.Setup(p => p.Name).Returns("PropertyName");
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
-            object entity = new { PropertyName = 42 };
+            var entity = new { PropertyName = 42 };
             Mock<ODataEdmTypeSerializer> innerSerializer = new Mock<ODataEdmTypeSerializer>(propertyType.Object, ODataPayloadKind.Property);
             ODataValue propertyValue = new Mock<ODataValue>().Object;
 
@@ -398,9 +518,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             innerSerializer.Setup(s => s.CreateODataValue(42, _writeContext)).Returns(propertyValue).Verifiable();
 
             var serializer = new ODataEntityTypeSerializer(_serializer.EntityType, serializerProvider.Object);
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, _customerSet.ElementType.AsReference(), entity);
 
             // Act
-            ODataProperty createdProperty = serializer.CreateStructuralProperty(property.Object, entity, _writeContext);
+            ODataProperty createdProperty = serializer.CreateStructuralProperty(property.Object, entityInstanceContext);
 
             // Assert
             innerSerializer.Verify();
@@ -408,75 +529,77 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Equal(propertyValue, createdProperty.Value);
         }
 
-        private void VerifyEntityInstanceContext(EntityInstanceContext instanceContext, ODataSerializerContext writeContext)
+        private bool Verify(EntityInstanceContext instanceContext, object instance, ODataSerializerContext writeContext)
         {
+            Assert.Same(instance, (instanceContext.EdmObject as EdmStructuredObject).Instance);
             Assert.Equal(writeContext.Model, instanceContext.EdmModel);
             Assert.Equal(writeContext.EntitySet, instanceContext.EntitySet);
             Assert.Equal(writeContext.Request, instanceContext.Request);
             Assert.Equal(writeContext.SkipExpensiveAvailabilityChecks, instanceContext.SkipExpensiveAvailabilityChecks);
             Assert.Equal(writeContext.Url, instanceContext.Url);
+            return true;
+        }
+
+        [Fact]
+        public void CreateNavigationLink_ThrowsArgumentNull_NavigationProperty()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateNavigationLink(navigationProperty: null, entityInstanceContext: _entityInstanceContext),
+                "navigationProperty");
+        }
+
+        [Fact]
+        public void CreateNavigationLink_ThrowsArgumentNull_EntityInstanceContext()
+        {
+            IEdmNavigationProperty navigationProperty = new Mock<IEdmNavigationProperty>().Object;
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateNavigationLink(navigationProperty, entityInstanceContext: null),
+                "entityInstanceContext");
+        }
+
+        [Fact]
+        public void CreateNavigationLink_CreatesCorrectNavigationLink()
+        {
+            // Arrange
+            Uri navigationLinkUri = new Uri("http://navigation_link");
+            IEdmNavigationProperty property1 = CreateFakeNavigationProperty("Property1", _serializer.EntityType);
+            EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
+            {
+                NavigationLinkBuilder = (ctxt, property, metadataLevel) => navigationLinkUri
+            };
+            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
+
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
+            serializer.CallBase = true;
+
+            // Act
+            ODataNavigationLink navigationLink = serializer.Object.CreateNavigationLink(property1, _entityInstanceContext);
+
+            // Assert
+            Assert.Equal("Property1", navigationLink.Name);
+            Assert.Equal(navigationLinkUri, navigationLink.Url);
         }
 
         [Fact]
         public void CreateEntry_UsesCorrectTypeName()
         {
             EntityInstanceContext instanceContext = new EntityInstanceContext();
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, new DefaultODataSerializerProvider());
-            serializer.Setup(s => s.CreateStructuralPropertyBag(instanceContext, _writeContext)).Returns(Enumerable.Empty<ODataProperty>());
-            serializer.Setup(s => s.CreateODataActions(instanceContext, _writeContext)).Returns(Enumerable.Empty<ODataAction>());
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             serializer.CallBase = true;
+            SelectExpandNode selectExpandNode = new SelectExpandNode();
 
             // Act
-            ODataEntry entry = serializer.Object.CreateEntry(instanceContext, _writeContext);
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, instanceContext);
 
             // Assert
             Assert.Equal("Default.Customer", entry.TypeName);
         }
 
         [Fact]
-        public void CreateODataActions_ThrowsArgumentNull_EntityInstanceContext()
-        {
-            Assert.ThrowsArgumentNull(
-                () => _serializer.CreateODataActions(entityInstanceContext: null, writeContext: null),
-                "entityInstanceContext");
-        }
-
-        [Fact]
-        public void CreateODataActions_ThrowsArgumentNull_WriteContext()
-        {
-            Assert.ThrowsArgumentNull(
-                () => _serializer.CreateODataActions(new EntityInstanceContext(), writeContext: null),
-                "writeContext");
-        }
-
-        [Fact]
-        public void CreateODataActions_Calls_CreateODataActionForAllActionsOnEntityType()
-        {
-            // Arrange
-            IEdmFunctionImport[] actions = new[] { new Mock<IEdmFunctionImport>().Object, new Mock<IEdmFunctionImport>().Object };
-            ODataAction[] odataActions = new[] { new ODataAction(), new ODataAction() };
-            _model.SetAnnotationValue<BindableProcedureFinder>(_model, new FakeBindableProcedureFinder(actions));
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EntityType, new DefaultODataSerializerProvider());
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext { EdmModel = _model, EntityType = _customerSet.ElementType };
-
-            serializer.CallBase = true;
-            serializer.Setup(s => s.CreateODataAction(actions[0], entityInstanceContext, It.IsAny<ODataMetadataLevel>())).Returns(odataActions[0]).Verifiable();
-            serializer.Setup(s => s.CreateODataAction(actions[1], entityInstanceContext, It.IsAny<ODataMetadataLevel>())).Returns(odataActions[1]).Verifiable();
-
-            // Act
-            var result =
-                serializer.Object.CreateODataActions(entityInstanceContext, new ODataSerializerContext { MetadataLevel = ODataMetadataLevel.Default }).ToArray();
-
-            // Assert
-            serializer.Verify();
-            Assert.Equal(odataActions, result);
-        }
-
-        [Fact]
         public void CreateODataAction_ThrowsArgumentNull_Action()
         {
             Assert.ThrowsArgumentNull(
-                () => _serializer.CreateODataAction(action: null, entityInstanceContext: null, metadataLevel: ODataMetadataLevel.Default),
+                () => _serializer.CreateODataAction(action: null, entityInstanceContext: null),
                 "action");
         }
 
@@ -486,7 +609,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmFunctionImport action = new Mock<IEdmFunctionImport>().Object;
 
             Assert.ThrowsArgumentNull(
-                () => _serializer.CreateODataAction(action, entityInstanceContext: null, metadataLevel: ODataMetadataLevel.Default),
+                () => _serializer.CreateODataAction(action, entityInstanceContext: null),
                 "entityInstanceContext");
         }
 
@@ -495,14 +618,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             Mock<IEdmFunctionImport> action = new Mock<IEdmFunctionImport>();
             Assert.Null(
-                _serializer.CreateODataAction(action.Object, new EntityInstanceContext { EdmModel = EdmCoreModel.Instance }, ODataMetadataLevel.Default));
+                _serializer.CreateODataAction(action.Object, new EntityInstanceContext { EdmModel = EdmCoreModel.Instance }));
         }
 
         [Fact]
         public void CreateEntry_WritesCorrectIdLink()
         {
             // Arrange
-            EntityInstanceContext instanceContext = new EntityInstanceContext();
+            EntityInstanceContext instanceContext = new EntityInstanceContext { SerializerContext = _writeContext };
             bool customIdLinkbuilderCalled = false;
             EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
             {
@@ -516,13 +639,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             };
             _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
 
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, new DefaultODataSerializerProvider());
-            serializer.Setup(s => s.CreateStructuralPropertyBag(instanceContext, _writeContext)).Returns(Enumerable.Empty<ODataProperty>());
-            serializer.Setup(s => s.CreateODataActions(instanceContext, _writeContext)).Returns(Enumerable.Empty<ODataAction>());
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             serializer.CallBase = true;
+            SelectExpandNode selectExpandNode = new SelectExpandNode();
 
             // Act
-            ODataEntry entry = serializer.Object.CreateEntry(instanceContext, _writeContext);
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, instanceContext);
 
             // Assert
             Assert.True(customIdLinkbuilderCalled);
@@ -532,7 +654,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_WritesCorrectEditLink()
         {
             // Arrange
-            EntityInstanceContext instanceContext = new EntityInstanceContext();
+            EntityInstanceContext instanceContext = new EntityInstanceContext { SerializerContext = _writeContext };
             bool customEditLinkbuilderCalled = false;
             EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
             {
@@ -546,13 +668,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             };
             _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
 
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, new DefaultODataSerializerProvider());
-            serializer.Setup(s => s.CreateStructuralPropertyBag(instanceContext, _writeContext)).Returns(Enumerable.Empty<ODataProperty>());
-            serializer.Setup(s => s.CreateODataActions(instanceContext, _writeContext)).Returns(Enumerable.Empty<ODataAction>());
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             serializer.CallBase = true;
+            SelectExpandNode selectExpandNode = new SelectExpandNode();
 
             // Act
-            ODataEntry entry = serializer.Object.CreateEntry(instanceContext, _writeContext);
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, instanceContext);
 
             // Assert
             Assert.True(customEditLinkbuilderCalled);
@@ -562,7 +683,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_WritesCorrectReadLink()
         {
             // Arrange
-            EntityInstanceContext instanceContext = new EntityInstanceContext();
+            EntityInstanceContext instanceContext = new EntityInstanceContext { SerializerContext = _writeContext };
             bool customReadLinkbuilderCalled = false;
             EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
             {
@@ -577,16 +698,23 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
 
-            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, new DefaultODataSerializerProvider());
-            serializer.Setup(s => s.CreateStructuralPropertyBag(instanceContext, _writeContext)).Returns(Enumerable.Empty<ODataProperty>());
-            serializer.Setup(s => s.CreateODataActions(instanceContext, _writeContext)).Returns(Enumerable.Empty<ODataAction>());
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             serializer.CallBase = true;
+            SelectExpandNode selectExpandNode = new SelectExpandNode();
 
             // Act
-            ODataEntry entry = serializer.Object.CreateEntry(instanceContext, _writeContext);
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, instanceContext);
 
             // Assert
             Assert.True(customReadLinkbuilderCalled);
+        }
+
+        [Fact]
+        public void CreateSelectExpandNode_ThrowsArgumentNull_EntityInstanceContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateSelectExpandNode(entityInstanceContext: null),
+                "entityInstanceContext");
         }
 
         [Fact]
@@ -685,10 +813,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
 
             EntityInstanceContext context = CreateContext(model, url);
+            context.SerializerContext.MetadataLevel = ODataMetadataLevel.Default;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context,
-                ODataMetadataLevel.Default);
+            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
 
             // Assert
             string expectedMetadata = expectedMetadataPrefix + "#" + expectedContainerName + "." + expectedActionName;
@@ -716,10 +844,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmModel model = CreateFakeModel(annotationsManager);
 
             EntityInstanceContext context = CreateContext(model);
+            context.SerializerContext.MetadataLevel = ODataMetadataLevel.MinimalMetadata;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context,
-                ODataMetadataLevel.MinimalMetadata);
+            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
 
             // Assert
             Assert.Null(actualAction);
@@ -745,10 +873,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
 
             EntityInstanceContext context = CreateContext(model, url);
+            context.SerializerContext.MetadataLevel = ODataMetadataLevel.MinimalMetadata;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context,
-                ODataMetadataLevel.MinimalMetadata);
+            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
 
             // Assert
             Assert.NotNull(actualAction);
@@ -771,10 +899,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmModel model = CreateFakeModel(annotationsManager);
 
             EntityInstanceContext context = CreateContext(model);
+            context.SerializerContext.MetadataLevel = ODataMetadataLevel.MinimalMetadata;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context,
-                ODataMetadataLevel.MinimalMetadata);
+            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
 
             // Assert
             Assert.Null(actualAction);
@@ -800,10 +928,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
             EntityInstanceContext context = CreateContext(model, url);
+            context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context,
-                (ODataMetadataLevel)metadataLevel);
+            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
 
             // Assert
             Assert.NotNull(actualAction);
@@ -828,10 +956,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
             EntityInstanceContext context = CreateContext(model, url);
+            context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context,
-                (ODataMetadataLevel)metadataLevel);
+            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
 
             // Assert
             Assert.NotNull(actualAction);
@@ -861,10 +989,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
             EntityInstanceContext context = CreateContext(model, url);
+            context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context,
-                (ODataMetadataLevel)metadataLevel);
+            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
 
             // Assert
             Assert.NotNull(actualAction);
@@ -889,10 +1017,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
             EntityInstanceContext context = CreateContext(model, url);
+            context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context,
-                (ODataMetadataLevel)metadataLevel);
+            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
 
             // Assert
             Assert.NotNull(actualAction);

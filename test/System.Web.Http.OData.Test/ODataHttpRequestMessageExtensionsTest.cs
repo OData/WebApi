@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
 using System.Web.Http;
-using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
+using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -124,6 +124,61 @@ namespace System.Net.Http
             {
                 Assert.Null(contentError.InnerError);
             }
+        }
+
+        [Fact]
+        public void GetSelectExpandCaluse_ThrowsArgumentNull_Request()
+        {
+            HttpRequestMessage request = null;
+            Assert.ThrowsArgumentNull(
+                () => request.GetSelectExpandClause(),
+                "request");
+        }
+
+        [Fact]
+        public void SetSelectExpandCaluse_ThrowsArgumentNull_Request()
+        {
+            HttpRequestMessage request = null;
+            Assert.ThrowsArgumentNull(
+                () => request.SetSelectExpandClause(GetMockSelectExpandClause()),
+                "request");
+        }
+
+        [Fact]
+        public void SetSelectExpandCaluse_ThrowsArgumentNull_SelectExpandClause()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            Assert.ThrowsArgumentNull(
+                () => request.SetSelectExpandClause(selectExpandClause: null),
+                "selectExpandClause");
+        }
+
+        [Fact]
+        public void GetSelectExpandClause_ReturnsNullByDefault()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            Assert.Null(request.GetSelectExpandClause());
+        }
+
+        [Fact]
+        public void GetSelectExpandClause_Returns_SetSelectExpandClause()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            SelectExpandClause selectExpandCaluse = GetMockSelectExpandClause();
+
+            // Act
+            request.SetSelectExpandClause(selectExpandCaluse);
+            var result = request.GetSelectExpandClause();
+
+            // Assert
+            Assert.Same(selectExpandCaluse, result);
+        }
+
+        private SelectExpandClause GetMockSelectExpandClause()
+        {
+            return new SelectExpandClause(new Mock<Selection>().Object, new Expansion(Enumerable.Empty<ExpandItem>()));
         }
     }
 }

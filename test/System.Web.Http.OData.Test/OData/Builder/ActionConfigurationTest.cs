@@ -2,8 +2,8 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Expressions;
@@ -314,16 +314,13 @@ namespace System.Web.Http.OData.Builder
 
             // Act
             ActionConfiguration reward = customer.Action("Reward");
-            reward.HasActionLink(ctx => new Uri(string.Format(uriTemplate, (ctx.EntityInstance as Customer).CustomerId)),
+            reward.HasActionLink(ctx => new Uri(string.Format(uriTemplate, ctx.GetPropertyValue("CustomerId"))),
                 followsConventions: false);
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
-            EntityInstanceContext<Customer> context = new EntityInstanceContext<Customer>()
-            {
-                EdmModel = model,
-                EntityType = customerType,
-                EntityInstance = new Customer { CustomerId = 1 }
-            };
+            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model };
+
+            EntityInstanceContext context = new EntityInstanceContext(serializerContext, customerType.AsReference(), new Customer { CustomerId = 1 });
             IEdmFunctionImport rewardAction = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault().FunctionImports().SingleOrDefault();
             ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(rewardAction);
 
@@ -357,15 +354,9 @@ namespace System.Web.Http.OData.Builder
             IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
             IEdmFunctionImport watchAction = container.FunctionImports().SingleOrDefault();
             IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
-            EntityInstanceContext<Movie> context = new EntityInstanceContext<Movie>()
-            {
-                EdmModel = model,
-                EntitySet = entitySet,
-                EntityType = movieType,
-                Url = urlHelper,
-                EntityInstance = new Movie { ID = 1, Name = "Avatar" },
-                SkipExpensiveAvailabilityChecks = false
-            };
+            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model, EntitySet = entitySet, Url = urlHelper };
+
+            EntityInstanceContext context = new EntityInstanceContext(serializerContext, movieType.AsReference(), new Movie { ID = 1, Name = "Avatar" });
             ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(watchAction);
 
             //Assert

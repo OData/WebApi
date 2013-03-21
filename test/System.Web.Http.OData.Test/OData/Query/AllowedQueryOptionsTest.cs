@@ -18,14 +18,14 @@ namespace System.Web.Http.OData.Query
         [InlineData(AllowedQueryOptions.Skip)]
         [InlineData(AllowedQueryOptions.Top)]
         [InlineData(AllowedQueryOptions.InlineCount)]
+        [InlineData(AllowedQueryOptions.Select)]
+        [InlineData(AllowedQueryOptions.Expand)]
         public void Supported_Contains_SupportedQueryOptions(AllowedQueryOptions queryOption)
         {
             Assert.Equal(queryOption, AllowedQueryOptions.Supported & queryOption);
         }
 
         [Theory]
-        [InlineData(AllowedQueryOptions.Select)]
-        [InlineData(AllowedQueryOptions.Expand)]
         [InlineData(AllowedQueryOptions.Format)]
         [InlineData(AllowedQueryOptions.SkipToken)]
         public void Supported_DoesNotContain_UnsupportedQueryOptions(AllowedQueryOptions queryOption)

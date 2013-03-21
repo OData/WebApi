@@ -45,7 +45,8 @@ namespace System.Web.Http.OData.Query
         {
             // Actions with a bound parameter of type ODataQueryOptions do not support the query filter
             // The assumption is that the action will handle the querying within the action implementation
-            if (actionDescriptor != null && IsIQueryable(actionDescriptor.ReturnType) &&
+            if (actionDescriptor != null &&
+                (IsIQueryable(actionDescriptor.ReturnType) || typeof(SingleResult).IsAssignableFrom(actionDescriptor.ReturnType)) &&
                 !actionDescriptor.GetParameters().Any(parameter => typeof(ODataQueryOptions).IsAssignableFrom(parameter.ParameterType)))
             {
                 return new FilterInfo[] { new FilterInfo(QueryFilter, FilterScope.Global) };

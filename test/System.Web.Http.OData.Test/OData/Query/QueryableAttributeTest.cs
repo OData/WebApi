@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Reflection;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
@@ -16,7 +17,9 @@ using System.Web.Http.OData.Query.Controllers;
 using System.Web.Http.OData.Query.Validators;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Moq;
@@ -188,6 +191,20 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
+        public void MaxExpansionDepth_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty(
+                new QueryableAttribute(),
+                o => o.MaxExpansionDepth,
+                expectedDefaultValue: 2,
+                minLegalValue: 0,
+                illegalLowerValue: -1,
+                illegalUpperValue: null,
+                maxLegalValue: int.MaxValue,
+                roundTripTestValue: 100);
+        }
+
+        [Fact]
         public void OnActionExecuted_Throws_Null_Context()
         {
             Assert.ThrowsArgumentNull(() => new QueryableAttribute().OnActionExecuted(null), "actionExecutedContext");
@@ -335,40 +352,6 @@ namespace System.Web.Http.OData.Query
                 () => attribute.OnActionExecuted(context),
                 "actionExecutedContext",
                 "Queries can not be applied to a response content of type 'System.Net.Http.StreamContent'. The response content must be an ObjectContent.");
-        }
-
-        [Theory]
-        [InlineData("GetObject")]
-        [InlineData("GetCollectionOfCustomer")]
-        [InlineData("GetListOfCustomer")]
-        [InlineData("GetStronglyTypedCustomer")]
-        [InlineData("GetArrayOfCustomers")]
-        [InlineData("GetNonGenericEnumerable")]
-        public void InvalidActionReturnType_Throws(string actionName)
-        {
-            // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$skip=1");
-            HttpConfiguration config = new HttpConfiguration();
-            request.SetConfiguration(config);
-            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
-            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod(actionName));
-            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
-            HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
-            context.Response = new HttpResponseMessage(HttpStatusCode.OK);
-            Type returnType = actionDescriptor.ReturnType;
-            object instance = returnType.IsArray ? Array.CreateInstance(returnType.GetElementType(), 5) : Activator.CreateInstance(returnType);
-            context.Response.Content = new ObjectContent(returnType, instance, new JsonMediaTypeFormatter());
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => attribute.OnActionExecuted(context),
-                String.Format(
-                    "The action '{0}' on controller '{1}' with return type '{2}' cannot support querying. Ensure the type of the returned content is IEnumerable, IQueryable, or a generic form of either interface.",
-                    actionName,
-                    controllerDescriptor.ControllerName,
-                    actionDescriptor.ReturnType.FullName));
         }
 
         [Theory]
@@ -523,20 +506,6 @@ namespace System.Web.Http.OData.Query
         }
 
         [Theory]
-        [InlineData(typeof(IEnumerable), true)]
-        [InlineData(typeof(IQueryable), true)]
-        [InlineData(typeof(IEnumerable<Customer>), true)]
-        [InlineData(typeof(IQueryable<Customer>), true)]
-        [InlineData(typeof(object), false)]
-        [InlineData(typeof(string), false)]
-        [InlineData(typeof(List<Customer>), false)]
-        [InlineData(typeof(Customer[]), false)]
-        public void IsSupportedReturnType_ReturnsWhetherReturnTypeIsIEnumerableOrIQueryable(Type returnType, bool isSupported)
-        {
-            Assert.Equal(isSupported, QueryableAttribute.IsSupportedReturnType(returnType));
-        }
-
-        [Theory]
         [InlineData("Id,Address")]
         [InlineData("   Id,Address  ")]
         [InlineData(" Id , Address ")]
@@ -680,6 +649,153 @@ namespace System.Web.Http.OData.Query
 
             // Assert
             Assert.True(called);
+        }
+
+        [Fact]
+        public void ApplyQuery_SingleEntity_ThrowsArgumentNull_Entity()
+        {
+            QueryableAttribute attribute = new QueryableAttribute();
+            ODataQueryOptions options = new ODataQueryOptions(new ODataQueryContext(EdmCoreModel.Instance, typeof(int)), new HttpRequestMessage());
+
+            Assert.ThrowsArgumentNull(
+                () => attribute.ApplyQuery(entity: null, queryOptions: options),
+                "entity");
+        }
+
+        [Fact]
+        public void ApplyQuery_SingleEntity_ThrowsArgumentNull_QueryOptions()
+        {
+            QueryableAttribute attribute = new QueryableAttribute();
+
+            Assert.ThrowsArgumentNull(
+                () => attribute.ApplyQuery(entity: 42, queryOptions: null),
+                "queryOptions");
+        }
+
+        [Fact]
+        public void ApplyQuery_CallsApplyOnODataQueryOptions()
+        {
+            object entity = new object();
+            QueryableAttribute attribute = new QueryableAttribute();
+            ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
+            HttpRequestMessage request = new HttpRequestMessage();
+            Mock<ODataQueryOptions> queryOptions = new Mock<ODataQueryOptions>(context, request);
+
+            attribute.ApplyQuery(entity, queryOptions.Object);
+
+            queryOptions.Verify(q => q.ApplyTo(entity, It.IsAny<ODataQuerySettings>()), Times.Once());
+        }
+
+        public static TheoryDataSet<object, Type> GetElementTypeTestData
+        {
+            get
+            {
+                return new TheoryDataSet<object, Type>
+                {
+                    { Enumerable.Empty<int>(), typeof(int) },
+                    { new List<int>(), typeof(int) },
+                    { new int[0], typeof(int) },
+                    { Enumerable.Empty<string>().AsQueryable(), typeof(string) },
+                    { new SingleResult<string>(Enumerable.Empty<string>().AsQueryable()), typeof(string) },
+                    { new Customer(), typeof(Customer) }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("GetElementTypeTestData")]
+        public void GetElementType_Returns_ExpectedElementType(object response, Type expectedElementType)
+        {
+            HttpActionDescriptor actionDescriptor = new Mock<HttpActionDescriptor>().Object;
+            Assert.Equal(expectedElementType, QueryableAttribute.GetElementType(response, actionDescriptor));
+        }
+
+        [Fact]
+        public void SingleOrDefault_IQueryableOfT_OneElementInSequence_ReturnsElement()
+        {
+            Customer customer = new Customer();
+            IQueryable<Customer> queryable = new[] { customer }.AsQueryable();
+            HttpActionDescriptor actionDescriptor = new Mock<HttpActionDescriptor>().Object;
+
+            var result = QueryableAttribute.SingleOrDefault(queryable, actionDescriptor);
+
+            Assert.Same(customer, result);
+        }
+
+        [Fact]
+        public void SingleOrDefault_IQueryableOfT_ZeroElementsInSequence_ReturnsNull()
+        {
+            IQueryable<Customer> queryable = Enumerable.Empty<Customer>().AsQueryable();
+            HttpActionDescriptor actionDescriptor = new Mock<HttpActionDescriptor>().Object;
+
+            var result = QueryableAttribute.SingleOrDefault(queryable, actionDescriptor);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void SingleOrDefault_IQueryableOfT_MoreThaneOneElementInSequence_Throws()
+        {
+            IQueryable<Customer> queryable = new[] { new Customer(), new Customer() }.AsQueryable();
+            ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor
+            {
+                Configuration = new HttpConfiguration(),
+                MethodInfo = GetType().GetMethod("SomeAction", BindingFlags.Instance | BindingFlags.NonPublic),
+                ControllerDescriptor = new HttpControllerDescriptor { ControllerName = "SomeName" }
+            };
+
+            Assert.Throws<InvalidOperationException>(
+                () => QueryableAttribute.SingleOrDefault(queryable, actionDescriptor),
+                "The action 'SomeAction' on controller 'SomeName' returned a SingleResult containing more than one element. " +
+                "SingleResult must have zero or one elements.");
+        }
+
+        [Fact]
+        public void OnActionExecuted_SingleResult_ReturnsSingleItemEvenIfThereIsNoSelectExpand()
+        {
+            Customer customer = new Customer();
+            SingleResult singleResult = new SingleResult<Customer>(new Customer[] { customer }.AsQueryable());
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", singleResult);
+            QueryableAttribute attribute = new QueryableAttribute();
+
+            attribute.OnActionExecuted(actionExecutedContext);
+
+            Assert.Equal(HttpStatusCode.OK, actionExecutedContext.Response.StatusCode);
+            Assert.Equal(customer, (actionExecutedContext.Response.Content as ObjectContent).Value);
+        }
+
+        [Fact]
+        public void OnActionExecuted_SingleResult_Returns400_IfQueryContainsNonSelectExpand()
+        {
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/?$top=10", new Customer());
+            QueryableAttribute attribute = new QueryableAttribute();
+
+            attribute.OnActionExecuted(actionExecutedContext);
+
+            Assert.Equal(HttpStatusCode.BadRequest, actionExecutedContext.Response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("$filter=ID eq 1")]
+        [InlineData("$orderby=ID")]
+        [InlineData("$inlinecount=allpages")]
+        [InlineData("$skip=1")]
+        [InlineData("$top=0")]
+        public void ValidateSelectExpandOnly_ThrowsODataException_IfODataQueryOptionsHasNonSelectExpand(string parameter)
+        {
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost?" + parameter);
+            ODataQueryContext context = new ODataQueryContext(model.Model, typeof(Customer));
+            ODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
+
+            Assert.Throws<ODataException>(
+                () => QueryableAttribute.ValidateSelectExpandOnly(queryOptions),
+                "The requested resource is not a collection. Query options $filter, $orderby, $inlinecount, $skip, and $top can be applied only on collections.");
+        }
+
+        private void SomeAction()
+        {
         }
 
         private static HttpActionExecutedContext GetActionExecutedContext<TResponse>(string uri, TResponse result)

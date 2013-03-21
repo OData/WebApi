@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.Http.OData.Properties;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 
@@ -26,22 +28,22 @@ namespace System.Web.Http.OData
         /// </summary>
         /// <param name="serializerContext">The backing <see cref="ODataSerializerContext"/>.</param>
         /// <param name="entityType">The EDM entity type of this instance context.</param>
-        /// <param name="entityInstance">The CLR instance of this instance context.</param>
-        public EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityType entityType, object entityInstance)
+        /// <param name="entityInstance">The object representing the instance of this context.</param>
+        public EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, object entityInstance)
+            : this(serializerContext, entityType, AsEdmStructuredObject(entityInstance, entityType))
+        {
+        }
+
+        private EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, IEdmStructuredObject edmObject)
         {
             if (serializerContext == null)
             {
                 throw Error.ArgumentNull("serializerContext");
             }
 
-            if (entityType == null)
-            {
-                throw Error.ArgumentNull("entityType");
-            }
-
             SerializerContext = serializerContext;
-            EntityType = entityType;
-            EntityInstance = entityInstance;
+            EntityType = entityType.EntityDefinition();
+            EdmObject = edmObject;
         }
 
         /// <summary>
@@ -100,8 +102,14 @@ namespace System.Web.Http.OData
         public IEdmEntityType EntityType { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="IEdmStructuredObject"/> backing this instance.
+        /// </summary>
+        public IEdmStructuredObject EdmObject { get; set; }
+
+        /// <summary>
         /// Gets or sets the value of this entity instance.
         /// </summary>
+        [Obsolete("Entity instance might not be available when the incoming uri has a $select. Use the EdmObject property instead.")]
         public object EntityInstance { get; set; }
 
         /// <summary>
@@ -136,6 +144,54 @@ namespace System.Web.Http.OData
             set
             {
                 SerializerContext.SkipExpensiveAvailabilityChecks = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given name from the <see cref="IEdmObject"/> of this instance if present; throws if the property is
+        /// not present.
+        /// </summary>
+        /// <param name="propertyName">The name of the property to get.</param>
+        /// <returns>The value of the property if present.</returns>
+        internal object GetPropertyValue(string propertyName)
+        {
+            if (EdmObject == null)
+            {
+                throw Error.InvalidOperation(SRResources.EdmObjectNull, typeof(EntityInstanceContext).Name);
+            }
+
+            object value;
+            if (EdmObject.TryGetValue(propertyName, out value))
+            {
+                return value;
+            }
+            else
+            {
+                IEdmTypeReference edmType = EdmObject.GetEdmType();
+                if (edmType == null)
+                {
+                    throw Error.InvalidOperation(SRResources.EdmTypeCannotBeNull, EdmObject.GetType(), typeof(IEdmObject));
+                }
+
+                throw Error.InvalidOperation(SRResources.PropertyNotFound, edmType.ToTraceString(), propertyName);
+            }
+        }
+
+        private static IEdmStructuredObject AsEdmStructuredObject(object entityInstance, IEdmEntityTypeReference entityType)
+        {
+            if (entityType == null)
+            {
+                throw Error.ArgumentNull("entityType");
+            }
+
+            IEdmStructuredObject edmObject = entityInstance as IEdmStructuredObject;
+            if (edmObject != null)
+            {
+                return edmObject;
+            }
+            else
+            {
+                return new EdmStructuredObject(entityInstance, entityType);
             }
         }
     }

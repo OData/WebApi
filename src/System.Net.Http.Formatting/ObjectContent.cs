@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting;
@@ -93,7 +92,7 @@ namespace System.Net.Http
         public object Value
         {
             get { return _value; }
-            set { VerifyAndSetObject(value); }
+            set { _value = value; }
         }
 
         internal static MediaTypeHeaderValue BuildHeaderValue(string mediaType)

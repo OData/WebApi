@@ -11,6 +11,7 @@ using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.Routing.Conventions;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
+using SelectExpandClause = Microsoft.Data.OData.Query.SemanticAst.SelectExpandClause;
 
 namespace System.Net.Http
 {
@@ -28,6 +29,7 @@ namespace System.Net.Http
         private const string InlineCountPropertyKey = "MS_InlineCount";
         private const string NextPageLinkPropertyKey = "MS_NextPageLink";
         private const string MessageDetailKey = "MessageDetail";
+        private const string SelectExpandClauseKey = "MS_SelectExpandClause";
 
         private const string ODataMaxServiceVersion = "MaxDataServiceVersion";
 
@@ -360,6 +362,46 @@ namespace System.Net.Http
             }
 
             request.Properties[NextPageLinkPropertyKey] = nextPageLink;
+        }
+
+        /// <summary>
+        /// Gets the parsed <see cref="SelectExpandClause"/> of the given request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The parsed <see cref="SelectExpandClause"/> of the given request.</returns>
+        public static SelectExpandClause GetSelectExpandClause(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            object selectExpandClause;
+            if (request.Properties.TryGetValue(SelectExpandClauseKey, out selectExpandClause))
+            {
+                return selectExpandClause as SelectExpandClause;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Sets the parsed <see cref="SelectExpandClause"/> for the <see cref="ODataMediaTypeFormatter"/> to use
+        /// while writing response for this request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="selectExpandClause">The parsed <see cref="SelectExpandClause"/> of the given request.</param>
+        public static void SetSelectExpandClause(this HttpRequestMessage request, SelectExpandClause selectExpandClause)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+            if (selectExpandClause == null)
+            {
+                throw Error.ArgumentNull("selectExpandClause");
+            }
+
+            request.Properties[SelectExpandClauseKey] = selectExpandClause;
         }
     }
 }

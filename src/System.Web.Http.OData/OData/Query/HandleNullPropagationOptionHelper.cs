@@ -1,9 +1,16 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
+using System.Linq;
+
 namespace System.Web.Http.OData.Query
 {
     internal static class HandleNullPropagationOptionHelper
     {
+        private const string EntityFrameworkQueryProviderNamespace = "System.Data.Entity.Internal.Linq";
+        private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
+        private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
+
         public static bool IsDefined(HandleNullPropagationOption value)
         {
             return value == HandleNullPropagationOption.Default ||
@@ -17,6 +24,29 @@ namespace System.Web.Http.OData.Query
             {
                 throw Error.InvalidEnumArgument(parameterValue, (int)value, typeof(HandleNullPropagationOption));
             }
+        }
+
+        public static HandleNullPropagationOption GetDefaultHandleNullPropagationOption(IQueryable query)
+        {
+            Contract.Assert(query != null);
+
+            HandleNullPropagationOption options;
+
+            string queryProviderNamespace = query.Provider.GetType().Namespace;
+            switch (queryProviderNamespace)
+            {
+                case EntityFrameworkQueryProviderNamespace:
+                case Linq2SqlQueryProviderNamespace:
+                    options = HandleNullPropagationOption.False;
+                    break;
+
+                case Linq2ObjectsQueryProviderNamespace:
+                default:
+                    options = HandleNullPropagationOption.True;
+                    break;
+            }
+
+            return options;
         }
     }
 }

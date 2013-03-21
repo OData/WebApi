@@ -9,6 +9,7 @@ using System.Linq;
 using System.Spatial;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Query.Expressions;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
@@ -107,7 +108,15 @@ namespace System.Web.Http.OData.Formatter
                 Type enumerableOfT = ExtractGenericInterface(clrType, typeof(IEnumerable<>));
                 if (enumerableOfT != null)
                 {
-                    IEdmTypeReference elementType = GetEdmTypeReference(edmModel, enumerableOfT.GetGenericArguments()[0]);
+                    Type elementClrType = enumerableOfT.GetGenericArguments()[0];
+
+                    // IEnumerable<SelectExpandWrapper<T>> is a collection of T.
+                    if (elementClrType.IsGenericType && elementClrType.GetGenericTypeDefinition() == typeof(SelectExpandWrapper<>))
+                    {
+                        elementClrType = elementClrType.GetGenericArguments()[0];
+                    }
+
+                    IEdmTypeReference elementType = GetEdmTypeReference(edmModel, elementClrType);
                     if (elementType != null)
                     {
                         return new EdmCollectionType(elementType);
@@ -372,24 +381,37 @@ namespace System.Web.Http.OData.Formatter
             }
             else
             {
-                ClrTypeAnnotation annotation = edmModel.GetAnnotationValue<ClrTypeAnnotation>(edmTypeReference.Definition);
-                if (annotation != null)
-                {
-                    return annotation.ClrType;
-                }
-
-                IEnumerable<Type> matchingTypes = GetMatchingTypes(edmTypeReference.FullName(), assembliesResolver);
-
-                if (matchingTypes.Count() > 1)
-                {
-                    throw Error.Argument("edmTypeReference", SRResources.MultipleMatchingClrTypesForEdmType,
-                        edmTypeReference.FullName(), String.Join(",", matchingTypes.Select(type => type.AssemblyQualifiedName)));
-                }
-
-                edmModel.SetAnnotationValue<ClrTypeAnnotation>(edmTypeReference.Definition, new ClrTypeAnnotation(matchingTypes.SingleOrDefault()));
-
-                return matchingTypes.SingleOrDefault();
+                return GetClrType(edmTypeReference.Definition, edmModel, assembliesResolver);
             }
+        }
+
+        public static Type GetClrType(IEdmType edmType, IEdmModel edmModel)
+        {
+            return GetClrType(edmType, edmModel, _defaultAssemblyResolver);
+        }
+
+        public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, IAssembliesResolver assembliesResolver)
+        {
+            Contract.Assert(edmType is IEdmSchemaType);
+
+            ClrTypeAnnotation annotation = edmModel.GetAnnotationValue<ClrTypeAnnotation>(edmType);
+            if (annotation != null)
+            {
+                return annotation.ClrType;
+            }
+
+            string typeName = (edmType as IEdmSchemaType).FullName();
+            IEnumerable<Type> matchingTypes = GetMatchingTypes(typeName, assembliesResolver);
+
+            if (matchingTypes.Count() > 1)
+            {
+                throw Error.Argument("edmTypeReference", SRResources.MultipleMatchingClrTypesForEdmType,
+                    typeName, String.Join(",", matchingTypes.Select(type => type.AssemblyQualifiedName)));
+            }
+
+            edmModel.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(matchingTypes.SingleOrDefault()));
+
+            return matchingTypes.SingleOrDefault();
         }
 
         public static IEdmPrimitiveType GetEdmPrimitiveTypeOrNull(Type clrType)

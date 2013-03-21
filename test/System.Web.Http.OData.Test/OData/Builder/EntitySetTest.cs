@@ -3,6 +3,7 @@
 using System.Linq;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Formatter.Serialization;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
@@ -217,17 +218,21 @@ namespace System.Web.Http.OData.Builder
 
             vehiclesSet.HasNavigationPropertyLink(
                 vehiclesSet.HasOptionalBinding((Motorcycle m) => m.Manufacturer, "manufacturers").NavigationProperty,
-                (ctxt, property) => new Uri(String.Format("http://localhost/vehicles/{0}/{1}/{2}", ctxt.EntityInstance.Model, ctxt.EntityInstance.Name, property.Name)), followsConventions: false);
+                (ctxt, property) =>
+                    new Uri(String.Format("http://localhost/vehicles/{0}/{1}/{2}",
+                        ctxt.GetPropertyValue("Model"), ctxt.GetPropertyValue("Name"), property.Name)), followsConventions: false);
 
             IEdmModel model = builder.GetEdmModel();
             var vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
             var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
-            var motorcycleManufacturerProperty = motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+            var motorcycleManufacturerProperty =
+                motorcycle.AssertHasNavigationProperty(
+                model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
-            Uri link = model.GetEntitySetLinkBuilder(vehicles).BuildNavigationLink(
-                new EntityInstanceContext { EntityInstance = new Motorcycle { Name = "Motorcycle1", Model = 2009 }, EdmModel = model, EntitySet = vehicles, EntityType = motorcycle },
-                motorcycleManufacturerProperty,
-                ODataMetadataLevel.Default);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehicles };
+            var entityContext = new EntityInstanceContext(serializerContext, motorcycle.AsReference(), new Motorcycle { Name = "Motorcycle1", Model = 2009 });
+
+            Uri link = model.GetEntitySetLinkBuilder(vehicles).BuildNavigationLink(entityContext, motorcycleManufacturerProperty, ODataMetadataLevel.Default);
 
             Assert.Equal("http://localhost/vehicles/2009/Motorcycle1/Manufacturer", link.AbsoluteUri);
         }

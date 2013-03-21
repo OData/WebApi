@@ -124,27 +124,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestWriteEntityReferenceLink_InJsonLight_WithNavigationPropertyButNotEntitySet_Throws()
-        {
-            // Arrange
-            IODataResponseMessage response = CreateResponse();
-            ODataMessageWriterSettings settings = CreateJsonLightSettings();
-            IEdmModel model = CreateModel();
-            ODataEntityReferenceLink link = new ODataEntityReferenceLink
-            {
-                Url = CreateFakeUri()
-            };
-            IEdmNavigationProperty navigationProperty =
-                model.EntityContainers().Single().EntitySets().First().NavigationTargets.First().NavigationProperty;
-
-            using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
-            {
-                // Act & Assert
-                Assert.Throws<ODataException>(() => writer.WriteEntityReferenceLink(link, null, navigationProperty));
-            }
-        }
-
-        [Fact]
         public void TestWriteEntityReferenceLink_InJsonLight_WithEntitySetButNotNavigationProperty_Throws()
         {
             // Arrange

@@ -70,5 +70,10 @@ namespace System.Web.Http.OData
 
             return new EdmStructuralProperty(declaringType, pInfo.Name, propertyType ?? EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(pInfo.PropertyType));
         }
+
+        public static IEdmEntityTypeReference AsReference(this IEdmEntityType entity)
+        {
+            return new EdmEntityTypeReference(entity, isNullable: false);
+        }
     }
 }

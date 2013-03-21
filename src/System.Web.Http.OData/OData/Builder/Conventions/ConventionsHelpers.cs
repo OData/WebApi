@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
+using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 
@@ -15,21 +16,26 @@ namespace System.Web.Http.OData.Builder.Conventions
 {
     internal static class ConventionsHelpers
     {
-        public static string GetEntityKeyValue(EntityInstanceContext entityContext, EntityTypeConfiguration entityTypeConfiguration)
+        public static string GetEntityKeyValue(EntityInstanceContext entityContext)
         {
+            Contract.Assert(entityContext != null);
+            Contract.Assert(entityContext.EntityType != null);
+            Contract.Assert(entityContext.EdmObject != null);
+
+            IEnumerable<IEdmProperty> keys = entityContext.EntityType.Key();
+            IEdmStructuredObject entityInstance = entityContext.EdmObject;
+
             // TODO: BUG 453795: reflection cleanup
-            if (entityTypeConfiguration.Keys().Count() == 1)
+            if (keys.Count() == 1)
             {
-                return GetUriRepresentationForKeyValue(entityTypeConfiguration.Keys().First().PropertyInfo, entityContext.EntityInstance, entityTypeConfiguration);
+                return GetUriRepresentationForKeyValue(keys.First(), entityContext);
             }
             else
             {
-                return String.Join(
-                    ",",
-                    entityTypeConfiguration
-                        .Keys()
-                        .Select(
-                            key => String.Format(CultureInfo.InvariantCulture, "{0}={1}", key.Name, GetUriRepresentationForKeyValue(key.PropertyInfo, entityContext.EntityInstance, entityTypeConfiguration))));
+                IEnumerable<string> keyValues =
+                    keys.Select(key => String.Format(
+                        CultureInfo.InvariantCulture, "{0}={1}", key.Name, GetUriRepresentationForKeyValue(key, entityContext)));
+                return String.Join(",", keyValues);
             }
         }
 
@@ -134,17 +140,16 @@ namespace System.Web.Http.OData.Builder.Conventions
             return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V3);
         }
 
-        private static string GetUriRepresentationForKeyValue(PropertyInfo key, object entityInstance, EntityTypeConfiguration entityType)
+        private static string GetUriRepresentationForKeyValue(IEdmProperty key, EntityInstanceContext entityInstanceContext)
         {
             Contract.Assert(key != null);
-            Contract.Assert(entityInstance != null);
-            Contract.Assert(entityType != null);
+            Contract.Assert(entityInstanceContext != null);
 
-            object value = key.GetValue(entityInstance, null);
-
+            object value = entityInstanceContext.GetPropertyValue(key.Name);
             if (value == null)
             {
-                throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, entityType.FullName);
+                IEdmTypeReference edmType = entityInstanceContext.EdmObject.GetEdmType();
+                throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, edmType.Definition);
             }
 
             return GetUriRepresentationForValue(value);

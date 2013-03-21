@@ -38,21 +38,21 @@ namespace System.Web.Http.OData.Builder.Conventions
                 // generate links with cast if any of the derived types define a navigation property
                 if (derivedTypesDefineNavigationProperty)
                 {
-                    configuration.HasIdLink(new SelfLinkBuilder<string>((entityContext) => GenerateSelfLink(configuration, entityContext, includeCast: true), followsConventions: true));
+                    configuration.HasIdLink(new SelfLinkBuilder<string>((entityContext) => GenerateSelfLink(entityContext, includeCast: true), followsConventions: true));
                 }
                 else
                 {
-                    configuration.HasIdLink(new SelfLinkBuilder<string>((entityContext) => GenerateSelfLink(configuration, entityContext, includeCast: false), followsConventions: true));
+                    configuration.HasIdLink(new SelfLinkBuilder<string>((entityContext) => GenerateSelfLink(entityContext, includeCast: false), followsConventions: true));
                 }
             }
         }
 
-        internal static string GenerateSelfLink(EntitySetConfiguration configuration, EntityInstanceContext entityContext, bool includeCast)
+        internal static string GenerateSelfLink(EntityInstanceContext entityContext, bool includeCast)
         {
             List<ODataPathSegment> idLinkPathSegments = new List<ODataPathSegment>();
 
             idLinkPathSegments.Add(new EntitySetPathSegment(entityContext.EntitySet));
-            idLinkPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType)));
+            idLinkPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext)));
 
             if (includeCast)
             {

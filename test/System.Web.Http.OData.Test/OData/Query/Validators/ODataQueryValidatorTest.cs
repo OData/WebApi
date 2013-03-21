@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Web.Http.OData.Builder;
-using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Query.Validators
 {
@@ -89,6 +88,24 @@ namespace System.Web.Http.OData.Query.Validators
 
             // Act & Assert
             Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Fact]
+        public void Validate_ValidatesSelectExpandQueryOption_IfItIsNotNull()
+        {
+            // Arrange
+            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$expand=Contacts/Contacts");
+            ODataQueryOptions option = new ODataQueryOptions(_context, message);
+
+            Mock<SelectExpandQueryValidator> selectExpandValidator = new Mock<SelectExpandQueryValidator>();
+            option.SelectExpand.Validator = selectExpandValidator.Object;
+            ODataValidationSettings settings = new ODataValidationSettings();
+
+            // Act
+            _validator.Validate(option, settings);
+
+            // Assert
+            selectExpandValidator.Verify(v => v.Validate(option.SelectExpand, settings), Times.Once());
         }
     }
 }

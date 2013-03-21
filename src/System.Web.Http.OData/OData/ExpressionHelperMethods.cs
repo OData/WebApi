@@ -31,6 +31,9 @@ namespace System.Web.Http.OData
         private static MethodInfo _enumerableOfTypeMethod = GenericMethodOf(_ => Enumerable.OfType<int>(default(IEnumerable)));
         private static MethodInfo _queryableOfTypeMethod = GenericMethodOf(_ => Queryable.OfType<int>(default(IQueryable)));
 
+        private static MethodInfo _enumerableSelectMethod = GenericMethodOf(_ => Enumerable.Select<int, int>(default(IEnumerable<int>), i => i));
+        private static MethodInfo _queryableSelectMethod = GenericMethodOf(_ => Queryable.Select<int, int>(default(IQueryable<int>), i => i));
+
         public static MethodInfo QueryableOrderByGeneric
         {
             get { return _orderByMethod; }
@@ -69,6 +72,16 @@ namespace System.Web.Http.OData
         public static MethodInfo QueryableWhereGeneric
         {
             get { return _whereMethod; }
+        }
+
+        public static MethodInfo QueryableSelectGeneric
+        {
+            get { return _queryableSelectMethod; }
+        }
+
+        public static MethodInfo EnumerableSelectGeneric
+        {
+            get { return _enumerableSelectMethod; }
         }
 
         public static MethodInfo QueryableEmptyAnyGeneric

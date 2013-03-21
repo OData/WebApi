@@ -5,6 +5,7 @@ using System.Data.Linq;
 using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Serialization.Models;
+using System.Web.Http.OData.Query.Expressions;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -92,6 +93,26 @@ namespace System.Web.Http.OData.Formatter
         {
             IEdmModel model = GetEdmModel();
             Assert.Null(model.GetEdmType(typeof(TypeNotInModel)));
+        }
+
+        [Fact]
+        public void GetEdmType_ReturnsCollection_ForIEnumerableOfT()
+        {
+            IEdmModel model = GetEdmModel();
+            IEdmType edmType = model.GetEdmType(typeof(IEnumerable<BaseType>));
+
+            Assert.Equal(EdmTypeKind.Collection, edmType.TypeKind);
+            Assert.Equal("System.Web.Http.OData.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
+        }
+
+        [Fact]
+        public void GetEdmType_ReturnsCollection_ForIEnumerableOfSelectExpandWrapperOfT()
+        {
+            IEdmModel model = GetEdmModel();
+            IEdmType edmType = model.GetEdmType(typeof(IEnumerable<SelectExpandWrapper<BaseType>>));
+
+            Assert.Equal(EdmTypeKind.Collection, edmType.TypeKind);
+            Assert.Equal("System.Web.Http.OData.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
         }
 
         [Theory]

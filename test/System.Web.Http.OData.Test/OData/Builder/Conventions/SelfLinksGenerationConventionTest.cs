@@ -2,12 +2,9 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Serialization;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -63,26 +60,11 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
             IEdmEntitySet carsEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
-            HttpConfiguration configuration = new HttpConfiguration();
-            string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, null, model);
+            HttpRequestMessage request = GetODataRequest(model);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = carsEdmEntitySet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carsEdmEntitySet.ElementType.AsReference(), new Car { Model = 2009, Name = "Accord" });
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.SetODataRouteName(routeName);
-
-            string idLink =
-                SelfLinksGenerationConvention.GenerateSelfLink(
-                vehicles,
-                new EntityInstanceContext()
-                {
-                    EdmModel = model,
-                    EntitySet = carsEdmEntitySet,
-                    EntityType = carsEdmEntitySet.ElementType,
-                    Url = request.GetUrlHelper(),
-                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
-                },
-                includeCast: false);
+            string idLink = SelfLinksGenerationConvention.GenerateSelfLink(entityContext, includeCast: false);
 
             Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')", idLink);
         }
@@ -96,26 +78,11 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
             IEdmEntitySet carsEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
-            HttpConfiguration configuration = new HttpConfiguration();
-            string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, null, model);
+            HttpRequestMessage request = GetODataRequest(model);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = carsEdmEntitySet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carsEdmEntitySet.ElementType.AsReference(), new Car { Model = 2009, Name = "Accord" });
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.SetODataRouteName(routeName);
-
-            string idLink =
-                SelfLinksGenerationConvention.GenerateSelfLink(
-                vehicles,
-                new EntityInstanceContext()
-                {
-                    EdmModel = model,
-                    EntitySet = carsEdmEntitySet,
-                    EntityType = carsEdmEntitySet.ElementType,
-                    Url = request.GetUrlHelper(),
-                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
-                },
-                includeCast: true);
+            string idLink = SelfLinksGenerationConvention.GenerateSelfLink(entityContext, includeCast: true);
 
             Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car", idLink);
         }
@@ -130,26 +97,12 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
             IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
 
-            HttpConfiguration configuration = new HttpConfiguration();
-            string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, null, model);
-
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.SetODataRouteName(routeName);
-
+            HttpRequestMessage request = GetODataRequest(model);
             EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Accord" });
 
-            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(
-                new EntityInstanceContext()
-                {
-                    EdmModel = model,
-                    EntitySet = vehiclesEdmEntitySet,
-                    EntityType = carType,
-                    Url = request.GetUrlHelper(),
-                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
-                },
-                ODataMetadataLevel.Default);
+            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car", selfLinks.IdLink);
         }
@@ -164,6 +117,18 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
             IEdmEntityType sportbikeType = model.AssertHasEntityType(typeof(SportBike));
 
+            HttpRequestMessage request = GetODataRequest(model);
+            EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, sportbikeType.AsReference(), new SportBike { Model = 2009, Name = "Ninja" });
+
+            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
+
+            Assert.Equal("http://localhost/motorcycles(Model=2009,Name='Ninja')", selfLinks.IdLink);
+        }
+
+        private static HttpRequestMessage GetODataRequest(IEdmModel model)
+        {
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
             configuration.Routes.MapODataRoute(routeName, null, model);
@@ -172,20 +137,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.SetConfiguration(configuration);
             request.SetODataRouteName(routeName);
 
-            EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
-
-            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(
-                new EntityInstanceContext()
-                {
-                    EdmModel = model,
-                    EntitySet = vehiclesEdmEntitySet,
-                    EntityType = sportbikeType,
-                    Url = request.GetUrlHelper(),
-                    EntityInstance = new Car { Model = 2009, Name = "Ninja" }
-                },
-                ODataMetadataLevel.Default);
-
-            Assert.Equal("http://localhost/motorcycles(Model=2009,Name='Ninja')", selfLinks.IdLink);
+            return request;
         }
 
         class SelfLinkConventionTests_EntityType

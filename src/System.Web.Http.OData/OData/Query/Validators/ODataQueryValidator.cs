@@ -67,6 +67,11 @@ namespace System.Web.Http.OData.Query.Validators
                 ValidateQueryOptionAllowed(AllowedQueryOptions.Select, validationSettings.AllowedQueryOptions);
             }
 
+            if (options.SelectExpand != null)
+            {
+                options.SelectExpand.Validate(validationSettings);
+            }
+
             if (options.RawValues.Format != null)
             {
                 ValidateQueryOptionAllowed(AllowedQueryOptions.Format, validationSettings.AllowedQueryOptions);

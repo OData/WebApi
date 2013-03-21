@@ -28,7 +28,7 @@ namespace System.Web.Http
     public class QueryableAttribute : ActionFilterAttribute
     {
         private const char CommaSeparator = ',';
-    
+
         // validation settings
         private ODataValidationSettings _validationSettings;
         private string _allowedOrderByProperties;
@@ -66,7 +66,7 @@ namespace System.Web.Http
                 _querySettings.EnsureStableOrdering = value;
             }
         }
-            
+
         /// <summary>
         /// Gets or sets a value indicating how null propagation should
         /// be handled during query composition. 
@@ -91,8 +91,8 @@ namespace System.Web.Http
         /// would result in better performance with Entity framework.
         /// </summary>
         /// <value>The default value is <c>true</c>.</value>
-        public bool EnableConstantParameterization 
-        { 
+        public bool EnableConstantParameterization
+        {
             get
             {
                 return _querySettings.EnableConstantParameterization;
@@ -155,7 +155,7 @@ namespace System.Web.Http
                 return _querySettings.PageSize ?? default(int);
             }
             set
-            {  
+            {
                 _querySettings.PageSize = value;
             }
         }
@@ -256,12 +256,12 @@ namespace System.Web.Http
             set
             {
                 _allowedOrderByProperties = value;
-   
+
                 if (String.IsNullOrEmpty(value))
                 {
                     _validationSettings.AllowedOrderByProperties.Clear();
                 }
-                else 
+                else
                 {
                     // now parse the value and set it to validationSettings
                     string[] properties = _allowedOrderByProperties.Split(CommaSeparator);
@@ -298,8 +298,21 @@ namespace System.Web.Http
                 return _validationSettings.MaxTop ?? default(int);
             }
             set
-            {  
+            {
                 _validationSettings.MaxTop = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the max expansion depth for the $expand query option.
+        /// </summary>
+        /// <remarks>To disable the maximum expansion depth check, set this property to 0.</remarks>
+        public int MaxExpansionDepth
+        {
+            get { return _validationSettings.MaxExpansionDepth; }
+            set
+            {
+                _validationSettings.MaxExpansionDepth = value;
             }
         }
 
@@ -348,18 +361,14 @@ namespace System.Web.Http
                 {
                     throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent, response.Content.GetType().FullName);
                 }
-                ValidateReturnType(responseContent.ObjectType, actionDescriptor);
 
                 // Apply the query if there are any query options or if there is a page size set
                 if (responseContent.Value != null && request.RequestUri != null &&
-                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _querySettings.PageSize.HasValue))
+                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _querySettings.PageSize.HasValue || responseContent.Value is SingleResult))
                 {
                     try
                     {
-                        IEnumerable query = responseContent.Value as IEnumerable;
-                        Contract.Assert(query != null, "ValidateResponseContent should have ensured the responseContent implements IEnumerable");
-                        IQueryable queryResults = ExecuteQuery(query, request, actionDescriptor);
-                        responseContent.Value = queryResults;
+                        responseContent.Value = ExecuteQuery(responseContent.Value, request, actionDescriptor);
                     }
                     catch (ODataException e)
                     {
@@ -425,7 +434,6 @@ namespace System.Web.Http
             {
                 throw Error.ArgumentNull("queryable");
             }
-
             if (queryOptions == null)
             {
                 throw Error.ArgumentNull("queryOptions");
@@ -434,56 +442,30 @@ namespace System.Web.Http
             return queryOptions.ApplyTo(queryable, _querySettings);
         }
 
-        private static void ValidateReturnType(Type responseContentType, HttpActionDescriptor actionDescriptor)
+        /// <summary>
+        /// Applies the query to the given entity based on incoming query from uri and query settings.
+        /// </summary>
+        /// <param name="entity">The original entity from the response message.</param>
+        /// <param name="queryOptions">The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.</param>
+        /// <returns>The new entity after the $select and $expand query has been applied to.</returns>
+        public virtual object ApplyQuery(object entity, ODataQueryOptions queryOptions)
         {
-            if (!IsSupportedReturnType(responseContentType))
+            if (entity == null)
             {
-                throw Error.InvalidOperation(
-                    SRResources.InvalidReturnTypeForQuerying,
-                    actionDescriptor.ActionName,
-                    actionDescriptor.ControllerDescriptor.ControllerName,
-                    responseContentType.FullName);
+                throw Error.ArgumentNull("entity");
             }
-        }
-
-        internal static bool IsSupportedReturnType(Type objectType)
-        {
-            Contract.Assert(objectType != null);
-
-            if (objectType == typeof(IEnumerable) || objectType == typeof(IQueryable))
+            if (queryOptions == null)
             {
-                return true;
+                throw Error.ArgumentNull("queryOptions");
             }
 
-            if (objectType.IsGenericType)
-            {
-                Type genericTypeDefinition = objectType.GetGenericTypeDefinition();
-                if (genericTypeDefinition == typeof(IEnumerable<>) || genericTypeDefinition == typeof(IQueryable<>))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return queryOptions.ApplyTo(entity, _querySettings);
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed after being sent.")]
-        private IQueryable ExecuteQuery(IEnumerable query, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
+        private object ExecuteQuery(object response, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
         {
-            Type originalQueryType = query.GetType();
-            Type elementClrType = TypeHelper.GetImplementedIEnumerableType(originalQueryType);
-
-            if (elementClrType == null)
-            {
-                // The element type cannot be determined because the type of the content
-                // is not IEnumerable<T> or IQueryable<T>.
-                throw Error.InvalidOperation(
-                    SRResources.FailedToRetrieveTypeToBuildEdmModel,
-                    this.GetType().Name,
-                    actionDescriptor.ActionName,
-                    actionDescriptor.ControllerDescriptor.ControllerName,
-                    originalQueryType.FullName);
-            }
+            Type elementClrType = GetElementType(response, actionDescriptor);
 
             IEdmModel model = GetModel(elementClrType, request, actionDescriptor);
             if (model == null)
@@ -496,13 +478,32 @@ namespace System.Web.Http
             ValidateQuery(request, queryOptions);
 
             // apply the query
-            IQueryable queryable = query as IQueryable;
-            if (queryable == null)
+            IEnumerable enumerable = response as IEnumerable;
+            if (enumerable == null)
             {
-                queryable = query.AsQueryable();
-            }
+                // response is not a collection; we only support $select and $expand on single entities.
+                ValidateSelectExpandOnly(queryOptions);
 
-            return ApplyQuery(queryable, queryOptions);
+                SingleResult singleResult = response as SingleResult;
+                if (singleResult == null)
+                {
+                    // response is a single entity.
+                    return ApplyQuery(entity: response, queryOptions: queryOptions);
+                }
+                else
+                {
+                    // response is a composable SingleResult. ApplyQuery and call SingleOrDefault.
+                    IQueryable queryable = singleResult.Queryable;
+                    queryable = ApplyQuery(queryable, queryOptions);
+                    return SingleOrDefault(queryable, actionDescriptor);
+                }
+            }
+            else
+            {
+                // response is a collection.
+                IQueryable queryable = (enumerable as IQueryable) ?? enumerable.AsQueryable();
+                return ApplyQuery(queryable, queryOptions);
+            }
         }
 
         /// <summary>
@@ -529,6 +530,64 @@ namespace System.Web.Http
 
             Contract.Assert(model != null);
             return model;
+        }
+
+        internal static Type GetElementType(object response, HttpActionDescriptor actionDescriptor)
+        {
+            Contract.Assert(response != null);
+
+            IEnumerable enumerable = response as IEnumerable;
+            if (enumerable == null)
+            {
+                SingleResult singleResult = response as SingleResult;
+                if (singleResult == null)
+                {
+                    return response.GetType();
+                }
+
+                enumerable = singleResult.Queryable;
+            }
+
+            Type elementClrType = TypeHelper.GetImplementedIEnumerableType(enumerable.GetType());
+            if (elementClrType == null)
+            {
+                // The element type cannot be determined because the type of the content
+                // is not IEnumerable<T> or IQueryable<T>.
+                throw Error.InvalidOperation(
+                    SRResources.FailedToRetrieveTypeToBuildEdmModel,
+                    typeof(QueryableAttribute).Name,
+                    actionDescriptor.ActionName,
+                    actionDescriptor.ControllerDescriptor.ControllerName,
+                    response.GetType().FullName);
+            }
+
+            return elementClrType;
+        }
+
+        internal static object SingleOrDefault(IQueryable queryable, HttpActionDescriptor actionDescriptor)
+        {
+            IEnumerator enumerator = queryable.GetEnumerator();
+            object result = enumerator.MoveNext() ? enumerator.Current : null;
+
+            if (enumerator.MoveNext())
+            {
+                throw new InvalidOperationException(Error.Format(
+                    SRResources.SingleResultHasMoreThanOneEntity,
+                    actionDescriptor.ActionName,
+                    actionDescriptor.ControllerDescriptor.ControllerName,
+                    typeof(SingleResult).Name));
+            }
+
+            return result;
+        }
+
+        internal static void ValidateSelectExpandOnly(ODataQueryOptions queryOptions)
+        {
+            if (queryOptions.Filter != null || queryOptions.InlineCount != null || queryOptions.OrderBy != null || queryOptions.Skip != null
+                || queryOptions.Top != null)
+            {
+                throw new ODataException(Error.Format(SRResources.NonSelectExpandOnSingleEntity));
+            }
         }
     }
 }

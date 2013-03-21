@@ -11,6 +11,9 @@ namespace System.Web.Http.OData.Query
     {
         private const int MinMaxSkip = 0;
         private const int MinMaxTop = 0;
+        private const int MinMaxExpansionDepth = 0;
+        private const int MinMaxNodeCount = 1;
+        private const int MinMaxAnyAllExpressionDepth = 1;
 
         private AllowedArithmeticOperators _allowedArithmeticOperators = AllowedArithmeticOperators.All;
         private AllowedFunctions _allowedFunctions = AllowedFunctions.AllFunctions;
@@ -21,6 +24,7 @@ namespace System.Web.Http.OData.Query
         private int? _maxTop;
         private int _maxAnyAllExpressionDepth = 1;
         private int _maxNodeCount = 100;
+        private int _maxExpansionDepth = 2;
 
         /// <summary>
         /// Gets or sets a list of allowed arithmetic operators including 'add', 'sub', 'mul', 'div', 'mod'.
@@ -152,9 +156,9 @@ namespace System.Web.Http.OData.Query
             }
             set
             {
-                if (value <= 0)
+                if (value < MinMaxAnyAllExpressionDepth)
                 {
-                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinMaxAnyAllExpressionDepth);
                 }
 
                 _maxAnyAllExpressionDepth = value;
@@ -175,9 +179,9 @@ namespace System.Web.Http.OData.Query
             }
             set
             {
-                if (value <= 0)
+                if (value < MinMaxNodeCount)
                 {
-                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinMaxNodeCount);
                 }
 
                 _maxNodeCount = value;
@@ -221,6 +225,23 @@ namespace System.Web.Http.OData.Query
                 }
 
                 _maxTop = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the max expansion depth for the $expand query option.
+        /// </summary>
+        /// <remarks>To disable the maximum expansion depth check, set this property to 0.</remarks>
+        public int MaxExpansionDepth
+        {
+            get { return _maxExpansionDepth; }
+            set
+            {
+                if (value < MinMaxExpansionDepth)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinMaxExpansionDepth);
+                }
+                _maxExpansionDepth = value;
             }
         }
     }

@@ -9,7 +9,6 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Routing;
-using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -311,9 +310,9 @@ namespace System.Web.Http.OData.Formatter
                 .Property(c => c.SeatingCapacity);
 
             builder.EntitySet<Vehicle>("vehicles").HasIdLink(
-                (v) => "http://localhost/vehicles/" + v.EntityInstance.Name, followsConventions: false);
+                (v) => "http://localhost/vehicles/" + v.GetPropertyValue("Name"), followsConventions: false);
             builder.EntitySet<Motorcycle>("motorcycles").HasIdLink(
-                (m) => "http://localhost/motorcycles/" + m.EntityInstance.Name, followsConventions: false);
+                (m) => "http://localhost/motorcycles/" + m.GetPropertyValue("Name"), followsConventions: false);
             builder.EntitySet<Car>("cars");
 
             builder

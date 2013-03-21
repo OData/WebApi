@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
@@ -18,13 +17,9 @@ namespace System.Web.Http.OData.Query
     /// </summary>
     public class FilterQueryOption
     {
-        private const string EntityFrameworkQueryProviderNamespace = "System.Data.Entity.Internal.Linq";
-        private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
-        private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
-
         private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
         private FilterClause _filterClause;
-    
+
         /// <summary>
         /// Initialize a new instance of <see cref="FilterQueryOption"/> based on the raw $filter value and 
         /// an EdmModel from <see cref="ODataQueryContext"/>.
@@ -57,7 +52,7 @@ namespace System.Web.Http.OData.Query
         /// Gets or sets the Filter Query Validator
         /// </summary>
         public FilterQueryValidator Validator { get; set; }
-       
+
         /// <summary>
         /// Gets the parsed <see cref="FilterClause"/> for this query option.
         /// </summary>
@@ -130,7 +125,7 @@ namespace System.Web.Http.OData.Query
             if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
             {
                 updatedSettings = new ODataQuerySettings(updatedSettings);
-                updatedSettings.HandleNullPropagation = GetDefaultHandleNullPropagationOption(query);
+                updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
             }
 
             Expression filter = FilterBinder.Bind(filterClause, Context.ElementClrType, Context.Model, assembliesResolver, updatedSettings);
@@ -153,29 +148,6 @@ namespace System.Web.Http.OData.Query
             {
                 Validator.Validate(this, validationSettings);
             }
-        }
-
-        private static HandleNullPropagationOption GetDefaultHandleNullPropagationOption(IQueryable query)
-        {
-            Contract.Assert(query != null);
-
-            HandleNullPropagationOption options;
-
-            string queryProviderNamespace = query.Provider.GetType().Namespace;
-            switch (queryProviderNamespace)
-            {
-                case EntityFrameworkQueryProviderNamespace:
-                case Linq2SqlQueryProviderNamespace:
-                    options = HandleNullPropagationOption.False;
-                    break;
-
-                case Linq2ObjectsQueryProviderNamespace:
-                default:
-                    options = HandleNullPropagationOption.True;
-                    break;
-            }
-
-            return options;
         }
     }
 }

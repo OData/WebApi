@@ -95,6 +95,30 @@ namespace System.Web.Http.OData
             return whereMethod.Invoke(null, new object[] { query, where }) as IQueryable;
         }
 
+        // If the expression is not a nullable type, cast it to one.
+        public static Expression ToNullable(Expression expression)
+        {
+            if (!expression.Type.IsNullable())
+            {
+                return Expression.Convert(expression, expression.Type.ToNullable());
+            }
+
+            return expression;
+        }
+
+        // Entity Framework does not understand default(T) expression. Hence, generate a constant expression with the default value.
+        public static Expression Default(Type type)
+        {
+            if (type.IsValueType)
+            {
+                return Expression.Constant(Activator.CreateInstance(type), type);
+            }
+            else
+            {
+                return Expression.Constant(null, type);
+            }
+        }
+
         private static LambdaExpression GetPropertyAccessLambda(Type type, string propertyName)
         {
             ParameterExpression odataItParameter = Expression.Parameter(type, "$it");

@@ -3,13 +3,13 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
+using Microsoft.Data.OData.Query.SemanticAst;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -85,42 +85,72 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             Contract.Assert(writeContext != null);
 
-            IEdmEntityType entityType = EntityType.EntityDefinition();
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph);
-
-            ODataEntry entry = CreateEntry(entityInstanceContext, writeContext);
-            if (entry != null)
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, EntityType, graph);
+            SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityInstanceContext);
+            if (selectExpandNode != null)
             {
-                writer.WriteStart(entry);
-                WriteNavigationLinks(entityInstanceContext, writer, writeContext);
-                writer.WriteEnd();
+                ODataEntry entry = CreateEntry(selectExpandNode, entityInstanceContext);
+                if (entry != null)
+                {
+                    writer.WriteStart(entry);
+                    WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, entityInstanceContext, writer);
+                    WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties, entityInstanceContext, writer);
+                    writer.WriteEnd();
+                }
             }
+        }
+
+        /// <summary>
+        /// Creates the <see cref="SelectExpandNode"/> that describes the set of properties and actions to select and expand while writing this entity.
+        /// </summary>
+        /// <param name="entityInstanceContext">Contains the entity instance being written and the context.</param>
+        /// <returns>
+        /// The <see cref="SelectExpandNode"/> that describes the set of properties and actions to select and expand while writing this entity.
+        /// </returns>
+        public virtual SelectExpandNode CreateSelectExpandNode(EntityInstanceContext entityInstanceContext)
+        {
+            if (entityInstanceContext == null)
+            {
+                throw Error.ArgumentNull("entityInstanceContext");
+            }
+
+            ODataSerializerContext writeContext = entityInstanceContext.SerializerContext;
+            return SelectExpandNode.BuildSelectExpandNode(writeContext.SelectExpandClause, EntityType, writeContext.Model);
         }
 
         /// <summary>
         /// Creates the <see cref="ODataEntry"/> to be written while writing this entity.
         /// </summary>
+        /// <param name="selectExpandNode">The <see cref="SelectExpandNode"/> describing the response graph.</param>
         /// <param name="entityInstanceContext">The context for the entity instance being written.</param>
-        /// <param name="writeContext">The serializer write context.</param>
         /// <returns>The created <see cref="ODataEntry"/>.</returns>
-        public virtual ODataEntry CreateEntry(EntityInstanceContext entityInstanceContext, ODataSerializerContext writeContext)
+        public virtual ODataEntry CreateEntry(SelectExpandNode selectExpandNode, EntityInstanceContext entityInstanceContext)
         {
+            if (selectExpandNode == null)
+            {
+                throw Error.ArgumentNull("selectExpandNode");
+            }
+            if (entityInstanceContext == null)
+            {
+                throw Error.ArgumentNull("entityInstanceContext");
+            }
+
             string typeName = EntityType.FullName();
 
             ODataEntry entry = new ODataEntry
             {
                 TypeName = typeName,
-                Properties = CreateStructuralPropertyBag(entityInstanceContext, writeContext),
-                Actions = CreateODataActions(entityInstanceContext, writeContext)
+                Properties = CreateStructuralPropertyBag(selectExpandNode.SelectedStructuralProperties, entityInstanceContext),
+                Actions = CreateODataActions(selectExpandNode.SelectedActions, entityInstanceContext)
             };
 
-            AddTypeNameAnnotationAsNeeded(entry, writeContext.EntitySet, writeContext.MetadataLevel);
+            AddTypeNameAnnotationAsNeeded(entry, entityInstanceContext.EntitySet, entityInstanceContext.SerializerContext.MetadataLevel);
 
-            if (writeContext.EntitySet != null)
+            if (entityInstanceContext.EntitySet != null)
             {
-                IEdmModel model = writeContext.Model;
-                EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
-                EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityInstanceContext, writeContext.MetadataLevel);
+                IEdmModel model = entityInstanceContext.SerializerContext.Model;
+                EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(entityInstanceContext.EntitySet);
+                EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityInstanceContext, entityInstanceContext.SerializerContext.MetadataLevel);
 
                 if (selfLinks.IdLink != null)
                 {
@@ -141,79 +171,155 @@ namespace System.Web.Http.OData.Formatter.Serialization
             return entry;
         }
 
-        private void WriteNavigationLinks(EntityInstanceContext entityInstanceContext, ODataWriter writer, ODataSerializerContext writeContext)
+        private void WriteNavigationLinks(
+            IEnumerable<IEdmNavigationProperty> navigationProperties, EntityInstanceContext entityInstanceContext, ODataWriter writer)
         {
-            Contract.Assert(writeContext != null);
+            Contract.Assert(entityInstanceContext != null);
 
-            IEnumerable<ODataNavigationLink> navigationLinks = CreateNavigationLinks(entityInstanceContext, writeContext);
-            if (navigationLinks != null)
+            IEnumerable<ODataNavigationLink> navigationLinks = CreateNavigationLinks(navigationProperties, entityInstanceContext);
+            foreach (ODataNavigationLink navigationLink in navigationLinks)
             {
-                foreach (ODataNavigationLink navigationLink in navigationLinks)
+                writer.WriteStart(navigationLink);
+                writer.WriteEnd();
+            }
+        }
+
+        private void WriteExpandedNavigationProperties(
+            IDictionary<IEdmNavigationProperty, SelectExpandClause> navigationPropertiesToExpand,
+            EntityInstanceContext entityInstanceContext,
+            ODataWriter writer)
+        {
+            Contract.Assert(navigationPropertiesToExpand != null);
+            Contract.Assert(entityInstanceContext != null);
+            Contract.Assert(writer != null);
+
+            foreach (KeyValuePair<IEdmNavigationProperty, SelectExpandClause> navigationPropertyToExpand in navigationPropertiesToExpand)
+            {
+                IEdmNavigationProperty navigationProperty = navigationPropertyToExpand.Key;
+
+                ODataNavigationLink navigationLink = CreateNavigationLink(navigationProperty, entityInstanceContext);
+                if (navigationLink != null)
                 {
                     writer.WriteStart(navigationLink);
+                    WriteExpandedNavigationProperty(navigationPropertyToExpand, entityInstanceContext, writer);
                     writer.WriteEnd();
                 }
             }
         }
 
-        /// <summary>
-        /// Creates the collection of <see cref="ODataNavigationLink"/>s to be written while writing this entity.
-        /// </summary>
-        /// <param name="entityInstanceContext">The context for the entity instance being written.</param>
-        /// <param name="writeContext">The serializer write context.</param>
-        /// <returns>The collection of navigation links to be written.</returns>
-        public virtual IEnumerable<ODataNavigationLink> CreateNavigationLinks(EntityInstanceContext entityInstanceContext, ODataSerializerContext writeContext)
+        private void WriteExpandedNavigationProperty(
+            KeyValuePair<IEdmNavigationProperty, SelectExpandClause> navigationPropertyToExpand,
+            EntityInstanceContext entityInstanceContext,
+            ODataWriter writer)
         {
-            if (writeContext == null)
-            {
-                throw Error.ArgumentNull("writeContext");
-            }
+            Contract.Assert(entityInstanceContext != null);
+            Contract.Assert(writer != null);
 
-            foreach (IEdmNavigationProperty navProperty in EntityType.NavigationProperties())
-            {
-                IEdmTypeReference propertyType = navProperty.Type;
+            ODataSerializerContext writeContext = entityInstanceContext.SerializerContext;
 
-                if (writeContext.EntitySet != null)
+            IEdmNavigationProperty navigationProperty = navigationPropertyToExpand.Key;
+            SelectExpandClause selectExpandClause = navigationPropertyToExpand.Value;
+
+            object propertyValue = entityInstanceContext.GetPropertyValue(navigationProperty.Name);
+            if (propertyValue != null)
+            {
+                // backup current context.
+                SelectExpandClause currentSelectExpandClause = writeContext.SelectExpandClause;
+                IEdmEntitySet currentEntitySet = writeContext.EntitySet;
+
+                // update the context with child context.
+                writeContext.SelectExpandClause = selectExpandClause;
+                writeContext.EntitySet = currentEntitySet.FindNavigationTarget(navigationProperty);
+
+                // write object.
+                Type propertyType = propertyValue.GetType();
+                ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(writeContext.Model, propertyValue);
+                if (serializer == null)
                 {
-                    IEdmModel model = writeContext.Model;
-                    EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
-                    Uri navigationUrl = linkBuilder.BuildNavigationLink(entityInstanceContext, navProperty, writeContext.MetadataLevel);
+                    throw new SerializationException(
+                        Error.Format(SRResources.TypeCannotBeSerialized, propertyType.FullName, typeof(ODataMediaTypeFormatter).Name));
+                }
 
-                    ODataNavigationLink navigationLink = new ODataNavigationLink
-                    {
-                        IsCollection = propertyType.IsCollection(),
-                        Name = navProperty.Name,
-                    };
+                serializer.WriteObjectInline(propertyValue, writer, writeContext);
 
-                    if (navigationUrl != null)
-                    {
-                        navigationLink.Url = navigationUrl;
-                    }
+                // revert back context.
+                writeContext.SelectExpandClause = currentSelectExpandClause;
+                writeContext.EntitySet = currentEntitySet;
+            }
+        }
 
+        private IEnumerable<ODataNavigationLink> CreateNavigationLinks(
+            IEnumerable<IEdmNavigationProperty> navigationProperties, EntityInstanceContext entityInstanceContext)
+        {
+            Contract.Assert(navigationProperties != null);
+            Contract.Assert(entityInstanceContext != null);
+
+            foreach (IEdmNavigationProperty navProperty in navigationProperties)
+            {
+                ODataNavigationLink navigationLink = CreateNavigationLink(navProperty, entityInstanceContext);
+                if (navigationLink != null)
+                {
                     yield return navigationLink;
                 }
             }
         }
 
         /// <summary>
-        /// Creates the collection of <see cref="ODataProperty" />s to be written while writing this entity.
+        /// Creates the <see cref="ODataNavigationLink"/> to be written while writing this entity.
         /// </summary>
+        /// <param name="navigationProperty">The navigation property for which the navigation link is being created.</param>
         /// <param name="entityInstanceContext">The context for the entity instance being written.</param>
-        /// <param name="writeContext">The serializer write context.</param>
-        /// <returns>The collection of properties to be written.</returns>
-        public virtual IEnumerable<ODataProperty> CreateStructuralPropertyBag(EntityInstanceContext entityInstanceContext, ODataSerializerContext writeContext)
+        /// <returns>The navigation link to be written.</returns>
+        public virtual ODataNavigationLink CreateNavigationLink(IEdmNavigationProperty navigationProperty, EntityInstanceContext entityInstanceContext)
         {
+            if (navigationProperty == null)
+            {
+                throw Error.ArgumentNull("navigationProperty");
+            }
             if (entityInstanceContext == null)
             {
                 throw Error.ArgumentNull("entityInstanceContext");
             }
 
-            IEnumerable<IEdmStructuralProperty> edmProperties = EntityType.StructuralProperties();
+            ODataSerializerContext writeContext = entityInstanceContext.SerializerContext;
+            ODataNavigationLink navigationLink = null;
+
+            if (writeContext.EntitySet != null)
+            {
+                IEdmTypeReference propertyType = navigationProperty.Type;
+                IEdmModel model = writeContext.Model;
+                EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                Uri navigationUrl = linkBuilder.BuildNavigationLink(entityInstanceContext, navigationProperty, writeContext.MetadataLevel);
+
+                navigationLink = new ODataNavigationLink
+                {
+                    IsCollection = propertyType.IsCollection(),
+                    Name = navigationProperty.Name,
+                };
+
+                if (navigationUrl != null)
+                {
+                    navigationLink.Url = navigationUrl;
+                }
+            }
+
+            return navigationLink;
+        }
+
+        private IEnumerable<ODataProperty> CreateStructuralPropertyBag(
+            IEnumerable<IEdmStructuralProperty> structuralProperties, EntityInstanceContext entityInstanceContext)
+        {
+            Contract.Assert(structuralProperties != null);
+            Contract.Assert(entityInstanceContext != null);
 
             List<ODataProperty> properties = new List<ODataProperty>();
-            foreach (IEdmStructuralProperty property in edmProperties)
+            foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
             {
-                properties.Add(CreateStructuralProperty(property, entityInstanceContext.EntityInstance, writeContext));
+                ODataProperty property = CreateStructuralProperty(structuralProperty, entityInstanceContext);
+                if (property != null)
+                {
+                    properties.Add(property);
+                }
             }
 
             return properties;
@@ -223,20 +329,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Creates the <see cref="ODataProperty"/> to be written for the given entity and the structural property.
         /// </summary>
         /// <param name="structuralProperty">The EDM structural property being written.</param>
-        /// <param name="entityInstance">The entity being written.</param>
-        /// <param name="writeContext">The serializer context.</param>
+        /// <param name="entityInstanceContext">The context for the entity instance being written.</param>
         /// <returns>The <see cref="ODataProperty"/> to write.</returns>
-        public virtual ODataProperty CreateStructuralProperty(IEdmStructuralProperty structuralProperty, object entityInstance, ODataSerializerContext writeContext)
+        public virtual ODataProperty CreateStructuralProperty(IEdmStructuralProperty structuralProperty, EntityInstanceContext entityInstanceContext)
         {
             if (structuralProperty == null)
             {
                 throw Error.ArgumentNull("structuralProperty");
             }
-
-            if (entityInstance == null)
+            if (entityInstanceContext == null)
             {
-                throw Error.ArgumentNull("entityInstance");
+                throw Error.ArgumentNull("entityInstanceContext");
             }
+
+            ODataSerializerContext writeContext = entityInstanceContext.SerializerContext;
 
             ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(structuralProperty.Type);
             if (serializer == null)
@@ -245,31 +351,24 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     Error.Format(SRResources.TypeCannotBeSerialized, structuralProperty.Type.FullName(), typeof(ODataMediaTypeFormatter).Name));
             }
 
-            object propertyValue = entityInstance.GetType().GetProperty(structuralProperty.Name).GetValue(entityInstance, index: null);
+            object propertyValue = entityInstanceContext.GetPropertyValue(structuralProperty.Name);
             return serializer.CreateProperty(propertyValue, structuralProperty.Name, writeContext);
         }
 
-        /// <summary>
-        /// Creates the collection of <see cref="ODataAction"/>s to be written while writing this entity.
-        /// </summary>
-        /// <param name="entityInstanceContext">The context for the entity instance being written. </param>
-        /// <param name="writeContext">The serializer write context.</param>
-        /// <returns>The collection of actions to be written.</returns>
-        public virtual IEnumerable<ODataAction> CreateODataActions(EntityInstanceContext entityInstanceContext, ODataSerializerContext writeContext)
+        private IEnumerable<ODataAction> CreateODataActions(
+            IEnumerable<IEdmFunctionImport> actions, EntityInstanceContext entityInstanceContext)
         {
-            if (entityInstanceContext == null)
-            {
-                throw Error.ArgumentNull("entityInstanceContext");
-            }
+            Contract.Assert(actions != null);
+            Contract.Assert(entityInstanceContext != null);
 
-            if (writeContext == null)
+            foreach (IEdmFunctionImport action in actions)
             {
-                throw Error.ArgumentNull("writeContext");
+                ODataAction oDataAction = CreateODataAction(action, entityInstanceContext);
+                if (oDataAction != null)
+                {
+                    yield return oDataAction;
+                }
             }
-
-            return entityInstanceContext.EdmModel.GetAvailableProcedures(entityInstanceContext.EntityType)
-                .Select(action => CreateODataAction(action, entityInstanceContext, writeContext.MetadataLevel))
-                .Where(action => action != null);
         }
 
         /// <summary>
@@ -277,10 +376,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// </summary>
         /// <param name="action">The OData action.</param>
         /// <param name="entityInstanceContext">The context for the entity instance being written.</param>
-        /// <param name="metadataLevel">The <see cref="ODataMetadataLevel"/> of the response.</param>
         /// <returns>The created action or null if the action should not be written.</returns>
         [SuppressMessage("Microsoft.Usage", "CA2234: Pass System.Uri objects instead of strings", Justification = "This overload is equally good")]
-        public virtual ODataAction CreateODataAction(IEdmFunctionImport action, EntityInstanceContext entityInstanceContext, ODataMetadataLevel metadataLevel)
+        public virtual ODataAction CreateODataAction(IEdmFunctionImport action, EntityInstanceContext entityInstanceContext)
         {
             if (action == null)
             {
@@ -292,6 +390,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("entityInstanceContext");
             }
 
+            ODataMetadataLevel metadataLevel = entityInstanceContext.SerializerContext.MetadataLevel;
             IEdmModel model = entityInstanceContext.EdmModel;
 
             ActionLinkBuilder builder = model.GetActionLinkBuilder(action);

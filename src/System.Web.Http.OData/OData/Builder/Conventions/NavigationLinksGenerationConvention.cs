@@ -24,7 +24,9 @@ namespace System.Web.Http.OData.Builder.Conventions
                     {
                         configuration.HasNavigationPropertyLink(
                                 property,
-                                new NavigationLinkBuilder((entityContext, navigationProperty) => GenerateNavigationPropertyLink(entityContext, navigationProperty, configuration, includeCast: false), followsConventions: true));
+                                new NavigationLinkBuilder(
+                                    (entityContext, navigationProperty) =>
+                                        GenerateNavigationPropertyLink(entityContext, navigationProperty, includeCast: false), followsConventions: true));
                     }
                 }
             }
@@ -38,17 +40,19 @@ namespace System.Web.Http.OData.Builder.Conventions
                     {
                         configuration.HasNavigationPropertyLink(
                                 property,
-                                new NavigationLinkBuilder((entityContext, navigationProperty) => GenerateNavigationPropertyLink(entityContext, navigationProperty, configuration, includeCast: true), followsConventions: true));
+                                new NavigationLinkBuilder(
+                                    (entityContext, navigationProperty) =>
+                                        GenerateNavigationPropertyLink(entityContext, navigationProperty, includeCast: true), followsConventions: true));
                     }
                 }
             }
         }
 
-        internal static Uri GenerateNavigationPropertyLink(EntityInstanceContext entityContext, IEdmNavigationProperty navigationProperty, EntitySetConfiguration configuration, bool includeCast)
+        internal static Uri GenerateNavigationPropertyLink(EntityInstanceContext entityContext, IEdmNavigationProperty navigationProperty, bool includeCast)
         {
             List<ODataPathSegment> navigationPathSegments = new List<ODataPathSegment>();
             navigationPathSegments.Add(new EntitySetPathSegment(entityContext.EntitySet));
-            navigationPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType)));
+            navigationPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext)));
 
             if (includeCast)
             {

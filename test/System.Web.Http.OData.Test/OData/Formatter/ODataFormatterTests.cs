@@ -464,14 +464,14 @@ namespace System.Web.Http.OData.Formatter
             EntitySetConfiguration<MainEntity> mainSet = builder.EntitySet<MainEntity>("MainEntity");
 
             Func<EntityInstanceContext<MainEntity>, string> idLinkFactory = (e) =>
-                CreateAbsoluteLink("/MainEntity/id/" + e.EntityInstance.Id.ToString());
+                CreateAbsoluteLink("/MainEntity/id/" + e.GetPropertyValue("Id").ToString());
             mainSet.HasIdLink(idLinkFactory, followsConventions: true);
 
             Func<EntityInstanceContext<MainEntity>, string> editLinkFactory;
 
             if (!sameLinksForIdAndEdit)
             {
-                editLinkFactory = (e) => CreateAbsoluteLink("/MainEntity/edit/" + e.EntityInstance.Id.ToString());
+                editLinkFactory = (e) => CreateAbsoluteLink("/MainEntity/edit/" + e.GetPropertyValue("Id").ToString());
                 mainSet.HasEditLink(editLinkFactory, followsConventions: false);
             }
 
@@ -479,7 +479,7 @@ namespace System.Web.Http.OData.Formatter
 
             if (!sameLinksForEditAndRead)
             {
-                readLinkFactory = (e) => CreateAbsoluteLink("/MainEntity/read/" + e.EntityInstance.Id.ToString());
+                readLinkFactory = (e) => CreateAbsoluteLink("/MainEntity/read/" + e.GetPropertyValue("Id").ToString());
                 mainSet.HasReadLink(readLinkFactory, followsConventions: false);
             }
 
@@ -490,15 +490,15 @@ namespace System.Web.Http.OData.Formatter
             NavigationPropertyConfiguration mainToRelated = mainSet.EntityType.HasRequired((e) => e.Related);
 
             main.Action("DoAlways").ReturnsCollectionFromEntitySet<MainEntity>("MainEntity").HasActionLink((c) =>
-                CreateAbsoluteUri("/MainEntity/DoAlways/" + ((MainEntity)(c.EntityInstance)).Id),
+                CreateAbsoluteUri("/MainEntity/DoAlways/" + c.GetPropertyValue("Id")),
                 followsConventions: true);
             main.TransientAction("DoSometimes").ReturnsCollectionFromEntitySet<MainEntity>(
                 "MainEntity").HasActionLink((c) =>
-                    CreateAbsoluteUri("/MainEntity/DoSometimes/" + ((MainEntity)(c.EntityInstance)).Id),
+                    CreateAbsoluteUri("/MainEntity/DoSometimes/" + c.GetPropertyValue("Id")),
                     followsConventions: false);
 
             mainSet.HasNavigationPropertyLink(mainToRelated, (c, p) => new Uri("/MainEntity/RelatedEntity/" +
-                c.EntityInstance.Id, UriKind.Relative), followsConventions: true);
+                c.GetPropertyValue("Id"), UriKind.Relative), followsConventions: true);
 
             EntitySetConfiguration<RelatedEntity> related = builder.EntitySet<RelatedEntity>("RelatedEntity");
 

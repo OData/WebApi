@@ -1,9 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Net.Http;
 using System.Web.Http.OData.Formatter;
-using System.Web.Http.Routing;
+using System.Web.Http.OData.Formatter.Serialization;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
@@ -22,7 +21,7 @@ namespace System.Web.Http.OData.Builder
             products.HasIdLink(c =>
                 string.Format(
                     "http://server/service/Products({0})",
-                    c.EntityInstance.ID
+                    c.GetPropertyValue("ID")
                 ),
                 followsConventions: false);
 
@@ -31,7 +30,8 @@ namespace System.Web.Http.OData.Builder
             var productType = model.SchemaElements.OfType<IEdmEntityType>().Single();
             var productsSet = model.SchemaElements.OfType<IEdmEntityContainer>().Single().EntitySets().Single();
             var productInstance = new EntitySetLinkConfigurationTest_Product { ID = 15 };
-            var entityContext = new EntityInstanceContext { EdmModel = model, EntitySet = productsSet, EntityType = productType, EntityInstance = productInstance };
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = productsSet };
+            var entityContext = new EntityInstanceContext(serializerContext, productType.AsReference(), productInstance);
             var entitySetLinkBuilderAnnotation = new EntitySetLinkBuilderAnnotation(actor);
 
             // Act
@@ -59,21 +59,21 @@ namespace System.Web.Http.OData.Builder
             products.HasEditLink(c => new Uri(
                 string.Format(
                     "http://server1/service/Products({0})",
-                    c.EntityInstance.ID
+                    c.GetPropertyValue("ID")
                 )
             ),
             followsConventions: false);
             products.HasReadLink(c => new Uri(
                 string.Format(
                     "http://server2/service/Products/15",
-                    c.EntityInstance.ID
+                    c.GetPropertyValue("ID")
                 )
             ),
             followsConventions: false);
             products.HasIdLink(c =>
                 string.Format(
                     "http://server3/service/Products({0})",
-                    c.EntityInstance.ID
+                    c.GetPropertyValue("ID")
                 ),
             followsConventions: false
             );
@@ -83,7 +83,8 @@ namespace System.Web.Http.OData.Builder
             var productType = model.SchemaElements.OfType<IEdmEntityType>().Single();
             var productsSet = model.SchemaElements.OfType<IEdmEntityContainer>().Single().EntitySets().Single();
             var productInstance = new EntitySetLinkConfigurationTest_Product { ID = 15 };
-            var entityContext = new EntityInstanceContext { EdmModel = model, EntitySet = productsSet, EntityType = productType, EntityInstance = productInstance };
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = productsSet };
+            var entityContext = new EntityInstanceContext(serializerContext, productType.AsReference(), productInstance);
 
             // Act
             var editLink = actor.GetEditLink().Factory(entityContext);

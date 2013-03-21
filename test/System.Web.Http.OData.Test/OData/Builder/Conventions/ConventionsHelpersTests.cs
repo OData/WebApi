@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Reflection;
+using System.Web.Http.OData.Formatter.Serialization;
+using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
@@ -10,6 +12,8 @@ namespace System.Web.Http.OData.Builder.Conventions
 {
     public class ConventionsHelpersTests
     {
+        private ODataSerializerContext _writeContext = new ODataSerializerContext { Model = EdmCoreModel.Instance };
+
         public static TheoryDataSet<object, string> GetEntityKeyValue_SingleKey_DifferentDataTypes_Data
         {
             get
@@ -157,17 +161,14 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_SingleKey()
         {
             // Arrange
-            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
-            var entityInstance = new { Key = "key" };
-            PrimitivePropertyConfiguration[] keys = { new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key"), structuralType) };
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            entityType.AddKeys(entityType.AddStructuralProperty("Property", EdmPrimitiveTypeKind.String));
+            var entityInstance = new { Property = "key" };
 
-            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>();
-            entityType
-                .Setup(e => e.Keys)
-                .Returns(keys);
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, entityType.Object);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
 
             // Assert
             Assert.Equal("'key'", keyValue);
@@ -178,17 +179,14 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_SingleKey_DifferentDataTypes(object value, object expectedValue)
         {
             // Arrange
-            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
-            var entityInstance = new { Key = value };
-            PrimitivePropertyConfiguration[] keys = { new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key"), structuralType) };
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            entityType.AddKeys(entityType.AddStructuralProperty("Property", EdmPrimitiveTypeKind.String));
+            var entityInstance = new { Property = value };
 
-            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>();
-            entityType
-                .Setup(e => e.Keys)
-                .Returns(keys);
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, entityType.Object);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
 
             // Assert
             Assert.Equal(expectedValue, keyValue);
@@ -198,22 +196,16 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_MultipleKeys()
         {
             // Arrange
-            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
             var entityInstance = new { Key1 = "key1", Key2 = 2, Key3 = true };
-            PrimitivePropertyConfiguration[] keys = 
-            {
-                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key1"), structuralType),
-                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key2"), structuralType),
-                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key3"), structuralType),
-            };
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1", EdmPrimitiveTypeKind.String));
+            entityType.AddKeys(entityType.AddStructuralProperty("Key2", EdmPrimitiveTypeKind.Int32));
+            entityType.AddKeys(entityType.AddStructuralProperty("Key3", EdmPrimitiveTypeKind.Boolean));
 
-            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>();
-            entityType
-                .Setup(e => e.Keys)
-                .Returns(keys);
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, entityType.Object);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
 
             // Assert
             Assert.Equal("Key1='key1',Key2=2,Key3=true", keyValue);
@@ -223,41 +215,34 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_ThrowsForNullKeys()
         {
             // Arrange
-            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
             var entityInstance = new { Key = (string)null };
-            PrimitivePropertyConfiguration[] keys = { new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key"), structuralType) };
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            entityType.AddKeys(entityType.AddStructuralProperty("Key", EdmPrimitiveTypeKind.String));
 
-            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>();
-            entityType.Setup(e => e.Keys).Returns(keys);
-            entityType.Setup(e => e.FullName).Returns("FullName");
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, entityType.Object),
-                "Key property 'Key' of type 'FullName' is null. Key properties cannot have null values.");
+                () => ConventionsHelpers.GetEntityKeyValue(entityInstanceContext),
+                "Key property 'Key' of type 'NS.Name' is null. Key properties cannot have null values.");
         }
 
         [Fact]
         public void GetEntityKeyValue_ThrowsForNullKeys_WithMultipleKeys()
         {
             // Arrange
-            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
             var entityInstance = new { Key1 = "abc", Key2 = "def", Key3 = (string)null };
-            PrimitivePropertyConfiguration[] keys = 
-            {
-                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key1"), structuralType),
-                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key2"), structuralType),
-                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key3"), structuralType),
-            };
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1", EdmPrimitiveTypeKind.String));
+            entityType.AddKeys(entityType.AddStructuralProperty("Key2", EdmPrimitiveTypeKind.Int32));
+            entityType.AddKeys(entityType.AddStructuralProperty("Key3", EdmPrimitiveTypeKind.Boolean));
 
-            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>();
-            entityType.Setup(e => e.Keys).Returns(keys);
-            entityType.Setup(e => e.FullName).Returns("EntityType");
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, entityType.Object),
-                "Key property 'Key3' of type 'EntityType' is null. Key properties cannot have null values.");
+                () => ConventionsHelpers.GetEntityKeyValue(entityInstanceContext),
+                "Key property 'Key3' of type 'NS.Name' is null. Key properties cannot have null values.");
         }
 
         [Fact]
@@ -265,16 +250,14 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             // Arrange
             var entityInstance = new { Key = "key" };
+            EdmEntityType baseEntityType = new EdmEntityType("NS", "Name");
+            baseEntityType.AddKeys(baseEntityType.AddStructuralProperty("Key", EdmPrimitiveTypeKind.String));
+            EdmEntityType derivedEntityType = new EdmEntityType("NS", "Derived", baseEntityType);
 
-            Mock<EntityTypeConfiguration> baseEntityType = new Mock<EntityTypeConfiguration>();
-            PrimitivePropertyConfiguration[] keys = { new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key"), baseEntityType.Object) };
-            baseEntityType.Setup(e => e.Keys).Returns(keys);
-
-            Mock<EntityTypeConfiguration> derivedEntityType = new Mock<EntityTypeConfiguration>();
-            derivedEntityType.Setup(e => e.BaseType).Returns(baseEntityType.Object);
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, derivedEntityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, derivedEntityType.Object);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
 
             // Assert
             Assert.Equal("'key'", keyValue);
@@ -284,23 +267,17 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_MultipleKeys_DerivedType()
         {
             // Arrange
-            Mock<EntityTypeConfiguration> baseEntityType = new Mock<EntityTypeConfiguration>();
-
             var entityInstance = new { Key1 = "key1", Key2 = 2, Key3 = true };
-            PrimitivePropertyConfiguration[] keys = 
-            {
-                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key1"), baseEntityType.Object),
-                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key2"), baseEntityType.Object),
-                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key3"), baseEntityType.Object),
-            };
+            EdmEntityType baseEntityType = new EdmEntityType("NS", "Name");
+            baseEntityType.AddKeys(baseEntityType.AddStructuralProperty("Key1", EdmPrimitiveTypeKind.String));
+            baseEntityType.AddKeys(baseEntityType.AddStructuralProperty("Key2", EdmPrimitiveTypeKind.Int32));
+            baseEntityType.AddKeys(baseEntityType.AddStructuralProperty("Key3", EdmPrimitiveTypeKind.Boolean));
+            EdmEntityType derivedEntityType = new EdmEntityType("NS", "Derived", baseEntityType);
 
-            baseEntityType.Setup(e => e.Keys).Returns(keys);
-
-            Mock<EntityTypeConfiguration> derivedEntityType = new Mock<EntityTypeConfiguration>();
-            derivedEntityType.Setup(e => e.BaseType).Returns(baseEntityType.Object);
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, derivedEntityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, derivedEntityType.Object);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
 
             // Assert
             Assert.Equal("Key1='key1',Key2=2,Key3=true", keyValue);

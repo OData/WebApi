@@ -15,6 +15,8 @@ namespace System.Web.Http.OData.Query
         [Theory]
         [InlineData("GetQueryable")]
         [InlineData("GetGenericQueryable")]
+        [InlineData("GetSingleResult")]
+        [InlineData("GetSingleResultOfT")]
         public void GetFilters_ReturnsQueryableFilter_ForQueryableActions(string actionName)
         {
             HttpConfiguration config = new HttpConfiguration();
@@ -117,6 +119,16 @@ namespace System.Web.Http.OData.Query
 
         [Queryable(PageSize = 100)]
         public IQueryable GetQueryableWithFilterAttribute()
+        {
+            return null;
+        }
+
+        public SingleResult GetSingleResult()
+        {
+            return null;
+        }
+
+        public SingleResult<int> GetSingleResultOfT()
         {
             return null;
         }

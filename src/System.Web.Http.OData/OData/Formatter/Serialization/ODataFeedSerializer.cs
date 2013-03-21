@@ -129,7 +129,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     throw new SerializationException(SRResources.NullElementInCollection);
                 }
 
-                ODataEdmTypeSerializer entrySerializer = SerializerProvider.GetODataPayloadSerializer(writeContext.Model, entry.GetType()) as ODataEdmTypeSerializer;
+                ODataEdmTypeSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(writeContext.Model, entry);
                 if (entrySerializer == null)
                 {
                     throw new SerializationException(

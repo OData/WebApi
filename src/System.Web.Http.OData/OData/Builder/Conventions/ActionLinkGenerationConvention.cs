@@ -32,7 +32,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             List<ODataPathSegment> actionPathSegments = new List<ODataPathSegment>();
             actionPathSegments.Add(new EntitySetPathSegment(entityContext.EntitySet));
-            actionPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext, actionEntityType)));
+            actionPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext)));
 
             // generate link with cast if the entityset type doesn't match the entity type the action is bound to.
             if (!entityContext.EntitySet.ElementType.IsOrInheritsFrom(entityContext.EdmModel.FindDeclaredType(actionEntityType.FullName)))

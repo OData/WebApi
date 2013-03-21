@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter.Serialization

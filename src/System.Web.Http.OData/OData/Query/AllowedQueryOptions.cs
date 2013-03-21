@@ -61,7 +61,7 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// A value that corresponds to the default query options supported by <see cref="QueryableAttribute"/>.
         /// </summary>
-        Supported = Filter | OrderBy | Top | Skip | InlineCount,
+        Supported = Filter | OrderBy | Top | Skip | InlineCount | Select | Expand,
 
         /// <summary>
         /// A value that corresponds to allowing all query options.

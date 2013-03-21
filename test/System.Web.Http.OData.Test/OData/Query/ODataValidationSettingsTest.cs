@@ -144,5 +144,19 @@ namespace System.Web.Http.OData.Query
                 illegalUpperValue: null,
                 roundTripTestValue: 2);
         }
+
+        [Fact]
+        public void MaxExpansionDepth_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty(
+             new ODataValidationSettings(),
+             o => o.MaxExpansionDepth,
+             expectedDefaultValue: 2,
+             minLegalValue: 0,
+             maxLegalValue: int.MaxValue,
+             illegalLowerValue: -1,
+             illegalUpperValue: null,
+             roundTripTestValue: 100);
+        }
     }
 }

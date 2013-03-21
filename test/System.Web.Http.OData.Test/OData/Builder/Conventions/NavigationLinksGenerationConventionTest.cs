@@ -2,11 +2,9 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.Routing;
+using System.Web.Http.OData.Formatter.Serialization;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -86,17 +84,10 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
-            Uri uri = linkBuilder.BuildNavigationLink(
-                new EntityInstanceContext()
-                {
-                    EdmModel = model,
-                    EntitySet = vehiclesEdmEntitySet,
-                    EntityType = carType,
-                    Url = request.GetUrlHelper(),
-                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
-                },
-                carManufacturerProperty,
-                ODataMetadataLevel.Default);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Accord" });
+
+            Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.Default);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car/Manufacturer", uri.AbsoluteUri);
         }
@@ -151,17 +142,10 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
-            Uri uri = linkBuilder.BuildNavigationLink(
-                new EntityInstanceContext()
-                {
-                    EdmModel = model,
-                    EntitySet = vehiclesEdmEntitySet,
-                    EntityType = carType,
-                    Url = request.GetUrlHelper(),
-                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
-                },
-                carManufacturerProperty,
-                ODataMetadataLevel.Default);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Accord" });
+
+            Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.Default);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/Manufacturer", uri.AbsoluteUri);
         }
@@ -188,17 +172,10 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
-            Uri uri = linkBuilder.BuildNavigationLink(
-                new EntityInstanceContext()
-                {
-                    EdmModel = model,
-                    EntitySet = vehiclesEdmEntitySet,
-                    EntityType = sportbikeType,
-                    Url = request.GetUrlHelper(),
-                    EntityInstance = new Car { Model = 2009, Name = "Ninja" }
-                },
-                motorcycleManufacturerProperty,
-                ODataMetadataLevel.Default);
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, sportbikeType.AsReference(), new SportBike { Model = 2009, Name = "Ninja" });
+
+            Uri uri = linkBuilder.BuildNavigationLink(entityContext, motorcycleManufacturerProperty, ODataMetadataLevel.Default);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Ninja')/Manufacturer", uri.AbsoluteUri);
         }
@@ -219,18 +196,13 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.SetConfiguration(configuration);
             request.SetODataRouteName(routeName);
 
-            Uri uri =
-                NavigationLinksGenerationConvention.GenerateNavigationPropertyLink(
-                new EntityInstanceContext
-                {
-                    EdmModel = model,
-                    EntityInstance = new NavigationLinksGenerationConventionTest_Order { ID = 100 },
-                    EntitySet = edmEntitySet,
-                    EntityType = edmEntitySet.ElementType,
-                    Url = request.GetUrlHelper(),
-                },
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = edmEntitySet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(
+                serializerContext, edmEntitySet.ElementType.AsReference(), new NavigationLinksGenerationConventionTest_Order { ID = 100 });
+
+            Uri uri = NavigationLinksGenerationConvention.GenerateNavigationPropertyLink(
+                entityContext,
                 edmEntitySet.ElementType.NavigationProperties().Single(),
-                orders,
                 includeCast: false);
 
             Assert.Equal("http://localhost/Orders(100)/Customer", uri.AbsoluteUri);
@@ -252,18 +224,14 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.SetConfiguration(configuration);
             request.SetODataRouteName(routeName);
 
+            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = edmEntitySet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(
+                serializerContext, edmEntitySet.ElementType.AsReference(), new NavigationLinksGenerationConventionTest_Order { ID = 100 });
+
             Uri uri =
                 NavigationLinksGenerationConvention.GenerateNavigationPropertyLink(
-                new EntityInstanceContext
-                {
-                    EdmModel = model,
-                    EntityInstance = new NavigationLinksGenerationConventionTest_Order { ID = 100 },
-                    EntitySet = edmEntitySet,
-                    EntityType = edmEntitySet.ElementType,
-                    Url = request.GetUrlHelper()
-                },
+                entityContext,
                 edmEntitySet.ElementType.NavigationProperties().Single(),
-                orders,
                 includeCast: false);
 
             Assert.Equal("http://localhost/Orders(100)/Customer", uri.AbsoluteUri);

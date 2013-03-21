@@ -5,7 +5,7 @@ using System.ComponentModel;
 namespace System.Web.Http.WebHost
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("This is no longer needed and should be removed.", true)]
+    [Obsolete("Use of this type is not recommended because it no longer has initialization logic.")]
     public static class PreApplicationStartCode
     {
         private static bool _startWasCalled;

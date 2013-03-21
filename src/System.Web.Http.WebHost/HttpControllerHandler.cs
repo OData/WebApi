@@ -32,7 +32,7 @@ namespace System.Web.Http.WebHost
                 () =>
                 {
                     // If the behavior is explicitly disabled, do nothing
-                    if (!SuppressFormsAuthRedirectModule.GetEnabled(WebConfigurationManager.AppSettings))
+                    if (!SuppressFormsAuthRedirectHelper.GetEnabled(WebConfigurationManager.AppSettings))
                     {
                         return httpContext => { };
                     }

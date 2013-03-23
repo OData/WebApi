@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -187,6 +188,34 @@ namespace System.Web.Http.Tracing.Tracers
 
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+        }
+
+        [Fact]
+        public void Inner_Property_On_HttpControllerTracer_Returns_IHttpController()
+        {
+            // Arrange
+            IHttpController expectedInner = new Mock<IHttpController>().Object;
+            HttpControllerTracer productUnderTest = new HttpControllerTracer(new HttpRequestMessage(), expectedInner, new TestTraceWriter());
+
+            // Act
+            IHttpController actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_HttpControllerTracer_Returns_IHttpController()
+        {
+            // Arrange
+            IHttpController expectedInner = new Mock<IHttpController>().Object;
+            HttpControllerTracer productUnderTest = new HttpControllerTracer(new HttpRequestMessage(), expectedInner, new TestTraceWriter());
+
+            // Act
+            IHttpController actualInner = Decorator.GetInner(productUnderTest as IHttpController);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

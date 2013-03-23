@@ -9,17 +9,20 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer to monitor <see cref="MediaTypeFormatter"/> instances.
     /// </summary>
-    internal class MediaTypeFormatterTracer : MediaTypeFormatter, IFormatterTracer
+    internal class MediaTypeFormatterTracer : MediaTypeFormatter, IFormatterTracer, IDecorator<MediaTypeFormatter>
     {
         private const string ReadFromStreamAsyncMethodName = "ReadFromStreamAsync";
         private const string WriteToStreamAsyncMethodName = "WriteToStreamAsync";
         private const string GetPerRequestFormatterInstanceMethodName = "GetPerRequestFormatterInstance";
+
+        private readonly MediaTypeFormatter _inner;
 
         public MediaTypeFormatterTracer(MediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
         {
@@ -29,9 +32,15 @@ namespace System.Web.Http.Tracing.Tracers
             InnerFormatter = innerFormatter;
             TraceWriter = traceWriter;
             Request = request;
+            _inner = innerFormatter;
 
             // copy all non-overridable members from inner formatter
             CopyNonOverriableMembersFromInner(this);
+        }
+
+        public MediaTypeFormatter Inner
+        {
+            get { return _inner; }
         }
 
         public MediaTypeFormatter InnerFormatter { get; private set; }

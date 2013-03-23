@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -72,6 +73,34 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Same(exception, thrown);
             Assert.Same(exception, traceWriter.Traces[1].Exception);
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+        }
+
+        [Fact]
+        public void Inner_Property_On_AuthorizationFilterTracer_Returns_IAuthorizationFilter()
+        {
+            // Arrange
+            IAuthorizationFilter expectedInner = new Mock<IAuthorizationFilter>().Object;
+            AuthorizationFilterTracer productUnderTest = new AuthorizationFilterTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            IAuthorizationFilter actualInner = productUnderTest.Inner as IAuthorizationFilter;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_AuthorizationFilterTracer_Returns_IAuthorizationFilter()
+        {
+            // Arrange
+            IAuthorizationFilter expectedInner = new Mock<IAuthorizationFilter>().Object;
+            AuthorizationFilterTracer productUnderTest = new AuthorizationFilterTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            IAuthorizationFilter actualInner = Decorator.GetInner(productUnderTest as IAuthorizationFilter);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

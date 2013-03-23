@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
@@ -13,12 +14,14 @@ namespace System.Web.Http.Tracing.Tracers
     /// Tracer for <see cref="XmlMediaTypeFormatter"/>.  
     /// It is required because users can select formatters by this type.
     /// </summary>
-    internal class XmlMediaTypeFormatterTracer : XmlMediaTypeFormatter, IFormatterTracer
+    internal class XmlMediaTypeFormatterTracer : XmlMediaTypeFormatter, IFormatterTracer, IDecorator<XmlMediaTypeFormatter>
     {
+        private readonly XmlMediaTypeFormatter _inner;
         private MediaTypeFormatterTracer _innerTracer;
 
         public XmlMediaTypeFormatterTracer(XmlMediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
         {
+            _inner = innerFormatter;
             _innerTracer = new MediaTypeFormatterTracer(innerFormatter, traceWriter, request);
 
             // copy values we cannot override
@@ -31,6 +34,11 @@ namespace System.Web.Http.Tracing.Tracers
         HttpRequestMessage IFormatterTracer.Request
         {
             get { return _innerTracer.Request; }
+        }
+
+        public XmlMediaTypeFormatter Inner
+        {
+            get { return _inner; }
         }
 
         public MediaTypeFormatter InnerFormatter

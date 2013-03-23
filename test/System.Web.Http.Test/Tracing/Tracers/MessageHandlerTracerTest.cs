@@ -4,7 +4,9 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.Tracing.Tracers
 {
@@ -153,6 +155,34 @@ namespace System.Web.Http.Tracing.Tracers
             {
                 return _callback(request, cancellationToken);
             }
+        }
+
+        [Fact]
+        public void Inner_Property_On_MessageHandlerTracer_Returns_DelegatingHandler()
+        {
+            // Arrange
+            DelegatingHandler expectedInner = new Mock<DelegatingHandler>().Object;
+            MessageHandlerTracer productUnderTest = new MessageHandlerTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            DelegatingHandler actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_MessageHandlerTracer_Returns_DelegatingHandler()
+        {
+            // Arrange
+            DelegatingHandler expectedInner = new Mock<DelegatingHandler>().Object;
+            MessageHandlerTracer productUnderTest = new MessageHandlerTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            DelegatingHandler actualInner = Decorator.GetInner(productUnderTest as DelegatingHandler);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

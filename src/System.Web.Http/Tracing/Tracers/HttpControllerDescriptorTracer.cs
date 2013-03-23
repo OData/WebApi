@@ -7,13 +7,14 @@ using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref=" HttpControllerDescriptor"/>
     /// </summary>
-    internal class HttpControllerDescriptorTracer : HttpControllerDescriptor
+    internal class HttpControllerDescriptorTracer : HttpControllerDescriptor, IDecorator<HttpControllerDescriptor>
     {
         private const string CreateControllerMethodName = "CreateController";
 
@@ -28,7 +29,12 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerDescriptor = innerDescriptor;
             _traceWriter = traceWriter;
-        }        
+        }
+
+        public HttpControllerDescriptor Inner
+        {
+            get { return _innerDescriptor; }
+        }
 
         public override ConcurrentDictionary<object, object> Properties
         {

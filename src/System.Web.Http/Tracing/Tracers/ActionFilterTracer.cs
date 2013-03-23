@@ -5,19 +5,25 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IActionFilter"/>.
     /// </summary>
-    internal class ActionFilterTracer : FilterTracer, IActionFilter
+    internal class ActionFilterTracer : FilterTracer, IActionFilter, IDecorator<IActionFilter>
     {
         private const string ExecuteActionFilterAsyncMethodName = "ExecuteActionFilterAsync";
 
         public ActionFilterTracer(IActionFilter innerFilter, ITraceWriter traceWriter)
             : base(innerFilter, traceWriter)
         {
+        }
+
+        public new IActionFilter Inner
+        {
+            get { return InnerActionFilter; }
         }
 
         private IActionFilter InnerActionFilter

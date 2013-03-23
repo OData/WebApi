@@ -80,7 +80,6 @@
     <Compile Include="OData\Routing\ODataRouteConstants.cs" />
     <Compile Include="OData\EntitySetController.cs" />
     <Compile Include="OData\NonValidatingParameterBindingAttribute.cs" />
-    <Compile Include="MediaTypeFormatterExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ODataHttpErrorExtensions.cs" />
     <Compile Include="ODataHttpConfigurationExtensions.cs" />

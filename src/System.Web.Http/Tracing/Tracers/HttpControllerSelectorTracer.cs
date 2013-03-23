@@ -6,13 +6,14 @@ using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IHttpControllerSelector"/>.
     /// </summary>
-    internal class HttpControllerSelectorTracer : IHttpControllerSelector
+    internal class HttpControllerSelectorTracer : IHttpControllerSelector, IDecorator<IHttpControllerSelector>
     {
         private const string SelectControllerMethodName = "SelectController";
 
@@ -26,6 +27,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerSelector = innerSelector;
             _traceWriter = traceWriter;
+        }
+
+        public IHttpControllerSelector Inner
+        {
+            get { return _innerSelector; }
         }
 
         HttpControllerDescriptor IHttpControllerSelector.SelectController(HttpRequestMessage request)

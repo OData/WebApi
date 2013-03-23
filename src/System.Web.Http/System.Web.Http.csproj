@@ -110,6 +110,8 @@
     <Compile Include="Routing\HttpRouteEntry.cs" />
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />
     <Compile Include="Routing\IInlineConstraintResolver.cs" />
+    <Compile Include="Services\Decorator.cs" />
+    <Compile Include="Services\IDecorator.cs" />
     <Compile Include="Tracing\TraceLevelHelper.cs" />
     <Compile Include="Tracing\TraceKindHelper.cs" />
     <Compile Include="Validation\IModelValidatorCache.cs" />

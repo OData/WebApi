@@ -11,6 +11,8 @@ using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
+using System.Web.Http.Services;
+using System.Web.Http.Tracing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -46,7 +48,29 @@ namespace System.Web.Http.OData
             configuration.Formatters.Add(formatter2);
 
             // Act
-            IEnumerable<MediaTypeFormatter> result = configuration.Formatters.Where(f => f != null && f.IsODataFormatter());
+            IEnumerable<MediaTypeFormatter> result = configuration.Formatters.Where(f => f != null && Decorator.GetInner(f) is ODataMediaTypeFormatter);
+
+            // Assert
+            IEnumerable<MediaTypeFormatter> expectedFormatters = new MediaTypeFormatter[]
+            {
+                formatter1, formatter2
+            };
+
+            Assert.True(expectedFormatters.SequenceEqual(result));
+        }
+
+        [Fact]
+        public void IsODataFormatter_ReturnsTrue_For_Derived_ODataFormatters()
+        {
+            // Arrange
+            HttpConfiguration configuration = new HttpConfiguration();
+            ODataMediaTypeFormatter formatter1 = CreateODataFormatter();
+            DerivedODataMediaTypeFormatter formatter2 = new DerivedODataMediaTypeFormatter(new ODataPayloadKind[0]);
+            configuration.Formatters.Add(formatter1);
+            configuration.Formatters.Add(formatter2);
+
+            // Act
+            IEnumerable<MediaTypeFormatter> result = configuration.Formatters.Where(f => f != null && Decorator.GetInner(f) is ODataMediaTypeFormatter);
 
             // Assert
             IEnumerable<MediaTypeFormatter> expectedFormatters = new MediaTypeFormatter[]
@@ -99,6 +123,14 @@ namespace System.Web.Http.OData
         private static ODataMediaTypeFormatter CreateODataFormatter()
         {
             return new ODataMediaTypeFormatter(new ODataPayloadKind[0]);
+        }
+
+        private class DerivedODataMediaTypeFormatter: ODataMediaTypeFormatter
+        {
+            public DerivedODataMediaTypeFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
+                : base(payloadKinds)
+            {
+            }
         }
     }
 }

@@ -3,18 +3,14 @@
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    internal class BufferedMediaTypeFormatterTracerTest : MediaTypeFormatterTracerTestBase<BufferedMediaTypeFormatter, BufferedMediaTypeFormatterTracer>
+    public class BufferedMediaTypeFormatterTracerTest
     {
-        public override BufferedMediaTypeFormatterTracer CreateTracer(BufferedMediaTypeFormatter formatter, HttpRequestMessage request, ITraceWriter traceWriter)
-        {
-            return new BufferedMediaTypeFormatterTracer(formatter, traceWriter, request);
-        }
-
         [Fact]
         public void BufferSize_Uses_Inners()
         {
@@ -133,6 +129,34 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
             Assert.Same(exception, thrown);
             Assert.Same(exception, traceWriter.Traces[1].Exception);
+        }
+
+        [Fact]
+        public void Inner_Property_On_BufferedMediaTypeFormatterTracer_Returns_BufferedMediaTypeFormatter()
+        {
+            // Arrange
+            BufferedMediaTypeFormatter expectedInner = new Mock<BufferedMediaTypeFormatter>().Object;
+            BufferedMediaTypeFormatterTracer productUnderTest = new BufferedMediaTypeFormatterTracer(expectedInner, new TestTraceWriter(), new HttpRequestMessage());
+
+            // Act
+            BufferedMediaTypeFormatter actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_BufferedMediaTypeFormatterTracer_Returns_BufferedMediaTypeFormatter()
+        {
+            // Arrange
+            BufferedMediaTypeFormatter expectedInner = new Mock<BufferedMediaTypeFormatter>().Object;
+            BufferedMediaTypeFormatterTracer productUnderTest = new BufferedMediaTypeFormatterTracer(expectedInner, new TestTraceWriter(), new HttpRequestMessage());
+
+            // Act
+            BufferedMediaTypeFormatter actualInner = Decorator.GetInner(productUnderTest as BufferedMediaTypeFormatter);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

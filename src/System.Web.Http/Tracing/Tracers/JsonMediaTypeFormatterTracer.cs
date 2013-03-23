@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
@@ -13,11 +14,14 @@ namespace System.Web.Http.Tracing.Tracers
     /// Tracer for <see cref="JsonMediaTypeFormatter"/>.  
     /// It is required because users can select formatters by this type.
     /// </summary>
-    internal class JsonMediaTypeFormatterTracer : JsonMediaTypeFormatter, IFormatterTracer
+    internal class JsonMediaTypeFormatterTracer : JsonMediaTypeFormatter, IFormatterTracer, IDecorator<JsonMediaTypeFormatter>
     {
+        private readonly JsonMediaTypeFormatter _inner;
         private MediaTypeFormatterTracer _innerTracer;
+
         public JsonMediaTypeFormatterTracer(JsonMediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
         {
+            _inner = innerFormatter;
             _innerTracer = new MediaTypeFormatterTracer(innerFormatter, traceWriter, request);
 
             // copy values we cannot override
@@ -31,6 +35,11 @@ namespace System.Web.Http.Tracing.Tracers
         HttpRequestMessage IFormatterTracer.Request
         {
             get { return _innerTracer.Request; }
+        }
+
+        public JsonMediaTypeFormatter Inner
+        {
+            get { return _inner; }
         }
 
         public MediaTypeFormatter InnerFormatter

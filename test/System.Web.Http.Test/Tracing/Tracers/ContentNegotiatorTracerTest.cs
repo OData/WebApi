@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -186,6 +187,34 @@ namespace System.Web.Http.Tracing.Tracers
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, _traceWriter.Traces, new TraceRecordComparer());
             Assert.Same(expectedException, _traceWriter.Traces[1].Exception);
+        }
+
+        [Fact]
+        public void Inner_Property_On_ContentNegotiatiorTracer_Returns_IContentNegotiator()
+        {
+            // Arrange
+            IContentNegotiator expectedInner = new Mock<IContentNegotiator>().Object;
+            ContentNegotiatorTracer productUnderTest = new ContentNegotiatorTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            IContentNegotiator actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_ContentNegotiatiorTracer_Returns_IContentNegotiator()
+        {
+            // Arrange
+            IContentNegotiator expectedInner = new Mock<IContentNegotiator>().Object;
+            ContentNegotiatorTracer productUnderTest = new ContentNegotiatorTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            IContentNegotiator actualInner = Decorator.GetInner(productUnderTest as IContentNegotiator);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

@@ -6,18 +6,21 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    internal class BufferedMediaTypeFormatterTracer : BufferedMediaTypeFormatter, IFormatterTracer
+    internal class BufferedMediaTypeFormatterTracer : BufferedMediaTypeFormatter, IFormatterTracer, IDecorator<BufferedMediaTypeFormatter>
     {
         private const string OnReadFromStreamMethodName = "ReadFromStream";
         private const string OnWriteToStreamMethodName = "WriteToStream";
 
+        private readonly BufferedMediaTypeFormatter _inner;
         private MediaTypeFormatterTracer _innerTracer;
 
         public BufferedMediaTypeFormatterTracer(BufferedMediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
         {
+            _inner = innerFormatter;
             _innerTracer = new MediaTypeFormatterTracer(innerFormatter, traceWriter, request);
 
             // copy non-overridable members from inner formatter
@@ -28,6 +31,11 @@ namespace System.Web.Http.Tracing.Tracers
         HttpRequestMessage IFormatterTracer.Request
         {
             get { return _innerTracer.Request; }
+        }
+
+        public BufferedMediaTypeFormatter Inner
+        {
+            get { return _inner; }
         }
 
         public MediaTypeFormatter InnerFormatter

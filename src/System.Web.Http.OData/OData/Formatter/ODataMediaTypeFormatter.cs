@@ -32,8 +32,6 @@ namespace System.Web.Http.OData.Formatter
         private const string ODataMaxServiceVersion = "MaxDataServiceVersion";
         private const string ODataServiceVersion = "DataServiceVersion";
 
-        internal const string IsODataKey = "MS_IsOData";
-
         private readonly ODataDeserializerProvider _deserializerProvider;
         private readonly ODataVersion _version;
 
@@ -161,13 +159,6 @@ namespace System.Web.Http.OData.Formatter
             }
             else
             {
-                // Adds information to allow callers to identify the ODataMediaTypeFormatter through the tracing wrapper
-                // This is a workaround until tracing provides information about the wrapped inner formatter
-                if (type == typeof(IEdmModel))
-                {
-                    request.Properties[IsODataKey] = true;
-                }
-
                 ODataVersion version = GetResponseODataVersion(request);
                 return new ODataMediaTypeFormatter(this, version, request);
             }

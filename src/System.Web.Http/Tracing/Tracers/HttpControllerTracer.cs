@@ -7,13 +7,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IHttpController"/>.
     /// </summary>
-    internal class HttpControllerTracer : IHttpController, IDisposable
+    internal class HttpControllerTracer : IHttpController, IDisposable, IDecorator<IHttpController>
     {
         private const string DisposeMethodName = "Dispose";
         private const string ExecuteAsyncMethodName = "ExecuteAsync";
@@ -30,6 +31,11 @@ namespace System.Web.Http.Tracing.Tracers
             _innerController = innerController;
             _request = request;
             _traceWriter = traceWriter;
+        }
+
+        public IHttpController Inner
+        {
+            get { return _innerController; }
         }
 
         void IDisposable.Dispose()

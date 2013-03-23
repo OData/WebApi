@@ -11,13 +11,14 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="HttpActionDescriptor"/>.
     /// </summary>
-    internal class HttpActionDescriptorTracer : HttpActionDescriptor
+    internal class HttpActionDescriptorTracer : HttpActionDescriptor, IDecorator<HttpActionDescriptor>
     {
         private const string ExecuteMethodName = "ExecuteAsync";
 
@@ -32,6 +33,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerDescriptor = innerDescriptor;
             _traceWriter = traceWriter;
+        }
+
+        public HttpActionDescriptor Inner
+        {
+            get { return _innerDescriptor; }
         }
 
         public override ConcurrentDictionary<object, object> Properties

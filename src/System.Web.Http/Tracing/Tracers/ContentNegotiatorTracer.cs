@@ -5,13 +5,14 @@ using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IContentNegotiator"/>.
     /// </summary>
-    internal class ContentNegotiatorTracer : IContentNegotiator
+    internal class ContentNegotiatorTracer : IContentNegotiator, IDecorator<IContentNegotiator>
     {
         private const string NegotiateMethodName = "Negotiate";
 
@@ -25,6 +26,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerNegotiator = innerNegotiator;
             _traceWriter = traceWriter;
+        }
+
+        public IContentNegotiator Inner
+        {
+            get { return _innerNegotiator; }
         }
 
         public ContentNegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)

@@ -9,6 +9,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 using System.Web.Http.Metadata.Providers;
 using System.Web.Http.ModelBinding;
+using System.Web.Http.Services;
 using System.Web.Http.Validation;
 using Microsoft.TestCommon;
 using Moq;
@@ -200,5 +201,36 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
         }
 
+        [Fact]
+        public void Inner_Property_On_FormatterParameterBindingTracer_Returns_FormatterParameterBinding()
+        {
+            // Arrange
+            HttpParameterDescriptor httpParameterDescriptor = new Mock<HttpParameterDescriptor>().Object;
+            MediaTypeFormatterCollection mediaTypeFormatterCollection = new MediaTypeFormatterCollection();
+            FormatterParameterBinding expectedInner = new FormatterParameterBinding(httpParameterDescriptor, mediaTypeFormatterCollection, null);
+            FormatterParameterBindingTracer productUnderTest = new FormatterParameterBindingTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            FormatterParameterBinding actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_FormatterParameterBindingTracer_Returns_FormatterParameterBinding()
+        {
+            // Arrange
+            HttpParameterDescriptor httpParameterDescriptor = new Mock<HttpParameterDescriptor>().Object;
+            MediaTypeFormatterCollection mediaTypeFormatterCollection = new MediaTypeFormatterCollection();
+            FormatterParameterBinding expectedInner = new FormatterParameterBinding(httpParameterDescriptor, mediaTypeFormatterCollection, null);
+            FormatterParameterBindingTracer productUnderTest = new FormatterParameterBindingTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            FormatterParameterBinding actualInner = Decorator.GetInner(productUnderTest as FormatterParameterBinding);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
     }
 }

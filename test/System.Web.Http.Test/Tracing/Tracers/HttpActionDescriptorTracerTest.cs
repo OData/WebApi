@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -370,6 +371,36 @@ namespace System.Web.Http.Tracing.Tracers
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
             Assert.Same(exception, traceWriter.Traces[1].Exception);
+        }
+
+        [Fact]
+        public void Inner_Property_On_HttpActionDescriptorTracer_Returns_HttpActionDescriptor()
+        {
+            // Arrange
+            HttpActionDescriptor expectedInner = new Mock<HttpActionDescriptor>().Object;
+            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext();
+            HttpActionDescriptorTracer productUnderTest = new HttpActionDescriptorTracer(controllerContext, expectedInner, new TestTraceWriter());
+
+            // Act
+            HttpActionDescriptor actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_HttpActionDescriptorTracer_Returns_HttpActionDescriptor()
+        {
+            // Arrange
+            HttpActionDescriptor expectedInner = new Mock<HttpActionDescriptor>().Object;
+            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext();
+            HttpActionDescriptorTracer productUnderTest = new HttpActionDescriptorTracer(controllerContext, expectedInner, new TestTraceWriter());
+
+            // Act
+            HttpActionDescriptor actualInner = Decorator.GetInner(productUnderTest as HttpActionDescriptor);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

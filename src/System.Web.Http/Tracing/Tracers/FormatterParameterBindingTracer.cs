@@ -11,6 +11,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
@@ -18,12 +19,12 @@ namespace System.Web.Http.Tracing.Tracers
     /// Tracer to wrap a <see cref="FormatterParameterBinding"/>.
     /// Its primary purpose is to intercept binding requests so that it can create tracers for the formatters.
     /// </summary>
-    internal class FormatterParameterBindingTracer : FormatterParameterBinding
+    internal class FormatterParameterBindingTracer : FormatterParameterBinding, IDecorator<FormatterParameterBinding>
     {
         private const string ExecuteBindingAsyncMethodName = "ExecuteBindingAsync";
 
-        private FormatterParameterBinding _innerBinding;
-        private ITraceWriter _traceWriter;
+        private readonly FormatterParameterBinding _innerBinding;
+        private readonly ITraceWriter _traceWriter;
 
         public FormatterParameterBindingTracer(FormatterParameterBinding innerBinding, ITraceWriter traceWriter) : base(innerBinding.Descriptor, innerBinding.Formatters, innerBinding.BodyModelValidator)
         {
@@ -32,6 +33,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerBinding = innerBinding;
             _traceWriter = traceWriter;
+        }
+
+        public FormatterParameterBinding Inner
+        {
+            get { return _innerBinding; }
         }
 
         public override string ErrorMessage

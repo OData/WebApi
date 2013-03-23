@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -207,6 +208,34 @@ namespace System.Web.Http.Tracing.Tracers
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
             Assert.Equal(expectedException, traceWriter.Traces[1].Exception);
+        }
+
+        [Fact]
+        public void Inner_Property_On_HttpActionInvokerTracer_Returns_IHttpActionInvoker()
+        {
+            // Arrange
+            IHttpActionInvoker expectedInner = new Mock<IHttpActionInvoker>().Object;
+            HttpActionInvokerTracer productUnderTest = new HttpActionInvokerTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            IHttpActionInvoker actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_HttpActionInvokerTracer_Returns_IHttpActionInvoker()
+        {
+            // Arrange
+            IHttpActionInvoker expectedInner = new Mock<IHttpActionInvoker>().Object;
+            HttpActionInvokerTracer productUnderTest = new HttpActionInvokerTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            IHttpActionInvoker actualInner = Decorator.GetInner(productUnderTest as IHttpActionInvoker);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

@@ -5,10 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    internal class HttpActionBindingTracer : HttpActionBinding
+    internal class HttpActionBindingTracer : HttpActionBinding, IDecorator<HttpActionBinding>
     {
         private const string ExecuteBindingAsyncMethodName = "ExecuteBindingAsync";
 
@@ -34,6 +35,11 @@ namespace System.Web.Http.Tracing.Tracers
             {
                 ActionDescriptor = _innerBinding.ActionDescriptor;
             }
+        }
+
+        public HttpActionBinding Inner
+        {
+            get { return _innerBinding; }
         }
 
         public override Task ExecuteBindingAsync(Controllers.HttpActionContext actionContext, CancellationToken cancellationToken)

@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
@@ -12,7 +13,7 @@ namespace System.Web.Http.Tracing.Tracers
     /// Tracer for <see cref="AuthorizationFilterAttribute"/>
     /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "internal type needs to override, tracer are not sealed")]
-    internal class AuthorizationFilterAttributeTracer : AuthorizationFilterAttribute
+    internal class AuthorizationFilterAttributeTracer : AuthorizationFilterAttribute, IDecorator<AuthorizationFilterAttribute>
     {
         private const string OnAuthorizationMethodName = "OnAuthorization";
 
@@ -26,6 +27,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerFilter = innerFilter;
             _traceStore = traceWriter;
+        }
+
+        public AuthorizationFilterAttribute Inner
+        {
+            get { return _innerFilter; }
         }
 
         public override bool AllowMultiple

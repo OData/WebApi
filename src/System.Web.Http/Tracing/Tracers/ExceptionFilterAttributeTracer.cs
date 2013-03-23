@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http.Filters;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
@@ -11,7 +12,7 @@ namespace System.Web.Http.Tracing.Tracers
     /// Tracer for <see cref="ExceptionFilterAttribute"/>.
     /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "internal type needs to override, tracer are not sealed")]
-    internal class ExceptionFilterAttributeTracer : ExceptionFilterAttribute
+    internal class ExceptionFilterAttributeTracer : ExceptionFilterAttribute, IDecorator<ExceptionFilterAttribute>
     {
         private const string OnExceptionMethodName = "OnException";
 
@@ -25,6 +26,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerFilter = innerFilter;
             _traceStore = traceWriter;
+        }
+
+        public ExceptionFilterAttribute Inner
+        {
+            get { return _innerFilter; }
         }
 
         public override bool AllowMultiple

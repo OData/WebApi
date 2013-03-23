@@ -3,13 +3,14 @@
 using System.Diagnostics.Contracts;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IActionValueBinder"/>
     /// </summary>
-    internal class ActionValueBinderTracer : IActionValueBinder
+    internal class ActionValueBinderTracer : IActionValueBinder, IDecorator<IActionValueBinder>
     {
         private readonly IActionValueBinder _innerBinder;
         private readonly ITraceWriter _traceWriter;
@@ -21,6 +22,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerBinder = innerBinder;
             _traceWriter = traceWriter;
+        }
+
+        public IActionValueBinder Inner
+        {
+            get { return _innerBinder; }
         }
 
         // Creates wrapping tracers for all HttpParameterBindings

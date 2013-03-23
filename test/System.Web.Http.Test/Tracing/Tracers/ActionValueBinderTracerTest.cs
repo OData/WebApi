@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -96,6 +97,33 @@ namespace System.Web.Http.Tracing.Tracers
             // Assert
             Assert.IsAssignableFrom<FormatterParameterBindingTracer>(actualBinding.ParameterBindings[0]);
         }
+        
+        [Fact]
+        public void Inner_Property_On_ActionValueBinderTracer_Returns_IActionValueBinder()
+        {
+            // Arrange
+            IActionValueBinder expectedInner = new Mock<IActionValueBinder>().Object;
+            ActionValueBinderTracer productUnderTest = new ActionValueBinderTracer(expectedInner, new TestTraceWriter());
 
+            // Act
+            IActionValueBinder actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_Property_On_ActionValueBinderTracer_Returns_IActionValueBinder()
+        {
+            // Arrange
+            IActionValueBinder expectedInner = new Mock<IActionValueBinder>().Object;
+            ActionValueBinderTracer productUnderTest = new ActionValueBinderTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            IActionValueBinder actualInner = Decorator.GetInner(productUnderTest as IActionValueBinder);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
     }
 }

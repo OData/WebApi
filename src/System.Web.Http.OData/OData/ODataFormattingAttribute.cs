@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.OData.Formatter;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.OData
 {
@@ -50,7 +51,7 @@ namespace System.Web.Http.OData
 
             // If any OData formatters are registered globally, do nothing and use those instead
             MediaTypeFormatterCollection controllerFormatters = controllerSettings.Formatters;
-            if (!controllerFormatters.Where(f => f != null && f.IsODataFormatter()).Any())
+            if (!controllerFormatters.Where(f => f != null && Decorator.GetInner(f) is ODataMediaTypeFormatter).Any())
             {
                 // Remove Xml and Json formatters to avoid media type conflicts
                 controllerFormatters.RemoveRange(

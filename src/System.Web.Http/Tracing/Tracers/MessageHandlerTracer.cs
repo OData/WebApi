@@ -4,13 +4,14 @@ using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer to wrap a <see cref="DelegatingHandler"/>.
     /// </summary>
-    internal class MessageHandlerTracer : DelegatingHandler
+    internal class MessageHandlerTracer : DelegatingHandler, IDecorator<DelegatingHandler>
     {
         private const string SendAsyncMethodName = "SendAsync";
 
@@ -24,6 +25,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerHandler = innerHandler;
             _traceWriter = traceWriter;
+        }
+
+        public DelegatingHandler Inner
+        {
+            get { return _innerHandler; }
         }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

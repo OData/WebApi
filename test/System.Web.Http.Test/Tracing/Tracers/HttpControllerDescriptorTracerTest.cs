@@ -3,6 +3,7 @@
 using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -74,6 +75,34 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
             Assert.Same(_exception, thrown);
             Assert.Same(_exception, traceWriter.Traces[1].Exception);
+        }
+
+        [Fact]
+        public void Inner_Property_On_HttpControllerDescriptorTracer_Returns_HttpControllerDescriptor()
+        {
+            // Arrange
+            HttpControllerDescriptor expectedInner = new Mock<HttpControllerDescriptor>().Object;
+            HttpControllerDescriptorTracer productUnderTest = new HttpControllerDescriptorTracer(new HttpConfiguration(), "controller", typeof(ApiController), expectedInner, new TestTraceWriter());
+
+            // Act
+            HttpControllerDescriptor actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_HttpControllerDescriptorTracer_Returns_HttpControllerDescriptor()
+        {
+            // Arrange
+            HttpControllerDescriptor expectedInner = new Mock<HttpControllerDescriptor>().Object;
+            HttpControllerDescriptorTracer productUnderTest = new HttpControllerDescriptorTracer(new HttpConfiguration(), "controller", typeof(ApiController), expectedInner, new TestTraceWriter());
+
+            // Act
+            HttpControllerDescriptor actualInner = Decorator.GetInner(productUnderTest as HttpControllerDescriptor);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
 
         private static HttpControllerDescriptorTracer GetHttpControllerDescriptorTracer(HttpControllerDescriptor controllerDescriptor, ITraceWriter traceWriter)

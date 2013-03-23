@@ -6,13 +6,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IHttpActionInvoker"/>.
     /// </summary>
-    internal class HttpActionInvokerTracer : IHttpActionInvoker
+    internal class HttpActionInvokerTracer : IHttpActionInvoker, IDecorator<IHttpActionInvoker>
     {
         private const string InvokeActionAsyncMethodName = "InvokeActionAsync";
 
@@ -26,6 +27,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerInvoker = innerInvoker;
             _traceWriter = traceWriter;
+        }
+
+        public IHttpActionInvoker Inner
+        {
+            get { return _innerInvoker; }
         }
 
         Task<HttpResponseMessage> IHttpActionInvoker.InvokeActionAsync(HttpActionContext actionContext, CancellationToken cancellationToken)

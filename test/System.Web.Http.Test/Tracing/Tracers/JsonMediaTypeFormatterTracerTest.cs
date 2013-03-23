@@ -2,18 +2,14 @@
 
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Newtonsoft.Json;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    internal class JsonMediaTypeFormatterTracerTest : ReadWriteMediaTypeFormatterTracerTestBase<JsonMediaTypeFormatter, JsonMediaTypeFormatterTracer>
+    public class JsonMediaTypeFormatterTracerTest 
     {
-        public override JsonMediaTypeFormatterTracer CreateTracer(JsonMediaTypeFormatter formatter, HttpRequestMessage request, ITraceWriter traceWriter)
-        {
-            return new JsonMediaTypeFormatterTracer(formatter, traceWriter, request);
-        }
-
         [Fact]
         public void UseDataContractJsonSerializer_Uses_Inners()
         {
@@ -66,5 +62,32 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Same(innerFormatter.SerializerSettings, tracer.SerializerSettings);
         }
 
+        [Fact]
+        public void Inner_Property_On_JsonMediaTypeFormatterTracerTest_Returns_JsonMediaTypeFormatter()
+        {
+            // Arrange
+            JsonMediaTypeFormatter expectedInner = new JsonMediaTypeFormatter();
+            JsonMediaTypeFormatterTracer productUnderTest = new JsonMediaTypeFormatterTracer(expectedInner, new TestTraceWriter(), new HttpRequestMessage());
+
+            // Act
+            JsonMediaTypeFormatter actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_JsonMediaTypeFormatterTracerTest_Returns_JsonMediaTypeFormatter()
+        {
+            // Arrange
+            JsonMediaTypeFormatter expectedInner = new JsonMediaTypeFormatter();
+            JsonMediaTypeFormatterTracer productUnderTest = new JsonMediaTypeFormatterTracer(expectedInner, new TestTraceWriter(), new HttpRequestMessage());
+
+            // Act
+            JsonMediaTypeFormatter actualInner = Decorator.GetInner(productUnderTest as JsonMediaTypeFormatter);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
     }
 }

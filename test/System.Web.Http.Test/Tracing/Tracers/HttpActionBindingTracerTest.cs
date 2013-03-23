@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -118,6 +119,34 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
             Assert.Same(exception, thrown);
             Assert.Same(exception, traceWriter.Traces[1].Exception);
+        }
+        
+        [Fact]
+        public void Inner_Property_On_HttpActionBindingTracer_Returns_HttpActionBinding()
+        {
+            // Arrange
+            HttpActionBinding expectedInner = new HttpActionBinding();
+            HttpActionBindingTracer productUnderTest = new HttpActionBindingTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            HttpActionBinding actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_HttpActionBindingTracer_Returns_HttpActionBinding()
+        {
+            // Arrange
+            HttpActionBinding expectedInner = new HttpActionBinding();
+            HttpActionBindingTracer productUnderTest = new HttpActionBindingTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            HttpActionBinding actualInner = Decorator.GetInner(productUnderTest as HttpActionBinding);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

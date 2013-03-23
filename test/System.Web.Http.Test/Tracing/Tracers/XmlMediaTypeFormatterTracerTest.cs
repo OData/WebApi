@@ -2,17 +2,13 @@
 
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    internal class XmlMediaTypeFormatterTracerTest : ReadWriteMediaTypeFormatterTracerTestBase<XmlMediaTypeFormatter, XmlMediaTypeFormatterTracer>
+    public class XmlMediaTypeFormatterTracerTest
     {
-        public override XmlMediaTypeFormatterTracer CreateTracer(XmlMediaTypeFormatter formatter, HttpRequestMessage request, ITraceWriter traceWriter)
-        {
-            return new XmlMediaTypeFormatterTracer(formatter, traceWriter, request);
-        }
-
         [Fact]
         public void UseXmlSerializer_Uses_Inners()
         {
@@ -50,6 +46,34 @@ namespace System.Web.Http.Tracing.Tracers
 
             // Act & Assert
             Assert.Equal(innerFormatter.Indent, tracer.Indent);
+        }
+
+        [Fact]
+        public void Inner_Property_On_XmlMediaTypeFormatterTracer_Returns_XmlMediaTypeFormatter()
+        {
+            // Arrange
+            XmlMediaTypeFormatter expectedInner = new XmlMediaTypeFormatter();
+            XmlMediaTypeFormatterTracer productUnderTest = new XmlMediaTypeFormatterTracer(expectedInner, new TestTraceWriter(), new HttpRequestMessage());
+
+            // Act
+            XmlMediaTypeFormatter actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_XmlMediaTypeFormatterTracer_Returns_XmlMediaTypeFormatter()
+        {
+            // Arrange
+            XmlMediaTypeFormatter expectedInner = new XmlMediaTypeFormatter();
+            XmlMediaTypeFormatterTracer productUnderTest = new XmlMediaTypeFormatterTracer(expectedInner, new TestTraceWriter(), new HttpRequestMessage());
+
+            // Act
+            XmlMediaTypeFormatter actualInner = Decorator.GetInner(productUnderTest as XmlMediaTypeFormatter);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

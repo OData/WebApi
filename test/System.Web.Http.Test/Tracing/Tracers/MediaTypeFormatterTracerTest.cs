@@ -2,18 +2,14 @@
 
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    internal class MediaTypeFormatterTracerTest : ReadWriteMediaTypeFormatterTracerTestBase<MediaTypeFormatter, MediaTypeFormatterTracer>
+    public class MediaTypeFormatterTracerTest
     {
-        public override MediaTypeFormatterTracer CreateTracer(MediaTypeFormatter formatter, HttpRequestMessage request, ITraceWriter traceWriter)
-        {
-            return new MediaTypeFormatterTracer(formatter, traceWriter, request);
-        }
-
         public static TheoryDataSet<MediaTypeFormatter> AllKnownFormatters
         {
             get
@@ -41,6 +37,36 @@ namespace System.Web.Http.Tracing.Tracers
             // Assert
             IFormatterTracer tracer = Assert.IsAssignableFrom<IFormatterTracer>(tracingFormatter);
             Assert.Same(formatter, tracer.InnerFormatter);
+        }
+
+        [Theory]
+        [PropertyData("AllKnownFormatters")]
+        public void Inner_Property_On_All_MediaTypeFormatterTracers_Returns_Object_Of_Type_MediaTypeFormatter(MediaTypeFormatter formatter)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            MediaTypeFormatter formatterTracer = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
+            
+            // Act
+            MediaTypeFormatter innerFormatter = (formatterTracer as IDecorator<MediaTypeFormatter>).Inner;      
+
+            // Assert
+            Assert.Same(formatter, innerFormatter);
+        }
+
+        [Theory]
+        [PropertyData("AllKnownFormatters")]
+        public void Decorator_GetInner_On_All_MediaTypeFormatterTracers_Returns_Object_Of_Type_MediaTypeFormatter(MediaTypeFormatter formatter)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            MediaTypeFormatter formatterTracer = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
+
+            // Act
+            MediaTypeFormatter innerFormatter = Decorator.GetInner(formatterTracer);
+
+            // Assert
+            Assert.Same(formatter, innerFormatter);
         }
     }
 }

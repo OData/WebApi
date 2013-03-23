@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -246,6 +247,34 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Equal(1, wrappedFilters.Where(f => f.Instance.GetType() == typeof(ActionFilterTracer)).Count());
             Assert.Equal(1, wrappedFilters.Where(f => f.Instance.GetType() == typeof(AuthorizationFilterTracer)).Count());
             Assert.Equal(1, wrappedFilters.Where(f => f.Instance.GetType() == typeof(ExceptionFilterTracer)).Count());
+        }
+
+        [Fact]
+        public void Inner_Property_On_FilterTracer_Returns_IFilter()
+        {
+            // Arrange
+            IFilter expectedInner = new Mock<IFilter>().Object;
+            FilterTracer productUnderTest = new FilterTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            IFilter actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_Property_On_FilterTracer_Returns_IFilter()
+        {
+            // Arrange
+            IFilter expectedInner = new Mock<IFilter>().Object;
+            FilterTracer productUnderTest = new FilterTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            IFilter actualInner = Decorator.GetInner(productUnderTest as IFilter);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
 
         // Test filter class that exposes all filter behaviors will cause separate filters for each

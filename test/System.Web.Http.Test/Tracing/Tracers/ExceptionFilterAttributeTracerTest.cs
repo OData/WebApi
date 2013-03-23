@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -169,6 +170,34 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Same(exception, thrown);
             Assert.Same(exception, traceWriter.Traces[1].Exception);
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+        }
+
+        [Fact]
+        public void Inner_Property_On_ExceptionFilterAttributeTracer_Returns_ExceptionFilterAttribute()
+        {
+            // Arrange
+            ExceptionFilterAttribute expectedInner = new Mock<ExceptionFilterAttribute>().Object;
+            ExceptionFilterAttributeTracer productUnderTest = new ExceptionFilterAttributeTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            ExceptionFilterAttribute actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_ExceptionFilterAttributeTracer_Returns_ExceptionFilterAttribute()
+        {
+            // Arrange
+            ExceptionFilterAttribute expectedInner = new Mock<ExceptionFilterAttribute>().Object;
+            ExceptionFilterAttributeTracer productUnderTest = new ExceptionFilterAttributeTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            ExceptionFilterAttribute actualInner = Decorator.GetInner(productUnderTest as ExceptionFilterAttribute);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

@@ -3,19 +3,25 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Filters;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IExceptionFilter"/>.
     /// </summary>
-    internal class ExceptionFilterTracer : FilterTracer, IExceptionFilter
+    internal class ExceptionFilterTracer : FilterTracer, IExceptionFilter, IDecorator<IExceptionFilter>
     {
         private const string ExecuteExceptionFilterAsyncMethodName = "ExecuteExceptionFilterAsync";
 
         public ExceptionFilterTracer(IExceptionFilter innerFilter, ITraceWriter traceWriter)
             : base(innerFilter, traceWriter)
         {
+        }
+
+        public new IExceptionFilter Inner
+        {
+            get { return InnerExceptionFilter; }
         }
 
         public IExceptionFilter InnerExceptionFilter

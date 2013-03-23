@@ -10,6 +10,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 using System.Web.Http.ValueProviders;
 
 namespace System.Web.Http.Tracing.Tracers
@@ -18,7 +19,7 @@ namespace System.Web.Http.Tracing.Tracers
     /// Tracer to wrap an <see cref="HttpParameterBinding"/>.
     /// Its primary purpose is to monitor <see cref="ExecuteBindingAsync"/>.
     /// </summary>
-    internal class HttpParameterBindingTracer : HttpParameterBinding, IValueProviderParameterBinding
+    internal class HttpParameterBindingTracer : HttpParameterBinding, IValueProviderParameterBinding, IDecorator<HttpParameterBinding>
     {
         private const string ExecuteBindingAsyncMethodName = "ExecuteBindingAsync";
 
@@ -29,6 +30,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             InnerBinding = innerBinding;
             TraceWriter = traceWriter;
+        }
+
+        public HttpParameterBinding Inner
+        {
+            get { return InnerBinding; }
         }
 
         protected HttpParameterBinding InnerBinding { get; private set; }

@@ -5,13 +5,14 @@ using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IHttpControllerActivator"/>.
     /// </summary>
-    internal class HttpControllerActivatorTracer : IHttpControllerActivator
+    internal class HttpControllerActivatorTracer : IHttpControllerActivator, IDecorator<IHttpControllerActivator>
     {
         private const string CreateMethodName = "Create";
 
@@ -25,6 +26,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerActivator = innerActivator;
             _traceWriter = traceWriter;
+        }
+
+        public IHttpControllerActivator Inner
+        {
+            get { return _innerActivator; }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "disposable controller is later released in ReleaseController")]

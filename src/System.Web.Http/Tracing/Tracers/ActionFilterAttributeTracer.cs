@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
@@ -13,7 +14,7 @@ namespace System.Web.Http.Tracing.Tracers
     /// Tracer for <see cref="ActionFilterAttribute"/>.
     /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "internal type needs to override, tracer are not sealed")]
-    internal class ActionFilterAttributeTracer : ActionFilterAttribute
+    internal class ActionFilterAttributeTracer : ActionFilterAttribute, IDecorator<ActionFilterAttribute>
     {
         private const string ActionExecutedMethodName = "ActionExecuted";
         private const string ActionExecutingMethodName = "ActionExecuting";
@@ -28,6 +29,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerFilter = innerFilter;
             _traceWriter = traceWriter;
+        }
+
+        public ActionFilterAttribute Inner
+        {
+            get { return _innerFilter; }
         }
 
         public override bool AllowMultiple

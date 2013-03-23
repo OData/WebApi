@@ -8,6 +8,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 using System.Web.Http.Metadata.Providers;
 using System.Web.Http.ModelBinding;
+using System.Web.Http.Services;
 using System.Web.Http.ValueProviders;
 using Microsoft.TestCommon;
 using Moq;
@@ -209,6 +210,40 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Same(exception, thrown);
             Assert.Same(exception, traceWriter.Traces[1].Exception);
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+        }
+
+        [Fact]
+        public void Inner_Property_On_HttpParameterBindingTracer_Returns_HttpParameterBinding()
+        {
+            // Arrange
+            Mock<HttpParameterDescriptor> mockParamDescriptor = new Mock<HttpParameterDescriptor>() { CallBase = true };
+            mockParamDescriptor.Setup(d => d.ParameterName).Returns("paramName");
+            mockParamDescriptor.Setup(d => d.ParameterType).Returns(typeof(string));
+            HttpParameterBinding expectedInner = new Mock<HttpParameterBinding>(mockParamDescriptor.Object).Object;
+            HttpParameterBindingTracer productUnderTest = new HttpParameterBindingTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            HttpParameterBinding actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_HttpParameterBindingTracer_Returns_HttpParameterBinding()
+        {
+            // Arrange
+            Mock<HttpParameterDescriptor> mockParamDescriptor = new Mock<HttpParameterDescriptor>() { CallBase = true };
+            mockParamDescriptor.Setup(d => d.ParameterName).Returns("paramName");
+            mockParamDescriptor.Setup(d => d.ParameterType).Returns(typeof(string));
+            HttpParameterBinding expectedInner = new Mock<HttpParameterBinding>(mockParamDescriptor.Object).Object;
+            HttpParameterBindingTracer productUnderTest = new HttpParameterBindingTracer(expectedInner, new TestTraceWriter());
+
+            // Act
+            HttpParameterBinding actualInner = Decorator.GetInner(productUnderTest as HttpParameterBinding);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

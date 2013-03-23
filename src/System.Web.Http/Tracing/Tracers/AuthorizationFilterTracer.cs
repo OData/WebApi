@@ -5,19 +5,25 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IAuthorizationFilter"/>.
     /// </summary>
-    internal class AuthorizationFilterTracer : FilterTracer, IAuthorizationFilter
+    internal class AuthorizationFilterTracer : FilterTracer, IAuthorizationFilter, IDecorator<IAuthorizationFilter>
     {
         private const string ExecuteAuthorizationFilterAsyncMethodName = "ExecuteAuthorizationFilterAsync";
 
         public AuthorizationFilterTracer(IAuthorizationFilter innerFilter, ITraceWriter traceWriter)
             : base(innerFilter, traceWriter)
         {
+        }
+
+        public new IAuthorizationFilter Inner
+        {
+            get { return InnerAuthorizationFilter; }
         }
 
         private IAuthorizationFilter InnerAuthorizationFilter

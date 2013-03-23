@@ -4,13 +4,14 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IHttpActionSelector"/>.
     /// </summary>
-    internal class HttpActionSelectorTracer : IHttpActionSelector
+    internal class HttpActionSelectorTracer : IHttpActionSelector, IDecorator<IHttpActionSelector>
     {
         private const string SelectActionMethodName = "SelectAction";
 
@@ -24,6 +25,11 @@ namespace System.Web.Http.Tracing.Tracers
 
             _innerSelector = innerSelector;
             _traceWriter = traceWriter;
+        }
+
+        public IHttpActionSelector Inner
+        {
+            get { return _innerSelector; }
         }
 
         public ILookup<string, HttpActionDescriptor> GetActionMapping(HttpControllerDescriptor controllerDescriptor)

@@ -2,17 +2,13 @@
 
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Web.Http.Services;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    internal class FormUrlEncodedMediaTypeFormatterTracerTest : ReadWriteMediaTypeFormatterTracerTestBase<FormUrlEncodedMediaTypeFormatter, FormUrlEncodedMediaTypeFormatterTracer>
+    public class FormUrlEncodedMediaTypeFormatterTracerTest
     {
-        public override FormUrlEncodedMediaTypeFormatterTracer CreateTracer(FormUrlEncodedMediaTypeFormatter formatter, HttpRequestMessage request, ITraceWriter traceWriter)
-        {
-            return new FormUrlEncodedMediaTypeFormatterTracer(formatter, traceWriter, request);
-        }
-        
         [Fact]
         public void MaxDepth_Uses_Inners()
         {
@@ -37,6 +33,34 @@ namespace System.Web.Http.Tracing.Tracers
 
             // Act & Assert
             Assert.Equal(innerFormatter.ReadBufferSize, tracer.ReadBufferSize);
+        }
+
+        [Fact]
+        public void Inner_Property_On_FormUrlEncodedMediaTypeFormatterTracer_Returns_FormUrlEncodedMediaTypeFormatter()
+        {
+            // Arrange
+            FormUrlEncodedMediaTypeFormatter expectedInner = new FormUrlEncodedMediaTypeFormatter();
+            FormUrlEncodedMediaTypeFormatterTracer productUnderTest = new FormUrlEncodedMediaTypeFormatterTracer(expectedInner, new TestTraceWriter(), new HttpRequestMessage());
+
+            // Act
+            FormUrlEncodedMediaTypeFormatter actualInner = productUnderTest.Inner;
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
+        }
+
+        [Fact]
+        public void Decorator_GetInner_On_FormUrlEncodedMediaTypeFormatterTracer_Returns_FormUrlEncodedMediaTypeFormatter()
+        {
+            // Arrange
+            FormUrlEncodedMediaTypeFormatter expectedInner = new FormUrlEncodedMediaTypeFormatter();
+            FormUrlEncodedMediaTypeFormatterTracer productUnderTest = new FormUrlEncodedMediaTypeFormatterTracer(expectedInner, new TestTraceWriter(), new HttpRequestMessage());
+
+            // Act
+            FormUrlEncodedMediaTypeFormatter actualInner = Decorator.GetInner(productUnderTest as FormUrlEncodedMediaTypeFormatter);
+
+            // Assert
+            Assert.Same(expectedInner, actualInner);
         }
     }
 }

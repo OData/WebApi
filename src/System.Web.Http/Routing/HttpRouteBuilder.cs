@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing.Constraints;
@@ -55,17 +56,18 @@ namespace System.Web.Http.Routing
         public IInlineConstraintResolver ConstraintResolver { get; private set; }
 
         /// <summary>
-        /// Builds an <see cref="IHttpRoute"/> based on the specified route info provider.
+        /// Builds an <see cref="IHttpRoute"/> for a particular action.
         /// </summary>
-        /// <param name="provider">The provider used to determine the route name and the route template.</param>
+        /// <param name="routeTemplate">The tokenized route template for the route.</param>
+        /// <param name="httpMethods">The HTTP methods supported by the route.</param>
         /// <param name="controllerName">The name of the associated controller.</param>
         /// <param name="actionName">The name of the associated action.</param>
         /// <returns>The generated <see cref="IHttpRoute"/>.</returns>
-        public virtual IHttpRoute BuildHttpRoute(IHttpRouteInfoProvider provider, string controllerName, string actionName)
+        public virtual IHttpRoute BuildHttpRoute(string routeTemplate, IEnumerable<HttpMethod> httpMethods, string controllerName, string actionName)
         {
-            if (provider == null)
+            if (routeTemplate == null)
             {
-                throw Error.ArgumentNull("provider");
+                throw Error.ArgumentNull("routeTemplate");
             }
 
             if (controllerName == null)
@@ -84,16 +86,17 @@ namespace System.Web.Http.Routing
                 { "action", actionName }
             };
 
-            HttpRouteValueDictionary constraints = new HttpRouteValueDictionary
+            HttpRouteValueDictionary constraints = new HttpRouteValueDictionary();
+            if (httpMethods != null)
             {
                 // Current method constraint implementation is inefficient since it matches before running the constraint.
                 // Consider checking the HTTP method first in a custom route as a performance optimization.
-                { "httpMethod", new HttpMethodConstraint(provider.HttpMethods.ToArray()) }
-            };
+                constraints.Add("httpMethod", new HttpMethodConstraint(httpMethods.ToArray()));
+            }
 
-            string routeTemplate = ParseRouteTemplate(provider.RouteTemplate, defaults, constraints);
+            string detokenizedRouteTemplate = ParseRouteTemplate(routeTemplate, defaults, constraints);
 
-            return BuildHttpRoute(defaults, constraints, routeTemplate);
+            return BuildHttpRoute(defaults, constraints, detokenizedRouteTemplate);
         }
 
         /// <summary>

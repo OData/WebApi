@@ -11,7 +11,7 @@ namespace System.Web.Http
     /// Specifies that an action supports the PUT HTTP method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class HttpPutAttribute : Attribute, IHttpRouteInfoProvider
+    public sealed class HttpPutAttribute : Attribute, IActionHttpMethodProvider, IHttpRouteInfoProvider
     {
         private static readonly Collection<HttpMethod> _supportedMethods = new Collection<HttpMethod>(new HttpMethod[] { HttpMethod.Put });
 

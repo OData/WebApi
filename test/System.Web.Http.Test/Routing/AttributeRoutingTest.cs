@@ -10,22 +10,25 @@ namespace System.Web.Http.Routing
     public class AttributeRoutingTest
     {
         [Theory]
-        [InlineData("GET", "Controller/42", "Get42")]
+        [InlineData("GET", "controller/42", "Get42")]
         // Tests inline route constraints
-        [InlineData("GET", "Controller/Ethan", "GetByNameEthan")]
+        [InlineData("GET", "controller/Ethan", "GetByNameEthan")]
         // Tests the HTTP method constraint
-        [InlineData("PUT", "Controller/42", "Put42")]
+        [InlineData("PUT", "controller/42", "Put42")]
         // Tests optional parameters
-        [InlineData("GET", "Optional/1/2", "Optional12")]
-        [InlineData("GET", "Optional/1", "Optional1")]
-        [InlineData("GET", "Optional", "Optional")]
-        [InlineData("GET", "OptionalWithConstraint", "OptionalWithConstraint")]
+        [InlineData("GET", "optional/1/2", "Optional12")]
+        [InlineData("GET", "optional/1", "Optional1")]
+        [InlineData("GET", "optional", "Optional")]
+        [InlineData("GET", "optionalwconstraint", "OptionalWithConstraint")]
         // Tests default values
-        [InlineData("GET", "Default/1/2", "Default12")]
-        [InlineData("GET", "Default/1", "Default1D2")]
-        [InlineData("GET", "Default", "DefaultD1D2")]
+        [InlineData("GET", "default/1/2", "Default12")]
+        [InlineData("GET", "default/1", "Default1D2")]
+        [InlineData("GET", "default", "DefaultD1D2")]
         // Test wildcard parameters
-        [InlineData("GET", "Wildcard/a/b/c", "Wildcarda/b/c")]
+        [InlineData("GET", "wildcard/a/b/c", "Wildcarda/b/c")]
+        // Test prefixes
+        [InlineData("GET", "prefix", "PrefixedGet")]
+        [InlineData("GET", "prefix/123", "PrefixedGetById123")]
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -58,53 +61,61 @@ namespace System.Web.Http.Routing
 
     public class AttributedController : ApiController
     {
-        [HttpGet("Controller/{id:int}")]
+        [HttpGet("controller/{id:int}")]
         public string Get(int id)
         {
             return "Get" + id;
         }
 
-        [HttpGet("Controller/{name}")]
+        [HttpGet("controller/{name}")]
         public string GetByName(string name)
         {
             return "GetByName" + name;
         }
 
-        [HttpGet("Controller/Get1")]
-        [HttpGet("Controller/Get2")]
-        public string MultipleGet()
-        {
-            return "MultipleGet";
-        }
-
-        [HttpPut("Controller/{id}")]
+        [HttpPut("controller/{id}")]
         public string Put(string id)
         {
             return "Put" + id;
         }
 
-        [HttpGet("Optional/{opt1?}/{opt2?}")]
+        [HttpGet("optional/{opt1?}/{opt2?}")]
         public string Optional(string opt1 = null, string opt2 = null)
         {
             return "Optional" + opt1 + opt2;
         }
 
-        [HttpGet("OptionalWithConstraint/{opt:int?}")]
+        [HttpGet("optionalwconstraint/{opt:int?}")]
         public string OptionalWithConstraint(string opt = null)
         {
             return "OptionalWithConstraint" + opt;
         }
 
-        [HttpGet("Default/{default1=D1}/{default2=D2}")]
+        [HttpGet("default/{default1=D1}/{default2=D2}")]
         public string Default(string default1, string default2)
         {
             return "Default" + default1 + default2;
         }
 
-        [HttpGet("Wildcard/{*wildcard}")]
+        [HttpGet("wildcard/{*wildcard}")]
         public string Wildcard(string wildcard)
         {
             return "Wildcard" + wildcard;
+        }
+    }
+
+    [RoutePrefix("prefix")]
+    public class PrefixedController : ApiController
+    {
+        public string Get()
+        {
+            return "PrefixedGet";
+        }
+
+        [HttpGet("{id}")]
+        public string GetById(int id)
+        {
+            return "PrefixedGetById" + id;
         }
     }
 }

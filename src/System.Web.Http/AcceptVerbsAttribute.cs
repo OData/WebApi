@@ -15,7 +15,7 @@ namespace System.Web.Http
     [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "The accessor is exposed as an Collection<HttpMethod>.")]
     [CLSCompliant(false)]
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class AcceptVerbsAttribute : Attribute, IHttpRouteInfoProvider
+    public sealed class AcceptVerbsAttribute : Attribute, IActionHttpMethodProvider, IHttpRouteInfoProvider
     {
         private readonly Collection<HttpMethod> _httpMethods;
 

@@ -120,10 +120,9 @@ namespace System.Web.Http.Routing
             }
             else
             {
-                string[] splitArguments = argumentString.Split(',');
-                int argumentCount = splitArguments.Length;
+                string[] arguments = argumentString.Split(',').Select(argument => argument.Trim()).ToArray();
 
-                ConstructorInfo[] matchingConstructors = constructors.Where(ci => ci.GetParameters().Length == argumentCount).ToArray();
+                ConstructorInfo[] matchingConstructors = constructors.Where(ci => ci.GetParameters().Length == arguments.Length).ToArray();
                 int constructorMatches = matchingConstructors.Length;
 
                 if (constructorMatches == 0)
@@ -133,7 +132,7 @@ namespace System.Web.Http.Routing
                 else if (constructorMatches == 1)
                 {
                     activationConstructor = matchingConstructors[0];
-                    parameters = ConvertArguments(activationConstructor.GetParameters(), splitArguments);
+                    parameters = ConvertArguments(activationConstructor.GetParameters(), arguments);
                 }
                 else
                 {

@@ -238,12 +238,9 @@ namespace System.Web.Http.Routing
 
         private static IHttpRoute BuildRoute(string routeTemplate, IInlineConstraintResolver constraintResolver = null)
         {
-            // Arrange
-            IHttpRouteInfoProvider provider = new FakeRouteProvider(routeTemplate);
-
             // Act
             HttpRouteBuilder routeBuilder = new HttpRouteBuilder(constraintResolver ?? new DefaultInlineConstraintResolver());
-            IHttpRoute route = routeBuilder.BuildHttpRoute(provider, "FakeController", "FakeAction");
+            IHttpRoute route = routeBuilder.BuildHttpRoute(routeTemplate, new HttpMethod[] { HttpMethod.Get }, "FakeController", "FakeAction");
 
             // Assertions for default, unspecified behavior:
             Assert.NotNull(route);
@@ -252,21 +249,6 @@ namespace System.Web.Http.Routing
             Assert.IsType<HttpMethodConstraint>(route.Constraints["httpMethod"]);
 
             return route;
-        }
-
-        private class FakeRouteProvider : IHttpRouteInfoProvider
-        {
-            public FakeRouteProvider(string routeTemplate)
-            {
-                HttpMethods = new Collection<HttpMethod> { HttpMethod.Get };
-                RouteTemplate = routeTemplate;
-            }
-
-            public Collection<HttpMethod> HttpMethods { get; private set; }
-            
-            public string RouteName { get; private set; }
-            
-            public string RouteTemplate { get; private set; }
         }
     }
 }

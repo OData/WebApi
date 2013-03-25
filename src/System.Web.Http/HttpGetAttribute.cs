@@ -11,7 +11,7 @@ namespace System.Web.Http
     /// Specifies that an action supports the GET HTTP method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class HttpGetAttribute : Attribute, IHttpRouteInfoProvider
+    public sealed class HttpGetAttribute : Attribute, IActionHttpMethodProvider, IHttpRouteInfoProvider
     {
         private static readonly Collection<HttpMethod> _supportedMethods = new Collection<HttpMethod>(new HttpMethod[] { HttpMethod.Get });
 

@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.ModelBinding;
@@ -77,28 +80,60 @@ namespace System.Web.Http
             IHttpActionSelector actionSelector = configuration.Services.GetActionSelector();
             foreach (HttpControllerDescriptor controllerDescriptor in controllerSelector.GetControllerMapping().Values)
             {
+                Collection<RoutePrefixAttribute> prefixAttributes = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>();
+                string[] routePrefixes = prefixAttributes.Select(prefixAttribute => prefixAttribute.Prefix).ToArray();
+
                 foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionSelector.GetActionMapping(controllerDescriptor))
                 {
-                    MapHttpAttributeRoutes(configuration.Routes, controllerDescriptor, actionGrouping, routeBuilder);
+                    HttpRouteCollection routes = configuration.Routes;
+                    string controllerName = controllerDescriptor.ControllerName;
+                    MapHttpAttributeRoutes(routes, routeBuilder, controllerName, routePrefixes, actionGrouping);
                 }
             }
         }
 
-        private static void MapHttpAttributeRoutes(HttpRouteCollection routes, HttpControllerDescriptor controllerDescriptor,
-            IGrouping<string, HttpActionDescriptor> actionGrouping, HttpRouteBuilder routeBuilder)
+        private static void MapHttpAttributeRoutes(HttpRouteCollection routes, HttpRouteBuilder routeBuilder, string controllerName,
+            string[] routePrefixes, IGrouping<string, HttpActionDescriptor> actionGrouping)
         {
             List<IHttpRoute> namelessAttributeRoutes = new List<IHttpRoute>();
-            string controllerName = controllerDescriptor.ControllerName;
             string actionName = actionGrouping.Key;
 
             foreach (HttpActionDescriptor actionDescriptor in actionGrouping)
             {
-                foreach (IHttpRouteInfoProvider routeProvider in actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false))
+                IEnumerable<IHttpRouteInfoProvider> routeInfoProviders = actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
+                foreach (IHttpRouteInfoProvider routeProvider in routeInfoProviders.DefaultIfEmpty())
                 {
-                    if (routeProvider.RouteTemplate != null)
+                    foreach (string routePrefix in routePrefixes.DefaultIfEmpty())
                     {
-                        IHttpRoute route = routeBuilder.BuildHttpRoute(routeProvider, controllerName, actionName);
-                        if (routeProvider.RouteName == null)
+                        StringBuilder templateBuilder = new StringBuilder();
+
+                        if (!String.IsNullOrWhiteSpace(routePrefix))
+                        {
+                            templateBuilder.Append(routePrefix.TrimEnd('/'));
+                        }
+
+                        string providerTemplate = routeProvider == null ? null : routeProvider.RouteTemplate;
+                        if (!String.IsNullOrWhiteSpace(providerTemplate))
+                        {
+                            if (templateBuilder.Length != 0)
+                            {
+                                // If there is a route prefix, add a separator
+                                templateBuilder.Append('/');
+                            }
+
+                            templateBuilder.Append(providerTemplate);
+                        }
+
+                        if (templateBuilder.Length == 0)
+                        {
+                            // Route prefix and route template are both null or whitespace so ignore and move on
+                            continue;
+                        }
+
+                        string routeTemplate = templateBuilder.ToString();
+                        Collection<HttpMethod> httpMethods = actionDescriptor.SupportedHttpMethods;
+                        IHttpRoute route = routeBuilder.BuildHttpRoute(routeTemplate, httpMethods, controllerName, actionName);
+                        if (routeProvider == null || routeProvider.RouteName == null)
                         {
                             namelessAttributeRoutes.Add(route);
                         }

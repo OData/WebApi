@@ -11,7 +11,7 @@ namespace System.Web.Http
     /// Specifies that an action supports the POST HTTP method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class HttpPostAttribute : Attribute, IHttpRouteInfoProvider
+    public sealed class HttpPostAttribute : Attribute, IActionHttpMethodProvider, IHttpRouteInfoProvider
     {
         private static readonly Collection<HttpMethod> _supportedMethods = new Collection<HttpMethod>(new HttpMethod[] { HttpMethod.Post });
 

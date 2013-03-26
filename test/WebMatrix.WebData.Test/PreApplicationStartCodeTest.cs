@@ -66,16 +66,7 @@ namespace WebMatrix.WebData.Test
 
                 // Verify simple membership
                 var providers = Membership.Providers;
-                var simpleMembershipProviderFound = false;
-                foreach (var provider in providers)
-                {
-                    if (provider is SimpleMembershipProvider)
-                    {
-                        simpleMembershipProviderFound = true;
-                        break;
-                    }
-                }
-                Assert.True(simpleMembershipProviderFound);
+                Assert.NotEmpty(providers.OfType<SimpleMembershipProvider>());
                 Assert.True(Roles.Enabled);
             });
         }
@@ -91,16 +82,7 @@ namespace WebMatrix.WebData.Test
 
                 // Verify simple membership
                 var providers = Membership.Providers;
-                var simpleMembershipProviderFound = false;
-                foreach (var provider in providers)
-                {
-                    if (provider is SimpleMembershipProvider)
-                    {
-                        simpleMembershipProviderFound = true;
-                        break;
-                    }
-                }
-                Assert.False(simpleMembershipProviderFound);
+                Assert.Empty(providers.OfType<SimpleMembershipProvider>());
                 Assert.False(Roles.Enabled);
             });
         }

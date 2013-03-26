@@ -64,6 +64,7 @@
     <Compile Include="AdditionalMetaDataAttribute.cs" />
     <Compile Include="AllowAnonymousAttribute.cs" />
     <Compile Include="ActionDescriptorHelper.cs" />
+    <Compile Include="Async\BeginInvokeDelegateOfTState.cs" />
     <Compile Include="Async\TaskAsyncActionDescriptor.cs" />
     <Compile Include="Async\TaskWrapperAsyncResult.cs" />
     <Compile Include="Filters\AuthenticationChallengeContext.cs" />

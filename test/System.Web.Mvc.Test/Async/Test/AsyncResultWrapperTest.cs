@@ -34,6 +34,41 @@ namespace System.Web.Mvc.Async.Test
         }
 
         [Fact]
+        public void Begin_AsynchronousCompletionWithState()
+        {
+            // Arrange
+            IAsyncResult innerResult = new MockAsyncResult();
+            object invokeState = new object();
+            object capturedBeginState = null;
+            object capturedEndState = null;
+            object expectedRetun = new object();
+
+            // Act
+            IAsyncResult outerResult = AsyncResultWrapper.Begin(
+                null,
+                null,
+                (AsyncCallback callback, object callbackState, object innerInvokeState) =>
+                {
+                    capturedBeginState = innerInvokeState;
+                    return innerResult;
+                },
+                (IAsyncResult result, object innerInvokeState) =>
+                {
+                    capturedEndState = innerInvokeState;
+                    return expectedRetun;
+                },
+                invokeState,
+                null,
+                Timeout.Infinite);
+            object endResult = AsyncResultWrapper.End<object>(outerResult);
+
+            // Assert
+            Assert.Same(expectedRetun, endResult);
+            Assert.Same(invokeState, capturedBeginState);
+            Assert.Same(invokeState, capturedEndState);
+        }
+
+        [Fact]
         public void Begin_ReturnsAsyncResultWhichWrapsInnerResult()
         {
             // Arrange
@@ -138,7 +173,7 @@ namespace System.Web.Mvc.Async.Test
                     Assert.True(innerIAsyncResult.CompletedSynchronously);
                 },
                 callbackState: expectedCallbackState,
-                func: (innerIAsyncResult, innerState) => 
+                func: (innerIAsyncResult, innerState) =>
                 {
                     funcCalled = true;
                     Assert.NotNull(innerIAsyncResult);
@@ -147,8 +182,8 @@ namespace System.Web.Mvc.Async.Test
                     Assert.True(innerIAsyncResult.IsCompleted);
                     Assert.True(innerIAsyncResult.CompletedSynchronously);
                     return expectedReturn;
-                }, 
-                funcState: expectedState, 
+                },
+                funcState: expectedState,
                 tag: null);
             object retVal = AsyncResultWrapper.End<object>(asyncResult);
 

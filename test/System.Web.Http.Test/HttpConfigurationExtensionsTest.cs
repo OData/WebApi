@@ -91,10 +91,8 @@ namespace System.Net.Http
 
             // Assert
             HttpRouteCollection routes = config.Routes;
-            IHttpRoute route1 = routes.First(route => route.RouteTemplate == "Controller/Get1");
-            Assert.Equal(route1, routes["Controller.MultipleGet1"]);
-            IHttpRoute route2 = routes.First(route => route.RouteTemplate == "Controller/Get2");
-            Assert.Equal(route2, routes["Controller.MultipleGet2"]);
+            IHttpRoute route1 = Assert.Single(routes.Where(route => route.RouteTemplate == "Controller/Get1"));
+            IHttpRoute route2 = Assert.Single(routes.Where(route => route.RouteTemplate == "Controller/Get2"));
         }
 
         public class TestParameter

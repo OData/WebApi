@@ -267,19 +267,5 @@ namespace System.Web.Http.WebHost.Routing
             // Assert
             Assert.True(isLocal);
         }
-
-        [Fact]
-        public void IsLocal_Call_To_HttpRequestMessageExtension_Method_With_NoPropertyValue()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            HttpRequestMessageWrapper wrapper = new HttpRequestMessageWrapper("/", request);
-
-            // Act
-            bool isLocal = wrapper.IsLocal;
-
-            // Assert
-            Assert.False(isLocal);
-        }
     }
 }

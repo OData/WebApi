@@ -266,43 +266,6 @@ namespace System.Web.Http
             traceManager.Initialize(configuration);
         }
 
-        internal bool ShouldIncludeErrorDetail(HttpRequestMessage request)
-        {
-            switch (IncludeErrorDetailPolicy)
-            {
-                case IncludeErrorDetailPolicy.Default:
-                    Lazy<bool> includeErrorDetail;
-                    if (request.Properties.TryGetValue<Lazy<bool>>(HttpPropertyKeys.IncludeErrorDetailKey, out includeErrorDetail))
-                    {
-                        // If we are on webhost and the user hasn't changed the IncludeErrorDetailPolicy
-                        // look up into the ASP.NET CustomErrors property else default to LocalOnly.
-                        return includeErrorDetail.Value;
-                    }
-
-                    goto case IncludeErrorDetailPolicy.LocalOnly;
-
-                case IncludeErrorDetailPolicy.LocalOnly:
-                    if (request == null)
-                    {
-                        return false;
-                    }
-
-                    Lazy<bool> isLocal;
-                    if (request.Properties.TryGetValue<Lazy<bool>>(HttpPropertyKeys.IsLocalKey, out isLocal))
-                    {
-                        return isLocal.Value;
-                    }
-                    return false;
-
-                case IncludeErrorDetailPolicy.Always:
-                    return true;
-
-                case IncludeErrorDetailPolicy.Never:
-                default:
-                    return false;
-            }
-        }
-
         /// <summary>
         /// Adds the given <paramref name="resource"/> to a list of resources that will be disposed once the configuration is disposed.
         /// </summary>

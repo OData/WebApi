@@ -189,8 +189,7 @@ namespace System.Net.Http
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "o", Justification = "oDataError is spelled correctly.")]
         public static HttpResponseMessage CreateODataErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, ODataError oDataError)
         {
-            HttpConfiguration config = request.GetConfiguration();
-            if (config != null && ShouldIncludeErrorDetail(config, request))
+            if (request.ShouldIncludeErrorDetail())
             {
                 return request.CreateResponse(statusCode, oDataError);
             }
@@ -210,58 +209,11 @@ namespace System.Net.Http
         internal static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, string message, string messageDetail)
         {
             HttpError error = new HttpError(message);
-            HttpConfiguration config = request.GetConfiguration();
-            if (config != null && ShouldIncludeErrorDetail(config, request))
+            if (request.ShouldIncludeErrorDetail())
             {
                 error.Add(MessageDetailKey, messageDetail);
             }
             return request.CreateErrorResponse(statusCode, error);
-        }
-
-        // IMPORTANT: This is a slightly modified version of HttpConfiguration.ShouldIncludeErrorDetail
-        // That method is internal, so as a workaround the logic is copied here; Work Item #361 tracks making the method public
-        // When the work item is fixed, we should be able to remove this copy and use the public method instead
-        internal static bool ShouldIncludeErrorDetail(HttpConfiguration config, HttpRequestMessage request)
-        {
-            switch (config.IncludeErrorDetailPolicy)
-            {
-                case IncludeErrorDetailPolicy.Default:
-                    object includeErrorDetail;
-                    if (request.Properties.TryGetValue(HttpPropertyKeys.IncludeErrorDetailKey, out includeErrorDetail))
-                    {
-                        Lazy<bool> includeErrorDetailLazy = includeErrorDetail as Lazy<bool>;
-                        if (includeErrorDetailLazy != null)
-                        {
-                            return includeErrorDetailLazy.Value;
-                        }
-                    }
-
-                    goto case IncludeErrorDetailPolicy.LocalOnly;
-
-                case IncludeErrorDetailPolicy.LocalOnly:
-                    if (request == null)
-                    {
-                        return false;
-                    }
-
-                    object isLocal;
-                    if (request.Properties.TryGetValue(HttpPropertyKeys.IsLocalKey, out isLocal))
-                    {
-                        Lazy<bool> isLocalLazy = isLocal as Lazy<bool>;
-                        if (isLocalLazy != null)
-                        {
-                            return isLocalLazy.Value;
-                        }
-                    }
-                    return false;
-
-                case IncludeErrorDetailPolicy.Always:
-                    return true;
-
-                case IncludeErrorDetailPolicy.Never:
-                default:
-                    return false;
-            }
         }
 
         /// <summary>

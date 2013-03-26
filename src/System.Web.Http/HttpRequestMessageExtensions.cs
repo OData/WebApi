@@ -353,19 +353,18 @@ namespace System.Net.Http
         {
             HttpConfiguration configuration = request.GetConfiguration();
 
+            HttpError error = errorCreator(request.ShouldIncludeErrorDetail());
             // CreateErrorResponse should never fail, even if there is no configuration associated with the request
             // In that case, use the default HttpConfiguration to con-neg the response media type
             if (configuration == null)
             {
                 using (HttpConfiguration defaultConfig = new HttpConfiguration())
                 {
-                    HttpError error = errorCreator(defaultConfig.ShouldIncludeErrorDetail(request));
                     return request.CreateResponse<HttpError>(statusCode, error, defaultConfig);
                 }
             }
             else
             {
-                HttpError error = errorCreator(configuration.ShouldIncludeErrorDetail(request));
                 return request.CreateResponse<HttpError>(statusCode, error, configuration);
             }
         }
@@ -738,13 +737,52 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
-            Lazy<bool> isLocal;
-            if (request.Properties.TryGetValue<Lazy<bool>>(HttpPropertyKeys.IsLocalKey, out isLocal))
+            Lazy<bool> isLocal = request.GetProperty<Lazy<bool>>(HttpPropertyKeys.IsLocalKey);
+
+            return isLocal == null ? false : isLocal.Value;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether error details, such as exception messages and stack traces, should be included for this HTTP request.
+        /// </summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <returns><see langword="true"/> if the error details are to be included; otherwise, <see langword="false"/>.</returns>
+        public static bool ShouldIncludeErrorDetail(this HttpRequestMessage request)
+        {
+            if (request == null)
             {
-                return isLocal.Value;
+                throw Error.ArgumentNull("request");
             }
 
-            return false;
+            HttpConfiguration configuration = request.GetConfiguration();
+            IncludeErrorDetailPolicy includeErrorDetailPolicy = IncludeErrorDetailPolicy.Default;
+            if (configuration != null)
+            {
+                includeErrorDetailPolicy = configuration.IncludeErrorDetailPolicy;
+            }
+            switch (includeErrorDetailPolicy)
+            {
+                case IncludeErrorDetailPolicy.Default:
+                    Lazy<bool> includeErrorDetail = request.GetProperty<Lazy<bool>>(HttpPropertyKeys.IncludeErrorDetailKey);
+                    if (includeErrorDetail != null)
+                    {
+                        // If we are on webhost and the user hasn't changed the IncludeErrorDetailPolicy
+                        // look up into the Request's property bag else default to LocalOnly.
+                        return includeErrorDetail.Value;
+                    }
+
+                    goto case IncludeErrorDetailPolicy.LocalOnly;
+
+                case IncludeErrorDetailPolicy.LocalOnly:
+                    return request.IsLocal();
+
+                case IncludeErrorDetailPolicy.Always:
+                    return true;
+
+                case IncludeErrorDetailPolicy.Never:
+                default:
+                    return false;
+            }
         }
     }
 }

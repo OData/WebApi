@@ -587,6 +587,19 @@ namespace System.Net.Http
         }
 
         [Fact]
+        public void IsLocal_With_Property_Value_String_Returns_False()
+        {
+            // Arrange
+            _request.Properties.Add(HttpPropertyKeys.IsLocalKey, "Test String");
+
+            // Act
+            bool isLocal = _request.IsLocal();
+
+            // Assert
+            Assert.False(isLocal);
+        }
+
+        [Fact]
         public void IsLocal_WhenRequestIsNull_Throws()
         {
             // Arrange
@@ -594,6 +607,95 @@ namespace System.Net.Http
 
             // Act and Assert
             Assert.ThrowsArgumentNull(() => request.IsLocal(), "request");
+        }
+
+        [Theory]
+        [InlineData(IncludeErrorDetailPolicy.Default, null, null, false)]
+        [InlineData(IncludeErrorDetailPolicy.Default, null, true, true)]
+        [InlineData(IncludeErrorDetailPolicy.Default, null, false, false)]
+        [InlineData(IncludeErrorDetailPolicy.Default, true, null, false)]
+        [InlineData(IncludeErrorDetailPolicy.Default, true, true, true)]
+        [InlineData(IncludeErrorDetailPolicy.Default, true, false, false)]
+        [InlineData(IncludeErrorDetailPolicy.Default, false, null, false)]
+        [InlineData(IncludeErrorDetailPolicy.Default, false, true, true)]
+        [InlineData(IncludeErrorDetailPolicy.Default, false, false, false)]
+        [InlineData(IncludeErrorDetailPolicy.LocalOnly, null, null, false)]
+        [InlineData(IncludeErrorDetailPolicy.LocalOnly, null, true, false)]
+        [InlineData(IncludeErrorDetailPolicy.LocalOnly, null, false, false)]
+        [InlineData(IncludeErrorDetailPolicy.LocalOnly, true, null, true)]
+        [InlineData(IncludeErrorDetailPolicy.LocalOnly, true, true, true)]
+        [InlineData(IncludeErrorDetailPolicy.LocalOnly, true, false, true)]
+        [InlineData(IncludeErrorDetailPolicy.LocalOnly, false, null, false)]
+        [InlineData(IncludeErrorDetailPolicy.LocalOnly, false, true, false)]
+        [InlineData(IncludeErrorDetailPolicy.LocalOnly, false, false, false)]
+        [InlineData(IncludeErrorDetailPolicy.Always, null, null, true)]
+        [InlineData(IncludeErrorDetailPolicy.Always, null, true, true)]
+        [InlineData(IncludeErrorDetailPolicy.Always, null, false, true)]
+        [InlineData(IncludeErrorDetailPolicy.Always, true, null, true)]
+        [InlineData(IncludeErrorDetailPolicy.Always, true, true, true)]
+        [InlineData(IncludeErrorDetailPolicy.Always, true, false, true)]
+        [InlineData(IncludeErrorDetailPolicy.Always, false, null, true)]
+        [InlineData(IncludeErrorDetailPolicy.Always, false, true, true)]
+        [InlineData(IncludeErrorDetailPolicy.Always, false, false, true)]
+        [InlineData(IncludeErrorDetailPolicy.Never, null, null, false)]
+        [InlineData(IncludeErrorDetailPolicy.Never, null, true, false)]
+        [InlineData(IncludeErrorDetailPolicy.Never, null, false, false)]
+        [InlineData(IncludeErrorDetailPolicy.Never, true, null, false)]
+        [InlineData(IncludeErrorDetailPolicy.Never, true, true, false)]
+        [InlineData(IncludeErrorDetailPolicy.Never, true, false, false)]
+        [InlineData(IncludeErrorDetailPolicy.Never, false, null, false)]
+        [InlineData(IncludeErrorDetailPolicy.Never, false, true, false)]
+        [InlineData(IncludeErrorDetailPolicy.Never, false, false, false)]
+        [InlineData(null, false, false, false)]
+        public void ShouldIncludeErrorDetail(IncludeErrorDetailPolicy errorDetail, bool isLocal, bool includeErrorDetail, bool expectedResult)
+        {
+            // Arrange
+            _config.IncludeErrorDetailPolicy = errorDetail;
+            _request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => isLocal));
+            _request.Properties.Add(HttpPropertyKeys.IncludeErrorDetailKey, new Lazy<bool>(() => includeErrorDetail));
+
+            // Act
+            bool includeError = _request.ShouldIncludeErrorDetail();
+
+            // Assert
+            Assert.Equal(includeError, expectedResult);
+        }
+
+        [Fact]
+        public void ShouldIncludeErrorDetail_Returns_False_WhenConfigIsNull_includeErrorDetail_Null()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            // Act
+            bool includeError = request.ShouldIncludeErrorDetail();
+
+            // Assert
+            Assert.False(includeError);
+        }
+
+        [Fact]
+        public void ShouldIncludeErrorDetail_Returns_Value_WhenConfigIsNull_includeErrorDetail_HasValue()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Properties.Add(HttpPropertyKeys.IncludeErrorDetailKey, new Lazy<bool>(() => true));
+
+            // Act
+            bool includeError = request.ShouldIncludeErrorDetail();
+
+            // Assert
+            Assert.True(includeError);
+        }
+
+        [Fact]
+        public void ShouldIncludeErrorDetail_WhenRequestIsNull_Throws()
+        {
+            // Arrange
+            HttpRequestMessage request = null;
+
+            // Act and Assert
+            Assert.ThrowsArgumentNull(() => request.ShouldIncludeErrorDetail(), "request");
         }
     }
 }

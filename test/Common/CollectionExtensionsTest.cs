@@ -9,6 +9,29 @@ namespace System.Collections.Generic
     public class CollectionExtensionsTest
     {
         [Fact]
+        public void AppendAndReallocateEmpty_ReturnsOne()
+        {
+            string[] empty = new string[0];
+
+            string[] emptyAppended = empty.AppendAndReallocate("AppendedEmpty");
+
+            Assert.Equal(1, emptyAppended.Length);
+            Assert.Equal("AppendedEmpty", emptyAppended[0]);
+        }
+
+        [Fact]
+        public void AppendAndReallocateOne_ReturnsTwo()
+        {
+            string[] one = new string[] { "One" };
+
+            string[] oneAppended = one.AppendAndReallocate("AppendedOne");
+
+            Assert.Equal(2, oneAppended.Length);
+            Assert.Equal("One", oneAppended[0]);
+            Assert.Equal("AppendedOne", oneAppended[1]);
+        }
+
+        [Fact]
         public void AsArray_Array_ReturnsSameInstance()
         {
             object[] array = new object[] { new object(), new object() };

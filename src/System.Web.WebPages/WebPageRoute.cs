@@ -28,7 +28,7 @@ namespace System.Web.WebPages
 
             // Parse incoming URL (we trim off the first two chars since they're always "~/")
             string requestPath = context.Request.AppRelativeCurrentExecutionFilePath.Substring(2) + context.Request.PathInfo;
-            List<string> registeredExtensions = WebPageHttpHandler.SupportedExtensions;
+            string[] registeredExtensions = WebPageHttpHandler.SupportedExtensions;
 
             // Check if this request matches a file in the app
             WebPageMatch webpageRouteMatch = MatchRequest(requestPath, registeredExtensions, VirtualPathFactoryManager.InstancePathExists, context, DisplayModeProvider.Instance);
@@ -77,9 +77,9 @@ namespace System.Web.WebPages
             return webPageMatch;
         }
 
-        private static string GetRouteLevelMatch(string pathValue, List<string> supportedExtensions, Func<string, bool> virtualPathExists, HttpContextBase context, DisplayModeProvider displayModeProvider)
+        private static string GetRouteLevelMatch(string pathValue, string[] supportedExtensions, Func<string, bool> virtualPathExists, HttpContextBase context, DisplayModeProvider displayModeProvider)
         {
-            for (int i = 0; i < supportedExtensions.Count; i++)
+            for (int i = 0; i < supportedExtensions.Length; i++)
             {
                 string supportedExtension = supportedExtensions[i];
 
@@ -117,7 +117,7 @@ namespace System.Web.WebPages
             return null;
         }
 
-        internal static WebPageMatch MatchRequest(string pathValue, List<string> supportedExtensions, Func<string, bool> virtualPathExists, HttpContextBase context, DisplayModeProvider displayModes)
+        internal static WebPageMatch MatchRequest(string pathValue, string[] supportedExtensions, Func<string, bool> virtualPathExists, HttpContextBase context, DisplayModeProvider displayModes)
         {
             string currentLevel = String.Empty;
             string currentPathInfo = pathValue;
@@ -130,7 +130,7 @@ namespace System.Web.WebPages
                 {
                     // TODO: Look into switching to RawURL to eliminate the need for this issue
                     bool foundSupportedExtension = false;
-                    for (int i = 0; i < supportedExtensions.Count; i++)
+                    for (int i = 0; i < supportedExtensions.Length; i++)
                     {
                         string supportedExtension = supportedExtensions[i];
                         if (pathValue.EndsWith("." + supportedExtension, StringComparison.OrdinalIgnoreCase))
@@ -180,7 +180,7 @@ namespace System.Web.WebPages
             return MatchDefaultFiles(pathValue, supportedExtensions, virtualPathExists, context, displayModes, currentLevel);
         }
 
-        private static WebPageMatch MatchDefaultFiles(string pathValue, List<string> supportedExtensions, Func<string, bool> virtualPathExists, HttpContextBase context, DisplayModeProvider displayModes, string currentLevel)
+        private static WebPageMatch MatchDefaultFiles(string pathValue, string[] supportedExtensions, Func<string, bool> virtualPathExists, HttpContextBase context, DisplayModeProvider displayModes, string currentLevel)
         {
             // If we haven't found anything yet, now try looking for default.* or index.* at the current url
             currentLevel = pathValue;

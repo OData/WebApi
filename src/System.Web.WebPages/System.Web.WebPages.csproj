@@ -39,8 +39,17 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>CommonResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="..\Common\CollectionExtensions.cs">
+      <Link>Common\CollectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Empty.cs">
+      <Link>Common\Empty.cs</Link>
+    </Compile>
     <Compile Include="..\Common\HashCodeCombiner.cs">
       <Link>Common\HashCodeCombiner.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\ListWrapperCollection.cs">
+      <Link>Common\ListWrapperCollection.cs</Link>
     </Compile>
     <Compile Include="..\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>

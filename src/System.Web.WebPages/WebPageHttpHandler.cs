@@ -16,7 +16,7 @@ namespace System.Web.WebPages
     {
         internal const string StartPageFileName = "_PageStart";
         public static readonly string WebPagesVersionHeaderName = "X-AspNetWebPages-Version";
-        private static readonly List<string> _supportedExtensions = new List<string>();
+        private static string[] _supportedExtensions = Empty<string>.Array;
         internal static readonly string WebPagesVersion = GetVersionString();
         private readonly WebPage _webPage;
         private readonly Lazy<WebPageRenderingBase> _startPage;
@@ -53,7 +53,7 @@ namespace System.Web.WebPages
             get { return _startPage.Value; }
         }
 
-        internal static List<string> SupportedExtensions
+        internal static string[] SupportedExtensions
         {
             get { return _supportedExtensions; }
         }
@@ -182,7 +182,8 @@ namespace System.Web.WebPages
         public static void RegisterExtension(string extension)
         {
             // Note: we don't lock or check for duplicates because we only expect this method to be called during PreAppStart
-            _supportedExtensions.Add(extension);
+            // Long lived data with few writes and many reads, so reallocate the array each time.
+            _supportedExtensions = _supportedExtensions.AppendAndReallocate(extension);
         }
 
         internal static bool ShouldGenerateSourceHeader(HttpContextBase context)

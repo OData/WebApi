@@ -12,6 +12,20 @@ namespace System.Collections.Generic
     internal static class CollectionExtensions
     {
         /// <summary>
+        /// Return a new array with the value added to the end. Slow and best suited to long lived arrays with few writes relative to reads.
+        /// </summary>
+        public static T[] AppendAndReallocate<T>(this T[] array, T value)
+        {
+            Contract.Assert(array != null);
+
+            int originalLength = array.Length;
+            T[] newArray = new T[originalLength + 1];
+            array.CopyTo(newArray, 0);
+            newArray[originalLength] = value;
+            return newArray;
+        }
+
+        /// <summary>
         /// Return the enumerable as an Array, copying if required. Optimized for common case where it is an Array. 
         /// Avoid mutating the return value.
         /// </summary>

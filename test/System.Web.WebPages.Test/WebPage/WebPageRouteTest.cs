@@ -41,7 +41,7 @@ namespace System.Web.WebPages.Test
             mockContext.Setup(c => c.Response.Cookies).Returns(new HttpCookieCollection());
             var displayModeProvider = new DisplayModeProvider();
 
-            WebPageMatch smartyMatch = WebPageRoute.MatchRequest(url, supportedExt.ToList(), objectFactory.Exists, mockContext.Object, displayModeProvider);
+            WebPageMatch smartyMatch = WebPageRoute.MatchRequest(url, supportedExt.ToArray(), objectFactory.Exists, mockContext.Object, displayModeProvider);
             if (match != null)
             {
                 Assert.NotNull(smartyMatch);
@@ -275,7 +275,7 @@ namespace System.Web.WebPages.Test
             var displayModeProvider = new DisplayModeProvider();
 
             // Act
-            WebPageMatch mobileMatch = WebPageRoute.MatchRequest("page.aspx", new List<string>() { "aspx" }, objectFactory.Exists, mockContext.Object, displayModeProvider);
+            WebPageMatch mobileMatch = WebPageRoute.MatchRequest("page.aspx", new string[] { "aspx" }, objectFactory.Exists, mockContext.Object, displayModeProvider);
 
             // Assert
             Assert.NotNull(mobileMatch.MatchedPath);
@@ -299,7 +299,7 @@ namespace System.Web.WebPages.Test
             displayModeProvider.Modes.Add(displayMode.Object);
 
             // Act
-            WebPageMatch smartyMatch = WebPageRoute.MatchRequest("notThere.aspx", new List<string>() { "aspx" }, objectFactory.Exists, mockContext.Object, displayModeProvider);
+            WebPageMatch smartyMatch = WebPageRoute.MatchRequest("notThere.aspx", new string[] { "aspx" }, objectFactory.Exists, mockContext.Object, displayModeProvider);
 
             // Assert
             Assert.Null(DisplayModeProvider.GetDisplayMode(mockContext.Object));

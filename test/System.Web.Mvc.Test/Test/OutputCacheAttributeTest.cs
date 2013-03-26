@@ -209,6 +209,33 @@ namespace System.Web.Mvc.Test
             context.Verify(c => c.Result, Times.Never());
         }
 
+        [Fact]
+        public void OutputCacheDurationDoesNotSetIfInChildAction()
+        {
+            // Arrange
+            OutputCacheAttribute attr = new OutputCacheAttribute();
+            Mock<ActionExecutingContext> context = new Mock<ActionExecutingContext>();
+            context.Setup(c => c.IsChildAction).Returns(true);
+
+            // Act & assert
+            Assert.Throws<InvalidOperationException>(delegate { attr.OnActionExecuting(context.Object); });
+        }
+
+        [Fact]
+        public void OutputCacheLocationSetNoneIfInChildAction()
+        {
+            // Arrange
+            OutputCacheAttribute attr = new OutputCacheAttribute()
+            {
+                Location = OutputCacheLocation.None
+            };
+            Mock<ActionExecutingContext> context = new Mock<ActionExecutingContext>();
+            context.Setup(c => c.IsChildAction).Returns(true);
+
+            // Act & assert
+            Assert.DoesNotThrow(delegate { attr.OnActionExecuting(context.Object); });
+        }
+
         // GetChildActionUniqueId
 
         [Fact]

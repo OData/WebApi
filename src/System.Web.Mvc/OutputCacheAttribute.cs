@@ -202,6 +202,14 @@ namespace System.Web.Mvc
 
             if (filterContext.IsChildAction)
             {
+                // Skip validation and caching if there's no caching on the server for this action. It's ok to 
+                // explicitly disable caching for a child action, but it will be ignored if the parent action
+                // is using caching.
+                if (IsServerSideCacheDisabled())
+                {
+                    return;
+                }
+
                 ValidateChildActionConfiguration();
 
                 // Already actively being captured? (i.e., cached child action inside of cached child action)
@@ -331,6 +339,20 @@ namespace System.Web.Mvc
             if (String.IsNullOrWhiteSpace(VaryByParam))
             {
                 throw new InvalidOperationException(MvcResources.OutputCacheAttribute_InvalidVaryByParam);
+            }
+        }
+
+        private bool IsServerSideCacheDisabled()
+        {
+            switch (Location)
+            {
+                case OutputCacheLocation.None:
+                case OutputCacheLocation.Client:
+                case OutputCacheLocation.Downstream:
+                    return true;
+
+                default: 
+                    return false;
             }
         }
 

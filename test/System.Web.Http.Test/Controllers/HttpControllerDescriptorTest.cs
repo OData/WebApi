@@ -172,6 +172,50 @@ namespace System.Web.Http
             Assert.Same(config, desc.Configuration); // didn't change anything, the config instance stays the same
         }
 
+        [Fact]
+        public void GetCustomAttributes_GetsInheritedAttributes()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            HttpControllerDescriptor desc = new HttpControllerDescriptor(config, "MyController", typeof(MyDerived1Controller));
+
+            var attributes = desc.GetCustomAttributes<MyConfigBaseAttribute>();
+
+            Assert.Equal(1, attributes.Count);
+        }
+
+        [Fact]
+        public void GetCustomAttributesInheritTrue_GetsInheritedAttributes()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            HttpControllerDescriptor desc = new HttpControllerDescriptor(config, "MyController", typeof(MyDerived1Controller));
+
+            var attributes = desc.GetCustomAttributes<MyConfigBaseAttribute>(inherit: true);
+
+            Assert.Equal(1, attributes.Count);
+        }
+
+        [Fact]
+        public void GetCustomAttributesInheritFalse_DoesNotGetInheritedAttributes()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            HttpControllerDescriptor desc = new HttpControllerDescriptor(config, "MyController", typeof(MyDerived1Controller));
+
+            var attributes = desc.GetCustomAttributes<MyConfigBaseAttribute>(inherit: false);
+
+            Assert.Empty(attributes);
+        }
+
+        [Fact]
+        public void GetCustomAttributesInheritFalse_GetsDeclaredAttributes()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            HttpControllerDescriptor desc = new HttpControllerDescriptor(config, "MyController", typeof(MyDerived1Controller));
+
+            var attributes = desc.GetCustomAttributes<MyConfigDerived1Attribute>(inherit: false);
+
+            Assert.Equal(1, attributes.Count);
+        }
+
         class NoopControllerConfigAttribute : Attribute, IControllerConfiguration
         {
             public void Initialize(HttpControllerSettings controllerSettings, HttpControllerDescriptor controllerDescriptor)

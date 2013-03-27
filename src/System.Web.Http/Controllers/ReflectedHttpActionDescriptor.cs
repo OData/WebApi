@@ -109,6 +109,7 @@ namespace System.Web.Http.Controllers
             get { return _returnType; }
         }
 
+        /// <inheritdoc/>
         public override Collection<T> GetCustomAttributes<T>(bool inherit)
         {
             object[] attributes = inherit ? _attributeCache : _declaredOnlyAttributeCache;

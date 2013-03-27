@@ -80,7 +80,7 @@ namespace System.Web.Http
             IHttpActionSelector actionSelector = configuration.Services.GetActionSelector();
             foreach (HttpControllerDescriptor controllerDescriptor in controllerSelector.GetControllerMapping().Values)
             {
-                Collection<RoutePrefixAttribute> prefixAttributes = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>();
+                Collection<RoutePrefixAttribute> prefixAttributes = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>(inherit: false);
                 string[] routePrefixes = prefixAttributes.Select(prefixAttribute => prefixAttribute.Prefix).ToArray();
 
                 foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionSelector.GetActionMapping(controllerDescriptor))
@@ -101,36 +101,34 @@ namespace System.Web.Http
             foreach (HttpActionDescriptor actionDescriptor in actionGrouping)
             {
                 IEnumerable<IHttpRouteInfoProvider> routeInfoProviders = actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
+
+                // DefaultIfEmpty below is required to add routes when there is a route prefix but no
+                // route provider or when there is a route provider with a template but no route prefix
                 foreach (IHttpRouteInfoProvider routeProvider in routeInfoProviders.DefaultIfEmpty())
                 {
                     foreach (string routePrefix in routePrefixes.DefaultIfEmpty())
                     {
-                        StringBuilder templateBuilder = new StringBuilder();
-
-                        if (!String.IsNullOrWhiteSpace(routePrefix))
-                        {
-                            templateBuilder.Append(routePrefix.TrimEnd('/'));
-                        }
-
                         string providerTemplate = routeProvider == null ? null : routeProvider.RouteTemplate;
-                        if (!String.IsNullOrWhiteSpace(providerTemplate))
+                        if (routePrefix == null && providerTemplate == null)
                         {
-                            if (templateBuilder.Length != 0)
-                            {
-                                // If there is a route prefix, add a separator
-                                templateBuilder.Append('/');
-                            }
-
-                            templateBuilder.Append(providerTemplate);
-                        }
-
-                        if (templateBuilder.Length == 0)
-                        {
-                            // Route prefix and route template are both null or whitespace so ignore and move on
                             continue;
                         }
 
-                        string routeTemplate = templateBuilder.ToString();
+                        string routeTemplate;
+                        if (String.IsNullOrWhiteSpace(routePrefix))
+                        {
+                            routeTemplate = providerTemplate ?? String.Empty;
+                        }
+                        else if (String.IsNullOrWhiteSpace(providerTemplate))
+                        {
+                            routeTemplate = routePrefix;
+                        }
+                        else
+                        {
+                            // template and prefix both not null - combine them
+                            routeTemplate = routePrefix.TrimEnd('/') + '/' + providerTemplate;
+                        }
+
                         Collection<HttpMethod> httpMethods = actionDescriptor.SupportedHttpMethods;
                         IHttpRoute route = routeBuilder.BuildHttpRoute(routeTemplate, httpMethods, controllerName, actionName);
                         if (routeProvider == null || routeProvider.RouteName == null)

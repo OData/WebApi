@@ -23,7 +23,8 @@ namespace System.Web.Http.Controllers
         private string _controllerName;
         private Type _controllerType;
 
-        private object[] _attrCached;
+        private object[] _attributeCache;
+        private object[] _declaredOnlyAttributeCache;
 
         public HttpControllerDescriptor(HttpConfiguration configuration, string controllerName, Type controllerType)
         {
@@ -150,17 +151,43 @@ namespace System.Web.Http.Controllers
         /// <returns>A collection of attributes associated with this controller.</returns>
         public virtual Collection<T> GetCustomAttributes<T>() where T : class
         {
+            return GetCustomAttributes<T>(inherit: true);
+        }
+
+        /// <summary>
+        /// Returns a collection of attributes that can be assigned to <typeparamref name="T"/> for this descriptor's controller.
+        /// </summary>
+        /// <remarks>The default implementation retrieves the matching set of attributes declared on <see cref="ControllerType"/>.</remarks>
+        /// <typeparam name="T">Used to filter the collection of attributes. Use a value of <see cref="Object"/> to retrieve all attributes.</typeparam>
+        /// <param name="inherit"><c>true</c> to search this controller's inheritance chain to find the attributes; otherwise, <c>false</c>.</param>
+        /// <returns>A collection of attributes associated with this controller.</returns>
+        public virtual Collection<T> GetCustomAttributes<T>(bool inherit) where T : class
+        {
+            object[] attributes;
             // Getting custom attributes via reflection is slow. 
             // But iterating over a object[] to pick out specific types is fast. 
             // Furthermore, many different services may call to ask for different attributes, so we have multiple callers. 
             // That means there's not a single cache for the callers, which means there's some value caching here.
-            if (_attrCached == null)
+            if (inherit)
             {
-                // Even in a race, we'll just ask for the custom attributes twice.
-                _attrCached = ControllerType.GetCustomAttributes(inherit: true);
+                if (_attributeCache == null)
+                {
+                    // Even in a race, we'll just ask for the custom attributes twice.
+                    _attributeCache = ControllerType.GetCustomAttributes(inherit: true);
+                }
+                attributes = _attributeCache;
+            }
+            else
+            {
+                if (_declaredOnlyAttributeCache == null)
+                {
+                    // Even in a race, we'll just ask for the custom attributes twice.
+                    _declaredOnlyAttributeCache = ControllerType.GetCustomAttributes(inherit: false);
+                }
+                attributes = _declaredOnlyAttributeCache;
             }
 
-            return new Collection<T>(TypeHelper.OfType<T>(_attrCached));
+            return new Collection<T>(TypeHelper.OfType<T>(attributes));
         }
 
         // For unit tests for initializing mock objects. Controller may not have a type, so we can't do the normal Initialize() path. 

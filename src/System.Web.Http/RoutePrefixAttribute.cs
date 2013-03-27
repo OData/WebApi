@@ -5,7 +5,7 @@ namespace System.Web.Http
     /// <summary>
     /// Annotates a controller with a route prefix that applies to all actions within the controller.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public sealed class RoutePrefixAttribute : Attribute
     {
         /// <summary>

@@ -10,7 +10,7 @@ namespace System.Web.Http.Routing
     public interface IHttpRouteInfoProvider
     {
         /// <summary>
-        /// Gets the name of the route.
+        /// Gets the name of the route to generate.
         /// </summary>
         string RouteName { get; }
 
@@ -18,5 +18,10 @@ namespace System.Web.Http.Routing
         /// Gets the route template describing the URI pattern to match against.
         /// </summary>
         string RouteTemplate { get; }
+
+        /// <summary>
+        /// Gets the order of the route relative to other routes.
+        /// </summary>
+        int RouteOrder { get; }
     }
 }

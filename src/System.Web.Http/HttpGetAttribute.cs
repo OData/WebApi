@@ -11,14 +11,13 @@ namespace System.Web.Http
     /// Specifies that an action supports the GET HTTP method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class HttpGetAttribute : Attribute, IActionHttpMethodProvider, IHttpRouteInfoProvider
+    public sealed class HttpGetAttribute : HttpVerbAttribute
     {
-        private static readonly Collection<HttpMethod> _supportedMethods = new Collection<HttpMethod>(new HttpMethod[] { HttpMethod.Get });
-
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpGetAttribute" /> class.
         /// </summary>
         public HttpGetAttribute()
+            : base(HttpMethod.Get)
         {
         }
 
@@ -27,29 +26,8 @@ namespace System.Web.Http
         /// </summary>
         /// <param name="routeTemplate">The route template describing the URI pattern to match against.</param>
         public HttpGetAttribute(string routeTemplate)
+            : base(HttpMethod.Get, routeTemplate)
         {
-            RouteTemplate = routeTemplate;
         }
-
-        /// <summary>
-        /// Gets the HTTP methods the action supports.
-        /// </summary>
-        public Collection<HttpMethod> HttpMethods
-        {
-            get
-            {
-                return _supportedMethods;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the name of the route to generate for this action.
-        /// </summary>
-        public string RouteName { get; set; }
-
-        /// <summary>
-        /// Gets the route template describing the URI pattern to match against.
-        /// </summary>
-        public string RouteTemplate { get; private set; }
     }
 }

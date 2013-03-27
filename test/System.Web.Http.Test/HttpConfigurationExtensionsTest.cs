@@ -164,22 +164,145 @@ namespace System.Net.Http
             Assert.Single(routes.Where(route => route.RouteTemplate == "prefix2/controller/get2"));
         }
 
+        [Fact]
+        public void MapHttpAttributeRoutes_RespectsRouteOrder()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            var routePrefixes = new Collection<RoutePrefixAttribute>() { };
+            var routeProviders = new Collection<IHttpRouteInfoProvider>()
+                {
+                    new HttpGetAttribute("get1") { RouteOrder = 1 },
+                    new HttpGetAttribute("get2"),
+                    new HttpGetAttribute("get3") { RouteOrder = -1 }
+                };
+            SetupConfiguration(config, routePrefixes, routeProviders);
+
+            // Act
+            config.MapHttpAttributeRoutes();
+
+            // Assert
+            HttpRouteCollection routes = config.Routes;
+            Assert.Equal(3, routes.Count);
+            Assert.Equal("get3", routes.ElementAt(0).RouteTemplate);
+            Assert.Equal("get2", routes.ElementAt(1).RouteTemplate);
+            Assert.Equal("get1", routes.ElementAt(2).RouteTemplate);
+        }
+
+        [Fact]
+        public void MapHttpAttributeRoutes_RespectsRouteOrderAcrossControllers()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            HttpControllerDescriptor controllerDescriptor1 = CreateControllerDescriptor("Controller1", new Collection<RoutePrefixAttribute>());
+            HttpActionDescriptor actionDescriptor1 = CreateActionDescriptor(
+                "Action1",
+                new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute("action1/route1") { RouteOrder = 3 }, new HttpGetAttribute("action1/route2") { RouteOrder = 1 } },
+                controllerDescriptor1);
+            HttpControllerDescriptor controllerDescriptor2 = CreateControllerDescriptor("Controller2", new Collection<RoutePrefixAttribute>());
+            HttpActionDescriptor actionDescriptor2 = CreateActionDescriptor(
+                "Action2",
+                new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute("action2/route1") { RouteOrder = 2 } },
+                controllerDescriptor2);
+            
+            RegisterControllerSelector(config, new[] { controllerDescriptor1, controllerDescriptor2 });
+            RegisterActionSelector(config,
+                new Dictionary<HttpControllerDescriptor, IEnumerable<HttpActionDescriptor>>()
+                {
+                    { controllerDescriptor1, new HttpActionDescriptor[] { actionDescriptor1 } },
+                    { controllerDescriptor2, new HttpActionDescriptor[] { actionDescriptor2 } }
+                });
+
+            // Act
+            config.MapHttpAttributeRoutes();
+
+            // Assert
+            HttpRouteCollection routes = config.Routes;
+            Assert.Equal(3, routes.Count);
+            Assert.Equal("action1/route2", routes.ElementAt(0).RouteTemplate);
+            Assert.Equal("action2/route1", routes.ElementAt(1).RouteTemplate);
+            Assert.Equal("action1/route1", routes.ElementAt(2).RouteTemplate);
+        }
+
+        [Fact]
+        public void MapHttpAttributeRoutes_RespectsRoutePrefixOrder()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            var routePrefixes = new Collection<RoutePrefixAttribute>()
+                {
+                    new RoutePrefixAttribute("prefix1") { Order = 1 },
+                    new RoutePrefixAttribute("prefix2"),
+                    new RoutePrefixAttribute("prefix3") { Order = -1 },
+                };
+            var routeProviders = new Collection<IHttpRouteInfoProvider>()
+                {
+                    new HttpGetAttribute("get1") { RouteOrder = 1 },
+                    new HttpGetAttribute("get2"),
+                    new HttpGetAttribute("get3") { RouteOrder = -1 }
+                };
+            SetupConfiguration(config, routePrefixes, routeProviders);
+
+            // Act
+            config.MapHttpAttributeRoutes();
+
+            // Assert
+            HttpRouteCollection routes = config.Routes;
+            Assert.Equal(9, routes.Count);
+            Assert.Equal("prefix3/get3", routes.ElementAt(0).RouteTemplate);
+            Assert.Equal("prefix3/get2", routes.ElementAt(1).RouteTemplate);
+            Assert.Equal("prefix3/get1", routes.ElementAt(2).RouteTemplate);
+            Assert.Equal("prefix2/get3", routes.ElementAt(3).RouteTemplate);
+            Assert.Equal("prefix2/get2", routes.ElementAt(4).RouteTemplate);
+            Assert.Equal("prefix2/get1", routes.ElementAt(5).RouteTemplate);
+            Assert.Equal("prefix1/get3", routes.ElementAt(6).RouteTemplate);
+            Assert.Equal("prefix1/get2", routes.ElementAt(7).RouteTemplate);
+            Assert.Equal("prefix1/get1", routes.ElementAt(8).RouteTemplate);
+        }
+
         private static void SetupConfiguration(HttpConfiguration config, Collection<RoutePrefixAttribute> routePrefixes, Collection<IHttpRouteInfoProvider> routeProviders)
         {
+            HttpControllerDescriptor controllerDescriptor = CreateControllerDescriptor("Controller", routePrefixes);
+            HttpActionDescriptor actionDescriptor = CreateActionDescriptor("Action", routeProviders, controllerDescriptor);
+
+            RegisterControllerSelector(config, new[] { controllerDescriptor });
+            RegisterActionSelector(config,
+                new Dictionary<HttpControllerDescriptor, IEnumerable<HttpActionDescriptor>>()
+                {
+                    { controllerDescriptor, new HttpActionDescriptor[] { actionDescriptor } }
+                });
+        }
+
+        private static HttpControllerDescriptor CreateControllerDescriptor(string controllerName, Collection<RoutePrefixAttribute> routePrefixes)
+        {
             Mock<HttpControllerDescriptor> controllerDescriptor = new Mock<HttpControllerDescriptor>();
-            controllerDescriptor.Object.ControllerName = "Controller";
+            controllerDescriptor.Object.ControllerName = controllerName;
             controllerDescriptor.Setup(cd => cd.GetCustomAttributes<RoutePrefixAttribute>(false)).Returns(routePrefixes);
+            return controllerDescriptor.Object;
+        }
 
-            Mock<HttpActionDescriptor> actionDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor.Object);
-            actionDescriptor.Setup(ad => ad.ActionName).Returns("Action");
+        private static HttpActionDescriptor CreateActionDescriptor(string actionName, Collection<IHttpRouteInfoProvider> routeProviders, HttpControllerDescriptor controllerDescriptor)
+        {
+            Mock<HttpActionDescriptor> actionDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            actionDescriptor.Setup(ad => ad.ActionName).Returns(actionName);
             actionDescriptor.Setup(ad => ad.GetCustomAttributes<IHttpRouteInfoProvider>(false)).Returns(routeProviders);
+            return actionDescriptor.Object;
+        }
 
+        private static void RegisterControllerSelector(HttpConfiguration config, IEnumerable<HttpControllerDescriptor> controllerDescriptors)
+        {
             Mock<IHttpControllerSelector> controllerSelector = new Mock<IHttpControllerSelector>();
-            controllerSelector.Setup(c => c.GetControllerMapping()).Returns(new Dictionary<string, HttpControllerDescriptor>() { { "Controller", controllerDescriptor.Object } });
+            controllerSelector.Setup(c => c.GetControllerMapping()).Returns(controllerDescriptors.ToDictionary(cd => cd.ControllerName));
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector.Object);
+        }
 
+        private static void RegisterActionSelector(HttpConfiguration config, Dictionary<HttpControllerDescriptor, IEnumerable<HttpActionDescriptor>> actionMap)
+        {
             Mock<IHttpActionSelector> actionSelector = new Mock<IHttpActionSelector>();
-            actionSelector.Setup(a => a.GetActionMapping(controllerDescriptor.Object)).Returns(new[] { actionDescriptor.Object }.ToLookup(ad => ad.ActionName));
+            foreach (var mapEntry in actionMap)
+            {
+                actionSelector.Setup(a => a.GetActionMapping(mapEntry.Key)).Returns(mapEntry.Value.ToLookup(ad => ad.ActionName));
+            }
             config.Services.Replace(typeof(IHttpActionSelector), actionSelector.Object);
         }
 

@@ -52,6 +52,11 @@ namespace System.Web.Http
         public string RouteName { get; set; }
 
         /// <summary>
+        /// Gets or sets the order of the route relative to other routes.
+        /// </summary>
+        public int RouteOrder { get; set; }
+
+        /// <summary>
         /// Gets or sets the route template describing the URI pattern to match against.
         /// </summary>
         public string RouteTemplate { get; set; }

@@ -72,6 +72,7 @@
     <Compile Include="Controllers\IHostPrincipalService.cs" />
     <Compile Include="Controllers\IHttpActionResult.cs" />
     <Compile Include="ContinuationResult.cs" />
+    <Compile Include="HttpVerbAttribute.cs" />
     <Compile Include="RoutePrefixAttribute.cs" />
     <Compile Include="Filters\HttpAuthenticationContext.cs" />
     <Compile Include="MessageResult.cs" />

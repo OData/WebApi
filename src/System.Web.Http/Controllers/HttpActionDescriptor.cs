@@ -21,6 +21,8 @@ namespace System.Web.Http.Controllers
 
         private IActionResultConverter _converter;
         private readonly Lazy<Collection<FilterInfo>> _filterPipeline;
+        private FilterGrouping _filterGrouping;
+        private Collection<FilterInfo> _filterPipelineForGrouping;
 
         private HttpConfiguration _configuration;
         private HttpControllerDescriptor _controllerDescriptor;
@@ -230,6 +232,20 @@ namespace System.Web.Http.Controllers
         public virtual Collection<FilterInfo> GetFilterPipeline()
         {
             return _filterPipeline.Value;
+        }
+
+        internal FilterGrouping GetFilterGrouping()
+        {
+            // Performance-sensitive
+            // Filter grouping is expensive so cache whenever possible
+            // For compatibility, the virtual method must be called
+            Collection<FilterInfo> currentFilterPipeline = GetFilterPipeline();
+            if (_filterGrouping == null || _filterPipelineForGrouping != currentFilterPipeline)
+            {
+                _filterGrouping = new FilterGrouping(currentFilterPipeline);
+                _filterPipelineForGrouping = currentFilterPipeline;
+            }
+            return _filterGrouping;
         }
 
         private Collection<FilterInfo> InitializeFilterPipeline()

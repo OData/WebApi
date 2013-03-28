@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
@@ -133,9 +131,12 @@ namespace System.Web.Http.OData.Formatter
 
             object actualValue;
 
-            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
-                "http://localhost/WorkItems(10)/ID"))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID"))
             {
+                HttpConfiguration config = new HttpConfiguration();
+                config.Routes.MapODataRoute("default", "", model);
+                request.SetConfiguration(config);
+                request.SetODataRouteName("default");
                 request.SetEdmModel(model);
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);

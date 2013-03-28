@@ -3,8 +3,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Net.Http.Headers;
 using System.Web.Http;
-using System.Web.Http.Hosting;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.Routing.Conventions;
 using Microsoft.Data.Edm;
@@ -26,6 +28,8 @@ namespace System.Net.Http
         private const string InlineCountPropertyKey = "MS_InlineCount";
         private const string NextPageLinkPropertyKey = "MS_NextPageLink";
         private const string MessageDetailKey = "MessageDetail";
+
+        private const string ODataMaxServiceVersion = "MaxDataServiceVersion";
 
         /// <summary>
         /// Retrieves the EDM model associated with the request.
@@ -174,8 +178,8 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
-        /// with an instance of <see cref="ObjectContent{T}"/> wrapping <paramref name="oDataError"/> as the content. If no formatter 
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error
+        /// with an instance of <see cref="ObjectContent{T}"/> wrapping <paramref name="oDataError"/> as the content. If no formatter
         /// is found, this method returns a response with status 406 NotAcceptable.
         /// </summary>
         /// <remarks>
@@ -214,6 +218,42 @@ namespace System.Net.Http
                 error.Add(MessageDetailKey, messageDetail);
             }
             return request.CreateErrorResponse(statusCode, error);
+        }
+
+        internal static ODataVersion GetODataVersion(this HttpRequestMessage request)
+        {
+            // OData protocol requires that you send the minimum version that the client needs to know to understand the response.
+            // There is no easy way we can figure out the minimum version that the client needs to understand our response. We send response headers much ahead
+            // generating the response. So if the requestMessage has a MaxDataServiceVersion, tell the client that our response is of the same version; Else use
+            // the DataServiceVersionHeader. Our response might require a higher version of the client and it might fail.
+            // If the client doesn't send these headers respond with the default version (V3).
+            return GetODataVersionFromHeaders(request.Headers, ODataMaxServiceVersion, ODataMediaTypeFormatter.ODataServiceVersion) ?? ODataMediaTypeFormatter.DefaultODataVersion;
+        }
+
+        private static ODataVersion? GetODataVersionFromHeaders(HttpHeaders headers, params string[] headerNames)
+        {
+            foreach (string headerName in headerNames)
+            {
+                IEnumerable<string> values;
+                if (headers.TryGetValues(headerName, out values))
+                {
+                    string value = values.FirstOrDefault();
+                    if (value != null)
+                    {
+                        string trimmedValue = value.Trim(' ', ';');
+                        try
+                        {
+                            return ODataUtils.StringToODataVersion(trimmedValue);
+                        }
+                        catch (ODataException)
+                        {
+                            // Parsing ODataVersion failed, try next header
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

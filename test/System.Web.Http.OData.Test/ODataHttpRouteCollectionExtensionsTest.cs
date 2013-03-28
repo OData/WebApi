@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Web.Http.OData.Batch;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.Routing.Conventions;
 using System.Web.Http.Routing;
@@ -53,6 +53,23 @@ namespace System.Web.Http.OData
             Assert.Same(model, odataConstraint.EdmModel);
             Assert.Same(pathHandler, odataConstraint.PathHandler);
             Assert.Same(conventions, odataConstraint.RoutingConventions);
+        }
+
+        [Fact]
+        public void MapODataRoute_AddsBatchRoute_WhenBatchHandlerIsProvided()
+        {
+            HttpRouteCollection routes = new HttpRouteCollection();
+            IEdmModel model = new EdmModel();
+            string routeName = "name";
+            string routePrefix = "prefix";
+
+            var batchHandler = new DefaultODataBatchHandler(new HttpServer());
+            routes.MapODataRoute(routeName, routePrefix, model, batchHandler);
+
+            IHttpRoute batchRoute = routes["nameBatch"];
+            Assert.NotNull(batchRoute);
+            Assert.Same(batchHandler, batchRoute.Handler);
+            Assert.Equal("prefix/$batch", batchRoute.RouteTemplate);
         }
     }
 }

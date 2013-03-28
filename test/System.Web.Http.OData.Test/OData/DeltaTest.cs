@@ -340,9 +340,13 @@ namespace System.Web.Http.OData
             IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create();
             Delta<DeltaModel> delta;
 
-            using (HttpRequestMessage request = new HttpRequestMessage())
+            using (HttpRequestMessage request = new HttpRequestMessage { RequestUri = new Uri("http://localhost") })
             {
                 IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
+                HttpConfiguration config = new HttpConfiguration();
+                config.Routes.MapODataRoute("default", "", model);
+                request.SetODataRouteName("default");
+                request.SetConfiguration(config);
                 request.SetEdmModel(model);
                 request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(

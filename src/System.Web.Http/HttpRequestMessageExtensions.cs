@@ -354,6 +354,7 @@ namespace System.Net.Http
             HttpConfiguration configuration = request.GetConfiguration();
 
             HttpError error = errorCreator(request.ShouldIncludeErrorDetail());
+
             // CreateErrorResponse should never fail, even if there is no configuration associated with the request
             // In that case, use the default HttpConfiguration to con-neg the response media type
             if (configuration == null)
@@ -372,8 +373,8 @@ namespace System.Net.Http
         /// <summary>
         /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> with an instance
         /// of <see cref="ObjectContent{T}"/> as the content and <see cref="System.Net.HttpStatusCode.OK"/> as the status code
-        /// if a formatter can be found. If no formatter is found, this method returns a response with status 406 NotAcceptable. 
-        /// This forwards the call to <see cref="CreateResponse{T}(HttpRequestMessage, HttpStatusCode, T, HttpConfiguration)"/> with 
+        /// if a formatter can be found. If no formatter is found, this method returns a response with status 406 NotAcceptable.
+        /// This forwards the call to <see cref="CreateResponse{T}(HttpRequestMessage, HttpStatusCode, T, HttpConfiguration)"/> with
         /// <see cref="System.Net.HttpStatusCode.OK"/> status code and a <c>null</c> configuration.
         /// </summary>
         /// <remarks>
@@ -605,14 +606,38 @@ namespace System.Net.Http
                 return;
             }
 
-            List<IDisposable> trackedResources;
-            if (!request.Properties.TryGetValue(HttpPropertyKeys.DisposableRequestResourcesKey, out trackedResources))
-            {
-                trackedResources = new List<IDisposable>();
-                request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey] = trackedResources;
-            }
+            List<IDisposable> trackedResources = GetRegisteredResourcesForDispose(request);
 
             trackedResources.Add(resource);
+        }
+
+        /// <summary>
+        /// Adds the given <paramref name="resources"/> to a list of resources that will be disposed by a host once
+        /// the <paramref name="request"/> is disposed.
+        /// </summary>
+        /// <param name="request">The request controlling the lifecycle of <paramref name="resources"/>.</param>
+        /// <param name="resources">The resources to dispose when <paramref name="request"/> is being disposed. Can be <c>null</c>.</param>
+        public static void RegisterForDispose(this HttpRequestMessage request, IEnumerable<IDisposable> resources)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (resources == null)
+            {
+                throw Error.ArgumentNull("resources");
+            }
+
+            List<IDisposable> trackedResources = GetRegisteredResourcesForDispose(request);
+
+            foreach (IDisposable resource in resources)
+            {
+                if (resource != null)
+                {
+                    trackedResources.Add(resource);
+                }
+            }
         }
 
         /// <summary>
@@ -779,7 +804,7 @@ namespace System.Net.Http
 
             request.Properties[HttpPropertyKeys.VirtualPathRoot] = virtualPathRoot;
         }
-        
+
         /// <summary>
         /// Gets a value indicating whether the request originates from a local address or not.
         /// </summary>
@@ -838,6 +863,32 @@ namespace System.Net.Http
                 default:
                     return false;
             }
+        }
+
+        /// <summary>
+        /// Gets the collection of resources registered for dispose once the <paramref name="request"/> is disposed.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>A collection of resources registered for dispose.</returns>
+        public static IEnumerable<IDisposable> GetResourcesForDisposal(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return GetRegisteredResourcesForDispose(request);
+        }
+
+        private static List<IDisposable> GetRegisteredResourcesForDispose(HttpRequestMessage request)
+        {
+            List<IDisposable> registeredResourcesForDispose;
+            if (!request.Properties.TryGetValue(HttpPropertyKeys.DisposableRequestResourcesKey, out registeredResourcesForDispose))
+            {
+                registeredResourcesForDispose = new List<IDisposable>();
+                request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey] = registeredResourcesForDispose;
+            }
+            return registeredResourcesForDispose;
         }
     }
 }

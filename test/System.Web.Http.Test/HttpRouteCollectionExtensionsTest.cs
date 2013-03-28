@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Web.Http.Batch;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http
 {
@@ -102,6 +104,19 @@ namespace System.Web.Http
             Assert.Equal(1, route.Defaults.Count);
             Assert.Equal("C1", route.Constraints["c1"]);
             Assert.Same(route, routes["name"]);
+        }
+
+        [Fact]
+        public void MapHttpBatchRoute_CreatesRoutesUsingCustomBatchHandler()
+        {
+            HttpRouteCollection routes = new HttpRouteCollection();
+            HttpBatchHandler mockBatchHandler = new Mock<HttpBatchHandler>(new HttpServer()).Object;
+            IHttpRoute route = routes.MapHttpBatchRoute("batch", "api/batch", mockBatchHandler);
+
+            Assert.NotNull(route);
+            Assert.Equal("api/batch", route.RouteTemplate);
+            Assert.Same(route, routes["batch"]);
+            Assert.Same(mockBatchHandler, route.Handler);
         }
     }
 }

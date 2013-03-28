@@ -56,10 +56,25 @@
     <Compile Include="..\Common\Error.cs">
       <Link>Common\Error.cs</Link>
     </Compile>
+    <Compile Include="OData\Batch\ODataBatchHandler.cs" />
+    <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
+    <Compile Include="OData\ContentIdHelpers.cs" />
     <Compile Include="ODataHttpRouteCollectionExtensions.cs" />
     <Compile Include="ODataHttpRequestMessageExtensions.cs" />
     <Compile Include="ODataMediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="OData\AsyncEntitySetController.cs" />
+    <Compile Include="OData\Batch\UnbufferedODataBatchHandler.cs" />
+    <Compile Include="OData\Batch\ODataBatchResponseItem.cs" />
+    <Compile Include="OData\Batch\ODataBatchRequestItem.cs" />
+    <Compile Include="OData\Batch\OperationResponseItem.cs" />
+    <Compile Include="OData\Batch\ODataBatchReaderExtensions.cs" />
+    <Compile Include="OData\Batch\LazyStreamContent.cs" />
+    <Compile Include="OData\Batch\ChangeSetRequestItem.cs" />
+    <Compile Include="OData\Batch\OperationRequestItem.cs" />
+    <Compile Include="OData\Batch\ChangeSetResponseItem.cs" />
+    <Compile Include="OData\Batch\ODataHttpContentExtensions.cs" />
+    <Compile Include="OData\Batch\ODataBatchContent.cs" />
+    <Compile Include="OData\Batch\DefaultODataBatchHandler.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpers.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkBase.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataItemBase.cs" />

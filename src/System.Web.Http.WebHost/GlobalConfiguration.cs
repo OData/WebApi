@@ -29,7 +29,7 @@ namespace System.Web.Http
         private static Lazy<HttpMessageHandler> _defaultHandler = new Lazy<HttpMessageHandler>(
             () => new HttpRoutingDispatcher(_configuration.Value));
 
-        private static Lazy<HttpMessageHandler> _defaultServer = new Lazy<HttpMessageHandler>(
+        private static Lazy<HttpServer> _defaultServer = new Lazy<HttpServer>(
             () => new HttpServer(GlobalConfiguration.Configuration, GlobalConfiguration.DefaultHandler));
 
         /// <summary>
@@ -49,9 +49,9 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets the global <see cref="T:System.Net.Http.HttpMessageHandler"/>.
+        /// Gets the global <see cref="T:System.Web.Http.HttpServer"/>.
         /// </summary>
-        public static HttpMessageHandler DefaultServer
+        public static HttpServer DefaultServer
         {
             get { return _defaultServer.Value; }
         }

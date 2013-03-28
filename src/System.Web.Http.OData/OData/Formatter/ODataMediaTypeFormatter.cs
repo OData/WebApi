@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -28,10 +27,8 @@ namespace System.Web.Http.OData.Formatter
     /// </summary>
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
-        private const ODataVersion DefaultODataVersion = ODataVersion.V3;
-        private const string ODataMaxServiceVersion = "MaxDataServiceVersion";
-        private const string ODataServiceVersion = "DataServiceVersion";
-
+        internal const ODataVersion DefaultODataVersion = ODataVersion.V3;
+        internal const string ODataServiceVersion = "DataServiceVersion";
         private readonly ODataDeserializerProvider _deserializerProvider;
         private readonly ODataVersion _version;
 
@@ -159,7 +156,7 @@ namespace System.Web.Http.OData.Formatter
             }
             else
             {
-                ODataVersion version = GetResponseODataVersion(request);
+                ODataVersion version = request.GetODataVersion();
                 return new ODataMediaTypeFormatter(this, version, request);
             }
         }
@@ -224,6 +221,7 @@ namespace System.Web.Http.OData.Formatter
         }
 
         /// <inheritdoc/>
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "ODataMessageReader disposed later with request.")]
         public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             if (type == null)
@@ -246,6 +244,7 @@ namespace System.Web.Http.OData.Formatter
                 object result;
 
                 HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
+
                 // If content length is 0 then return default value for this type
                 if (contentHeaders == null || contentHeaders.ContentLength == 0)
                 {
@@ -268,14 +267,20 @@ namespace System.Web.Http.OData.Formatter
                     }
 
                     ODataMessageReader oDataMessageReader = null;
-                    ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings { DisableMessageStreamDisposal = true, MessageQuotas = MessageReaderQuotas };
+                    ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings
+                    {
+                        DisableMessageStreamDisposal = true,
+                        MessageQuotas = MessageReaderQuotas,
+                        BaseUri = GetBaseAddress(_request)
+                    };
+
                     try
                     {
                         IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
                         oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
 
+                        _request.RegisterForDispose(oDataMessageReader);
                         ODataPath path = _request.GetODataPath();
-
                         ODataDeserializerContext readContext = new ODataDeserializerContext
                         {
                             IsPatchMode = isPatchMode,
@@ -300,13 +305,6 @@ namespace System.Web.Http.OData.Formatter
 
                         formatterLogger.LogError(String.Empty, e);
                         result = GetDefaultValueForType(type);
-                    }
-                    finally
-                    {
-                        if (oDataMessageReader != null)
-                        {
-                            oDataMessageReader.Dispose();
-                        }
                     }
                 }
 
@@ -351,6 +349,9 @@ namespace System.Web.Http.OData.Formatter
                     throw new SerializationException(message);
                 }
 
+                UrlHelper urlHelper = _request.GetUrlHelper();
+                Contract.Assert(urlHelper != null);
+
                 ODataPath path = _request.GetODataPath();
                 IEdmEntitySet targetEntitySet = path == null ? null : path.EntitySet;
 
@@ -361,20 +362,11 @@ namespace System.Web.Http.OData.Formatter
                     throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
                 }
 
-                UrlHelper urlHelper = _request.GetUrlHelper();
-                Contract.Assert(urlHelper != null);
-
-                string baseAddress = urlHelper.ODataLink();
-                if (baseAddress == null)
-                {
-                    throw new SerializationException(SRResources.UnableToDetermineBaseUrl);
-                }
-
-                IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream);
+                IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream, content.Headers);
 
                 ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
                 {
-                    BaseUri = new Uri(baseAddress),
+                    BaseUri = GetBaseAddress(_request),
                     Version = _version,
                     Indent = true,
                     DisableMessageStreamDisposal = true,
@@ -401,7 +393,6 @@ namespace System.Web.Http.OData.Formatter
                 if (contentHeaders != null && contentHeaders.ContentType != null)
                 {
                     contentType = contentHeaders.ContentType;
-                    writerSettings.SetContentType(contentType.ToString(), contentType.CharSet);
                 }
 
                 using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, model))
@@ -421,42 +412,6 @@ namespace System.Web.Http.OData.Formatter
                     serializer.WriteObject(value, messageWriter, writeContext);
                 }
             });
-        }
-
-        private static ODataVersion GetResponseODataVersion(HttpRequestMessage request)
-        {
-            // OData protocol requires that you send the minimum version that the client needs to know to understand the response.
-            // There is no easy way we can figure out the minimum version that the client needs to understand our response. We send response headers much ahead
-            // generating the response. So if the requestMessage has a MaxDataServiceVersion, tell the client that our response is of the same version; Else use
-            // the DataServiceVersionHeader. Our response might require a higher version of the client and it might fail.
-            // If the client doesn't send these headers respond with the default version (V3).
-            return GetODataVersion(request.Headers, ODataMaxServiceVersion, ODataServiceVersion) ?? DefaultODataVersion;
-        }
-
-        private static ODataVersion? GetODataVersion(HttpHeaders headers, params string[] headerNames)
-        {
-            foreach (string headerName in headerNames)
-            {
-                IEnumerable<string> values;
-                if (headers.TryGetValues(headerName, out values))
-                {
-                    string value = values.FirstOrDefault();
-                    if (value != null)
-                    {
-                        string trimmedValue = value.Trim(' ', ';');
-                        try
-                        {
-                            return ODataUtils.StringToODataVersion(trimmedValue);
-                        }
-                        catch (ODataException)
-                        {
-                            // Parsing ODataVersion failed, try next header
-                        }
-                    }
-                }
-            }
-
-            return null;
         }
 
         private static string GetRootElementName(ODataPath path)
@@ -491,6 +446,20 @@ namespace System.Web.Http.OData.Formatter
             }
 
             return false;
+        }
+
+        private static Uri GetBaseAddress(HttpRequestMessage request)
+        {
+            UrlHelper urlHelper = request.GetUrlHelper();
+            Contract.Assert(urlHelper != null);
+
+            string baseAddress = urlHelper.ODataLink();
+            if (baseAddress == null)
+            {
+                throw new SerializationException(SRResources.UnableToDetermineBaseUrl);
+            }
+
+            return new Uri(baseAddress);
         }
     }
 }

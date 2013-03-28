@@ -101,7 +101,7 @@ namespace System.Web.Http.OData.Formatter
 
         public void SetHeader(string headerName, string headerValue)
         {
-            _headers.Add(headerName, headerValue);
+            _headers[headerName] = headerValue;
         }
     }
 }

@@ -47,10 +47,10 @@ namespace System.Web.Cors.Test
             corsPolicy.Headers.Add("foo");
             corsPolicy.Headers.Add("bar");
             corsPolicy.Origins.Add("http://example.com");
-            corsPolicy.Origins.Add("http://example2.com");
+            corsPolicy.Origins.Add("http://example.org");
             corsPolicy.Methods.Add("GET");
 
-            Assert.Equal(@"AllowAnyHeader: True, AllowAnyMethod: False, AllowAnyOrigin: True, PreflightMaxAge: 10, SupportsCredentials: True, Origins: {http://example.com,http://example2.com}, Methods: {GET}, Headers: {foo,bar}, ExposedHeaders: {}", corsPolicy.ToString());
+            Assert.Equal(@"AllowAnyHeader: True, AllowAnyMethod: False, AllowAnyOrigin: True, PreflightMaxAge: 10, SupportsCredentials: True, Origins: {http://example.com,http://example.org}, Methods: {GET}, Headers: {foo,bar}, ExposedHeaders: {}", corsPolicy.ToString());
         }
     }
 }

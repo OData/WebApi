@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Runtime.Serialization;
+using System.Web.Http.OData.Batch;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
@@ -45,10 +48,32 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             if (entityReferenceLink != null)
             {
-                return entityReferenceLink.Url;
+                return ResolveContentId(entityReferenceLink.Url, readContext);
             }
 
             return null;
+        }
+
+        private static Uri ResolveContentId(Uri uri, ODataDeserializerContext readContext)
+        {
+            if (uri != null)
+            {
+                IDictionary<string, string> contentIDToLocationMapping = readContext.Request.GetODataContentIdMapping();
+                if (contentIDToLocationMapping != null)
+                {
+                    Uri baseAddress = new Uri(readContext.Request.GetUrlHelper().ODataLink());
+                    string relativeUrl = uri.IsAbsoluteUri ? baseAddress.MakeRelativeUri(uri).OriginalString : uri.OriginalString;
+                    string resolvedUrl = ContentIdHelpers.ResolveContentId(relativeUrl, contentIDToLocationMapping);
+                    Uri resolvedUri = new Uri(resolvedUrl, UriKind.RelativeOrAbsolute);
+                    if (!resolvedUri.IsAbsoluteUri)
+                    {
+                        resolvedUri = new Uri(baseAddress, uri);
+                    }
+                    return resolvedUri;
+                }
+            }
+
+            return uri;
         }
 
         private static IEdmNavigationProperty GetNavigationProperty(ODataPath path)

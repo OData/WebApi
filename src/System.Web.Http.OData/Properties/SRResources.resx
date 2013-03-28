@@ -589,4 +589,19 @@
   <data name="NavigationPropertyNotfound" xml:space="preserve">
     <value>Cannot find navigation property '{0}' on the entity type '{1}'.</value>
   </data>
+  <data name="BatchRequestInvalidMediaType" xml:space="preserve">
+    <value>The batch request must have '{0}' as the media type.</value>
+  </data>
+  <data name="BatchRequestMissingBoundary" xml:space="preserve">
+    <value>The batch request must have a boundary specification in the "Content-Type" header.</value>
+  </data>
+  <data name="BatchRequestMissingContentType" xml:space="preserve">
+    <value>The batch request must have a "Content-Type" header.</value>
+  </data>
+  <data name="InvalidBatchReaderState" xml:space="preserve">
+    <value>The current batch reader state '{0}' is invalid. The expected state is '{1}'.</value>
+  </data>
+  <data name="BatchRequestMissingContent" xml:space="preserve">
+    <value>The 'Content' property on the batch request cannot be null.</value>
+  </data>
 </root>

@@ -46,5 +46,10 @@ namespace System.Web.Http.OData.Routing
         /// Route data key for the navigation property name when manipulating links.
         /// </summary>
         public static readonly string NavigationProperty = "navigationProperty";
+
+        /// <summary>
+        /// Route template suffix for OData batch.
+        /// </summary>
+        public static readonly string Batch = "$batch";
     }
 }

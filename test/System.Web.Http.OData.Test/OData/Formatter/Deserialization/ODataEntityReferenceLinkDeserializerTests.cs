@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
@@ -52,6 +53,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader messageReader = new ODataMessageReader(new MockODataRequestMessage(requestMessage));
             ODataDeserializerContext context = new ODataDeserializerContext
             {
+                Request = new HttpRequestMessage(),
                 Path = new ODataPath(new NavigationPathSegment(GetNavigationProperty(CreateModel())))
             };
 
@@ -81,6 +83,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             ODataDeserializerContext context = new ODataDeserializerContext
             {
+                Request = new HttpRequestMessage(),
                 Path = new ODataPath(new NavigationPathSegment(navigationProperty))
             };
 

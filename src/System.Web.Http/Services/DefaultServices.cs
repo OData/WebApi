@@ -135,8 +135,7 @@ namespace System.Web.Http.Services
                                         new MutableObjectModelBinderProvider());
             SetSingle<ModelMetadataProvider>(new DataAnnotationsModelMetadataProvider());
             SetMultiple<ModelValidatorProvider>(new DataAnnotationsModelValidatorProvider(),
-                                        new DataMemberModelValidatorProvider(),
-                                        new InvalidModelValidatorProvider());
+                                        new DataMemberModelValidatorProvider());
 
             // This is an ordered list,so put the most common providers at the top. 
             SetMultiple<ValueProviderFactory>(new QueryStringValueProviderFactory(),

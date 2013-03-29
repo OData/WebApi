@@ -77,10 +77,9 @@ namespace System.Web.Http.Services
             Assert.IsType<MutableObjectModelBinderProvider>(modelBinderProviders[7]);
 
             object[] validatorProviders = defaultServices.GetServices(typeof(ModelValidatorProvider)).ToArray();
-            Assert.Equal(3, validatorProviders.Length);
+            Assert.Equal(2, validatorProviders.Length);
             Assert.IsType<DataAnnotationsModelValidatorProvider>(validatorProviders[0]);
             Assert.IsType<DataMemberModelValidatorProvider>(validatorProviders[1]);
-            Assert.IsType<InvalidModelValidatorProvider>(validatorProviders[2]);
 
             object[] valueProviderFactories = defaultServices.GetServices(typeof(ValueProviderFactory)).ToArray();
             Assert.Equal(2, valueProviderFactories.Length);

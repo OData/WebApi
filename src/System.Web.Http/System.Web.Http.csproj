@@ -107,6 +107,7 @@
     <Compile Include="Routing\Constraints\RegexHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\OptionalHttpRouteConstraint.cs" />
     <Compile Include="Routing\HttpRouteBuilder.cs" />
+    <Compile Include="Routing\HttpRouteEntry.cs" />
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />
     <Compile Include="Routing\IInlineConstraintResolver.cs" />
     <Compile Include="Tracing\TraceLevelHelper.cs" />

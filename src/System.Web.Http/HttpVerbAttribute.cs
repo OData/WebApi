@@ -53,7 +53,7 @@ namespace System.Web.Http
         public string RouteName { get; set; }
 
         /// <summary>
-        /// Gets or sets the order of the route relative to other routes.
+        /// Gets or sets the order of the route relative to other routes. The default order is 0.
         /// </summary>
         public int RouteOrder { get; set; }
 

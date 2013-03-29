@@ -121,6 +121,11 @@ namespace System.Web.Http.Routing
             foreach (Match parameterMatch in parameterMatches)
             {
                 string parameterName = parameterMatch.Groups["parameterName"].Value;
+                // We may need to strip out the initial wildcard used for wildcard parameters
+                if (parameterName.StartsWith("*", StringComparison.OrdinalIgnoreCase))
+                {
+                    parameterName = parameterName.Substring(1);
+                }
 
                 // Add the default value if present
                 Group defaultValueGroup = parameterMatch.Groups["defaultValue"];

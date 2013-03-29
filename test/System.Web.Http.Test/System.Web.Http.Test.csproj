@@ -132,6 +132,7 @@
     <Compile Include="Routing\Constraints\OptionalHttpRouteConstraintTest.cs" />
     <Compile Include="Routing\Constraints\RangeHttpRouteConstraintTest.cs" />
     <Compile Include="Routing\Constraints\RegexHttpRouteConstraintTest.cs" />
+    <Compile Include="Routing\HttpRouteEntryTest.cs" />
     <Compile Include="Routing\HttpRouteBuilderTest.cs" />
     <Compile Include="Routing\DefaultInlineConstraintResolverTest.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />

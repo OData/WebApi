@@ -51,7 +51,7 @@ namespace System.Net.Http
             var config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>();
             var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute() };
-            SetupConfiguration(config, routePrefixes, routeProviders);
+            SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act
             config.MapHttpAttributeRoutes();
@@ -62,21 +62,20 @@ namespace System.Net.Http
 
         [Theory]
         [InlineData(null, "", "")]
-        [InlineData(null, "   ", "")]
+        [InlineData(null, "   ", "")] // Needs to be updated when Issue 955 is fixed
         [InlineData(null, "controller/{id}", "controller/{id}")]
         [InlineData("", null, "")]
         [InlineData("", "", "")]
-        [InlineData("", "   ", "")]
+        [InlineData("", "   ", "")]  // Needs to be updated when Issue 955 is fixed
         [InlineData("", "controller/{id}", "controller/{id}")]
-        [InlineData("   ", null, "")]
-        [InlineData("   ", "", "")]
-        [InlineData("   ", "   ", "")]
-        [InlineData("   ", "controller/{id}", "controller/{id}")]
+        [InlineData("   ", null, "")]  // Needs to be updated when Issue 955 is fixed
+        [InlineData("   ", "", "")]  // Needs to be updated when Issue 955 is fixed
+        [InlineData("   ", "   ", "   /   ")]
+        [InlineData("   ", "controller/{id}", "   /controller/{id}")]
         [InlineData("prefix/{prefixId}", null, "prefix/{prefixId}")]
         [InlineData("prefix/{prefixId}", "", "prefix/{prefixId}")]
-        [InlineData("prefix/{prefixId}", "   ", "prefix/{prefixId}")]
+        [InlineData("prefix/{prefixId}", "   ", "prefix/{prefixId}/   ")]
         [InlineData("prefix/{prefixId}", "controller/{id}", "prefix/{prefixId}/controller/{id}")]
-        [InlineData("prefix/{prefixId}/", "controller/{id}", "prefix/{prefixId}/controller/{id}")]
         public void MapHttpAttributeRoutes_AddsRouteFromAttribute(string prefix, string template, string expectedTemplate)
         {
             // Arrange
@@ -93,7 +92,7 @@ namespace System.Net.Http
                 routeProviders.Add(new HttpGetAttribute(template));
             }
 
-            SetupConfiguration(config, routePrefixes, routeProviders);
+            SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act
             config.MapHttpAttributeRoutes();
@@ -106,13 +105,43 @@ namespace System.Net.Http
         }
 
         [Fact]
+        public void MapHttpAttributeRoutes_ThrowsForRoutePrefixThatEndsWithSeparator()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix/") };
+            var routeProviders = new Collection<IHttpRouteInfoProvider>() { };
+            SetUpConfiguration(config, routePrefixes, routeProviders);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => config.MapHttpAttributeRoutes(),
+                "The route prefix 'prefix/' on the controller named 'Controller' cannot end with a '/' character.");
+        }
+
+        [Fact]
+        public void MapHttpAttributeRoutes_ThrowsForRouteTemplateThatStartsWithSeparator()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            var routePrefixes = new Collection<RoutePrefixAttribute>() { };
+            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute("/get") };
+            SetUpConfiguration(config, routePrefixes, routeProviders);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => config.MapHttpAttributeRoutes(),
+                "The route template '/get' on the action named 'Action' cannot start with a '/' character.");
+        }
+
+        [Fact]
         public void MapHttpAttributeRoutes_RegistersRouteForActionsWithPrefixButNoRouteTemplate()
         {
             // Arrange
             var config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix/{prefixId}") };
             var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute() };
-            SetupConfiguration(config, routePrefixes, routeProviders);
+            SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act
             config.MapHttpAttributeRoutes();
@@ -131,7 +160,7 @@ namespace System.Net.Http
             HttpConfiguration config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>();
             var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute("controller/get1"), new HttpGetAttribute("controller/get2") };
-            SetupConfiguration(config, routePrefixes, routeProviders);
+            SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act
             config.MapHttpAttributeRoutes();
@@ -150,7 +179,7 @@ namespace System.Net.Http
             HttpConfiguration config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix1"), new RoutePrefixAttribute("prefix2") };
             var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute("controller/get1"), new HttpGetAttribute("controller/get2") };
-            SetupConfiguration(config, routePrefixes, routeProviders);
+            SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act
             config.MapHttpAttributeRoutes();
@@ -176,7 +205,7 @@ namespace System.Net.Http
                     new HttpGetAttribute("get2"),
                     new HttpGetAttribute("get3") { RouteOrder = -1 }
                 };
-            SetupConfiguration(config, routePrefixes, routeProviders);
+            SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act
             config.MapHttpAttributeRoutes();
@@ -241,7 +270,7 @@ namespace System.Net.Http
                     new HttpGetAttribute("get2"),
                     new HttpGetAttribute("get3") { RouteOrder = -1 }
                 };
-            SetupConfiguration(config, routePrefixes, routeProviders);
+            SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act
             config.MapHttpAttributeRoutes();
@@ -260,7 +289,7 @@ namespace System.Net.Http
             Assert.Equal("prefix1/get1", routes.ElementAt(8).RouteTemplate);
         }
 
-        private static void SetupConfiguration(HttpConfiguration config, Collection<RoutePrefixAttribute> routePrefixes, Collection<IHttpRouteInfoProvider> routeProviders)
+        private static void SetUpConfiguration(HttpConfiguration config, Collection<RoutePrefixAttribute> routePrefixes, Collection<IHttpRouteInfoProvider> routeProviders)
         {
             HttpControllerDescriptor controllerDescriptor = CreateControllerDescriptor("Controller", routePrefixes);
             HttpActionDescriptor actionDescriptor = CreateActionDescriptor("Action", routeProviders, controllerDescriptor);

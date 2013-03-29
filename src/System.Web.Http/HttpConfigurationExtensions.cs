@@ -3,14 +3,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ModelBinding.Binders;
+using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 
 namespace System.Web.Http
@@ -92,7 +91,7 @@ namespace System.Web.Http
                 }
             }
 
-            attributeRoutes.Sort(CompareRoutes);
+            attributeRoutes.Sort();
 
             foreach (HttpRouteEntry attributeRoute in attributeRoutes)
             {
@@ -123,24 +122,26 @@ namespace System.Web.Http
                             continue;
                         }
 
+                        ValidateTemplates(prefixTemplate, providerTemplate, actionDescriptor);
+
                         string routeTemplate;
-                        if (String.IsNullOrWhiteSpace(prefixTemplate))
+                        if (String.IsNullOrEmpty(prefixTemplate))
                         {
                             routeTemplate = providerTemplate ?? String.Empty;
                         }
-                        else if (String.IsNullOrWhiteSpace(providerTemplate))
+                        else if (String.IsNullOrEmpty(providerTemplate))
                         {
                             routeTemplate = prefixTemplate;
                         }
                         else
                         {
                             // template and prefix both not null - combine them
-                            routeTemplate = prefixTemplate.TrimEnd('/') + '/' + providerTemplate;
+                            routeTemplate = prefixTemplate + '/' + providerTemplate;
                         }
 
                         Collection<HttpMethod> httpMethods = actionDescriptor.SupportedHttpMethods;
                         IHttpRoute route = routeBuilder.BuildHttpRoute(routeTemplate, httpMethods, controllerName, actionName);
-                        HttpRouteEntry entry = new HttpRouteEntry() { Route = route };
+                        HttpRouteEntry entry = new HttpRouteEntry() { Route = route, RouteTemplate = routeTemplate };
                         if (routeProvider != null)
                         {
                             entry.Name = routeProvider.RouteName;
@@ -155,6 +156,26 @@ namespace System.Web.Http
                 }
             }
 
+            SetDefaultRouteNames(routes, controllerName, actionName);
+
+            return routes;
+        }
+
+        private static void ValidateTemplates(string prefixTemplate, string providerTemplate, HttpActionDescriptor actionDescriptor)
+        {
+            if (prefixTemplate != null && prefixTemplate.EndsWith("/", StringComparison.OrdinalIgnoreCase))
+            {
+                throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidPrefix, prefixTemplate, actionDescriptor.ControllerDescriptor.ControllerName);
+            }
+
+            if (providerTemplate != null && providerTemplate.StartsWith("/", StringComparison.OrdinalIgnoreCase))
+            {
+                throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidTemplate, providerTemplate, actionDescriptor.ActionName);
+            }
+        }
+
+        private static void SetDefaultRouteNames(List<HttpRouteEntry> routes, string controllerName, string actionName)
+        {
             // Only use a route suffix to disambiguate between multiple routes without a specified route name
             HttpRouteEntry[] namelessRoutes = routes.Where(entry => entry.Name == null).ToArray();
             if (namelessRoutes.Length == 1)
@@ -170,44 +191,6 @@ namespace System.Web.Http
                     routeSuffix++;
                 }
             }
-
-            return routes;
-        }
-
-        private static int CompareRoutes(HttpRouteEntry entryA, HttpRouteEntry entryB)
-        {
-            Contract.Assert(entryA != null);
-            Contract.Assert(entryB != null);
-
-            // Order by prefixes first
-            if (entryA.PrefixOrder > entryB.PrefixOrder)
-            {
-                return 1;
-            }
-            else if (entryA.PrefixOrder < entryB.PrefixOrder)
-            {
-                return -1;
-            }
-
-            // Then order by the attribute order
-            if (entryA.Order > entryB.Order)
-            {
-                return 1;
-            }
-            else if (entryA.Order < entryB.Order)
-            {
-                return -1;
-            }
-
-            return 0;
-        }
-
-        private class HttpRouteEntry
-        {
-            public IHttpRoute Route { get; set; }
-            public string Name { get; set; }
-            public int PrefixOrder { get; set; }
-            public int Order { get; set; }
         }
     }
 }

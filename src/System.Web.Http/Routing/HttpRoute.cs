@@ -27,7 +27,6 @@ namespace System.Web.Http.Routing
         private const string HttpMethodParameterName = "httpMethod";
 
         private string _routeTemplate;
-        private HttpParsedRoute _parsedRoute;
         private HttpRouteValueDictionary _defaults;
         private HttpRouteValueDictionary _constraints;
         private HttpRouteValueDictionary _dataTokens;
@@ -66,7 +65,7 @@ namespace System.Web.Http.Routing
             Handler = handler;
 
             // The parser will throw for invalid routes. 
-            _parsedRoute = HttpRouteParser.Parse(RouteTemplate);
+            ParsedRoute = HttpRouteParser.Parse(RouteTemplate);
         }
 
         public IDictionary<string, object> Defaults
@@ -90,6 +89,8 @@ namespace System.Web.Http.Routing
         {
             get { return _routeTemplate; }
         }
+
+        internal HttpParsedRoute ParsedRoute { get; private set; }
 
         public virtual IHttpRouteData GetRouteData(string virtualPathRoot, HttpRequestMessage request)
         {
@@ -122,7 +123,7 @@ namespace System.Web.Http.Routing
             }
 
             string decodedRelativeRequestPath = UriQueryUtility.UrlDecode(relativeRequestPath);
-            HttpRouteValueDictionary values = _parsedRoute.Match(decodedRelativeRequestPath, _defaults);
+            HttpRouteValueDictionary values = ParsedRoute.Match(decodedRelativeRequestPath, _defaults);
             if (values == null)
             {
                 // If we got back a null value set, that means the URI did not match
@@ -169,7 +170,7 @@ namespace System.Web.Http.Routing
                 return null;
             }
 
-            BoundRouteTemplate result = _parsedRoute.Bind(routeData.Values, newValues, _defaults, _constraints);
+            BoundRouteTemplate result = ParsedRoute.Bind(routeData.Values, newValues, _defaults, _constraints);
             if (result == null)
             {
                 return null;

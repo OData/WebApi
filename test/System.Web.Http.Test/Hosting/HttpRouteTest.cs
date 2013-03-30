@@ -34,5 +34,29 @@ namespace System.Web.Http.Hosting
             expectedResult["id"] = "999";
             Assert.Equal(expectedResult, data.Values, new DictionaryEqualityComparer());
         }
+
+        [Theory]
+        [InlineData("controller")]
+        [InlineData("cOnTrOlLeR")]
+        [InlineData("CONTROLLER")]
+        public void GetVirtualPath_GetsValuesInCaseInsensitiveWay(string controllerKey)
+        {
+            var route = new HttpRoute("{controller}");
+            var request = new HttpRequestMessage();
+            request.SetRouteData(
+                new HttpRouteData(route, new HttpRouteValueDictionary() {
+                    { "controller", "Employees" }
+                }));
+            var values = new HttpRouteValueDictionary()
+            {
+                { "httproute", true },
+                { controllerKey, "Customers" }
+            };
+
+            IHttpVirtualPathData virtualPath = route.GetVirtualPath(request, values);
+
+            Assert.NotNull(virtualPath);
+            Assert.Equal("Customers", virtualPath.VirtualPath);
+        }
     }
 }

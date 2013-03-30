@@ -186,7 +186,7 @@ namespace System.Web.Http.Routing
 
         private static IDictionary<string, object> GetRouteDictionaryWithoutHttpRouteKey(IDictionary<string, object> routeValues)
         {
-            var newRouteValues = new Dictionary<string, object>();
+            var newRouteValues = new HttpRouteValueDictionary();
             if (routeValues != null)
             {
                 foreach (var routeValue in routeValues)

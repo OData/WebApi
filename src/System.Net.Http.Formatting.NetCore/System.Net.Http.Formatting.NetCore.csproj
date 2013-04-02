@@ -34,6 +34,12 @@
     <Compile Include="..\Common\UriQueryUtility.cs">
       <Link>Common\UriQueryUtility.cs</Link>
     </Compile>
+    <Compile Include="..\Common\CollectionExtensions.cs">
+      <Link>Common\CollectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\ListWrapperCollection.cs">
+      <Link>Common\ListWrapperCollection.cs</Link>
+    </Compile>
     <Compile Include="..\System.Net.Http.Formatting\FormattingUtilities.cs">
       <Link>FormattingUtilities.cs</Link>
     </Compile>

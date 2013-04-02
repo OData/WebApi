@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http
+namespace System.Collections.Generic
 {
     public class DictionaryExtensionsTest
     {
@@ -36,10 +36,59 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void TryGetValueThrowsOnNullCollection()
+        public void RemoveFromDictionary_Args0_EvensRemoved()
         {
-            string value;
-            Assert.ThrowsArgumentNull(() => DictionaryExtensions.TryGetValue<string>(null, String.Empty, out value), "collection");
+            Dictionary<object, int> dictionary = new Dictionary<object, int>();
+            object object1 = new object();
+            object object2 = new object();
+            object object3 = new object();
+            object object4 = new object();
+            dictionary.Add(object1, 1);
+            dictionary.Add(object2, 2);
+            dictionary.Add(object3, 3);
+            dictionary.Add(object4, 4);
+
+            Func<KeyValuePair<object, int>, bool> removeAction = (KeyValuePair<object, int> entry) =>
+            {
+                // remove even values
+                return (entry.Value % 2) == 0;
+            };
+            dictionary.RemoveFromDictionary(removeAction);
+
+            Assert.Equal(2, dictionary.Count);
+            Assert.True(dictionary.ContainsKey(object1));
+            Assert.False(dictionary.ContainsKey(object2));
+            Assert.True(dictionary.ContainsKey(object3));
+            Assert.False(dictionary.ContainsKey(object4));
+        }
+
+        [Fact]
+        public void RemoveFromDictionary_Args1_EvensRemoved()
+        {
+            Dictionary<object, int> dictionary = new Dictionary<object, int>();
+            object object1 = new object();
+            object object2 = new object();
+            object object3 = new object();
+            object object4 = new object();
+            dictionary.Add(object1, 1);
+            dictionary.Add(object2, 2);
+            dictionary.Add(object3, 3);
+            dictionary.Add(object4, 4);
+            object expectedArgument = new object();
+
+            Func<KeyValuePair<object, int>, object, bool> removeAction = (KeyValuePair<object, int> entry, object arg) =>
+            {
+                Assert.Equal(expectedArgument, arg);
+                // remove even values
+                return (entry.Value % 2) == 0;
+            };
+            dictionary.RemoveFromDictionary(removeAction, expectedArgument);
+
+            Assert.Equal(2, dictionary.Count);
+            Assert.True(dictionary.ContainsKey(object1));
+            Assert.False(dictionary.ContainsKey(object2));
+            Assert.True(dictionary.ContainsKey(object3));
+            Assert.False(dictionary.ContainsKey(object4));
         }
 
         [Fact]

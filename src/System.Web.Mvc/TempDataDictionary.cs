@@ -88,12 +88,14 @@ namespace System.Web.Mvc
 
         public void Save(ControllerContext controllerContext, ITempDataProvider tempDataProvider)
         {
-            string[] keysToKeep = _initialKeys.Union(_retainedKeys, StringComparer.OrdinalIgnoreCase).ToArray();
-            string[] keysToRemove = _data.Keys.Except(keysToKeep, StringComparer.OrdinalIgnoreCase).ToArray();
-            foreach (string key in keysToRemove)
-            {
-                _data.Remove(key);
-            }
+            // Frequently called so ensure delegate is stateless
+            _data.RemoveFromDictionary((KeyValuePair<string, object> entry, TempDataDictionary tempData) =>
+                {
+                    string key = entry.Key;
+                    return !tempData._initialKeys.Contains(key) 
+                        && !tempData._retainedKeys.Contains(key);
+                }, this);
+
             tempDataProvider.SaveTempData(controllerContext, _data);
         }
 

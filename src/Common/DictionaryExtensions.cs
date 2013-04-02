@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
-namespace System.Web.Http
+namespace System.Collections.Generic
 {
     /// <summary>
     /// Extension methods for <see cref="IDictionary{TKey,TValue}"/>.
@@ -14,6 +11,45 @@ namespace System.Web.Http
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal static class DictionaryExtensions
     {
+        /// <summary>
+        /// Remove entries from dictionary that match the removeCondition.
+        /// </summary>
+        public static void RemoveFromDictionary<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Func<KeyValuePair<TKey, TValue>, bool> removeCondition)
+        {
+            // Pass the delegate as the state to avoid a delegate and closure
+            dictionary.RemoveFromDictionary((entry, innerCondition) =>
+                {
+                    return innerCondition(entry);
+                },
+                removeCondition);
+        }
+
+        /// <summary>
+        /// Remove entries from dictionary that match the removeCondition.
+        /// </summary>
+        public static void RemoveFromDictionary<TKey, TValue, TState>(this IDictionary<TKey, TValue> dictionary, Func<KeyValuePair<TKey, TValue>, TState, bool> removeCondition, TState state)
+        {
+            Contract.Assert(dictionary != null);
+            Contract.Assert(removeCondition != null);
+
+            // Because it is not possible to delete while enumerating, a copy of the keys must be taken. Use the size of the dictionary as an upper bound
+            // to avoid creating more than one copy of the keys.
+            int removeCount = 0;
+            TKey[] keys = new TKey[dictionary.Count];
+            foreach (var entry in dictionary)
+            {
+                if (removeCondition(entry, state))
+                {
+                    keys[removeCount] = entry.Key;
+                    removeCount++;
+                }
+            }
+            for (int i = 0; i < removeCount; i++)
+            {
+                dictionary.Remove(keys[i]);
+            }
+        }
+
         /// <summary>
         /// Gets the value of <typeparamref name="T"/> associated with the specified key or <c>default</c> value if
         /// either the key is not present or the value is not of type <typeparamref name="T"/>. 
@@ -25,10 +61,7 @@ namespace System.Web.Http
         /// <returns><c>true</c> if key was found, value is non-null, and value is of type <typeparamref name="T"/>; otherwise false.</returns>
         public static bool TryGetValue<T>(this IDictionary<string, object> collection, string key, out T value)
         {
-            if (collection == null)
-            {
-                throw Error.ArgumentNull("collection");
-            }
+            Contract.Assert(collection != null);
 
             object valueObj;
             if (collection.TryGetValue(key, out valueObj))
@@ -46,15 +79,8 @@ namespace System.Web.Http
 
         internal static IEnumerable<KeyValuePair<string, TValue>> FindKeysWithPrefix<TValue>(this IDictionary<string, TValue> dictionary, string prefix)
         {
-            if (dictionary == null)
-            {
-                throw Error.ArgumentNull("dictionary");
-            }
-
-            if (prefix == null)
-            {
-                throw Error.ArgumentNull("prefix");
-            }
+            Contract.Assert(dictionary != null);
+            Contract.Assert(prefix != null);
 
             TValue exactMatchValue;
             if (dictionary.TryGetValue(prefix, out exactMatchValue))

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -198,16 +199,8 @@ namespace System.Web.Mvc
         {
             RouteValueDictionary rvd = RequestContext.RouteData.Values;
 
-            // Get all keys for which the corresponding value is 'Optional'.
-            // ToArray() necessary so that we don't manipulate the dictionary while enumerating.
-            string[] matchingKeys = (from entry in rvd
-                                     where entry.Value == UrlParameter.Optional
-                                     select entry.Key).ToArray();
-
-            foreach (string key in matchingKeys)
-            {
-                rvd.Remove(key);
-            }
+            // Ensure delegate is stateless
+            rvd.RemoveFromDictionary((entry) => entry.Value == UrlParameter.Optional);
         }
 
         #region IHttpHandler Members

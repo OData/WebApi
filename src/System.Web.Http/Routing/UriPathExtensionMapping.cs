@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
-using System.Web.Http;
 using System.Web.Http.Routing;
 
 namespace System.Net.Http.Formatting

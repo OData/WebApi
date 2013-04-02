@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using System.Threading;
 
 namespace System.Web.Http.ValueProviders.Providers
 {
@@ -13,10 +12,13 @@ namespace System.Web.Http.ValueProviders.Providers
         private readonly CultureInfo _culture;
         private PrefixContainer _prefixContainer;
         private Dictionary<string, object> _values;
-        private Func<IEnumerable<KeyValuePair<string, string>>> _valuesFactory;
-        private object _valuesLock;
-        private bool _valuesInitialized;
+        private readonly Lazy<Dictionary<string, object>> _lazyValues;
 
+        /// <summary>
+        /// Creates a NameValuePairsProvider wrapping an existing set of key value pairs.
+        /// </summary>
+        /// <param name="values">The key value pairs to wrap.</param>
+        /// <param name="culture">The culture to return with ValueProviderResult instances.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Represents a collection of name/value pairs, cannot use NameValueCollection because it performs poorly")]
         public NameValuePairsValueProvider(IEnumerable<KeyValuePair<string, string>> values, CultureInfo culture)
         {
@@ -29,6 +31,11 @@ namespace System.Web.Http.ValueProviders.Providers
             _culture = culture;
         }
 
+        /// <summary>
+        /// Creates a NameValuePairsProvider wrapping a lazily evaluated set of key value pairs.
+        /// </summary>
+        /// <param name="valuesFactory">A function returning the key value pairs to wrap.</param>
+        /// <param name="culture">The culture to return with ValueProviderResult instances.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Represents a collection of name/value pairs, cannot use NameValueCollection because it performs poorly")]
         public NameValuePairsValueProvider(Func<IEnumerable<KeyValuePair<string, string>>> valuesFactory, CultureInfo culture)
         {
@@ -36,8 +43,7 @@ namespace System.Web.Http.ValueProviders.Providers
             {
                 throw Error.ArgumentNull("valuesFactory");
             }
-
-            _valuesFactory = valuesFactory;
+            _lazyValues = new Lazy<Dictionary<string, object>>(() => InitializeValues(valuesFactory()), isThreadSafe: true);
             _culture = culture;
         }
 
@@ -54,14 +60,12 @@ namespace System.Web.Http.ValueProviders.Providers
         {
             get
             {
-                PrefixContainer prefixContainer = Volatile.Read(ref _prefixContainer);
-                if (prefixContainer == null)
+                if (_prefixContainer == null)
                 {
                     // Initialization race is OK providing data remains read-only and object identity is not significant
-                    prefixContainer = new PrefixContainer(Values.Keys);
-                    Volatile.Write(ref _prefixContainer, prefixContainer);
+                    _prefixContainer = new PrefixContainer(Values.Keys);
                 }
-                return prefixContainer;
+                return _prefixContainer;
             }
         }
 
@@ -69,12 +73,12 @@ namespace System.Web.Http.ValueProviders.Providers
         {
             get
             {
-                Dictionary<string, object> values = Volatile.Read(ref _values);
-                if (values == null)
+                if (_values == null)
                 {
-                    return InitializeValuesThreadSafe();
+                    Contract.Assert(_lazyValues != null);
+                    _values = _lazyValues.Value;
                 }
-                return values;
+                return _values;
             }
         }
 
@@ -119,11 +123,6 @@ namespace System.Web.Http.ValueProviders.Providers
                 }
             }
             return values;
-        }
-
-        private Dictionary<string, object> InitializeValuesThreadSafe()
-        {
-            return LazyInitializer.EnsureInitialized(ref _values, ref _valuesInitialized, ref _valuesLock, () => InitializeValues(_valuesFactory()));
         }
 
         public virtual bool ContainsPrefix(string prefix)

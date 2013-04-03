@@ -67,13 +67,6 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("formatters");
             }
 
-            // If formatter list is empty then we won't find a match
-            IList<MediaTypeFormatter> formatterList = formatters.AsIList();
-            if (formatterList.Count == 0)
-            {
-                return null;
-            }
-
             // Go through each formatter to compute how well it matches.
             Collection<MediaTypeFormatterMatch> matches = ComputeFormatterMatches(type, request, formatters);
 

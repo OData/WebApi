@@ -7,8 +7,7 @@ namespace System.Web.Mvc
 {
     public class DictionaryValueProvider<TValue> : IValueProvider, IEnumerableValueProvider
     {
-        // The class could be read from multiple threads, so mark volatile to ensure the lazy initialization works on all memory models
-        private volatile PrefixContainer _prefixContainer;
+        private PrefixContainer _prefixContainer;
         private readonly Dictionary<string, ValueProviderResult> _values = new Dictionary<string, ValueProviderResult>(StringComparer.OrdinalIgnoreCase);
 
         public DictionaryValueProvider(IDictionary<string, TValue> dictionary, CultureInfo culture)
@@ -30,20 +29,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                // The class could be read from multiple threads, which could result in a race condition where this is created more than once.
-                // Ensure that:
-                //     - The input data and object remain read-only
-                //     - There is no dependency on the identity
-                //     - The object is not modified after assignment
-                //     - The field remains declared as volatile
-                //     - Use a local to minimize volatile operations on the common code path
-                PrefixContainer prefixContainer = _prefixContainer;
-                if (prefixContainer == null)
+                if (_prefixContainer == null)
                 {
-                    prefixContainer = new PrefixContainer(_values.Keys);
-                    _prefixContainer = prefixContainer;
+                    // Race condition on initialization has no side effects
+                    _prefixContainer = new PrefixContainer(_values.Keys);
                 }
-                return prefixContainer;
+                return _prefixContainer;
             }
         }
 

@@ -42,6 +42,49 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void ModelBinderProviderCollectionCombinedItemsClearResetsCache()
+        {
+            TestCacheReset((collection) => collection.Clear());
+        }
+
+        [Fact]
+        public void ModelBinderProviderCollectionCombinedItemsInsertResetsCache()
+        {
+            TestCacheReset((collection) => collection.Insert(0, new Mock<IModelBinderProvider>(MockBehavior.Strict).Object));
+        }
+
+        [Fact]
+        public void ModelBinderProviderCollectionCombinedItemsRemoveResetsCache()
+        {
+            TestCacheReset((collection) => collection.RemoveAt(0));
+        }
+
+        [Fact]
+        public void ModelBinderProviderCollectionCombinedItemsSetResetsCache()
+        {
+            TestCacheReset((collection) => collection[0] = new Mock<IModelBinderProvider>(MockBehavior.Strict).Object);
+        }
+
+        private static void TestCacheReset(Action<ModelBinderProviderCollection> mutatingAction)
+        {
+            // Arrange
+            var providers = new List<IModelBinderProvider>() 
+            {
+                new Mock<IModelBinderProvider>(MockBehavior.Strict).Object, 
+                new Mock<IModelBinderProvider>(MockBehavior.Strict).Object
+            };
+            var collection = new ModelBinderProviderCollection(providers);
+
+            // Act
+            mutatingAction(collection);
+
+            IModelBinderProvider[] combined = collection.CombinedItems;
+
+            // Assert
+            Assert.Equal(providers, combined);
+        }
+
+        [Fact]
         public void ModelBinderProviderCollectionCombinedItemsDelegatesToResolver()
         {
             // Arrange

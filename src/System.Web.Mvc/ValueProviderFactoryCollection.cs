@@ -56,6 +56,12 @@ namespace System.Web.Mvc
             return new ValueProviderCollection(providers);
         }
 
+        protected override void ClearItems()
+        {
+            _combinedItems = null;
+            base.ClearItems();
+        }
+
         protected override void InsertItem(int index, ValueProviderFactory item)
         {
             if (item == null)

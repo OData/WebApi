@@ -64,6 +64,49 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void ViewEngineCollectionCombinedItemsClearResetsCache()
+        {
+            TestCacheReset((collection) => collection.Clear());
+        }
+
+        [Fact]
+        public void ViewEngineCollectionCombinedItemsInsertResetsCache()
+        {
+            TestCacheReset((collection) => collection.Insert(0, new Mock<IViewEngine>(MockBehavior.Strict).Object));
+        }
+
+        [Fact]
+        public void ViewEngineCollectionCombinedItemsRemoveResetsCache()
+        {
+            TestCacheReset((collection) => collection.RemoveAt(0));
+        }
+
+        [Fact]
+        public void ViewEngineCollectionCombinedItemsSetResetsCache()
+        {
+            TestCacheReset((collection) => collection[0] = new Mock<IViewEngine>(MockBehavior.Strict).Object);
+        }
+
+        private static void TestCacheReset(Action<ViewEngineCollection> mutatingAction)
+        {
+            // Arrange
+            var providers = new List<IViewEngine>() 
+            {
+                new Mock<IViewEngine>(MockBehavior.Strict).Object, 
+                new Mock<IViewEngine>(MockBehavior.Strict).Object
+            };
+            var collection = new ViewEngineCollection(providers);
+
+            // Act
+            mutatingAction(collection);
+
+            IViewEngine[] combined = collection.CombinedItems;
+
+            // Assert
+            Assert.Equal(providers, combined);
+        }
+
+        [Fact]
         public void ViewEngineCollectionCombinedItemsDelegatesToResolver()
         {
             // Arrange

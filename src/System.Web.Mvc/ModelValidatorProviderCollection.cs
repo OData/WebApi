@@ -40,6 +40,12 @@ namespace System.Web.Mvc
             }
         }
 
+        protected override void ClearItems()
+        {
+            _combinedItems = null;
+            base.ClearItems();
+        }
+
         protected override void InsertItem(int index, ModelValidatorProvider item)
         {
             if (item == null)

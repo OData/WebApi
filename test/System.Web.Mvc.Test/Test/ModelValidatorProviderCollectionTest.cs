@@ -77,6 +77,49 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void ModelValidatorProviderCollectionCombinedItemsClearResetsCache()
+        {
+            TestCacheReset((collection) => collection.Clear());
+        }
+
+        [Fact]
+        public void ModelValidatorProviderCollectionCombinedItemsInsertResetsCache()
+        {
+            TestCacheReset((collection) => collection.Insert(0, new Mock<ModelValidatorProvider>(MockBehavior.Strict).Object));
+        }
+
+        [Fact]
+        public void ModelValidatorProviderCollectionCombinedItemsRemoveResetsCache()
+        {
+            TestCacheReset((collection) => collection.RemoveAt(0));
+        }
+
+        [Fact]
+        public void ModelValidatorProviderCollectionCombinedItemsSetResetsCache()
+        {
+            TestCacheReset((collection) => collection[0] = new Mock<ModelValidatorProvider>(MockBehavior.Strict).Object);
+        }
+
+        private static void TestCacheReset(Action<ModelValidatorProviderCollection> mutatingAction)
+        {
+            // Arrange
+            var providers = new List<ModelValidatorProvider>() 
+            {
+                new Mock<ModelValidatorProvider>(MockBehavior.Strict).Object, 
+                new Mock<ModelValidatorProvider>(MockBehavior.Strict).Object
+            };
+            var collection = new ModelValidatorProviderCollection(providers);
+
+            // Act
+            mutatingAction(collection);
+
+            ModelValidatorProvider[] combined = collection.CombinedItems;
+
+            // Assert
+            Assert.Equal(providers, combined);
+        }
+
+        [Fact]
         public void ModelBinderValidatorCollectionCombinedItemsDelegatesToResolver()
         {
             // Arrange

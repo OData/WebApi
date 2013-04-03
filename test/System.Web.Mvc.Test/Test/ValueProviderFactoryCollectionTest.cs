@@ -77,6 +77,49 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void ValueProviderFactoryCollectionCombinedItemsClearResetsCache()
+        {
+            TestCacheReset((collection) => collection.Clear());
+        }
+
+        [Fact]
+        public void ValueProviderFactoryCollectionCombinedItemsInsertResetsCache()
+        {
+            TestCacheReset((collection) => collection.Insert(0, new Mock<ValueProviderFactory>(MockBehavior.Strict).Object));
+        }
+
+        [Fact]
+        public void ValueProviderFactoryCollectionCombinedItemsRemoveResetsCache()
+        {
+            TestCacheReset((collection) => collection.RemoveAt(0));
+        }
+
+        [Fact]
+        public void ValueProviderFactoryCollectionCombinedItemsSetResetsCache()
+        {
+            TestCacheReset((collection) => collection[0] = new Mock<ValueProviderFactory>(MockBehavior.Strict).Object);
+        }
+
+        private static void TestCacheReset(Action<ValueProviderFactoryCollection> mutatingAction)
+        {
+            // Arrange
+            var providers = new List<ValueProviderFactory>() 
+            {
+                new Mock<ValueProviderFactory>(MockBehavior.Strict).Object, 
+                new Mock<ValueProviderFactory>(MockBehavior.Strict).Object
+            };
+            var collection = new ValueProviderFactoryCollection(providers);
+
+            // Act
+            mutatingAction(collection);
+
+            ValueProviderFactory[] combined = collection.CombinedItems;
+
+            // Assert
+            Assert.Equal(providers, combined);
+        }
+
+        [Fact]
         public void ValueProviderFactoryCollectionCombinedItemsDelegatesToResolver()
         {
             // Arrange

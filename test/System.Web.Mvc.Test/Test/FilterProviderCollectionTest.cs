@@ -49,6 +49,49 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void FilterProviderCollectionCombinedItemsClearResetsCache()
+        {
+            TestCacheReset((collection) => collection.Clear());
+        }
+
+        [Fact]
+        public void FilterProviderCollectionCombinedItemsInsertResetsCache()
+        {
+            TestCacheReset((collection) => collection.Insert(0, new Mock<IFilterProvider>(MockBehavior.Strict).Object));
+        }
+
+        [Fact]
+        public void FilterProviderCollectionCombinedItemsRemoveResetsCache()
+        {
+            TestCacheReset((collection) => collection.RemoveAt(0));
+        }
+
+        [Fact]
+        public void FilterProviderCollectionCombinedItemsSetResetsCache()
+        {
+            TestCacheReset((collection) => collection[0] = new Mock<IFilterProvider>(MockBehavior.Strict).Object);
+        }
+
+        private static void TestCacheReset(Action<FilterProviderCollection> mutatingAction)
+        {
+            // Arrange
+            var providers = new List<IFilterProvider>() 
+            {
+                new Mock<IFilterProvider>(MockBehavior.Strict).Object, 
+                new Mock<IFilterProvider>(MockBehavior.Strict).Object
+            };
+            var collection = new FilterProviderCollection(providers);
+
+            // Act
+            mutatingAction(collection);
+
+            IFilterProvider[] combined = collection.CombinedItems;
+
+            // Assert
+            Assert.Equal(providers, combined);
+        }
+
+        [Fact]
         public void FilterProviderCollectionCombinedItemsDelegatesToResolver()
         {
             // Arrange

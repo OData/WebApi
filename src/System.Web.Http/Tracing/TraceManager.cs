@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.Services;
 using System.Web.Http.Tracing.Tracers;
 
 namespace System.Web.Http.Tracing
@@ -119,22 +121,87 @@ namespace System.Web.Http.Tracing
             int handlerCount = configuration.MessageHandlers.Count;
 
             // If message handlers have already been wired into the pipeline,
-            // we do not install tracing message handlers.  This scenario occurs
+            // we do not install tracing message handlers. This scenario occurs
             // when initialization is attempted twice, such as per-controller configuration. 
             if (handlerCount > 0 && configuration.MessageHandlers[0].InnerHandler != null)
             {
                 return;
             }
 
-            // Insert a tracing handler before each existing message handler (in execution order)
-            for (int i = 0; i < handlerCount * 2; i += 2)
+            // For the MessageHandlerTracers to be registered, the message handler list must be of the form:
+            // messageHandler1
+            // messageHandler1Tracer
+            // ...
+            // ...
+            // messageHandlerN
+            // messageHandlerNTracer
+            // requestMessageHandlerTracer
+            // Where "N" is a non-negative integer. That is, there could be zero or more pairs of handlers/tracers, plus a 
+            // request tracer at the end. If the state does not match this pattern, the tracer list is recreated.
+            if (!AreMessageHandlerTracersRegistered(configuration.MessageHandlers))
             {
-                DelegatingHandler innerHandler = configuration.MessageHandlers[i];
-                DelegatingHandler handlerTracer = new MessageHandlerTracer(innerHandler, traceWriter);
-                configuration.MessageHandlers.Insert(i + 1, handlerTracer);
+                // Removing the MessageHandlerTracer and RequestMessageHandlerTracer in the reverse order.
+                for (int i = handlerCount - 1; i >= 0; i--)
+                {
+                    if (configuration.MessageHandlers[i] is RequestMessageHandlerTracer || configuration.MessageHandlers[i] is MessageHandlerTracer)
+                    {
+                        configuration.MessageHandlers.RemoveAt(i);
+                    }
+                }
+                handlerCount = configuration.MessageHandlers.Count;
+
+                // Insert a tracing handler before each existing message handler (in execution order)
+                for (int i = 0; i < handlerCount * 2; i += 2)
+                {
+                    DelegatingHandler innerHandler = configuration.MessageHandlers[i];
+                    DelegatingHandler handlerTracer = new MessageHandlerTracer(innerHandler, traceWriter);
+                    configuration.MessageHandlers.Insert(i + 1, handlerTracer);
+                }
+
+                configuration.MessageHandlers.Add(new RequestMessageHandlerTracer(traceWriter));
+            }
+        }
+
+        private static bool AreMessageHandlerTracersRegistered(Collection<DelegatingHandler> messageHandlers)
+        {
+            int handlerCount = messageHandlers.Count;
+            
+            // if the handler count is zero, exit early.
+            if (handlerCount == 0)
+            {
+                return false;
             }
 
-            configuration.MessageHandlers.Add(new RequestMessageHandlerTracer(traceWriter));
+            // if RequestMessageHandlerTracer is absent, exit early.
+            if (!(messageHandlers[handlerCount - 1] is RequestMessageHandlerTracer))
+            {
+                return false;
+            }
+
+            // Message handler list must be an odd number (2*N+1) for N message handlers.
+            if (handlerCount % 2 != 1)
+            {
+                return false;
+            }
+
+            // Check if all odd positions have tracers and even positions have their corresponding handlers.
+            for (int i = 1; i < handlerCount; i += 2)
+            {
+                DelegatingHandler messageHandler = messageHandlers[i - 1];
+                DelegatingHandler tracer = messageHandlers[i];
+                if (!(tracer is MessageHandlerTracer))
+                {
+                    return false;
+                }
+
+                DelegatingHandler innerHandler = Decorator.GetInner(tracer);
+                if (innerHandler != messageHandler)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

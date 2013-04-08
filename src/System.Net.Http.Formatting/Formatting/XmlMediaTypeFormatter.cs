@@ -173,9 +173,7 @@ namespace System.Net.Http.Formatting
 
             // If there is a registered non-null serializer, we can support this type.
             // Otherwise attempt to create the default serializer.
-            object serializer = _serializerCache.GetOrAdd(
-                type,
-                (t) => CreateDefaultSerializer(t, throwOnError: false));
+            object serializer = GetCachedSerializer(type, throwOnError: false);
 
             // Null means we tested it before and know it is not supported
             return serializer != null;
@@ -189,6 +187,7 @@ namespace System.Net.Http.Formatting
         /// <returns><c>true</c> if objects of this <paramref name="type"/> can be written, otherwise <c>false</c>.</returns>
         public override bool CanWriteType(Type type)
         {
+            // Performance-sensitive
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
@@ -204,9 +203,7 @@ namespace System.Net.Http.Formatting
             }
 
             // If there is a registered non-null serializer, we can support this type.
-            object serializer = _serializerCache.GetOrAdd(
-                type,
-                (t) => CreateDefaultSerializer(t, throwOnError: false));
+            object serializer = GetCachedSerializer(type, throwOnError: false);
 
             // Null means we tested it before and know it is not supported
             return serializer != null;
@@ -415,6 +412,19 @@ namespace System.Net.Http.Formatting
             return serializer;
         }
 
+        private object GetCachedSerializer(Type type, bool throwOnError)
+        {
+            // Performance-sensitive
+            object serializer;
+            if (!_serializerCache.TryGetValue(type, out serializer))
+            {
+                // Race condition on creation has no side effects
+                serializer = CreateDefaultSerializer(type, throwOnError);
+                _serializerCache.TryAdd(type, serializer);
+            }
+            return serializer;
+        }
+
         private void VerifyAndSetSerializer(Type type, object serializer)
         {
             if (type == null)
@@ -440,8 +450,10 @@ namespace System.Net.Http.Formatting
 
         private object GetSerializerForType(Type type)
         {
+            // Performance-sensitive
             Contract.Assert(type != null, "Type cannot be null");
-            object serializer = _serializerCache.GetOrAdd(type, (t) => CreateDefaultSerializer(t, throwOnError: true));
+
+            object serializer = GetCachedSerializer(type, throwOnError: true);
 
             if (serializer == null)
             {

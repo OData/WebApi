@@ -117,6 +117,7 @@ namespace System.Web.Http.Controllers
         }
 
         /// <inheritdoc/>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             if (controllerContext == null)
@@ -129,11 +130,20 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("arguments");
             }
 
-            return TaskHelpers.RunSynchronously(() =>
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return TaskHelpers.Canceled<object>();
+            }
+
+            try
             {
                 object[] argumentValues = PrepareParameters(arguments, controllerContext);
                 return _actionExecutor.Value.Execute(controllerContext.Controller, argumentValues);
-            }, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                return TaskHelpers.FromError<object>(e);
+            }
         }
 
         public override Collection<IFilter> GetFilters()

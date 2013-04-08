@@ -290,6 +290,7 @@ namespace System.Net.Http.Formatting
         /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
         /// <param name="transportContext">The <see cref="TransportContext"/>.</param>
         /// <returns>A <see cref="Task"/> that will write the value to the stream.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             if (type == null)
@@ -302,7 +303,7 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("writeStream");
             }
 
-            return TaskHelpers.RunSynchronously(() =>
+            try
             {
                 bool isRemapped = false;
                 if (UseXmlSerializer)
@@ -343,7 +344,12 @@ namespace System.Net.Http.Formatting
                         xmlObjectSerializer.WriteObject(writer, value);
                     }
                 }
-            });
+                return TaskHelpers.Completed();
+            }
+            catch (Exception e)
+            {
+                return TaskHelpers.FromError(e);
+            }
         }
 
         private object CreateDefaultSerializer(Type type, bool throwOnError)

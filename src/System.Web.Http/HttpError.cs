@@ -12,21 +12,15 @@ using System.Xml.Serialization;
 namespace System.Web.Http
 {
     /// <summary>
-    /// Defines a serializable container for arbitrary error information.
+    /// Defines a serializable container for storing error information. This information is stored 
+    /// as key/value pairs. The dictionary keys to look up standard error information are available 
+    /// on the <see cref="HttpErrorKeys"/> type.
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "This type is only a dictionary to get the right serialization format")]
     [SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable", Justification = "DCS does not support IXmlSerializable types that are also marked as [Serializable]")]
     [XmlRoot("Error")]
     public sealed class HttpError : Dictionary<string, object>, IXmlSerializable
     {
-        private const string MessageKey = "Message";
-        private const string MessageDetailKey = "MessageDetail";
-        private const string ModelStateKey = "ModelState";
-        private const string ExceptionMessageKey = "ExceptionMessage";
-        private const string ExceptionTypeKey = "ExceptionType";
-        private const string StackTraceKey = "StackTrace";
-        private const string InnerExceptionKey = "InnerException";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpError"/> class.
         /// </summary>
@@ -64,12 +58,12 @@ namespace System.Web.Http
 
             if (includeErrorDetail)
             {
-                Add(ExceptionMessageKey, exception.Message);
-                Add(ExceptionTypeKey, exception.GetType().FullName);
-                Add(StackTraceKey, exception.StackTrace);
+                Add(HttpErrorKeys.ExceptionMessageKey, exception.Message);
+                Add(HttpErrorKeys.ExceptionTypeKey, exception.GetType().FullName);
+                Add(HttpErrorKeys.StackTraceKey, exception.StackTrace);
                 if (exception.InnerException != null)
                 {
-                    Add(InnerExceptionKey, new HttpError(exception.InnerException, includeErrorDetail));
+                    Add(HttpErrorKeys.InnerExceptionKey, new HttpError(exception.InnerException, includeErrorDetail));
                 }
             }
         }
@@ -115,7 +109,7 @@ namespace System.Web.Http
                 }
             }
 
-            Add(ModelStateKey, modelStateError);
+            Add(HttpErrorKeys.ModelStateKey, modelStateError);
         }
 
         /// <summary>
@@ -132,7 +126,7 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("message");
             }
 
-            Add(MessageDetailKey, messageDetail);
+            Add(HttpErrorKeys.MessageDetailKey, messageDetail);
         }
 
         /// <summary>
@@ -142,8 +136,8 @@ namespace System.Web.Http
         /// </summary>
         public string Message
         {
-            get { return GetPropertyValue<String>(MessageKey); }
-            set { this[MessageKey] = value; }
+            get { return GetPropertyValue<String>(HttpErrorKeys.MessageKey); }
+            set { this[HttpErrorKeys.MessageKey] = value; }
         }
 
         /// <summary>
@@ -157,7 +151,7 @@ namespace System.Web.Http
         /// </remarks>
         public HttpError ModelState
         {
-            get { return GetPropertyValue<HttpError>(ModelStateKey); }
+            get { return GetPropertyValue<HttpError>(HttpErrorKeys.ModelStateKey); }
         }
 
         /// <summary>
@@ -170,8 +164,8 @@ namespace System.Web.Http
         /// </remarks>
         public string MessageDetail
         {
-            get { return GetPropertyValue<String>(MessageDetailKey); }
-            set { this[MessageDetailKey] = value; }
+            get { return GetPropertyValue<String>(HttpErrorKeys.MessageDetailKey); }
+            set { this[HttpErrorKeys.MessageDetailKey] = value; }
         }
 
         /// <summary>
@@ -184,8 +178,8 @@ namespace System.Web.Http
         /// </remarks>
         public string ExceptionMessage
         {
-            get { return GetPropertyValue<String>(ExceptionMessageKey); }
-            set { this[ExceptionMessageKey] = value; }
+            get { return GetPropertyValue<String>(HttpErrorKeys.ExceptionMessageKey); }
+            set { this[HttpErrorKeys.ExceptionMessageKey] = value; }
         }
 
         /// <summary>
@@ -198,8 +192,8 @@ namespace System.Web.Http
         /// </remarks>
         public string ExceptionType
         {
-            get { return GetPropertyValue<String>(ExceptionTypeKey); }
-            set { this[ExceptionTypeKey] = value; }
+            get { return GetPropertyValue<String>(HttpErrorKeys.ExceptionTypeKey); }
+            set { this[HttpErrorKeys.ExceptionTypeKey] = value; }
         }
 
         /// <summary>
@@ -212,8 +206,8 @@ namespace System.Web.Http
         /// </remarks>
         public string StackTrace
         {
-            get { return GetPropertyValue<String>(StackTraceKey); }
-            set { this[StackTraceKey] = value; }
+            get { return GetPropertyValue<String>(HttpErrorKeys.StackTraceKey); }
+            set { this[HttpErrorKeys.StackTraceKey] = value; }
         }
 
         /// <summary>
@@ -226,7 +220,7 @@ namespace System.Web.Http
         /// </remarks>
         public HttpError InnerException
         {
-            get { return GetPropertyValue<HttpError>(InnerExceptionKey); }
+            get { return GetPropertyValue<HttpError>(HttpErrorKeys.InnerExceptionKey); }
         }
 
         /// <summary>

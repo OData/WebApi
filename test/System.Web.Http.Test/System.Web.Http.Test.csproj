@@ -88,6 +88,7 @@
     <Compile Include="Dispatcher\HttpErrorTest.cs" />
     <Compile Include="Dispatcher\HttpRoutingDispatcherTest.cs" />
     <Compile Include="Filters\HttpFilterCollectionTest.cs" />
+    <Compile Include="HttpErrorKeysTest.cs" />
     <Compile Include="HttpResponseMessageExtensionsTest.cs" />
     <Compile Include="HttpResponseExceptionTest.cs" />
     <Compile Include="HttpServerTest.cs" />

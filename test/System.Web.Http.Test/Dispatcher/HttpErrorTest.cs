@@ -11,6 +11,22 @@ namespace System.Web.Http.Dispatcher
 {
     public class HttpErrorTest
     {
+        public static TheoryDataSet<HttpError, Func<string>, string, string> ErrorKeyValue
+        {
+            get
+            {
+                HttpError httpError = new HttpError();
+                return new TheoryDataSet<HttpError, Func<string>, string, string>
+                {       
+                    { httpError, () => httpError.Message, "Message", "Message_Value" },
+                    { httpError, () => httpError.MessageDetail, "MessageDetail", "MessageDetail_Value" },
+                    { httpError, () => httpError.ExceptionMessage, "ExceptionMessage", "ExceptionMessage_Value" },
+                    { httpError, () => httpError.ExceptionType, "ExceptionType", "ExceptionType_Value" },
+                    { httpError, () => httpError.StackTrace, "StackTrace", "StackTrace_Value" },
+                };
+            }
+        }
+
         [Fact]
         public void Constructor_GuardClauses()
         {
@@ -283,6 +299,48 @@ namespace System.Web.Http.Dispatcher
 
             Assert.Null(error.GetPropertyValue<string>("key"));
             Assert.Equal(0, error.GetPropertyValue<int>("key"));
+        }
+
+        [Theory]
+        [PropertyData("ErrorKeyValue")]
+        public void HttpErrorStringProperties_UseCorrectHttpErrorKey(HttpError httpError, Func<string> productUnderTest, string key, string actualValue)
+        {
+            // Arrange
+            httpError[key] = actualValue;
+
+            // Act
+            string expectedValue = productUnderTest.Invoke();
+
+            // Assert
+            Assert.Equal(expectedValue, actualValue);
+        }
+
+        [Fact]
+        public void HttpErrorProperty_InnerException_UsesCorrectHttpErrorKey()
+        {
+            // Arrange
+            HttpError error = new HttpError(new ArgumentException("error", new Exception()), true);
+
+            // Act
+            HttpError innerException = error.InnerException;
+
+            // Assert
+            Assert.Same(error["InnerException"], innerException);
+        }
+
+        [Fact]
+        public void HttpErrorProperty_ModelState_UsesCorrectHttpErrorKey()
+        {
+            // Arrange
+            ModelStateDictionary modelState = new ModelStateDictionary();
+            modelState.AddModelError("[0].Name", "error1");
+            HttpError error = new HttpError(modelState, true);
+
+            // Act
+            HttpError actualModelStateError = error.ModelState;
+
+            // Assert
+            Assert.Same(error["ModelState"], actualModelStateError);
         }
     }
 }

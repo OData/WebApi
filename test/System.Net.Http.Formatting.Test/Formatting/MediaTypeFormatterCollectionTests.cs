@@ -376,5 +376,87 @@ namespace System.Net.Http.Formatting
         {
             Assert.True(MediaTypeFormatterCollection.IsTypeExcludedFromValidation(type));
         }
+
+        [Fact]
+        public void WritingFormatters_FiltersOutCanWriteAnyTypesFalse()
+        {
+            // Arrange
+            MockMediaTypeFormatter writableFormatter = new MockMediaTypeFormatter();
+            MockMediaTypeFormatter readOnlyFormatter = new MockMediaTypeFormatter() { CanWriteAnyTypesReturn = false };
+            List<MediaTypeFormatter> formatters = new List<MediaTypeFormatter>() { writableFormatter, readOnlyFormatter };
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(formatters);
+
+            // Act
+            MediaTypeFormatter[] writableFormatters = collection.WritingFormatters;
+
+            // Assert
+            MediaTypeFormatter[] expectedFormatters = new MediaTypeFormatter[] { writableFormatter };
+            Assert.Equal(expectedFormatters, writableFormatters);
+        }
+
+        [Fact]
+        public void WritingFormatters_FiltersOutNull()
+        {
+            // Arrange
+            MockMediaTypeFormatter writableFormatter = new MockMediaTypeFormatter();
+            List<MediaTypeFormatter> formatters = new List<MediaTypeFormatter>() { writableFormatter };
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(formatters);
+            collection.Add(null);
+
+            // Act
+            MediaTypeFormatter[] writableFormatters = collection.WritingFormatters;
+
+            // Assert
+            MediaTypeFormatter[] expectedFormatters = new MediaTypeFormatter[] { writableFormatter };
+            Assert.Equal(expectedFormatters, writableFormatters);
+        }
+
+        [Fact]
+        public void WritingFormatters_Caches()
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter1 = new MockMediaTypeFormatter();
+            MockMediaTypeFormatter formatter2 = new MockMediaTypeFormatter();
+            List<MediaTypeFormatter> formatters = new List<MediaTypeFormatter>() { formatter1, formatter2 };
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(formatters);
+
+            // Act
+            MediaTypeFormatter[] writableFormatters1 = collection.WritingFormatters;
+            MediaTypeFormatter[] writableFormatters2 = collection.WritingFormatters;
+
+            // Assert
+            MediaTypeFormatter[] expectedFormatters = formatters.ToArray();
+            Assert.Equal(expectedFormatters, writableFormatters1);
+            Assert.Same(writableFormatters1, writableFormatters2);
+        }
+
+        [Fact]
+        public void WritingFormatters_Insert_ResetsCache()
+        {
+            TestWritingFormattersCacheReset((collection) => collection.Insert(0, new MockMediaTypeFormatter()));
+        }
+
+        [Fact]
+        public void WritingFormatters_RemoveAt_ResetsCache()
+        {
+            TestWritingFormattersCacheReset((collection) => collection.RemoveAt(0));
+        }
+
+        private static void TestWritingFormattersCacheReset(Action<MediaTypeFormatterCollection> mutation)
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter1 = new MockMediaTypeFormatter();
+            MockMediaTypeFormatter formatter2 = new MockMediaTypeFormatter();
+            List<MediaTypeFormatter> formatters = new List<MediaTypeFormatter>() { formatter1, formatter2 };
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(formatters);
+
+            // Act
+            mutation(collection);
+            MediaTypeFormatter[] expectedFormatters = collection.ToArray();
+            MediaTypeFormatter[] writableFormatters = collection.WritingFormatters;
+
+            // Assert
+            Assert.Equal(expectedFormatters, writableFormatters);
+        }
     }
 }

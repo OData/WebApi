@@ -7,9 +7,21 @@ namespace System.Net.Http.Formatting.Mocks
 {
     public class MockMediaTypeFormatter : MediaTypeFormatter
     {
+        private bool _canWriteAnyTypes = true;
         public bool CallBase { get; set; }
         public Func<Type, bool> CanReadTypeCallback { get; set; }
         public Func<Type, bool> CanWriteTypeCallback { get; set; }
+
+        internal override bool CanWriteAnyTypes
+        {
+            get { return _canWriteAnyTypes; }
+        }
+
+        public bool CanWriteAnyTypesReturn
+        {
+            get { return _canWriteAnyTypes; }
+            set { _canWriteAnyTypes = value; }
+        }
 
         public override bool CanReadType(Type type)
         {

@@ -127,6 +127,11 @@ namespace System.Net.Http.Formatting
         public IRequiredMemberSelector RequiredMemberSelector { get; set; }
 #endif
 
+        internal virtual bool CanWriteAnyTypes
+        {
+            get { return true; }
+        }
+
         /// <summary>
         /// Returns a <see cref="Task"/> to deserialize an object of the given <paramref name="type"/> from the given <paramref name="readStream"/>
         /// </summary>

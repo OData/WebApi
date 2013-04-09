@@ -17,6 +17,8 @@ namespace System.Net.Http.Formatting
     {
         private static readonly Type _mediaTypeFormatterType = typeof(MediaTypeFormatter);
 
+        private MediaTypeFormatter[] _writingFormatters;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MediaTypeFormatterCollection"/> class.
         /// </summary>
@@ -65,6 +67,18 @@ namespace System.Net.Http.Formatting
             get { return Items.OfType<FormUrlEncodedMediaTypeFormatter>().FirstOrDefault(); }
         }
 #endif
+
+        internal MediaTypeFormatter[] WritingFormatters
+        {
+            get
+            {
+                if (_writingFormatters == null)
+                {
+                    _writingFormatters = GetWritingFormatters();
+                }
+                return _writingFormatters;
+            }
+        }
 
         /// <summary>
         /// Helper to search a collection for a formatter that can read the .NET type in the given mediaType.
@@ -182,6 +196,14 @@ namespace System.Net.Http.Formatting
             {
                 Changing(this, EventArgs.Empty);
             }
+
+            // Clear cached state
+            _writingFormatters = null;
+        }
+
+        private MediaTypeFormatter[] GetWritingFormatters()
+        {
+            return Items.Where((formatter) => formatter != null && formatter.CanWriteAnyTypes).ToArray();
         }
 
         /// <summary>

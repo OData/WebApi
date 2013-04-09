@@ -21,6 +21,7 @@ namespace System.Net.Http.Formatting
 
         private int _readBufferSize = DefaultBufferSize;
         private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
+        private readonly bool _isDerived;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FormUrlEncodedMediaTypeFormatter"/> class.
@@ -28,6 +29,7 @@ namespace System.Net.Http.Formatting
         public FormUrlEncodedMediaTypeFormatter()
         {
             SupportedMediaTypes.Add(MediaTypeConstants.ApplicationFormUrlEncodedMediaType);
+            _isDerived = GetType() != typeof(FormUrlEncodedMediaTypeFormatter);
         }
 
         /// <summary>
@@ -80,6 +82,14 @@ namespace System.Net.Http.Formatting
                 }
 
                 _readBufferSize = value;
+            }
+        }
+
+        internal override bool CanWriteAnyTypes
+        {
+            get
+            {
+                return _isDerived;
             }
         }
 

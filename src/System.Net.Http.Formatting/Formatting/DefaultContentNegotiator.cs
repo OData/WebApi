@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
@@ -120,12 +121,10 @@ namespace System.Net.Http.Formatting
 
             // Go through each formatter to find how well it matches.
             ListWrapperCollection<MediaTypeFormatterMatch> matches = new ListWrapperCollection<MediaTypeFormatterMatch>();
-            IList<MediaTypeFormatter> formatterList = formatters.AsIList();
-            // Cache the count, which is faster for IList<T>.
-            int formatterCount = formatterList.Count;
-            for (int i = 0; i < formatterCount; i++) 
+            MediaTypeFormatter[] writingFormatters = GetWritingFormatters(formatters);
+            for (int i = 0; i < writingFormatters.Length; i++) 
             {
-                MediaTypeFormatter formatter = formatterList[i];
+                MediaTypeFormatter formatter = writingFormatters[i];
                 MediaTypeFormatterMatch match = null;
 
                 // Check first that formatter can write the actual type
@@ -570,6 +569,17 @@ namespace System.Net.Http.Formatting
             }
 
             return potentialReplacement;
+        }
+
+        private static MediaTypeFormatter[] GetWritingFormatters(IEnumerable<MediaTypeFormatter> formatters)
+        {
+            Contract.Assert(formatters != null);
+            MediaTypeFormatterCollection formatterCollection = formatters as MediaTypeFormatterCollection;
+            if (formatterCollection != null)
+            {
+                return formatterCollection.WritingFormatters;
+            }
+            return formatters.AsArray();
         }
     }
 }

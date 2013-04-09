@@ -137,6 +137,11 @@ namespace System.Net.Http
             HttpRequestMessage request = null;
             Assert.ThrowsArgumentNull(() =>
             {
+                request.CreateResponse(_value);
+            }, "request");
+
+            Assert.ThrowsArgumentNull(() =>
+            {
                 request.CreateResponse(HttpStatusCode.OK, _value);
             }, "request");
 
@@ -153,8 +158,30 @@ namespace System.Net.Http
 
             Assert.Throws<InvalidOperationException>(() =>
             {
+                _request.CreateResponse(_value);
+            }, "The request does not have an associated configuration object or the provided configuration was null.");
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
                 _request.CreateResponse(HttpStatusCode.OK, _value, configuration: null);
             }, "The request does not have an associated configuration object or the provided configuration was null.");
+        }
+
+        [Fact]
+        public void CreateResponse_DoingConneg_OnlyContent_RetrievesContentNegotiatorFromServiceResolver()
+        {
+            // Arrange
+            Mock<DefaultServices> servicesMock = new Mock<DefaultServices> { CallBase = true };
+            servicesMock.Setup(s => s.GetService(typeof(IContentNegotiator)))
+                        .Returns(new Mock<IContentNegotiator>().Object)
+                        .Verifiable();
+            _config.Services = servicesMock.Object;
+
+            // Act
+            _request.CreateResponse(_value);
+
+            // Assert
+            servicesMock.Verify();
         }
 
         [Fact]
@@ -181,6 +208,9 @@ namespace System.Net.Http
             _config.Services.Clear(typeof(IContentNegotiator));
 
             // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(_value),
+                "The provided configuration does not have an instance of the 'System.Net.Http.Formatting.IContentNegotiator' service registered.");
+
             Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, _config),
                 "The provided configuration does not have an instance of the 'System.Net.Http.Formatting.IContentNegotiator' service registered.");
         }
@@ -513,7 +543,7 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void SetUrlHelper_AndThen_GetUrlHelper_ReturnsConsistentResult()
+        public void SetUrlHelper_AndThen_GetUrlHelper_Returns_SameInstance()
         {
             HttpRequestMessage request = new HttpRequestMessage();
             UrlHelper urlHelper = new UrlHelper();

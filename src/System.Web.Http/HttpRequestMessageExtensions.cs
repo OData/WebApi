@@ -371,6 +371,26 @@ namespace System.Net.Http
 
         /// <summary>
         /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> with an instance
+        /// of <see cref="ObjectContent{T}"/> as the content and <see cref="System.Net.HttpStatusCode.OK"/> as the status code
+        /// if a formatter can be found. If no formatter is found, this method returns a response with status 406 NotAcceptable. 
+        /// This forwards the call to <see cref="CreateResponse{T}(HttpRequestMessage, HttpStatusCode, T, HttpConfiguration)"/> with 
+        /// <see cref="System.Net.HttpStatusCode.OK"/> status code and a <c>null</c> configuration.
+        /// </summary>
+        /// <remarks>
+        /// This method requires that <paramref name="request"/> has been associated with an instance of
+        /// <see cref="HttpConfiguration"/>.
+        /// </remarks>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        /// <param name="request">The request.</param>
+        /// <param name="value">The value to wrap. Can be <c>null</c>.</param>
+        /// <returns>A response wrapping <paramref name="value"/> with <see cref="System.Net.HttpStatusCode.OK"/> status code.</returns>
+        public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, T value)
+        {
+            return request.CreateResponse<T>(HttpStatusCode.OK, value, configuration: null);
+        }
+
+        /// <summary>
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> with an instance
         /// of <see cref="ObjectContent{T}"/> as the content if a formatter can be found. If no formatter is found, this
         /// method returns a response with status 406 NotAcceptable. This forwards the call to
         /// <see cref="CreateResponse{T}(HttpRequestMessage, HttpStatusCode, T, HttpConfiguration)"/> with a <c>null</c>

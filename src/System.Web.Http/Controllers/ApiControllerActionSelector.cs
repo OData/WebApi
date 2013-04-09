@@ -53,7 +53,9 @@ namespace System.Web.Http.Controllers
 
         private ActionSelectorCacheItem GetInternalSelector(HttpControllerDescriptor controllerDescriptor)
         {
-            // First check in the local fast cache and if not a match then look in the broader
+            // Performance-sensitive
+
+            // First check in the local fast cache and if not a match then look in the broader 
             // HttpControllerDescriptor.Properties cache
             if (_fastCache == null)
             {
@@ -70,9 +72,14 @@ namespace System.Web.Http.Controllers
             {
                 // If the key doesn't match then lookup/create delegate in the HttpControllerDescriptor.Properties for
                 // that HttpControllerDescriptor instance
-                ActionSelectorCacheItem selector = (ActionSelectorCacheItem)controllerDescriptor.Properties.GetOrAdd(
-                    _cacheKey,
-                    _ => new ActionSelectorCacheItem(controllerDescriptor));
+                object cacheValue;
+                if (controllerDescriptor.Properties.TryGetValue(_cacheKey, out cacheValue))
+                {
+                    return (ActionSelectorCacheItem)cacheValue;
+                }
+                // Race condition on initialization has no side effects
+                ActionSelectorCacheItem selector = new ActionSelectorCacheItem(controllerDescriptor);
+                controllerDescriptor.Properties.TryAdd(_cacheKey, selector);
                 return selector;
             }
         }
@@ -146,6 +153,7 @@ namespace System.Web.Http.Controllers
             [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
             public HttpActionDescriptor SelectAction(HttpControllerContext controllerContext)
             {
+                // Performance-sensitive
                 string actionName;
                 bool useActionName = controllerContext.RouteData.Values.TryGetValue(ActionRouteKey, out actionName);
 
@@ -168,8 +176,7 @@ namespace System.Web.Http.Controllers
                             Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
                     }
 
-                    // This filters out any incompatible verbs from the incoming action list
-                    actionsFoundByHttpMethods = actionsFoundByName.Where(actionDescriptor => actionDescriptor.SupportedHttpMethods.Contains(incomingMethod)).ToArray();
+                    actionsFoundByHttpMethods = FilterIncompatibleVerbs(incomingMethod, actionsFoundByName);
                 }
                 else
                 {
@@ -209,6 +216,11 @@ namespace System.Web.Http.Controllers
                         string ambiguityList = CreateAmbiguousMatchList(selectedActions);
                         throw Error.InvalidOperation(SRResources.ApiControllerActionSelector_AmbiguousMatch, ambiguityList);
                 }
+            }
+
+            private static ReflectedHttpActionDescriptor[] FilterIncompatibleVerbs(HttpMethod incomingMethod, ReflectedHttpActionDescriptor[] actionsFoundByName)
+            {
+                return actionsFoundByName.Where(actionDescriptor => actionDescriptor.SupportedHttpMethods.Contains(incomingMethod)).ToArray();
             }
 
             public ILookup<string, HttpActionDescriptor> GetActionMapping()

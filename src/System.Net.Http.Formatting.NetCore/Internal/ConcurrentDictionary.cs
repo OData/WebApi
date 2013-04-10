@@ -81,7 +81,10 @@ namespace System.Net.Http.Internal
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            throw new NotImplementedException();
+            lock (_lock)
+            {
+                return _dictionary.TryGetValue(key, out value);
+            }
         }
 
         public void Add(KeyValuePair<TKey, TValue> item)

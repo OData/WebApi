@@ -221,17 +221,35 @@ namespace System.Collections.Concurrent
         }
 
         [Fact]
-        public void TryGetValue_ThrowsNotImplementedException()
+        public void TryGetValue_ReturnsTrueAndValueWhenPresent()
         {
             // Arrange
             ConcurrentDictionary<int, int> dictionary = new ConcurrentDictionary<int, int>();
+            dictionary.TryAdd(1, -1);
 
-            // Act/Assert
-            Assert.Throws<NotImplementedException>(() => 
-            {
-                int value;
-                dictionary.TryGetValue(0, out value);
-            });
+            // Act
+            int returnedValue;
+            bool tryResult = dictionary.TryGetValue(1, out returnedValue);
+
+            // Assert
+            Assert.Equal(-1, returnedValue);
+            Assert.True(tryResult);
+        }
+
+        [Fact]
+        public void TryGetValue_ReturnsFalseAndDefaultWhenMissing()
+        {
+            // Arrange
+            ConcurrentDictionary<int, int> dictionary = new ConcurrentDictionary<int, int>();
+            dictionary.TryAdd(1, -1);
+
+            // Act
+            int returnedValue;
+            bool tryResult = dictionary.TryGetValue(2, out returnedValue);
+
+            // Assert
+            Assert.Equal(0, returnedValue);
+            Assert.False(tryResult);
         }
 
         [Fact]

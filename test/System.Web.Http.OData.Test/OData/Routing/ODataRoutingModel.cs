@@ -134,6 +134,7 @@ namespace System.Web.Http.OData.Routing
         public class VIP : RoutingCustomer
         {
             public virtual SalesPerson RelationshipManager { get; set; }
+            public string Company { get; set; }
         }
 
         public class ImportantProduct : Product

@@ -43,7 +43,9 @@ namespace System.Web.Http.OData.Formatter
                 CreateApplicationAtomXmlTypeFeed(serializerProvider, deserializerProvider),
                 CreateApplicationAtomXmlTypeEntry(serializerProvider, deserializerProvider),
                 CreateApplicationXml(serializerProvider, deserializerProvider),
-                CreateTextXml(serializerProvider, deserializerProvider)
+                CreateTextXml(serializerProvider, deserializerProvider),
+                // Bug #970: Use the SerializerProvider in the parameter instead of RawValueSerializerProvider
+                CreateRawValue(new RawValueSerializerProvider(), deserializerProvider)
             };
         }
 
@@ -53,6 +55,14 @@ namespace System.Web.Http.OData.Formatter
                 throwOnInvalidBytes: true));
             formatter.SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true,
                 throwOnInvalidBytes: true));
+        }
+
+        private static ODataMediaTypeFormatter CreateRawValue(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
+        {
+            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(serializerProvider, deserializerProvider, ODataPayloadKind.Value);
+            formatter.MediaTypeMappings.Add(new ODataPrimitiveValueMediaTypeMapping());
+            formatter.MediaTypeMappings.Add(new ODataBinaryValueMediaTypeMapping());
+            return formatter;
         }
 
         private static ODataMediaTypeFormatter CreateApplicationAtomSvcXml(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)

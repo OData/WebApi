@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
@@ -48,11 +49,20 @@ namespace System.Web.Http.OData.Routing
         [InlineData("GET", "RoutingCustomers(10)/Products", "GetProducts(10)")]
         [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Products", "GetProducts(10)")]
         [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/RelationshipManager", "GetRelationshipManagerFromVIP(10)")]
+        // structural properties
+        [InlineData("GET", "RoutingCustomers(10)/Name", "GetName(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/Address", "GetAddress(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Name", "GetName(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Company", "GetCompanyFromVIP(10)")]
         // links
         [InlineData("PUT", "RoutingCustomers(1)/$links/Products", "CreateLink(1)(Products)")]
         [InlineData("POST", "RoutingCustomers(1)/$links/Products", "CreateLink(1)(Products)")]
         [InlineData("DELETE", "RoutingCustomers(1)/$links/Products", "DeleteLink(1)(Products)")]
         [InlineData("DELETE", "RoutingCustomers(1)/$links/Products(5)", "DeleteLink(1)(5)(Products)")]
+        // raw value
+        [InlineData("GET", "RoutingCustomers(10)/Name/$value", "GetName(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Name/$value", "GetName(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Company/$value", "GetCompanyFromVIP(10)")]
         // actions on entities by key
         [InlineData("POST", "RoutingCustomers(1)/GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers(1)")]
         [InlineData("POST", "RoutingCustomers(1)/System.Web.Http.OData.Routing.VIP/GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers(1)")]
@@ -87,61 +97,76 @@ namespace System.Web.Http.OData.Routing
 
         public string GetRoutingCustomer(int key)
         {
-            return String.Format("GetRoutingCustomer({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "GetRoutingCustomer({0})", key);
         }
 
         public string PutRoutingCustomer(int key)
         {
-            return String.Format("PutRoutingCustomer({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "PutRoutingCustomer({0})", key);
         }
 
         [AcceptVerbs("PATCH", "MERGE")]
         public string PatchRoutingCustomer(int key)
         {
-            return String.Format("PatchRoutingCustomer({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "PatchRoutingCustomer({0})", key);
         }
 
         public string DeleteRoutingCustomer(int key)
         {
-            return String.Format("DeleteRoutingCustomer({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "DeleteRoutingCustomer({0})", key);
         }
 
         public string GetProducts(int key)
         {
-            return String.Format("GetProducts({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "GetProducts({0})", key);
         }
 
         public string GetRelationshipManagerFromVIP(int key)
         {
-            return String.Format("GetRelationshipManagerFromVIP({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "GetRelationshipManagerFromVIP({0})", key);
+        }
+
+        public string GetName(int key)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "GetName({0})", key);
+        }
+
+        public string GetAddress(int key)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "GetAddress({0})", key);
+        }
+
+        public string GetCompanyFromVIP(int key)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "GetCompanyFromVIP({0})", key);
         }
 
         [AcceptVerbs("POST", "PUT")]
         public string CreateLink(int key, string navigationProperty)
         {
-            return String.Format("CreateLink({0})({1})", key, navigationProperty);
+            return String.Format(CultureInfo.InvariantCulture, "CreateLink({0})({1})", key, navigationProperty);
         }
 
         public string DeleteLink(int key, string navigationProperty)
         {
-            return String.Format("DeleteLink({0})({1})", key, navigationProperty);
+            return String.Format(CultureInfo.InvariantCulture, "DeleteLink({0})({1})", key, navigationProperty);
         }
 
         public string DeleteLink(int key, int relatedKey, string navigationProperty)
         {
-            return String.Format("DeleteLink({0})({1})({2})", key, relatedKey, navigationProperty);
+            return String.Format(CultureInfo.InvariantCulture, "DeleteLink({0})({1})({2})", key, relatedKey, navigationProperty);
         }
 
         [AcceptVerbs("POST")]
         public string GetRelatedRoutingCustomers(int key)
         {
-            return String.Format("GetRelatedRoutingCustomers({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "GetRelatedRoutingCustomers({0})", key);
         }
 
         [AcceptVerbs("POST")]
         public string GetSalesPersonOnVIP(int key)
         {
-            return String.Format("GetSalesPersonOnVIP({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "GetSalesPersonOnVIP({0})", key);
         }
 
         [AcceptVerbs("POST")]
@@ -177,23 +202,23 @@ namespace System.Web.Http.OData.Routing
 
         public string Get(int key)
         {
-            return String.Format("Get({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "Get({0})", key);
         }
 
         public string Put(int key)
         {
-            return String.Format("Put({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "Put({0})", key);
         }
 
         [AcceptVerbs("PATCH", "MERGE")]
         public string Patch(int key)
         {
-            return String.Format("Patch({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "Patch({0})", key);
         }
 
         public string Delete(int key)
         {
-            return String.Format("Delete({0})", key);
+            return String.Format(CultureInfo.InvariantCulture, "Delete({0})", key);
         }
     }
 }

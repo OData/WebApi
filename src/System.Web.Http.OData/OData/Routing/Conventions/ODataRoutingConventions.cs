@@ -22,6 +22,7 @@ namespace System.Web.Http.OData.Routing.Conventions
                 new EntitySetRoutingConvention(),
                 new EntityRoutingConvention(),
                 new NavigationRoutingConvention(),
+                new PropertyRoutingConvention(),
                 new LinksRoutingConvention(),
                 new ActionRoutingConvention(),
                 new UnmappedRequestRoutingConvention()

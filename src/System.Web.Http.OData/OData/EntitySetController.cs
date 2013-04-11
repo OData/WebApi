@@ -20,6 +20,7 @@ namespace System.Web.Http.OData
     /// <typeparam name="TEntity">The type associated with the exposed entity set's entity type.</typeparam>
     /// <typeparam name="TKey">The type associated with the entity key of the exposed entity set's entity type.</typeparam>
     [CLSCompliant(false)]
+    [ODataNullValue]
     public abstract class EntitySetController<TEntity, TKey> : ODataController where TEntity : class
     {
         /// <summary>

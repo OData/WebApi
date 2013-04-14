@@ -13,6 +13,7 @@ using System.Web.Http.Dispatcher;
 using System.Web.Http.Internal;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
+using System.Web.Http.Services;
 
 namespace System.Web.Http.Description
 {
@@ -266,6 +267,10 @@ namespace System.Web.Http.Description
                 actionDescriptor.Configuration.Formatters.Where(f => f.CanWriteType(returnType)) :
                 Enumerable.Empty<MediaTypeFormatter>();
 
+            // Replacing the formatter tracers with formatters if tracers are present.
+            supportedRequestBodyFormatters = GetInnerFormatters(supportedRequestBodyFormatters);
+            supportedResponseFormatters = GetInnerFormatters(supportedResponseFormatters);
+
             // get HttpMethods supported by an action. Usually there is one HttpMethod per action but we allow multiple of them per action as well.
             IList<HttpMethod> supportedMethods = GetHttpMethodsSupportedByAction(route, actionDescriptor);
 
@@ -282,6 +287,14 @@ namespace System.Web.Http.Description
                     SupportedRequestBodyFormatters = new Collection<MediaTypeFormatter>(supportedRequestBodyFormatters.ToList()),
                     ParameterDescriptions = new Collection<ApiParameterDescription>(parameterDescriptions)
                 });
+            }
+        }
+
+        private static IEnumerable<MediaTypeFormatter> GetInnerFormatters(IEnumerable<MediaTypeFormatter> mediaTypeFormatters)
+        {
+            foreach (MediaTypeFormatter formatter in mediaTypeFormatters)
+            {
+                yield return Decorator.GetInner(formatter);
             }
         }
 

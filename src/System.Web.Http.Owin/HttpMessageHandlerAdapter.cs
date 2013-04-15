@@ -26,6 +26,7 @@ namespace System.Web.Http.Owin
         private AppFunc _next;
         private HttpMessageInvoker _messageInvoker;
         private IHostBufferPolicySelector _bufferPolicySelector;
+        private bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpMessageHandlerAdapter" /> class.
@@ -307,7 +308,11 @@ namespace System.Web.Http.Owin
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            _messageInvoker.Dispose();
+            if (!_disposed)
+            {
+                _disposed = true;
+                _messageInvoker.Dispose();
+            }
         }
 
         /// <inheritdoc />

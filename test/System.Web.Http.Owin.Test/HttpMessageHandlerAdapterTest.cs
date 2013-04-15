@@ -22,12 +22,12 @@ namespace System.Web.Http.Owin
         [Fact]
         public void Invoke_BuildsAppropriateRequestMessage()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             var request = handler.Request;
             Assert.Equal(HttpMethod.Get, request.Method);
@@ -37,13 +37,13 @@ namespace System.Web.Http.Owin
         [Fact]
         public void Invoke_BuildsUriWithQueryStringIfPresent()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             environment["owin.RequestQueryString"] ="id=45";
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             var request = handler.Request;
             Assert.Equal(HttpMethod.Get, request.Method);
@@ -53,12 +53,12 @@ namespace System.Web.Http.Owin
         [Fact]
         public void Invoke_BuildsUriWithHostAndPort()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost:12345", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             var request = handler.Request;
             Assert.Equal(HttpMethod.Get, request.Method);
@@ -68,45 +68,45 @@ namespace System.Web.Http.Owin
         [Fact]
         public void Invoke_Throws_IfHostHeaderMissing()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var requestHeaders = environment["owin.RequestHeaders"] as IDictionary<string, string[]>;
             requestHeaders.Remove("Host");
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
             Assert.Throws<InvalidOperationException>(
-                () => new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait(),
+                () => adapter.Invoke(environment).Wait(),
                 "The OWIN environment does not contain a value for the required 'Host' header.");
         }
 
         [Fact]
         public void Invoke_Throws_IfHostHeaderHasNoValues()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var requestHeaders = environment["owin.RequestHeaders"] as IDictionary<string, string[]>;
             requestHeaders["Host"] = new string[0];
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
             Assert.Throws<InvalidOperationException>(
-                () => new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait(),
+                () => adapter.Invoke(environment).Wait(),
                 "The OWIN environment does not contain a value for the required 'Host' header.");
         }
 
         [Fact]
         public void Invoke_AddsRequestHeadersToRequestMessage()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var requestHeaders = environment["owin.RequestHeaders"] as IDictionary<string, string[]>;
             requestHeaders["Accept"] = new string[] { "application/json", "application/xml" };
             requestHeaders["Content-Length"] = new string[] { "45" };
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             var request = handler.Request;
             Assert.Equal(2, request.Headers.Count());
@@ -119,16 +119,17 @@ namespace System.Web.Http.Owin
         [Fact]
         public void Invoke_SetsRequestBodyOnRequestMessage()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            environment["owin.RequestBody"] = new MemoryStream(Encoding.UTF8.GetBytes("This is the request body."));
+            var expectedBody = "This is the request body.";
+            environment["owin.RequestBody"] = new MemoryStream(Encoding.UTF8.GetBytes(expectedBody));
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             var request = handler.Request;
-            Assert.Equal("This is the request body.", request.Content.ReadAsStringAsync().Result);
+            Assert.Equal(expectedBody, request.Content.ReadAsStringAsync().Result);
         }
 
         [Theory]
@@ -136,17 +137,18 @@ namespace System.Web.Http.Owin
         [InlineData(true)]
         public void Invoke_RespectsInputBufferingSetting(bool bufferInput)
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: bufferInput, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var requestBodyMock = new Mock<MemoryStream>(Encoding.UTF8.GetBytes("This is the request body."));
+            var expectedBody = "This is the request body.";
+            var requestBodyMock = new Mock<MemoryStream>(Encoding.UTF8.GetBytes(expectedBody));
             requestBodyMock.CallBase = true;
             requestBodyMock.Setup(s => s.CanSeek).Returns(false);
             MemoryStream requestBody = requestBodyMock.Object;
             environment["owin.RequestBody"] = requestBody;
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             if (bufferInput)
             {
@@ -155,7 +157,7 @@ namespace System.Web.Http.Owin
                 var owinRequestBody = environment["owin.RequestBody"] as Stream;
                 byte[] bodyBytes = new byte[25];
                 int charsRead = owinRequestBody.Read(bodyBytes, 0, 25);
-                Assert.Equal("This is the request body.", Encoding.UTF8.GetString(bodyBytes));
+                Assert.Equal(expectedBody, Encoding.UTF8.GetString(bodyBytes));
             }
             else
             {
@@ -163,19 +165,19 @@ namespace System.Web.Http.Owin
             }
             // Assert that Web API gets the right body
             var request = handler.Request;
-            Assert.Equal("This is the request body.", request.Content.ReadAsStringAsync().Result);
+            Assert.Equal(expectedBody, request.Content.ReadAsStringAsync().Result);
 
         }
 
         [Fact]
         public void Invoke_SetsOwinEnvironment()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             var request = handler.Request;
             Assert.Same(environment, request.GetOwinEnvironment());
@@ -187,16 +189,16 @@ namespace System.Web.Http.Owin
         [InlineData(true, true)]
         public void Invoke_SetsRequestIsLocalProperty(bool? isLocal, bool expectedRequestLocal)
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             if (isLocal.HasValue)
             {
                 environment["server.IsLocal"] = isLocal.Value;
             }
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             var request = handler.Request;
             Assert.Equal(expectedRequestLocal, request.IsLocal());
@@ -205,14 +207,14 @@ namespace System.Web.Http.Owin
         [Fact]
         public void Invoke_SetsClientCertificate()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var clientCert = new Mock<X509Certificate2>().Object;
             environment["ssl.ClientCertificate"] = clientCert;
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             var request = handler.Request;
             Assert.Equal(clientCert, request.GetClientCertificate());
@@ -221,14 +223,14 @@ namespace System.Web.Http.Owin
         [Fact]
         public void Invoke_CallsMessageHandler_WithEnvironmentCancellationToken()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var cancellationToken = new CancellationToken();
             environment["owin.CallCancelled"] = cancellationToken;
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             Assert.Equal(cancellationToken, handler.CancellationToken);
         }
@@ -236,14 +238,14 @@ namespace System.Web.Http.Owin
         [Fact]
         public void Invoke_CallsMessageHandler_WithEnvironmentUser()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response };
+            var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var user = new Mock<IPrincipal>().Object;
             environment["server.User"] = user;
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             Assert.Equal(user, handler.User);
         }
@@ -252,12 +254,13 @@ namespace System.Web.Http.Owin
         public void Invoke_Throws_IfMessageHandlerReturnsNull()
         {
             HttpResponseMessage response = null;
-            var handler = new MockHandler() { Response = response };
+            var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
             Assert.Throws<InvalidOperationException>(
-                () => new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait(),
+                () => adapter.Invoke(environment).Wait(),
                 "The message handler did not return a response message.");
         }
 
@@ -271,11 +274,12 @@ namespace System.Web.Http.Owin
                 return TaskHelpers.Completed();
             });
             HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
-            var handler = new MockHandler() { Response = response, AddNoRouteMatchedKey = true };
+            var handler = new HandlerStub() { Response = response, AddNoRouteMatchedKey = true };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(next, handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(next, handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             Assert.False(nextCalled);
         }
@@ -290,11 +294,12 @@ namespace System.Web.Http.Owin
                 return TaskHelpers.Completed();
             });
             HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.NotFound);
-            var handler = new MockHandler() { Response = response, AddNoRouteMatchedKey = false };
+            var handler = new HandlerStub() { Response = response, AddNoRouteMatchedKey = false };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(next, handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(next, handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             Assert.False(nextCalled);
         }
@@ -309,11 +314,12 @@ namespace System.Web.Http.Owin
                     return TaskHelpers.Completed();
                 });
             HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.NotFound);
-            var handler = new MockHandler() { Response = response, AddNoRouteMatchedKey = true };
+            var handler = new HandlerStub() { Response = response, AddNoRouteMatchedKey = true };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(next, handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(next, handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             Assert.True(nextCalled);
         }
@@ -321,15 +327,17 @@ namespace System.Web.Http.Owin
         [Fact]
         public void Invoke_SetsResponseStatusCodeAndReasonPhrase()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable) { ReasonPhrase = "OH NO!" };
-            var handler = new MockHandler() { Response = response };
+            var expectedReasonPhrase = "OH NO!";
+            var response = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable) { ReasonPhrase = expectedReasonPhrase };
+            var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             Assert.Equal(HttpStatusCode.ServiceUnavailable, environment["owin.ResponseStatusCode"]);
-            Assert.Equal("OH NO!", environment["owin.ResponseReasonPhrase"]);
+            Assert.Equal(expectedReasonPhrase, environment["owin.ResponseReasonPhrase"]);
         }
 
         [Fact]
@@ -338,11 +346,12 @@ namespace System.Web.Http.Owin
             var response = new HttpResponseMessage(HttpStatusCode.OK);
             response.Headers.Location = new Uri("http://www.location.com/");
             response.Content = new StringContent(@"{""x"":""y""}", Encoding.UTF8, "application/json");
-            var handler = new MockHandler() { Response = response };
+            var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             var responseHeaders = environment["owin.ResponseHeaders"] as IDictionary<string, string[]>;
             Assert.Equal(3, responseHeaders.Count);
@@ -355,14 +364,16 @@ namespace System.Web.Http.Owin
         public void Invoke_SetsResponseBody()
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-            response.Content = new StringContent(@"{""x"":""y""}", Encoding.UTF8, "application/json");
-            var handler = new MockHandler() { Response = response };
+            var expectedBody = @"{""x"":""y""}";
+            response.Content = new StringContent(expectedBody, Encoding.UTF8, "application/json");
+            var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var responseStream = new MemoryStream();
             environment["owin.ResponseBody"] = responseStream;
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             responseStream.Seek(0, SeekOrigin.Begin);
             byte[] bodyBytes = new byte[9];
@@ -370,7 +381,7 @@ namespace System.Web.Http.Owin
             // Assert that we can read 9 characters and no more characters after that
             Assert.Equal(9, charsRead);
             Assert.Equal(-1, responseStream.ReadByte());
-            Assert.Equal(@"{""x"":""y""}", Encoding.UTF8.GetString(bodyBytes));
+            Assert.Equal(expectedBody, Encoding.UTF8.GetString(bodyBytes));
         }
 
         [Theory]
@@ -380,11 +391,12 @@ namespace System.Web.Http.Owin
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
             response.Content = new ObjectContent<string>("blue", new JsonMediaTypeFormatter());
-            var handler = new MockHandler() { Response = response };
+            var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: bufferOutput);
             var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
 
-            new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector).Invoke(environment).Wait();
+            adapter.Invoke(environment).Wait();
 
             var responseHeaders = environment["owin.ResponseHeaders"] as IDictionary<string, string[]>;
             if (bufferOutput)
@@ -395,6 +407,12 @@ namespace System.Web.Http.Owin
             {
                 Assert.False(responseHeaders.ContainsKey("Content-Length"));
             }            
+        }
+
+        private static HandlerStub CreateOKHandlerStub()
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            return new HandlerStub() { Response = response };
         }
 
         private static Dictionary<string, object> CreateEnvironment(string method, string scheme, string hostHeaderValue, string pathBase, string path)
@@ -420,28 +438,28 @@ namespace System.Web.Http.Owin
             bufferPolicySelector.Setup(bps => bps.UseBufferedOutputStream(It.IsAny<HttpResponseMessage>())).Returns(bufferOutput);
             return bufferPolicySelector.Object;
         }
-    }
 
-    public class MockHandler : HttpMessageHandler
-    {
-        public HttpRequestMessage Request { get; private set; }
-        public CancellationToken CancellationToken { get; private set; }
-        public HttpResponseMessage Response { get; set; }
-        public IPrincipal User { get; set; }
-        public bool AddNoRouteMatchedKey { get; set; }
-
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        public class HandlerStub : HttpMessageHandler
         {
-            Request = request;
-            CancellationToken = cancellationToken;
-            User = Thread.CurrentPrincipal;
+            public HttpRequestMessage Request { get; private set; }
+            public CancellationToken CancellationToken { get; private set; }
+            public HttpResponseMessage Response { get; set; }
+            public IPrincipal User { get; set; }
+            public bool AddNoRouteMatchedKey { get; set; }
 
-            if (AddNoRouteMatchedKey)
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
-                request.Properties["MS_NoRouteMatched"] = true;
-            }
+                Request = request;
+                CancellationToken = cancellationToken;
+                User = Thread.CurrentPrincipal;
 
-            return TaskHelpers.FromResult<HttpResponseMessage>(Response);
+                if (AddNoRouteMatchedKey)
+                {
+                    request.Properties["MS_NoRouteMatched"] = true;
+                }
+
+                return TaskHelpers.FromResult<HttpResponseMessage>(Response);
+            }
         }
     }
 }

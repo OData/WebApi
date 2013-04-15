@@ -58,7 +58,7 @@ namespace System.Web.Http.Owin
         public void UseBufferedOutputStream_ReturnsFalse_ForPushStreamContent()
         {
             HttpResponseMessage response = new HttpResponseMessage();
-            response.Content = new PushStreamContent((s, c, tc) => Thread.Sleep(0));
+            response.Content = new PushStreamContent((s, c, tc) => { return; });
 
             Assert.False(new OwinBufferPolicySelector().UseBufferedOutputStream(response));
         }

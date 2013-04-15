@@ -15,6 +15,7 @@
   <assembly name="System.Web.Http.Common"/>
   <assembly name="System.Web.Http.Cors"/>
   <assembly name="System.Web.Http.OData"/>
+  <assembly name="System.Web.Http.Owin"/>
   <assembly name="System.Web.Http.SelfHost"/>
   <assembly name="System.Web.Http.SignalR"/>
   <assembly name="System.Web.Http.Tracing"/>
@@ -47,6 +48,7 @@
   <assembly name="System.Web.Http.Cors.Test"/>
   <assembly name="System.Web.Http.Integration.Test"/>
   <assembly name="System.Web.Http.OData.Test"/>
+  <assembly name="System.Web.Http.Owin.Test"/>
   <assembly name="System.Web.Http.SelfHost.Test"/>
   <assembly name="System.Web.Http.SignalR.Test"/>
   <assembly name="System.Web.Http.Test"/>

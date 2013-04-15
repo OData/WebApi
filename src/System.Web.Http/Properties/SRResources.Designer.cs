@@ -97,6 +97,24 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An object of type &apos;{0}&apos; was returned where an instance of IHttpActionResult was expected..
+        /// </summary>
+        internal static string ApiControllerActionInvoker_InvalidHttpActionResult {
+            get {
+                return ResourceManager.GetString("ApiControllerActionInvoker_InvalidHttpActionResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A null value was returned where an instance of IHttpActionResult was expected..
+        /// </summary>
+        internal static string ApiControllerActionInvoker_NullHttpActionResult {
+            get {
+                return ResourceManager.GetString("ApiControllerActionInvoker_NullHttpActionResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No action was found on the controller &apos;{0}&apos; that matches the name &apos;{1}&apos;..
         /// </summary>
         internal static string ApiControllerActionSelector_ActionNameNotFound {

@@ -453,4 +453,10 @@
   <data name="BatchRequestMissingContent" xml:space="preserve">
     <value>The 'Content' property on the batch request cannot be null.</value>
   </data>
+  <data name="ApiControllerActionInvoker_InvalidHttpActionResult" xml:space="preserve">
+    <value>An object of type '{0}' was returned where an instance of IHttpActionResult was expected.</value>
+  </data>
+  <data name="ApiControllerActionInvoker_NullHttpActionResult" xml:space="preserve">
+    <value>A null value was returned where an instance of IHttpActionResult was expected.</value>
+  </data>
 </root>

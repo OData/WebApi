@@ -162,7 +162,7 @@ namespace System.Web.Http.Routing
                 else
                 {
                     // Strip out the equal sign at the beginning
-                    Contract.Assert(defaultValueMatch.StartsWith("="));
+                    Contract.Assert(defaultValueMatch.StartsWith("=", StringComparison.Ordinal));
                     return defaultValueMatch.Substring(1);
                 }
             }

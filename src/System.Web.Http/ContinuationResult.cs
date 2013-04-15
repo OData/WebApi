@@ -4,14 +4,20 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Controllers;
 
 namespace System.Web.Http
 {
+    /// <summary>
+    /// Represents an action result that returns the results of a specified continuation function.
+    /// </summary>
     public class ContinuationResult : IHttpActionResult
     {
         private readonly Func<Task<HttpResponseMessage>> _continuation;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ContinuationResult"/> class.
+        /// </summary>
+        /// <param name="continuation">The continuation function.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Required for compatibility with existing filters")]
         public ContinuationResult(Func<Task<HttpResponseMessage>> continuation)
@@ -24,6 +30,15 @@ namespace System.Web.Http
             _continuation = continuation;
         }
 
+        /// <summary>Gets the continuation function.</summary>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Required for compatibility with existing filters")]
+        public Func<Task<HttpResponseMessage>> Continuation
+        {
+            get { return _continuation; }
+        }
+
+        /// <inheritdoc />
         public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return _continuation();

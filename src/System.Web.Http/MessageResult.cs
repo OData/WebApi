@@ -3,14 +3,16 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Controllers;
 
 namespace System.Web.Http
 {
+    /// <summary>Represents an action result that returns a specified response message.</summary>
     public class MessageResult : IHttpActionResult
     {
         private readonly HttpResponseMessage _response;
 
+        /// <summary>Initializes a new instance of the <see cref="MessageResult"/> class.</summary>
+        /// <param name="response">The response message.</param>
         public MessageResult(HttpResponseMessage response)
         {
             if (response == null)
@@ -21,6 +23,13 @@ namespace System.Web.Http
             _response = response;
         }
 
+        /// <summary>Gets the response message.</summary>
+        public HttpResponseMessage Response
+        {
+            get { return _response; }
+        }
+
+        /// <inheritdoc />
         public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(_response);

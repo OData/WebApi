@@ -115,7 +115,10 @@ namespace System.Web.Http.Controllers
         /// <see cref="HttpResponseMessage"/>. 
         /// </summary>
         /// <remarks>
+        /// <para>This converter is not used when returning an <see cref="IHttpActionResult"/>.</para>
+        /// <para>
         /// The behavior of the returned converter should align with the action's declared <see cref="ReturnType"/>.
+        /// </para>
         /// </remarks>
         public virtual IActionResultConverter ResultConverter
         {
@@ -191,6 +194,10 @@ namespace System.Web.Http.Controllers
             else if (typeof(HttpResponseMessage).IsAssignableFrom(type))
             {
                 return _responseMessageResultConverter;
+            }
+            else if (typeof(IHttpActionResult).IsAssignableFrom(type))
+            {
+                return null;
             }
             else
             {

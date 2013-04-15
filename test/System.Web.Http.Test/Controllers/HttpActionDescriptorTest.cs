@@ -20,6 +20,16 @@ namespace System.Web.Http.Controllers
         }
 
         [Fact]
+        public void GetResultConverter_WhenReturnTypeIsActionResult_ReturnsNull()
+        {
+            // Act
+            IActionResultConverter converter = HttpActionDescriptor.GetResultConverter(typeof(IHttpActionResult));
+
+            // Assert
+            Assert.Null(converter);
+        }
+
+        [Fact]
         public void GetResultConverter_WhenTypeIsAnGenericParameterType_Throws()
         {
             var genericType = typeof(HttpActionDescriptorTest).GetMethod("SampleGenericMethod").ReturnType;

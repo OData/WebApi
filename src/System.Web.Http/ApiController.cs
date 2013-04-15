@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
 using System.Threading;
@@ -212,6 +213,24 @@ namespace System.Web.Http
                     }));
 
             return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
+        }
+
+        /// <summary>Creates a <see cref="MessageResult"/> with the specified response.</summary>
+        /// <param name="response">The HTTP response message.</param>
+        /// <returns>A <see cref="MessageResult"/> for the specified response.</returns>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic",
+            Justification = "Consistency and discoverability are better with an instance method.")]
+        public MessageResult Message(HttpResponseMessage response)
+        {
+            return new MessageResult(response);
+        }
+
+        /// <summary>Creates a <see cref="StatusCodeResult"/> with the specified status code.</summary>
+        /// <param name="status">The HTTP status code for the response message</param>
+        /// <returns>A <see cref="StatusCodeResult"/> with the specified status code.</returns>
+        public StatusCodeResult StatusCode(HttpStatusCode status)
+        {
+            return new StatusCodeResult(status, this);
         }
 
         private async Task<HttpResponseMessage> ExecuteAction(HttpActionBinding actionBinding, HttpActionContext actionContext,

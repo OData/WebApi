@@ -76,6 +76,7 @@
     <Compile Include="Controllers\HttpActionContext.cs" />
     <Compile Include="Controllers\IControllerConfiguration.cs" />
     <Compile Include="Controllers\IHostPrincipalService.cs" />
+    <Compile Include="StatusCodeResult.cs" />
     <Compile Include="IHttpActionResult.cs" />
     <Compile Include="ContinuationResult.cs" />
     <Compile Include="HttpErrorKeys.cs" />

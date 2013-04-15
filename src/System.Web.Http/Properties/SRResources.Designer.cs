@@ -151,6 +151,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ApiController.Request must not be null..
+        /// </summary>
+        internal static string ApiControllerResult_MustNotBeNull {
+            get {
+                return ResourceManager.GetString("ApiControllerResult_MustNotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Documentation for &apos;{0}&apos;..
         /// </summary>
         internal static string ApiExplorer_DefaultDocumentation {

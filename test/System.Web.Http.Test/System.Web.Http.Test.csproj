@@ -80,6 +80,7 @@
     <Compile Include="Controllers\HttpControllerContextTest.cs" />
     <Compile Include="Controllers\HttpConfigurationTest.cs" />
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
+    <Compile Include="StatusCodeResultTests.cs" />
     <Compile Include="HttpConfigurationExtensionsTest.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerTypeResolverTest.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerSelectorTest.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="HttpServerTest.cs" />
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensionsTest.cs" />
+    <Compile Include="MessageResultTests.cs" />
     <Compile Include="Metadata\Providers\AssociatedMetadataProviderTest.cs" />
     <Compile Include="ModelBinding\FormatterParameterBindingTest.cs" />
     <Compile Include="ModelBinding\HttpParameterBindingExtensionsTest.cs" />

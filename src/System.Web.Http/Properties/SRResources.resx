@@ -459,4 +459,7 @@
   <data name="ApiControllerActionInvoker_NullHttpActionResult" xml:space="preserve">
     <value>A null value was returned where an instance of IHttpActionResult was expected.</value>
   </data>
+  <data name="ApiControllerResult_MustNotBeNull" xml:space="preserve">
+    <value>ApiController.Request must not be null.</value>
+  </data>
 </root>

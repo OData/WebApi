@@ -62,14 +62,14 @@ namespace System.Net.Http
 
         [Theory]
         [InlineData(null, "", "")]
-        [InlineData(null, "   ", "")] // Needs to be updated when Issue 955 is fixed
+        [InlineData(null, "   ", "   ")]
         [InlineData(null, "controller/{id}", "controller/{id}")]
         [InlineData("", null, "")]
         [InlineData("", "", "")]
-        [InlineData("", "   ", "")]  // Needs to be updated when Issue 955 is fixed
+        [InlineData("", "   ", "   ")]
         [InlineData("", "controller/{id}", "controller/{id}")]
-        [InlineData("   ", null, "")]  // Needs to be updated when Issue 955 is fixed
-        [InlineData("   ", "", "")]  // Needs to be updated when Issue 955 is fixed
+        [InlineData("   ", null, "   ")]
+        [InlineData("   ", "", "   ")]
         [InlineData("   ", "   ", "   /   ")]
         [InlineData("   ", "controller/{id}", "   /controller/{id}")]
         [InlineData("prefix/{prefixId}", null, "prefix/{prefixId}")]

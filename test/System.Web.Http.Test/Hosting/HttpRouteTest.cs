@@ -9,6 +9,16 @@ namespace System.Web.Http.Hosting
 {
     public class HttpRouteTest
     {
+        [Fact]
+        public void Ctor_PreservesWhitespaceInRouteTemplate()
+        {
+            string whitespace = "   ";
+
+            HttpRoute httpRoute = new HttpRoute(whitespace);
+
+            Assert.Equal(whitespace, httpRoute.RouteTemplate);
+        }
+
         [Theory]
         [InlineData("{controller}/{id}", "/SelfHostServer", "http://localhost/SelfHostServer/Customer/999")]
         [InlineData("{controller}/{id}", "", "http://localhost/Customer/999")]

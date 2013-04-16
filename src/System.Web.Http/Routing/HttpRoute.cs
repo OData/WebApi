@@ -58,13 +58,13 @@ namespace System.Web.Http.Routing
 
         public HttpRoute(string routeTemplate, HttpRouteValueDictionary defaults, HttpRouteValueDictionary constraints, HttpRouteValueDictionary dataTokens, HttpMessageHandler handler)
         {
-            _routeTemplate = String.IsNullOrWhiteSpace(routeTemplate) ? String.Empty : routeTemplate;
+            _routeTemplate = routeTemplate == null ? String.Empty : routeTemplate;
             _defaults = defaults ?? new HttpRouteValueDictionary();
             _constraints = constraints ?? new HttpRouteValueDictionary();
             _dataTokens = dataTokens ?? new HttpRouteValueDictionary();
             Handler = handler;
 
-            // The parser will throw for invalid routes. 
+            // The parser will throw for invalid routes.
             ParsedRoute = HttpRouteParser.Parse(RouteTemplate);
         }
 

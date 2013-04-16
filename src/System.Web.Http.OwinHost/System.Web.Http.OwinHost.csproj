@@ -5,8 +5,8 @@
     <ProjectGuid>{66DD7CD7-C68F-4D0E-9F3D-3B58C49D1467}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>System.Web.Http.Owin</RootNamespace>
-    <AssemblyName>System.Web.Http.Owin</AssemblyName>
+    <RootNamespace>System.Web.Http.OwinHost</RootNamespace>
+    <AssemblyName>System.Web.Http.OwinHost</AssemblyName>
     <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>

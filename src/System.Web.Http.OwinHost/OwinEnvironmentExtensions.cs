@@ -3,9 +3,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
-using System.Web.Http.Owin.Properties;
+using System.Web.Http.OwinHost.Properties;
 
-namespace System.Web.Http.Owin
+namespace System.Web.Http.OwinHost
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal static class OwinEnvironmentExtensions

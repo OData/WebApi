@@ -8,7 +8,7 @@ using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Owin;
 
-namespace System.Web.Http.Owin
+namespace System.Web.Http.OwinHost
 {
     public class IntegrationTest
     {

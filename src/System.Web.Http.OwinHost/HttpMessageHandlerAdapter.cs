@@ -13,10 +13,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
-using System.Web.Http.Owin.Properties;
+using System.Web.Http.OwinHost.Properties;
 using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
-namespace System.Web.Http.Owin
+namespace System.Web.Http.OwinHost
 {
     /// <summary>
     /// Represents an OWIN component that submits requests to an <see cref="HttpMessageHandler"/> when invoked.

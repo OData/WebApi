@@ -303,7 +303,9 @@ namespace WebMatrix.WebData
 
         internal static int GetUserId(IDatabase db, string userTableName, string userNameColumn, string userIdColumn, string userName)
         {
-            var result = db.QueryValue(@"SELECT " + userIdColumn + " FROM " + userTableName + " WHERE (UPPER(" + userNameColumn + ") = @0)", userName.ToUpperInvariant());
+            // Casing is normalized in Sql to allow the database to normalize username according to its collation. The common issue 
+            // that can occur here is the 'Turkish i problem', where the uppercase of 'i' is not 'I' in Turkish.
+            var result = db.QueryValue(@"SELECT " + userIdColumn + " FROM " + userTableName + " WHERE (UPPER(" + userNameColumn + ") = UPPER(@0))", userName);
             if (result != null)
             {
                 return (int)result;

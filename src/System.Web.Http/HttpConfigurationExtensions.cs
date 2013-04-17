@@ -79,23 +79,30 @@ namespace System.Web.Http
             List<HttpRouteEntry> attributeRoutes = new List<HttpRouteEntry>();
 
             IHttpControllerSelector controllerSelector = configuration.Services.GetHttpControllerSelector();
-            IHttpActionSelector actionSelector = configuration.Services.GetActionSelector();
-            foreach (HttpControllerDescriptor controllerDescriptor in controllerSelector.GetControllerMapping().Values)
+            IDictionary<string, HttpControllerDescriptor> controllerMapping = controllerSelector.GetControllerMapping();
+            if (controllerMapping != null)
             {
-                Collection<RoutePrefixAttribute> routePrefixes = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>(inherit: false);
-
-                foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionSelector.GetActionMapping(controllerDescriptor))
+                foreach (HttpControllerDescriptor controllerDescriptor in controllerMapping.Values)
                 {
-                    string controllerName = controllerDescriptor.ControllerName;
-                    attributeRoutes.AddRange(CreateAttributeRoutes(routeBuilder, controllerName, routePrefixes, actionGrouping));
+                    Collection<RoutePrefixAttribute> routePrefixes = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>(inherit: false);
+                    IHttpActionSelector actionSelector = controllerDescriptor.Configuration.Services.GetActionSelector();
+                    ILookup<string, HttpActionDescriptor> actionMapping = actionSelector.GetActionMapping(controllerDescriptor);
+                    if (actionMapping != null)
+                    {
+                        foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionMapping)
+                        {
+                            string controllerName = controllerDescriptor.ControllerName;
+                            attributeRoutes.AddRange(CreateAttributeRoutes(routeBuilder, controllerName, routePrefixes, actionGrouping));
+                        }
+                    }
                 }
-            }
 
-            attributeRoutes.Sort();
+                attributeRoutes.Sort();
 
-            foreach (HttpRouteEntry attributeRoute in attributeRoutes)
-            {
-                configuration.Routes.Add(attributeRoute.Name, attributeRoute.Route);
+                foreach (HttpRouteEntry attributeRoute in attributeRoutes)
+                {
+                    configuration.Routes.Add(attributeRoute.Name, attributeRoute.Route);
+                }
             }
         }
 

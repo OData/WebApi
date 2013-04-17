@@ -67,6 +67,7 @@
     <Compile Include="Helpers\CryptoUtilTest.cs" />
     <Compile Include="Helpers\Claims\MockClaimsIdentity.cs" />
     <Compile Include="Helpers\AntiXsrf\BinaryBlobTest.cs" />
+    <Compile Include="Html\LabelHelperTest.cs" />
     <Compile Include="Mvc\ModelClientValidationMembershipPasswordRuleTest.cs" />
     <Compile Include="Utils\SessionStateUtilTest.cs" />
     <Compile Include="WebPage\BrowserHelpersTest.cs" />

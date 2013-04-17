@@ -15,7 +15,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString CheckBox(string name, object htmlAttributes)
         {
-            return CheckBox(name, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return CheckBox(name, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString CheckBox(string name, IDictionary<string, object> htmlAttributes)
@@ -35,7 +35,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString CheckBox(string name, bool isChecked, object htmlAttributes)
         {
-            return CheckBox(name, isChecked, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return CheckBox(name, isChecked, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString CheckBox(string name, bool isChecked, IDictionary<string, object> htmlAttributes)

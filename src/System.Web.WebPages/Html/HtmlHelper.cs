@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Web.Routing;
 using System.Web.WebPages.Scope;
 
 namespace System.Web.WebPages.Html
@@ -197,6 +199,31 @@ namespace System.Web.WebPages.Html
         public IHtmlString Raw(object value)
         {
             return new HtmlString(value == null ? null : value.ToString());
+        }
+
+        /// <summary>
+        /// Creates a dictionary of HTML attributes from the input object, 
+        /// translating underscores to dashes.
+        /// <example>
+        /// new { data_name="value" } will translate to the entry { "data-name" , "value" }
+        /// in the resulting dictionary.
+        /// </example>
+        /// </summary>
+        /// <param name="htmlAttributes">Anonymous object describing HTML attributes.</param>
+        /// <returns>A dictionary that represents HTML attributes.</returns>
+        public static RouteValueDictionary AnonymousObjectToHtmlAttributes(object htmlAttributes)
+        {
+            RouteValueDictionary result = new RouteValueDictionary();
+
+            if (htmlAttributes != null)
+            {
+                foreach (PropertyDescriptor property in TypeDescriptor.GetProperties(htmlAttributes))
+                {
+                    result.Add(property.Name.Replace('_', '-'), property.GetValue(htmlAttributes));
+                }
+            }
+
+            return result;
         }
     }
 }

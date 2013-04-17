@@ -149,6 +149,28 @@ namespace System.Web.WebPages.Test
             Assert.Equal("<b>boldFromObject</b>", markupHtml.ToHtmlString());
         }
 
+        /// <summary>
+        /// Will invoke a helper with overload that accepts custom attribute with a name containing
+        /// and underscore as an anonymous object, and will then assert that the resulted html
+        /// has the attribute name underscore correctly transformed to a dash
+        /// </summary>
+        /// <param name="helperInvocation"></param>
+        public static void AssertHelperTransformsAttributesUnderscoresToDashs(Func<HtmlHelper, object, IHtmlString> helperInvocation)
+        {
+            // Arrange
+            HtmlHelper helper = HtmlHelperFactory.Create();
+            const string expected = @"data-name=""value""";
+            const string unexpected = @"data_name=""value""";
+            var attributes = new { data_name = "value" };
+
+            // Act
+            var htmlString = helperInvocation(helper, attributes).ToHtmlString();
+
+            // Assert            
+            Assert.DoesNotContain(unexpected, htmlString);
+            Assert.Contains(expected, htmlString);
+        }
+
         private class ObjectWithWrapperMarkup
         {
             public override string ToString()

@@ -93,19 +93,19 @@ namespace System.Web.Mvc
 
         public IViewDataContainer ViewDataContainer { get; internal set; }
 
+        /// <summary>
+        /// Creates a dictionary of HTML attributes from the input object, 
+        /// translating underscores to dashes.
+        /// <example>
+        /// new { data_name="value" } will translate to the entry { "data-name" , "value" }
+        /// in the resulting dictionary.
+        /// </example>
+        /// </summary>
+        /// <param name="htmlAttributes">Anonymous object describing HTML attributes.</param>
+        /// <returns>A dictionary that represents HTML attributes.</returns>
         public static RouteValueDictionary AnonymousObjectToHtmlAttributes(object htmlAttributes)
         {
-            RouteValueDictionary result = new RouteValueDictionary();
-
-            if (htmlAttributes != null)
-            {
-                foreach (PropertyDescriptor property in TypeDescriptor.GetProperties(htmlAttributes))
-                {
-                    result.Add(property.Name.Replace('_', '-'), property.GetValue(htmlAttributes));
-                }
-            }
-
-            return result;
+            return System.Web.WebPages.Html.HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "For consistency, all helpers are instance methods.")]

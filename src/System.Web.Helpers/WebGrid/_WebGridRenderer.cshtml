@@ -2,6 +2,7 @@
 @using System.Text 
 @using System.Web.Helpers.Resources
 @using System.Web.Mvc 
+@using System.Web.WebPages.Html 
 @using System.Web.WebPages.Scope 
 @using Microsoft.Internal.Web.Utils
 
@@ -78,7 +79,7 @@
 
     @GridInitScript(webGrid, httpContext) 
 
-    var htmlAttributeDictionary = TypeHelper.ObjectToDictionary(htmlAttributes);
+    var htmlAttributeDictionary = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
     if (webGrid.IsAjaxEnabled) {
         htmlAttributeDictionary["data-swhgajax"] = "true";
         htmlAttributeDictionary["data-swhgcontainer"] = webGrid.AjaxUpdateContainerId;

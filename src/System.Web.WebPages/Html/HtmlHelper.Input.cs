@@ -35,7 +35,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString TextBox(string name, object value, object htmlAttributes)
         {
-            return TextBox(name, value, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return TextBox(name, value, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString TextBox(string name, object value, IDictionary<string, object> htmlAttributes)
@@ -66,7 +66,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString Hidden(string name, object value, object htmlAttributes)
         {
-            return Hidden(name, value, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return Hidden(name, value, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString Hidden(string name, object value, IDictionary<string, object> htmlAttributes)
@@ -115,7 +115,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString Password(string name, object value, object htmlAttributes)
         {
-            return Password(name, value, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return Password(name, value, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString Password(string name, object value, IDictionary<string, object> htmlAttributes)

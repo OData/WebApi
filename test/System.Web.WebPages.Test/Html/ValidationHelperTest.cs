@@ -103,6 +103,16 @@ namespace System.Web.WebPages.Test
         }
 
         [Fact]
+        public void ValidationMessageWithAttributesFromAnonymousObject_WithUnderscoreInName_TransformsUnderscoresToDashs()
+        {
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.ValidationMessage("foo", attributes));
+
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.ValidationMessage("foo", "bar", attributes));
+        }
+
+        [Fact]
         public void ValidationSummary()
         {
             // Arrange
@@ -334,6 +344,25 @@ namespace System.Web.WebPages.Test
                 html.ToHtmlString());
         }
 
+        [Fact]
+        public void ValidationSummaryWithAttributesFromAnonymousObject_WithUnderscoreInName_TransformsUnderscoresToDashs()
+        {
+            // Arrange
+            var modelState = new ModelStateDictionary();
+            modelState.AddFormError("error");
+
+            HtmlHelper htmlHelper = HtmlHelperFactory.Create(modelState);
+
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                htmlHelper.ValidationSummary(attributes));
+
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                htmlHelper.ValidationSummary("foo", attributes));
+
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                htmlHelper.ValidationSummary("foo", true, attributes));
+        }
+        
         private static ModelStateDictionary GetModelStateWithErrors()
         {
             ModelStateDictionary modelState = new ModelStateDictionary();

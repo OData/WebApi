@@ -581,5 +581,26 @@ namespace System.Web.WebPages.Test
             Assert.Equal(@"<input data-some-val=""5"" data-val=""true"" data-val-length=""Name cannot exceed 30 characters"" data-val-length-max=""30"" data-val-required=""Please specify a valid Name."" id=""name"" name=""name"" type=""text"" value="""" />",
                          html.ToString());
         }
+
+        [Fact]
+        public void TextBoxWithAttributesFromAnonymousObject_WithUnderscoreInName_TransformsUnderscoresToDashs()
+        {
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.TextBox("foo", "value", attributes));
+        }
+
+        [Fact]
+        public void HiddenTextBoxWithAttributesFromAnonymousObject_WithUnderscoreInName_TransformsUnderscoresToDashs()
+        {
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.Hidden("foo", "value", attributes));
+        }
+
+        [Fact]
+        public void PasswordTextBoxWithAttributesFromAnonymousObject_WithUnderscoreInName_TransformsUnderscoresToDashs()
+        {
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.Password("foo", "value", attributes));
+        }
     }
 }

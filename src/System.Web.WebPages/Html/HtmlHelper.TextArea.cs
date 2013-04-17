@@ -40,7 +40,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString TextArea(string name, object htmlAttributes)
         {
-            return TextArea(name, value: null, htmlAttributes: TypeHelper.ObjectToDictionary(htmlAttributes));
+            return TextArea(name, value: null, htmlAttributes: AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString TextArea(string name, IDictionary<string, object> htmlAttributes)
@@ -55,7 +55,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString TextArea(string name, string value, object htmlAttributes)
         {
-            return TextArea(name, value, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return TextArea(name, value, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString TextArea(string name, string value, IDictionary<string, object> htmlAttributes)
@@ -71,7 +71,7 @@ namespace System.Web.WebPages.Html
         public IHtmlString TextArea(string name, string value, int rows, int columns,
                                     object htmlAttributes)
         {
-            return TextArea(name, value, rows, columns, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return TextArea(name, value, rows, columns, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString TextArea(string name, string value, int rows, int columns,

@@ -20,12 +20,12 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString Label(string labelText, object attributes)
         {
-            return Label(labelText, null, TypeHelper.ObjectToDictionary(attributes));
+            return Label(labelText, null, AnonymousObjectToHtmlAttributes(attributes));
         }
 
         public IHtmlString Label(string labelText, string labelFor, object attributes)
         {
-            return Label(labelText, labelFor, TypeHelper.ObjectToDictionary(attributes));
+            return Label(labelText, labelFor, AnonymousObjectToHtmlAttributes(attributes));
         }
 
         public IHtmlString Label(string labelText, string labelFor, IDictionary<string, object> attributes)

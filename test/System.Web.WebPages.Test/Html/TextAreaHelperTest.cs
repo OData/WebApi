@@ -206,5 +206,18 @@ namespace System.Web.WebPages.Test
             Assert.Equal(@"<textarea cols=""20"" data-some-val=""5"" data-val=""true"" data-val-length=""Name cannot exceed 30 characters"" data-val-length-max=""30"" data-val-required=""Please specify a valid Name."" id=""name"" name=""name"" rows=""2""></textarea>",
                          html.ToString());
         }
+
+        [Fact]
+        public void TextAreaWithAttributesFromAnonymousObject_WithUnderscoreInName_TransformsUnderscoresToDashs()
+        {
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.TextArea("foo", attributes));
+
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.TextArea("foo", "value", attributes));
+
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.TextArea("foo", "value", 1, 1, attributes));
+        }
     }
 }

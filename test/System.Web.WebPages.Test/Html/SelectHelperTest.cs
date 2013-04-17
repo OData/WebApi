@@ -306,6 +306,19 @@ namespace System.Web.WebPages.Test
                 html.ToString());
         }
 
+        [Fact]
+        public void DropDownWithAttributesFromAnonymousObject_WithUnderscoreInName_TransformsUnderscoresToDashs()
+        {
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.DropDownList("foo", GetSelectList(), attributes));
+
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.DropDownList("foo", "val", GetSelectList(), attributes));
+
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.DropDownList("foo", "val", GetSelectList(), "val", attributes));
+        }
+
         // ListBox
 
         [Fact]
@@ -769,6 +782,19 @@ namespace System.Web.WebPages.Test
               + "<option value=\"C\">Charlie</option>" + Environment.NewLine
               + "</select>",
                 html.ToString());
+        }
+
+        [Fact]
+        public void ListBoxWithAttributesFromAnonymousObject_WithUnderscoreInName_TransformsUnderscoresToDashs()
+        {
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.ListBox("foo", GetSelectList(), attributes));
+
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.ListBox("foo", "val", GetSelectList(), "val", attributes));
+
+            HtmlHelperTest.AssertHelperTransformsAttributesUnderscoresToDashs((helper, attributes) =>
+                helper.ListBox("foo", "val", GetSelectList(), "val", attributes));
         }
 
         private static IEnumerable<SelectListItem> GetSelectList()

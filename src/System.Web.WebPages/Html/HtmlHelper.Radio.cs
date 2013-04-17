@@ -15,7 +15,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString RadioButton(string name, object value, object htmlAttributes)
         {
-            return RadioButton(name, value, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return RadioButton(name, value, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString RadioButton(string name, object value, IDictionary<string, object> htmlAttributes)
@@ -35,7 +35,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString RadioButton(string name, object value, bool isChecked, object htmlAttributes)
         {
-            return RadioButton(name, value, isChecked, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return RadioButton(name, value, isChecked, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString RadioButton(string name, object value, bool isChecked, IDictionary<string, object> htmlAttributes)

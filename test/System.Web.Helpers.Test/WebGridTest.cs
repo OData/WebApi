@@ -4,9 +4,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web.TestUtil;
+using System.Web.UI;
 using System.Web.WebPages;
 using Microsoft.TestCommon;
 using Moq;
@@ -1908,7 +1910,7 @@ namespace System.Web.Helpers.Test
                 "</tbody></table>", html.ToString());
             XhtmlAssert.Validate1_1(html);
         }
-
+        
         [Fact]
         public void TableRenderingWithStyles()
         {
@@ -2245,6 +2247,30 @@ namespace System.Web.Helpers.Test
             // Assert
             Assert.Equal(typeof(Person), type);
         }
+
+        [Fact]
+        public void WebGridWithAttributesFromAnonymousObject_WithUnderscoreInName_TransformsUnderscoresToDashs()
+        {
+            // Arrange
+            const string expected = @"data-name=""value""";
+            const string unexpected = @"data_name=""value""";
+            var attributes = new { data_name = "value" };
+
+            var grid = new WebGrid(GetContext(), ajaxUpdateContainerId: "grid")
+                    .Bind(new[]
+            {
+                new { P1 = 1, P2 = '2', P3 = "3" },
+                new { P1 = 4, P2 = '5', P3 = "6" }
+            });
+
+            // Act
+            var htmlString = grid.GetHtml(htmlAttributes: attributes).ToHtmlString();
+
+            // Assert            
+            Assert.DoesNotContain(unexpected, htmlString);
+            Assert.Contains(expected, htmlString);
+        }
+
 
         private static IEnumerable<dynamic> Dynamics(params object[] objects)
         {

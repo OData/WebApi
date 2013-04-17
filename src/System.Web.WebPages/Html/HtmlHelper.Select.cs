@@ -59,7 +59,7 @@ namespace System.Web.WebPages.Html
                                    object htmlAttributes)
         {
             return ListBox(name, defaultOption: defaultOption, selectList: selectList,
-                           selectedValues: selectedValues, htmlAttributes: TypeHelper.ObjectToDictionary(htmlAttributes));
+                           selectedValues: selectedValues, htmlAttributes: AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString ListBox(string name, IEnumerable<SelectListItem> selectList,
@@ -90,7 +90,7 @@ namespace System.Web.WebPages.Html
         public IHtmlString ListBox(string name, string defaultOption, IEnumerable<SelectListItem> selectList,
                                    object selectedValues, int size, bool allowMultiple, object htmlAttributes)
         {
-            return ListBox(name, defaultOption, selectList, selectedValues, size, allowMultiple, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return ListBox(name, defaultOption, selectList, selectedValues, size, allowMultiple, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         private IHtmlString BuildListBox(string name, string defaultOption, IEnumerable<SelectListItem> selectList,
@@ -208,7 +208,7 @@ namespace System.Web.WebPages.Html
         public IHtmlString DropDownList(string name, string defaultOption, IEnumerable<SelectListItem> selectList, object selectedValue,
                                         object htmlAttributes)
         {
-            return DropDownList(name, defaultOption, selectList, selectedValue, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return DropDownList(name, defaultOption, selectList, selectedValue, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         private IHtmlString BuildDropDownList(string name, string defaultOption, IEnumerable<SelectListItem> selectList,

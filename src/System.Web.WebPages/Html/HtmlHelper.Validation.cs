@@ -23,7 +23,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString ValidationMessage(string name, object htmlAttributes)
         {
-            return ValidationMessage(name, null, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return ValidationMessage(name, null, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString ValidationMessage(string name, IDictionary<string, object> htmlAttributes)
@@ -33,7 +33,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString ValidationMessage(string name, string message, object htmlAttributes)
         {
-            return ValidationMessage(name, message, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return ValidationMessage(name, message, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString ValidationMessage(string name, string message, IDictionary<string, object> htmlAttributes)
@@ -119,7 +119,7 @@ namespace System.Web.WebPages.Html
 
         public IHtmlString ValidationSummary(string message, bool excludeFieldErrors, object htmlAttributes)
         {
-            return ValidationSummary(message, excludeFieldErrors, TypeHelper.ObjectToDictionary(htmlAttributes));
+            return ValidationSummary(message, excludeFieldErrors, AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public IHtmlString ValidationSummary(string message, bool excludeFieldErrors, IDictionary<string, object> htmlAttributes)

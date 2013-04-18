@@ -49,10 +49,10 @@ namespace System.Web.Http.Tracing
                     { new List<DelegatingHandler>() { msgHandlerTracer, requestMsgtracer, messageHandler } },
                     { new List<DelegatingHandler>() { msgHandlerTracer, messageHandler, requestMsgtracer } },
                     { new List<DelegatingHandler>() { messageHandler, msgHandlerTracerDummy, requestMsgtracer } }
-                };           
+                };
             }
         }
-        
+
         [Fact]
         public void TraceManager_Is_In_Default_ServiceResolver()
         {
@@ -137,8 +137,10 @@ namespace System.Web.Http.Tracing
             new TraceManager().Initialize(config);
 
             // Assert
-            Assert.IsAssignableFrom<RequestMessageHandlerTracer>(config.MessageHandlers[config.MessageHandlers.Count - 1]);
+            Assert.IsAssignableFrom<RequestMessageHandlerTracer>(config.MessageHandlers[0]);
             Assert.IsAssignableFrom<MessageHandlerTracer>(config.MessageHandlers[config.MessageHandlers.Count - 2]);
+            Assert.Equal(3, config.MessageHandlers.Count);
+            Assert.True(IsMessageHandlerCollectionValid(config.MessageHandlers));
         }
 
         [Fact]
@@ -273,6 +275,59 @@ namespace System.Web.Http.Tracing
         }
 
         [Fact]
+        public void HttpServer_CallsCustomMessageHandlers_InTheCorrectOrder()
+        {
+            // Arrange
+            List<int> order = new List<int>();
+            order.Add(1);
+            order.Add(2);
+            order.Add(3);
+            order.Add(4);
+            List<int>.Enumerator e = order.GetEnumerator();
+            OrderAwareMessageHandler messageHandler1 = new OrderAwareMessageHandler(e, 1);
+            OrderAwareMessageHandler messageHandler2 = new OrderAwareMessageHandler(e, 2);
+            OrderAwareMessageHandler messageHandler3 = new OrderAwareMessageHandler(e, 3);
+            OrderAwareMessageHandler messageHandler4 = new OrderAwareMessageHandler(e, 4);
+            HttpRequestMessage request = new HttpRequestMessage();
+            TraceManager traceManager = new TraceManager();
+            HttpConfiguration config = new HttpConfiguration();
+            config.Services.Replace(typeof(ITraceWriter), new TestTraceWriter());
+            config.MessageHandlers.Add(messageHandler1);
+            config.MessageHandlers.Add(messageHandler2);
+            config.MessageHandlers.Add(messageHandler3);
+            config.MessageHandlers.Add(messageHandler4);
+            Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>(config);
+            dispatcherMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None)
+                .Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
+            HttpServer server = new HttpServer(config, dispatcherMock.Object);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
+
+            // Act
+            Task<HttpResponseMessage> response = invoker.SendAsync(request, CancellationToken.None);
+
+            // Assert
+            Assert.True(IsMessageHandlerCollectionValid(config.MessageHandlers));
+        }
+
+        public class OrderAwareMessageHandler : DelegatingHandler
+        {
+            private static IEnumerator<int> _order;
+            private int _expectedOrder;
+
+            public OrderAwareMessageHandler(IEnumerator<int> order, int expectedOrder)
+            {
+                _order = order;
+                _expectedOrder = expectedOrder;
+            }
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                _order.MoveNext();
+                Assert.True(_order.Current == _expectedOrder);
+                return base.SendAsync(request, cancellationToken);
+            }
+        }
+
+        [Fact]
         public void Initialize_Repairs_Handler_Collection_If_MsgHandler_Deleted()
         {
             // Arrange
@@ -292,7 +347,7 @@ namespace System.Web.Http.Tracing
             int expectedHandlerCount = config.MessageHandlers.Count;
 
             // Act
-            config.MessageHandlers.RemoveAt(0);
+            config.MessageHandlers.RemoveAt(expectedHandlerCount - 1);
             traceManager.Initialize(config);
 
             // Assert
@@ -318,10 +373,11 @@ namespace System.Web.Http.Tracing
             }
             TraceManager traceManager = new TraceManager();
             traceManager.Initialize(config);
+            int handlerCount = config.MessageHandlers.Count;
             Collection<DelegatingHandler> expectedMessageHandlers = config.MessageHandlers;
 
             // Act
-            config.MessageHandlers.RemoveAt(1);
+            config.MessageHandlers.RemoveAt(handlerCount - 2);
             traceManager.Initialize(config);
 
             // Assert
@@ -456,23 +512,23 @@ namespace System.Web.Http.Tracing
                 return false;
             }
 
-            // if RequestMessageHandler is absent
-            if (!(messageHandlers[handlerCount - 1] is RequestMessageHandlerTracer))
+            // if RequestMessageHandlerTracer is absent, exit early.
+            if (!(messageHandlers[0] is RequestMessageHandlerTracer))
             {
                 return false;
             }
 
-            // Message handler list must be an odd number (2*N+1) for N message handlers
+            // Message handler list must be an odd number (2*N+1) for N message handlers.
             if (handlerCount % 2 != 1)
             {
                 return false;
             }
 
-            // Check if all odd positions have tracers and even positions have their corresponding handlers
-            for (int i = 1; i < handlerCount; i += 2)
+            // Check if all odd positions have tracers and even positions have their corresponding handlers.
+            for (int i = 2; i < handlerCount; i += 2)
             {
-                DelegatingHandler messageHandler = messageHandlers[i - 1];
-                DelegatingHandler tracer = messageHandlers[i];
+                DelegatingHandler tracer = messageHandlers[i - 1];
+                DelegatingHandler messageHandler = messageHandlers[i];
                 if (!(tracer is MessageHandlerTracer))
                 {
                     return false;

@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http.Tracing;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.ModelBinding
 {
@@ -51,17 +52,51 @@ namespace System.Web.Http.ModelBinding
         // We verify only the stable parts of the trace record, not the optional messages etc.
         public static List<ExpectedTraceRecord> ExpectedTraceRecords = new List<ExpectedTraceRecord>() {
             new ExpectedTraceRecord("System.Web.Http.Request",      string.Empty,                     string.Empty),
+            new ExpectedTraceRecord("System.Web.Http.MessageHandlers",  "DelegatingHandlerProxy",  "SendAsync"),
             new ExpectedTraceRecord("System.Web.Http.Controllers",  "DefaultHttpControllerSelector",  "SelectController"),
             new ExpectedTraceRecord("System.Web.Http.Controllers",  "HttpControllerDescriptor",       "CreateController"),
             new ExpectedTraceRecord("System.Web.Http.Controllers",  "DefaultHttpControllerActivator", "Create"),
             new ExpectedTraceRecord("System.Web.Http.Controllers",  "ValuesController",               "ExecuteAsync"),
             new ExpectedTraceRecord("System.Web.Http.Action",       "ApiControllerActionSelector",    "SelectAction"),
             new ExpectedTraceRecord("System.Web.Http.Action",       "ApiControllerActionInvoker",     "InvokeActionAsync"),
-            new ExpectedTraceRecord("System.Web.Http.Action",       "ReflectedHttpActionDescriptor",  "ExecuteAsync"),            new ExpectedTraceRecord("System.Web.Http.ModelBinding", "HttpActionBinding",              "ExecuteBindingAsync"),
+            new ExpectedTraceRecord("System.Web.Http.Action",       "ReflectedHttpActionDescriptor",  "ExecuteAsync"),            
+            new ExpectedTraceRecord("System.Web.Http.ModelBinding", "HttpActionBinding",              "ExecuteBindingAsync"),
             new ExpectedTraceRecord("System.Web.Http.ModelBinding", "ModelBinderParameterBinding",    "ExecuteBindingAsync"),
             new ExpectedTraceRecord("System.Net.Http.Formatting",   "DefaultContentNegotiator",       "Negotiate"),
             new ExpectedTraceRecord("System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "GetPerRequestFormatterInstance"),
             new ExpectedTraceRecord("System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "WriteToStreamAsync"),
+        };
+
+        // These are all the Begin/End traces we expect in a successful ValuesController.Get(id).
+        public static List<ExpectedTraceRecord> ExpectedTraceRecordOrder = new List<ExpectedTraceRecord>() {
+            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Request",      string.Empty,                     string.Empty),
+            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.MessageHandlers",  "DelegatingHandlerProxy",  "SendAsync"),
+            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Controllers",  "DefaultHttpControllerSelector",  "SelectController"),
+            new ExpectedTraceRecord(TraceKind.End,       "System.Web.Http.Controllers",  "DefaultHttpControllerSelector",  "SelectController"),
+            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Controllers",  "HttpControllerDescriptor",       "CreateController"),
+            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Controllers",  "DefaultHttpControllerActivator", "Create"),
+            new ExpectedTraceRecord(TraceKind.End,       "System.Web.Http.Controllers",  "DefaultHttpControllerActivator", "Create"),
+            new ExpectedTraceRecord(TraceKind.End,       "System.Web.Http.Controllers",  "HttpControllerDescriptor",       "CreateController"),
+            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Controllers",  "ValuesController",               "ExecuteAsync"),
+            new ExpectedTraceRecord(TraceKind.Begin,    "System.Web.Http.Action",       "ApiControllerActionSelector",    "SelectAction"),
+            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Action",       "ApiControllerActionSelector",    "SelectAction"),
+            new ExpectedTraceRecord(TraceKind.Begin,    "System.Web.Http.ModelBinding", "HttpActionBinding",              "ExecuteBindingAsync"),
+            new ExpectedTraceRecord(TraceKind.Begin,    "System.Web.Http.ModelBinding", "ModelBinderParameterBinding",    "ExecuteBindingAsync"),
+            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.ModelBinding", "ModelBinderParameterBinding",    "ExecuteBindingAsync"),
+            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.ModelBinding", "HttpActionBinding",              "ExecuteBindingAsync"),
+            new ExpectedTraceRecord(TraceKind.Begin,    "System.Web.Http.Action",       "ApiControllerActionInvoker",     "InvokeActionAsync"),
+            new ExpectedTraceRecord(TraceKind.Begin,    "System.Web.Http.Action",       "ReflectedHttpActionDescriptor",  "ExecuteAsync"),     
+            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Action",       "ReflectedHttpActionDescriptor",  "ExecuteAsync"),
+            new ExpectedTraceRecord(TraceKind.Begin,    "System.Net.Http.Formatting",   "DefaultContentNegotiator",       "Negotiate"),
+            new ExpectedTraceRecord(TraceKind.Begin,    "System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "GetPerRequestFormatterInstance"),
+            new ExpectedTraceRecord(TraceKind.End,      "System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "GetPerRequestFormatterInstance"),
+            new ExpectedTraceRecord(TraceKind.End,      "System.Net.Http.Formatting",   "DefaultContentNegotiator",       "Negotiate"),
+            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Action",       "ApiControllerActionInvoker",     "InvokeActionAsync"),
+            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Controllers",  "ValuesController",               "ExecuteAsync"),
+            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.MessageHandlers",  "DelegatingHandlerProxy",  "SendAsync"),
+            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Request",      string.Empty,                     string.Empty),
+            new ExpectedTraceRecord(TraceKind.Begin,    "System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "WriteToStreamAsync"),
+            new ExpectedTraceRecord(TraceKind.End,      "System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "WriteToStreamAsync"),
         };
 
         [Theory]
@@ -226,6 +261,8 @@ namespace System.Web.Http.ModelBinding
         {
             HttpConfiguration config = new HttpConfiguration();
             config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{id}", new { id = RouteParameter.Optional });
+            Mock<DelegatingHandler> customMessageHandler = new Mock<DelegatingHandler>() { CallBase = true };
+            config.MessageHandlers.Add(customMessageHandler.Object);
             MemoryTraceWriter traceWriter = new MemoryTraceWriter();
             config.Services.Replace(typeof(ITraceWriter), traceWriter);
 
@@ -255,6 +292,33 @@ namespace System.Web.Http.ModelBinding
             }
         }
 
+        [Fact]
+        public void ValuesController_Get_Id_Writes_Expected_Traces_InTheCorrectOrder()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{id}", new { id = RouteParameter.Optional });
+            Mock<DelegatingHandler> customMessageHandler = new Mock<DelegatingHandler>() { CallBase = true };
+            config.MessageHandlers.Add(customMessageHandler.Object);
+            MemoryTraceWriter traceWriter = new MemoryTraceWriter();
+            config.Services.Replace(typeof(ITraceWriter), traceWriter);
+
+            using (HttpServer server = new HttpServer(config))
+            {
+                using (HttpClient client = new HttpClient(server))
+                {
+                    traceWriter.Start();
+
+                    // Calls ValueController.Get(id) using query string
+                    string uri = _baseAddress + "/api/Values?id=5";
+                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
+                    HttpResponseMessage response = client.SendAsync(request).Result;
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    traceWriter.Finish();
+
+                    Assert.True(ConfirmTracingOrder(ExpectedTraceRecordOrder, traceWriter.Records));
+                }
+            }
+        }
         // Returns a list of strings describing all of the expected trace records that were not
         // actually traced.
         // If you experience test failures from this list, it means someone stopped tracing or 
@@ -321,6 +385,27 @@ namespace System.Web.Http.ModelBinding
             return unexpected;
         }
 
+        // Returns true if the tracing records are in the correct order, else returns false.
+        private static bool ConfirmTracingOrder(IList<ExpectedTraceRecord> expectedRecords, IList<TraceRecord> actualRecords)
+        {
+            int traceBeginPos = 0;
+            foreach (ExpectedTraceRecord expectedRecord in expectedRecords)
+            {
+                TraceRecord beginTrace = actualRecords.SingleOrDefault(r =>
+                    String.Equals(r.Category, expectedRecord.Category, StringComparison.OrdinalIgnoreCase) &&
+                    String.Equals(r.Operator, expectedRecord.OperatorName, StringComparison.OrdinalIgnoreCase) &&
+                    String.Equals(r.Operation, expectedRecord.OperationName, StringComparison.OrdinalIgnoreCase) &&
+                    object.Equals(r.Kind, expectedRecord.TraceKind) 
+                    );
+
+                if (!object.ReferenceEquals(beginTrace, actualRecords.ElementAt(traceBeginPos)))
+                {
+                    return false;
+                }
+                traceBeginPos++;
+            }
+            return true;
+        }
     }
 
     public class ExpectedTraceRecord
@@ -332,7 +417,16 @@ namespace System.Web.Http.ModelBinding
             OperationName = operationName;
         }
 
+        public ExpectedTraceRecord(TraceKind kind, string category, string operatorName, string operationName)
+        {
+            TraceKind = kind;
+            Category = category;
+            OperatorName = operatorName;
+            OperationName = operationName;
+        }
+
         public string Category { get; private set; }
+        public TraceKind TraceKind { get; private set; }
         public string OperatorName { get; private set; }
         public string OperationName { get; private set; }
     }

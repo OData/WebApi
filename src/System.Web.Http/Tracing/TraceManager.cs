@@ -128,16 +128,18 @@ namespace System.Web.Http.Tracing
                 return;
             }
 
-            // For the MessageHandlerTracers to be registered, the message handler list must be of the form:
-            // messageHandler1
-            // messageHandler1Tracer
-            // ...
-            // ...
-            // messageHandlerN
-            // messageHandlerNTracer
+            // RequestMessageHandlerTracer will be the first tracer to get executed and each messageHandlerTracer
+            // will execute before its respective handler. For the MessageHandlerTracers to be registered, 
+            // the message handler list must be of the form:
             // requestMessageHandlerTracer
+            // messageHandler1Tracer
+            // messageHandler1
+            // ...
+            // ...
+            // messageHandlerNTracer
+            // messageHandlerN
             // Where "N" is a non-negative integer. That is, there could be zero or more pairs of handlers/tracers, plus a 
-            // request tracer at the end. If the state does not match this pattern, the tracer list is recreated.
+            // request tracer at the beginning. If the state does not match this pattern, the tracer list is recreated.
             if (!AreMessageHandlerTracersRegistered(configuration.MessageHandlers))
             {
                 // Removing the MessageHandlerTracer and RequestMessageHandlerTracer in the reverse order.
@@ -155,10 +157,10 @@ namespace System.Web.Http.Tracing
                 {
                     DelegatingHandler innerHandler = configuration.MessageHandlers[i];
                     DelegatingHandler handlerTracer = new MessageHandlerTracer(innerHandler, traceWriter);
-                    configuration.MessageHandlers.Insert(i + 1, handlerTracer);
+                    configuration.MessageHandlers.Insert(i, handlerTracer);
                 }
 
-                configuration.MessageHandlers.Add(new RequestMessageHandlerTracer(traceWriter));
+                configuration.MessageHandlers.Insert(0, new RequestMessageHandlerTracer(traceWriter));
             }
         }
 
@@ -173,7 +175,7 @@ namespace System.Web.Http.Tracing
             }
 
             // if RequestMessageHandlerTracer is absent, exit early.
-            if (!(messageHandlers[handlerCount - 1] is RequestMessageHandlerTracer))
+            if (!(messageHandlers[0] is RequestMessageHandlerTracer))
             {
                 return false;
             }
@@ -185,10 +187,10 @@ namespace System.Web.Http.Tracing
             }
 
             // Check if all odd positions have tracers and even positions have their corresponding handlers.
-            for (int i = 1; i < handlerCount; i += 2)
+            for (int i = 2; i < handlerCount; i += 2)
             {
-                DelegatingHandler messageHandler = messageHandlers[i - 1];
-                DelegatingHandler tracer = messageHandlers[i];
+                DelegatingHandler tracer = messageHandlers[i - 1];
+                DelegatingHandler messageHandler = messageHandlers[i];
                 if (!(tracer is MessageHandlerTracer))
                 {
                     return false;

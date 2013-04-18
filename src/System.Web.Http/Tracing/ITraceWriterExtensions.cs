@@ -292,7 +292,7 @@ namespace System.Web.Http.Tracing
         /// <param name="category">The logical category of the trace.</param>
         /// <param name="level">The <see cref="TraceLevel"/> of the trace.</param>
         /// <param name="operatorName">The name of the object performing the operation.  It may be null.</param>
-        /// <param name="operationName">The name of the operation being performaed.  It may be null.</param>
+        /// <param name="operationName">The name of the operation being performed.  It may be null.</param>
         /// <param name="beginTrace">The <see cref="Action"/> to invoke prior to performing the operation, 
         /// allowing the given <see cref="TraceRecord"/> to be filled in.  It may be null.</param>
         /// <param name="execute">An <see cref="Action"/> that performs the operation.</param>

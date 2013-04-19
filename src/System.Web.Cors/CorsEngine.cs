@@ -97,7 +97,7 @@ namespace System.Web.Cors
             }
 
             if (policy.AllowAnyMethod ||
-                policy.Methods.Contains(requestContext.AccessControlRequestMethod, StringComparer.OrdinalIgnoreCase))
+                policy.Methods.Contains(requestContext.AccessControlRequestMethod))
             {
                 result.AllowedMethods.Add(requestContext.AccessControlRequestMethod);
             }

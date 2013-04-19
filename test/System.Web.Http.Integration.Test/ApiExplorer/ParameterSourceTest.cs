@@ -55,5 +55,34 @@ namespace System.Web.Http.ApiExplorer
             Assert.NotNull(description);
             Assert.True(description.ParameterDescriptions.All(param => param.Source == ApiParameterSource.Unknown), "The parameter source should be Unknown.");
         }
+
+        [Fact]
+        public void EnumParameters_ShowUpCorrectlyOnDescription()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "{controller}");
+            DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(EnumParameterOverloadsController));
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
+            IApiExplorer explorer = config.Services.GetApiExplorer();
+
+            ApiDescription description = explorer.ApiDescriptions.FirstOrDefault(desc => desc.ActionDescriptor.ActionName == "GetWithEnumParameter");
+            Assert.NotNull(description);
+            Assert.Equal(1, description.ParameterDescriptions.Count);
+            Assert.Equal(ApiParameterSource.FromUri, description.ParameterDescriptions[0].Source);
+            Assert.Equal("EnumParameterOverloads?scope={scope}", description.RelativePath);
+
+            description = explorer.ApiDescriptions.FirstOrDefault(desc => desc.ActionDescriptor.ActionName == "GetWithTwoEnumParameters");
+            Assert.NotNull(description);
+            Assert.Equal(2, description.ParameterDescriptions.Count);
+            Assert.Equal(ApiParameterSource.FromUri, description.ParameterDescriptions[0].Source);
+            Assert.Equal(ApiParameterSource.FromUri, description.ParameterDescriptions[1].Source);
+            Assert.Equal("EnumParameterOverloads?level={level}&kind={kind}", description.RelativePath);
+
+            description = explorer.ApiDescriptions.FirstOrDefault(desc => desc.ActionDescriptor.ActionName == "GetWithNullableEnumParameter");
+            Assert.NotNull(description);
+            Assert.Equal(1, description.ParameterDescriptions.Count);
+            Assert.Equal(ApiParameterSource.FromUri, description.ParameterDescriptions[0].Source);
+            Assert.Equal("EnumParameterOverloads?level={level}", description.RelativePath);
+        }
     }
 }

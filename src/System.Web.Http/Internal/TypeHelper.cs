@@ -23,7 +23,7 @@ namespace System.Web.Http.Internal
             if (type.IsGenericType && !type.IsGenericTypeDefinition)
             {
                 Type genericTypeDefinition = type.GetGenericTypeDefinition();
-                // REVIEW: should we consider subclasses of Task<> ??
+
                 if (TaskGenericType == genericTypeDefinition)
                 {
                     return type.GetGenericArguments()[0];
@@ -79,6 +79,12 @@ namespace System.Web.Http.Internal
             }
 
             return TypeHelper.IsSimpleType(type);
+        }
+
+        internal static bool CanConvertFromString(Type type)
+        {
+            return TypeHelper.IsSimpleUnderlyingType(type) ||
+                TypeHelper.HasStringConverter(type);
         }
 
         internal static bool HasStringConverter(Type type)

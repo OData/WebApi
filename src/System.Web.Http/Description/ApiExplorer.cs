@@ -305,7 +305,7 @@ namespace System.Web.Http.Description
             foreach (ApiParameterDescription parameterDescriptor in parameterDescriptions)
             {
                 Type parameterType = parameterDescriptor.ParameterDescriptor.ParameterType;
-                if (parameterDescriptor.Source == ApiParameterSource.FromUri && TypeHelper.IsSimpleUnderlyingType(parameterType))
+                if (parameterDescriptor.Source == ApiParameterSource.FromUri && TypeHelper.CanConvertFromString(parameterType))
                 {
                     parameterValuesForRoute.Add(parameterDescriptor.Name, "{" + parameterDescriptor.Name + "}");
                 }

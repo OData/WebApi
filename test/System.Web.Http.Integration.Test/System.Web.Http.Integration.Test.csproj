@@ -51,6 +51,7 @@
     <Compile Include="ApiExplorer\DocumentationTest.cs" />
     <Compile Include="ApiExplorer\RouteConstraintsTest.cs" />
     <Compile Include="ApiExplorer\RoutesTest.cs" />
+    <Compile Include="Controllers\Apis\EnumParameterOverloadsController.cs" />
     <Compile Include="Controllers\Apis\HeaderValueProviderFactory.cs" />
     <Compile Include="Controllers\Apis\ParameterTestController.cs" />
     <Compile Include="Controllers\Apis\SpecialConfigController.cs" />

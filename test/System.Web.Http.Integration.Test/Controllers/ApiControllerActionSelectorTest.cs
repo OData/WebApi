@@ -21,7 +21,8 @@ namespace System.Web.Http
         [InlineData("GET", "Test/5?random=9", "GetUser")]
         [InlineData("Post", "Test", "PostUser")]
         [InlineData("Post", "Test?name=mario&age=10", "PostUserByNameAndAge")]
-        // Note: Normally the following would not match DeleteUserByIdAndOptName because it has 'id' and 'age' as parameters while the DeleteUserByIdAndOptName action has 'id' and 'name'. 
+
+        // Note: Normally the following would not match DeleteUserByIdAndOptName because it has 'id' and 'age' as parameters while the DeleteUserByIdAndOptName action has 'id' and 'name'.
         // However, because the default value is provided on action parameter 'name', having the 'id' in the request was enough to match the action.
         [InlineData("Delete", "Test/6?age=10", "DeleteUserByIdAndOptName")]
         [InlineData("Delete", "Test", "DeleteUserByOptName")]
@@ -266,6 +267,22 @@ namespace System.Web.Http
             HttpControllerContext context = ApiControllerHelper.CreateControllerContext(httpMethod, requestUrl, routeUrl, routeDefault);
             context.Configuration.Services.Add(typeof(ValueProviderFactory), new HeaderValueProviderFactory());
             context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
+            HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
+
+            Assert.Equal(expectedActionName, descriptor.ActionName);
+        }
+
+        [Theory]
+        [InlineData("GET", "Test", "Get")]
+        [InlineData("GET", "Test?scope=global", "GetWithEnumParameter")]
+        [InlineData("GET", "Test?level=off&kind=trace", "GetWithTwoEnumParameters")]
+        [InlineData("GET", "Test?level=", "GetWithNullableEnumParameter")]
+        public void SelectAction_ReturnsActionDescriptor_ForEnumParameterOverloads(string httpMethod, string requestUrl, string expectedActionName)
+        {
+            string routeUrl = "{controller}";
+
+            HttpControllerContext context = ApiControllerHelper.CreateControllerContext(httpMethod, requestUrl, routeUrl);
+            context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "EnumParameterOverloadsController", typeof(EnumParameterOverloadsController));
             HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
 
             Assert.Equal(expectedActionName, descriptor.ActionName);

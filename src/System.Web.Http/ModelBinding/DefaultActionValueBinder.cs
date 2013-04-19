@@ -14,7 +14,7 @@ namespace System.Web.Http.ModelBinding
     {
         /// <summary>
         /// Implementation of <see cref="IActionValueBinder"/>, Primary entry point for binding parameters for an action.
-        /// </summary>           
+        /// </summary>
         public virtual HttpActionBinding GetBinding(HttpActionDescriptor actionDescriptor)
         {
             if (actionDescriptor == null)
@@ -33,7 +33,7 @@ namespace System.Web.Http.ModelBinding
         }
 
         /// <summary>
-        /// Update actionBinding to enforce there is at most 1 body parameter. 
+        /// Update actionBinding to enforce there is at most 1 body parameter.
         /// If there are multiple, convert them all to <see cref="ErrorParameterBinding"/>
         /// </summary>
         private static void EnsureOneBodyParameter(HttpActionBinding actionBinding)
@@ -63,8 +63,8 @@ namespace System.Web.Http.ModelBinding
             }
         }
 
-        // Determine how a single parameter will get bound. 
-        // This is all sync. We don't need to actually read the body just to determine that we'll bind to the body.         
+        // Determine how a single parameter will get bound.
+        // This is all sync. We don't need to actually read the body just to determine that we'll bind to the body.
         protected virtual HttpParameterBinding GetParameterBinding(HttpParameterDescriptor parameter)
         {
             // Attribute has the highest precedence
@@ -87,9 +87,9 @@ namespace System.Web.Http.ModelBinding
             }
 
             // Not explicitly specified in global map or attribute.
-            // Use a default policy to determine it. These are catch-all policies. 
+            // Use a default policy to determine it. These are catch-all policies.
             Type type = parameter.ParameterType;
-            if (TypeHelper.IsSimpleUnderlyingType(type) || TypeHelper.HasStringConverter(type))
+            if (TypeHelper.CanConvertFromString(type))
             {
                 // For simple types, the default is to look in URI. Exactly as if the parameter had a [FromUri] attribute.
                 return parameter.BindWithAttribute(new FromUriAttribute());
@@ -108,7 +108,7 @@ namespace System.Web.Http.ModelBinding
             pb.Add(typeof(CancellationToken), parameter => new CancellationTokenParameterBinding(parameter));
             pb.Add(typeof(HttpRequestMessage), parameter => new HttpRequestParameterBinding(parameter));
 
-            // Warning binder for HttpContent. 
+            // Warning binder for HttpContent.
             pb.Add(parameter => typeof(HttpContent).IsAssignableFrom(parameter.ParameterType) ?
                                     parameter.BindAsError(Error.Format(SRResources.ParameterBindingIllegalType, parameter.ParameterType.Name, parameter.ParameterName))
                                     : null);

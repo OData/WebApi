@@ -2,7 +2,7 @@
 
 namespace System.Web.Http.Cors.Tracing
 {
-    internal static class TraceCategories
+    public static class TraceCategories
     {
         public const string CorsCategory = "System.Web.Http.Cors";
     }

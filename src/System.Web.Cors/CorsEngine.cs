@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Web.Cors.Properties;
 
 namespace System.Web.Cors
@@ -199,7 +198,7 @@ namespace System.Web.Cors
                         result.AllowedOrigin = CorsConstants.AnyOrigin;
                     }
                 }
-                else if (policy.Origins.Contains(requestContext.Origin, StringComparer.OrdinalIgnoreCase))
+                else if (policy.Origins.Contains(requestContext.Origin))
                 {
                     result.AllowedOrigin = requestContext.Origin;
                 }

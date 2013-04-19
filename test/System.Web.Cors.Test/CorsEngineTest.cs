@@ -606,5 +606,20 @@ namespace System.Web.Cors.Test
                 corsEngine.TryValidateOrigin(new CorsRequestContext(), new CorsPolicy(), null),
                 "result");
         }
+
+        [Fact]
+        public void TryValidateOrigin_DoesCaseSensitiveComparison()
+        {
+            CorsEngine corsEngine = new CorsEngine();
+
+            CorsPolicy policy = new CorsPolicy();
+            policy.Origins.Add("http://Example.com");
+            CorsResult result = new CorsResult();
+
+            bool isValid = corsEngine.TryValidateOrigin(new CorsRequestContext { Origin = "http://example.com" }, policy, result);
+            Assert.False(isValid);
+            Assert.Equal(1, result.ErrorMessages.Count);
+            Assert.Equal("The origin 'http://example.com' is not allowed.", result.ErrorMessages[0]);
+        }
     }
 }

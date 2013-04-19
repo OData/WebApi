@@ -3,10 +3,11 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Cors;
+using System.Web.Http.Cors;
 using System.Web.Http.Cors.Tracing;
 using System.Web.Http.Tracing;
 
-namespace System.Web.Http.Cors
+namespace System.Web.Http
 {
     /// <summary>
     /// CORS-related extension methods for <see cref="HttpConfiguration"/>.

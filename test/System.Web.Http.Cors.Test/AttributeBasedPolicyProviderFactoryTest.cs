@@ -175,5 +175,24 @@ namespace System.Web.Http.Cors
             Assert.NotNull(policyProvider);
             Assert.IsType(typeof(DisableCorsAttribute), policyProvider);
         }
+
+        [Fact]
+        public void GetCorsPolicyProvider_Preflight_ReturnsPolicyProviderUsingPerControllerConfiguration()
+        {
+            AttributeBasedPolicyProviderFactory providerFactory = new AttributeBasedPolicyProviderFactory();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Options, "http://localhost/percontrollerconfig");
+            request.Headers.Add("Origin", "http://localhost");
+            request.Headers.Add(CorsConstants.AccessControlRequestMethod, "httpmethod");
+            HttpConfiguration config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            config.Routes.MapHttpRoute("default", "{controller}/{id}", new { id = RouteParameter.Optional });
+
+            ICorsPolicyProvider provider = providerFactory.GetCorsPolicyProvider(request);
+
+            Assert.True(request.GetCorsRequestContext().IsPreflight);
+            EnableCorsAttribute enableCorsAttribute = Assert.IsType<EnableCorsAttribute>(provider);
+            Assert.Equal(1, enableCorsAttribute.Origins.Length);
+            Assert.Equal("http://example.com", enableCorsAttribute.Origins[0]);
+        }
     }
 }

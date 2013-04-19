@@ -55,6 +55,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttributeBasedPolicyProviderFactoryTest.cs" />
+    <Compile Include="Controllers\ExternalActionSelectorAttribute.cs" />
+    <Compile Include="Controllers\PerControllerConfigController.cs" />
     <Compile Include="Controllers\SampleController.cs" />
     <Compile Include="Controllers\DefaultController.cs" />
     <Compile Include="CorsMessageHandlerTest.cs" />

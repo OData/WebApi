@@ -2,8 +2,14 @@
 
 namespace System.Web.Http.Cors.Tracing
 {
+    /// <summary>
+    /// Category names traced by the default CORS tracing implementation.
+    /// </summary>
     public static class TraceCategories
     {
+        /// <summary>
+        /// The trace category for CORS related events.
+        /// </summary>
         public const string CorsCategory = "System.Web.Http.Cors";
     }
 }

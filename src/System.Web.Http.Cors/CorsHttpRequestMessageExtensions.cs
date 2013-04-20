@@ -46,13 +46,16 @@ namespace System.Web.Http.Cors
                     AccessControlRequestMethod = request.GetHeader(CorsConstants.AccessControlRequestMethod)
                 };
 
-                string allowAccessRequestHeaders = request.GetHeader(CorsConstants.AccessControlRequestHeaders);
-                if (allowAccessRequestHeaders != null)
+                IEnumerable<string> accessControlRequestHeaders = request.GetHeaders(CorsConstants.AccessControlRequestHeaders);
+                foreach (string accessControlRequestHeader in accessControlRequestHeaders)
                 {
-                    IEnumerable<string> headerValues = allowAccessRequestHeaders.Split(',').Select(x => x.Trim());
-                    foreach (string header in headerValues)
+                    if (accessControlRequestHeader != null)
                     {
-                        requestContext.AccessControlRequestHeaders.Add(header);
+                        IEnumerable<string> headerValues = accessControlRequestHeader.Split(',').Select(x => x.Trim());
+                        foreach (string header in headerValues)
+                        {
+                            requestContext.AccessControlRequestHeaders.Add(header);
+                        }
                     }
                 }
 
@@ -65,16 +68,21 @@ namespace System.Web.Http.Cors
 
         private static string GetHeader(this HttpRequestMessage request, string name)
         {
+            return request.GetHeaders(name).FirstOrDefault();
+        }
+
+        private static IEnumerable<string> GetHeaders(this HttpRequestMessage request, string name)
+        {
             IEnumerable<string> headerValues;
             if (request.Headers.TryGetValues(name, out headerValues))
             {
                 if (headerValues != null)
                 {
-                    return headerValues.FirstOrDefault();
+                    return headerValues;
                 }
             }
 
-            return null;
+            return Enumerable.Empty<string>();
         }
     }
 }

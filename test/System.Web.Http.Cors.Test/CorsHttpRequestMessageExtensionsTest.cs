@@ -108,5 +108,22 @@ namespace System.Web.Http.Cors.Test
             Assert.Contains("foo", result.AccessControlRequestHeaders);
             Assert.Contains("bar", result.AccessControlRequestHeaders);
         }
+
+        [Fact]
+        public void GetCorsRequestContext_RetunsRequestHeadersFromMultipleAccessControlRequestHeaders()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "http://example.com/test");
+            request.Headers.Add("Origin", "foo");
+            request.Headers.Add("Access-Control-Request-Headers", "foo, bar");
+            request.Headers.Add("Access-Control-Request-Headers", "extra,baz");
+
+            CorsRequestContext result = request.GetCorsRequestContext();
+
+            Assert.Equal(4, result.AccessControlRequestHeaders.Count);
+            Assert.Contains("foo", result.AccessControlRequestHeaders);
+            Assert.Contains("bar", result.AccessControlRequestHeaders);
+            Assert.Contains("extra", result.AccessControlRequestHeaders);
+            Assert.Contains("baz", result.AccessControlRequestHeaders);
+        }
     }
 }

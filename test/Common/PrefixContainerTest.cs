@@ -120,16 +120,20 @@ namespace System.Web
         [Fact]
         public void ContainsPrefix_ShouldIdentifyCollectionWhenNonCollectionPropertyOccursOnBinarySearchBoundary()
         {
+            // Arrange
             var container = new PrefixContainer(new[] { "foo.a", "foo.b", "foo.c", "foo.d", "foo.esSomethingElse", "foo.es[0].a", "foo.es[0].b", "foo.es[0].c", "foo.es[0].d", "foo.es[0].e" });
 
+            // Act & Assert
             Assert.True(container.ContainsPrefix("foo.es"));
         }
 
         [Fact]
         public void ContainsPrefix_ShouldIdentifyCollectionWhenNonCollectionPropertyDoesNotOccurOnBinarySearchBoundary()
         {
+            // Arrange
             var container = new PrefixContainer(new[] { "foo.a", "foo.b", "foo.c", "foo.d", "foo.esSomethingElse", "foo.es[0].a", "foo.es[0].b", "foo.es[0].c" });
 
+            // Act & Assert
             Assert.True(container.ContainsPrefix("foo.es"));
         }
 

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace System.Web
 {
@@ -39,7 +38,19 @@ namespace System.Web
                 return _sortedValues.Length > 0; // only match empty string when we have some value
             }
 
-            return Array.BinarySearch(_sortedValues, prefix, new PrefixComparer(prefix)) > -1;
+            PrefixComparer prefixComparer = new PrefixComparer(prefix);
+            bool containsPrefix = Array.BinarySearch(_sortedValues, prefix, prefixComparer) > -1;
+            if (!containsPrefix)
+            {
+                // If there's something in the search boundary that starts with the same name
+                // as the collection prefix that we're trying to find, the binary search would actually fail.
+                // For example, let's say we have foo.a, foo.bM and foo.b[0]. Calling Array.BinarySearch
+                // will fail to find foo.b because it will land on foo.bM, then look at foo.a and finally
+                // failing to find the prefix which is actually present in the container (foo.b[0]).
+                // Here we're doing another pass looking specifically for collection prefix.
+                containsPrefix = Array.BinarySearch(_sortedValues, prefix + "[", prefixComparer) > -1;
+            }
+            return containsPrefix;
         }
 
         // Given "foo.bar", "foo.hello", "something.other", foo[abc].baz and asking for prefix "foo" will return:

@@ -27,6 +27,7 @@ namespace System.Web.WebPages.Test
             Assert.Equal(basePageContext.HttpContext, subPageContext.HttpContext);
             Assert.Equal(basePageContext.OutputStack, subPageContext.OutputStack);
             Assert.Equal(basePageContext.Validation, subPageContext.Validation);
+            Assert.Equal(basePageContext.ModelState, subPageContext.ModelState);
             Assert.Equal(pageDataDictionary, subPageContext.PageData);
             Assert.Equal(model, subPageContext.Model);
             Assert.Null(subPageContext.BodyAction);
@@ -50,6 +51,7 @@ namespace System.Web.WebPages.Test
             Assert.Equal(basePageContext.HttpContext, subPageContext.HttpContext);
             Assert.Equal(basePageContext.OutputStack, subPageContext.OutputStack);
             Assert.Equal(basePageContext.Validation, subPageContext.Validation);
+            Assert.Equal(basePageContext.ModelState, subPageContext.ModelState);
             Assert.Equal(pageDataDictionary, subPageContext.PageData);
             Assert.Equal(model, subPageContext.Model);
             Assert.Equal(sectionWritersStack, subPageContext.SectionWritersStack);

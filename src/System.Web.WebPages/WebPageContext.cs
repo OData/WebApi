@@ -62,6 +62,7 @@ namespace System.Web.WebPages
                 }
                 return _modelStateDictionary;
             }
+            private set { _modelStateDictionary = value; }
         }
 
         internal ValidationHelper Validation
@@ -145,7 +146,9 @@ namespace System.Web.WebPages
                 Validation = parentContext.Validation,
                 PageData = pageData,
                 Model = model,
+                ModelState = parentContext.ModelState,
             };
+
             if (isLayoutPage)
             {
                 nestedContext.BodyAction = parentContext.BodyAction;

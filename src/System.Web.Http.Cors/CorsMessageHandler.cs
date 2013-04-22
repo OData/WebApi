@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Cors;
+using System.Web.Http.Cors.Properties;
 
 namespace System.Web.Http.Cors
 {
@@ -130,6 +132,24 @@ namespace System.Web.Http.Cors
             if (corsRequestContext == null)
             {
                 throw new ArgumentNullException("corsRequestContext");
+            }
+
+            try
+            {
+                // Make sure Access-Control-Request-Method is valid.
+                new HttpMethod(corsRequestContext.AccessControlRequestMethod);
+            }
+            catch (ArgumentException)
+            {
+                return request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        SRResources.AccessControlRequestMethodCannotBeNullOrEmpty);
+            }
+            catch (FormatException)
+            {
+                return request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    String.Format(CultureInfo.CurrentCulture,
+                        SRResources.InvalidAccessControlRequestMethod,
+                        corsRequestContext.AccessControlRequestMethod));
             }
 
             CorsPolicy corsPolicy = await GetCorsPolicyAsync(request);

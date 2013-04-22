@@ -164,14 +164,35 @@ namespace System.Web.Http.Cors
         }
 
         [Fact]
-        public void HandleCorsPreflightRequestAsync_NullConfig_Throws()
+        public void HandleCorsPreflightRequestAsync_ReturnsBadRequestWhenAccessControlRequestMethodIsInvalid()
         {
             CorsMessageHandler corsHandler = new CorsMessageHandler(new HttpConfiguration());
-            Assert.ThrowsArgumentNull(() =>
-            {
-                HttpResponseMessage response = corsHandler.HandleCorsPreflightRequestAsync(null, new CorsRequestContext(), CancellationToken.None).Result;
-            },
-            "request");
+            HttpResponseMessage response = corsHandler.HandleCorsPreflightRequestAsync(new HttpRequestMessage(),
+                new CorsRequestContext
+                {
+                    AccessControlRequestMethod = "Get-http://localhost"
+                },
+                CancellationToken.None).Result;
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal("The \"Access-Control-Request-Method\" header value 'Get-http://localhost' is invalid.", response.Content.ReadAsAsync<HttpError>().Result.Message);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void HandleCorsPreflightRequestAsync_ReturnsBadRequestWhenAccessControlRequestMethodIsNullOrEmpty(string accessControlRequestMethod)
+        {
+            CorsMessageHandler corsHandler = new CorsMessageHandler(new HttpConfiguration());
+            HttpResponseMessage response = corsHandler.HandleCorsPreflightRequestAsync(new HttpRequestMessage(),
+                new CorsRequestContext
+                {
+                    AccessControlRequestMethod = accessControlRequestMethod
+                },
+                CancellationToken.None).Result;
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal("The \"Access-Control-Request-Method\" header value cannot be null or empty.", response.Content.ReadAsAsync<HttpError>().Result.Message);
         }
 
         [Fact]

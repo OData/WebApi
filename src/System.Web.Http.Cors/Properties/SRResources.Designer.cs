@@ -61,6 +61,24 @@ namespace System.Web.Http.Cors.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The &quot;Access-Control-Request-Method&quot; header value cannot be null or empty..
+        /// </summary>
+        internal static string AccessControlRequestMethodCannotBeNullOrEmpty {
+            get {
+                return ResourceManager.GetString("AccessControlRequestMethodCannotBeNullOrEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &quot;Access-Control-Request-Method&quot; header value &apos;{0}&apos; is invalid..
+        /// </summary>
+        internal static string InvalidAccessControlRequestMethod {
+            get {
+                return ResourceManager.GetString("InvalidAccessControlRequestMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The request does not have an associated configuration object..
         /// </summary>
         internal static string NoConfiguration {

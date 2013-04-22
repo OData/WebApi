@@ -173,7 +173,7 @@ namespace Microsoft.Web.Helpers.Test
         public void LikeBoxTest()
         {
             // Arrange
-            var expectedText = @"<iframe src=""http://www.facebook.com/plugins/recommendations.php?href=http%3a%2f%2fsomesite&amp;width=100&amp;height=200&amp;header=False&amp;colorscheme=blue&amp;connections=5&amp;stream=True&amp;header=False&amp;locale=french"" scrolling=""no"" frameborder=""0"" style=""border:none; overflow:hidden; width:100px; height:200px;"" allowTransparency=""true""></iframe>";
+            var expectedText = @"<iframe src=""http://www.facebook.com/plugins/likebox.php?href=http%3a%2f%2fsomesite&amp;width=100&amp;height=200&amp;header=False&amp;colorscheme=blue&amp;connections=5&amp;stream=True&amp;header=False&amp;locale=french"" scrolling=""no"" frameborder=""0"" style=""border:none; overflow:hidden; width:100px; height:200px;"" allowTransparency=""true""></iframe>";
 
             // Act
             var actualText = Facebook.LikeBox("http://somesite", 100, 200, "blue", 5, true, false);

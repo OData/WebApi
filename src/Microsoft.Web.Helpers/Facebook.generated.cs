@@ -929,7 +929,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 #line 581 "Facebook.cshtml"
                                         
     
-    var src = new UrlBuilder("http://www.facebook.com/plugins/recommendations.php")
+    var src = new UrlBuilder("http://www.facebook.com/plugins/likebox.php")
                     .AddParam("href", href)
                     .AddParam("width", width)
                     .AddParam("height", height)

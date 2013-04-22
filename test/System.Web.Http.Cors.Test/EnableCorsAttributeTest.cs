@@ -12,7 +12,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void Default_Constructor()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute();
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "*");
 
             Assert.False(enableCors.SupportsCredentials);
             Assert.Empty(enableCors.ExposedHeaders);
@@ -22,58 +22,23 @@ namespace System.Web.Http.Cors.Test
             Assert.Equal(-1, enableCors.PreflightMaxAge);
         }
 
-        [Fact]
-        public void SettingNullExposedHeaders_Throws()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void SettingNullOrEmptyOrigins_Throws(string origins)
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute();
-
-            Assert.ThrowsArgumentNull(() =>
+            Assert.ThrowsArgument(() =>
             {
-                enableCors.ExposedHeaders = null;
+                new EnableCorsAttribute(origins: origins, headers: "*", methods: "*");
             },
-            "value");
-        }
-
-        [Fact]
-        public void SettingNullHeaders_Throws()
-        {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute();
-
-            Assert.ThrowsArgumentNull(() =>
-            {
-                enableCors.Headers = null;
-            },
-            "value");
-        }
-
-        [Fact]
-        public void SettingNullMethods_Throws()
-        {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute();
-
-            Assert.ThrowsArgumentNull(() =>
-            {
-                enableCors.Methods = null;
-            },
-            "value");
-        }
-
-        [Fact]
-        public void SettingNullOrigins_Throws()
-        {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute();
-
-            Assert.ThrowsArgumentNull(() =>
-            {
-                enableCors.Origins = null;
-            },
-            "value");
+            "origins",
+            "Value cannot be null or an empty string.");
         }
 
         [Fact]
         public void GetCorsPolicyAsync_DefaultPolicyValues()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute();
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "*");
 
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage()).Result;
 
@@ -91,7 +56,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void GetCorsPolicyAsync_RetunsExpectedSupportsCredentials()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "*")
             {
                 SupportsCredentials = true
             };
@@ -104,7 +69,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void GetCorsPolicyAsync_RetunsExpectedPreflightMaxAge()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "*")
             {
                 PreflightMaxAge = 20
             };
@@ -117,10 +82,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void GetCorsPolicyAsync_RetunsExpectedExposeHeaders()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute
-            {
-                ExposedHeaders = new[] { "foo", "bar" }
-            };
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "*", exposedHeaders: "foo, bar");
 
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage()).Result;
 
@@ -130,10 +92,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void GetCorsPolicyAsync_RetunsExpectedHeaders()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute
-            {
-                Headers = new[] { "Accept", "Content-Type" }
-            };
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "Accept, Content-Type", methods: "*");
 
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage()).Result;
 
@@ -143,10 +102,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void GetCorsPolicyAsync_RetunsExpectedMethods()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute
-            {
-                Methods = new[] { "GET", "Delete" }
-            };
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "GET, Delete");
 
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage()).Result;
 
@@ -156,10 +112,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void GetCorsPolicyAsync_RetunsExpectedOrigins()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute
-            {
-                Origins = new[] { "http://example.com" }
-            };
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "http://example.com", headers: "*", methods: "*");
 
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage()).Result;
 
@@ -169,8 +122,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void AllowAnyHeader_IsFalse_WhenHeadersPropertyIsSet()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute();
-            enableCors.Headers = new[] { "foo" };
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "foo", methods: "*");
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage()).Result;
 
             Assert.False(corsPolicy.AllowAnyHeader);
@@ -179,8 +131,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void AllowAnyOrigin_IsFalse_WhenOriginsPropertyIsSet()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute();
-            enableCors.Origins = new[] { "http://example.com" };
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "http://example.com", headers: "*", methods: "*");
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage()).Result;
 
             Assert.False(corsPolicy.AllowAnyOrigin);
@@ -189,8 +140,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void AllowAnyMethod_IsFalse_WhenMethodsPropertyIsSet()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute();
-            enableCors.Methods = new[] { "GET" };
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "GET");
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage()).Result;
 
             Assert.False(corsPolicy.AllowAnyMethod);
@@ -199,7 +149,7 @@ namespace System.Web.Http.Cors.Test
         [Fact]
         public void SettingNegativePreflightMaxAge_Throws()
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute();
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "*");
             Assert.ThrowsArgumentOutOfRange(() =>
             {
                 enableCors.PreflightMaxAge = -2;

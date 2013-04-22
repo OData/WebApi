@@ -2,7 +2,7 @@
 
 namespace System.Web.Http.Cors
 {
-    [EnableCors]
+    [EnableCors("*", "*", "*")]
     public class SampleController : ApiController
     {
         public string Get()
@@ -26,12 +26,12 @@ namespace System.Web.Http.Cors
         {
         }
 
-        [EnableCors(Origins = new[] { "http://example.com" })]
+        [EnableCors("http://example.com", "*", "*")]
         public void Head()
         {
         }
 
-        [EnableCors(Origins = new[] { "http://example.com", "http://localhost" })]
+        [EnableCors("http://example.com, http://localhost", "*", "*")]
         public void Put()
         {
         }

@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Cors;
+using System.Web.Http.Cors.Properties;
 
 namespace System.Web.Http.Cors
 {
@@ -13,121 +14,119 @@ namespace System.Web.Http.Cors
     /// By default, it allows all origins, methods and headers.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
+    [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "Attribute arguments are accessible as collections.")]
     public sealed class EnableCorsAttribute : Attribute, ICorsPolicyProvider
     {
         private CorsPolicy _corsPolicy;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EnableCorsAttribute"/> class.
+        /// Initializes a new instance of the <see cref="EnableCorsAttribute" /> class.
         /// </summary>
-        public EnableCorsAttribute()
+        /// <param name="origins">Comma-separated list of origins that are allowed to access the resource. Use "*" to allow all.</param>
+        /// <param name="headers">Comma-separated list of headers that are supported by the resource. Use "*" to allow all. Use null or empty string to allow none.</param>
+        /// <param name="methods">Comma-separated list of methods that are supported by the resource. Use "*" to allow all. Use null or empty string to allow none.</param>
+        public EnableCorsAttribute(string origins, string headers, string methods)
+            : this(origins, headers, methods, null)
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EnableCorsAttribute" /> class.
+        /// </summary>
+        /// <param name="origins">Comma-separated list of origins that are allowed to access the resource. Use "*" to allow all.</param>
+        /// <param name="headers">Comma-separated list of headers that are supported by the resource. Use "*" to allow all. Use null or empty string to allow none.</param>
+        /// <param name="methods">Comma-separated list of methods that are supported by the resource. Use "*" to allow all. Use null or empty string to allow none.</param>
+        /// <param name="exposedHeaders">Comma-separated list of headers that the resource might use and can be exposed. Use null or empty string to expose none.</param>
+        public EnableCorsAttribute(string origins, string headers, string methods, string exposedHeaders)
+        {
+            if (String.IsNullOrEmpty(origins))
+            {
+                throw new ArgumentException(
+                    SRResources.ArgumentCannotBeNullOrEmpty,
+                    "origins");
+            }
+
             _corsPolicy = new CorsPolicy();
-            _corsPolicy.AllowAnyHeader = true;
-            _corsPolicy.AllowAnyMethod = true;
-            _corsPolicy.AllowAnyOrigin = true;
-        }
+            if (origins == "*")
+            {
+                _corsPolicy.AllowAnyOrigin = true;
+            }
+            else
+            {
+                AddCommaSeparatedValuesToCollection(origins, _corsPolicy.Origins);
+            }
 
-        /// <summary>
-        /// Gets or sets the headers that the resource might use and can be exposed.
-        /// </summary>
-        /// <exception cref="System.ArgumentNullException">value</exception>
-        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Attributes can contain properties that return arrays.")]
-        public string[] ExposedHeaders
-        {
-            get
+            if (!String.IsNullOrEmpty(headers))
             {
-                return _corsPolicy.ExposedHeaders.ToArray();
-            }
-            set
-            {
-                if (value == null)
+                if (headers == "*")
                 {
-                    throw new ArgumentNullException("value");
+                    _corsPolicy.AllowAnyHeader = true;
                 }
-                _corsPolicy.ExposedHeaders.Clear();
-                for (int i = 0; i < value.Length; i++)
+                else
                 {
-                    _corsPolicy.ExposedHeaders.Add(value[i]);
+                    AddCommaSeparatedValuesToCollection(headers, _corsPolicy.Headers);
                 }
             }
-        }
 
-        /// <summary>
-        /// Gets or sets the headers that are supported by the resource.
-        /// </summary>
-        /// <exception cref="System.ArgumentNullException">value</exception>
-        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Attributes can contain properties that return arrays.")]
-        public string[] Headers
-        {
-            get
+            if (!String.IsNullOrEmpty(methods))
             {
-                return _corsPolicy.Headers.ToArray();
+                if (methods == "*")
+                {
+                    _corsPolicy.AllowAnyMethod = true;
+                }
+                else
+                {
+                    AddCommaSeparatedValuesToCollection(methods, _corsPolicy.Methods);
+                }
             }
-            set
+
+            if (!String.IsNullOrEmpty(exposedHeaders))
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-                _corsPolicy.Headers.Clear();
-                for (int i = 0; i < value.Length; i++)
-                {
-                    _corsPolicy.Headers.Add(value[i]);
-                }
-                _corsPolicy.AllowAnyHeader = false;
+                AddCommaSeparatedValuesToCollection(exposedHeaders, _corsPolicy.ExposedHeaders);
             }
         }
 
         /// <summary>
-        /// Gets or sets the methods that are supported by the resource.
+        /// Gets the headers that the resource might use and can be exposed.
         /// </summary>
-        /// <exception cref="System.ArgumentNullException">value</exception>
-        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Attributes can contain properties that return arrays.")]
-        public string[] Methods
+        public IList<string> ExposedHeaders
         {
             get
             {
-                return _corsPolicy.Methods.ToArray();
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-                _corsPolicy.Methods.Clear();
-                for (int i = 0; i < value.Length; i++)
-                {
-                    _corsPolicy.Methods.Add(value[i]);
-                }
-                _corsPolicy.AllowAnyMethod = false;
+                return _corsPolicy.ExposedHeaders;
             }
         }
 
         /// <summary>
-        /// Gets or sets the origins that are allowed to access the resource.
+        /// Gets the headers that are supported by the resource.
         /// </summary>
-        /// <exception cref="System.ArgumentNullException">value</exception>
-        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Attributes can contain properties that return arrays.")]
-        public string[] Origins
+        public IList<string> Headers
         {
             get
             {
-                return _corsPolicy.Origins.ToArray();
+                return _corsPolicy.Headers;
             }
-            set
+        }
+
+        /// <summary>
+        /// Gets the methods that are supported by the resource.
+        /// </summary>
+        public IList<string> Methods
+        {
+            get
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-                _corsPolicy.Origins.Clear();
-                for (int i = 0; i < value.Length; i++)
-                {
-                    _corsPolicy.Origins.Add(value[i]);
-                }
-                _corsPolicy.AllowAnyOrigin = false;
+                return _corsPolicy.Methods;
+            }
+        }
+
+        /// <summary>
+        /// Gets the origins that are allowed to access the resource.
+        /// </summary>
+        public IList<string> Origins
+        {
+            get
+            {
+                return _corsPolicy.Origins;
             }
         }
 
@@ -171,6 +170,19 @@ namespace System.Web.Http.Cors
         public Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request)
         {
             return Task.FromResult(_corsPolicy);
+        }
+
+        private static void AddCommaSeparatedValuesToCollection(string commaSeparatedValues, IList<string> collection)
+        {
+            string[] values = commaSeparatedValues.Split(',');
+            for (int i = 0; i < values.Length; i++)
+            {
+                string value = values[i].Trim();
+                if (!String.IsNullOrEmpty(value))
+                {
+                    collection.Add(value);
+                }
+            }
         }
     }
 }

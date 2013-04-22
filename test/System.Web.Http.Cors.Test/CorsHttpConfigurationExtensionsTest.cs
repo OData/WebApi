@@ -74,7 +74,7 @@ namespace System.Web.Http.Cors.Test
         {
             HttpConfiguration config = new HttpConfiguration();
             config.MessageHandlers.Clear();
-            EnableCorsAttribute policyProvider = new EnableCorsAttribute();
+            EnableCorsAttribute policyProvider = new EnableCorsAttribute(origins: "*", headers: "*", methods: "*");
             config.EnableCors(policyProvider);
             config.Initializer(config);
 
@@ -90,7 +90,7 @@ namespace System.Web.Http.Cors.Test
             ITraceWriter traceMock = new Mock<ITraceWriter>().Object;
             config.Services.Replace(typeof(ITraceWriter), traceMock);
             config.MessageHandlers.Clear();
-            EnableCorsAttribute policyProvider = new EnableCorsAttribute();
+            EnableCorsAttribute policyProvider = new EnableCorsAttribute(origins: "*", headers: "*", methods: "*");
             config.EnableCors(policyProvider);
             config.Initializer(config);
 

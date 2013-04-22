@@ -70,6 +70,15 @@ namespace System.Web.Http.Cors.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Value cannot be null or an empty string..
+        /// </summary>
+        internal static string ArgumentCannotBeNullOrEmpty {
+            get {
+                return ResourceManager.GetString("ArgumentCannotBeNullOrEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The &quot;Access-Control-Request-Method&quot; header value &apos;{0}&apos; is invalid..
         /// </summary>
         internal static string InvalidAccessControlRequestMethod {

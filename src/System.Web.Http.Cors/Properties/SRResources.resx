@@ -120,6 +120,9 @@
   <data name="AccessControlRequestMethodCannotBeNullOrEmpty" xml:space="preserve">
     <value>The "Access-Control-Request-Method" header value cannot be null or empty.</value>
   </data>
+  <data name="ArgumentCannotBeNullOrEmpty" xml:space="preserve">
+    <value>Value cannot be null or an empty string.</value>
+  </data>
   <data name="InvalidAccessControlRequestMethod" xml:space="preserve">
     <value>The "Access-Control-Request-Method" header value '{0}' is invalid.</value>
   </data>

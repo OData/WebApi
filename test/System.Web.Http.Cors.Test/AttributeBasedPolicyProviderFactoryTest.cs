@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
 using System.Net.Http;
 using System.Web.Cors;
 using System.Web.Http.Controllers;
@@ -191,8 +192,8 @@ namespace System.Web.Http.Cors
 
             Assert.True(request.GetCorsRequestContext().IsPreflight);
             EnableCorsAttribute enableCorsAttribute = Assert.IsType<EnableCorsAttribute>(provider);
-            Assert.Equal(1, enableCorsAttribute.Origins.Length);
-            Assert.Equal("http://example.com", enableCorsAttribute.Origins[0]);
+            Assert.Equal(1, enableCorsAttribute.Origins.Count());
+            Assert.Equal("http://example.com", enableCorsAttribute.Origins.First());
         }
     }
 }

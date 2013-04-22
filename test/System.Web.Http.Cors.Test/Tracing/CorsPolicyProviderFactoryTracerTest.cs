@@ -86,7 +86,7 @@ namespace System.Web.Http.Cors.Tracing
             Mock<ICorsPolicyProviderFactory> policyProviderFactoryMock = new Mock<ICorsPolicyProviderFactory>();
             policyProviderFactoryMock
                 .Setup(f => f.GetCorsPolicyProvider(It.IsAny<HttpRequestMessage>()))
-                .Returns(new EnableCorsAttribute());
+                .Returns(new EnableCorsAttribute(origins: "*", headers: "*", methods: "*"));
             CorsPolicyProviderFactoryTracer tracer = new CorsPolicyProviderFactoryTracer(policyProviderFactoryMock.Object, traceWriterMock.Object);
             HttpRequestMessage requestMessage = new HttpRequestMessage();
             requestMessage.Method = HttpMethod.Get;

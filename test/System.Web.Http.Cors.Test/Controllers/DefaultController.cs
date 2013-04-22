@@ -9,7 +9,7 @@ namespace System.Web.Http.Cors
             return "value";
         }
 
-        [EnableCors(Origins = new[] { "http://restrictedExample.com" })]
+        [EnableCors("http://restrictedExample.com", "*", "*")]
         public string Post()
         {
             return "value created";

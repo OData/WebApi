@@ -52,7 +52,7 @@ namespace System.Web.Http.Cors.Tracing
                         endTrace = traceRecord;
                     }
                 });
-            CorsPolicyProviderTracer tracer = new CorsPolicyProviderTracer(new EnableCorsAttribute(), traceWriterMock.Object);
+            CorsPolicyProviderTracer tracer = new CorsPolicyProviderTracer(new EnableCorsAttribute(origins: "*", headers: "*", methods: "*"), traceWriterMock.Object);
             HttpRequestMessage requestMessage = new HttpRequestMessage();
             requestMessage.Method = HttpMethod.Get;
             requestMessage.Headers.Add(CorsConstants.Origin, "http://example.com");

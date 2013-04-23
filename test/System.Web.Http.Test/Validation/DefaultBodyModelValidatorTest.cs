@@ -79,6 +79,24 @@ namespace System.Web.Http.Validation
                             { "[1].Value.Profession", "The Profession field is required." }
                         }
                     },
+
+                    // IValidatableObject's
+                    { new ValidatableModel(), typeof(ValidatableModel), new Dictionary<string, string>()
+                        {
+                            { "", "Error1" },
+                            { "Property1", "Error2" },
+                            { "Property2", "Error3" },
+                            { "Property3", "Error3" }
+                        }
+                    },
+                    { new[] { new ValidatableModel() }, typeof(ValidatableModel[]), new Dictionary<string, string>()
+                        {
+                            { "[0]", "Error1" },
+                            { "[0].Property1", "Error2" },
+                            { "[0].Property2", "Error3" },
+                            { "[0].Property3", "Error3" }
+                        }
+                    },
                     
                     // Testing we don't blow up on cycles
                     { LonelyPerson, typeof(Person), new Dictionary<string, string>()
@@ -192,4 +210,14 @@ namespace System.Web.Http.Validation
         public int Value;
         public string Reference;
     }
+
+    public class ValidatableModel : IValidatableObject
+    {
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            yield return new ValidationResult("Error1", new string[] { });
+            yield return new ValidationResult("Error2", new[] { "Property1" });
+            yield return new ValidationResult("Error3", new[] { "Property2", "Property3" });
+        }
+    } 
 }

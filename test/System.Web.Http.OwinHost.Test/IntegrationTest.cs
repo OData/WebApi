@@ -15,11 +15,11 @@ namespace System.Web.Http.OwinHost
         [Fact]
         public void SimpleGet_Works()
         {
-            using (WebApplication.Start<IntegrationTest>(url: "http://localhost:12345/vroot"))
+            using (WebApplication.Start<IntegrationTest>(url: "http://localhost:50232/vroot"))
             {
                 HttpClient client = new HttpClient();
 
-                var response = client.GetAsync("http://localhost:12345/vroot/HelloWorld").Result;
+                var response = client.GetAsync("http://localhost:50232/vroot/HelloWorld").Result;
 
                 Assert.True(response.IsSuccessStatusCode);
                 Assert.Equal("\"Hello from OWIN\"", response.Content.ReadAsStringAsync().Result);
@@ -30,12 +30,12 @@ namespace System.Web.Http.OwinHost
         [Fact]
         public void SimplePost_Works()
         {
-            using (WebApplication.Start<IntegrationTest>(url: "http://localhost:12345/vroot"))
+            using (WebApplication.Start<IntegrationTest>(url: "http://localhost:50232/vroot"))
             {
                 HttpClient client = new HttpClient();
                 var content = new StringContent("\"Echo this\"", Encoding.UTF8, "application/json");
 
-                var response = client.PostAsync("http://localhost:12345/vroot/Echo", content).Result;
+                var response = client.PostAsync("http://localhost:50232/vroot/Echo", content).Result;
 
                 Assert.True(response.IsSuccessStatusCode);
                 Assert.Equal("\"Echo this\"", response.Content.ReadAsStringAsync().Result);
@@ -46,11 +46,11 @@ namespace System.Web.Http.OwinHost
         [Fact]
         public void GetThatThrowsDuringSerializations_RespondsWith500()
         {
-            using (WebApplication.Start<IntegrationTest>(url: "http://localhost:12345/vroot"))
+            using (WebApplication.Start<IntegrationTest>(url: "http://localhost:50232/vroot"))
             {
                 HttpClient client = new HttpClient();
 
-                var response = client.GetAsync("http://localhost:12345/vroot/Error").Result;
+                var response = client.GetAsync("http://localhost:50232/vroot/Error").Result;
 
                 Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
                 JObject json = Assert.IsType<JObject>(JToken.Parse(response.Content.ReadAsStringAsync().Result));

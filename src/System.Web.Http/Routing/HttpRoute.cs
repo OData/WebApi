@@ -165,12 +165,9 @@ namespace System.Web.Http.Routing
             var newValues = GetRouteDictionaryWithoutHttpRouteKey(values);
 
             IHttpRouteData routeData = request.GetRouteData();
-            if (routeData == null)
-            {
-                return null;
-            }
+            IDictionary<string, object> requestValues = routeData == null ? null : routeData.Values;
 
-            BoundRouteTemplate result = ParsedRoute.Bind(routeData.Values, newValues, _defaults, _constraints);
+            BoundRouteTemplate result = ParsedRoute.Bind(requestValues, newValues, _defaults, _constraints);
             if (result == null)
             {
                 return null;

@@ -245,7 +245,6 @@ namespace System.Web.Http.OData
             string routeName = "Route";
             config.Routes.MapODataRoute(routeName, null, model);
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Mock"), "http://localhost/People");
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             request.SetODataPath(new DefaultODataPathHandler().Parse(model, "People"));
             request.SetODataRouteName(routeName);

@@ -68,5 +68,22 @@ namespace System.Web.Http.Hosting
             Assert.NotNull(virtualPath);
             Assert.Equal("Customers", virtualPath.VirtualPath);
         }
+
+        [Fact]
+        public void GetVirtualPath_GeneratesPathWithoutRouteData()
+        {
+            var route = new HttpRoute("{controller}");
+            var request = new HttpRequestMessage();
+            var values = new HttpRouteValueDictionary()
+            {
+                { "httproute", true },
+                { "controller", "Customers" }
+            };
+
+            IHttpVirtualPathData virtualPath = route.GetVirtualPath(request, values);
+
+            Assert.NotNull(virtualPath);
+            Assert.Equal("Customers", virtualPath.VirtualPath);
+        }
     }
 }

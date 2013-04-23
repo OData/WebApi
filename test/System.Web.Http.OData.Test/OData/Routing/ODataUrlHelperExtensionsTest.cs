@@ -61,7 +61,6 @@ namespace System.Web.Http.OData.Routing
             HttpConfiguration config = new HttpConfiguration(new HttpRouteCollection("http://localhost/vpath"));
             config.Routes.MapHttpRoute("OData", "prefix/{*odataPath}");
             request.SetConfiguration(config);
-            request.Properties["MS_HttpRouteData"] = new HttpRouteData(new HttpRoute());
             UrlHelper urlHelper = new UrlHelper(request);
             string odataPath = "odataPath";
 
@@ -78,7 +77,6 @@ namespace System.Web.Http.OData.Routing
             HttpConfiguration config = new HttpConfiguration(new HttpRouteCollection("http://localhost/"));
             config.Routes.MapHttpRoute("OData", "{*odataPath}");
             request.Properties["MS_HttpConfiguration"] = config;
-            request.Properties["MS_HttpRouteData"] = new HttpRouteData(new HttpRoute());
             UrlHelper urlHelper = new UrlHelper(request);
             string odataPath = "Customers('$&+,/:;=?@ <>#%{}|\\^~[]` ')";
 

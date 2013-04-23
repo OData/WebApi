@@ -520,7 +520,6 @@ namespace System.Net.Http
         {
             HttpRequestMessage request = new HttpRequestMessage();
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
             UrlHelper urlHelper = request.GetUrlHelper();
 
@@ -533,7 +532,6 @@ namespace System.Net.Http
         {
             HttpRequestMessage request = new HttpRequestMessage();
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
             UrlHelper urlHelper1 = request.GetUrlHelper();
             UrlHelper urlHelper2 = request.GetUrlHelper();

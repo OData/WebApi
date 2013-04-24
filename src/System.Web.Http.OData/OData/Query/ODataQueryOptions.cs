@@ -210,7 +210,7 @@ namespace System.Web.Http.OData.Query
                 result = Filter.ApplyTo(result, querySettings, _assembliesResolver);
             }
 
-            if (InlineCount != null)
+            if (InlineCount != null && Request.GetInlineCount() == null)
             {
                 long? count = InlineCount.GetEntityCount(result);
                 if (count.HasValue)
@@ -257,7 +257,7 @@ namespace System.Web.Http.OData.Query
             {
                 bool resultsLimited;
                 result = LimitResults(result, querySettings.PageSize.Value, Context, out resultsLimited);
-                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri)
+                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri && Request.GetNextPageLink() == null)
                 {
                     Uri nextPageLink = GetNextPageLink(Request, querySettings.PageSize.Value);
                     Request.SetNextPageLink(nextPageLink);

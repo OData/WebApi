@@ -763,6 +763,41 @@ namespace System.Web.Http.OData.Query
             Assert.True(enumerator.MoveNext());
             Assert.Equal(6, enumerator.Current);
         }
+
+        [Fact]
+        public void ApplyTo_IgnoresInlineCount_IfRequestAlreadyHasInlineCount()
+        {
+            // Arrange
+            long count = 42;
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$inlinecount=allpages");
+            ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
+            ODataQueryOptions options = new ODataQueryOptions(context, request);
+            request.SetInlineCount(count);
+
+            // Act
+            options.ApplyTo(Enumerable.Empty<int>().AsQueryable());
+
+            // Assert
+            Assert.Equal(count, request.GetInlineCount());
+        }
+
+        [Fact]
+        public void ApplyTo_DoesnotCalculateNextPageLink_IfRequestAlreadyHasNextPageLink()
+        {
+            // Arrange
+            Uri nextPageLink = new Uri("http://localhost/nextpagelink");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
+            ODataQueryOptions options = new ODataQueryOptions(context, request);
+            request.SetNextPageLink(nextPageLink);
+
+            // Act
+            IQueryable result = options.ApplyTo(Enumerable.Range(0,100).AsQueryable(), new ODataQuerySettings { PageSize = 1 });
+
+            // Assert
+            Assert.Equal(nextPageLink, request.GetNextPageLink());
+            Assert.Equal(1, (result as IQueryable<int>).Count());
+        }
     }
 
     public class ODataQueryOptionTest_ComplexModel

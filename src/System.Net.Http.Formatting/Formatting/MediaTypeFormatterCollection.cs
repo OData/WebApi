@@ -38,6 +38,8 @@ namespace System.Net.Http.Formatting
             VerifyAndSetFormatters(formatters);
         }
 
+        internal event EventHandler Changing;
+
         /// <summary>
         /// Gets the <see cref="MediaTypeFormatter"/> to use for Xml.
         /// </summary>
@@ -148,6 +150,38 @@ namespace System.Net.Http.Formatting
                 typeof(XObject).IsAssignableFrom(type) ||
                 typeof(Type).IsAssignableFrom(type) ||
                 type == typeof(byte[]);
+        }
+
+        protected override void ClearItems()
+        {
+            OnChanging();
+            base.ClearItems();
+        }
+
+        protected override void InsertItem(int index, MediaTypeFormatter item)
+        {
+            OnChanging();
+            base.InsertItem(index, item);
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            OnChanging();
+            base.RemoveItem(index);
+        }
+
+        protected override void SetItem(int index, MediaTypeFormatter item)
+        {
+            OnChanging();
+            base.SetItem(index, item);
+        }
+
+        private void OnChanging()
+        {
+            if (Changing != null)
+            {
+                Changing(this, EventArgs.Empty);
+            }
         }
 
         /// <summary>

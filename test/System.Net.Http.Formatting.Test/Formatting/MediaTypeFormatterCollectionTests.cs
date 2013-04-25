@@ -115,6 +115,46 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        public void MediaTypeFormatterCollection_Changing_FiresOnClear()
+        {
+            TestChanging((collection) => collection.Clear(), 1);
+        }
+
+        [Fact]
+        public void MediaTypeFormatterCollection_Changing_FiresOnInsert()
+        {
+            TestChanging((collection) => collection.Insert(0, new XmlMediaTypeFormatter()), 1);
+        }
+
+        [Fact]
+        public void MediaTypeFormatterCollection_Changing_FiresOnRemove()
+        {
+            TestChanging((collection) => collection.RemoveAt(0), 1);
+        }
+
+        [Fact]
+        public void MediaTypeFormatterCollection_Changing_FiresOnSet()
+        {
+            TestChanging((collection) => collection[0] = new XmlMediaTypeFormatter(), 1);
+        }
+
+        private static void TestChanging(Action<MediaTypeFormatterCollection> mutation, int expectedCount)
+        {
+            // Arrange
+            MediaTypeFormatter formatter1 = new XmlMediaTypeFormatter();
+            MediaTypeFormatter formatter2 = new JsonMediaTypeFormatter();
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[] { formatter1, formatter2 });
+            int changeCount = 0;
+            collection.Changing += (source, args) => { changeCount++; };
+
+            // Act
+            mutation(collection);
+
+            //Assert
+            Assert.Equal(expectedCount, changeCount);
+        }
+
+        [Fact]
         public void XmlFormatter_SetByCtor()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();

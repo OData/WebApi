@@ -44,8 +44,8 @@ namespace System.Web
             {
                 // If there's something in the search boundary that starts with the same name
                 // as the collection prefix that we're trying to find, the binary search would actually fail.
-                // For example, let's say we have foo.a, foo.bM and foo.b[0]. Calling Array.BinarySearch
-                // will fail to find foo.b because it will land on foo.bM, then look at foo.a and finally
+                // For example, let's say we have foo.a, foo.bE and foo.b[0]. Calling Array.BinarySearch
+                // will fail to find foo.b because it will land on foo.bE, then look at foo.a and finally
                 // failing to find the prefix which is actually present in the container (foo.b[0]).
                 // Here we're doing another pass looking specifically for collection prefix.
                 containsPrefix = Array.BinarySearch(_sortedValues, prefix + "[", prefixComparer) > -1;

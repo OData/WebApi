@@ -93,6 +93,7 @@
     <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializerTest.cs" />
     <Compile Include="OData\Formatter\ODataRawValueMediaTypeMappingTests.cs" />
     <Compile Include="OData\Formatter\ODataValueExtensionsTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinksSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataRawValueSerializerTests.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinkSerializerTest.cs" />

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
@@ -20,6 +21,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         private static readonly ODataWorkspaceSerializer _workspaceSerializer = new ODataWorkspaceSerializer();
         private static readonly ODataEntityReferenceLinkSerializer _entityReferenceLinkSerializer = new ODataEntityReferenceLinkSerializer();
+        private static readonly ODataEntityReferenceLinksSerializer _entityReferenceLinksSerializer = new ODataEntityReferenceLinksSerializer();
         private static readonly ODataErrorSerializer _errorSerializer = new ODataErrorSerializer();
         private static readonly ODataMetadataSerializer _metadataSerializer = new ODataMetadataSerializer();
 
@@ -105,9 +107,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 return _workspaceSerializer;
             }
-            else if (type == typeof(Uri))
+            else if (type == typeof(Uri) || type == typeof(ODataEntityReferenceLink))
             {
                 return _entityReferenceLinkSerializer;
+            }
+            else if (typeof(IEnumerable<Uri>).IsAssignableFrom(type) || type == typeof(ODataEntityReferenceLinks))
+            {
+                return _entityReferenceLinksSerializer;
             }
             else if (type == typeof(ODataError) || type == typeof(HttpError))
             {

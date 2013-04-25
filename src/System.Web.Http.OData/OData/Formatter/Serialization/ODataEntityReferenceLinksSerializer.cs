@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
@@ -9,20 +11,19 @@ using Microsoft.Data.OData;
 namespace System.Web.Http.OData.Formatter.Serialization
 {
     /// <summary>
-    /// Represents an <see cref="ODataSerializer"/> for serializing $links response.
+    /// Represents an <see cref="ODataSerializer"/> for serializing $link response for a collection navigation property.
     /// </summary>
-    /// <remarks>For example, the response to the url http://localhost/Products(10)/$links/Category gets serialized using this.</remarks>
-    public class ODataEntityReferenceLinkSerializer : ODataSerializer
+    public class ODataEntityReferenceLinksSerializer : ODataSerializer
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ODataEntityReferenceLinkSerializer"/>.
+        /// Initializes a new instance of the <see cref="ODataEntityReferenceLinksSerializer"/> class.
         /// </summary>
-        public ODataEntityReferenceLinkSerializer()
-            : base(ODataPayloadKind.EntityReferenceLink)
+        public ODataEntityReferenceLinksSerializer()
+            : base(ODataPayloadKind.EntityReferenceLinks)
         {
         }
 
-        /// <inheritdoc/>
+        /// <inheridoc />
         public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
@@ -54,19 +55,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             if (graph != null)
             {
-                ODataEntityReferenceLink entityReferenceLink = graph as ODataEntityReferenceLink;
-                if (entityReferenceLink == null)
+                ODataEntityReferenceLinks entityReferenceLinks = graph as ODataEntityReferenceLinks;
+                if (entityReferenceLinks == null)
                 {
-                    Uri uri = graph as Uri;
-                    if (uri == null)
+                    IEnumerable<Uri> uris = graph as IEnumerable<Uri>;
+                    if (uris == null)
                     {
                         throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
                     }
 
-                    entityReferenceLink = new ODataEntityReferenceLink { Url = uri };
+                    entityReferenceLinks = new ODataEntityReferenceLinks
+                    {
+                        Links = uris.Select(uri => new ODataEntityReferenceLink { Url = uri })
+                    };
                 }
 
-                messageWriter.WriteEntityReferenceLink(entityReferenceLink, entitySet, navigationProperty);
+                messageWriter.WriteEntityReferenceLinks(entityReferenceLinks, entitySet, navigationProperty);
             }
         }
     }

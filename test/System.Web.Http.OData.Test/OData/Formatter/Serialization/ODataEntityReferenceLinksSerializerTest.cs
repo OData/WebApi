@@ -11,12 +11,12 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
-    public class ODataEntityReferenceLinkSerializerTest
+    public class ODataEntityReferenceLinksSerializerTest
     {
         private readonly IEdmModel _model;
         private readonly IEdmEntitySet _customerSet;
 
-        public ODataEntityReferenceLinkSerializerTest()
+        public ODataEntityReferenceLinksSerializerTest()
         {
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
             _customerSet = _model.FindDeclaredEntityContainer("Default.Container").FindEntitySet("Customers");
@@ -25,7 +25,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_ThrowsArgumentNull_MessageWriter()
         {
-            ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
+            ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, messageWriter: null, writeContext: new ODataSerializerContext()),
                 "messageWriter");
@@ -34,7 +34,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_ThrowsArgumentNull_WriteContext()
         {
-            ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
+            ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
                 "writeContext");
@@ -43,7 +43,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_Throws_EntitySetMissingDuringSerialization()
         {
-            ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
+            ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             ODataSerializerContext writeContext = new ODataSerializerContext();
 
             Assert.Throws<SerializationException>(
@@ -54,7 +54,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_Throws_ODataPathMissing()
         {
-            ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
+            ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet };
 
             Assert.Throws<SerializationException>(
@@ -65,7 +65,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_Throws_NavigationPropertyMissingDuringSerialization()
         {
-            ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
+            ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = new ODataPath() };
 
             Assert.Throws<SerializationException>(
@@ -77,34 +77,43 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObject_Throws_ObjectCannotBeWritten_IfGraphIsNotUri()
         {
             IEdmNavigationProperty navigationProperty = _customerSet.ElementType.NavigationProperties().First();
-            ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
+            ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             ODataPath path = new ODataPath(new NavigationPathSegment(navigationProperty));
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = path };
 
             Assert.Throws<SerializationException>(
                 () => serializer.WriteObject(graph: "not uri", messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
-                "ODataEntityReferenceLinkSerializer cannot write an object of type 'System.String'.");
+                "ODataEntityReferenceLinksSerializer cannot write an object of type 'System.String'.");
         }
 
         public static TheoryDataSet<object> SerializationTestData
         {
             get
             {
-                Uri uri = new Uri("http://sampleuri/");
+                Uri uri1 = new Uri("http://uri1");
+                Uri uri2 = new Uri("http://uri2");
                 return new TheoryDataSet<object>
                 {
-                    uri,
-                    new ODataEntityReferenceLink { Url = uri }
+                    new Uri[] { uri1, uri2 },
+
+                    new ODataEntityReferenceLinks 
+                    { 
+                        Links = new ODataEntityReferenceLink[] 
+                        { 
+                            new ODataEntityReferenceLink{ Url = uri1 }, 
+                            new ODataEntityReferenceLink{ Url = uri2 }
+                        }
+                    }
                 };
             }
         }
 
         [Theory]
         [PropertyData("SerializationTestData")]
-        public void ODataEntityReferenceLinkSerializer_Serializes_Uri(object link)
+        public void ODataEntityReferenceLinkSerializer_Serializes_UrisAndEntityReferenceLinks(object uris)
         {
             // Arrange
-            ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
+            ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             IEdmNavigationProperty navigationProperty = _customerSet.ElementType.NavigationProperties().First();
             ODataPath path = new ODataPath(new NavigationPathSegment(navigationProperty));
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = path };
@@ -112,12 +121,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IODataResponseMessage message = new ODataMessageWrapper(stream);
 
             // Act
-            serializer.WriteObject(link, new ODataMessageWriter(message), writeContext);
+            serializer.WriteObject(uris, new ODataMessageWriter(message), writeContext);
 
             // Assert
             stream.Seek(0, SeekOrigin.Begin);
             XElement element = XElement.Load(stream);
-            Assert.Equal("http://sampleuri/", element.Value);
+            Assert.Equal(2, element.Elements().Count());
+            Assert.Equal("http://uri1/", element.Elements().ElementAt(0).Value);
+            Assert.Equal("http://uri2/", element.Elements().ElementAt(1).Value);
         }
     }
 }

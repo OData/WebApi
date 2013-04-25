@@ -83,6 +83,7 @@
     <Compile Include="OData\Formatter\ODataPrimitiveValueMediaTypeMapping.cs" />
     <Compile Include="OData\Formatter\ODataValueExtensions.cs" />
     <Compile Include="OData\Formatter\ODataRawValueMediaTypeMapping.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinksSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataRawValueSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\RawValueSerializerProvider.cs" />
     <Compile Include="OData\ODataNullValueAttribute.cs" />

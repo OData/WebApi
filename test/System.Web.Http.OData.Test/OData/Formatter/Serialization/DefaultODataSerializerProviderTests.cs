@@ -159,15 +159,21 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Equal(collectionSerializer.SerializerProvider, serializerProvider);
         }
 
-        [Fact]
-        public void GetODataSerializer_ODataError()
+        [Theory]
+        [InlineData(typeof(ODataError), typeof(ODataErrorSerializer))]
+        [InlineData(typeof(Uri), typeof(ODataEntityReferenceLinkSerializer))]
+        [InlineData(typeof(ODataEntityReferenceLink), typeof(ODataEntityReferenceLinkSerializer))]
+        [InlineData(typeof(Uri[]), typeof(ODataEntityReferenceLinksSerializer))]
+        [InlineData(typeof(List<Uri>), typeof(ODataEntityReferenceLinksSerializer))]
+        [InlineData(typeof(ODataEntityReferenceLinks), typeof(ODataEntityReferenceLinksSerializer))]
+        public void GetODataSerializer_Returns_ExpectedSerializerType(Type payloadType, Type expectedSerializerType)
         {
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
 
-            ODataSerializer serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataError));
+            ODataSerializer serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, payloadType);
+
             Assert.NotNull(serializer);
-            Assert.Equal(typeof(ODataErrorSerializer), serializer.GetType());
-            Assert.Equal(ODataPayloadKind.Error, serializer.ODataPayloadKind);
+            Assert.IsType(expectedSerializerType, serializer);
         }
 
         [Fact]
@@ -244,6 +250,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             // Act & Assert
             Assert.Same(serializer, serializerProvider.GetEdmTypeSerializer(edmType));
-        } 
+        }
     }
 }

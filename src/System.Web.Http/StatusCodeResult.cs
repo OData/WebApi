@@ -13,7 +13,7 @@ namespace System.Web.Http
     public class StatusCodeResult : IHttpActionResult
     {
         private readonly HttpStatusCode _statusCode;
-        private readonly ILazyDependencyProvider _dependencies;
+        private readonly IDependencyProvider _dependencies;
 
         /// <summary>Initializes a new instance of the <see cref="StatusCodeResult"/> class.</summary>
         /// <param name="statusCode">The HTTP status code for the response message.</param>
@@ -28,7 +28,7 @@ namespace System.Web.Http
         {
         }
 
-        private StatusCodeResult(HttpStatusCode statusCode, ILazyDependencyProvider dependencies)
+        private StatusCodeResult(HttpStatusCode statusCode, IDependencyProvider dependencies)
         {
             Contract.Assert(dependencies != null);
 
@@ -77,12 +77,17 @@ namespace System.Web.Http
             return response;
         }
 
-        private interface ILazyDependencyProvider
+        /// <summary>Defines a provider for dependencies that are not always directly available.</summary>
+        /// <remarks>
+        /// This abstraction supports the unit testing scenario of creating the result without creating a request
+        /// message. (The ApiController provider implementation does lazy evaluation to make that scenario work.)
+        /// </remarks>
+        private interface IDependencyProvider
         {
             HttpRequestMessage Request { get; }
         }
 
-        private class DirectDependencyProvider : ILazyDependencyProvider
+        private class DirectDependencyProvider : IDependencyProvider
         {
             private readonly HttpRequestMessage _request;
 
@@ -102,11 +107,11 @@ namespace System.Web.Http
             }
         }
 
-        private class ApiControllerDependencyProvider : ILazyDependencyProvider
+        private class ApiControllerDependencyProvider : IDependencyProvider
         {
             private readonly ApiController _controller;
 
-            private ILazyDependencyProvider _resolved;
+            private HttpRequestMessage _request;
 
             public ApiControllerDependencyProvider(ApiController controller)
             {
@@ -123,13 +128,13 @@ namespace System.Web.Http
                 get
                 {
                     EnsureResolved();
-                    return _resolved.Request;
+                    return _request;
                 }
             }
 
             private void EnsureResolved()
             {
-                if (_resolved == null)
+                if (_request == null)
                 {
                     HttpRequestMessage request = _controller.Request;
 
@@ -138,7 +143,7 @@ namespace System.Web.Http
                         throw new InvalidOperationException(SRResources.ApiControllerResult_MustNotBeNull);
                     }
 
-                    _resolved = new DirectDependencyProvider(request);
+                    _request = request;
                 }
             }
         }

@@ -179,8 +179,7 @@ namespace System.Web.Http
 
             // Act & Assert
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
-                { HttpRequestMessage ignore = result.Request; });
-            Assert.Equal("ApiController.Request must not be null.", exception.Message);
+                { HttpRequestMessage ignore = result.Request; }, "ApiController.Request must not be null.");
         }
 
         [Fact]

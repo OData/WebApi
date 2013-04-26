@@ -78,7 +78,7 @@ namespace System.Web.Http
                 {
                     Assert.NotNull(response);
                     Assert.Equal(expectedStatusCode, response.StatusCode);
-                    Assert.Equal(expectedRequest, response.RequestMessage);
+                    Assert.Same(expectedRequest, response.RequestMessage);
                 }
             }
         }
@@ -100,11 +100,11 @@ namespace System.Web.Http
             // Arrange
             HttpStatusCode expectedStatusCode = CreateStatusCode();
             ApiController controller = CreateController();
-            IHttpActionResult result = new StatusCodeResult(expectedStatusCode, controller);
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
                 controller.Request = expectedRequest;
+                IHttpActionResult result = new StatusCodeResult(expectedStatusCode, controller);
 
                 // Act
                 Task<HttpResponseMessage> task = result.ExecuteAsync(CancellationToken.None);
@@ -117,7 +117,7 @@ namespace System.Web.Http
                 {
                     Assert.NotNull(response);
                     Assert.Equal(expectedStatusCode, response.StatusCode);
-                    Assert.Equal(expectedRequest, response.RequestMessage);
+                    Assert.Same(expectedRequest, response.RequestMessage);
                 }
             }
         }
@@ -199,7 +199,7 @@ namespace System.Web.Http
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
                 controller.Request = expectedRequest;
-                Assert.Equal(expectedRequest, result.Request);
+                Assert.Same(expectedRequest, result.Request);
             }
         }
 

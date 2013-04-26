@@ -6,6 +6,8 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -213,6 +215,46 @@ namespace System.Web.Http
                     }));
 
             return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
+        }
+
+        /// <summary>Creates a <see cref="FormattedContentResult{T}"/> with the specified values.</summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="statusCode">The HTTP status code for the response message.</param>
+        /// <param name="value">The content value to format in the entity body.</param>
+        /// <param name="formatter">The formatter to use to format the content.</param>
+        /// <returns>A <see cref="FormattedContentResult{T}"/> with the specified values.</returns>
+        public FormattedContentResult<T> Content<T>(HttpStatusCode statusCode, T value, MediaTypeFormatter formatter)
+        {
+            return Content(statusCode, value, formatter, (MediaTypeHeaderValue)null);
+        }
+
+        /// <summary>Creates a <see cref="FormattedContentResult{T}"/> with the specified values.</summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="statusCode">The HTTP status code for the response message.</param>
+        /// <param name="value">The content value to format in the entity body.</param>
+        /// <param name="formatter">The formatter to use to format the content.</param>
+        /// <param name="mediaType">The value for the Content-Type header.</param>
+        /// <returns>A <see cref="FormattedContentResult{T}"/> with the specified values.</returns>
+        public FormattedContentResult<T> Content<T>(HttpStatusCode statusCode, T value, MediaTypeFormatter formatter,
+            string mediaType)
+        {
+            return Content(statusCode, value, formatter, new MediaTypeHeaderValue(mediaType));
+        }
+
+        /// <summary>Creates a <see cref="FormattedContentResult{T}"/> with the specified values.</summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="statusCode">The HTTP status code for the response message.</param>
+        /// <param name="value">The content value to format in the entity body.</param>
+        /// <param name="formatter">The formatter to use to format the content.</param>
+        /// <param name="mediaType">
+        /// The value for the Content-Type header, or <see langword="null"/> to have the formatter pick a default
+        /// value.
+        /// </param>
+        /// <returns>A <see cref="FormattedContentResult{T}"/> with the specified values.</returns>
+        public FormattedContentResult<T> Content<T>(HttpStatusCode statusCode, T value, MediaTypeFormatter formatter,
+            MediaTypeHeaderValue mediaType)
+        {
+            return new FormattedContentResult<T>(statusCode, value, formatter, mediaType, this);
         }
 
         /// <summary>Creates a <see cref="MessageResult"/> with the specified response.</summary>

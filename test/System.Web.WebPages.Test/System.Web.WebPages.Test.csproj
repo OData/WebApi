@@ -70,6 +70,7 @@
     <Compile Include="Html\LabelHelperTest.cs" />
     <Compile Include="Mvc\ModelClientValidationMembershipPasswordRuleTest.cs" />
     <Compile Include="Utils\SessionStateUtilTest.cs" />
+    <Compile Include="Utils\UrlRewriterHelperTest.cs" />
     <Compile Include="WebPage\BrowserHelpersTest.cs" />
     <Compile Include="WebPage\BrowserOverrideStoresTest.cs" />
     <Compile Include="WebPage\CookieBrowserOverrideStoreTest.cs" />

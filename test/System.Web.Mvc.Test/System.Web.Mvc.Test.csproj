@@ -103,8 +103,8 @@
     <Compile Include="Test\ControllerInstanceFilterProviderTest.cs" />
     <Compile Include="Test\PreApplicationStartCodeTest.cs" />
     <Compile Include="Test\RemoteAttributeTest.cs" />
+    <Compile Include="Test\UrlHelperTest.cs" />
     <Compile Include="Test\UrlParameterTest.cs" />
-    <Compile Include="Test\UrlRewriterHelperTest.cs" />
     <Compile Include="Test\ViewStartPageTest.cs" />
     <Compile Include="Test\RazorViewEngineTest.cs" />
     <Compile Include="Test\RazorViewTest.cs" />
@@ -207,7 +207,6 @@
     <Compile Include="Test\HttpPostAttributeTest.cs" />
     <Compile Include="Test\LinqBinaryModelBinderTest.cs" />
     <Compile Include="Test\MockHelpers.cs" />
-    <Compile Include="Test\UrlUtilTest.cs" />
     <Compile Include="Test\ExceptionContextTest.cs" />
     <Compile Include="Test\ModelBindingContextTest.cs" />
     <Compile Include="Test\ResultExecutedContextTest.cs" />
@@ -287,7 +286,6 @@
     <Compile Include="Test\SelectListTest.cs" />
     <Compile Include="Test\TempDataDictionaryTest.cs" />
     <Compile Include="Test\TypeHelpersTest.cs" />
-    <Compile Include="Test\UrlHelperTest.cs" />
     <Compile Include="Test\ViewDataDictionaryTest.cs" />
     <Compile Include="Test\ViewEnginesTest.cs" />
     <Compile Include="Test\ViewMasterPageTest.cs" />

@@ -4,20 +4,17 @@ using System.Collections.Specialized;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Mvc.Test
+namespace System.Web.WebPages.Test
 {
     public class UrlRewriterHelperTest
     {
-        private const string _urlWasRewrittenServerVar = "IIS_WasUrlRewritten";
-        private const string _urlRewriterEnabledServerVar = "IIS_UrlRewriteModule";
-
         [Fact]
         public void WasRequestRewritten_FalseIfUrlRewriterIsTurnedOff()
         {
             // Arrange
             UrlRewriterHelper helper = new UrlRewriterHelper();
             Mock<HttpContextBase> requestMock = new Mock<HttpContextBase>();
-            requestMock.Setup(c => c.Request.ServerVariables.Get(_urlRewriterEnabledServerVar)).Returns((string)null).Verifiable();
+            requestMock.Setup(c => c.Request.ServerVariables.Get(UrlRewriterHelper.UrlRewriterEnabledServerVar)).Returns((string)null).Verifiable();
 
             // Act
             bool result = helper.WasRequestRewritten(requestMock.Object);
@@ -25,7 +22,7 @@ namespace System.Web.Mvc.Test
             // Assert
             Assert.False(result);
             requestMock.Verify();
-            requestMock.Verify(c => c.Request.ServerVariables.Get(_urlWasRewrittenServerVar), Times.Never());
+            requestMock.Verify(c => c.Request.ServerVariables.Get(UrlRewriterHelper.UrlWasRewrittenServerVar), Times.Never());
         }
 
         [Fact]
@@ -34,8 +31,8 @@ namespace System.Web.Mvc.Test
             // Arrange
             UrlRewriterHelper helper = new UrlRewriterHelper();
             Mock<HttpContextBase> requestMock = new Mock<HttpContextBase>();
-            requestMock.Setup(c => c.Request.ServerVariables.Get(_urlRewriterEnabledServerVar)).Returns("yes").Verifiable();
-            requestMock.Setup(c => c.Request.ServerVariables.Get(_urlWasRewrittenServerVar)).Returns((string)null).Verifiable();
+            requestMock.Setup(c => c.Request.ServerVariables.Get(UrlRewriterHelper.UrlRewriterEnabledServerVar)).Returns("yes").Verifiable();
+            requestMock.Setup(c => c.Request.ServerVariables.Get(UrlRewriterHelper.UrlWasRewrittenServerVar)).Returns((string)null).Verifiable();
 
             // Act
             bool result = helper.WasRequestRewritten(requestMock.Object);
@@ -51,8 +48,8 @@ namespace System.Web.Mvc.Test
             // Arrange
             UrlRewriterHelper helper = new UrlRewriterHelper();
             Mock<HttpContextBase> requestMock = new Mock<HttpContextBase>();
-            requestMock.Setup(c => c.Request.ServerVariables.Get(_urlRewriterEnabledServerVar)).Returns("yes").Verifiable();
-            requestMock.Setup(c => c.Request.ServerVariables.Get(_urlWasRewrittenServerVar)).Returns("yes").Verifiable();
+            requestMock.Setup(c => c.Request.ServerVariables.Get(UrlRewriterHelper.UrlRewriterEnabledServerVar)).Returns("yes").Verifiable();
+            requestMock.Setup(c => c.Request.ServerVariables.Get(UrlRewriterHelper.UrlWasRewrittenServerVar)).Returns("yes").Verifiable();
 
             // Act
             bool result = helper.WasRequestRewritten(requestMock.Object);

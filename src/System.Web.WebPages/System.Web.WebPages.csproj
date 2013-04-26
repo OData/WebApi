@@ -137,6 +137,7 @@
     <Compile Include="RequestBrowserOverrideStore.cs" />
     <Compile Include="Utils\SessionStateUtil.cs" />
     <Compile Include="Utils\TypeHelper.cs" />
+    <Compile Include="Utils\UrlRewriterHelper.cs" />
     <Compile Include="Utils\UrlUtil.cs" />
     <Compile Include="Validation\CompareValidator.cs" />
     <Compile Include="Validation\DataTypeValidator.cs" />

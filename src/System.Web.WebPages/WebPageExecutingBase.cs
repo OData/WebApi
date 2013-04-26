@@ -83,7 +83,7 @@ namespace System.Web.WebPages
 
         public virtual string Href(string path, params object[] pathParts)
         {
-            return UrlUtil.Url(VirtualPath, path, pathParts);
+            return UrlUtil.GenerateClientUrl(Context, VirtualPath, path, pathParts);
         }
 
         protected internal void BeginContext(int startPosition, int length, bool isLiteral)

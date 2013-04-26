@@ -164,7 +164,6 @@
     <Compile Include="SingleServiceResolver.cs" />
     <Compile Include="Razor\StartPageLookupDelegate.cs" />
     <Compile Include="TagBuilderExtensions.cs" />
-    <Compile Include="UrlRewriterHelper.cs" />
     <Compile Include="ValidationAttributeHelpers.cs" />
     <Compile Include="ViewStartPage.cs" />
     <Compile Include="WebViewPage.cs" />
@@ -282,7 +281,6 @@
     <Compile Include="Html\LabelExtensions.cs" />
     <Compile Include="Html\TemplateHelpers.cs" />
     <Compile Include="HttpPostAttribute.cs" />
-    <Compile Include="UrlUtil.cs" />
     <Compile Include="ExceptionContext.cs" />
     <Compile Include="ResultExecutedContext.cs" />
     <Compile Include="ResultExecutingContext.cs" />

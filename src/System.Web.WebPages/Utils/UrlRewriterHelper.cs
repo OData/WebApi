@@ -2,12 +2,13 @@
 
 using System.Collections.Specialized;
 
-namespace System.Web.Mvc
+namespace System.Web.WebPages
 {
     internal class UrlRewriterHelper
     {
-        private const string UrlWasRewrittenServerVar = "IIS_WasUrlRewritten";
-        private const string UrlRewriterEnabledServerVar = "IIS_UrlRewriteModule";
+        // internal for tests
+        internal const string UrlWasRewrittenServerVar = "IIS_WasUrlRewritten";
+        internal const string UrlRewriterEnabledServerVar = "IIS_UrlRewriteModule";
 
         private object _lockObject = new object();
         private bool _urlRewriterIsTurnedOnValue;

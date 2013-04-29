@@ -25,6 +25,7 @@ namespace System.Web.Http
         /// Initializes a new instance of the <see cref="HttpError"/> class.
         /// </summary>
         public HttpError()
+            : base(StringComparer.OrdinalIgnoreCase)
         {
         }
 
@@ -33,6 +34,7 @@ namespace System.Web.Http
         /// </summary>
         /// <param name="message">The error message to associate with this instance.</param>
         public HttpError(string message)
+            : this()
         {
             if (message == null)
             {
@@ -48,6 +50,7 @@ namespace System.Web.Http
         /// <param name="exception">The exception to use for error information.</param>
         /// <param name="includeErrorDetail"><c>true</c> to include the exception information in the error; <c>false</c> otherwise</param>
         public HttpError(Exception exception, bool includeErrorDetail)
+            : this()
         {
             if (exception == null)
             {
@@ -74,6 +77,7 @@ namespace System.Web.Http
         /// <param name="modelState">The invalid model state to use for error information.</param>
         /// <param name="includeErrorDetail"><c>true</c> to include exception messages in the error; <c>false</c> otherwise</param>
         public HttpError(ModelStateDictionary modelState, bool includeErrorDetail)
+            : this()
         {
             if (modelState == null)
             {

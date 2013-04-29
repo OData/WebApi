@@ -27,6 +27,21 @@ namespace System.Web.Http.Dispatcher
             }
         }
 
+        public static TheoryDataSet<HttpError> HttpErrors
+        {
+            get
+            {
+                return new TheoryDataSet<HttpError>()
+                {
+                    new HttpError(),
+                    new HttpError("error"),
+                    new HttpError(new NotImplementedException(), true),
+                    new HttpError(new ModelStateDictionary() { { "key", new ModelState() { Errors = { new ModelError("error") } } } }, true),
+                    new HttpError("error", "errordetail"),
+                };
+            }
+        }
+
         [Fact]
         public void Constructor_GuardClauses()
         {
@@ -341,6 +356,19 @@ namespace System.Web.Http.Dispatcher
 
             // Assert
             Assert.Same(error["ModelState"], actualModelStateError);
+        }
+
+        [Theory]
+        [PropertyData("HttpErrors")]
+        public void HttpErrors_UseCaseInsensitiveComparer(HttpError httpError)
+        {
+            var lowercaseKey = "abcd";
+            var uppercaseKey = "ABCD";
+
+            httpError[lowercaseKey] = "error";
+
+            Assert.True(httpError.ContainsKey(lowercaseKey));
+            Assert.True(httpError.ContainsKey(uppercaseKey));
         }
     }
 }

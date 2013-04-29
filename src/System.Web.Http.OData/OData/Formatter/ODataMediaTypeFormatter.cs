@@ -224,16 +224,22 @@ namespace System.Web.Http.OData.Formatter
                     }
                     else
                     {
-                    ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type);
-                    if (serializer != null)
-                    {
+                        // SingleResult<T> should be serialized as T.
+                        if (type.IsGenericType && type.GetGenericTypeDefinition().IsEquivalentTo(typeof(SingleResult<>)))
+                        {
+                            type = type.GetGenericArguments()[0];
+                        }
+
+                        ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type);
+                        if (serializer != null)
+                        {
                             payloadKind = serializer.ODataPayloadKind;
-                    }
+                        }
                         else
                         {
                             return false;
-                }
-            }
+                        }
+                    }
 
                     return _payloadKinds.Contains(payloadKind);
                 }

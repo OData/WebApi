@@ -8,7 +8,7 @@ namespace System.Web.Http
     /// Represents an <see cref="IQueryable"/> containing zero or one entities.
     /// </summary>
     /// <typeparam name="T">The type of the data in the data source.</typeparam>
-    public class SingleResult<T> : SingleResult
+    public sealed class SingleResult<T> : SingleResult
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SingleResult"/> class.

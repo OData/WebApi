@@ -484,6 +484,19 @@ namespace System.Web.Http.OData.Formatter
             serializer.Verify();
         }
 
+        [Theory]
+        [InlineData(typeof(SingleResult), false)]
+        [InlineData(typeof(SingleResult<SampleType>), true)]
+        [InlineData(typeof(SingleResult<TypeNotInModel>), false)]
+        public void CanWriteType_ReturnsExpectedResult_ForSingleResult(Type type, bool expectedResult)
+        {
+            IEdmModel model = CreateModel();
+            HttpRequestMessage request = CreateFakeODataRequest(model);
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.Entry);
+
+            Assert.Equal(expectedResult, formatter.CanWriteType(type));
+        }
+
         private static Encoding CreateEncoding(string name)
         {
             if (name == "utf-8")
@@ -605,6 +618,10 @@ namespace System.Web.Http.OData.Formatter
                     </entry>"
                 );
             }
+        }
+
+        private class TypeNotInModel
+        {
         }
 
         private class FeedEdmObject : IEdmObject, IEnumerable

@@ -13,7 +13,9 @@ namespace System.Web.Http.ValueProviders.Providers
         {
             new KeyValuePair<string, string>("foo", "fooValue1"),
             new KeyValuePair<string, string>("foo", "fooValue2"),
-            new KeyValuePair<string, string>("bar.baz", "someOtherValue")
+            new KeyValuePair<string, string>("bar.baz", "someOtherValue"),
+            new KeyValuePair<string, string>("null_value", null),
+            new KeyValuePair<string, string>("prefix.null_value", null)
         };
 
         [Fact]
@@ -114,9 +116,9 @@ namespace System.Web.Http.ValueProviders.Providers
             IDictionary<string, string> result = valueProvider.GetKeysFromPrefix("");
 
             // Assert
-            Assert.Equal(2, result.Count);
-            Assert.Equal("foo", result["foo"]);
-            Assert.Equal("bar", result["bar"]);
+            Assert.Equal<KeyValuePair<string, string>>(
+                result.OrderBy(kvp => kvp.Key),
+                new Dictionary<string, string> { { "bar", "bar" }, { "foo", "foo" }, { "null_value", "null_value" }, { "prefix", "prefix" } });
         }
 
         [Fact]
@@ -191,6 +193,46 @@ namespace System.Web.Http.ValueProviders.Providers
             Assert.Equal(new List<string>() { "fooValue1", "fooValue2" }, (List<string>)vpResult.RawValue);
             Assert.Equal("fooValue1,fooValue2", vpResult.AttemptedValue);
             Assert.Equal(culture, vpResult.Culture);
+        }
+
+        [Theory]
+        [InlineData("null_value")]
+        [InlineData("prefix.null_value")]
+        public void GetValue_NullValue(string key)
+        {
+            // Arrange
+            var culture = CultureInfo.GetCultureInfo("fr-FR");
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, culture);
+
+            // Act
+            ValueProviderResult vpResult = valueProvider.GetValue(key);
+
+            // Assert
+            Assert.NotNull(vpResult);
+            Assert.Equal(null, vpResult.RawValue);
+            Assert.Equal(null, vpResult.AttemptedValue);
+            Assert.Equal(culture, vpResult.Culture);
+        }
+
+        [Fact]
+        public void GetValue_NullMultipleValue()
+        {
+            // Arrange
+            var backingStore = new KeyValuePair<string, string>[] 
+            { 
+                new KeyValuePair<string, string>("key", null),
+                new KeyValuePair<string, string>("key", null),
+                new KeyValuePair<string, string>("key", "value")
+            };
+            var culture = CultureInfo.GetCultureInfo("fr-FR");
+            var valueProvider = new NameValuePairsValueProvider(backingStore, culture);
+
+            // Act
+            ValueProviderResult vpResult = valueProvider.GetValue("key");
+
+            // Assert
+            Assert.Equal(new[] { null, null, "value" }, vpResult.RawValue as IEnumerable<string>);
+            Assert.Equal(",,value", vpResult.AttemptedValue);
         }
 
         [Fact]

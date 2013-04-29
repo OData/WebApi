@@ -107,7 +107,7 @@ namespace System.Web.Http.ValueProviders.Providers
                     List<string> valueStrings = value as List<string>;
                     if (valueStrings == null)
                     {
-                        Contract.Assert(value is string);
+                        Contract.Assert(value is string || value == null);
 
                         // allocate a new list to store the first value and the second, new value
                         values[name] = new List<string>() { value as string, nameValuePair.Value };
@@ -164,7 +164,7 @@ namespace System.Web.Http.ValueProviders.Providers
             List<string> valueStrings = value as List<string>;
             if (valueStrings == null)
             {
-                Contract.Assert(value is string);
+                Contract.Assert(value is string || value == null);
                 return value as string;
             }
             else

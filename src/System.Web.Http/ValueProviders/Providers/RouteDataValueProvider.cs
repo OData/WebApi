@@ -10,15 +10,16 @@ namespace System.Web.Http.ValueProviders.Providers
     public class RouteDataValueProvider : NameValuePairsValueProvider
     {
         public RouteDataValueProvider(HttpActionContext actionContext, CultureInfo culture)
-            : base(GetRoutes(actionContext.ControllerContext.RouteData), culture)
+            : base(GetRouteValues(actionContext.ControllerContext.RouteData), culture)
         {
         }
 
-        internal static IEnumerable<KeyValuePair<string, string>> GetRoutes(IHttpRouteData routeData)
+        internal static IEnumerable<KeyValuePair<string, string>> GetRouteValues(IHttpRouteData routeData)
         {
             foreach (KeyValuePair<string, object> pair in routeData.Values)
             {
-                yield return new KeyValuePair<string, string>(pair.Key, pair.Value.ToString());
+                string value = (pair.Value == null) ? null : pair.Value.ToString();
+                yield return new KeyValuePair<string, string>(pair.Key, value);
             }
         }
     }

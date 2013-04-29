@@ -287,6 +287,7 @@
     <Compile Include="ValueProviders\Providers\NameValuePairsValueProviderTest.cs" />
     <Compile Include="ValueProviders\Providers\QueryStringValueProviderFactoryTest.cs" />
     <Compile Include="ValueProviders\Providers\QueryStringValueProviderTest.cs" />
+    <Compile Include="ValueProviders\Providers\RouteDataValueProviderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

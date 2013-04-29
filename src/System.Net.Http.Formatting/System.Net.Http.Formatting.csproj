@@ -61,7 +61,6 @@
     <Compile Include="HttpContentFormDataExtensions.cs" />
     <Compile Include="UnsupportedMediaTypeException.cs" />
     <Compile Include="Internal\ByteRangeStream.cs" />
-    <Compile Include="Internal\MultipartWriteDelegatingStream.cs" />
     <Compile Include="Internal\ReadOnlyStreamWithEncodingPreamble.cs" />
     <Compile Include="Internal\TypeExtensions.cs" />
     <Compile Include="InvalidByteRangeException.cs" />

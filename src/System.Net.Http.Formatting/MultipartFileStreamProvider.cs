@@ -107,7 +107,7 @@ namespace System.Net.Http
             MultipartFileData fileData = new MultipartFileData(headers, localFilePath);
             _fileData.Add(fileData);
 
-            return new MultipartWriteDelegatingStream(File.Create(localFilePath, _bufferSize, FileOptions.Asynchronous));
+            return File.Create(localFilePath, _bufferSize, FileOptions.Asynchronous);
         }
 
         /// <summary>

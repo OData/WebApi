@@ -117,8 +117,8 @@ namespace System.Net.Http
                 stream0 = provider.GetStream(content, content.ElementAt(0).Headers);
                 stream1 = provider.GetStream(content, content.ElementAt(1).Headers);
 
-                Assert.IsType<MultipartWriteDelegatingStream>(stream0);
-                Assert.IsType<MultipartWriteDelegatingStream>(stream1);
+                Assert.IsType<FileStream>(stream0);
+                Assert.IsType<FileStream>(stream1);
 
                 Assert.Equal(2, provider.FileData.Count);
                 string partialFileName = String.Format("{0}BodyPart_", tempPath);

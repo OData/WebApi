@@ -7,6 +7,8 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.Http.OData.Formatter.Serialization;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
@@ -458,6 +460,22 @@ namespace System.Web.Http.OData.Formatter
 
             // Assert
             Assert.Equal(MediaTypeHeaderValue.Parse("application/xml"), mediaType);
+        }
+
+        [Fact]
+        public void Create_UsesDefaultSerializerProviderInstance()
+        {
+            var formatters = ODataMediaTypeFormatters.Create();
+
+            Assert.Same(formatters.First().SerializerProvider, DefaultODataSerializerProvider.Instance);
+        }
+
+        [Fact]
+        public void Create_UsesDefaultDeserializerProviderInstance()
+        {
+            var formatters = ODataMediaTypeFormatters.Create();
+
+            Assert.Same(formatters.First().DeserializerProvider, DefaultODataDeserializerProvider.Instance);
         }
 
         private static IEdmModel CreateModel()

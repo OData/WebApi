@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Formatter
         /// <returns>A list of media type formatters to handle OData.</returns>
         public static IList<ODataMediaTypeFormatter> Create()
         {
-            return Create(new DefaultODataSerializerProvider(), new DefaultODataDeserializerProvider());
+            return Create(DefaultODataSerializerProvider.Instance, DefaultODataDeserializerProvider.Instance);
         }
 
         /// <summary>

@@ -25,6 +25,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private static readonly ODataErrorSerializer _errorSerializer = new ODataErrorSerializer();
         private static readonly ODataMetadataSerializer _metadataSerializer = new ODataMetadataSerializer();
 
+        private static readonly DefaultODataSerializerProvider _instance = new DefaultODataSerializerProvider();
+
+        /// <summary>
+        /// Gets the default instance of the <see cref="DefaultODataSerializerProvider"/>.
+        /// </summary>
+        public static DefaultODataSerializerProvider Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
+
         /// <inheritdoc />
         public override ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType)
         {

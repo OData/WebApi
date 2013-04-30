@@ -129,6 +129,28 @@ namespace System.Web.Http.OData.Formatter
         }
 
         /// <summary>
+        /// Gets the <see cref="ODataSerializerProvider"/> that will be used by this formatter instance.
+        /// </summary>
+        public ODataSerializerProvider SerializerProvider
+        {
+            get
+            {
+                return _serializerProvider;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ODataDeserializerProvider"/> that will be used by this formatter instance.
+        /// </summary>
+        public ODataDeserializerProvider DeserializerProvider
+        {
+            get
+            {
+                return _deserializerProvider;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="ODataMessageQuotas"/> that this formatter uses on the read side.
         /// </summary>
         public ODataMessageQuotas MessageReaderQuotas { get; private set; }

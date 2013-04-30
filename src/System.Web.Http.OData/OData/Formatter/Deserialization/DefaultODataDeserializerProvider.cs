@@ -20,12 +20,25 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         private static readonly ODataEntityReferenceLinkDeserializer _entityReferenceLinkDeserializer = new ODataEntityReferenceLinkDeserializer();
         private readonly ODataActionPayloadDeserializer _actionPayloadDeserializer;
 
+        private static readonly DefaultODataDeserializerProvider _instance = new DefaultODataDeserializerProvider();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultODataDeserializerProvider"/> class.
         /// </summary>
         public DefaultODataDeserializerProvider()
         {
             _actionPayloadDeserializer = new ODataActionPayloadDeserializer(this);
+        }
+
+        /// <summary>
+        /// Gets the default instance of the <see cref="DefaultODataDeserializerProvider"/>.
+        /// </summary>
+        public static DefaultODataDeserializerProvider Instance
+        {
+            get
+            {
+                return _instance;
+            }
         }
 
         /// <inheritdoc />

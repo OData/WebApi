@@ -251,5 +251,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Act & Assert
             Assert.Same(serializer, serializerProvider.GetEdmTypeSerializer(edmType));
         }
+
+        [Fact]
+        public void Property_Instance_IsCached()
+        {
+            DefaultODataSerializerProvider instance1 = DefaultODataSerializerProvider.Instance;
+            DefaultODataSerializerProvider instance2 = DefaultODataSerializerProvider.Instance;
+
+            Assert.Same(instance1, instance2);
+        }
     }
 }

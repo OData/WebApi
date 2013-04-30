@@ -200,6 +200,15 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Assert.Same(deserializer, deserializerProvider.GetEdmTypeDeserializer(edmType));
         }
 
+        [Fact]
+        public void Property_Instance_IsCached()
+        {
+            DefaultODataDeserializerProvider instance1 = DefaultODataDeserializerProvider.Instance;
+            DefaultODataDeserializerProvider instance2 = DefaultODataDeserializerProvider.Instance;
+
+            Assert.Same(instance1, instance2);
+        }
+
         public class MyActionPayload : ODataActionParameters
         {
         }

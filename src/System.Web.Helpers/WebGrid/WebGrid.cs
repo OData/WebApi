@@ -1,12 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Web.Helpers.Resources;
 using System.Web.WebPages;
@@ -134,6 +136,8 @@ namespace System.Web.Helpers
             {
                 _sortDirectionFieldName = sortDirectionFieldName;
             }
+
+            CustomSorters = new Dictionary<string, Expression>(StringComparer.OrdinalIgnoreCase);
         }
 
         public IEnumerable<string> ColumnNames
@@ -408,6 +412,8 @@ namespace System.Web.Helpers
         {
             get { return FieldNamePrefix + _sortFieldName; }
         }
+
+        internal IDictionary<string, Expression> CustomSorters { get; private set; }
 
         public int TotalRowCount
         {
@@ -759,6 +765,27 @@ namespace System.Web.Helpers
             return WebGridRenderer.Table(this, HttpContext, tableStyle: tableStyle, headerStyle: headerStyle, footerStyle: footerStyle, rowStyle: rowStyle,
                                          alternatingRowStyle: alternatingRowStyle, selectedRowStyle: selectedRowStyle, caption: caption, displayHeader: displayHeader, fillEmptyRows: fillEmptyRows,
                                          emptyRowCellValue: emptyRowCellValue, columns: columns, exclusions: exclusions, footer: footer, htmlAttributes: htmlAttributes);
+        }
+
+        /// <summary>
+        /// Adds a specific sort function for a given column.
+        /// </summary>
+        /// <typeparam name="TElement">The type of elements in the grid's source.</typeparam>
+        /// <typeparam name="TProperty">The column type, usually inferred from the keySelector function's return type.</typeparam>
+        /// <param name="columnName">The column name (as used for sorting)</param>
+        /// <param name="keySelector">The function used to select a key to sort by, for each element in the grid's source.</param>
+        /// <returns>The current grid, with the new custom sorter applied.</returns>
+        /// <example>
+        /// <code>
+        /// var grid = new WebGrid(items)
+        ///     .AddSorter("Manager.Name", (Employee x) => (x == null || x.Manager == null) ? null : x.Manager.Name);
+        /// </code>
+        /// </example>
+        [SuppressMessage("Microsoft.Design", "CA1006", Justification = "This design make sense, and is a reasonable user experience for users of the helpers")]
+        public WebGrid AddSorter<TElement, TProperty>(string columnName, Expression<Func<TElement, TProperty>> keySelector)
+        {
+            CustomSorters[columnName] = keySelector;
+            return this;
         }
 
         /// <param name="columns">The set of columns that are rendered to the client.</param>

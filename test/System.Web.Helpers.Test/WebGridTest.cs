@@ -2188,6 +2188,47 @@ namespace System.Web.Helpers.Test
                 + "</tbody></table>", html.ToString());
         }
 
+        [Fact]
+        public void CustomSorter()
+        {
+            // Arrange
+            var context = GetContext();
+            IList<Employee> employees = new List<Employee>();
+            employees.Add(new Employee { Name = "A", Salary = 10, Manager = new Employee { Name = "C" } });
+            employees.Add(new Employee { Name = "B", Salary = 20, Manager = null });
+            employees.Add(new Employee { Name = "C", Salary = 30, Manager = new Employee { Name = "A" } });
+
+            // Act
+            var grid = new WebGrid(context, defaultSort: "Salary")
+                .AddSorter("Manager.Name", (Employee x) => (x == null || x.Manager == null) ? null : x.Manager.Name);
+
+            grid.Bind(employees);
+
+            grid.SortColumn = "Manager.Name";
+            grid.SortDirection = SortDirection.Ascending;
+
+            var html = grid.Table(columns: grid.Columns(
+                grid.Column("Name"),
+                grid.Column("Manager.Name",
+                header: "Manager",
+                format: item => item.Manager == null ? "" : item.Manager.Name)));
+
+            // Assert
+            Assert.Equal(20, grid.Rows[0]["Salary"]);
+            Assert.Equal(30, grid.Rows[1]["Salary"]);
+            Assert.Equal(10, grid.Rows[2]["Salary"]);
+
+            UnitTestHelper.AssertEqualsIgnoreWhitespace(
+                "<table><thead><tr>"
+                + "<th scope=\"col\"><a href=\"?sort=Name&amp;sortdir=ASC\">Name</a></th>"
+                + "<th scope=\"col\"><a href=\"?sort=Manager.Name&amp;sortdir=DESC\">Manager</a></th>"
+                + "</tr></thead><tbody>"
+                + "<tr><td>B</td><td></td></tr>"
+                + "<tr><td>C</td><td>A</td></tr>"
+                + "<tr><td>A</td><td>C</td></tr>"
+                + "</tbody></table>", html.ToString());
+        }
+
         private static IEnumerable<Person> Iterator()
         {
             yield return new Person { FirstName = "Foo", LastName = "Bar" };

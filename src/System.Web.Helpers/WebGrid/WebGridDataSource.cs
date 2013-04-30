@@ -16,6 +16,8 @@ namespace System.Web.Helpers
     /// </summary>
     internal sealed class WebGridDataSource : IWebGridDataSource
     {
+        private static readonly MethodInfo SortGenericExpressionMethod = typeof(WebGridDataSource).GetMethod("SortGenericExpression", BindingFlags.Static | BindingFlags.NonPublic);
+
         private readonly WebGrid _grid;
         private readonly Type _elementType;
         private readonly IEnumerable<dynamic> _values;
@@ -107,13 +109,26 @@ namespace System.Web.Helpers
                 var getter = Expression.Dynamic(binder, typeof(object), param);
                 return SortGenericExpression<IDynamicMetaObjectProvider, object>(data, getter, param, sort.SortDirection);
             }
+
+            Expression sorterFunctionBody;
+            ParameterExpression sorterFunctionParameter;
+
+            Expression sorter;
+            if (_grid.CustomSorters.TryGetValue(sort.SortColumn, out sorter))
+            {
+                var lambda = sorter as LambdaExpression;
+                Debug.Assert(lambda != null);
+
+                sorterFunctionBody = lambda.Body;
+                sorterFunctionParameter = lambda.Parameters[0];
+            }
             else
             {
                 // The IQueryable<dynamic> data source is cast as IQueryable<object> at runtime. We must call
                 // SortGenericExpression using reflection so that the LINQ expressions use the actual element type.
                 // Lambda: o => o.Property[.NavigationProperty,etc]
-                var param = Expression.Parameter(elementType, "o");
-                Expression member = param;
+                sorterFunctionParameter = Expression.Parameter(elementType, "o");
+                Expression member = sorterFunctionParameter;
                 var type = elementType;
                 var sorts = sort.SortColumn.Split('.');
                 foreach (var name in sorts)
@@ -131,10 +146,11 @@ namespace System.Web.Helpers
                     member = Expression.Property(member, prop);
                     type = prop.PropertyType;
                 }
-                MethodInfo m = GetType().GetMethod("SortGenericExpression", BindingFlags.Static | BindingFlags.NonPublic);
-                m = m.MakeGenericMethod(elementType, member.Type);
-                return (IQueryable<dynamic>)m.Invoke(null, new object[] { data, member, param, sort.SortDirection });
+                sorterFunctionBody = member;
             }
+
+            var actualSortMethod = SortGenericExpressionMethod.MakeGenericMethod(elementType, sorterFunctionBody.Type);
+            return (IQueryable<dynamic>)actualSortMethod.Invoke(null, new object[] { data, sorterFunctionBody, sorterFunctionParameter, sort.SortDirection });
         }
 
         private static IQueryable<TElement> SortGenericExpression<TElement, TProperty>(IQueryable<dynamic> data, Expression body,

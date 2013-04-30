@@ -225,7 +225,7 @@ namespace System.Web.Http.OData.Formatter
                     else
                     {
                         // SingleResult<T> should be serialized as T.
-                        if (type.IsGenericType && type.GetGenericTypeDefinition().IsEquivalentTo(typeof(SingleResult<>)))
+                        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleResult<>))
                         {
                             type = type.GetGenericArguments()[0];
                         }

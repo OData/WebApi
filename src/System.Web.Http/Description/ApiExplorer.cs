@@ -149,20 +149,34 @@ namespace System.Web.Http.Description
             IDictionary<string, HttpControllerDescriptor> controllerMappings = controllerSelector.GetControllerMapping();
             if (controllerMappings != null)
             {
+                ApiDescriptionComparer descriptionComparer = new ApiDescriptionComparer();
                 foreach (var route in _config.Routes)
                 {
-                    ExploreRouteControllers(controllerMappings, route, apiDescriptions);
-                }
+                    Collection<ApiDescription> descriptionsFromRoute = ExploreRouteControllers(controllerMappings, route);
 
-                // remove ApiDescription that will lead to ambiguous action matching. E.g. a controller with Post() and PostComment(). When the route template is {controller}, it produces POST /controller and POST /controller.
-                apiDescriptions = RemoveInvalidApiDescriptions(apiDescriptions);
+                    // Remove ApiDescription that will lead to ambiguous action matching.
+                    // E.g. a controller with Post() and PostComment(). When the route template is {controller}, it produces POST /controller and POST /controller.
+                    descriptionsFromRoute = RemoveInvalidApiDescriptions(descriptionsFromRoute);
+
+                    foreach (ApiDescription description in descriptionsFromRoute)
+                    {
+                        // Do not add the description if the previous route has a matching description with the same HTTP method and relative path.
+                        // E.g. having two routes with the templates "api/Values/{id}" and "api/{controller}/{id}" can potentially produce the same
+                        // relative path "api/Values/{id}" but only the first one matters.
+                        if (!apiDescriptions.Contains(description, descriptionComparer))
+                        {
+                            apiDescriptions.Add(description);
+                        }
+                    }
+                }
             }
 
             return apiDescriptions;
         }
 
-        private void ExploreRouteControllers(IDictionary<string, HttpControllerDescriptor> controllerMappings, IHttpRoute route, Collection<ApiDescription> apiDescriptions)
+        private Collection<ApiDescription> ExploreRouteControllers(IDictionary<string, HttpControllerDescriptor> controllerMappings, IHttpRoute route)
         {
+            Collection<ApiDescription> apiDescriptions = new Collection<ApiDescription>();
             string routeTemplate = route.RouteTemplate;
             string controllerVariableValue;
             if (_controllerVariableRegex.IsMatch(routeTemplate))
@@ -192,6 +206,8 @@ namespace System.Web.Http.Description
                     }
                 }
             }
+
+            return apiDescriptions;
         }
 
         private void ExploreRouteActions(IHttpRoute route, string localPath, HttpControllerDescriptor controllerDescriptor, Collection<ApiDescription> apiDescriptions)
@@ -467,6 +483,19 @@ namespace System.Web.Http.Description
             IActionValueBinder actionValueBinder = controllerServices.GetActionValueBinder();
             HttpActionBinding actionBinding = actionValueBinder != null ? actionValueBinder.GetBinding(actionDescriptor) : null;
             return actionBinding;
+        }
+
+        private sealed class ApiDescriptionComparer : IEqualityComparer<ApiDescription>
+        {
+            public bool Equals(ApiDescription x, ApiDescription y)
+            {
+                return String.Equals(x.ID, y.ID, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public int GetHashCode(ApiDescription obj)
+            {
+                return obj.ID.ToUpperInvariant().GetHashCode();
+            }
         }
     }
 }

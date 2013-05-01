@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
@@ -16,7 +15,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         public ComplexTypeTest()
         {
-            _formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }, GetSampleRequest());
+            _formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }) { Request = GetSampleRequest() };
             _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
             _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
         }

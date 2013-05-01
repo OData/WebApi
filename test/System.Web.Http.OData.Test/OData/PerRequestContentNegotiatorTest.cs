@@ -18,7 +18,7 @@ namespace System.Web.Http.OData
         public void Negotiate_CallGetPerRequestFormatterInstanceFirst()
         {
             HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeFormatter perRequestFormatter = new ODataMediaTypeFormatter(Enumerable.Empty<ODataPayloadKind>(), request);
+            MediaTypeFormatter perRequestFormatter = new ODataMediaTypeFormatter(Enumerable.Empty<ODataPayloadKind>()) { Request = request };
             Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>();
             formatter
                 .Setup(f => f.GetPerRequestFormatterInstance(typeof(void), request, It.IsAny<MediaTypeHeaderValue>()))

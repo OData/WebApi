@@ -38,55 +38,69 @@ namespace System.Web.Http.OData.Formatter
         /// </summary>
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
 
-        private readonly HttpRequestMessage _request;
         private readonly ODataSerializerProvider _serializerProvider;
 
-        internal ODataMediaTypeFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
-            : this(payloadKinds, request: null)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataMediaTypeFormatter"/> class.
+        /// </summary>
+        /// <param name="payloadKinds">The kind of payloads this formatter supports.</param>
+        public ODataMediaTypeFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
+            : this(DefaultODataDeserializerProvider.Instance, DefaultODataSerializerProvider.Instance, payloadKinds)
         {
         }
 
-        internal ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
-            ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
-            : this(deserializerProvider, serializerProvider, payloadKinds, DefaultODataVersion, request: null)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataMediaTypeFormatter"/> class.
+        /// </summary>
+        /// <param name="deserializerProvider">The <see cref="ODataDeserializerProvider"/> to use.</param>
+        /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use.</param>
+        /// <param name="payloadKinds">The kind of payloads this formatter supports.</param>
+        public ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider, ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
         {
-        }
-
-        internal ODataMediaTypeFormatter(IEnumerable<ODataPayloadKind> payloadKinds,
-            HttpRequestMessage request)
-            : this(new DefaultODataDeserializerProvider(), new DefaultODataSerializerProvider(),
-                payloadKinds, DefaultODataVersion, request)
-        {
-        }
-
-        internal ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
-            ODataSerializerProvider serializerProvider,
-            IEnumerable<ODataPayloadKind> payloadKinds,
-            ODataVersion version,
-            HttpRequestMessage request)
-        {
-            Contract.Assert(deserializerProvider != null);
-            Contract.Assert(serializerProvider != null);
-            Contract.Assert(payloadKinds != null);
+            if (deserializerProvider == null)
+            {
+                throw Error.ArgumentNull("deserializerProvider");
+            }
+            if (serializerProvider == null)
+            {
+                throw Error.ArgumentNull("serializerProvider");
+            }
+            if (payloadKinds == null)
+            {
+                throw Error.ArgumentNull("payloadKinds");
+            }
 
             _deserializerProvider = deserializerProvider;
             _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
-            _version = version;
-            _request = request;
 
             // Maxing out the received message size as we depend on the hosting layer to enforce this limit.
             MessageReaderQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
             MessageWriterQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
+            _version = DefaultODataVersion;
         }
 
-        private ODataMediaTypeFormatter(ODataMediaTypeFormatter formatter, ODataVersion version,
-            HttpRequestMessage request)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataMediaTypeFormatter"/> class.
+        /// </summary>
+        /// <param name="formatter">The <see cref="ODataMediaTypeFormatter"/> to copy settings from.</param>
+        /// <param name="version">The OData version that this formatter supports.</param>
+        /// <param name="request">The <see cref="HttpRequestMessage"/> for the per-request formatter instance.</param>
+        /// <remarks>This is a copy constructor to be used in <see cref="GetPerRequestFormatterInstance"/>.</remarks>
+        internal ODataMediaTypeFormatter(ODataMediaTypeFormatter formatter, ODataVersion version, HttpRequestMessage request)
         {
+            if (formatter == null)
+            {
+                throw Error.ArgumentNull("formatter");
+            }
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
             Contract.Assert(formatter._serializerProvider != null);
             Contract.Assert(formatter._deserializerProvider != null);
             Contract.Assert(formatter._payloadKinds != null);
-            Contract.Assert(request != null);
 
             // Parameter 1: formatter
 
@@ -125,7 +139,7 @@ namespace System.Web.Http.OData.Formatter
             _version = version;
 
             // Parameter 3: request
-            _request = request;
+            Request = request;
         }
 
         /// <summary>
@@ -160,13 +174,18 @@ namespace System.Web.Http.OData.Formatter
         /// </summary>
         public ODataMessageQuotas MessageWriterQuotas { get; private set; }
 
+        /// <summary>
+        /// The request message associated with the per-request formatter instance.
+        /// </summary>
+        internal HttpRequestMessage Request { get; set; }
+
         /// <inheritdoc/>
         public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)
         {
             // call base to validate parameters
             base.GetPerRequestFormatterInstance(type, request, mediaType);
 
-            if (_request != null && _request == request)
+            if (Request != null && Request == request)
             {
                 // If the request is already set on this formatter, return itself.
                 return this;
@@ -195,9 +214,9 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("type");
             }
 
-            if (_request != null)
+            if (Request != null)
             {
-                IEdmModel model = _request.GetEdmModel();
+                IEdmModel model = Request.GetEdmModel();
                 if (model != null)
                 {
                     TryGetInnerTypeForDelta(ref type);
@@ -221,9 +240,9 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("type");
             }
 
-            if (_request != null)
+            if (Request != null)
             {
-                IEdmModel model = _request.GetEdmModel();
+                IEdmModel model = Request.GetEdmModel();
                 if (model != null)
                 {
                     ODataPayloadKind payloadKind;
@@ -284,7 +303,7 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("readStream");
             }
 
-            if (_request == null)
+            if (Request == null)
             {
                 throw Error.InvalidOperation(SRResources.ReadFromStreamAsyncMustHaveRequest);
             }
@@ -302,7 +321,7 @@ namespace System.Web.Http.OData.Formatter
                 }
                 else
                 {
-                    IEdmModel model = _request.GetEdmModel();
+                    IEdmModel model = Request.GetEdmModel();
                     if (model == null)
                     {
                         throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
@@ -321,7 +340,7 @@ namespace System.Web.Http.OData.Formatter
                     {
                         DisableMessageStreamDisposal = true,
                         MessageQuotas = MessageReaderQuotas,
-                        BaseUri = GetBaseAddress(_request)
+                        BaseUri = GetBaseAddress(Request)
                     };
 
                     try
@@ -329,14 +348,14 @@ namespace System.Web.Http.OData.Formatter
                         IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
                         oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
 
-                        _request.RegisterForDispose(oDataMessageReader);
-                        ODataPath path = _request.GetODataPath();
+                        Request.RegisterForDispose(oDataMessageReader);
+                        ODataPath path = Request.GetODataPath();
                         ODataDeserializerContext readContext = new ODataDeserializerContext
                         {
                             IsPatchMode = isPatchMode,
                             Path = path,
                             Model = model,
-                            Request = _request
+                            Request = Request
                         };
 
                         if (isPatchMode)
@@ -376,7 +395,7 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("writeStream");
             }
 
-            if (_request == null)
+            if (Request == null)
             {
                 throw Error.InvalidOperation(SRResources.WriteToStreamAsyncMustHaveRequest);
             }
@@ -384,7 +403,7 @@ namespace System.Web.Http.OData.Formatter
             HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
             return TaskHelpers.RunSynchronously(() =>
             {
-                IEdmModel model = _request.GetEdmModel();
+                IEdmModel model = Request.GetEdmModel();
                 if (model == null)
                 {
                     throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
@@ -392,14 +411,14 @@ namespace System.Web.Http.OData.Formatter
 
                 ODataSerializer serializer = GetSerializer(type, value, model, _serializerProvider);
 
-                UrlHelper urlHelper = _request.GetUrlHelper();
+                UrlHelper urlHelper = Request.GetUrlHelper();
                 Contract.Assert(urlHelper != null);
 
-                ODataPath path = _request.GetODataPath();
+                ODataPath path = Request.GetODataPath();
                 IEdmEntitySet targetEntitySet = path == null ? null : path.EntitySet;
 
                 // serialize a response
-                HttpConfiguration configuration = _request.GetConfiguration();
+                HttpConfiguration configuration = Request.GetConfiguration();
                 if (configuration == null)
                 {
                     throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
@@ -409,7 +428,7 @@ namespace System.Web.Http.OData.Formatter
 
                 ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
                 {
-                    BaseUri = GetBaseAddress(_request),
+                    BaseUri = GetBaseAddress(Request),
                     Version = _version,
                     Indent = true,
                     DisableMessageStreamDisposal = true,
@@ -442,7 +461,7 @@ namespace System.Web.Http.OData.Formatter
                 {
                     ODataSerializerContext writeContext = new ODataSerializerContext()
                     {
-                        Request = _request,
+                        Request = Request,
                         Url = urlHelper,
                         EntitySet = targetEntitySet,
                         Model = model,
@@ -450,7 +469,7 @@ namespace System.Web.Http.OData.Formatter
                         SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                         Path = path,
                         MetadataLevel = ODataMediaTypes.GetMetadataLevel(contentType),
-                        SelectExpandClause = _request.GetSelectExpandClause()
+                        SelectExpandClause = Request.GetSelectExpandClause()
                     };
 
                     serializer.WriteObject(value, messageWriter, writeContext);

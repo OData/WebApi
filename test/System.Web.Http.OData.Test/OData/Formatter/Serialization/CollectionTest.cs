@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -20,7 +18,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         public CollectionTest()
         {
-            _formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Collection }, GetSampleRequest());
+            _formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Collection });
+            _formatter.Request = GetSampleRequest();
             _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
             _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
         }

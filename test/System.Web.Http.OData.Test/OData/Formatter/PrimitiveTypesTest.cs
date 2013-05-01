@@ -166,7 +166,7 @@ namespace System.Web.Http.OData.Formatter
 
         private ODataMediaTypeFormatter CreateFormatter(HttpRequestMessage request)
         {
-            return new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }, request);
+            return new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }) { Request = request };
         }
     }
 }

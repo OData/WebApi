@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
-
 namespace System.Web.Http.OData.Builder.Conventions
 {
     internal class NavigationLinksGenerationConvention : IEntitySetConvention
@@ -26,7 +22,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                                 property,
                                 new NavigationLinkBuilder(
                                     (entityContext, navigationProperty) =>
-                                        GenerateNavigationPropertyLink(entityContext, navigationProperty, includeCast: false), followsConventions: true));
+                                        entityContext.GenerateNavigationPropertyLink(navigationProperty, includeCast: false), followsConventions: true));
                     }
                 }
             }
@@ -42,33 +38,10 @@ namespace System.Web.Http.OData.Builder.Conventions
                                 property,
                                 new NavigationLinkBuilder(
                                     (entityContext, navigationProperty) =>
-                                        GenerateNavigationPropertyLink(entityContext, navigationProperty, includeCast: true), followsConventions: true));
+                                        entityContext.GenerateNavigationPropertyLink(navigationProperty, includeCast: true), followsConventions: true));
                     }
                 }
             }
-        }
-
-        internal static Uri GenerateNavigationPropertyLink(EntityInstanceContext entityContext, IEdmNavigationProperty navigationProperty, bool includeCast)
-        {
-            List<ODataPathSegment> navigationPathSegments = new List<ODataPathSegment>();
-            navigationPathSegments.Add(new EntitySetPathSegment(entityContext.EntitySet));
-            navigationPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext)));
-
-            if (includeCast)
-            {
-                navigationPathSegments.Add(new CastPathSegment(entityContext.EntityType));
-            }
-
-            navigationPathSegments.Add(new NavigationPathSegment(navigationProperty));
-
-            string link = entityContext.Url.ODataLink(navigationPathSegments);
-
-            if (link == null)
-            {
-                return null;
-            }
-
-            return new Uri(link);
         }
     }
 }

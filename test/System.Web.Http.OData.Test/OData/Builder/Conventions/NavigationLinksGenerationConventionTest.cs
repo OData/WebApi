@@ -179,63 +179,6 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Ninja')/Manufacturer", uri.AbsoluteUri);
         }
-
-        [Fact]
-        public void GenerateNavigationLink_GeneratesLink()
-        {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            var orders = builder.AddEntitySet("Orders", builder.AddEntity(typeof(NavigationLinksGenerationConventionTest_Order)));
-
-            IEdmModel model = builder.GetEdmModel();
-            var edmEntitySet = model.EntityContainers().Single().EntitySets().Single();
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, null, model);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.SetODataRouteName(routeName);
-
-            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = edmEntitySet, Url = request.GetUrlHelper() };
-            var entityContext = new EntityInstanceContext(
-                serializerContext, edmEntitySet.ElementType.AsReference(), new NavigationLinksGenerationConventionTest_Order { ID = 100 });
-
-            Uri uri = NavigationLinksGenerationConvention.GenerateNavigationPropertyLink(
-                entityContext,
-                edmEntitySet.ElementType.NavigationProperties().Single(),
-                includeCast: false);
-
-            Assert.Equal("http://localhost/Orders(100)/Customer", uri.AbsoluteUri);
-        }
-
-        [Fact]
-        public void GenerateNavigationLink_GeneratesCorrectLink_EvenIfRouteDataPointsToADifferentController()
-        {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            var orders = builder.AddEntitySet("Orders", builder.AddEntity(typeof(NavigationLinksGenerationConventionTest_Order)));
-
-            IEdmModel model = builder.GetEdmModel();
-            var edmEntitySet = model.EntityContainers().Single().EntitySets().Single();
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, null, model);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.SetODataRouteName(routeName);
-
-            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = edmEntitySet, Url = request.GetUrlHelper() };
-            var entityContext = new EntityInstanceContext(
-                serializerContext, edmEntitySet.ElementType.AsReference(), new NavigationLinksGenerationConventionTest_Order { ID = 100 });
-
-            Uri uri =
-                NavigationLinksGenerationConvention.GenerateNavigationPropertyLink(
-                entityContext,
-                edmEntitySet.ElementType.NavigationProperties().Single(),
-                includeCast: false);
-
-            Assert.Equal("http://localhost/Orders(100)/Customer", uri.AbsoluteUri);
-        }
     }
 
     public class NavigationLinksGenerationConventionTest_Order

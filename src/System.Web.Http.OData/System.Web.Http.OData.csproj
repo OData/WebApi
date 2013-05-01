@@ -58,6 +58,7 @@
     </Compile>
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
+    <Compile Include="OData\Builder\LinkGenerationHelpers.cs" />
     <Compile Include="OData\ContentIdHelpers.cs" />
     <Compile Include="ODataHttpRouteCollectionExtensions.cs" />
     <Compile Include="ODataHttpRequestMessageExtensions.cs" />

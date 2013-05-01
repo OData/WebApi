@@ -634,4 +634,7 @@
   <data name="UnsupportedSelectExpandPath" xml:space="preserve">
     <value>A path within the select or expand query option is not supported.</value>
   </data>
+  <data name="UrlHelperNull" xml:space="preserve">
+    <value>The property 'Url' of {0} cannot be null.</value>
+  </data>
 </root>

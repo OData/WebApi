@@ -1573,6 +1573,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The property &apos;Url&apos; of {0} cannot be null..
+        /// </summary>
+        internal static string UrlHelperNull {
+            get {
+                return ResourceManager.GetString("UrlHelperNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value &apos;{0}&apos; is invalid. {1}.
         /// </summary>
         internal static string ValueIsInvalid {

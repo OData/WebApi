@@ -52,42 +52,6 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         [Fact]
-        public void GenerateSelfLinkWithoutCast_Works()
-        {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            var vehicles = builder.AddEntitySet("cars", builder.AddEntity(typeof(Car)));
-
-            IEdmModel model = builder.GetEdmModel();
-            IEdmEntitySet carsEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
-
-            HttpRequestMessage request = GetODataRequest(model);
-            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = carsEdmEntitySet, Url = request.GetUrlHelper() };
-            var entityContext = new EntityInstanceContext(serializerContext, carsEdmEntitySet.ElementType.AsReference(), new Car { Model = 2009, Name = "Accord" });
-
-            string idLink = SelfLinksGenerationConvention.GenerateSelfLink(entityContext, includeCast: false);
-
-            Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')", idLink);
-        }
-
-        [Fact]
-        public void GenerateSelfLinkWithCast_Works()
-        {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            var vehicles = builder.AddEntitySet("cars", builder.AddEntity(typeof(Car)));
-
-            IEdmModel model = builder.GetEdmModel();
-            IEdmEntitySet carsEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
-
-            HttpRequestMessage request = GetODataRequest(model);
-            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = carsEdmEntitySet, Url = request.GetUrlHelper() };
-            var entityContext = new EntityInstanceContext(serializerContext, carsEdmEntitySet.ElementType.AsReference(), new Car { Model = 2009, Name = "Accord" });
-
-            string idLink = SelfLinksGenerationConvention.GenerateSelfLink(entityContext, includeCast: true);
-
-            Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car", idLink);
-        }
-
-        [Fact]
         public void SelfLinksGenerationConvention_Uses_GetByIdWithCast_IfDerivedTypeHasNavigationProperty()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();

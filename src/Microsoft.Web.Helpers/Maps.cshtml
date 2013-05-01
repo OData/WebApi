@@ -40,14 +40,25 @@
             ScopeStorage.CurrentScope[_bingApiKey] = value;
         }
     }
-    
-    private static int MapId {
-         get {
-            var value = (int?)HttpContext.Current.Items[_mapIdKey];
-            return value ?? 0;
+
+    // allow for stubbing this static resource in tests
+    private static Func<HttpContextBase> _getCurrentHttpContext = (Func<HttpContextBase>)(() => new HttpContextWrapper(HttpContext.Current));
+    internal static Func<HttpContextBase> GetCurrentHttpContext {
+        private get {
+            return _getCurrentHttpContext;
         }
         set {
-            HttpContext.Current.Items[_mapIdKey] = value;
+            _getCurrentHttpContext = value;
+        }
+    }
+
+    private static int MapId {
+        get {
+            var value = (int?)(GetCurrentHttpContext().Items[_mapIdKey]);
+            return value.GetValueOrDefault();
+        }
+        set {
+            GetCurrentHttpContext().Items[_mapIdKey] = value;
         }
     }
     

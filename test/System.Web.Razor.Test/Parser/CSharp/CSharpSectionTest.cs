@@ -332,5 +332,73 @@ namespace System.Web.Razor.Test.Parser.CSharp
                         Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
                     Factory.EmptyHtml()));
         }
+
+        [Fact]
+        public void ParseSectionBlockParsesComment()
+        {
+            ParseDocumentTest("@section s {<!-- -->}",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("s"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("section s {")
+                            .AutoCompleteWith(null, atEndOfSpan: true),
+                        new MarkupBlock(
+                            Factory.Markup("<!-- -->")),
+                        Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
+        }
+
+        // This was a user reported bug (codeplex #710), the section parser wasn't handling
+        // comments.
+        [Fact]
+        public void ParseSectionBlockParsesCommentWithDelimiters()
+        {
+            ParseDocumentTest("@section s {<!-- > \" '-->}",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("s"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("section s {")
+                            .AutoCompleteWith(null, atEndOfSpan: true),
+                        new MarkupBlock(
+                            Factory.Markup("<!-- > \" '-->")),
+                        Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
+        }
+
+        [Fact]
+        public void ParseSectionBlockCommentRecoversFromUnclosedTag()
+        {
+            ParseDocumentTest(
+                "@section s {" + Environment.NewLine + "<a" + Environment.NewLine + "<!--  > \" '-->}",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("s"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("section s {")
+                            .AutoCompleteWith(null, atEndOfSpan: true),
+                        new MarkupBlock(
+                            Factory.Markup(Environment.NewLine + "<a" + Environment.NewLine + "<!--  > \" '-->")),
+                        Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
+        }
+
+        [Fact]
+        public void ParseSectionBlockParsesXmlProcessingInstruction()
+        {
+            ParseDocumentTest(
+                "@section s { <? xml bleh ?>}",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("s"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("section s {")
+                            .AutoCompleteWith(null, atEndOfSpan: true),
+                        new MarkupBlock(
+                            Factory.Markup(" <? xml bleh ?>")),
+                        Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
+        }
     }
 }

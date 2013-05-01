@@ -38,19 +38,32 @@ namespace System.Web.Razor.Parser
         /// <returns>A boolean indicating if we scanned at least one tag.</returns>
         private bool ScanTagInDocumentContext()
         {
-            if (Optional(HtmlSymbolType.OpenAngle) && !At(HtmlSymbolType.Solidus))
+            if (Optional(HtmlSymbolType.OpenAngle))
             {
-                bool scriptTag = At(HtmlSymbolType.Text) &&
-                                 String.Equals(CurrentSymbol.Content, "script", StringComparison.OrdinalIgnoreCase);
-                Optional(HtmlSymbolType.Text);
-                TagContent(); // Parse the tag, don't care about the content
-                Optional(HtmlSymbolType.Solidus);
-                Optional(HtmlSymbolType.CloseAngle);
-                if (scriptTag)
+                if (At(HtmlSymbolType.Bang))
                 {
-                    SkipToEndScriptAndParseCode();
+                    BangTag();
+                    return true;
                 }
-                return true;
+                else if (At(HtmlSymbolType.QuestionMark))
+                {
+                    XmlPI();
+                    return true;
+                }
+                else if (!At(HtmlSymbolType.Solidus))
+                {
+                    bool scriptTag = At(HtmlSymbolType.Text) &&
+                                     String.Equals(CurrentSymbol.Content, "script", StringComparison.OrdinalIgnoreCase);
+                    Optional(HtmlSymbolType.Text);
+                    TagContent(); // Parse the tag, don't care about the content
+                    Optional(HtmlSymbolType.Solidus);
+                    Optional(HtmlSymbolType.CloseAngle);
+                    if (scriptTag)
+                    {
+                        SkipToEndScriptAndParseCode();
+                    }
+                    return true;
+                }
             }
             return false;
         }

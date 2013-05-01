@@ -74,8 +74,8 @@ namespace System.Web.Http.WebHost.Routing
                 throw Error.ArgumentNull("request");
             }
 
-            HttpContextBase httpContextBase;
-            if (!request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
+            HttpContextBase httpContextBase = request.GetHttpContext();
+            if (httpContextBase == null)
             {
                 httpContextBase = new HttpRequestMessageContextWrapper(VirtualPathRoot, request);
             }
@@ -102,8 +102,8 @@ namespace System.Web.Http.WebHost.Routing
                 throw Error.ArgumentNull("request");
             }
 
-            HttpContextBase httpContextBase;
-            if (!request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
+            HttpContextBase httpContextBase = request.GetHttpContext();
+            if (httpContextBase == null)
             {
                 httpContextBase = new HttpRequestMessageContextWrapper(VirtualPathRoot, request);
             }

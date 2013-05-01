@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="HttpContextPropertyMissing" xml:space="preserve">
+    <value>No HttpContextBase is associated with the request.</value>
+  </data>
   <data name="RouteCollectionNotSupported" xml:space="preserve">
     <value>This operation is not supported by '{0}'.</value>
   </data>

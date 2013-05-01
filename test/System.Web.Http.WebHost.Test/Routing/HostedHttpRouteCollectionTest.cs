@@ -136,7 +136,7 @@ namespace System.Web.Http.WebHost.Routing
         public void GetRouteData_WithHttpContext_UnmatchedRoute_ReturnsNull()
         {
             var request = new HttpRequestMessage();
-            request.Properties[HttpControllerHandler.HttpContextBaseKey] = CreateHttpContext("~/api2");
+            request.SetHttpContext(CreateHttpContext("~/api2"));
             IHttpRoute route = _webApiRoutes.CreateRoute("api", null, null);
             _webApiRoutes.Add("default", route);
 
@@ -149,7 +149,7 @@ namespace System.Web.Http.WebHost.Routing
         public void GetRouteData_WithHttpContext_MatchedRoute_ReturnsRouteData()
         {
             var request = new HttpRequestMessage();
-            request.Properties[HttpControllerHandler.HttpContextBaseKey] = CreateHttpContext("~/api");
+            request.SetHttpContext(CreateHttpContext("~/api"));
             IHttpRoute route = _webApiRoutes.CreateRoute("api", null, null);
             _webApiRoutes.Add("default", route);
 
@@ -188,7 +188,7 @@ namespace System.Web.Http.WebHost.Routing
         public void GetVirtualPath_ReturnsVirtualPathData()
         {
             var request = new HttpRequestMessage();
-            request.Properties[HttpControllerHandler.HttpContextBaseKey] = CreateHttpContext("~/api", "APP PATH MODIFIER RETURN VALUE");
+            request.SetHttpContext(CreateHttpContext("~/api", "APP PATH MODIFIER RETURN VALUE"));
             var config = new HttpConfiguration(_webApiRoutes);
             IHttpRoute route = _webApiRoutes.CreateRoute("api", null, null);
             _webApiRoutes.Add("default", route);
@@ -287,8 +287,8 @@ namespace System.Web.Http.WebHost.Routing
         private static HttpRequestMessage CreateHttpRequestMessageWithContext()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/api/controllerName/actionName");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
-            request.Properties[HttpControllerHandler.HttpContextBaseKey] = CreateHttpContext("~/api");
+            request.SetConfiguration(new HttpConfiguration());
+            request.SetHttpContext(CreateHttpContext("~/api"));
 
             return request;
         }

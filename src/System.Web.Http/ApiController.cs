@@ -366,7 +366,7 @@ namespace System.Web.Http
 
             IHttpActionResult innerResult = new ContinuationResult(innerAction);
             HttpAuthenticationContext authenticationContext = new HttpAuthenticationContext(actionContext);
-            authenticationContext.Principal = _principalService.CurrentPrincipal;
+            authenticationContext.Principal = _principalService.GetCurrentPrincipal(Request);
 
             foreach (IAuthenticationFilter filter in filters)
             {
@@ -390,7 +390,7 @@ namespace System.Web.Http
                     if (principal != null)
                     {
                         authenticationContext.Principal = principal;
-                        _principalService.CurrentPrincipal = principal;
+                        _principalService.SetCurrentPrincipal(principal, Request);
                     }
                 }
             }

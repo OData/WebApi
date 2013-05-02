@@ -155,6 +155,38 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void ExecuteRequestMessagesAsync_DisposesResponseInCaseOfException()
+        {
+            List<DisposableResponseMessage> responses = new List<DisposableResponseMessage>();
+            MockHttpServer server = new MockHttpServer(request =>
+            {
+                if (request.Method == HttpMethod.Put)
+                {
+                    throw new InvalidOperationException();
+                }
+                var response = new DisposableResponseMessage();
+                responses.Add(response);
+                return response;
+            });
+            DefaultHttpBatchHandler batchHandler = new DefaultHttpBatchHandler(server);
+            HttpRequestMessage[] requests = new HttpRequestMessage[]
+            {
+                new HttpRequestMessage(HttpMethod.Get, "http://example.com/"),
+                new HttpRequestMessage(HttpMethod.Post, "http://example.com/"),
+                new HttpRequestMessage(HttpMethod.Put, "http://example.com/")
+            };
+
+            Assert.Throws<InvalidOperationException>(
+                () => batchHandler.ExecuteRequestMessagesAsync(requests, CancellationToken.None).Result);
+
+            Assert.Equal(2, responses.Count);
+            foreach (var response in responses)
+            {
+                Assert.True(response.IsDisposed);
+            }
+        }
+
+        [Fact]
         public void ExecuteRequestMessagesAsync_NonSequentialExecution()
         {
             List<HttpRequestMessage> completedRequests = new List<HttpRequestMessage>();
@@ -319,6 +351,16 @@ namespace System.Web.Http
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 return _action(request);
+            }
+        }
+
+        private class DisposableResponseMessage : HttpResponseMessage
+        {
+            public bool IsDisposed { get; set; }
+
+            protected override void Dispose(bool disposing)
+            {
+                IsDisposed = true;
             }
         }
     }

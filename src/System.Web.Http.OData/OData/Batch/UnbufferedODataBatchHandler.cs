@@ -49,21 +49,35 @@ namespace System.Web.Http.OData.Batch
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
             List<IDisposable> resourcesToDispose = new List<IDisposable>();
-            while (batchReader.Read())
+            try
             {
-                ODataBatchResponseItem responseItem = null;
-                if (batchReader.State == ODataBatchReaderState.ChangesetStart)
+                while (batchReader.Read())
                 {
-                    responseItem = await ExecuteChangeSetAsync(batchReader, batchId, request, cancellationToken);
+                    ODataBatchResponseItem responseItem = null;
+                    if (batchReader.State == ODataBatchReaderState.ChangesetStart)
+                    {
+                        responseItem = await ExecuteChangeSetAsync(batchReader, batchId, request, cancellationToken);
+                    }
+                    else if (batchReader.State == ODataBatchReaderState.Operation)
+                    {
+                        responseItem = await ExecuteOperationAsync(batchReader, batchId, request, cancellationToken);
+                    }
+                    if (responseItem != null)
+                    {
+                        responses.Add(responseItem);
+                    }
                 }
-                else if (batchReader.State == ODataBatchReaderState.Operation)
+            }
+            catch
+            {
+                foreach (ODataBatchResponseItem response in responses)
                 {
-                    responseItem = await ExecuteOperationAsync(batchReader, batchId, request, cancellationToken);
+                    if (response != null)
+                    {
+                        response.Dispose();
+                    }
                 }
-                if (responseItem != null)
-                {
-                    responses.Add(responseItem);
-                }
+                throw;
             }
 
             return await CreateResponseMessageAsync(responses, request);
@@ -125,22 +139,36 @@ namespace System.Web.Http.OData.Batch
             Guid changeSetId = Guid.NewGuid();
             List<HttpResponseMessage> changeSetResponse = new List<HttpResponseMessage>();
             Dictionary<string, string> contentIdToLocationMapping = new Dictionary<string, string>();
-            while (batchReader.Read() && batchReader.State != ODataBatchReaderState.ChangesetEnd)
+            try
             {
-                if (batchReader.State == ODataBatchReaderState.Operation)
+                while (batchReader.Read() && batchReader.State != ODataBatchReaderState.ChangesetEnd)
                 {
-                    HttpRequestMessage changeSetOperationRequest = await batchReader.ReadChangeSetOperationRequestAsync(batchId, changeSetId, bufferContentStream: false);
-                    try
+                    if (batchReader.State == ODataBatchReaderState.Operation)
                     {
-                        HttpResponseMessage response = await ODataBatchRequestItem.SendMessageAsync(Invoker, changeSetOperationRequest, cancellationToken, contentIdToLocationMapping);
-                        changeSetResponse.Add(response);
-                    }
-                    finally
-                    {
-                        originalRequest.RegisterForDispose(changeSetOperationRequest.GetResourcesForDisposal());
-                        originalRequest.RegisterForDispose(changeSetOperationRequest);
+                        HttpRequestMessage changeSetOperationRequest = await batchReader.ReadChangeSetOperationRequestAsync(batchId, changeSetId, bufferContentStream: false);
+                        try
+                        {
+                            HttpResponseMessage response = await ODataBatchRequestItem.SendMessageAsync(Invoker, changeSetOperationRequest, cancellationToken, contentIdToLocationMapping);
+                            changeSetResponse.Add(response);
+                        }
+                        finally
+                        {
+                            originalRequest.RegisterForDispose(changeSetOperationRequest.GetResourcesForDisposal());
+                            originalRequest.RegisterForDispose(changeSetOperationRequest);
+                        }
                     }
                 }
+            }
+            catch
+            {
+                foreach (HttpResponseMessage response in changeSetResponse)
+                {
+                    if (response != null)
+                    {
+                        response.Dispose();
+                    }
+                }
+                throw;
             }
 
             return new ChangeSetResponseItem(changeSetResponse);

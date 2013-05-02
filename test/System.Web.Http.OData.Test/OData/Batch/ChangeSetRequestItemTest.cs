@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -60,6 +61,39 @@ namespace System.Web.Http
 
             var changesetResponse = Assert.IsType<ChangeSetResponseItem>(response);
             Assert.Equal(2, changesetResponse.Responses.Count());
+        }
+
+        [Fact]
+        public void SendRequestAsync_DisposesResponseInCaseOfException()
+        {
+            List<MockHttpResponseMessage> responses = new List<MockHttpResponseMessage>();
+            ChangeSetRequestItem requestItem = new ChangeSetRequestItem(new HttpRequestMessage[]
+            {
+                new HttpRequestMessage(HttpMethod.Get, "http://example.com"),
+                new HttpRequestMessage(HttpMethod.Post, "http://example.com"),
+                new HttpRequestMessage(HttpMethod.Put, "http://example.com")
+            });
+            Mock<HttpMessageInvoker> invoker = new Mock<HttpMessageInvoker>(new HttpServer());
+            invoker.Setup(i => i.SendAsync(It.IsAny<HttpRequestMessage>(), CancellationToken.None))
+                .Returns<HttpRequestMessage, CancellationToken>((req, cancel) =>
+                {
+                    if (req.Method == HttpMethod.Put)
+                    {
+                        throw new InvalidOperationException();
+                    }
+                    var response = new MockHttpResponseMessage();
+                    responses.Add(response);
+                    return Task.FromResult<HttpResponseMessage>(response);
+                });
+
+            Assert.Throws<InvalidOperationException>(
+                () => requestItem.SendRequestAsync(invoker.Object, CancellationToken.None).Result);
+
+            Assert.Equal(2, responses.Count);
+            foreach (var response in responses)
+            {
+                Assert.True(response.IsDisposed);
+            }
         }
 
         [Fact]

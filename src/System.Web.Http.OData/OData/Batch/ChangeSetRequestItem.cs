@@ -48,9 +48,24 @@ namespace System.Web.Http.OData.Batch
 
             Dictionary<string, string> contentIdToLocationMapping = new Dictionary<string, string>();
             List<HttpResponseMessage> responses = new List<HttpResponseMessage>();
-            foreach (HttpRequestMessage request in Requests)
+
+            try
             {
-                responses.Add(await SendMessageAsync(invoker, request, cancellationToken, contentIdToLocationMapping));
+                foreach (HttpRequestMessage request in Requests)
+                {
+                    responses.Add(await SendMessageAsync(invoker, request, cancellationToken, contentIdToLocationMapping));
+                }
+            }
+            catch
+            {
+                foreach (HttpResponseMessage response in responses)
+                {
+                    if (response != null)
+                    {
+                        response.Dispose();
+                    }
+                }
+                throw;
             }
 
             return new ChangeSetResponseItem(responses);

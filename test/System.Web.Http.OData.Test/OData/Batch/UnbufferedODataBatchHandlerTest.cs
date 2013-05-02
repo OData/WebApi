@@ -125,6 +125,44 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void ProcessBatchAsync_DisposesResponseInCaseOfException()
+        {
+            List<MockHttpResponseMessage> responses = new List<MockHttpResponseMessage>();
+            MockHttpServer server = new MockHttpServer(request =>
+            {
+                if (request.Method == HttpMethod.Put)
+                {
+                    throw new InvalidOperationException();
+                }
+                var response = new MockHttpResponseMessage();
+                responses.Add(response);
+                return response;
+            });
+            UnbufferedODataBatchHandler batchHandler = new UnbufferedODataBatchHandler(server);
+            HttpRequestMessage batchRequest = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
+            {
+                Content = new MultipartContent("mixed")
+                {
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Get, "http://example.com/")),
+                    new MultipartContent("mixed") // ChangeSet
+                    {
+                        ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values")),
+                        ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Put, "http://example.com/values"))
+                    }
+                }
+            };
+
+            Assert.Throws<InvalidOperationException>(
+                () => batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result);
+
+            Assert.Equal(2, responses.Count);
+            foreach (var response in responses)
+            {
+                Assert.True(response.IsDisposed);
+            }
+        }
+
+        [Fact]
         public void ValidateRequest_Throws_IfResponsesIsNull()
         {
             UnbufferedODataBatchHandler batchHandler = new UnbufferedODataBatchHandler(new HttpServer());

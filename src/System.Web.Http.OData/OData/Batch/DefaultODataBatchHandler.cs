@@ -72,9 +72,24 @@ namespace System.Web.Http.OData.Batch
             cancellationToken.ThrowIfCancellationRequested();
 
             IList<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
-            foreach (ODataBatchRequestItem request in requests)
+
+            try
             {
-                responses.Add(await request.SendRequestAsync(Invoker, cancellationToken));
+                foreach (ODataBatchRequestItem request in requests)
+                {
+                    responses.Add(await request.SendRequestAsync(Invoker, cancellationToken));
+                }
+            }
+            catch
+            {
+                foreach (ODataBatchResponseItem response in responses)
+                {
+                    if (response != null)
+                    {
+                        response.Dispose();
+                    }
+                }
+                throw;
             }
 
             return responses;

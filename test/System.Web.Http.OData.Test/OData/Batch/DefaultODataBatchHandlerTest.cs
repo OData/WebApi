@@ -139,6 +139,38 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void ExecuteRequestMessagesAsync_DisposesResponseInCaseOfException()
+        {
+            List<MockHttpResponseMessage> responses = new List<MockHttpResponseMessage>();
+            MockHttpServer server = new MockHttpServer(request =>
+            {
+                if (request.Method == HttpMethod.Put)
+                {
+                    throw new InvalidOperationException();
+                }
+                var response = new MockHttpResponseMessage();
+                responses.Add(response);
+                return response;
+            });
+            DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(server);
+            ODataBatchRequestItem[] requests = new ODataBatchRequestItem[]
+            {
+                new OperationRequestItem(new HttpRequestMessage(HttpMethod.Get, "http://example.com/")),
+                new OperationRequestItem(new HttpRequestMessage(HttpMethod.Post, "http://example.com/")),
+                new OperationRequestItem(new HttpRequestMessage(HttpMethod.Put, "http://example.com/")),
+            };
+
+            Assert.Throws<InvalidOperationException>(
+                () => batchHandler.ExecuteRequestMessagesAsync(requests, CancellationToken.None).Result);
+
+            Assert.Equal(2, responses.Count);
+            foreach (var response in responses)
+            {
+                Assert.True(response.IsDisposed);
+            }
+        }
+
+        [Fact]
         public void ExecuteRequestMessagesAsync_Throws_IfRequestsIsNull()
         {
             DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(new HttpServer());

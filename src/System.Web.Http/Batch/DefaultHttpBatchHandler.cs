@@ -138,18 +138,32 @@ namespace System.Web.Http.Batch
 
             List<HttpResponseMessage> responses = new List<HttpResponseMessage>();
 
-            switch (ExecutionOrder)
+            try
             {
-                case BatchExecutionOrder.Sequential:
-                    foreach (HttpRequestMessage request in requests)
-                    {
-                        responses.Add(await Invoker.SendAsync(request, cancellationToken));
-                    }
-                    break;
+                switch (ExecutionOrder)
+                {
+                    case BatchExecutionOrder.Sequential:
+                        foreach (HttpRequestMessage request in requests)
+                        {
+                            responses.Add(await Invoker.SendAsync(request, cancellationToken));
+                        }
+                        break;
 
-                case BatchExecutionOrder.NonSequential:
-                    responses.AddRange(await Task.WhenAll(requests.Select(request => Invoker.SendAsync(request, cancellationToken))));
-                    break;
+                    case BatchExecutionOrder.NonSequential:
+                        responses.AddRange(await Task.WhenAll(requests.Select(request => Invoker.SendAsync(request, cancellationToken))));
+                        break;
+                }
+            }
+            catch
+            {
+                foreach (HttpResponseMessage response in responses)
+                {
+                    if (response != null)
+                    {
+                        response.Dispose();
+                    }
+                }
+                throw;
             }
 
             return responses;

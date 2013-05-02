@@ -103,7 +103,11 @@ namespace System.Web.Http.Metadata.Providers
             Dictionary<string, PropertyInformation> properties = new Dictionary<string, PropertyInformation>();
             foreach (PropertyDescriptor property in typeDescriptor.GetProperties())
             {
-                properties.Add(property.Name, CreatePropertyInformation(type, property));
+                // Avoid re-generating a property descriptor if one has already been generated for the property name
+                if (!properties.ContainsKey(property.Name))
+                {
+                    properties.Add(property.Name, CreatePropertyInformation(type, property));
+                }
             }
             info.Properties = properties;
 

@@ -49,9 +49,8 @@ namespace System.Web.Http.Validation
                 throw Error.ArgumentNull("actionContext");
             }
 
-            if (model != null && MediaTypeFormatterCollection.IsTypeExcludedFromValidation(model.GetType()))
+            if (model != null && !ShouldValidateType(model.GetType()))
             {
-                // no validation for some DOM like types
                 return true;
             }
 
@@ -76,13 +75,30 @@ namespace System.Web.Http.Validation
             return ValidateNodeAndChildren(metadata, validationContext, container: null);
         }
 
+        /// <summary>
+        /// Determines whether instances of a particular type should be validated
+        /// </summary>
+        /// <param name="type">The type to validate.</param>
+        /// <returns><c>true</c> if the type should be validated; <c>false</c> otherwise</returns>
+        public virtual bool ShouldValidateType(Type type)
+        {
+            return !MediaTypeFormatterCollection.IsTypeExcludedFromValidation(type);
+        }
+
         private bool ValidateNodeAndChildren(ModelMetadata metadata, ValidationContext validationContext, object container)
         {            
             object model = metadata.Model;
             bool isValid = true;
 
-            // Optimization: we don't need to recursively traverse the graph for null and primitive types
-            if (model == null || TypeHelper.IsSimpleType(model.GetType()))
+            // We don't need to recursively traverse the graph for null values
+            if (model == null)
+            {
+                return ShallowValidate(metadata, validationContext, container);
+            }
+
+            // We don't need to recursively traverse the graph for types that shouldn't be validated
+            Type modelType = model.GetType();
+            if (TypeHelper.IsSimpleType(modelType) || !ShouldValidateType(modelType))
             {
                 return ShallowValidate(metadata, validationContext, container);
             }

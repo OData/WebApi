@@ -141,9 +141,13 @@ namespace System.Net.Http.Formatting
         {
             return
 #if !NETFX_CORE
-                typeof(XmlNode).IsAssignableFrom(type) || typeof(FormDataCollection).IsAssignableFrom(type) ||
+                typeof(XmlNode).IsAssignableFrom(type) ||
+                typeof(FormDataCollection).IsAssignableFrom(type) ||
 #endif
-                FormattingUtilities.IsJTokenType(type) || typeof(XObject).IsAssignableFrom(type);
+                FormattingUtilities.IsJTokenType(type) ||
+                typeof(XObject).IsAssignableFrom(type) ||
+                typeof(Type).IsAssignableFrom(type) ||
+                type == typeof(byte[]);
         }
 
         /// <summary>

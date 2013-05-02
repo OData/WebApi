@@ -7,7 +7,10 @@ using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
 using System.Web.Http;
+using System.Xml;
+using System.Xml.Linq;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
 
 namespace System.Net.Http.Formatting
 {
@@ -318,6 +321,18 @@ namespace System.Net.Http.Formatting
 
             // Assert
             Assert.Same(formatter, actualFormatter);
+        }
+
+        [Theory]
+        [InlineData(typeof(XmlElement))]
+        [InlineData(typeof(JObject))]
+        [InlineData(typeof(XAttribute))]
+        [InlineData(typeof(FormDataCollection))]
+        [InlineData(typeof(Type))]
+        [InlineData(typeof(byte[]))]
+        public void IsTypeExcludedFromValidation_ReturnsTrueForExcludedTypes(Type type)
+        {
+            Assert.True(MediaTypeFormatterCollection.IsTypeExcludedFromValidation(type));
         }
     }
 }

@@ -1,12 +1,44 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
+using System.Configuration.Provider;
+using System.Reflection;
+using System.Web.Security;
+using System.Web.WebPages.TestUtils;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace WebMatrix.WebData.Test
 {
     public class WebSecurityTest
     {
+        [Fact]
+        public void CreateUserAndAccount_WillAcceptBothObjectsAndDictionariesForExtendedParameters()
+        {
+            // since it is a static helper - you gotta love 'em
+            AppDomainUtils.RunInSeparateAppDomain(() =>
+                {
+                    // we need that in order to make sure the Membership static class is initialized correctly
+                    var discard = Membership.Provider as ProviderBase;
+
+                    // Arrange
+                    var providerMock = new Mock<ExtendedMembershipProvider>();
+                    providerMock.Setup(
+                        p => p.CreateUserAndAccount(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>()))
+                                .Returns((string username, string password, bool requireConfirmation, IDictionary<string, object> values) => "foo = " + values["foo"]);
+                    typeof(Membership).GetField("s_Provider", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, providerMock.Object);
+
+                    // Act
+                    var resultWithObject = WebSecurity.CreateUserAndAccount("name", "pass", new { foo = "bar" });
+                    var resultWithDictionary = WebSecurity.CreateUserAndAccount("name", "pass", new Dictionary<string, object> { { "foo", "baz" } });
+
+                    // Assert
+                    Assert.Equal("foo = bar", resultWithObject);
+                    Assert.Equal("foo = baz", resultWithDictionary);
+                });
+        }
+
         [Fact]
         public void VerifyExtendedMembershipProviderMethodsThrowWithInvalidProvider()
         {

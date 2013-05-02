@@ -253,10 +253,18 @@ namespace WebMatrix.WebData
             ExtendedMembershipProvider provider = VerifyProvider();
             Debug.Assert(provider != null); // VerifyProvider checks this
 
-            IDictionary<string, object> values = null;
-            if (propertyValues != null)
+            IDictionary<string, object> values = propertyValues as RouteValueDictionary;
+            if (values == null && propertyValues != null)
             {
-                values = new RouteValueDictionary(propertyValues);
+                var propertyValuesAsDictionary = propertyValues as IDictionary<string, object>;
+                if (propertyValuesAsDictionary != null)
+                {
+                    values = new RouteValueDictionary(propertyValuesAsDictionary);
+                }
+                else
+                {
+                    values = new RouteValueDictionary(propertyValues);
+                }
             }
 
             return provider.CreateUserAndAccount(userName, password, requireConfirmationToken, values);

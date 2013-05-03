@@ -272,7 +272,7 @@ namespace System.Web.Http.OData.Query
             if (querySettings.PageSize.HasValue)
             {
                 bool resultsLimited;
-                result = LimitResults(result, querySettings.PageSize.Value, Context, out resultsLimited);
+                result = LimitResults(result, querySettings.PageSize.Value, out resultsLimited);
                 if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri && Request.GetNextPageLink() == null)
                 {
                     Uri nextPageLink = GetNextPageLink(Request, querySettings.PageSize.Value);
@@ -419,9 +419,9 @@ namespace System.Web.Http.OData.Query
             return orderBy;
         }
 
-        internal static IQueryable LimitResults(IQueryable queryable, int limit, ODataQueryContext context, out bool resultsLimited)
+        internal static IQueryable LimitResults(IQueryable queryable, int limit, out bool resultsLimited)
         {
-            MethodInfo genericMethod = _limitResultsGenericMethod.MakeGenericMethod(context.ElementClrType);
+            MethodInfo genericMethod = _limitResultsGenericMethod.MakeGenericMethod(queryable.ElementType);
             object[] args = new object[] { queryable, limit, null };
             IQueryable results = genericMethod.Invoke(null, args) as IQueryable;
             resultsLimited = (bool)args[2];

@@ -661,7 +661,7 @@ namespace System.Web.Http.OData.Query
         [InlineData(8, false)]
         public void LimitResults_LimitsResults(int limit, bool resultsLimitedExpected)
         {
-            IQueryable<Customer> queryable = new List<Customer>() {
+            IQueryable queryable = new List<Customer>() {
                 new Customer() { CustomerId = 0 }, 
                 new Customer() { CustomerId = 1 },
                 new Customer() { CustomerId = 2 },
@@ -671,7 +671,7 @@ namespace System.Web.Http.OData.Query
             var context = new ODataQueryContext(model, typeof(Customer));
 
             bool resultsLimited;
-            IQueryable<Customer> result = ODataQueryOptions.LimitResults(queryable, limit, out resultsLimited);
+            IQueryable<Customer> result = ODataQueryOptions.LimitResults(queryable, limit, out resultsLimited) as IQueryable<Customer>;
 
             Assert.Equal(Math.Min(limit, 4), result.Count());
             Assert.Equal(resultsLimitedExpected, resultsLimited);
@@ -850,7 +850,7 @@ namespace System.Web.Http.OData.Query
             request.SetNextPageLink(nextPageLink);
 
             // Act
-            IQueryable result = options.ApplyTo(Enumerable.Range(0,100).AsQueryable(), new ODataQuerySettings { PageSize = 1 });
+            IQueryable result = options.ApplyTo(Enumerable.Range(0, 100).AsQueryable(), new ODataQuerySettings { PageSize = 1 });
 
             // Assert
             Assert.Equal(nextPageLink, request.GetNextPageLink());

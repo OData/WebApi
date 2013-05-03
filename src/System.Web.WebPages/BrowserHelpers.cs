@@ -57,7 +57,7 @@ namespace System.Web.WebPages
             {
                 string overriddenUserAgent = GetOverriddenUserAgent(httpContext);
 
-                if (!String.Equals(overriddenUserAgent, httpContext.Request.UserAgent))
+                if (!String.Equals(overriddenUserAgent, httpContext.Request.UserAgent, StringComparison.OrdinalIgnoreCase))
                 {
                     if (createBrowser != null)
                     {

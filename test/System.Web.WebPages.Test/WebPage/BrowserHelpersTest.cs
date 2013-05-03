@@ -266,6 +266,32 @@ namespace System.Web.WebPages.Test
             Assert.NotEqual(mobileBrowserType, deskTopBrowserType);
         }
 
+        [Fact]
+        public void GetOverriddenBrowser_OverridenUserAgentMatchingIsCaseInsensitive()
+        {
+            // Arrange
+            string mobileUserAgent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16";
+            string mobileUserAgentLowerCase = mobileUserAgent.ToLowerInvariant();
+
+            HttpCookie existingOverrideCookie = new HttpCookie(CookieBrowserOverrideStore.BrowserOverrideCookieName, mobileUserAgent);
+            HttpContextBase context = CookieBrowserOverrideStoreTest.CreateCookieContext(requestCookie: existingOverrideCookie).Object;
+            Mock.Get(context).Setup(c => c.Request.UserAgent).Returns(mobileUserAgent);
+            Mock.Get(context).Setup(c => c.Request.Browser).Returns(new HttpBrowserCapabilitiesWrapper(new HttpBrowserCapabilities()));
+
+            // this will set the overriden user agent
+            context.SetOverriddenBrowser(mobileUserAgentLowerCase);
+
+            // overriden browser is only created if the overriden userAgent is different from the request's user agent
+            bool overridenBrowserWasCreated = false;
+
+            // Act
+            var overriden = context.GetOverriddenBrowser(x => { overridenBrowserWasCreated = true; return null; });
+
+            // Assert
+            Assert.False(overridenBrowserWasCreated);
+            Assert.Same(context.Request.Browser, overriden);
+        }
+
         // We need to call the .ctor of SimpleWorkerRequest that depends on HttpRuntime so for unit testing
         // simply create the browser capabilities by going directly through the factory.
         private static HttpBrowserCapabilitiesBase CreateBrowserThroughFactory(string userAgent)

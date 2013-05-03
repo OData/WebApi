@@ -85,7 +85,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             // Assert
             Dictionary<string, object> dictionary = ToContainer(containerExpression).ToDictionary(includeAutoSelected: true);
-            Assert.Equal(Enumerable.Range(0, count).ToDictionary(i => i.ToString(), i => (object)i), dictionary);
+            Assert.Equal(Enumerable.Range(0, count).ToDictionary(i => i.ToString(), i => (object)i).OrderBy(kvp => kvp.Key), dictionary.OrderBy(kvp => kvp.Key));
         }
 
         private static PropertyContainer ToContainer(Expression containerCreationExpression)

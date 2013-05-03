@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace System.Web.Http.OData.Query.Expressions
 {
@@ -17,18 +16,6 @@ namespace System.Web.Http.OData.Query.Expressions
     /// </remarks>
     internal abstract class PropertyContainer
     {
-        private static readonly Type[] _containerTypes = new Type[]
-        {
-            typeof(PropertyContainerImpl<>), 
-            typeof(PropertyContainerImpl<,>),
-            typeof(PropertyContainerImpl<,,>),
-            typeof(PropertyContainerImpl<,,,>),
-            typeof(PropertyContainerImpl<,,,,>),
-            typeof(PropertyContainerImpl<,,,,,>),
-        };
-
-        private static readonly Type _chainingContainerType = typeof(ChainingPropertyContainerImpl<,,,,,>);
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyContainer"/> class.
         /// </summary>
@@ -48,90 +35,61 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         /// <summary>
-        /// Adds the properties in this container to the give dictionary.
+        /// Adds the properties in this container to the given dictionary.
         /// </summary>
         /// <param name="dictionary">The dictionary to add the properties to.</param>
         /// <param name="includeAutoSelected">Specifies whether auto selected properties should be included.</param>
         public abstract void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected);
 
         // Expression:
-        //      new PropertyContainer<...> 
+        //      new NamedProperty<T> 
         //      {
-        //          Property1 = new NamedProperty { Name = properties[0].Key, Value = properties[0].Value }, 
-        //          Property2 = new NamedProperty { Name = properties[1].Key, Value = properties[2].Value }
-        //          ... 
-        //          Next = new PropertyContainer<...> { ..... } 
+        //          Name = properties[0].Key, 
+        //          Value = properties[0].Value,
+        //
+        //          Next = new NamedProperty<> { ..... } 
         //      }
-        public static Expression CreatePropertyContainer(IList<NamedPropertyExpression> properties, int start = 0)
+        public static Expression CreatePropertyContainer(IList<NamedPropertyExpression> properties)
         {
-            Type _containerGenericType;
+            Expression container = null;
 
-            int propertiesInNextContainerStart = -1;
-            int propertiesInThisContainerCount = properties.Count - start;
-
-            if (propertiesInThisContainerCount > _containerTypes.Length)
+            // build the linked list of properties.
+            foreach (NamedPropertyExpression property in properties)
             {
-                propertiesInThisContainerCount = _containerTypes.Length;
-                propertiesInNextContainerStart = start + _containerTypes.Length;
-                _containerGenericType = _chainingContainerType;
-            }
-            else
-            {
-                _containerGenericType = _containerTypes[propertiesInThisContainerCount - 1];
+                container = CreateNamedPropertyCreationExpression(property, container);
             }
 
-            Type[] containerPropertyTypes = new Type[propertiesInThisContainerCount];
-            for (int i = 0; i < propertiesInThisContainerCount; i++)
-            {
-                containerPropertyTypes[i] = properties[start + i].Value.Type;
-            }
-            Type containerType = _containerGenericType.MakeGenericType(containerPropertyTypes);
-
-            List<MemberBinding> memberBindings = new List<MemberBinding>();
-            for (int i = 0; i < propertiesInThisContainerCount; i++)
-            {
-                Expression propertyNameExpression = properties[start + i].Name;
-                Expression propertyValueExpression = properties[start + i].Value;
-                bool isAutoSelected = properties[start + i].AutoSelected;
-
-                PropertyInfo namedProperty = GetContainerProperty(containerType, memberBindings.Count);
-                Expression namedPropertyValue = CreateNamedPropertyCreationExpression(propertyNameExpression, propertyValueExpression, isAutoSelected);
-
-                memberBindings.Add(Expression.Bind(namedProperty, namedPropertyValue));
-            }
-
-            if (propertiesInNextContainerStart != -1)
-            {
-                Expression nextContainerInitializer = CreatePropertyContainer(properties, propertiesInNextContainerStart);
-                memberBindings.Add(Expression.Bind(containerType.GetProperty("Next"), nextContainerInitializer));
-            }
-
-            return Expression.MemberInit(Expression.New(containerType), memberBindings);
+            return container;
         }
 
-        private static Expression CreateNamedPropertyCreationExpression(Expression name, Expression value, bool isAutoSelected)
+        // Expression:
+        // new NamedProperty<T> { Name = property.Name, Value = property.Value, Next = next }.
+        private static Expression CreateNamedPropertyCreationExpression(NamedPropertyExpression property, Expression next)
         {
-            Contract.Assert(name != null);
-            Contract.Assert(value != null);
+            Contract.Assert(property != null);
+            Contract.Assert(property.Value != null);
 
-            Type namedPropertyType = isAutoSelected ? typeof(AutoSelectedNamedProperty<>) : typeof(NamedProperty<>);
-            namedPropertyType = namedPropertyType.MakeGenericType(value.Type);
+            Type namedPropertyGenericType =
+                next == null
+                    ? property.AutoSelected ? typeof(AutoSelectedNamedProperty<>) : typeof(NamedProperty<>)
+                    : property.AutoSelected ? typeof(AutoSelectedNamedPropertyWithNext<>) : typeof(NamedPropertyWithNext<>);
+            Type namedPropertyType = namedPropertyGenericType.MakeGenericType(property.Value.Type);
 
-            Expression namedPropertyCreationExpression =
-                Expression.MemberInit(
-                    Expression.New(namedPropertyType),
-                    Expression.Bind(namedPropertyType.GetProperty("Name"), name),
-                    Expression.Bind(namedPropertyType.GetProperty("Value"), value));
+            List<MemberBinding> memberBindings = new List<MemberBinding>
+            {
+                Expression.Bind(namedPropertyType.GetProperty("Name"), property.Name),
+                Expression.Bind(namedPropertyType.GetProperty("Value"), property.Value)
+            };
 
-            return namedPropertyCreationExpression;
+            if (next != null)
+            {
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Next"), next));
+            }
+
+            return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
         }
 
-        private static PropertyInfo GetContainerProperty(Type containerType, int index)
-        {
-            return containerType.GetProperty("Value" + (index + 1));
-        }
-
-        private class NamedProperty<T>
+        private class NamedProperty<T> : PropertyContainer
         {
             public string Name { get; set; }
 
@@ -139,7 +97,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             public bool AutoSelected { get; set; }
 
-            internal void AddToDictionary(Dictionary<string, object> dictionary, bool includeAutoSelected)
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
             {
                 Contract.Assert(dictionary != null);
 
@@ -158,79 +116,25 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
-        private class PropertyContainerImpl<TProp1>
-        : PropertyContainer
+        // Entityframework requires that the two different type initializers for a given type in the same query have the same set of properties in the same order.
+        // A $select=Prop1,Prop2 where Prop1 and Prop2 are of the same type without this extra NamedPropertyWithNext type results in an select expression that looks like,
+        //      c => new NamedProperty<int> { Name = "Prop1", Value = c.Prop1, Next = new NamedProperty<int> { Name = "Prop2", Value = c.Prop2 } };
+        // Entityframework cannot translate this expression as the first NamedProperty<int> initialization has Next and the second one doesn't. Also, Entityframework cannot 
+        // create null's of NamedProperty<T>. So, you cannot generate an expression like new NamedProperty<int> { Next = null }. The exception that EF throws looks like this,
+        // "The type 'NamedProperty`1[SystemInt32...]' appears in two structurally incompatible initializations within a single LINQ to Entities query. 
+        // A type can be initialized in two places in the same query, but only if the same properties are set in both places and those properties are set in the same order."
+        private class NamedPropertyWithNext<T> : NamedProperty<T>
         {
-            public NamedProperty<TProp1> Value1 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
-            {
-                Value1.AddToDictionary(dictionary, includeAutoSelected);
-            }
-        }
-
-        private class PropertyContainerImpl<TProp1, TProp2>
-            : PropertyContainerImpl<TProp1>
-        {
-            public NamedProperty<TProp2> Value2 { get; set; }
+            public PropertyContainer Next { get; set; }
 
             public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
             {
                 base.ToDictionaryCore(dictionary, includeAutoSelected);
-                Value2.AddToDictionary(dictionary, includeAutoSelected);
+                Next.ToDictionaryCore(dictionary, includeAutoSelected);
             }
         }
 
-        private class PropertyContainerImpl<TProp1, TProp2, TProp3>
-            : PropertyContainerImpl<TProp1, TProp2>
-        {
-            public NamedProperty<TProp3> Value3 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, includeAutoSelected);
-                Value3.AddToDictionary(dictionary, includeAutoSelected);
-            }
-        }
-
-        private class PropertyContainerImpl<TProp1, TProp2, TProp3, TProp4>
-            : PropertyContainerImpl<TProp1, TProp2, TProp3>
-        {
-            public NamedProperty<TProp4> Value4 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, includeAutoSelected);
-                Value4.AddToDictionary(dictionary, includeAutoSelected);
-            }
-        }
-
-        private class PropertyContainerImpl<TProp1, TProp2, TProp3, TProp4, TProp5>
-            : PropertyContainerImpl<TProp1, TProp2, TProp3, TProp4>
-        {
-            public NamedProperty<TProp5> Value5 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, includeAutoSelected);
-                Value5.AddToDictionary(dictionary, includeAutoSelected);
-            }
-        }
-
-        private class PropertyContainerImpl<TProp1, TProp2, TProp3, TProp4, TProp5, TProp6>
-            : PropertyContainerImpl<TProp1, TProp2, TProp3, TProp4, TProp5>
-        {
-            public NamedProperty<TProp6> Value6 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, includeAutoSelected);
-                Value6.AddToDictionary(dictionary, includeAutoSelected);
-            }
-        }
-
-        private class ChainingPropertyContainerImpl<TProp1, TProp2, TProp3, TProp4, TProp5, TProp6>
-            : PropertyContainerImpl<TProp1, TProp2, TProp3, TProp4, TProp5, TProp6>
+        private class AutoSelectedNamedPropertyWithNext<T> : AutoSelectedNamedProperty<T>
         {
             public PropertyContainer Next { get; set; }
 

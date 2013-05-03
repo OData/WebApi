@@ -134,7 +134,7 @@ namespace System.Web.Http
             HttpRequestMessage Request { get; }
         }
 
-        private class DirectDependencyProvider : IDependencyProvider
+        private sealed class DirectDependencyProvider : IDependencyProvider
         {
             private readonly HttpRequestMessage _request;
 
@@ -154,7 +154,7 @@ namespace System.Web.Http
             }
         }
 
-        private class ApiControllerDependencyProvider : IDependencyProvider
+        private sealed class ApiControllerDependencyProvider : IDependencyProvider
         {
             private readonly ApiController _controller;
 

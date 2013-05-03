@@ -17,6 +17,7 @@
         <!-- Package sources used to restore packages. By default will used the registered sources under %APPDATA%\NuGet\NuGet.Config -->
         <PackageSource Include="https://nuget.org/api/v2/" />
         <PackageSource Include="https://www.myget.org/F/30de4ee06dd54956a82013fa17a3accb/" />
+        <PackageSource Include="http://www.myget.org/F/Katana/" /> <!-- TODO: Remove once Microsoft.Owin is published to NuGet. -->
     </ItemGroup>
 
     <PropertyGroup Condition=" '$(OS)' == 'Windows_NT'">

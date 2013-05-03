@@ -46,7 +46,6 @@
     <Compile Include="OwinBufferPolicySelectorTest.cs" />
     <Compile Include="HttpMessageHandlerAdapterTest.cs" />
     <Compile Include="OwinEnvironmentExtensionsTest.cs" />
-    <Compile Include="OwinHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="IntegrationTest.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -57,6 +56,10 @@
     <ProjectReference Include="..\..\src\System.Web.Http.OwinHost\System.Web.Http.OwinHost.csproj">
       <Project>{66dd7cd7-c68f-4d0e-9f3d-3b58c49d1467}</Project>
       <Name>System.Web.Http.OwinHost</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Web.Http.Owin\System.Web.Http.Owin.csproj">
+      <Project>{3a5a6d87-131a-47c0-8427-6c72dd63efdc}</Project>
+      <Name>System.Web.Http.Owin</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\System.Web.Http\System.Web.Http.csproj">
       <Project>{ddc1ce0c-486e-4e35-bb3b-eab61f8f9440}</Project>

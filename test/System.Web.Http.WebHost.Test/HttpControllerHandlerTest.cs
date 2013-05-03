@@ -117,6 +117,73 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
+        public void ConvertRequest_AddsOwinEnvironment_WhenPresentInHttpContext()
+        {
+            // Arrange
+            using (MemoryStream ignoreStream = new MemoryStream())
+            {
+                HttpRequestBase stubRequest = CreateStubRequest("IgnoreMethod", ignoreStream).Object;
+                IDictionary<string, object> expectedEnvironment = new Dictionary<string, object>();
+                IDictionary items = new Hashtable();
+                items.Add(HttpControllerHandler.OwinEnvironmentHttpContextKey, expectedEnvironment);
+                HttpContextBase context = CreateStubContext(stubRequest, items);
+
+                // Act
+                using (HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context))
+                {
+                    IDictionary<string, object> environment = actualRequest.GetOwinEnvironment();
+
+                    // Assert
+                    Assert.Same(expectedEnvironment, environment);
+                }
+            }
+        }
+
+        [Fact]
+        public void ConvertRequest_DoesNotAddOwinEnvironment_WhenNotPresentInHttpContext()
+        {
+            // Arrange
+            using (MemoryStream ignoreStream = new MemoryStream())
+            {
+                HttpRequestBase stubRequest = CreateStubRequest("IgnoreMethod", ignoreStream).Object;
+                IDictionary items = new Hashtable();
+                HttpContextBase context = CreateStubContext(stubRequest, items);
+
+                // Act
+                using (HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context))
+                {
+                    // Assert
+                    object ignore;
+                    bool found = actualRequest.Properties.TryGetValue(HttpControllerHandler.OwinEnvironmentKey,
+                        out ignore);
+                    Assert.False(found);
+                }
+            }
+        }
+
+        [Fact]
+        public void ConvertRequest_DoesNotAddOwinEnvironment_WhenItemsIsNull()
+        {
+            // Arrange
+            using (MemoryStream ignoreStream = new MemoryStream())
+            {
+                HttpRequestBase stubRequest = CreateStubRequest("IgnoreMethod", ignoreStream).Object;
+                IDictionary items = null;
+                HttpContextBase context = CreateStubContext(stubRequest, items);
+
+                // Act
+                using (HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context))
+                {
+                    // Assert
+                    object ignore;
+                    bool found = actualRequest.Properties.TryGetValue(HttpControllerHandler.OwinEnvironmentKey,
+                        out ignore);
+                    Assert.False(found);
+                }
+            }
+        }
+
+        [Fact]
         public void ConvertResponse_IfResponseHasNoCacheControlDefined_SetsNoCacheCacheabilityOnAspNetResponse()
         {
             // Arrange
@@ -735,6 +802,14 @@ namespace System.Web.Http.WebHost
             requestMock.Setup(m => m.TimedOutToken).Returns(cancellationToken);
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
             contextMock.SetupGet(m => m.Request).Returns(requestMock.Object);
+            return contextMock.Object;
+        }
+
+        private static HttpContextBase CreateStubContext(HttpRequestBase request, IDictionary items)
+        {
+            Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
+            contextMock.SetupGet(m => m.Request).Returns(request);
+            contextMock.SetupGet(m => m.Items).Returns(items);
             return contextMock.Object;
         }
 

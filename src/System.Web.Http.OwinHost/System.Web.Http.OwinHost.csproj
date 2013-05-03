@@ -40,7 +40,7 @@
     </Compile>
     <Compile Include="OwinBufferPolicySelector.cs" />
     <Compile Include="OwinEnvironmentExtensions.cs" />
-    <Compile Include="OwinHttpRequestMessageExtensions.cs" />
+    <Compile Include="HttpRequestMessageExtensions.cs" />
     <Compile Include="OwinConstants.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HttpMessageHandlerAdapter.cs" />

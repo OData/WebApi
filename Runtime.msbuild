@@ -74,7 +74,7 @@
                 Include="src\Microsoft.AspNet.Mvc.Facebook\*.csproj;
                          src\Microsoft.Web.WebPages.OAuth\*.csproj;
                          src\System.Net.Http.Formatting.NetCore\*.csproj;
-                         src\System.Web.Http.OwinHost\*.csproj;
+                         src\System.Web.Http.Owin\*.csproj;
                          src\System.Web.Http.SignalR\*.csproj;
                          src\System.Web.WebPages.Administration\*.csproj;
                          test\System.Web.Http.OData.Test\*.csproj" />

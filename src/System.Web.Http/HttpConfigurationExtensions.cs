@@ -3,10 +3,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.Filters;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ModelBinding.Binders;
 using System.Web.Http.Properties;
@@ -17,6 +19,8 @@ namespace System.Web.Http
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpConfigurationExtensions
     {
+        private const string SuppressDefaultHostAuthenticationKey = "SuppressDefaultHostAuthentication";
+
         /// <summary>
         /// Register that the given parameter type on an Action is to be bound using the model binder.
         /// </summary>
@@ -104,6 +108,74 @@ namespace System.Web.Http
                     configuration.Routes.Add(attributeRoute.Name, attributeRoute.Route);
                 }
             }
+        }
+
+        /// <summary>Gets a value indicating whether the host's default authentication is suppressed.</summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <returns>
+        /// <see langword="true"/> if the host's default authentication is suppressed; otherwise,
+        /// <see langword="false"/>.
+        /// </returns>
+        /// <remarks>
+        /// When the host's default authentication is suppressed, the current principal is set to anonymous upon
+        /// entering the <see cref="HttpServer"/>. As a result, any default authentication performed by the host is
+        /// ignored. The pipeline within the <see cref="HttpServer"/>, including <see cref="IAuthenticationFilter"/>s,
+        /// is then the exclusive authority for authentication.
+        /// </remarks>
+        public static bool GetSuppressDefaultHostAuthentication(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException("configuration");
+            }
+
+            Contract.Assert(configuration.Properties != null);
+
+            object value;
+
+            if (!configuration.Properties.TryGetValue(SuppressDefaultHostAuthenticationKey, out value) ||
+                !(value is bool))
+            {
+                return false;
+            }
+
+            return (bool)value;
+        }
+
+        /// <summary>Sets a value indicating whether to suppress the host's default authentication.</summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="value">
+        /// <see langword="true"/> to suppress the host's default authentication; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <remarks>
+        /// When the host's default authentication is suppressed, the current principal is set to anonymous upon
+        /// entering the <see cref="HttpServer"/>. As a result, any default authentication performed by the host is
+        /// ignored. The pipeline within the <see cref="HttpServer"/>, including <see cref="IAuthenticationFilter"/>s,
+        /// is then the exclusive authority for authentication.
+        /// </remarks>
+        public static void SetSuppressDefaultHostAuthentication(this HttpConfiguration configuration, bool value)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException("configuration");
+            }
+
+            Contract.Assert(configuration.Properties != null);
+
+            configuration.Properties[SuppressDefaultHostAuthenticationKey] = value;
+        }
+
+        /// <summary>Enables suppression of the host's default authentication.</summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <remarks>
+        /// When the host's default authentication is suppressed, the current principal is set to anonymous upon
+        /// entering the <see cref="HttpServer"/>. As a result, any default authentication performed by the host is
+        /// ignored. The pipeline within the <see cref="HttpServer"/>, including <see cref="IAuthenticationFilter"/>s,
+        /// is then the exclusive authority for authentication.
+        /// </remarks>
+        public static void SuppressDefaultHostAuthentication(this HttpConfiguration configuration)
+        {
+            SetSuppressDefaultHostAuthentication(configuration, true);
         }
 
         private static List<HttpRouteEntry> CreateAttributeRoutes(HttpRouteBuilder routeBuilder, string controllerName,

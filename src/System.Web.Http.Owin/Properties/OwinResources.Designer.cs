@@ -61,6 +61,15 @@ namespace System.Web.Http.Owin {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to HttpAuthenticationContext.Request must not be null..
+        /// </summary>
+        internal static string HttpAuthenticationContext_RequestMustNotBeNull {
+            get {
+                return ResourceManager.GetString("HttpAuthenticationContext_RequestMustNotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No OWIN environment is available for the request..
         /// </summary>
         internal static string OwinEnvironmentNotAvailable {

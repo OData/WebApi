@@ -76,6 +76,8 @@
     <Compile Include="Controllers\HttpActionContext.cs" />
     <Compile Include="Controllers\IControllerConfiguration.cs" />
     <Compile Include="Controllers\IHostPrincipalService.cs" />
+    <Compile Include="Filters\FailedAuthenticationResult.cs" />
+    <Compile Include="Filters\SucceededAuthenticationResult.cs" />
     <Compile Include="FormattedContentResult.cs" />
     <Compile Include="StatusCodeResult.cs" />
     <Compile Include="IHttpActionResult.cs" />

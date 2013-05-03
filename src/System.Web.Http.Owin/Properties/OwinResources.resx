@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="HttpAuthenticationContext_RequestMustNotBeNull" xml:space="preserve">
+    <value>HttpAuthenticationContext.Request must not be null.</value>
+  </data>
   <data name="OwinEnvironmentNotAvailable" xml:space="preserve">
     <value>No OWIN environment is available for the request.</value>
   </data>

@@ -52,19 +52,6 @@ namespace System.Web.Http.OData
         }
 
         [Theory]
-        [InlineData(typeof(int), false)]
-        [InlineData(typeof(string), true)]
-        [InlineData(typeof(DateTime), false)]
-        [InlineData(typeof(int?), true)]
-        [InlineData(typeof(IEnumerable), true)]
-        [InlineData(typeof(int[]), true)]
-        [InlineData(typeof(string[]), true)]
-        public void IsNullable_Returns_ExpectedValue(Type type, bool expectedResult)
-        {
-            Assert.Equal(expectedResult, TypeHelper.IsNullable(type));
-        }
-
-        [Theory]
         [InlineData(typeof(int), typeof(int?))]
         [InlineData(typeof(string), typeof(string))]
         [InlineData(typeof(DateTime), typeof(DateTime?))]

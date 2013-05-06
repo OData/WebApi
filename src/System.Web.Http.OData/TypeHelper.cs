@@ -13,24 +13,9 @@ namespace System.Web.Http
 {
     internal static class TypeHelper
     {
-        public static bool IsNullable(this Type t)
-        {
-            if (!t.IsValueType)
-            {
-                return true;
-            }
-
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         public static Type ToNullable(this Type t)
         {
-            if (IsNullable(t))
+            if (t.IsNullable())
             {
                 return t;
             }

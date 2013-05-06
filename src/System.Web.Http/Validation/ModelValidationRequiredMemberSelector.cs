@@ -54,6 +54,13 @@ namespace System.Web.Http.Validation
             }
 
             ModelMetadata metadata = _metadataProvider.GetMetadataForProperty(() => null, member.DeclaringType, member.Name);
+            if (metadata.ModelType.IsNullable())
+            {
+                // If the model type is nullable, the value validator will raise a model error for the null member
+                // Only non-nullable property types need to be checked by the formatter
+                return false;
+            }
+
             IEnumerable<ModelValidator> validators = metadata.GetValidators(_validatorProviders);
             return validators.Any(validator => validator.IsRequired);
         }

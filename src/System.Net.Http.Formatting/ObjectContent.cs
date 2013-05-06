@@ -122,13 +122,6 @@ namespace System.Net.Http
             return false;
         }
 
-        private static bool IsTypeNullable(Type type)
-        {
-            return !type.IsValueType() ||
-                   (type.IsGenericType() &&
-                    type.GetGenericTypeDefinition() == typeof(Nullable<>));
-        }
-
         private void VerifyAndSetObject(object value)
         {
             Contract.Assert(ObjectType != null, "Type cannot be null");
@@ -136,7 +129,7 @@ namespace System.Net.Http
             if (value == null)
             {
                 // Null may not be assigned to value types (unless Nullable<T>)
-                if (!IsTypeNullable(ObjectType))
+                if (!ObjectType.IsNullable())
                 {
                     throw Error.InvalidOperation(Properties.Resources.CannotUseNullValueType, typeof(ObjectContent).Name, ObjectType.Name);
                 }

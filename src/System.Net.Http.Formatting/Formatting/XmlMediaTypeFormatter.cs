@@ -221,6 +221,7 @@ namespace System.Net.Http.Formatting
         /// <param name="content">The <see cref="HttpContent"/> for the content being read.</param>
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
         /// <returns>A <see cref="Task"/> whose result will be the object instance that has been read.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             if (type == null)
@@ -233,51 +234,60 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("readStream");
             }
 
-            return TaskHelpers.RunSynchronously<object>(() =>
+            try
             {
-                HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
+                return Task.FromResult(ReadFromStream(type, readStream, content, formatterLogger));
+            }
+            catch (Exception e)
+            {
+                return TaskHelpers.FromError<object>(e);
+            }
+        }
 
-                // If content length is 0 then return default value for this type
-                if (contentHeaders != null && contentHeaders.ContentLength == 0)
-                {
-                    return GetDefaultValueForType(type);
-                }
+        private object ReadFromStream(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
+        {
+            HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
 
-                // Get the character encoding for the content
-                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
-                object serializer = GetSerializerForType(type);
+            // If content length is 0 then return default value for this type
+            if (contentHeaders != null && contentHeaders.ContentLength == 0)
+            {
+                return GetDefaultValueForType(type);
+            }
 
-                try
-                {
+            // Get the character encoding for the content
+            Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
+            object serializer = GetSerializerForType(type);
+
+            try
+            {
 #if NETFX_CORE
                     // Force a preamble into the stream, since CreateTextReader in WinRT only supports auto-detecting encoding.
                     using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new ReadOnlyStreamWithEncodingPreamble(readStream, effectiveEncoding), _readerQuotas))
 #else
-                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new NonClosingDelegatingStream(readStream), effectiveEncoding, _readerQuotas, null))
+                using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new NonClosingDelegatingStream(readStream), effectiveEncoding, _readerQuotas, null))
 #endif
-                    {
-                        XmlSerializer xmlSerializer = serializer as XmlSerializer;
-                        if (xmlSerializer != null)
-                        {
-                            return xmlSerializer.Deserialize(reader);
-                        }
-                        else
-                        {
-                            XmlObjectSerializer xmlObjectSerializer = (XmlObjectSerializer)serializer;
-                            return xmlObjectSerializer.ReadObject(reader);
-                        }
-                    }
-                }
-                catch (Exception e)
                 {
-                    if (formatterLogger == null)
+                    XmlSerializer xmlSerializer = serializer as XmlSerializer;
+                    if (xmlSerializer != null)
                     {
-                        throw;
+                        return xmlSerializer.Deserialize(reader);
                     }
-                    formatterLogger.LogError(String.Empty, e);
-                    return GetDefaultValueForType(type);
+                    else
+                    {
+                        XmlObjectSerializer xmlObjectSerializer = (XmlObjectSerializer)serializer;
+                        return xmlObjectSerializer.ReadObject(reader);
+                    }
                 }
-            });
+            }
+            catch (Exception e)
+            {
+                if (formatterLogger == null)
+                {
+                    throw;
+                }
+                formatterLogger.LogError(String.Empty, e);
+                return GetDefaultValueForType(type);
+            }
         }
 
         /// <summary>
@@ -305,50 +315,55 @@ namespace System.Net.Http.Formatting
 
             try
             {
-                bool isRemapped = false;
-                if (UseXmlSerializer)
-                {
-                    isRemapped = MediaTypeFormatter.TryGetDelegatingTypeForIEnumerableGenericOrSame(ref type);
-                }
-                else
-                {
-                    isRemapped = MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
-                }
-
-                if (isRemapped && value != null)
-                {
-                    value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
-                }
-
-                Encoding effectiveEncoding = SelectCharacterEncoding(content != null ? content.Headers : null);
-                XmlWriterSettings writerSettings = new XmlWriterSettings
-                {
-                    OmitXmlDeclaration = true,
-                    Indent = Indent,
-                    Encoding = effectiveEncoding,
-                    CloseOutput = false
-                };
-
-                object serializer = GetSerializerForType(type);
-
-                using (XmlWriter writer = XmlWriter.Create(writeStream, writerSettings))
-                {
-                    XmlSerializer xmlSerializer = serializer as XmlSerializer;
-                    if (xmlSerializer != null)
-                    {
-                        xmlSerializer.Serialize(writer, value);
-                    }
-                    else
-                    {
-                        XmlObjectSerializer xmlObjectSerializer = (XmlObjectSerializer)serializer;
-                        xmlObjectSerializer.WriteObject(writer, value);
-                    }
-                }
+                WriteToStream(ref type, ref value, writeStream, content);
                 return TaskHelpers.Completed();
             }
             catch (Exception e)
             {
                 return TaskHelpers.FromError(e);
+            }
+        }
+
+        private void WriteToStream(ref Type type, ref object value, Stream writeStream, HttpContent content)
+        {
+            bool isRemapped = false;
+            if (UseXmlSerializer)
+            {
+                isRemapped = MediaTypeFormatter.TryGetDelegatingTypeForIEnumerableGenericOrSame(ref type);
+            }
+            else
+            {
+                isRemapped = MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
+            }
+
+            if (isRemapped && value != null)
+            {
+                value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
+            }
+
+            Encoding effectiveEncoding = SelectCharacterEncoding(content != null ? content.Headers : null);
+            XmlWriterSettings writerSettings = new XmlWriterSettings
+            {
+                OmitXmlDeclaration = true,
+                Indent = Indent,
+                Encoding = effectiveEncoding,
+                CloseOutput = false
+            };
+
+            object serializer = GetSerializerForType(type);
+
+            using (XmlWriter writer = XmlWriter.Create(writeStream, writerSettings))
+            {
+                XmlSerializer xmlSerializer = serializer as XmlSerializer;
+                if (xmlSerializer != null)
+                {
+                    xmlSerializer.Serialize(writer, value);
+                }
+                else
+                {
+                    XmlObjectSerializer xmlObjectSerializer = (XmlObjectSerializer)serializer;
+                    xmlObjectSerializer.WriteObject(writer, value);
+                }
             }
         }
 

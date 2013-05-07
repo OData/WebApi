@@ -675,13 +675,18 @@ namespace System.Threading.Tasks
         /// <summary>
         /// Adapts any action into a Task (returning AsyncVoid, so that it's usable with Task{T} extension methods).
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         private static Task<AsyncVoid> ToAsyncVoidTask(Action action)
         {
-            return TaskHelpers.RunSynchronously<AsyncVoid>(() =>
+            try
             {
                 action();
                 return _defaultCompleted;
-            });
+            }
+            catch (Exception e)
+            {
+                return TaskHelpers.FromError<AsyncVoid>(e);
+            }
         }
 
         /// <summary>

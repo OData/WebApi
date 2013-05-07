@@ -219,6 +219,7 @@ namespace System.Net.Http.Formatting
         /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
         /// <returns>A <see cref="Task"/> whose result will be the object instance that has been read.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             if (type == null)
@@ -231,61 +232,70 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("readStream");
             }
 
-            return TaskHelpers.RunSynchronously<object>(() =>
+            try
             {
-                HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
+                return Task.FromResult(ReadFromStream(type, readStream, content, formatterLogger));
+            }
+            catch (Exception e)
+            {
+                return TaskHelpers.FromError<object>(e);
+            }
+        }
 
-                // If content length is 0 then return default value for this type
-                if (contentHeaders != null && contentHeaders.ContentLength == 0)
-                {
-                    return GetDefaultValueForType(type);
-                }
+        private object ReadFromStream(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
+        {
+            HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
 
-                // Get the character encoding for the content
-                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
+            // If content length is 0 then return default value for this type
+            if (contentHeaders != null && contentHeaders.ContentLength == 0)
+            {
+                return GetDefaultValueForType(type);
+            }
 
-                try
-                {
+            // Get the character encoding for the content
+            Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
+
+            try
+            {
 #if !NETFX_CORE // No DataContractJsonSerializer in portable library version
-                    if (UseDataContractJsonSerializer)
-                    {
-                        DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
-                        using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(new NonClosingDelegatingStream(readStream), effectiveEncoding, _readerQuotas, null))
-                        {
-                            return dataContractSerializer.ReadObject(reader);
-                        }
-                    }
-                    else
-#endif
-                    {
-                        using (JsonTextReader jsonTextReader = new JsonTextReader(new StreamReader(readStream, effectiveEncoding)) { CloseInput = false, MaxDepth = _maxDepth })
-                        {
-                            JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
-                            if (formatterLogger != null)
-                            {
-                                // Error must always be marked as handled
-                                // Failure to do so can cause the exception to be rethrown at every recursive level and overflow the stack for x64 CLR processes
-                                jsonSerializer.Error += (sender, e) =>
-                                {
-                                    Exception exception = e.ErrorContext.Error;
-                                    formatterLogger.LogError(e.ErrorContext.Path, exception);
-                                    e.ErrorContext.Handled = true;
-                                };
-                            }
-                            return jsonSerializer.Deserialize(jsonTextReader, type);
-                        }
-                    }
-                }
-                catch (Exception e)
+                if (UseDataContractJsonSerializer)
                 {
-                    if (formatterLogger == null)
+                    DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
+                    using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(new NonClosingDelegatingStream(readStream), effectiveEncoding, _readerQuotas, null))
                     {
-                        throw;
+                        return dataContractSerializer.ReadObject(reader);
                     }
-                    formatterLogger.LogError(String.Empty, e);
-                    return GetDefaultValueForType(type);
                 }
-            });
+                else
+#endif
+                {
+                    using (JsonTextReader jsonTextReader = new JsonTextReader(new StreamReader(readStream, effectiveEncoding)) { CloseInput = false, MaxDepth = _maxDepth })
+                    {
+                        JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
+                        if (formatterLogger != null)
+                        {
+                            // Error must always be marked as handled
+                            // Failure to do so can cause the exception to be rethrown at every recursive level and overflow the stack for x64 CLR processes
+                            jsonSerializer.Error += (sender, e) =>
+                            {
+                                Exception exception = e.ErrorContext.Error;
+                                formatterLogger.LogError(e.ErrorContext.Path, exception);
+                                e.ErrorContext.Handled = true;
+                            };
+                        }
+                        return jsonSerializer.Deserialize(jsonTextReader, type);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                if (formatterLogger == null)
+                {
+                    throw;
+                }
+                formatterLogger.LogError(String.Empty, e);
+                return GetDefaultValueForType(type);
+            }
         }
 
         /// <summary>
@@ -298,6 +308,7 @@ namespace System.Net.Http.Formatting
         /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
         /// <param name="transportContext">The <see cref="TransportContext"/>.</param>
         /// <returns>A <see cref="Task"/> that will write the value to the stream.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             if (type == null)
@@ -317,42 +328,52 @@ namespace System.Net.Http.Formatting
             }
 #endif
 
-            return TaskHelpers.RunSynchronously(() =>
+            try
             {
-                Encoding effectiveEncoding = SelectCharacterEncoding(content == null ? null : content.Headers);
+                WriteToStream(type, value, writeStream, content);
+                return TaskHelpers.Completed();
+            }
+            catch (Exception e)
+            {
+                return TaskHelpers.FromError(e);
+            }
+        }
+
+        private void WriteToStream(Type type, object value, Stream writeStream, HttpContent content)
+        {
+            Encoding effectiveEncoding = SelectCharacterEncoding(content == null ? null : content.Headers);
 
 #if !NETFX_CORE // No DataContractJsonSerializer in portable library version
-                if (UseDataContractJsonSerializer)
+            if (UseDataContractJsonSerializer)
+            {
+                if (MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type))
                 {
-                    if (MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type))
+                    if (value != null)
                     {
-                        if (value != null)
-                        {
-                            value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
-                        }
+                        value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
                     }
+                }
 
-                    DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
-                    using (XmlWriter writer = JsonReaderWriterFactory.CreateJsonWriter(writeStream, effectiveEncoding, ownsStream: false))
-                    {
-                        dataContractSerializer.WriteObject(writer, value);
-                    }
-                }
-                else
-#endif
+                DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
+                using (XmlWriter writer = JsonReaderWriterFactory.CreateJsonWriter(writeStream, effectiveEncoding, ownsStream: false))
                 {
-                    using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(writeStream, effectiveEncoding)) { CloseOutput = false })
-                    {
-                        if (Indent)
-                        {
-                            jsonTextWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
-                        }
-                        JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
-                        jsonSerializer.Serialize(jsonTextWriter, value);
-                        jsonTextWriter.Flush();
-                    }
+                    dataContractSerializer.WriteObject(writer, value);
                 }
-            });
+            }
+            else
+#endif
+            {
+                using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(writeStream, effectiveEncoding)) { CloseOutput = false })
+                {
+                    if (Indent)
+                    {
+                        jsonTextWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
+                    }
+                    JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
+                    jsonSerializer.Serialize(jsonTextWriter, value);
+                    jsonTextWriter.Flush();
+                }
+            }
         }
 
 #if !NETFX_CORE // No DataContractJsonSerializer in portable library version

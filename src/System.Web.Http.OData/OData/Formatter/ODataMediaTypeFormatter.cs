@@ -290,7 +290,7 @@ namespace System.Web.Http.OData.Formatter
         }
 
         /// <inheritdoc/>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "ODataMessageReader disposed later with request.")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             if (type == null)
@@ -308,81 +308,91 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.InvalidOperation(SRResources.ReadFromStreamAsyncMustHaveRequest);
             }
 
-            return TaskHelpers.RunSynchronously<object>(() =>
+            try 
             {
-                object result;
+                return Task.FromResult(ReadFromStream(type, readStream, content, formatterLogger));
+            }
+            catch (Exception ex)
+            {
+                return TaskHelpers.FromError<object>(ex);
+            }
+        }
 
-                HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "ODataMessageReader disposed later with request.")]
+        private object ReadFromStream(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
+        {
+            object result;
 
-                // If content length is 0 then return default value for this type
-                if (contentHeaders == null || contentHeaders.ContentLength == 0)
+            HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
+
+            // If content length is 0 then return default value for this type
+            if (contentHeaders == null || contentHeaders.ContentLength == 0)
+            {
+                result = GetDefaultValueForType(type);
+            }
+            else
+            {
+                IEdmModel model = Request.GetEdmModel();
+                if (model == null)
                 {
-                    result = GetDefaultValueForType(type);
+                    throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
                 }
-                else
+
+                Type originalType = type;
+                bool isPatchMode = TryGetInnerTypeForDelta(ref type);
+                ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(model, type);
+                if (deserializer == null)
                 {
-                    IEdmModel model = Request.GetEdmModel();
-                    if (model == null)
-                    {
-                        throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
-                    }
+                    throw Error.Argument("type", SRResources.FormatterReadIsNotSupportedForType, type.FullName, GetType().FullName);
+                }
 
-                    Type originalType = type;
-                    bool isPatchMode = TryGetInnerTypeForDelta(ref type);
-                    ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(model, type);
-                    if (deserializer == null)
-                    {
-                        throw Error.Argument("type", SRResources.FormatterReadIsNotSupportedForType, type.FullName, GetType().FullName);
-                    }
+                ODataMessageReader oDataMessageReader = null;
+                ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings
+                {
+                    DisableMessageStreamDisposal = true,
+                    MessageQuotas = MessageReaderQuotas,
+                    BaseUri = GetBaseAddress(Request)
+                };
 
-                    ODataMessageReader oDataMessageReader = null;
-                    ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings
+                try
+                {
+                    IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
+                    oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
+
+                    Request.RegisterForDispose(oDataMessageReader);
+                    ODataPath path = Request.GetODataPath();
+                    ODataDeserializerContext readContext = new ODataDeserializerContext
                     {
-                        DisableMessageStreamDisposal = true,
-                        MessageQuotas = MessageReaderQuotas,
-                        BaseUri = GetBaseAddress(Request)
+                        IsPatchMode = isPatchMode,
+                        Path = path,
+                        Model = model,
+                        Request = Request
                     };
 
-                    try
+                    if (isPatchMode)
                     {
-                        IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
-                        oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
-
-                        Request.RegisterForDispose(oDataMessageReader);
-                        ODataPath path = Request.GetODataPath();
-                        ODataDeserializerContext readContext = new ODataDeserializerContext
-                        {
-                            IsPatchMode = isPatchMode,
-                            Path = path,
-                            Model = model,
-                            Request = Request
-                        };
-
-                        if (isPatchMode)
-                        {
-                            readContext.PatchEntityType = originalType;
-                        }
-
-                        result = deserializer.Read(oDataMessageReader, readContext);
+                        readContext.PatchEntityType = originalType;
                     }
-                    catch (Exception e)
-                    {
-                        if (formatterLogger == null)
-                        {
-                            throw;
-                        }
 
-                        formatterLogger.LogError(String.Empty, e);
-                        result = GetDefaultValueForType(type);
-                    }
+                    result = deserializer.Read(oDataMessageReader, readContext);
                 }
+                catch (Exception e)
+                {
+                    if (formatterLogger == null)
+                    {
+                        throw;
+                    }
 
-                return result;
-            });
+                    formatterLogger.LogError(String.Empty, e);
+                    result = GetDefaultValueForType(type);
+                }
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>
-        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             if (type == null)
@@ -401,80 +411,91 @@ namespace System.Web.Http.OData.Formatter
             }
 
             HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
-            return TaskHelpers.RunSynchronously(() =>
+            try
             {
-                IEdmModel model = Request.GetEdmModel();
-                if (model == null)
+                WriteToStream(type, value, writeStream, content, contentHeaders);
+                return TaskHelpers.Completed();
+            }
+            catch (Exception ex)
+            {
+                return TaskHelpers.FromError(ex);
+            }
+        }
+
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
+        private void WriteToStream(Type type, object value, Stream writeStream, HttpContent content, HttpContentHeaders contentHeaders)
+        {
+            IEdmModel model = Request.GetEdmModel();
+            if (model == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
+            }
+
+            ODataSerializer serializer = GetSerializer(type, value, model, _serializerProvider);
+
+            UrlHelper urlHelper = Request.GetUrlHelper();
+            Contract.Assert(urlHelper != null);
+
+            ODataPath path = Request.GetODataPath();
+            IEdmEntitySet targetEntitySet = path == null ? null : path.EntitySet;
+
+            // serialize a response
+            HttpConfiguration configuration = Request.GetConfiguration();
+            if (configuration == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
+            }
+
+            IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream, content.Headers);
+
+            ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
+            {
+                BaseUri = GetBaseAddress(Request),
+                Version = _version,
+                Indent = true,
+                DisableMessageStreamDisposal = true,
+                MessageQuotas = MessageWriterQuotas
+            };
+
+            // The MetadataDocumentUri is never required for errors. Additionally, it sometimes won't be available
+            // for errors, such as when routing itself fails. In that case, the route data property is not
+            // available on the request, and due to a bug with HttpRoute.GetVirtualPath (bug #669) we won't be able
+            // to generate a metadata link.
+            if (serializer.ODataPayloadKind != ODataPayloadKind.Error)
+            {
+                string metadataLink = urlHelper.ODataLink(new MetadataPathSegment());
+
+                if (metadataLink == null)
                 {
-                    throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
+                    throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
                 }
 
-                ODataSerializer serializer = GetSerializer(type, value, model, _serializerProvider);
+                writerSettings.SetMetadataDocumentUri(new Uri(metadataLink));
+            }
 
-                UrlHelper urlHelper = Request.GetUrlHelper();
-                Contract.Assert(urlHelper != null);
+            MediaTypeHeaderValue contentType = null;
+            if (contentHeaders != null && contentHeaders.ContentType != null)
+            {
+                contentType = contentHeaders.ContentType;
+            }
 
-                ODataPath path = Request.GetODataPath();
-                IEdmEntitySet targetEntitySet = path == null ? null : path.EntitySet;
-
-                // serialize a response
-                HttpConfiguration configuration = Request.GetConfiguration();
-                if (configuration == null)
+            using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, model))
+            {
+                ODataSerializerContext writeContext = new ODataSerializerContext()
                 {
-                    throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
-                }
-
-                IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream, content.Headers);
-
-                ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
-                {
-                    BaseUri = GetBaseAddress(Request),
-                    Version = _version,
-                    Indent = true,
-                    DisableMessageStreamDisposal = true,
-                    MessageQuotas = MessageWriterQuotas
+                    Request = Request,
+                    Url = urlHelper,
+                    EntitySet = targetEntitySet,
+                    Model = model,
+                    RootElementName = GetRootElementName(path) ?? "root",
+                    SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
+                    Path = path,
+                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(contentType),
+                    SelectExpandClause = Request.GetSelectExpandClause()
                 };
 
-                // The MetadataDocumentUri is never required for errors. Additionally, it sometimes won't be available
-                // for errors, such as when routing itself fails. In that case, the route data property is not
-                // available on the request, and due to a bug with HttpRoute.GetVirtualPath (bug #669) we won't be able
-                // to generate a metadata link.
-                if (serializer.ODataPayloadKind != ODataPayloadKind.Error)
-                {
-                    string metadataLink = urlHelper.ODataLink(new MetadataPathSegment());
-
-                    if (metadataLink == null)
-                    {
-                        throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
-                    }
-
-                    writerSettings.SetMetadataDocumentUri(new Uri(metadataLink));
-                }
-
-                MediaTypeHeaderValue contentType = null;
-                if (contentHeaders != null && contentHeaders.ContentType != null)
-                {
-                    contentType = contentHeaders.ContentType;
-                }
-
-                using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, model))
-                {
-                    ODataSerializerContext writeContext = new ODataSerializerContext()
-                    {
-                        Request = Request,
-                        Url = urlHelper,
-                        EntitySet = targetEntitySet,
-                        Model = model,
-                        RootElementName = GetRootElementName(path) ?? "root",
-                        SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
-                        Path = path,
-                        MetadataLevel = ODataMediaTypes.GetMetadataLevel(contentType),
-                        SelectExpandClause = Request.GetSelectExpandClause()
-                    };
-
-                    serializer.WriteObject(value, messageWriter, writeContext);
-                }
-            });
+                serializer.WriteObject(value, messageWriter, writeContext);
+            }
         }
 
         private static ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider)

@@ -71,6 +71,7 @@ namespace System.Net.Http.Formatting
         }
 
         // Sealed because derived classes shouldn't override the async version. Override sync version instead.
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public sealed override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             if (type == null)
@@ -83,16 +84,26 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("writeStream");
             }
 
-            return TaskHelpers.RunSynchronously(
-                () =>
-                {
-                    using (Stream bufferedStream = GetBufferStream(writeStream, _bufferSizeInBytes))
-                    {
-                        WriteToStream(type, value, bufferedStream, content);
-                    }
-                });
+            try
+            {
+                WriteToStreamSync(type, value, writeStream, content);
+                return TaskHelpers.Completed();
+            }
+            catch (Exception e)
+            {
+                return TaskHelpers.FromError(e);
+            }
         }
 
+        private void WriteToStreamSync(Type type, object value, Stream writeStream, HttpContent content)
+        {
+            using (Stream bufferedStream = GetBufferStream(writeStream, _bufferSizeInBytes))
+            {
+                WriteToStream(type, value, bufferedStream, content);
+            }
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public sealed override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             if (type == null)
@@ -105,20 +116,32 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("readStream");
             }
 
-            return TaskHelpers.RunSynchronously<object>(
-                () =>
-                {
-                    HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
-                    if (contentHeaders != null && contentHeaders.ContentLength == 0)
-                    {
-                        return GetDefaultValueForType(type);
-                    }
+            try
+            {
+                return Task.FromResult(ReadFromStreamSync(type, readStream, content, formatterLogger));
+            }
+            catch (Exception e)
+            {
+                return TaskHelpers.FromError<object>(e);
+            }
+        }
 
-                    using (Stream bufferedStream = GetBufferStream(readStream, _bufferSizeInBytes))
-                    {
-                        return ReadFromStream(type, bufferedStream, content, formatterLogger);
-                    }
-                });
+        private object ReadFromStreamSync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
+        {
+            object result;
+            HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
+            if (contentHeaders != null && contentHeaders.ContentLength == 0)
+            {
+                result = GetDefaultValueForType(type);
+            }
+            else
+            {
+                using (Stream bufferedStream = GetBufferStream(readStream, _bufferSizeInBytes))
+                {
+                    result = ReadFromStream(type, bufferedStream, content, formatterLogger);
+                }
+            }
+            return result;
         }
 
         private static Stream GetBufferStream(Stream innerStream, int bufferSize)

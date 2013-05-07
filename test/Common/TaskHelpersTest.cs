@@ -356,34 +356,5 @@ namespace System.Threading.Tasks
             Assert.Equal(TaskStatus.RanToCompletion, tcs.Task.Status);
             Assert.Equal(null, tcs.Task.Result);
         }
-
-        // -----------------------------------------------------------------
-        //  TaskHelpers.RunSynchronously
-
-        [Fact]
-        public void RunSynchronously_Executes_Action()
-        {
-            bool wasRun = false;
-            Task t = TaskHelpers.RunSynchronously(() => { wasRun = true; });
-            t.WaitUntilCompleted();
-            Assert.True(wasRun);
-        }
-
-        [Fact]
-        public void RunSynchronously_Captures_Exception_In_AggregateException()
-        {
-            Task t = TaskHelpers.RunSynchronously(() => { throw new InvalidOperationException(); });
-            Assert.Throws<InvalidOperationException>(() => t.Wait());
-        }
-
-        [Fact]
-        public void RunSynchronously_Cancels()
-        {
-            CancellationTokenSource cts = new CancellationTokenSource();
-            cts.Cancel();
-
-            Task t = TaskHelpers.RunSynchronously(() => { throw new InvalidOperationException(); }, cts.Token);
-            Assert.Throws<TaskCanceledException>(() => t.Wait());
-        }
     }
 }

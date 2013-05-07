@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting.Parsers;
@@ -124,6 +125,7 @@ namespace System.Net.Http.Formatting
         /// <param name="content">The <see cref="HttpContent"/> for the content being read.</param>
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
         /// <returns>A <see cref="Task"/> whose result will be the object instance that has been read.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             if (type == null)
@@ -136,23 +138,35 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("readStream");
             }
 
-            return TaskHelpers.RunSynchronously<object>(() =>
+            try
             {
-                IEnumerable<KeyValuePair<string, string>> nameValuePairs = ReadFormUrlEncoded(readStream, ReadBufferSize);
+                return Task.FromResult(ReadFromStream(type, readStream));
+            }
+            catch (Exception e)
+            {
+                return TaskHelpers.FromError<object>(e);
+            }
+        }
 
-                if (type == typeof(FormDataCollection))
-                {
-                    return new FormDataCollection(nameValuePairs);
-                }
+        private object ReadFromStream(Type type, Stream readStream)
+        {
+            object result;
+            IEnumerable<KeyValuePair<string, string>> nameValuePairs = ReadFormUrlEncoded(readStream, ReadBufferSize);
 
-                if (FormattingUtilities.IsJTokenType(type))
-                {
-                    return FormUrlEncodedJson.Parse(nameValuePairs, _maxDepth);
-                }
-
+            if (type == typeof(FormDataCollection))
+            {
+                result = new FormDataCollection(nameValuePairs);
+            }
+            else if (FormattingUtilities.IsJTokenType(type))
+            {
+                result = FormUrlEncodedJson.Parse(nameValuePairs, _maxDepth);
+            }
+            else
+            {
                 // Passed us an unsupported type. Should have called CanReadType() first.
                 throw Error.InvalidOperation(Properties.Resources.SerializerCannotSerializeType, GetType().Name, type.Name);
-            });
+            }
+            return result;
         }
 
         /// <summary>

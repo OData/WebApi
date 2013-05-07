@@ -206,11 +206,16 @@ namespace System.Web.Http
             IAuthorizationFilter[] authorizationFilters = filterGrouping.AuthorizationFilters;
             IExceptionFilter[] exceptionFilters = filterGrouping.ExceptionFilters;
 
-            Func<Task<HttpResponseMessage>> result = InvokeActionWithAuthenticationFilters(actionContext, cancellationToken, authenticationFilters,
-                InvokeActionWithAuthorizationFilters(actionContext, cancellationToken, authorizationFilters, () =>
-                    {
-                        return ExecuteAction(actionDescriptor.ActionBinding, actionContext, cancellationToken, actionFilters, controllerServices);
-                    }));
+            Func<Task<HttpResponseMessage>> result;
+            result = () => ExecuteAction(actionDescriptor.ActionBinding, actionContext, cancellationToken, actionFilters, controllerServices);
+            if (authorizationFilters.Length > 0)
+            {
+                result = InvokeActionWithAuthorizationFilters(actionContext, cancellationToken, authorizationFilters, result);
+            }
+            if (authenticationFilters.Length > 0)
+            {
+                result = InvokeActionWithAuthenticationFilters(actionContext, cancellationToken, authenticationFilters, result);
+            }
 
             return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
         }
@@ -291,10 +296,16 @@ namespace System.Web.Http
 
             _modelState = actionContext.ModelState;
             cancellationToken.ThrowIfCancellationRequested();
-            return await InvokeActionWithActionFilters(actionContext, cancellationToken, actionFilters, () =>
+            ActionInvoker actionInvoker = new ActionInvoker(actionContext, cancellationToken, controllerServices);
+            // Empty filters is the default case so avoid delegates
+            // Ensure empty case remains the same as the filtered case
+            if (actionFilters.Length == 0)
             {
-                return controllerServices.GetActionInvoker().InvokeActionAsync(actionContext, cancellationToken);
-            })();
+                return await actionInvoker.InvokeActionAsync();
+            }
+            // Ensure delegate continues to use the C# Compiler static delegate caching optimization
+            Func<ActionInvoker, Task<HttpResponseMessage>> invokeCallback = (innerInvoker) => innerInvoker.InvokeActionAsync();
+            return await InvokeActionWithActionFilters(actionContext, cancellationToken, actionFilters, invokeCallback, actionInvoker)();
         }
 
         protected virtual void Initialize(HttpControllerContext controllerContext)
@@ -438,6 +449,11 @@ namespace System.Web.Http
             return result;
         }
 
+        private static Func<Task<HttpResponseMessage>> InvokeActionWithActionFilters<T>(HttpActionContext actionContext, CancellationToken cancellationToken, IActionFilter[] filters, Func<T, Task<HttpResponseMessage>> innerAction, T state)
+        {
+            return InvokeActionWithActionFilters(actionContext, cancellationToken, filters, () => innerAction(state));
+        }
+
         internal static Func<Task<HttpResponseMessage>> InvokeActionWithActionFilters(HttpActionContext actionContext, CancellationToken cancellationToken, IActionFilter[] filters, Func<Task<HttpResponseMessage>> innerAction)
         {
             Contract.Assert(actionContext != null);
@@ -488,6 +504,28 @@ namespace System.Web.Http
             {
                 throw Error.InvalidOperation(SRResources.RequestIsNull, GetType().Name);
             }
+        }
+
+        // Keep as struct to avoid allocation
+        private struct ActionInvoker
+        {
+            private readonly HttpActionContext _actionContext;
+            private readonly CancellationToken _cancellationToken;
+            private readonly ServicesContainer _controllerServices;
+
+            public ActionInvoker(HttpActionContext actionContext, CancellationToken cancellationToken, ServicesContainer controllerServices)
+            {
+                Contract.Assert(controllerServices != null);
+
+                _actionContext = actionContext;
+                _cancellationToken = cancellationToken;
+                _controllerServices = controllerServices;
+            }
+
+            public Task<HttpResponseMessage> InvokeActionAsync()
+            {
+                return _controllerServices.GetActionInvoker().InvokeActionAsync(_actionContext, _cancellationToken);
+            } 
         }
     }
 }

@@ -60,11 +60,27 @@ namespace System.Web.Http.Dispatcher
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The Web API framework will dispose of the response after sending it")]
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            // check if the request has any routing error. This implies that request matched a route but is not to be
+            // processed further as it is a bad request.
+            HttpResponseMessage routingErrorResponse = request.GetRoutingErrorResponse();
+            if (routingErrorResponse != null)
+            {
+                return Task.FromResult(routingErrorResponse);
+            }
+
             // Lookup route data, or if not found as a request property then we look it up in the route table
             IHttpRouteData routeData;
             if (!request.Properties.TryGetValue(HttpPropertyKeys.HttpRouteDataKey, out routeData))
             {
-                routeData = _configuration.Routes.GetRouteData(request);
+                try
+                {
+                    routeData = _configuration.Routes.GetRouteData(request);
+                }
+                catch (HttpResponseException e)
+                {
+                    return Task.FromResult(e.Response);
+                }
+
                 if (routeData != null)
                 {
                     request.Properties.Add(HttpPropertyKeys.HttpRouteDataKey, routeData);
@@ -83,7 +99,7 @@ namespace System.Web.Http.Dispatcher
 
             // routeData.Route could be null if user adds a custom route that derives from System.Web.Routing.Route explicitly 
             // and add that to the RouteCollection in the web hosted case
-            var invoker = (routeData.Route == null || routeData.Route.Handler == null) ? 
+            var invoker = (routeData.Route == null || routeData.Route.Handler == null) ?
                 _defaultInvoker : new HttpMessageInvoker(routeData.Route.Handler, disposeHandler: false);
             return invoker.SendAsync(request, cancellationToken);
         }

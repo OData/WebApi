@@ -879,6 +879,43 @@ namespace System.Net.Http
             return GetRegisteredResourcesForDispose(request);
         }
 
+        /// <summary>
+        /// Gets the response message of the <see cref="HttpResponseException"/> thrown by a custom route implementation.
+        /// </summary>
+        /// <remarks>Custom <see cref="IHttpRoute"/> implementations can throw <see cref="HttpResponseException"/> to indicate that the incoming request matches 
+        /// the route but is a bad request (HTTP 400 status code).</remarks>
+        /// <param name="request">The incoming request message.</param>
+        public static HttpResponseMessage GetRoutingErrorResponse(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetProperty<HttpResponseMessage>(HttpPropertyKeys.RoutingErrorResponseKey);
+        }
+
+        /// <summary>
+        /// Sets the response message of the <see cref="HttpResponseException"/> thrown by a custom route implementation.
+        /// </summary>
+        /// <remarks>Custom <see cref="IHttpRoute"/> implementations can throw <see cref="HttpResponseException"/> to indicate that the incoming request matches 
+        /// the route but is a bad request (HTTP 400 status code).</remarks>
+        /// <param name="request">The incoming request message.</param>
+        /// <param name="errorResponse">The error response to be returned.</param>
+        public static void SetRoutingErrorResponse(this HttpRequestMessage request, HttpResponseMessage errorResponse)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+            if (errorResponse == null)
+            {
+                throw Error.ArgumentNull("errorResponse");
+            }
+
+            request.Properties[HttpPropertyKeys.RoutingErrorResponseKey] = errorResponse;
+        }
+
         private static List<IDisposable> GetRegisteredResourcesForDispose(HttpRequestMessage request)
         {
             List<IDisposable> registeredResourcesForDispose;

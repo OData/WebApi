@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 
 namespace System.Web.Http.WebHost.Routing
@@ -46,6 +47,23 @@ namespace System.Web.Http.WebHost.Routing
             }
 
             return request;
+        }
+
+        public static void SetRoutingError(this HttpContextBase context, HttpResponseMessage errorResponse)
+        {
+            Contract.Assert(context != null);
+            Contract.Assert(errorResponse != null);
+
+            HttpRequestMessage request = context.GetOrCreateHttpRequestMessage();
+            request.SetRoutingErrorResponse(errorResponse);
+        }
+
+        public static HttpResponseMessage GetRoutingError(this HttpContextBase context)
+        {
+            Contract.Assert(context != null);
+
+            HttpRequestMessage request = context.GetOrCreateHttpRequestMessage();
+            return request.GetRoutingErrorResponse();
         }
     }
 }

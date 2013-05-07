@@ -39,5 +39,20 @@ namespace System.Web.Http.WebHost.Routing
             Assert.Equal(1, headerValues.Count());
             Assert.Equal("customHeaderValue", headerValues.First());
         }
+
+        [Fact]
+        public void SetRoutingError_AndThen_GetRoutingError_ReturnSameResult()
+        {
+            Mock<HttpContextBase> context = new Mock<HttpContextBase>();
+            Dictionary<string, object> items = new Dictionary<string, object>();
+            context.Setup(o => o.Items).Returns(items);
+            context.Object.SetHttpRequestMessage(new HttpRequestMessage());
+            HttpResponseMessage errorResponse = new HttpResponseMessage();
+
+            context.Object.SetRoutingError(errorResponse);
+            HttpResponseMessage result = context.Object.GetRoutingError();
+
+            Assert.Same(errorResponse, result);
+        }
     }
 }

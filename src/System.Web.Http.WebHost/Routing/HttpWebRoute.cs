@@ -53,21 +53,31 @@ namespace System.Web.Http.WebHost.Routing
 
         public override RouteData GetRouteData(HttpContextBase httpContext)
         {
-            if (HttpRoute is HostedHttpRoute)
+            try
             {
-                return base.GetRouteData(httpContext);
+                if (HttpRoute is HostedHttpRoute)
+                {
+                    return base.GetRouteData(httpContext);
+                }
+                else
+                {
+                    // if user passed us a custom IHttpRoute, then we should invoke their function instead of the base
+                    HttpRequestMessage request = httpContext.GetOrCreateHttpRequestMessage();
+                    IHttpRouteData data = HttpRoute.GetRouteData(httpContext.Request.ApplicationPath, request);
+                    return data == null ? null : data.ToRouteData();
+                }
             }
-            else
+            catch (HttpResponseException e)
             {
-                // if user passed us a custom IHttpRoute, then we should invoke their function instead of the base
-                HttpRequestMessage request = httpContext.GetOrCreateHttpRequestMessage();
-                IHttpRouteData data = HttpRoute.GetRouteData(httpContext.Request.ApplicationPath, request);
-                return data == null ? null : data.ToRouteData();
+                // Treat HttpResponseExceptions as matching routes but bad requests. As IHttpRoute cannot short circuit the response pipeline,
+                // stash the routing error response on the request so that HttpRoutingDispatcher can retrieve it back and return that error response.
+                httpContext.SetRoutingError(e.Response);
+                return new RouteData(this, HttpControllerRouteHandler.Instance);
             }
         }
 
         public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary values)
-        {   
+        {
             // Only perform URL generation if the "httproute" key was specified. This allows these
             // routes to be ignored when a regular MVC app tries to generate URLs. Without this special
             // key an HTTP route used for Web API would normally take over almost all the routes in a

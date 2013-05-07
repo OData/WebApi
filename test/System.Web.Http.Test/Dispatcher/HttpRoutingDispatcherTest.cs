@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
+using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 using Moq;
 using Moq.Protected;
@@ -100,6 +101,45 @@ namespace System.Web.Http.Dispatcher
             invoker.SendAsync(request, CancellationToken.None);
 
             mockHandler.Protected().Verify("SendAsync", Times.Once(), request, CancellationToken.None);
+        }
+
+        [Fact]
+        public void SendAsync_Returns_RoutingErrors_IfPresentOnTheRequest()
+        {
+            // Arrange
+            HttpRoutingDispatcher dispatcher = new HttpRoutingDispatcher(new HttpConfiguration());
+            HttpMessageInvoker invoker = new HttpMessageInvoker(dispatcher);
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpResponseMessage routingErrorResponse = new HttpResponseMessage();
+            request.SetRoutingErrorResponse(routingErrorResponse);
+
+            // Act
+            var result = invoker.SendAsync(request, CancellationToken.None).Result;
+
+            // Assert
+            Assert.Same(routingErrorResponse, result);
+        }
+
+        [Fact]
+        public void SendAsync_HandlesHttpResponseExceptions_FromCustomRoutes()
+        {
+            // Arrange
+            HttpResponseException routingError = new HttpResponseException(new HttpResponseMessage());
+            HttpRequestMessage request = new HttpRequestMessage();
+            Mock<IHttpRoute> customRoute = new Mock<IHttpRoute>();
+            customRoute.Setup(r => r.GetRouteData("/", request)).Throws(routingError);
+
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.Add("default", customRoute.Object);
+
+            HttpRoutingDispatcher dispatcher = new HttpRoutingDispatcher(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(dispatcher);
+
+            // Act
+            var result = invoker.SendAsync(request, CancellationToken.None).Result;
+
+            // Assert
+            Assert.Same(routingError.Response, result);
         }
 
         private static HttpRequestMessage CreateRequest(HttpConfiguration config, string requestUri)

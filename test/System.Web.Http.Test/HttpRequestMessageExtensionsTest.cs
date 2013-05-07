@@ -725,5 +725,40 @@ namespace System.Net.Http
             // Act and Assert
             Assert.ThrowsArgumentNull(() => request.ShouldIncludeErrorDetail(), "request");
         }
+
+        [Fact]
+        public void GetRoutingErrorResponse_ThrowsArgumentNull_Request()
+        {
+            HttpRequestMessage request = null;
+            Assert.ThrowsArgumentNull(() => request.GetRoutingErrorResponse(), "request");
+        }
+
+        [Fact]
+        public void SetRoutingErrorResponse_ThrowsArgumentNull_Request()
+        {
+            HttpRequestMessage request = null;
+            HttpResponseMessage errorResponse = new HttpResponseMessage();
+
+            Assert.ThrowsArgumentNull(() => request.SetRoutingErrorResponse(errorResponse), "request");
+        }
+
+        [Fact]
+        public void SetRoutingErrorResponse_ThrowsArgumentNull_ErrorResponse()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            Assert.ThrowsArgumentNull(() => request.SetRoutingErrorResponse(errorResponse: null), "errorResponse");
+        }
+
+        [Fact]
+        public void SetRoutingErrorResponse_AndThen_GetRoutingErrorResponse_Match()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpResponseMessage errorResponse = new HttpResponseMessage();
+
+            request.SetRoutingErrorResponse(errorResponse);
+            var result = request.GetRoutingErrorResponse();
+
+            Assert.Same(errorResponse, result);
+        }
     }
 }

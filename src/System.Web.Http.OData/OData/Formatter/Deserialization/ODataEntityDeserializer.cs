@@ -342,7 +342,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                         break;
 
                     case ODataReaderState.EntryEnd:
-                        Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek().Item == reader.Item, "The entry which is ending should be on the top of the items stack.");
+                        Contract.Assert(itemsStack.Count > 0 && (reader.Item == null || itemsStack.Peek().Item == reader.Item), "The entry which is ending should be on the top of the items stack.");
                         itemsStack.Pop();
                         break;
 

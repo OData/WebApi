@@ -132,14 +132,47 @@ namespace System.Web.Http.ModelBinding
             return (T)ReadAs(formData, typeof(T));
         }
 
+        public static T ReadAs<T>(this FormDataCollection formData, HttpActionContext actionContext)
+        {
+            return (T)ReadAs(formData, typeof(T), String.Empty, actionContext: actionContext);
+        }
+
         public static object ReadAs(this FormDataCollection formData, Type type)
         {
             return ReadAs(formData, type, String.Empty, requiredMemberSelector: null, formatterLogger: null);
         }
 
+        public static object ReadAs(this FormDataCollection formData, Type type, HttpActionContext actionContext)
+        {
+            return ReadAs(formData, type, String.Empty, actionContext);
+        }
+
         public static T ReadAs<T>(this FormDataCollection formData, string modelName, IRequiredMemberSelector requiredMemberSelector, IFormatterLogger formatterLogger)
         {
             return (T)ReadAs(formData, typeof(T), modelName, requiredMemberSelector, formatterLogger);
+        }
+
+        public static T ReadAs<T>(this FormDataCollection formData, string modelName, HttpActionContext actionContext)
+        {
+            return (T)ReadAs(formData, typeof(T), modelName, actionContext);
+        }
+
+        public static object ReadAs(this FormDataCollection formData, Type type, string modelName, HttpActionContext actionContext)
+        {
+            if (formData == null)
+            {
+                throw Error.ArgumentNull("formData");
+            }
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+            if (actionContext == null)
+            {
+                throw Error.ArgumentNull("actionContext");
+            }
+
+            return ReadAsInternal(formData, type, modelName, actionContext);
         }
 
         /// <summary>
@@ -148,9 +181,9 @@ namespace System.Web.Http.ModelBinding
         /// <param name="formData">collection with parsed form url data</param>
         /// <param name="type">target type to read as</param>
         /// <param name="modelName">null or empty to read the entire form as a single object. This is common for body data. 
+        /// Or the name of a model to do a partial binding against the form data. This is common for extracting individual fields.</param>
         /// <param name="requiredMemberSelector">The <see cref="IRequiredMemberSelector"/> used to determine required members.</param>
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
-        /// Or the name of a model to do a partial binding against the form data. This is common for extracting individual fields.</param>
         /// <returns>best attempt to bind the object. The best attempt may be null.</returns>
         public static object ReadAs(this FormDataCollection formData, Type type, string modelName, IRequiredMemberSelector requiredMemberSelector, IFormatterLogger formatterLogger)
         {
@@ -163,13 +196,12 @@ namespace System.Web.Http.ModelBinding
                 throw Error.ArgumentNull("type");
             }
 
-            if (modelName == null)
-            {
-                modelName = String.Empty;
-            }
-
             using (HttpConfiguration config = new HttpConfiguration())
             {
+                // The HttpActionContext provides access to configuration for ModelBinders, and is also provided
+                // to the IModelBinder when binding occurs. Since an HttpActionContext was not provided, create a default.
+                HttpActionContext actionContext = CreateActionContextForModelBinding(config);
+
                 bool validateRequiredMembers = requiredMemberSelector != null && formatterLogger != null;
                 if (validateRequiredMembers)
                 {
@@ -177,19 +209,11 @@ namespace System.Web.Http.ModelBinding
                     config.Services.Replace(typeof(ModelValidatorProvider), new RequiredMemberModelValidatorProvider(requiredMemberSelector));
                 }
 
-                // Looks like HttpActionContext is just a way of getting to the config, which we really
-                // just need to get a list of modelbinderPRoviders for composition. 
-                HttpActionContext actionContext = CreateActionContextForModelBinding(config);
+                object result = ReadAs(formData, type, modelName, actionContext);
 
-                IValueProvider vp = formData.GetJQueryValueProvider();
-                ModelBindingContext ctx = CreateModelBindingContext(actionContext, modelName, type, vp);
-
-                ModelBinderProvider modelBinderProvider = CreateModelBindingProvider(actionContext);
-
-                IModelBinder binder = modelBinderProvider.GetBinder(config, type);
-                bool haveResult = binder.BindModel(actionContext, ctx);
-
-                // Log model binding errors
+                // The model binding will log any errors to the HttpActionContext's ModelState. Since this is a context
+                // that we created and doesn't map to a real action invocation, we want to forward the errors to 
+                // the user-specified IFormatterLogger.
                 if (formatterLogger != null)
                 {
                     foreach (KeyValuePair<string, ModelState> modelStatePair in actionContext.ModelState)
@@ -208,12 +232,29 @@ namespace System.Web.Http.ModelBinding
                     }
                 }
 
-                if (haveResult)
-                {
-                    return ctx.Model;
-                }
-                return MediaTypeFormatter.GetDefaultValueForType(type);
+                return result;
             }
+        }
+
+        private static object ReadAsInternal(this FormDataCollection formData, Type type, string modelName, HttpActionContext actionContext)
+        {
+            Contract.Assert(formData != null);
+            Contract.Assert(type != null);
+            Contract.Assert(actionContext != null);
+
+            IValueProvider valueProvider = formData.GetJQueryValueProvider();
+            ModelBindingContext bindingContext = CreateModelBindingContext(actionContext, modelName ?? String.Empty, type, valueProvider);
+
+            ModelBinderProvider modelBinderProvider = CreateModelBindingProvider(actionContext);
+
+            IModelBinder modelBinder = modelBinderProvider.GetBinder(actionContext.ControllerContext.Configuration, type);
+            bool haveResult = modelBinder.BindModel(actionContext, bindingContext);
+            if (haveResult)
+            {
+                return bindingContext.Model;
+            }
+
+            return MediaTypeFormatter.GetDefaultValueForType(type);
         }
 
         // Helper for ReadAs() to get a ModelBinderProvider to read FormUrl data. 

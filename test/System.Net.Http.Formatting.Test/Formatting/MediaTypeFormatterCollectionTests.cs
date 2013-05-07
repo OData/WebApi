@@ -324,12 +324,14 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [InlineData(typeof(XmlElement))]
         [InlineData(typeof(JObject))]
         [InlineData(typeof(XAttribute))]
-        [InlineData(typeof(FormDataCollection))]
         [InlineData(typeof(Type))]
         [InlineData(typeof(byte[]))]
+#if !NETFX_CORE
+        [InlineData(typeof(XmlElement))]
+        [InlineData(typeof(FormDataCollection))]
+#endif
         public void IsTypeExcludedFromValidation_ReturnsTrueForExcludedTypes(Type type)
         {
             Assert.True(MediaTypeFormatterCollection.IsTypeExcludedFromValidation(type));

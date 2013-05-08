@@ -781,6 +781,29 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
         }
 
         [Fact]
+        public void TranslateHttpResponseException_Maps_Non_Errors_To_Info()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage
+            {
+                RequestUri = new Uri("http://localhost"),
+                Method = HttpMethod.Get
+            };
+
+            TraceRecord traceRecord = new TraceRecord(request, "MyCategory", TraceLevel.Error)
+            {
+                Exception = new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Moved))
+            };
+
+
+            // Act
+            new SystemDiagnosticsTraceWriter().TranslateHttpResponseException(traceRecord);
+
+            // Assert
+            Assert.Equal(TraceLevel.Info, traceRecord.Level);
+        }
+
+        [Fact]
         public void TranslateHttpResponseException_Does_Not_Alter_Server_Errors()
         {
             // Arrange
@@ -960,6 +983,40 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
         }
 
         [Fact]
+        public void TranslateHttpResponseException_HiddenInAggregateException_UnpackTheMostSevere()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage
+            {
+                RequestUri = new Uri("http://localhost"),
+                Method = HttpMethod.Get
+            };
+
+            var ex500 = new HttpResponseException(HttpStatusCode.InternalServerError);
+            var ex503 = new HttpResponseException(HttpStatusCode.ServiceUnavailable);
+            var ex401 = new HttpResponseException(HttpStatusCode.Unauthorized);
+            var ex503IsWithinMe = new Exception("I have 503 inside me", ex503);
+
+            var aggregate = new AggregateException(ex500, ex503IsWithinMe, ex401);
+
+            HttpError httpError = new HttpError(aggregate, includeErrorDetail: true);
+            HttpResponseMessage errorResponse = request.CreateResponse(HttpStatusCode.ServiceUnavailable);
+            errorResponse.Content = new ObjectContent<HttpError>(httpError, new JsonMediaTypeFormatter());
+
+            TraceRecord traceRecord = new TraceRecord(request, "System.Web.Http.Request", TraceLevel.Error)
+            {
+                Exception = new HttpResponseException(errorResponse)
+            };
+
+            // Act
+            new SystemDiagnosticsTraceWriter().TranslateHttpResponseException(traceRecord);
+
+            // Assert
+            Assert.Equal(TraceLevel.Error, traceRecord.Level);
+            Assert.Equal(HttpStatusCode.ServiceUnavailable, traceRecord.Status);
+        }
+
+        [Fact]
         public void TranslateHttpResponseException_Unpacks_ModelState_Errors()
         {
             // Arrange
@@ -1040,7 +1097,7 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
             Assert.Equal(TraceLevel.Warn, traceRecord.Level);
             Assert.Equal(string.Empty, traceRecord.Message);
         }
-        
+
         private static void AssertContainsExactly(string trace, IDictionary<string, string> expected)
         {
             IDictionary<string, string> actual = ParseTrace(trace);

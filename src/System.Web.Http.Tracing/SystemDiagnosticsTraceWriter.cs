@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Tracing.Properties;
@@ -300,68 +301,81 @@ namespace System.Web.Http.Tracing
                 throw Error.ArgumentNull("traceRecord");
             }
 
-            HttpResponseException httpResponseException = traceRecord.Exception as HttpResponseException;
-            if (httpResponseException != null)
+            var httpResponseException = ExtractHttpResponseException(traceRecord);
+
+            if (httpResponseException == null)
             {
-                HttpResponseMessage response = httpResponseException.Response;
-                Contract.Assert(response != null);
+                return;
+            }
 
-                // If the status has been set already, do not overwrite it,
-                // otherwise propagate the status into the record.
-                if (traceRecord.Status == 0)
+            HttpResponseMessage response = httpResponseException.Response;
+            Contract.Assert(response != null);
+
+            // If the status has been set already, do not overwrite it,
+            // otherwise propagate the status into the record.
+            if (traceRecord.Status == 0)
+            {
+                traceRecord.Status = response.StatusCode;
+            }
+
+            // Client level errors are downgraded to TraceLevel.Warn
+            if ((int)response.StatusCode < (int)HttpStatusCode.InternalServerError)
+            {
+                traceRecord.Level = TraceLevel.Warn;
+            }
+
+            // Non errors are downgraded to TraceLevel.Info
+            if ((int)response.StatusCode < (int)HttpStatusCode.BadRequest)
+            {
+                traceRecord.Level = TraceLevel.Info;
+            }
+
+            // HttpResponseExceptions often contain HttpError instances that carry
+            // detailed information that may be filtered out by IncludeErrorDetailPolicy
+            // before reaching the client. Capture it here for the trace.
+            ObjectContent objectContent = response.Content as ObjectContent;
+            if (objectContent == null)
+            {
+                return;
+            }
+
+            HttpError httpError = objectContent.Value as HttpError;
+            if (httpError == null)
+            {
+                return;
+            }
+
+            object messageObject = null;
+            object messageDetailsObject = null;
+
+            List<string> messages = new List<string>();
+
+            if (httpError.TryGetValue(MessageKey, out messageObject))
+            {
+                messages.Add(Error.Format(SRResources.HttpErrorUserMessageFormat, messageObject));
+            }
+
+            if (httpError.TryGetValue(MessageDetailKey, out messageDetailsObject))
+            {
+                messages.Add(Error.Format(SRResources.HttpErrorMessageDetailFormat, messageDetailsObject));
+            }
+
+            // Extract the exception from this HttpError and then incrementally
+            // walk down all inner exceptions.
+            AddExceptions(httpError, messages);
+
+            // ModelState errors are handled with a nested HttpError
+            object modelStateErrorObject = null;
+            if (httpError.TryGetValue(ModelStateKey, out modelStateErrorObject))
+            {
+                HttpError modelStateError = modelStateErrorObject as HttpError;
+                if (modelStateError != null)
                 {
-                    traceRecord.Status = response.StatusCode;
-                }
-
-                // Client level errors are downgraded to TraceLevel.Warn
-                if ((int)response.StatusCode < (int)HttpStatusCode.InternalServerError)
-                {
-                    traceRecord.Level = TraceLevel.Warn;
-                }
-
-                // HttpResponseExceptions often contain HttpError instances that carry
-                // detailed information that may be filtered out by IncludeErrorDetailPolicy
-                // before reaching the client. Capture it here for the trace.
-                ObjectContent objectContent = response.Content as ObjectContent;
-                if (objectContent != null)
-                {
-                    HttpError httpError = objectContent.Value as HttpError;
-                    if (httpError != null)
-                    {
-                        object messageObject = null;
-                        object messageDetailsObject = null;
-
-                        List<string> messages = new List<string>();
-
-                        if (httpError.TryGetValue(MessageKey, out messageObject))
-                        {
-                            messages.Add(Error.Format(SRResources.HttpErrorUserMessageFormat, messageObject));
-                        }
-
-                        if (httpError.TryGetValue(MessageDetailKey, out messageDetailsObject))
-                        {
-                            messages.Add(Error.Format(SRResources.HttpErrorMessageDetailFormat, messageDetailsObject));
-                        }
-
-                        // Extract the exception from this HttpError and then incrementally
-                        // walk down all inner exceptions.
-                        AddExceptions(httpError, messages);
-
-                        // ModelState errors are handled with a nested HttpError
-                        object modelStateErrorObject = null;
-                        if (httpError.TryGetValue(ModelStateKey, out modelStateErrorObject))
-                        {
-                            HttpError modelStateError = modelStateErrorObject as HttpError;
-                            if (modelStateError != null)
-                            {
-                                messages.Add(FormatModelStateErrors(modelStateError));
-                            }
-                        }
-
-                        traceRecord.Message = String.Join(", ", messages);
-                    }
+                    messages.Add(FormatModelStateErrors(modelStateError));
                 }
             }
+
+            traceRecord.Message = String.Join(", ", messages);
         }
 
         /// <summary>
@@ -428,6 +442,40 @@ namespace System.Web.Http.Tracing
 
                 httpError = innerExceptionObject as HttpError;
             }
+        }
+
+        private static HttpResponseException ExtractHttpResponseException(TraceRecord traceRecord)
+        {
+            return ExtractHttpResponseException(traceRecord.Exception);
+        }
+
+        private static HttpResponseException ExtractHttpResponseException(Exception exception)
+        {
+            if (exception == null)
+            {
+                return null;
+            }
+
+            var httpResponseException = exception as HttpResponseException;
+            if (httpResponseException != null)
+            {
+                return httpResponseException;
+            }
+
+            var aggregateException = exception as AggregateException;
+            if (aggregateException != null)
+            {
+                httpResponseException = aggregateException
+                    .Flatten()
+                    .InnerExceptions
+                    .Select(ExtractHttpResponseException)
+                    .Where(ex => ex != null && ex.Response != null)
+                    .OrderByDescending(ex => ex.Response.StatusCode)
+                    .FirstOrDefault();
+                return httpResponseException;
+            }
+
+            return ExtractHttpResponseException(exception.InnerException);
         }
 
         private static string FormatModelStateErrors(HttpError modelStateError)

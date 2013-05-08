@@ -444,5 +444,37 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Equal("self", feedMetadata.SelfLink.Relation);
         }
 
+        [Fact]
+        public void CreateODataFeed_Ignores_NextPageLink_ForInnerFeeds()
+        {
+            // Arrange
+            ODataFeedSerializer serializer = new ODataFeedSerializer(_customersType, new DefaultODataSerializerProvider());
+            Uri nextLink = new Uri("http://somelink");
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetNextPageLink(nextLink);
+            var result = new object[0];
+
+            // Act
+            ODataFeed feed = serializer.CreateODataFeed(result, new ODataSerializerContext { Request = request, IsNested = true });
+
+            // Assert
+            Assert.Null(feed.NextPageLink);
+        }
+
+        [Fact]
+        public void CreateODataFeed_Ignores_InlineCount_ForInnerFeeds()
+        {
+            // Arrange
+            ODataFeedSerializer serializer = new ODataFeedSerializer(_customersType, new DefaultODataSerializerProvider());
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetInlineCount(42);
+            var result = new object[0];
+
+            // Act
+            ODataFeed feed = serializer.CreateODataFeed(result, new ODataSerializerContext { Request = request, IsNested = true });
+
+            // Assert
+            Assert.Null(feed.Count);
+        }
     }
 }

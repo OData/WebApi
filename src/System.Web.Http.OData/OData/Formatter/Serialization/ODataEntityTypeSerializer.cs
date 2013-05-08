@@ -223,13 +223,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             object propertyValue = entityInstanceContext.GetPropertyValue(navigationProperty.Name);
             if (propertyValue != null)
             {
-                // backup current context.
-                SelectExpandClause currentSelectExpandClause = writeContext.SelectExpandClause;
-                IEdmEntitySet currentEntitySet = writeContext.EntitySet;
-
-                // update the context with child context.
-                writeContext.SelectExpandClause = selectExpandClause;
-                writeContext.EntitySet = currentEntitySet.FindNavigationTarget(navigationProperty);
+                // create the serializer context for the expanded item.
+                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(writeContext);
+                nestedWriteContext.SelectExpandClause = selectExpandClause;
+                nestedWriteContext.EntitySet = writeContext.EntitySet.FindNavigationTarget(navigationProperty);
+                nestedWriteContext.IsNested = true;
 
                 // write object.
                 Type propertyType = propertyValue.GetType();
@@ -239,12 +237,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     throw new SerializationException(
                         Error.Format(SRResources.TypeCannotBeSerialized, propertyType.FullName, typeof(ODataMediaTypeFormatter).Name));
                 }
-
-                serializer.WriteObjectInline(propertyValue, writer, writeContext);
-
-                // revert back context.
-                writeContext.SelectExpandClause = currentSelectExpandClause;
-                writeContext.EntitySet = currentEntitySet;
+                serializer.WriteObjectInline(propertyValue, writer, nestedWriteContext);
             }
         }
 

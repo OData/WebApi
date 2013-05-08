@@ -96,6 +96,7 @@
     <Compile Include="OData\Formatter\ODataValueExtensionsTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinksSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataRawValueSerializerTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataSerializerContextTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinkSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEdmTypeSerializerTest.cs" />

@@ -14,6 +14,37 @@ namespace System.Web.Http.OData.Formatter.Serialization
     public class ODataSerializerContext
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
+        /// </summary>
+        public ODataSerializerContext()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
+        /// </summary>
+        /// <param name="context">The <see cref="ODataSerializerContext"/> to copy settings from.</param>
+        /// <remarks>This is a copy constructor.</remarks>
+        public ODataSerializerContext(ODataSerializerContext context)
+        {
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            Request = context.Request;
+            Url = context.Url;
+            EntitySet = context.EntitySet;
+            Model = context.Model;
+            Path = context.Path;
+            RootElementName = context.RootElementName;
+            SkipExpensiveAvailabilityChecks = context.SkipExpensiveAvailabilityChecks;
+            MetadataLevel = context.MetadataLevel;
+            SelectExpandClause = context.SelectExpandClause;
+            IsNested = context.IsNested;
+        }
+
+        /// <summary>
         /// Gets or sets the HTTP Request whose response is being serialized.
         /// </summary>
         public HttpRequestMessage Request { get; set; }
@@ -58,5 +89,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Gets or sets the <see cref="SelectExpandClause"/>.
         /// </summary>
         public SelectExpandClause SelectExpandClause { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the current context is for an expanded (not root level) entry or feed.
+        /// </summary>
+        public bool IsNested { get; set; }
     }
 }

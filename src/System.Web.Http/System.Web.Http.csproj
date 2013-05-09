@@ -126,6 +126,7 @@
     <Compile Include="Services\IDecorator.cs" />
     <Compile Include="Tracing\TraceLevelHelper.cs" />
     <Compile Include="Tracing\TraceKindHelper.cs" />
+    <Compile Include="Tracing\Tracers\AuthenticationFilterTracer.cs" />
     <Compile Include="Validation\IModelValidatorCache.cs" />
     <Compile Include="Validation\ModelValidatorCache.cs" />
     <Compile Include="Controllers\ResponseMessageResultConverter.cs" />

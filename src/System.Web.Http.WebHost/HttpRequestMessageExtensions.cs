@@ -7,7 +7,7 @@ namespace System.Web.Http.WebHost
 {
     internal static class HttpRequestMessageExtensions
     {
-        internal static readonly string HttpContextBaseKey = "MS_HttpContext";
+        private const string HttpContextBaseKey = "MS_HttpContext";
 
         public static HttpContextBase GetHttpContext(this HttpRequestMessage request)
         {

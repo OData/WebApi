@@ -196,7 +196,7 @@ namespace System.Web.Http.OData.Query
             Assert.Reflection.IntegerProperty(
                 new QueryableAttribute(),
                 o => o.MaxExpansionDepth,
-                expectedDefaultValue: 2,
+                expectedDefaultValue: 1,
                 minLegalValue: 0,
                 illegalLowerValue: -1,
                 illegalUpperValue: null,

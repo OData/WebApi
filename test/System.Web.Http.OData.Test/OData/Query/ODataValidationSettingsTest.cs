@@ -151,7 +151,7 @@ namespace System.Web.Http.OData.Query
             Assert.Reflection.IntegerProperty(
              new ODataValidationSettings(),
              o => o.MaxExpansionDepth,
-             expectedDefaultValue: 2,
+             expectedDefaultValue: 1,
              minLegalValue: 0,
              maxLegalValue: int.MaxValue,
              illegalLowerValue: -1,

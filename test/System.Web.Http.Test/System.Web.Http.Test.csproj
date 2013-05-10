@@ -84,6 +84,7 @@
     <Compile Include="Controllers\HttpControllerContextTest.cs" />
     <Compile Include="Controllers\HttpConfigurationTest.cs" />
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
+    <Compile Include="NegotiatedContentResultTests.cs" />
     <Compile Include="FormattedContentResultTests.cs" />
     <Compile Include="StatusCodeResultTests.cs" />
     <Compile Include="HttpConfigurationExtensionsTest.cs" />

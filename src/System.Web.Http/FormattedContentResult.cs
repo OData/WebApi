@@ -102,13 +102,19 @@ namespace System.Web.Http
 
         private HttpResponseMessage Execute()
         {
-            HttpResponseMessage mutableResponse = new HttpResponseMessage(_statusCode);
+            return Execute(_statusCode, _content, _formatter, _mediaType, _dependencies.Request);
+        }
+
+        internal static HttpResponseMessage Execute(HttpStatusCode statusCode, T content, MediaTypeFormatter formatter,
+            MediaTypeHeaderValue mediaType, HttpRequestMessage request)
+        {
+            HttpResponseMessage mutableResponse = new HttpResponseMessage(statusCode);
             HttpResponseMessage response = null;
 
             try
             {
-                mutableResponse.Content = new ObjectContent<T>(_content, _formatter, _mediaType);
-                mutableResponse.RequestMessage = _dependencies.Request;
+                mutableResponse.Content = new ObjectContent<T>(content, formatter, mediaType);
+                mutableResponse.RequestMessage = request;
 
                 response = mutableResponse;
                 mutableResponse = null;
@@ -187,7 +193,7 @@ namespace System.Web.Http
 
                     if (request == null)
                     {
-                        throw new InvalidOperationException(SRResources.ApiControllerResult_MustNotBeNull);
+                        throw new InvalidOperationException(SRResources.ApiController_RequestMustNotBeNull);
                     }
 
                     _request = request;

@@ -82,6 +82,7 @@
     <Compile Include="Filters\FailedAuthenticationResult.cs" />
     <Compile Include="Filters\SucceededAuthenticationResult.cs" />
     <Compile Include="FormattedContentResult.cs" />
+    <Compile Include="NegotiatedContentResult.cs" />
     <Compile Include="StatusCodeResult.cs" />
     <Compile Include="IHttpActionResult.cs" />
     <Compile Include="ContinuationResult.cs" />

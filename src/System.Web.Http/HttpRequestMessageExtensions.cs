@@ -425,7 +425,6 @@ namespace System.Net.Http
         /// <param name="value">The value to wrap. Can be <c>null</c>.</param>
         /// <param name="configuration">The configuration to use. Can be <c>null</c>.</param>
         /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller will dispose")]
         public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, HttpConfiguration configuration)
         {
             if (request == null)
@@ -447,29 +446,7 @@ namespace System.Net.Http
 
             IEnumerable<MediaTypeFormatter> formatters = configuration.Formatters;
 
-            // Run content negotiation
-            ContentNegotiationResult result = contentNegotiator.Negotiate(typeof(T), request, formatters);
-
-            if (result == null)
-            {
-                // no result from content negotiation indicates that 406 should be sent.
-                return new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.NotAcceptable,
-                    RequestMessage = request,
-                };
-            }
-            else
-            {
-                MediaTypeHeaderValue mediaType = result.MediaType;
-                return new HttpResponseMessage
-                {
-                    // At this point mediaType should be a cloned value (the content negotiator is responsible for returning a new copy)
-                    Content = new ObjectContent<T>(value, result.Formatter, mediaType),
-                    StatusCode = statusCode,
-                    RequestMessage = request
-                };
-            }
+            return NegotiatedContentResult<T>.Execute(statusCode, value, contentNegotiator, request, formatters);
         }
 
         /// <summary>
@@ -570,7 +547,6 @@ namespace System.Net.Http
         /// <param name="formatter">The formatter to use.</param>
         /// <param name="mediaType">The media type override to set on the response's content. Can be <c>null</c>.</param>
         /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller will dispose")]
         public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, MediaTypeFormatter formatter, MediaTypeHeaderValue mediaType)
         {
             if (request == null)
@@ -582,9 +558,7 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("formatter");
             }
 
-            HttpResponseMessage response = request.CreateResponse(statusCode);
-            response.Content = new ObjectContent<T>(value, formatter, mediaType);
-            return response;
+            return FormattedContentResult<T>.Execute(statusCode, value, formatter, mediaType, request);
         }
 
         /// <summary>

@@ -324,7 +324,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ApiControllerContent_WithFormatter_CreatesCorrectFormatterResult()
+        public void ApiControllerContent_WithFormatter_CreatesCorrectFormattedContentResult()
         {
             // Arrange
             HttpStatusCode expectedStatusCode = CreateStatusCode();
@@ -352,7 +352,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ApiControllerContent_WithFormatterAndStringMediaType_CreatesCorrectFormatterResult()
+        public void ApiControllerContent_WithFormatterAndStringMediaType_CreatesCorrectFormattedContentResult()
         {
             // Arrange
             HttpStatusCode expectedStatusCode = CreateStatusCode();
@@ -382,7 +382,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ApiControllerContent_WithFormatterButNotMediaType_CreatesCorrectFormatterResult()
+        public void ApiControllerContent_WithFormatterButNotMediaType_CreatesCorrectFormattedContentResult()
         {
             // Arrange
             HttpStatusCode expectedStatusCode = CreateStatusCode();

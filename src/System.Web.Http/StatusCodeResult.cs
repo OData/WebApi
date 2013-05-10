@@ -140,7 +140,7 @@ namespace System.Web.Http
 
                     if (request == null)
                     {
-                        throw new InvalidOperationException(SRResources.ApiControllerResult_MustNotBeNull);
+                        throw new InvalidOperationException(SRResources.ApiController_RequestMustNotBeNull);
                     }
 
                     _request = request;

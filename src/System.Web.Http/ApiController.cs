@@ -215,6 +215,16 @@ namespace System.Web.Http
             return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
         }
 
+        /// <summary>Creates a <see cref="NegotiatedContentResult{T}"/> with the specified values.</summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="statusCode">The HTTP status code for the response message.</param>
+        /// <param name="value">The content value to negotiate and format in the entity body.</param>
+        /// <returns>A <see cref="NegotiatedContentResult{T}"/> with the specified values.</returns>
+        public NegotiatedContentResult<T> Content<T>(HttpStatusCode statusCode, T value)
+        {
+            return new NegotiatedContentResult<T>(statusCode, value, this);
+        }
+
         /// <summary>Creates a <see cref="FormattedContentResult{T}"/> with the specified values.</summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
         /// <param name="statusCode">The HTTP status code for the response message.</param>

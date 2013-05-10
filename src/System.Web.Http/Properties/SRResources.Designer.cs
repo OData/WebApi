@@ -97,6 +97,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ApiController.Request must not be null..
+        /// </summary>
+        internal static string ApiController_RequestMustNotBeNull {
+            get {
+                return ResourceManager.GetString("ApiController_RequestMustNotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An object of type &apos;{0}&apos; was returned where an instance of IHttpActionResult was expected..
         /// </summary>
         internal static string ApiControllerActionInvoker_InvalidHttpActionResult {
@@ -147,15 +156,6 @@ namespace System.Web.Http.Properties {
         internal static string ApiControllerActionSelector_HttpMethodNotSupported {
             get {
                 return ResourceManager.GetString("ApiControllerActionSelector_HttpMethodNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ApiController.Request must not be null..
-        /// </summary>
-        internal static string ApiControllerResult_MustNotBeNull {
-            get {
-                return ResourceManager.GetString("ApiControllerResult_MustNotBeNull", resourceCulture);
             }
         }
         
@@ -372,6 +372,15 @@ namespace System.Web.Http.Properties {
         internal static string HttpActionDescriptor_NoConverterForGenericParamterTypeExists {
             get {
                 return ResourceManager.GetString("HttpActionDescriptor_NoConverterForGenericParamterTypeExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to HttpControllerContext.Configuration must not be null..
+        /// </summary>
+        internal static string HttpControllerContext_ConfigurationMustNotBeNull {
+            get {
+                return ResourceManager.GetString("HttpControllerContext_ConfigurationMustNotBeNull", resourceCulture);
             }
         }
         

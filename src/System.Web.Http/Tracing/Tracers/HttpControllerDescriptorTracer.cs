@@ -21,11 +21,14 @@ namespace System.Web.Http.Tracing.Tracers
         private readonly HttpControllerDescriptor _innerDescriptor;
         private readonly ITraceWriter _traceWriter;
 
-        public HttpControllerDescriptorTracer(HttpConfiguration configuration, string controllerName, Type controllerType, HttpControllerDescriptor innerDescriptor, ITraceWriter traceWriter)
-            : base(configuration, controllerName, controllerType)
+        public HttpControllerDescriptorTracer(HttpControllerDescriptor innerDescriptor, ITraceWriter traceWriter)
         {
             Contract.Assert(innerDescriptor != null);
             Contract.Assert(traceWriter != null);
+
+            Configuration = innerDescriptor.Configuration;
+            ControllerName = innerDescriptor.ControllerName;
+            ControllerType = innerDescriptor.ControllerType;
 
             _innerDescriptor = innerDescriptor;
             _traceWriter = traceWriter;

@@ -64,7 +64,7 @@ namespace System.Web.Http.Tracing.Tracers
 
             if (controllerDescriptor != null && !(controllerDescriptor is HttpControllerDescriptorTracer))
             {
-                return new HttpControllerDescriptorTracer(controllerDescriptor.Configuration, controllerDescriptor.ControllerName, controllerDescriptor.ControllerType, controllerDescriptor, _traceWriter);
+                return new HttpControllerDescriptorTracer(controllerDescriptor, _traceWriter);
             }
 
             return controllerDescriptor;

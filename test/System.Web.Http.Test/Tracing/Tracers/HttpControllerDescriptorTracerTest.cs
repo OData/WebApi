@@ -81,8 +81,9 @@ namespace System.Web.Http.Tracing.Tracers
         public void Inner_Property_On_HttpControllerDescriptorTracer_Returns_HttpControllerDescriptor()
         {
             // Arrange
-            HttpControllerDescriptor expectedInner = new Mock<HttpControllerDescriptor>().Object;
-            HttpControllerDescriptorTracer productUnderTest = new HttpControllerDescriptorTracer(new HttpConfiguration(), "controller", typeof(ApiController), expectedInner, new TestTraceWriter());
+            HttpControllerDescriptor expectedInner = BuildHttpControllerDescriptor(_controller);
+
+            HttpControllerDescriptorTracer productUnderTest = new HttpControllerDescriptorTracer(expectedInner, new TestTraceWriter());
 
             // Act
             HttpControllerDescriptor actualInner = productUnderTest.Inner;
@@ -95,8 +96,9 @@ namespace System.Web.Http.Tracing.Tracers
         public void Decorator_GetInner_On_HttpControllerDescriptorTracer_Returns_HttpControllerDescriptor()
         {
             // Arrange
-            HttpControllerDescriptor expectedInner = new Mock<HttpControllerDescriptor>().Object;
-            HttpControllerDescriptorTracer productUnderTest = new HttpControllerDescriptorTracer(new HttpConfiguration(), "controller", typeof(ApiController), expectedInner, new TestTraceWriter());
+            HttpControllerDescriptor expectedInner = BuildHttpControllerDescriptor(_controller);
+
+            HttpControllerDescriptorTracer productUnderTest = new HttpControllerDescriptorTracer(expectedInner, new TestTraceWriter());
 
             // Act
             HttpControllerDescriptor actualInner = Decorator.GetInner(productUnderTest as HttpControllerDescriptor);
@@ -105,12 +107,52 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Same(expectedInner, actualInner);
         }
 
+        [Fact]
+        public void Decorator_DoesNotCauseControllerInitializationToHappenAgainAndAgain()
+        {
+            // Arrange
+            int raisedCount = 0;
+            RaiseWhenInitializedAttribute.Initialized += delegate { ++raisedCount; };
+
+            var descriptor = new HttpControllerDescriptor(new HttpConfiguration(), "my", typeof(MyController));
+            Assert.Equal(1, raisedCount);
+
+            // Act
+            new HttpControllerDescriptorTracer(descriptor, new TestTraceWriter());
+            new HttpControllerDescriptorTracer(descriptor, new TestTraceWriter());
+            new HttpControllerDescriptorTracer(descriptor, new TestTraceWriter());
+
+            // Assert
+            Assert.Equal(1, raisedCount);
+        }
+
+        private static HttpControllerDescriptor BuildHttpControllerDescriptor(IHttpController controller, string controllerName = "AnyController", HttpConfiguration httpConfiguration = null)
+        {
+            HttpControllerDescriptor expectedInner = new Mock<HttpControllerDescriptor>().Object;
+            expectedInner.ControllerName = controllerName;
+            expectedInner.ControllerType = controller.GetType();
+            expectedInner.Configuration = httpConfiguration ?? new HttpConfiguration();
+            return expectedInner;
+        }
+
         private static HttpControllerDescriptorTracer GetHttpControllerDescriptorTracer(HttpControllerDescriptor controllerDescriptor, ITraceWriter traceWriter)
         {
+            if (controllerDescriptor.Configuration == null)
+            {
+                controllerDescriptor.Configuration = new HttpConfiguration();
+            }
+
+            if (controllerDescriptor.ControllerName == null)
+            {
+                controllerDescriptor.ControllerName = "AnyController";
+            }
+
+            if (controllerDescriptor.ControllerType == null)
+            {
+                controllerDescriptor.ControllerType = _controller.GetType();
+            }
+
             return new HttpControllerDescriptorTracer(
-                configuration: new HttpConfiguration(),
-                controllerName: "AnyController",
-                controllerType: _controller.GetType(),
                 innerDescriptor: controllerDescriptor,
                 traceWriter: traceWriter);
         }
@@ -119,6 +161,24 @@ namespace System.Web.Http.Tracing.Tracers
         {
             Mock<HttpControllerDescriptor> mockControllerDescriptor = new Mock<HttpControllerDescriptor>(_controllerContext.Configuration, "AnyController", _controller.GetType());
             return mockControllerDescriptor;
+        }
+
+        private class RaiseWhenInitializedAttribute : Attribute, IControllerConfiguration
+        {
+            public static event EventHandler Initialized;
+            public void Initialize(HttpControllerSettings controllerSettings, HttpControllerDescriptor controllerDescriptor)
+            {
+                Initialized(this, EventArgs.Empty);
+            }
+        }
+
+        [RaiseWhenInitialized]
+        private class MyController : ApiController
+        {
+            public string Foo()
+            {
+                return "bar";
+            }
         }
     }
 }

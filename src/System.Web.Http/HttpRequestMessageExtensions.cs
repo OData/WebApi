@@ -796,6 +796,21 @@ namespace System.Net.Http
         }
 
         /// <summary>
+        /// Gets a value indicating whether the request originates from a batch.
+        /// </summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <returns><see langword="true"/> if the request originates from a batch; otherwise, <see langword="false"/>.</returns>
+        public static bool IsBatchRequest(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetProperty<bool>(HttpPropertyKeys.IsBatchRequest);
+        }
+
+        /// <summary>
         /// Gets a value indicating whether error details, such as exception messages and stack traces, should be included for this HTTP request.
         /// </summary>
         /// <param name="request">The HTTP request.</param>
@@ -856,7 +871,7 @@ namespace System.Net.Http
         /// <summary>
         /// Gets the response message of the <see cref="HttpResponseException"/> thrown by a custom route implementation.
         /// </summary>
-        /// <remarks>Custom <see cref="IHttpRoute"/> implementations can throw <see cref="HttpResponseException"/> to indicate that the incoming request matches 
+        /// <remarks>Custom <see cref="IHttpRoute"/> implementations can throw <see cref="HttpResponseException"/> to indicate that the incoming request matches
         /// the route but is a bad request (HTTP 400 status code).</remarks>
         /// <param name="request">The incoming request message.</param>
         public static HttpResponseMessage GetRoutingErrorResponse(this HttpRequestMessage request)
@@ -872,7 +887,7 @@ namespace System.Net.Http
         /// <summary>
         /// Sets the response message of the <see cref="HttpResponseException"/> thrown by a custom route implementation.
         /// </summary>
-        /// <remarks>Custom <see cref="IHttpRoute"/> implementations can throw <see cref="HttpResponseException"/> to indicate that the incoming request matches 
+        /// <remarks>Custom <see cref="IHttpRoute"/> implementations can throw <see cref="HttpResponseException"/> to indicate that the incoming request matches
         /// the route but is a bad request (HTTP 400 status code).</remarks>
         /// <param name="request">The incoming request message.</param>
         /// <param name="errorResponse">The error response to be returned.</param>

@@ -93,5 +93,10 @@ namespace System.Web.Http.Hosting
         /// response message from <see cref="HttpResponseException.Response"/>.
         /// </summary>
         public static readonly string RoutingErrorResponseKey = "MS_RoutingError";
+
+        /// <summary>
+        /// Provides a key that indicates whether the request is a batch request.
+        /// </summary>
+        public static readonly string IsBatchRequest = "MS_BatchRequest";
     }
 }

@@ -8,6 +8,7 @@ namespace System.Web.Http.WebHost
     internal static class HttpRequestMessageExtensions
     {
         private const string HttpContextBaseKey = "MS_HttpContext";
+        private const string HttpBatchContextKey = "MS_HttpBatchContext";
 
         public static HttpContextBase GetHttpContext(this HttpRequestMessage request)
         {
@@ -18,7 +19,22 @@ namespace System.Web.Http.WebHost
 
             HttpContextBase context;
 
-            if (!request.Properties.TryGetValue(HttpContextBaseKey, out context))
+            if (request.IsBatchRequest())
+            {
+                if (!request.Properties.TryGetValue(HttpBatchContextKey, out context))
+                {
+                    if (request.Properties.TryGetValue(HttpContextBaseKey, out context))
+                    {
+                        context = new HttpBatchContextWrapper(context, request);
+                        request.Properties[HttpBatchContextKey] = context;
+                    }
+                    else
+                    {
+                        context = null;
+                    }
+                }
+            }
+            else if (!request.Properties.TryGetValue(HttpContextBaseKey, out context))
             {
                 context = null;
             }

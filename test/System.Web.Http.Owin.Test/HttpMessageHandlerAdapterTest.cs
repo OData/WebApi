@@ -15,7 +15,7 @@ using System.Web.Http.Hosting;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OwinHost
+namespace System.Web.Http.Owin
 {
     public class HttpMessageHandlerAdapterTest
     {

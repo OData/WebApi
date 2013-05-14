@@ -13,10 +13,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
-using System.Web.Http.OwinHost.Properties;
+using System.Web.Http.Owin.Properties;
 using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
-namespace System.Web.Http.OwinHost
+namespace System.Web.Http.Owin
 {
     /// <summary>
     /// Represents an OWIN component that submits requests to an <see cref="HttpMessageHandler"/> when invoked.
@@ -87,7 +87,7 @@ namespace System.Web.Http.OwinHost
                 // Handle null responses
                 if (response == null)
                 {
-                    throw Error.InvalidOperation(SRResources.SendAsync_ReturnedNull);
+                    throw Error.InvalidOperation(OwinResources.SendAsync_ReturnedNull);
                 }
 
                 // Handle soft 404s where no route matched - call the next component
@@ -174,7 +174,7 @@ namespace System.Web.Http.OwinHost
             }
             else
             {
-                throw Error.InvalidOperation(SRResources.CreateRequestURI_MissingHostHeader);
+                throw Error.InvalidOperation(OwinResources.CreateRequestURI_MissingHostHeader);
             }
 
             // Append request path

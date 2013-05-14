@@ -57,7 +57,7 @@
       <Name>System.Net.Http.Formatting</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\System.Web.Http.Owin\System.Web.Http.Owin.csproj">
-      <Project>{3a5a6d87-131a-47c0-8427-6c72dd63efdc}</Project>
+      <Project>{66dd7cd7-c68f-4d0e-9f3d-3b58c49d1467}</Project>
       <Name>System.Web.Http.Owin</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\System.Web.Http.WebHost\System.Web.Http.WebHost.csproj">

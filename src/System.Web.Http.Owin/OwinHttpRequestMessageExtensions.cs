@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Web.Http.Owin;
+using System.Web.Http.Owin.Properties;
 using Microsoft.Owin;
 
 namespace System.Net.Http

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Owin;
+using System.Web.Http.Owin.Properties;
 using Microsoft.Owin;
 
 namespace System.Web.Http

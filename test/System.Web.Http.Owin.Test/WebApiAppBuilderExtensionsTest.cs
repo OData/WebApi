@@ -6,7 +6,7 @@ using Microsoft.TestCommon;
 using Moq;
 using Owin;
 
-namespace System.Web.Http.OwinHost
+namespace System.Web.Http.Owin
 {
     public class WebApiAppBuilderExtensionsTest
     {

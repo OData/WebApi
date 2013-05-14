@@ -117,10 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CreateRequestURI_MissingHostHeader" xml:space="preserve">
+    <value>The OWIN environment does not contain a value for the required 'Host' header.</value>
+  </data>
+  <data name="GetOwinValue_IncorrectType" xml:space="preserve">
+    <value>The value for key '{0}' in the OWIN environment is not of the expected type '{1}'.</value>
+  </data>
+  <data name="GetOwinValue_MissingRequiredValue" xml:space="preserve">
+    <value>The OWIN environment does not contain a value for the required key '{0}'.</value>
+  </data>
   <data name="HttpAuthenticationContext_RequestMustNotBeNull" xml:space="preserve">
     <value>HttpAuthenticationContext.Request must not be null.</value>
   </data>
   <data name="OwinEnvironmentNotAvailable" xml:space="preserve">
     <value>No OWIN environment is available for the request.</value>
+  </data>
+  <data name="SendAsync_ReturnedNull" xml:space="preserve">
+    <value>The message handler did not return a response message.</value>
   </data>
 </root>

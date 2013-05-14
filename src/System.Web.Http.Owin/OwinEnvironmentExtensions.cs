@@ -3,9 +3,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
-using System.Web.Http.OwinHost.Properties;
+using System.Web.Http.Owin.Properties;
 
-namespace System.Web.Http.OwinHost
+namespace System.Web.Http.Owin
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal static class OwinEnvironmentExtensions
@@ -22,9 +22,9 @@ namespace System.Web.Http.OwinHost
                 {
                     return (T)value;
                 }
-                throw Error.InvalidOperation(SRResources.GetOwinValue_IncorrectType, key, typeof(T).Name);
+                throw Error.InvalidOperation(OwinResources.GetOwinValue_IncorrectType, key, typeof(T).Name);
             }
-            throw Error.InvalidOperation(SRResources.GetOwinValue_MissingRequiredValue, key);
+            throw Error.InvalidOperation(OwinResources.GetOwinValue_MissingRequiredValue, key);
         }
     }
 }

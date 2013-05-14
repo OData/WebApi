@@ -8,14 +8,14 @@ using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Owin;
 
-namespace System.Web.Http.OwinHost
+namespace System.Web.Http.Owin
 {
-    public class IntegrationTest
+    public class OwinHostIntegrationTest
     {
         [Fact]
         public void SimpleGet_Works()
         {
-            using (WebApplication.Start<IntegrationTest>(url: "http://localhost:50232/vroot"))
+            using (WebApplication.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
             {
                 HttpClient client = new HttpClient();
 
@@ -30,7 +30,7 @@ namespace System.Web.Http.OwinHost
         [Fact]
         public void SimplePost_Works()
         {
-            using (WebApplication.Start<IntegrationTest>(url: "http://localhost:50232/vroot"))
+            using (WebApplication.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
             {
                 HttpClient client = new HttpClient();
                 var content = new StringContent("\"Echo this\"", Encoding.UTF8, "application/json");
@@ -46,7 +46,7 @@ namespace System.Web.Http.OwinHost
         [Fact]
         public void GetThatThrowsDuringSerializations_RespondsWith500()
         {
-            using (WebApplication.Start<IntegrationTest>(url: "http://localhost:50232/vroot"))
+            using (WebApplication.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
             {
                 HttpClient client = new HttpClient();
 

@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OwinHost
+namespace System.Web.Http.Owin
 {
     public class OwinEnvironmentExtensionsTest
     {

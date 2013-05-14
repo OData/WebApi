@@ -6,7 +6,7 @@ using System.Net.Http.Formatting;
 using System.Threading;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OwinHost
+namespace System.Web.Http.Owin
 {
     public class OwinBufferPolicySelectorTest
     {

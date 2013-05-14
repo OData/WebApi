@@ -3,7 +3,7 @@
 using System.Net.Http;
 using System.Web.Http.Hosting;
 
-namespace System.Web.Http.OwinHost
+namespace System.Web.Http.Owin
 {
     /// <summary>
     /// Provides the default implementation of <see cref="IHostBufferPolicySelector"/> used by the OWIN Web API adapter.

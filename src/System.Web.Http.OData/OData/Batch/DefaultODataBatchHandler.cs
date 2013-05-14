@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Batch;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Batch
@@ -125,11 +126,18 @@ namespace System.Web.Http.OData.Batch
             {
                 if (batchReader.State == ODataBatchReaderState.ChangesetStart)
                 {
-                    requests.Add(new ChangeSetRequestItem(await batchReader.ReadChangeSetRequestAsync(batchId)));
+                    IList<HttpRequestMessage> changeSetRequests = await batchReader.ReadChangeSetRequestAsync(batchId);
+                    foreach (HttpRequestMessage changeSetRequest in changeSetRequests)
+                    {
+                        changeSetRequest.CopyBatchRequestProperties(request);
+                    }
+                    requests.Add(new ChangeSetRequestItem(changeSetRequests));
                 }
                 else if (batchReader.State == ODataBatchReaderState.Operation)
                 {
-                    requests.Add(new OperationRequestItem(await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: true)));
+                    HttpRequestMessage operationRequest = await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: true);
+                    operationRequest.CopyBatchRequestProperties(request);
+                    requests.Add(new OperationRequestItem(operationRequest));
                 }
             }
 

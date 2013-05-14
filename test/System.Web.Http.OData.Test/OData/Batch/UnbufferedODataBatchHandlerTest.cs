@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Web.Http.OData.Batch;
+using System.Web.Http.Routing;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
@@ -191,6 +192,91 @@ namespace System.Web.Http
             Assert.ThrowsArgumentNull(
                 () => batchHandler.ExecuteChangeSetAsync(reader.CreateODataBatchReader(), Guid.NewGuid(), null, CancellationToken.None).Wait(),
                 "originalRequest");
+        }
+
+        [Fact]
+        public void ExecuteChangeSetAsync_CopiesPropertiesFromRequest_WithoutExcludedProperties()
+        {
+            MockHttpServer server = new MockHttpServer(request =>
+            {
+                return new HttpResponseMessage
+                {
+                    RequestMessage = request
+                };
+            });
+            UnbufferedODataBatchHandler batchHandler = new UnbufferedODataBatchHandler(server);
+            HttpRequestMessage batchRequest = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
+            {
+                Content = new MultipartContent("mixed")
+                {
+                    new MultipartContent("mixed") // ChangeSet
+                    {
+                        ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values")
+                        {
+                            Content = new StringContent("foo")
+                        })
+                    }
+                }
+            };
+            batchRequest.Properties.Add("foo", "bar");
+            batchRequest.SetRouteData(new HttpRouteData(new HttpRoute()));
+            batchRequest.RegisterForDispose(new StringContent(String.Empty));
+            batchRequest.SetUrlHelper(new UrlHelper());
+            ODataMessageReader reader = batchRequest.Content.GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }).Result;
+            ODataBatchReader batchReader = reader.CreateODataBatchReader();
+            List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
+            Guid batchId = Guid.NewGuid();
+            batchReader.Read();
+
+            var response = batchHandler.ExecuteChangeSetAsync(batchReader, Guid.NewGuid(), batchRequest, CancellationToken.None).Result;
+
+            var changeSetResponses = ((ChangeSetResponseItem)response).Responses;
+            foreach (var changeSetResponse in changeSetResponses)
+            {
+                var changeSetRequest = changeSetResponse.RequestMessage;
+                Assert.Equal("bar", changeSetRequest.Properties["foo"]);
+                Assert.Null(changeSetRequest.GetRouteData());
+                Assert.Same(changeSetRequest, changeSetRequest.GetUrlHelper().Request);
+                Assert.Empty(changeSetRequest.GetResourcesForDisposal());
+            }
+        }
+
+        [Fact]
+        public void ExecuteOperationAsync_CopiesPropertiesFromRequest_WithoutExcludedProperties()
+        {
+            MockHttpServer server = new MockHttpServer(request =>
+            {
+                return new HttpResponseMessage
+                {
+                    RequestMessage = request
+                };
+            });
+            UnbufferedODataBatchHandler batchHandler = new UnbufferedODataBatchHandler(server);
+            HttpRequestMessage batchRequest = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
+            {
+                Content = new MultipartContent("mixed")
+                {
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Get, "http://example.com/")),
+                }
+            };
+            batchRequest.Properties.Add("foo", "bar");
+            batchRequest.SetRouteData(new HttpRouteData(new HttpRoute()));
+            batchRequest.RegisterForDispose(new StringContent(String.Empty));
+            batchRequest.SetUrlHelper(new UrlHelper());
+            ODataMessageReader reader = batchRequest.Content.GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }).Result;
+            ODataBatchReader batchReader = reader.CreateODataBatchReader();
+            List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
+            Guid batchId = Guid.NewGuid();
+            batchReader.Read();
+
+            var response = batchHandler.ExecuteOperationAsync(batchReader, Guid.NewGuid(), batchRequest, CancellationToken.None).Result;
+
+            var operationResponse = ((OperationResponseItem)response).Response;
+            var operationRequest = operationResponse.RequestMessage;
+            Assert.Equal("bar", operationRequest.Properties["foo"]);
+            Assert.Null(operationRequest.GetRouteData());
+            Assert.Same(operationRequest, operationRequest.GetUrlHelper().Request);
+            Assert.Empty(operationRequest.GetResourcesForDisposal());
         }
 
         [Fact]

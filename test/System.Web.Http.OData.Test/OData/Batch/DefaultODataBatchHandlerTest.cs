@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Web.Http.OData.Batch;
+using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http
@@ -215,6 +216,47 @@ namespace System.Web.Http
             var changeSetRequest = ((ChangeSetRequestItem)requests[1]).Requests.First();
             Assert.Equal(HttpMethod.Post, changeSetRequest.Method);
             Assert.Equal("http://example.com/values", changeSetRequest.RequestUri.AbsoluteUri);
+        }
+
+        [Fact]
+        public void ParseBatchRequestsAsync_CopiesPropertiesFromRequest_WithoutExcludedProperties()
+        {
+            DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(new HttpServer());
+            HttpRequestMessage batchRequest = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
+            {
+                Content = new MultipartContent("mixed")
+                {
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Get, "http://example.com/")),
+                    new MultipartContent("mixed") // ChangeSet
+                    {
+                        ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values"))
+                    }
+                }
+            };
+            batchRequest.Properties.Add("foo", "bar");
+            batchRequest.SetRouteData(new HttpRouteData(new HttpRoute()));
+            batchRequest.RegisterForDispose(new StringContent(String.Empty));
+            batchRequest.SetUrlHelper(new UrlHelper());
+
+            IList<ODataBatchRequestItem> requests = batchHandler.ParseBatchRequestsAsync(batchRequest).Result;
+
+            Assert.Equal(2, requests.Count);
+
+            var operationRequest = ((OperationRequestItem)requests[0]).Request;
+            Assert.Equal(HttpMethod.Get, operationRequest.Method);
+            Assert.Equal("http://example.com/", operationRequest.RequestUri.AbsoluteUri);
+            Assert.Equal("bar", operationRequest.Properties["foo"]);
+            Assert.Null(operationRequest.GetRouteData());
+            Assert.Same(operationRequest, operationRequest.GetUrlHelper().Request);
+            Assert.Empty(operationRequest.GetResourcesForDisposal());
+
+            var changeSetRequest = ((ChangeSetRequestItem)requests[1]).Requests.First();
+            Assert.Equal(HttpMethod.Post, changeSetRequest.Method);
+            Assert.Equal("http://example.com/values", changeSetRequest.RequestUri.AbsoluteUri);
+            Assert.Equal("bar", changeSetRequest.Properties["foo"]);
+            Assert.Null(changeSetRequest.GetRouteData());
+            Assert.Same(operationRequest, operationRequest.GetUrlHelper().Request);
+            Assert.Empty(changeSetRequest.GetResourcesForDisposal());
         }
 
         [Fact]

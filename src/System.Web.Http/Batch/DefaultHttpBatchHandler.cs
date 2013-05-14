@@ -187,6 +187,7 @@ namespace System.Web.Http.Batch
             foreach (HttpContent httpContent in streamProvider.Contents)
             {
                 HttpRequestMessage innerRequest = await httpContent.ReadAsHttpRequestMessageAsync();
+                innerRequest.CopyBatchRequestProperties(request);
                 requests.Add(innerRequest);
             }
             return requests;

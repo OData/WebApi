@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Batch;
+using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http
@@ -277,6 +278,41 @@ namespace System.Web.Http
             Assert.Equal("http://example.com/", requests[0].RequestUri.AbsoluteUri);
             Assert.Equal(HttpMethod.Post, requests[1].Method);
             Assert.Equal("http://example.com/values", requests[1].RequestUri.AbsoluteUri);
+        }
+
+        [Fact]
+        public void ParseBatchRequestsAsync_CopiesPropertiesFromRequest_WithoutExcludedProperties()
+        {
+            DefaultHttpBatchHandler batchHandler = new DefaultHttpBatchHandler(new HttpServer());
+            HttpRequestMessage request = new HttpRequestMessage
+            {
+                Content = new MultipartContent("mixed")
+                {
+                    new HttpMessageContent(new HttpRequestMessage(HttpMethod.Get, "http://example.com/")),
+                    new HttpMessageContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values"))
+                }
+            };
+            request.Properties.Add("foo", "bar");
+            request.SetRouteData(new HttpRouteData(new HttpRoute()));
+            request.SetUrlHelper(new UrlHelper());
+            request.RegisterForDispose(new StringContent(String.Empty));
+
+            IList<HttpRequestMessage> requests = batchHandler.ParseBatchRequestsAsync(request).Result;
+
+            Assert.Equal(2, requests.Count);
+            Assert.Equal(HttpMethod.Get, requests[0].Method);
+            Assert.Equal("bar", requests[0].Properties["foo"]);
+            Assert.Null(requests[0].GetRouteData());
+            Assert.Same(requests[0], requests[0].GetUrlHelper().Request);
+            Assert.Empty(requests[0].GetResourcesForDisposal());
+            Assert.Equal("http://example.com/", requests[0].RequestUri.AbsoluteUri);
+
+            Assert.Equal(HttpMethod.Post, requests[1].Method);
+            Assert.Equal("http://example.com/values", requests[1].RequestUri.AbsoluteUri);
+            Assert.Equal("bar", requests[1].Properties["foo"]);
+            Assert.Null(requests[1].GetRouteData());
+            Assert.Same(requests[1], requests[1].GetUrlHelper().Request);
+            Assert.Empty(requests[1].GetResourcesForDisposal());
         }
 
         [Fact]

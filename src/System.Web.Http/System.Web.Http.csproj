@@ -73,6 +73,7 @@
     <Compile Include="Batch\BatchExecutionOrder.cs" />
     <Compile Include="Batch\HttpBatchHandler.cs" />
     <Compile Include="Batch\DefaultHttpBatchHandler.cs" />
+    <Compile Include="Batch\BatchHttpRequestMessageExtensions.cs" />
     <Compile Include="Controllers\HttpControllerSettings.cs" />
     <Compile Include="Controllers\HttpParameterDescriptorExtensions.cs" />
     <Compile Include="Controllers\IActionResultConverter.cs" />

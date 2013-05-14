@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Batch;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Batch
@@ -104,7 +105,9 @@ namespace System.Web.Http.OData.Batch
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            OperationRequestItem operation = new OperationRequestItem(await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: false));
+            HttpRequestMessage operationRequest = await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: false);
+            operationRequest.CopyBatchRequestProperties(originalRequest);
+            OperationRequestItem operation = new OperationRequestItem(operationRequest);
             try
             {
                 ODataBatchResponseItem response = await operation.SendRequestAsync(Invoker, cancellationToken);
@@ -146,6 +149,7 @@ namespace System.Web.Http.OData.Batch
                     if (batchReader.State == ODataBatchReaderState.Operation)
                     {
                         HttpRequestMessage changeSetOperationRequest = await batchReader.ReadChangeSetOperationRequestAsync(batchId, changeSetId, bufferContentStream: false);
+                        changeSetOperationRequest.CopyBatchRequestProperties(originalRequest);
                         try
                         {
                             HttpResponseMessage response = await ODataBatchRequestItem.SendMessageAsync(Invoker, changeSetOperationRequest, cancellationToken, contentIdToLocationMapping);

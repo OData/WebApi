@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http.OData.Batch;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
@@ -247,8 +248,8 @@ namespace System.Web.Http.OData.Formatter
                 {
                     ODataPayloadKind payloadKind;
 
-                    // TODO: We need the actual instance of the IEdmObject to figure out its EDM type which is needed to figure out the 
-                    // payload kind. We cannot get access to the instance in CanWriteType unless we change the content-negotiator. This works 
+                    // TODO: We need the actual instance of the IEdmObject to figure out its EDM type which is needed to figure out the
+                    // payload kind. We cannot get access to the instance in CanWriteType unless we change the content-negotiator. This works
                     // for now as we support writing IEdmObject's representing only entity or feed.This will have to change once we support type-less.
                     if (typeof(IEdmObject).IsAssignableFrom(type))
                     {
@@ -308,7 +309,7 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.InvalidOperation(SRResources.ReadFromStreamAsyncMustHaveRequest);
             }
 
-            try 
+            try
             {
                 return Task.FromResult(ReadFromStream(type, readStream, content, formatterLogger));
             }
@@ -356,7 +357,7 @@ namespace System.Web.Http.OData.Formatter
 
                 try
                 {
-                    IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
+                    IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders, Request.GetODataContentIdMapping());
                     oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
 
                     Request.RegisterForDispose(oDataMessageReader);
@@ -541,6 +542,7 @@ namespace System.Web.Http.OData.Formatter
 
             return serializer;
         }
+
         private static string GetRootElementName(ODataPath path)
         {
             if (path != null)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter
@@ -11,10 +12,12 @@ namespace System.Web.Http.OData.Formatter
     /// <summary>
     /// Wrapper for IODataRequestMessage and IODataResponseMessage.
     /// </summary>
-    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage
+    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage, IODataUrlResolver
     {
         private Stream _stream;
         private Dictionary<string, string> _headers;
+        private IDictionary<string, string> _contentIdMapping;
+        private static readonly Regex ContentIdReferencePattern = new Regex(@"\$\d", RegexOptions.Compiled);
 
         public ODataMessageWrapper()
             : this(stream: null, headers: null)
@@ -27,6 +30,11 @@ namespace System.Web.Http.OData.Formatter
         }
 
         public ODataMessageWrapper(Stream stream, HttpHeaders headers)
+            : this(stream: stream, headers: headers, contentIdMapping: null)
+        {
+        }
+
+        public ODataMessageWrapper(Stream stream, HttpHeaders headers, IDictionary<string, string> contentIdMapping)
         {
             _stream = stream;
             if (headers != null)
@@ -37,6 +45,7 @@ namespace System.Web.Http.OData.Formatter
             {
                 _headers = new Dictionary<string, string>();
             }
+            _contentIdMapping = contentIdMapping ?? new Dictionary<string, string>();
         }
 
         public IEnumerable<KeyValuePair<string, string>> Headers
@@ -102,6 +111,24 @@ namespace System.Web.Http.OData.Formatter
         public void SetHeader(string headerName, string headerValue)
         {
             _headers[headerName] = headerValue;
+        }
+
+        public Uri ResolveUrl(Uri baseUri, Uri payloadUri)
+        {
+            if (payloadUri == null)
+            {
+                throw new ArgumentNullException("payloadUri");
+            }
+
+            string originalPayloadUri = payloadUri.OriginalString;
+            if (ContentIdReferencePattern.IsMatch(originalPayloadUri))
+            {
+                string resolvedUri = ContentIdHelpers.ResolveContentId(originalPayloadUri, _contentIdMapping);
+                return new Uri(resolvedUri, UriKind.RelativeOrAbsolute);
+            }
+
+            // Returning null for default resolution.
+            return null;
         }
     }
 }

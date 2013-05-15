@@ -53,18 +53,23 @@ namespace System.Web.Http.OData.Batch
             {
                 foreach (HttpRequestMessage request in Requests)
                 {
-                    responses.Add(await SendMessageAsync(invoker, request, cancellationToken, contentIdToLocationMapping));
+                    HttpResponseMessage response = await SendMessageAsync(invoker, request, cancellationToken, contentIdToLocationMapping);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        responses.Add(response);
+                    }
+                    else
+                    {
+                        DisposeResponses(responses);
+                        responses.Clear();
+                        responses.Add(response);
+                        return new ChangeSetResponseItem(responses);
+                    }
                 }
             }
             catch
             {
-                foreach (HttpResponseMessage response in responses)
-                {
-                    if (response != null)
-                    {
-                        response.Dispose();
-                    }
-                }
+                DisposeResponses(responses);
                 throw;
             }
 
@@ -99,6 +104,17 @@ namespace System.Web.Http.OData.Batch
                     {
                         request.Dispose();
                     }
+                }
+            }
+        }
+
+        internal static void DisposeResponses(List<HttpResponseMessage> responses)
+        {
+            foreach (HttpResponseMessage response in responses)
+            {
+                if (response != null)
+                {
+                    response.Dispose();
                 }
             }
         }

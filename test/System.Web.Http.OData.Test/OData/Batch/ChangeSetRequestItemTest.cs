@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,6 +62,35 @@ namespace System.Web.Http
 
             var changesetResponse = Assert.IsType<ChangeSetResponseItem>(response);
             Assert.Equal(2, changesetResponse.Responses.Count());
+        }
+
+        [Fact]
+        public void SendRequestAsync_ReturnsSingleErrorResponse()
+        {
+            HttpRequestMessage[] requests = new HttpRequestMessage[]
+                {
+                    new HttpRequestMessage(HttpMethod.Get, "http://example.com"),
+                    new HttpRequestMessage(HttpMethod.Post, "http://example.com"),
+                    new HttpRequestMessage(HttpMethod.Put, "http://example.com")
+                };
+            ChangeSetRequestItem requestItem = new ChangeSetRequestItem(requests);
+
+            Mock<HttpMessageInvoker> invoker = new Mock<HttpMessageInvoker>(new HttpServer());
+            invoker.Setup(i => i.SendAsync(It.IsAny<HttpRequestMessage>(), CancellationToken.None))
+                .Returns<HttpRequestMessage, CancellationToken>((req, c) =>
+                {
+                    if (req.Method == HttpMethod.Post)
+                    {
+                        return Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest));
+                    }
+                    return Task.FromResult(new HttpResponseMessage());
+                });
+
+            var response = requestItem.SendRequestAsync(invoker.Object, CancellationToken.None).Result;
+
+            var changesetResponse = Assert.IsType<ChangeSetResponseItem>(response);
+            Assert.Equal(1, changesetResponse.Responses.Count());
+            Assert.Equal(HttpStatusCode.BadRequest, changesetResponse.Responses.First().StatusCode);
         }
 
         [Fact]

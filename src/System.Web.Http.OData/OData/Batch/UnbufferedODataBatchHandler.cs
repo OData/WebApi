@@ -153,7 +153,17 @@ namespace System.Web.Http.OData.Batch
                         try
                         {
                             HttpResponseMessage response = await ODataBatchRequestItem.SendMessageAsync(Invoker, changeSetOperationRequest, cancellationToken, contentIdToLocationMapping);
-                            changeSetResponse.Add(response);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                changeSetResponse.Add(response);
+                            }
+                            else
+                            {
+                                ChangeSetRequestItem.DisposeResponses(changeSetResponse);
+                                changeSetResponse.Clear();
+                                changeSetResponse.Add(response);
+                                return new ChangeSetResponseItem(changeSetResponse);
+                            }
                         }
                         finally
                         {
@@ -165,13 +175,7 @@ namespace System.Web.Http.OData.Batch
             }
             catch
             {
-                foreach (HttpResponseMessage response in changeSetResponse)
-                {
-                    if (response != null)
-                    {
-                        response.Dispose();
-                    }
-                }
+                ChangeSetRequestItem.DisposeResponses(changeSetResponse);
                 throw;
             }
 

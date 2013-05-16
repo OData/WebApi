@@ -102,6 +102,7 @@ namespace System.Web.Http.Owin
                         response = await BufferResponseBodyAsync(request, response);
                     }
 
+                    FixUpContentLengthHeaders(response);
                     await SendResponseMessageAsync(environment, response);
                 }
             }
@@ -269,6 +270,33 @@ namespace System.Web.Http.Owin
             }
         }
 
+        // Responsible for setting Content-Length and Transfer-Encoding if needed
+        private static void FixUpContentLengthHeaders(HttpResponseMessage response)
+        {
+            HttpContent responseContent = response.Content;
+            if (responseContent != null)
+            {
+                if (response.Headers.TransferEncodingChunked == true)
+                {
+                    // According to section 4.4 of the HTTP 1.1 spec, HTTP responses that use chunked transfer
+                    // encoding must not have a content length set. Chunked should take precedence over content
+                    // length in this case because chunked is always set explicitly by users while the Content-Length
+                    // header can be added implicitly by System.Net.Http.
+                    responseContent.Headers.ContentLength = null;
+                }
+                else
+                {
+                    // Triggers delayed content-length calculations.
+                    if (responseContent.Headers.ContentLength == null)
+                    {
+                        // If there is no content-length we can compute, then the response should use
+                        // chunked transfer encoding to prevent the server from buffering the content
+                        response.Headers.TransferEncodingChunked = true;
+                    }
+                }
+            }
+        }
+
         private static Task SendResponseMessageAsync(IDictionary<string, object> environment, HttpResponseMessage response)
         {
             environment[OwinConstants.ResponseStatusCodeKey] = response.StatusCode;
@@ -281,24 +309,22 @@ namespace System.Web.Http.Owin
                 responseHeaders[header.Key] = header.Value.ToArray();
             }
 
-            if (response.Content == null)
+            HttpContent responseContent = response.Content;
+            if (responseContent == null)
             {
                 return TaskHelpers.Completed();
             }
             else
             {
-                // Trigger delayed content-length calculations before enumerating the headers.
-                response.Content.Headers.ContentLength = response.Content.Headers.ContentLength;
-
                 // Copy content headers
-                foreach (KeyValuePair<string, IEnumerable<string>> contentHeader in response.Content.Headers)
+                foreach (KeyValuePair<string, IEnumerable<string>> contentHeader in responseContent.Headers)
                 {
                     responseHeaders[contentHeader.Key] = contentHeader.Value.ToArray();
                 }
 
                 // Copy body
                 Stream responseBody = environment.GetOwinValue<Stream>(OwinConstants.ResponseBodyKey);
-                return response.Content.CopyToAsync(responseBody);
+                return responseContent.CopyToAsync(responseBody);
             }
         }
 

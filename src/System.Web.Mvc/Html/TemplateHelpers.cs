@@ -49,6 +49,7 @@ namespace System.Web.Mvc.Html
                 { "Url", DefaultEditorTemplates.UrlInputTemplate },
                 { "EmailAddress", DefaultEditorTemplates.EmailAddressInputTemplate },
                 { "DateTime", DefaultEditorTemplates.DateTimeInputTemplate },
+                { "DateTime-local", DefaultEditorTemplates.DateTimeLocalInputTemplate },
                 { "Date", DefaultEditorTemplates.DateInputTemplate },
                 { "Time", DefaultEditorTemplates.TimeInputTemplate },
                 { typeof(Color).Name, DefaultEditorTemplates.ColorInputTemplate },
@@ -301,9 +302,11 @@ namespace System.Web.Mvc.Html
 
         private static HtmlHelper MakeHtmlHelper(HtmlHelper html, ViewDataDictionary viewData)
         {
-            return new HtmlHelper(
+            var newHelper = new HtmlHelper(
                 new ViewContext(html.ViewContext, html.ViewContext.View, viewData, html.ViewContext.TempData, html.ViewContext.Writer),
                 new ViewDataContainer(viewData));
+            newHelper.Html5DateRenderingMode = html.Html5DateRenderingMode;
+            return newHelper;
         }
 
         internal class ActionCacheCodeItem : ActionCacheItem

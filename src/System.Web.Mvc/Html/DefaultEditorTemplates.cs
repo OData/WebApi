@@ -246,16 +246,25 @@ namespace System.Web.Mvc.Html
 
         internal static string DateTimeInputTemplate(HtmlHelper html)
         {
+            ApplyRfc3339DateFormattingIfNeeded(html, "{0:yyyy-MM-ddTHH:mm:ss.fffK}");
             return HtmlInputTemplateHelper(html, inputType: "datetime");
+        }
+
+        internal static string DateTimeLocalInputTemplate(HtmlHelper html)
+        {
+            ApplyRfc3339DateFormattingIfNeeded(html, "{0:yyyy-MM-ddTHH:mm:ss.fff}");
+            return HtmlInputTemplateHelper(html, inputType: "datetime-local");
         }
 
         internal static string DateInputTemplate(HtmlHelper html)
         {
+            ApplyRfc3339DateFormattingIfNeeded(html, "{0:yyyy-MM-dd}");
             return HtmlInputTemplateHelper(html, inputType: "date");
         }
 
         internal static string TimeInputTemplate(HtmlHelper html)
         {
+            ApplyRfc3339DateFormattingIfNeeded(html, "{0:HH:mm:ss.fff}");
             return HtmlInputTemplateHelper(html, inputType: "time");
         }
 
@@ -281,6 +290,25 @@ namespace System.Web.Mvc.Html
             }
 
             return HtmlInputTemplateHelper(html, "color", value);
+        }
+
+        private static void ApplyRfc3339DateFormattingIfNeeded(HtmlHelper html, string format)
+        {
+            if (html.Html5DateRenderingMode != Html5DateRenderingMode.Rfc3339)
+            {
+                return;
+            }
+
+            if (html.ViewContext.ViewData.TemplateInfo.FormattedModelValue != html.ViewContext.ViewData.ModelMetadata.Model)
+            {
+                return;
+            }
+
+            object value = html.ViewContext.ViewData.ModelMetadata.Model;
+            if (value is DateTime || value is DateTimeOffset)
+            {
+                html.ViewContext.ViewData.TemplateInfo.FormattedModelValue = String.Format(CultureInfo.InvariantCulture, format, value);
+            }
         }
 
         private static string HtmlInputTemplateHelper(HtmlHelper html, string inputType = null)

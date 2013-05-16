@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Web.UI.WebControls;
+using System.Web.WebPages.Scope;
 using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 using Moq;
@@ -613,46 +614,109 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.EmailAddressInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
-        // DateTimeInputTemplate
-
         [Fact]
         public void DateTimeInputTemplateTests()
         {
+            var type = "datetime";
             Assert.Equal(
-                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"datetime\" value=\"Value\" />",
+                GetExpectedInputTag(type, "Value"),
                 DefaultEditorTemplates.DateTimeInputTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"datetime\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
+                GetExpectedInputTag(type, "&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"),
                 DefaultEditorTemplates.DateTimeInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+
+
+            var epocInLocalTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).ToLocalTime();
+            var helper = MakeHtmlHelper<DateTime>(epocInLocalTime);
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString(CultureInfo.CurrentCulture)),
+                DefaultEditorTemplates.DateTimeInputTemplate(helper));
+
+            helper.Html5DateRenderingMode = Html5DateRenderingMode.Rfc3339;
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-ddTHH:mm:ss.fffK")),
+                DefaultEditorTemplates.DateTimeInputTemplate(helper));
         }
 
-        // DateInputTemplate
+        [Fact]
+        public void DateTimeLocalInputTemplateTests()
+        {
+            var type = "datetime-local";
+            Assert.Equal(
+                GetExpectedInputTag(type, "Value"),
+                DefaultEditorTemplates.DateTimeLocalInputTemplate(MakeHtmlHelper<string>("Value")));
+
+            Assert.Equal(
+                GetExpectedInputTag(type, "&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"),
+                DefaultEditorTemplates.DateTimeLocalInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+
+            var epocInLocalTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).ToLocalTime();
+            var helper = MakeHtmlHelper<DateTime>(epocInLocalTime);
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString(CultureInfo.CurrentCulture)),
+                DefaultEditorTemplates.DateTimeLocalInputTemplate(helper));
+
+            helper.Html5DateRenderingMode = Html5DateRenderingMode.Rfc3339;
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-ddTHH:mm:ss.fff")),
+                DefaultEditorTemplates.DateTimeLocalInputTemplate(helper));
+        }
 
         [Fact]
         public void DateInputTemplateTests()
         {
+            var type = "date";
             Assert.Equal(
-                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"date\" value=\"Value\" />",
+                GetExpectedInputTag(type, "Value"),
                 DefaultEditorTemplates.DateInputTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"date\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
+                GetExpectedInputTag(type, "&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"),
                 DefaultEditorTemplates.DateInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
-        }
 
-        // TimeInputTemplate
+            var epocInLocalTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).ToLocalTime();
+            var helper = MakeHtmlHelper<DateTime>(epocInLocalTime);
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString(CultureInfo.CurrentCulture)),
+                DefaultEditorTemplates.DateInputTemplate(helper));
+
+            helper.Html5DateRenderingMode = Html5DateRenderingMode.Rfc3339;
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-dd")),
+                DefaultEditorTemplates.DateInputTemplate(helper));
+        }
 
         [Fact]
         public void TimeInputTemplateTests()
         {
+            var type = "time";
             Assert.Equal(
-                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"time\" value=\"Value\" />",
+                GetExpectedInputTag(type, "Value"),
                 DefaultEditorTemplates.TimeInputTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"time\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
+                GetExpectedInputTag(type, "&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"),
                 DefaultEditorTemplates.TimeInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+
+            var epocInLocalTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).ToLocalTime();
+            var helper = MakeHtmlHelper<DateTime>(epocInLocalTime);
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString(CultureInfo.CurrentCulture)),
+                DefaultEditorTemplates.TimeInputTemplate(helper));
+
+            helper.Html5DateRenderingMode = Html5DateRenderingMode.Rfc3339;
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString("HH:mm:ss.fff")),
+                DefaultEditorTemplates.TimeInputTemplate(helper));
         }
 
         // NumberInputTemplate
@@ -677,7 +741,7 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(
                 "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"color\" value=\"#33F4CC\" />",
                 DefaultEditorTemplates.ColorInputTemplate(MakeHtmlHelper<string>("#33F4CC")));
-            
+
             var color = Color.FromArgb(0x33, 0xf4, 0xcc);
             Assert.Equal(
                 "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"color\" value=\"#33F4CC\" />",
@@ -689,6 +753,11 @@ namespace System.Web.Mvc.Html.Test
         }
 
         // Helpers
+
+        static string GetExpectedInputTag(string type, string value)
+        {
+            return string.Format("<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"{0}\" value=\"{1}\" />", type, value);
+        }
 
         private HtmlHelper MakeHtmlHelper<TModel>(object model)
         {
@@ -709,6 +778,9 @@ namespace System.Web.Mvc.Html.Test
             {
                 HttpContext = mockHttpContext.Object
             };
+
+            // A new helper instance, is executing within a new scope, so it needs to be reset.
+            ScopeStorage.CurrentProvider.CurrentScope = new ScopeStorageDictionary();
 
             return new HtmlHelper(viewContext, new SimpleViewDataContainer(viewData));
         }

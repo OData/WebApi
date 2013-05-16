@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace System.Net.Http
@@ -17,6 +18,7 @@ namespace System.Net.Http
         private static readonly Type _streamType = typeof(Stream);
         private Stream _outputStream;
         private MultipartStreamProvider _streamProvider;
+        private HttpContent _parentContent;
         private HttpContentHeaders _headers;
 
         /// <summary>
@@ -24,10 +26,13 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="streamProvider">The stream provider.</param>
         /// <param name="maxBodyPartHeaderSize">The max length of the MIME header within each MIME body part.</param>
-        public MimeBodyPart(MultipartStreamProvider streamProvider, int maxBodyPartHeaderSize)
+        /// <param name="parentContent">The part's parent content</param>
+        public MimeBodyPart(MultipartStreamProvider streamProvider, int maxBodyPartHeaderSize, HttpContent parentContent)
         {
             Contract.Assert(streamProvider != null);
+            Contract.Assert(parentContent != null);
             _streamProvider = streamProvider;
+            _parentContent = parentContent;
             Segments = new List<ArraySegment<byte>>(2);
             _headers = FormattingUtilities.CreateEmptyContentHeaders();
             HeaderParser = new InternetMessageFormatHeaderParser(_headers, maxBodyPartHeaderSize);
@@ -42,12 +47,24 @@ namespace System.Net.Http
         public InternetMessageFormatHeaderParser HeaderParser { get; private set; }
 
         /// <summary>
-        /// Gets the content of the HTTP.
+        /// Gets the part's content as an HttpContent.
         /// </summary>
         /// <value>
-        /// The content of the HTTP.
+        /// The part's content, or null if the part had no content.
         /// </value>
-        public HttpContent HttpContent { get; private set; }
+        public HttpContent CreateHttpContent()
+        {
+            Contract.Assert(IsComplete);
+
+            if (_outputStream == null)
+            {
+                return null;
+            }
+
+            HttpContent content = new StreamContent(_outputStream);
+            _headers.CopyTo(content.Headers);
+            return content;
+        }
 
         /// <summary>
         /// Gets the set of <see cref="ArraySegment{T}"/> pointing to the read buffer with
@@ -72,17 +89,26 @@ namespace System.Net.Http
         public bool IsFinal { get; set; }
 
         /// <summary>
+        /// Writes the <paramref name="segment"/> into the part's output stream.
+        /// </summary>
+        /// <param name="segment">The current segment to be written to the part's output stream.</param>
+        public async Task WriteSegment(ArraySegment<byte> segment)
+        {
+            var stream = GetOutputStream();
+            await stream.WriteAsync(segment.Array, segment.Offset, segment.Count);
+        }
+
+        /// <summary>
         /// Gets the output stream.
         /// </summary>
         /// <returns>The output stream to write the body part to.</returns>
-        public Stream GetOutputStream(HttpContent parent)
+        private Stream GetOutputStream()
         {
-            Contract.Assert(parent != null);
             if (_outputStream == null)
             {
                 try
                 {
-                    _outputStream = _streamProvider.GetStream(parent, _headers);
+                    _outputStream = _streamProvider.GetStream(_parentContent, _headers);
                 }
                 catch (Exception e)
                 {
@@ -98,9 +124,6 @@ namespace System.Net.Http
                 {
                     throw Error.InvalidOperation(Properties.Resources.ReadAsMimeMultipartStreamProviderReadOnly, _streamProvider.GetType().Name, _streamType.Name);
                 }
-
-                HttpContent = new StreamContent(_outputStream);
-                _headers.CopyTo(HttpContent.Headers);
             }
 
             return _outputStream;
@@ -124,7 +147,7 @@ namespace System.Net.Http
             if (disposing)
             {
                 CleanupOutputStream();
-                HttpContent = null;
+                _parentContent = null;
                 HeaderParser = null;
                 Segments.Clear();
             }

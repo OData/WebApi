@@ -33,6 +33,8 @@ namespace System.Net.Http.Formatting.Parsers
         // Stream provider
         private MultipartStreamProvider _streamProvider;
 
+        private HttpContent _content;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MimeMultipartBodyPartParser"/> class.
         /// </summary>
@@ -62,8 +64,8 @@ namespace System.Net.Http.Formatting.Parsers
             string boundary = ValidateArguments(content, maxMessageSize, true);
 
             _mimeParser = new MimeMultipartParser(boundary, maxMessageSize);
-            _currentBodyPart = new MimeBodyPart(streamProvider, maxBodyPartHeaderSize);
-
+            _currentBodyPart = new MimeBodyPart(streamProvider, maxBodyPartHeaderSize, content);
+            _content = content;
             _maxBodyPartHeaderSize = maxBodyPartHeaderSize;
 
             _streamProvider = streamProvider;
@@ -178,7 +180,8 @@ namespace System.Net.Http.Formatting.Parsers
                     completed.IsComplete = true;
                     completed.IsFinal = isFinal;
 
-                    _currentBodyPart = new MimeBodyPart(_streamProvider, _maxBodyPartHeaderSize);
+                    _currentBodyPart = new MimeBodyPart(_streamProvider, _maxBodyPartHeaderSize, _content);
+
                     _mimeStatus = MimeMultipartParser.State.NeedMoreData;
                     _bodyPartHeaderStatus = ParserState.NeedMoreData;
                     yield return completed;

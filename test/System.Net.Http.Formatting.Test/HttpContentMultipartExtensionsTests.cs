@@ -168,23 +168,27 @@ namespace System.Net.Http
         public void ReadAsMultipartAsync_ThrowsOnBadStreamProvider()
         {
             HttpContent content = CreateContent(ValidBoundary, "A", "B", "C");
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => content.ReadAsMultipartAsync(new BadStreamProvider()).Result);
-            Assert.NotNull(exception.InnerException);
-            Assert.Equal(ExceptionStreamProviderMessage, exception.InnerException.Message);
+            IOException exception = Assert.Throws<IOException>(() => content.ReadAsMultipartAsync(new BadStreamProvider()).Result);
+            InvalidOperationException invalidOperationException = exception.InnerException as InvalidOperationException;
+            Assert.NotNull(invalidOperationException);
+            Assert.NotNull(invalidOperationException.InnerException);
+            Assert.Equal(ExceptionStreamProviderMessage, invalidOperationException.InnerException.Message);
         }
 
         [Fact]
         public void ReadAsMultipartAsync_ThrowsOnNullProvider()
         {
             HttpContent content = CreateContent(ValidBoundary, "A", "B", "C");
-            Assert.Throws<InvalidOperationException>(() => content.ReadAsMultipartAsync(new NullProvider()).Result);
+            IOException exception = Assert.Throws<IOException>(() => content.ReadAsMultipartAsync(new NullProvider()).Result);
+            Assert.IsType<InvalidOperationException>(exception.InnerException);
         }
 
         [Fact]
         public void ReadAsMultipartAsync_ThrowsOnReadOnlyStream()
         {
             HttpContent content = CreateContent(ValidBoundary, "A", "B", "C");
-            Assert.Throws<InvalidOperationException>(() => content.ReadAsMultipartAsync(new ReadOnlyStreamProvider()).Result);
+            IOException exception = Assert.Throws<IOException>(() => content.ReadAsMultipartAsync(new ReadOnlyStreamProvider()).Result);
+            Assert.IsType<InvalidOperationException>(exception.InnerException);
         }
 
         [Fact]
@@ -225,6 +229,22 @@ namespace System.Net.Http
             MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync().Result;
             Assert.Equal(1, result.Contents.Count);
             Assert.Equal(singleShortBody, result.Contents[0].ReadAsStringAsync().Result);
+            ValidateContents(result.Contents);
+        }
+
+        [Fact]
+        public void ReadAsMultipartAsync_WithHugeBody_AvoidStackOverflow()
+        {
+            // Arrange
+            var fiftyMegs = 1024 * 1024 * 50;
+            HttpContent content = CreateContent("---3123---", new string('x', fiftyMegs));
+
+            // Act
+            MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync(new MultipartMemoryStreamProvider(), 256).Result;
+
+            // Assert
+            // this is for sanity. The actual test here is that the Act part did not cause a stack overflow
+            Assert.Equal(fiftyMegs, result.Contents[0].ReadAsStringAsync().Result.Length);
             ValidateContents(result.Contents);
         }
 

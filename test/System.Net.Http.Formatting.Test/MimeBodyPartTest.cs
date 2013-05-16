@@ -2,6 +2,8 @@
 
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Http.Mocks;
+using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -9,7 +11,7 @@ namespace System.Net.Http
 {
     public class MimeBodyPartTest
     {
-        public static TheoryDataSet<MultipartStreamProvider> MultipartStreamProviders
+        public static TheoryDataSet<MultipartStreamProvider> BadMultipartStreamProviders
         {
             get
             {
@@ -23,12 +25,16 @@ namespace System.Net.Http
         }
 
         [Theory]
-        [TestDataSet(typeof(MimeBodyPartTest), "MultipartStreamProviders")]
+        [TestDataSet(typeof(MimeBodyPartTest), "BadMultipartStreamProviders")]
         public void GetOutputStream_ThrowsOnInvalidStreamProvider(MultipartStreamProvider streamProvider)
         {
+            // Arrange
             HttpContent parent = new StringContent("hello");
-            MimeBodyPart bodypart = new MimeBodyPart(streamProvider, 1024);
-            Assert.Throws<InvalidOperationException>(() => bodypart.GetOutputStream(parent));
+            MimeBodyPart bodypart = new MimeBodyPart(streamProvider, 1024, parent);
+            bodypart.Segments.Add(new ArraySegment<byte>(new byte[] { 1 }));
+
+            // Act and Assert
+            Assert.Throws<InvalidOperationException>(() => bodypart.WriteSegment(bodypart.Segments[0]).Wait());
         }
 
         [Fact]
@@ -36,14 +42,16 @@ namespace System.Net.Http
         {
             // Arrange
             HttpContent parent = new StringContent("hello");
-            Mock<Stream> mockStream = new Mock<Stream>();
+            Mock<Stream> mockStream = new Mock<Stream>() { CallBase = true };
             mockStream.Setup(s => s.CanWrite).Returns(true);
             Mock<MultipartStreamProvider> mockStreamProvider = new Mock<MultipartStreamProvider>();
             mockStreamProvider.Setup(sp => sp.GetStream(It.IsAny<HttpContent>(), It.IsAny<HttpContentHeaders>())).Returns(mockStream.Object);
-            MimeBodyPart bodypart = new MimeBodyPart(mockStreamProvider.Object, 1024);
+            MimeBodyPart bodypart = new MimeBodyPart(mockStreamProvider.Object, 1024, parent);
+            bodypart.Segments.Add(new ArraySegment<byte>(new byte[] { 1 }));
+            bodypart.WriteSegment(bodypart.Segments[0]).Wait();
 
             // Act
-            bodypart.GetOutputStream(parent);
+            bodypart.CreateHttpContent();
             bodypart.Dispose();
 
             // Assert
@@ -58,10 +66,12 @@ namespace System.Net.Http
             Mock<MemoryStream> mockStream = new Mock<MemoryStream> { CallBase = true };
             Mock<MultipartStreamProvider> mockStreamProvider = new Mock<MultipartStreamProvider>();
             mockStreamProvider.Setup(sp => sp.GetStream(It.IsAny<HttpContent>(), It.IsAny<HttpContentHeaders>())).Returns(mockStream.Object);
-            MimeBodyPart bodypart = new MimeBodyPart(mockStreamProvider.Object, 1024);
+            MimeBodyPart bodypart = new MimeBodyPart(mockStreamProvider.Object, 1024, parent);
+            bodypart.Segments.Add(new ArraySegment<byte>(new byte[] { 1 }));
+            bodypart.WriteSegment(bodypart.Segments[0]).Wait();
 
             // Act
-            bodypart.GetOutputStream(parent);
+            bodypart.CreateHttpContent();
             bodypart.Dispose();
 
             // Assert

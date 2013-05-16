@@ -130,7 +130,7 @@ namespace System.Net.Http
                 using (var parser = new MimeMultipartBodyPartParser(content, streamProvider))
                 {
                     byte[] data = new byte[bufferSize];
-                    MultipartAsyncContext context = new MultipartAsyncContext(content, stream, parser, data, streamProvider.Contents);
+                    MultipartAsyncContext context = new MultipartAsyncContext(stream, parser, data, streamProvider.Contents);
 
                     // Start async read/write loop
                     await MultipartReadAsync(context);
@@ -142,66 +142,45 @@ namespace System.Net.Http
             }
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
         private static async Task MultipartReadAsync(MultipartAsyncContext context)
         {
             Contract.Assert(context != null, "context cannot be null");
-            int bytesRead = 0;
-            try
+            while (true)
             {
-                bytesRead = await context.ContentStream.ReadAsync(context.Data, 0, context.Data.Length);
-            }
-            catch (Exception e)
-            {
-                throw new IOException(Properties.Resources.ReadAsMimeMultipartErrorReading, e);
-            }
-
-            IEnumerable<MimeBodyPart> parts = context.MimeParser.ParseBuffer(context.Data, bytesRead);
-            context.PartsEnumerator = parts.GetEnumerator();
-            await MoveToNextPartAsync(context);
-        }
-
-        private static async Task MoveToNextPartAsync(MultipartAsyncContext context)
-        {
-            Contract.Assert(context != null, "context cannot be null");
-            while (context.PartsEnumerator.MoveNext())
-            {
-                context.SegmentsEnumerator = context.PartsEnumerator.Current.Segments.GetEnumerator();
-                if (await MoveToNextSegmentAsync(context))
-                {
-                    return;
-                }
-            }
-
-            await MultipartReadAsync(context);
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
-        private static async Task<bool> MoveToNextSegmentAsync(MultipartAsyncContext context)
-        {
-            Contract.Assert(context != null, "context cannot be null");
-            if (context.SegmentsEnumerator.MoveNext())
-            {
-                Stream output = context.PartsEnumerator.Current.GetOutputStream(context.Parent);
+                int bytesRead;
                 try
                 {
-                    ArraySegment<byte> segment = (ArraySegment<byte>)context.SegmentsEnumerator.Current;
-                    await output.WriteAsync(segment.Array, segment.Offset, segment.Count);
-
-                    if (!await MoveToNextSegmentAsync(context))
-                    {
-                        await MoveToNextPartAsync(context);
-                    }
-
-                    return true;
+                    bytesRead = await context.ContentStream.ReadAsync(context.Data, 0, context.Data.Length);
                 }
                 catch (Exception e)
                 {
-                    context.PartsEnumerator.Current.Dispose();
-                    throw new IOException(Properties.Resources.ReadAsMimeMultipartErrorWriting, e);
+                    throw new IOException(Properties.Resources.ReadAsMimeMultipartErrorReading, e);
+                }
+
+                IEnumerable<MimeBodyPart> parts = context.MimeParser.ParseBuffer(context.Data, bytesRead);
+
+                foreach (MimeBodyPart part in parts)
+                {
+                    foreach (ArraySegment<byte> segment in part.Segments)
+                    {
+                        try
+                        {
+                            await part.WriteSegment(segment);
+                        }
+                        catch (Exception e)
+                        {
+                            part.Dispose();
+                            throw new IOException(Properties.Resources.ReadAsMimeMultipartErrorWriting, e);
+                        }
+                    }
+
+                    if (CheckIsFinalPart(part, context.Result))
+                    {
+                        return;
+                    }
                 }
             }
-
-            return CheckIsFinalPart(context.PartsEnumerator.Current, context.Result);
         }
 
         private static bool CheckIsFinalPart(MimeBodyPart part, ICollection<HttpContent> result)
@@ -210,9 +189,10 @@ namespace System.Net.Http
             Contract.Assert(result != null, "result cannot be null.");
             if (part.IsComplete)
             {
-                if (part.HttpContent != null)
+                HttpContent partContent = part.CreateHttpContent();
+                if (partContent != null)
                 {
-                    result.Add(part.HttpContent);
+                    result.Add(partContent);
                 }
 
                 bool isFinal = part.IsFinal;
@@ -228,24 +208,17 @@ namespace System.Net.Http
         /// </summary>
         private class MultipartAsyncContext
         {
-            public MultipartAsyncContext(HttpContent parent, Stream contentStream,  MimeMultipartBodyPartParser mimeParser, byte[] data, ICollection<HttpContent> result)
+            public MultipartAsyncContext(Stream contentStream,  MimeMultipartBodyPartParser mimeParser, byte[] data, ICollection<HttpContent> result)
             {
-                Contract.Assert(parent != null);
                 Contract.Assert(contentStream != null);
                 Contract.Assert(mimeParser != null);
                 Contract.Assert(data != null);
 
-                Parent = parent;
                 ContentStream = contentStream;
                 Result = result;
                 MimeParser = mimeParser;
                 Data = data;
             }
-
-            /// <summary>
-            /// Gets the parent HttpContent MIME content.
-            /// </summary>
-            public HttpContent Parent { get; private set; }
 
             /// <summary>
             /// Gets the <see cref="Stream"/> that we read from.
@@ -266,16 +239,6 @@ namespace System.Net.Http
             /// Gets the MIME parser instance used to parse the data
             /// </summary>
             public MimeMultipartBodyPartParser MimeParser { get; private set; }
-
-            /// <summary>
-            /// Gets or sets the parts enumerator for going through the parsed parts.
-            /// </summary>
-            public IEnumerator<MimeBodyPart> PartsEnumerator { get; set; }
-
-            /// <summary>
-            /// Gets or sets the segments enumerator for going through the segments within each part.
-            /// </summary>
-            public IEnumerator SegmentsEnumerator { get; set; }
         }
     }
 }

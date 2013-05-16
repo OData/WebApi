@@ -96,7 +96,7 @@ namespace System.Web.Razor.Parser
                 {
                     foreach (string component in nestingSequenceComponents)
                     {
-                        if (!String.Equals(CurrentSymbol.Content, component, Comparison))
+                        if (!EndOfFile && !String.Equals(CurrentSymbol.Content, component, Comparison))
                         {
                             return false;
                         }

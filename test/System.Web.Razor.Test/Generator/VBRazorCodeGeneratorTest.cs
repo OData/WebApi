@@ -71,6 +71,7 @@ namespace System.Web.Razor.Test.Generator
         [InlineData("Templates")]
         [InlineData("RazorComments")]
         [InlineData("Sections")]
+        [InlineData("EmptySection")] // this scenario causes a crash in Razor V2.0
         [InlineData("Helpers")]
         [InlineData("HelpersMissingCloseParen")]
         [InlineData("HelpersMissingOpenParen")]

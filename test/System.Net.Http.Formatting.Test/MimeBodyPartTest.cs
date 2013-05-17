@@ -49,6 +49,7 @@ namespace System.Net.Http
             MimeBodyPart bodypart = new MimeBodyPart(mockStreamProvider.Object, 1024, parent);
             bodypart.Segments.Add(new ArraySegment<byte>(new byte[] { 1 }));
             bodypart.WriteSegment(bodypart.Segments[0]).Wait();
+            bodypart.IsComplete = true;
 
             // Act
             bodypart.CreateHttpContent();
@@ -69,6 +70,7 @@ namespace System.Net.Http
             MimeBodyPart bodypart = new MimeBodyPart(mockStreamProvider.Object, 1024, parent);
             bodypart.Segments.Add(new ArraySegment<byte>(new byte[] { 1 }));
             bodypart.WriteSegment(bodypart.Segments[0]).Wait();
+            bodypart.IsComplete = true;
 
             // Act
             bodypart.CreateHttpContent();

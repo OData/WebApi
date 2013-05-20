@@ -14,51 +14,46 @@ using Microsoft.Web.Mvc.Properties;
 namespace Microsoft.Web.Mvc
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public sealed class FileExtensionsAttribute : DataTypeAttribute, IClientValidatable
+    public sealed class AcceptAttribute : DataTypeAttribute, IClientValidatable
     {
-        private string _extensions;
-
-        public FileExtensionsAttribute()
+        public AcceptAttribute()
             : base("upload")
         {
             ErrorMessage = MvcResources.FileExtensionsAttribute_Invalid;
+            ErrorMessage = MvcResources.AcceptAttribute_Invalid;
         }
 
-        public string Extensions
-        {
-            get { return String.IsNullOrWhiteSpace(_extensions) ? "png,jpg,jpeg,gif" : _extensions; }
-            set { _extensions = value; }
-        }
+        public string MimeTypes { get; set; }
 
-        private string ExtensionsFormatted
+        private string MimeTypesFormatted
         {
-            get { return ExtensionsParsed.Aggregate((left, right) => left + ", " + right); }
+            get { return MimeTypesParsed.Aggregate((left, right) => left + ", " + right); }
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "These strings are normalized to lowercase because they are presented to the user in lowercase format")]
-        private string ExtensionsNormalized
+        private string MimeTypesNormalized
         {
-            get { return Extensions.Replace(" ", String.Empty).Replace(".", String.Empty).ToLowerInvariant(); }
+            get { return MimeTypes.Replace(" ", String.Empty).ToLowerInvariant(); }
         }
 
-        private IEnumerable<string> ExtensionsParsed
+        private IEnumerable<string> MimeTypesParsed
         {
-            get { return ExtensionsNormalized.Split(',').Select(e => "." + e); }
+            get { return MimeTypesNormalized.Split(','); }
         }
 
         public override string FormatErrorMessage(string name)
         {
-            return String.Format(CultureInfo.CurrentCulture, ErrorMessageString, name, ExtensionsFormatted);
+            return String.Format(CultureInfo.CurrentCulture, ErrorMessageString, name, MimeTypesFormatted);
         }
 
         public IEnumerable<ModelClientValidationRule> GetClientValidationRules(ModelMetadata metadata, ControllerContext context)
         {
             var rule = new ModelClientValidationRule
             {
-                ValidationType = "extension",
+                ValidationType = "accept",
                 ErrorMessage = FormatErrorMessage(metadata.GetDisplayName())
             };
-            rule.ValidationParameters["extension"] = ExtensionsNormalized;
+            rule.ValidationParameters["mimetype"] = MimeTypesNormalized;
             yield return rule;
         }
 
@@ -72,29 +67,22 @@ namespace Microsoft.Web.Mvc
             HttpPostedFileBase valueAsFileBase = value as HttpPostedFileBase;
             if (valueAsFileBase != null)
             {
-                return ValidateExtension(valueAsFileBase.FileName);
+                return ValidateMimeTypes(valueAsFileBase.ContentType);
             }
 
             string valueAsString = value as string;
             if (valueAsString != null)
             {
-                return ValidateExtension(valueAsString);
+                return ValidateMimeTypes(valueAsString);
             }
 
             return false;
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "These strings are normalized to lowercase because they are presented to the user in lowercase format")]
-        private bool ValidateExtension(string fileName)
+        private bool ValidateMimeTypes(string mimeType)
         {
-            try
-            {
-                return ExtensionsParsed.Contains(Path.GetExtension(fileName).ToLowerInvariant());
-            }
-            catch (ArgumentException)
-            {
-                return false;
-            }
+            return MimeTypesParsed.Contains(mimeType.ToLowerInvariant());
         }
     }
 }

@@ -315,7 +315,17 @@
         return match;
     });
 
-    adapters.addSingleVal("accept", "exts").addSingleVal("regex", "pattern");
+    if ($jQval.methods.extension) {
+        adapters.addSingleVal("accept", "mimtype");
+        adapters.addSingleVal("extension", "extension");
+    } else {
+        // for backward compatibility, when the 'extension' validation method does not exist, such as with versions
+        // of JQuery Validation plugin prior to 1.10, we should use the 'accept' method for
+        // validating the extension, and ignore mime-type validations as they are not supported.
+        adapters.addSingleVal("extension", "extension", "accept");
+    }
+
+    adapters.addSingleVal("regex", "pattern");
     adapters.addBool("creditcard").addBool("date").addBool("digits").addBool("email").addBool("number").addBool("url");
     adapters.addMinMax("length", "minlength", "maxlength", "rangelength").addMinMax("range", "min", "max", "range");
     adapters.add("equalto", ["other"], function (options) {

@@ -231,4 +231,7 @@
   <data name="UrlAttribute_Invalid" xml:space="preserve">
     <value>The {0} field is not a valid fully-qualified http, https, or ftp URL.</value>
   </data>
+  <data name="AcceptAttribute_Invalid" xml:space="preserve">
+    <value>The {0} field only accepts files with one of the following content types: {1}.</value>
+  </data>
 </root>

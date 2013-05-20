@@ -36,6 +36,7 @@
     <Compile Include="..\TransparentCommonAssemblyInfo.cs">
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AcceptAttribute.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MachineKeyWrapper.cs" />
     <Compile Include="IMachineKey.cs" />

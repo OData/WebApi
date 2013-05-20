@@ -21,10 +21,10 @@ namespace System.Web.Mvc
         {
             var rule = new ModelClientValidationRule
             {
-                ValidationType = "accept",
+                ValidationType = "extension",
                 ErrorMessage = ErrorMessage
             };
-            rule.ValidationParameters["exts"] = extensions.Value(Attribute);
+            rule.ValidationParameters["extension"] = extensions.Value(Attribute);
             yield return rule;
         }
     }

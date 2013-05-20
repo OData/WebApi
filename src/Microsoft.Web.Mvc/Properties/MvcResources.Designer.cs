@@ -61,6 +61,15 @@ namespace Microsoft.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The {0} field only accepts files with one of the following content types: {1}..
+        /// </summary>
+        internal static string AcceptAttribute_Invalid {
+            get {
+                return ResourceManager.GetString("AcceptAttribute_Invalid", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to A value for &apos;{0}&apos; is required but was not present in the request..
         /// </summary>
         internal static string BindingBehavior_ValueNotFound {

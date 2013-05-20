@@ -22,6 +22,7 @@ namespace System.Web.Mvc
         public static readonly Type CreditCardAttributeType = FindType(_systemComponentModelDataAnnotationsAssembly, "System.ComponentModel.DataAnnotations.CreditCardAttribute");
         public static readonly Type EmailAddressAttributeType = FindType(_systemComponentModelDataAnnotationsAssembly, "System.ComponentModel.DataAnnotations.EmailAddressAttribute");
         public static readonly Type FileExtensionsAttributeType = FindType(_systemComponentModelDataAnnotationsAssembly, "System.ComponentModel.DataAnnotations.FileExtensionsAttribute");
+        public static readonly Type AcceptAttributeType = FindType(_systemComponentModelDataAnnotationsAssembly, "System.ComponentModel.DataAnnotations.AcceptAttribute");
         public static readonly Type PhoneAttributeType = FindType(_systemComponentModelDataAnnotationsAssembly, "System.ComponentModel.DataAnnotations.PhoneAttribute");
         public static readonly Type UrlAttributeType = FindType(_systemComponentModelDataAnnotationsAssembly, "System.ComponentModel.DataAnnotations.UrlAttribute");
 

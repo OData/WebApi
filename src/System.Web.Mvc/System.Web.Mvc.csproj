@@ -70,6 +70,7 @@
     <Compile Include="Async\BeginInvokeDelegateOfTState.cs" />
     <Compile Include="Async\TaskAsyncActionDescriptor.cs" />
     <Compile Include="Async\TaskWrapperAsyncResult.cs" />
+    <Compile Include="AcceptAttributeAdapter.cs" />
     <Compile Include="Filters\AuthenticationChallengeContext.cs" />
     <Compile Include="Filters\AuthenticationContext.cs" />
     <Compile Include="BuildManagerCompiledView.cs" />

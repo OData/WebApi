@@ -27,10 +27,10 @@ namespace Microsoft.Web.Mvc.Test
             ModelClientValidationRule clientRule = attribute.GetClientValidationRules(metadata, null).Single();
 
             // Assert
-            Assert.Equal("accept", clientRule.ValidationType);
+            Assert.Equal("extension", clientRule.ValidationType);
             Assert.Equal("The PropertyName field only accepts files with the following extensions: .foo, .bar, .baz", clientRule.ErrorMessage);
             Assert.Single(clientRule.ValidationParameters);
-            Assert.Equal("foo,bar,baz", clientRule.ValidationParameters["exts"]);
+            Assert.Equal("foo,bar,baz", clientRule.ValidationParameters["extension"]);
         }
 
         [Fact]

@@ -382,6 +382,9 @@ namespace System.Web.Mvc
             AddValidationAttributeAdapter(dict, ValidationAttributeHelpers.FileExtensionsAttributeType,
                    (metadata, context, attribute) => new FileExtensionsAttributeAdapter(metadata, context, attribute));
 
+            AddValidationAttributeAdapter(dict, ValidationAttributeHelpers.AcceptAttributeType,
+                   (metadata, context, attribute) => new AcceptAttributeAdapter(metadata, context, attribute));
+
             AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.CreditCardAttributeType, "creditcard");
             AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.EmailAddressAttributeType, "email");
             AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.PhoneAttributeType, "phone");

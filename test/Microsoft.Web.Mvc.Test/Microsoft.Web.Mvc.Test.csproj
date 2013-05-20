@@ -81,6 +81,7 @@
     <Compile Include="Test\AjaxOnlyAttributeTest.cs" />
     <Compile Include="Test\AsyncManagerExtensionsTest.cs" />
     <Compile Include="Test\CookieValueProviderFactoryTest.cs" />
+    <Compile Include="Test\AcceptAttributeTest.cs" />
     <Compile Include="Test\CreditCardAttributeTest.cs" />
     <Compile Include="Test\DynamicReflectionObjectTest.cs" />
     <Compile Include="Test\DynamicViewDataDictionaryTest.cs" />

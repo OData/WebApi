@@ -775,6 +775,35 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(HttpStatusCode.BadRequest, actionExecutedContext.Response.StatusCode);
         }
 
+        [Fact]
+        public void OnActionExecuted_SingleResult_WithEmptyQueryResult_SetsNotFoundResponse()
+        {
+            // Arrange
+            var customers = Enumerable.Empty<Customer>().AsQueryable();
+            SingleResult result = SingleResult.Create(customers);
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/",  result);
+            QueryableAttribute attribute = new QueryableAttribute();
+
+            // Act
+            attribute.OnActionExecuted(actionExecutedContext);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, actionExecutedContext.Response.StatusCode);
+        }
+
+        [Fact]
+        public void OnActionExecuted_SingleResult_WithMoreThanASingleQueryResult_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var customers = CustomerList.AsQueryable();
+            SingleResult result = SingleResult.Create(customers);
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/",  result);
+            QueryableAttribute attribute = new QueryableAttribute();
+
+            // Act and Assert
+            Assert.Throws<InvalidOperationException>(() => attribute.OnActionExecuted(actionExecutedContext));
+        }
+
         [Theory]
         [InlineData("$filter=ID eq 1")]
         [InlineData("$orderby=ID")]

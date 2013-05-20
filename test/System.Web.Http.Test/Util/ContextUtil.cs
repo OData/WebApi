@@ -32,7 +32,8 @@ namespace System.Web.Http
         public static HttpActionContext CreateActionContext(HttpControllerContext controllerContext = null, HttpActionDescriptor actionDescriptor = null)
         {
             HttpControllerContext context = controllerContext ?? ContextUtil.CreateControllerContext();
-            HttpActionDescriptor descriptor = actionDescriptor ?? new Mock<HttpActionDescriptor>() { CallBase = true }.Object;
+            HttpActionDescriptor descriptor = actionDescriptor ?? CreateActionDescriptor();
+            descriptor.ControllerDescriptor = context.ControllerDescriptor;
             return new HttpActionContext(context, descriptor);
         }
 
@@ -57,7 +58,14 @@ namespace System.Web.Http
             {
                 config = new HttpConfiguration();
             }
-            return new HttpControllerDescriptor() { Configuration = config };
+            return new HttpControllerDescriptor() { Configuration = config, ControllerName = "FooController" };
+        }
+
+        public static HttpActionDescriptor CreateActionDescriptor()
+        {
+            var mock = new Mock<HttpActionDescriptor>() { CallBase = true };
+            mock.SetupGet(d => d.ActionName).Returns("Bar");
+            return mock.Object;
         }
     }
 }

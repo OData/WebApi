@@ -362,13 +362,21 @@ namespace System.Web.Http
                     throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent, response.Content.GetType().FullName);
                 }
 
-                // Apply the query if there are any query options or if there is a page size set
+                // Apply the query if there are any query options, if there is a page size set or in the case of SingleResult
                 if (responseContent.Value != null && request.RequestUri != null &&
                     (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _querySettings.PageSize.HasValue || responseContent.Value is SingleResult))
                 {
                     try
                     {
-                        responseContent.Value = ExecuteQuery(responseContent.Value, request, actionDescriptor);
+                        object queryResult = ExecuteQuery(responseContent.Value, request, actionDescriptor);
+                        if (queryResult == null)
+                        {
+                            actionExecutedContext.Response = request.CreateResponse(HttpStatusCode.NotFound);
+                        }
+                        else
+                        {
+                            responseContent.Value = queryResult;
+                        }
                     }
                     catch (ODataException e)
                     {

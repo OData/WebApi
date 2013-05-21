@@ -28,6 +28,8 @@ namespace System.Web.Http.Hosting
         [InlineData("{controller}/{id}", "", "http://localhost/")]
         [InlineData("{controller}/{id}", "/SelfHostServer", "http://localhost/SelfHostServer")]
         [InlineData("{controller}/{id}", "", "http://localhost")]
+        [InlineData("api", "", "http://localhost/api")]
+        [InlineData("api", "", "http://LOCALHOST/API")]
         public void GetRouteDataShouldMatch(string uriTemplate, string virtualPathRoot, string requestUri)
         {
             HttpRoute route = new HttpRoute(uriTemplate);
@@ -35,6 +37,7 @@ namespace System.Web.Http.Hosting
             route.Defaults.Add("id", "999");
             HttpRequestMessage request = new HttpRequestMessage();
             request.RequestUri = new Uri(requestUri);
+
             IHttpRouteData data = route.GetRouteData(virtualPathRoot, request);
 
             // Assert

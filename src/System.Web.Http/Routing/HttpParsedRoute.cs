@@ -654,6 +654,12 @@ namespace System.Web.Http.Routing
                 }
             }
 
+            // Optimize for the common case where there is only one subsegment in the segment - either a parameter or a literal
+            if (routeSegment.Subsegments.Count == 1)
+            {
+                return MatchSingleContentPathSegment(routeSegment.Subsegments[0], requestPathSegment, matchedValues);
+            }
+
             // Find last literal segment and get its last index in the string
 
             int lastIndex = requestPathSegment.Length;
@@ -782,6 +788,24 @@ namespace System.Web.Http.Routing
             // request URI in order for it to be a match.
             // This check is related to the check we do earlier in this function for LiteralSubsegments.
             return (lastIndex == 0) || (routeSegment.Subsegments[0] is PathParameterSubsegment);
+        }
+
+        private static bool MatchSingleContentPathSegment(PathSubsegment pathSubsegment, string requestPathSegment, HttpRouteValueDictionary matchedValues)
+        {
+            PathParameterSubsegment parameterSubsegment = pathSubsegment as PathParameterSubsegment;
+            if (parameterSubsegment == null)
+            {
+                // Handle a single literal segment
+                PathLiteralSubsegment literalSubsegment = pathSubsegment as PathLiteralSubsegment;
+                Contract.Assert(literalSubsegment != null, "Invalid path segment type");
+                return literalSubsegment.Literal.Equals(requestPathSegment, StringComparison.OrdinalIgnoreCase);
+            }
+            else
+            {
+                // Handle a single parameter segment
+                matchedValues.Add(parameterSubsegment.ParameterName, requestPathSegment);
+                return true;
+            }
         }
 
         private static bool RoutePartsEqual(object a, object b)

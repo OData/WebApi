@@ -1,13 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
 using System.Web.Http.Properties;
@@ -154,11 +152,6 @@ namespace System.Web.Http
                 Thread.CurrentPrincipal = _anonymousPrincipal.Value;
             }
 
-            if (_configuration.GetSuppressDefaultHostAuthentication())
-            {
-                SuppressDefaultHostAuthentication(request);
-            }
-
             try
             {
                 return base.SendAsync(request, cancellationToken);
@@ -176,20 +169,6 @@ namespace System.Web.Http
                 Initialize();
                 return null;
             });
-        }
-
-        private void SuppressDefaultHostAuthentication(HttpRequestMessage request)
-        {
-            Contract.Assert(request != null);
-
-            IHostPrincipalService principalService = _configuration.Services.GetHostPrincipalService();
-
-            if (principalService == null)
-            {
-                throw new InvalidOperationException(SRResources.ServicesContainerIHostPrincipalServiceRequired);
-            }
-
-            principalService.SetCurrentPrincipal(_anonymousPrincipal.Value, request);
         }
 
         /// <summary>

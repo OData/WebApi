@@ -47,7 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HostAuthenticationFilterTest.cs" />
+    <Compile Include="OwinHttpConfigurationExtensionsTest.cs" />
+    <Compile Include="HttpMessageHandlerExtensions.cs" />
     <Compile Include="OwinHttpRequestMessageExtensionsTest.cs" />
+    <Compile Include="PassiveAuthenticationMessageHandlerTest.cs" />
     <Compile Include="WebApiAppBuilderExtensionsTest.cs" />
     <Compile Include="OwinBufferPolicySelectorTest.cs" />
     <Compile Include="HttpMessageHandlerAdapterTest.cs" />

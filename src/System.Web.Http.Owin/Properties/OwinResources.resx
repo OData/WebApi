@@ -135,4 +135,7 @@
   <data name="SendAsync_ReturnedNull" xml:space="preserve">
     <value>The message handler did not return a response message.</value>
   </data>
+  <data name="ServicesContainerIHostPrincipalServiceRequired" xml:space="preserve">
+    <value>ServicesContainer must have an IHostPrincipalService.</value>
+  </data>
 </root>

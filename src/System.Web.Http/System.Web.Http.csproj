@@ -79,10 +79,11 @@
     <Compile Include="Controllers\IActionResultConverter.cs" />
     <Compile Include="Controllers\HttpActionContext.cs" />
     <Compile Include="Controllers\IControllerConfiguration.cs" />
-    <Compile Include="Controllers\IHostPrincipalService.cs" />
+    <Compile Include="Hosting\IHostPrincipalService.cs" />
     <Compile Include="Filters\FailedAuthenticationResult.cs" />
     <Compile Include="Filters\SucceededAuthenticationResult.cs" />
     <Compile Include="FormattedContentResult.cs" />
+    <Compile Include="Hosting\SuppressHostPrincipalMessageHandler.cs" />
     <Compile Include="NegotiatedContentResult.cs" />
     <Compile Include="StatusCodeResult.cs" />
     <Compile Include="IHttpActionResult.cs" />
@@ -93,7 +94,7 @@
     <Compile Include="RoutePrefixAttribute.cs" />
     <Compile Include="Filters\HttpAuthenticationContext.cs" />
     <Compile Include="MessageResult.cs" />
-    <Compile Include="Controllers\ThreadPrincipalService.cs" />
+    <Compile Include="Hosting\ThreadPrincipalService.cs" />
     <Compile Include="Filters\IAuthenticationFilter.cs" />
     <Compile Include="Filters\IAuthenticationResult.cs" />
     <Compile Include="Filters\IOverrideFilter.cs" />

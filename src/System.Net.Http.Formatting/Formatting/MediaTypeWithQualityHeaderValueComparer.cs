@@ -50,7 +50,7 @@ namespace System.Net.Http.Formatting
                 ParsedMediaTypeHeaderValue parsedMediaType1 = new ParsedMediaTypeHeaderValue(mediaType1);
                 ParsedMediaTypeHeaderValue parsedMediaType2 = new ParsedMediaTypeHeaderValue(mediaType2);
 
-                if (!String.Equals(parsedMediaType1.Type, parsedMediaType2.Type, StringComparison.OrdinalIgnoreCase))
+                if (!parsedMediaType1.TypesEqual(ref parsedMediaType2))
                 {
                     if (parsedMediaType1.IsAllMediaRange)
                     {
@@ -69,7 +69,7 @@ namespace System.Net.Http.Formatting
                         return 1;
                     }
                 }
-                else if (!String.Equals(parsedMediaType1.Subtype, parsedMediaType2.Subtype, StringComparison.OrdinalIgnoreCase))
+                else if (!parsedMediaType1.SubTypesEqual(ref parsedMediaType2))
                 {
                     if (parsedMediaType1.IsSubtypeMediaRange)
                     {

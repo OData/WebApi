@@ -59,14 +59,14 @@ namespace System.Net.Http.Formatting
                 parsedMediaType2.IsSubtypeMediaRange ? MediaTypeHeaderValueRange.SubtypeMediaRange :
                 MediaTypeHeaderValueRange.None;
 
-            if (!String.Equals(parsedMediaType1.Type, parsedMediaType2.Type, StringComparison.OrdinalIgnoreCase))
+            if (!parsedMediaType1.TypesEqual(ref parsedMediaType2))
             {
                 if (mediaType2Range != MediaTypeHeaderValueRange.AllMediaRange)
                 {
                     return false;
                 }
             }
-            else if (!String.Equals(parsedMediaType1.Subtype, parsedMediaType2.Subtype, StringComparison.OrdinalIgnoreCase))
+            else if (!parsedMediaType1.SubTypesEqual(ref parsedMediaType2))
             {
                 if (mediaType2Range != MediaTypeHeaderValueRange.SubtypeMediaRange)
                 {

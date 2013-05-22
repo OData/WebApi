@@ -94,30 +94,68 @@ namespace System.Net.Http.Formatting
             Assert.Throws<Exception>(() => new MediaTypeHeaderValue(invalidMediaType), exceptionMessage: null, allowDerivedExceptions: true);
         }
 
-        [Theory]
-        [PropertyData("FullMediaRanges")]
-        [PropertyData("SubTypeMediaRanges")]
-        [PropertyData("InvalidMediaRanges")]
-        [PropertyData("NonMediaRanges")]
-        public void Type_ReturnsJustTheType(string mediaType)
+        [Fact]
+        public void TypesEqual_SameType_True()
         {
-            MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
-            string type = mediaTypeHeaderValue.MediaType.Split('/')[0];
-            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
-            Assert.Equal(type, parsedMediaType.Type);
+            ParsedMediaTypeHeaderValue parsedMediaType1 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/xml"));
+            ParsedMediaTypeHeaderValue parsedMediaType2 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/json"));
+            Assert.True(parsedMediaType1.TypesEqual(ref parsedMediaType2));
         }
 
-        [Theory]
-        [PropertyData("FullMediaRanges")]
-        [PropertyData("SubTypeMediaRanges")]
-        [PropertyData("InvalidMediaRanges")]
-        [PropertyData("NonMediaRanges")]
-        public void SubType_ReturnsJustTheSubType(string mediaType)
+        [Fact]
+        public void TypesEqual_SameTypeDifferentCase_True()
         {
-            MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
-            string subtype = mediaTypeHeaderValue.MediaType.Split('/')[1];
-            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
-            Assert.Equal(subtype, parsedMediaType.Subtype);
+            ParsedMediaTypeHeaderValue parsedMediaType1 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/xml"));
+            ParsedMediaTypeHeaderValue parsedMediaType2 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("TEXT/xml"));
+            Assert.True(parsedMediaType1.TypesEqual(ref parsedMediaType2));
+        }
+
+        [Fact]
+        public void TypesEqual_DifferentType_False()
+        {
+            ParsedMediaTypeHeaderValue parsedMediaType1 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("application/xml"));
+            ParsedMediaTypeHeaderValue parsedMediaType2 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/xml"));
+            Assert.False(parsedMediaType1.TypesEqual(ref parsedMediaType2));
+        }
+
+        [Fact]
+        public void TypesEqual_DifferentTypeSameLength_False()
+        {
+            ParsedMediaTypeHeaderValue parsedMediaType1 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("texx/xml"));
+            ParsedMediaTypeHeaderValue parsedMediaType2 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/xml"));
+            Assert.False(parsedMediaType1.TypesEqual(ref parsedMediaType2));
+        }
+
+        [Fact]
+        public void SubTypesEqual_SameType_True()
+        {
+            ParsedMediaTypeHeaderValue parsedMediaType1 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/xml"));
+            ParsedMediaTypeHeaderValue parsedMediaType2 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("application/xml"));
+            Assert.True(parsedMediaType1.SubTypesEqual(ref parsedMediaType2));
+        }
+
+        [Fact]
+        public void SubTypesEqual_SameTypeDifferentCase_True()
+        {
+            ParsedMediaTypeHeaderValue parsedMediaType1 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/xml"));
+            ParsedMediaTypeHeaderValue parsedMediaType2 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/XML"));
+            Assert.True(parsedMediaType1.SubTypesEqual(ref parsedMediaType2));
+        }
+
+        [Fact]
+        public void SubTypesEqual_DifferentType_False()
+        {
+            ParsedMediaTypeHeaderValue parsedMediaType1 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/xml"));
+            ParsedMediaTypeHeaderValue parsedMediaType2 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/json"));
+            Assert.False(parsedMediaType1.SubTypesEqual(ref parsedMediaType2));
+        }
+
+        [Fact]
+        public void SubTypesEqual_DifferentTypeSameLength_False()
+        {
+            ParsedMediaTypeHeaderValue parsedMediaType1 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/xml"));
+            ParsedMediaTypeHeaderValue parsedMediaType2 = new ParsedMediaTypeHeaderValue(MediaTypeHeaderValue.Parse("text/yml"));
+            Assert.False(parsedMediaType1.SubTypesEqual(ref parsedMediaType2));
         }
 
         [Theory]

@@ -38,9 +38,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalConfigurationTest.cs" />
     <Compile Include="Routing\HttpContextBaseExtensionsTest.cs" />
     <Compile Include="Routing\HttpRequestMessageWrapperTest.cs" />
     <Compile Include="Routing\HostedHttpRouteCollectionTest.cs" />
+    <Compile Include="WebHostPrincipalServiceTest.cs" />
     <Compile Include="WebHostBufferPolicySelectorTest.cs" />
     <Compile Include="HttpControllerHandlerTest.cs" />
     <Compile Include="RouteCollectionExtensionsTest.cs" />

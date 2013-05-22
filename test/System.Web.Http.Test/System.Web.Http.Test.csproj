@@ -84,6 +84,10 @@
     <Compile Include="Controllers\HttpControllerContextTest.cs" />
     <Compile Include="Controllers\HttpConfigurationTest.cs" />
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
+    <Compile Include="Hosting\HttpMessageHandlerExtensions.cs" />
+    <Compile Include="Hosting\SuppressHostPrincipalMessageHandlerTest.cs" />
+    <Compile Include="Hosting\ThreadCurrentPrincipalContext.cs" />
+    <Compile Include="Hosting\ThreadPrincipalServiceTest.cs" />
     <Compile Include="NegotiatedContentResultTests.cs" />
     <Compile Include="FormattedContentResultTests.cs" />
     <Compile Include="StatusCodeResultTests.cs" />

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.Hosting;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ModelBinding.Binders;
 using System.Web.Http.Routing;
@@ -327,6 +328,41 @@ namespace System.Net.Http
             Assert.Equal("PerController", Assert.Single(routes).RouteTemplate);
         }
 
+        [Fact]
+        public void SuppressHostPrincipal_InsertsSuppressHostPrincipalMessageHandler()
+        {
+            // Arrange
+            IHostPrincipalService expectedPrincipalService = new Mock<IHostPrincipalService>(
+                MockBehavior.Strict).Object;
+            DelegatingHandler existingHandler = new Mock<DelegatingHandler>(MockBehavior.Strict).Object;
+
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            {
+                configuration.Services.Replace(typeof(IHostPrincipalService), expectedPrincipalService);
+                configuration.MessageHandlers.Add(existingHandler);
+
+                // Act
+                configuration.SuppressHostPrincipal();
+
+                // Assert
+                Assert.Equal(2, configuration.MessageHandlers.Count);
+                DelegatingHandler firstHandler = configuration.MessageHandlers[0];
+                Assert.IsType<SuppressHostPrincipalMessageHandler>(firstHandler);
+                SuppressHostPrincipalMessageHandler suppressPrincipalHandler =
+                    (SuppressHostPrincipalMessageHandler)firstHandler;
+                IHostPrincipalService principalService = suppressPrincipalHandler.HostPrincipalService;
+                Assert.Same(expectedPrincipalService, principalService);
+            }
+        }
+
+        [Fact]
+        public void SuppressHostPrincipal_Throws_WhenConfigurationIsNull()
+        {
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => { HttpConfigurationExtensions.SuppressHostPrincipal(null); },
+                "configuration");
+        }
+
         private static void SetUpConfiguration(HttpConfiguration config, Collection<RoutePrefixAttribute> routePrefixes, Collection<IHttpRouteInfoProvider> routeProviders)
         {
             HttpControllerDescriptor controllerDescriptor = CreateControllerDescriptor(config, "Controller", routePrefixes);
@@ -381,7 +417,6 @@ namespace System.Net.Http
         public class TestParameter
         {
         }
-
         
         [ActionSelectorConfiguration]
         public class PerControllerActionSelectorController : ApiController { }

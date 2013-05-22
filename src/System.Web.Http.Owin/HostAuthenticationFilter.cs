@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Principal;
@@ -7,9 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.Owin;
 using System.Web.Http.Owin.Properties;
 using Microsoft.Owin;
+using Microsoft.Owin.Security;
 
 namespace System.Web.Http
 {
@@ -54,6 +56,7 @@ namespace System.Web.Http
 
             OwinRequest owinRequest = request.GetOwinRequest();
 
+            cancellationToken.ThrowIfCancellationRequested();
             IIdentity identity = await owinRequest.AuthenticateAsync(_authenticationType);
 
             if (identity == null)
@@ -68,7 +71,25 @@ namespace System.Web.Http
         public Task<IHttpActionResult> ChallengeAsync(HttpActionContext context, IHttpActionResult result,
             CancellationToken cancellationToken)
         {
-            // OWIN middleware adds challenges later (in the OWIN pipeline).
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
+
+            HttpRequestMessage request = context.Request;
+
+            if (request == null)
+            {
+                throw new InvalidOperationException(OwinResources.HttpAuthenticationContext_RequestMustNotBeNull);
+            }
+
+            OwinResponse response = request.GetOwinResponse();
+
+            // Control the challenges that OWIN middleware adds later.
+            response.AuthenticationResponseChallenge = AddChallengeAuthenticationType(
+                response.AuthenticationResponseChallenge, _authenticationType);
+
+            // Otherwise, return the provided result as-is.
             return Task.FromResult(result);
         }
 
@@ -76,6 +97,35 @@ namespace System.Web.Http
         public bool AllowMultiple
         {
             get { return true; }
+        }
+
+        private static AuthenticationResponseChallenge AddChallengeAuthenticationType(
+            AuthenticationResponseChallenge challenge, string authenticationType)
+        {
+            Contract.Assert(authenticationType != null);
+
+            List<string> authenticationTypes = new List<string>();
+            AuthenticationExtra extra;
+
+            if (challenge != null)
+            {
+                string[] currentAuthenticationTypes = challenge.AuthenticationTypes;
+
+                if (currentAuthenticationTypes != null)
+                {
+                    authenticationTypes.AddRange(currentAuthenticationTypes);
+                }
+
+                extra = challenge.Extra;
+            }
+            else
+            {
+                extra = new AuthenticationExtra();
+            }
+
+            authenticationTypes.Add(authenticationType);
+
+            return new AuthenticationResponseChallenge(authenticationTypes.ToArray(), extra);
         }
     }
 }

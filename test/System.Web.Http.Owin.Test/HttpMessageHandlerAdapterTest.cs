@@ -410,6 +410,21 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
+        public void Invoke_AddsZeroContentLengthHeader_WhenThereIsNoContent()
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            var handler = new HandlerStub() { Response = response };
+            var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
+            var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
+
+            adapter.Invoke(environment).Wait();
+
+            var responseHeaders = environment["owin.ResponseHeaders"] as IDictionary<string, string[]>;
+            Assert.Equal("0", responseHeaders["Content-Length"][0]);
+        }
+
+        [Fact]
         public void Invoke_AddsTransferEncodingChunkedHeaderOverContentLength()
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);

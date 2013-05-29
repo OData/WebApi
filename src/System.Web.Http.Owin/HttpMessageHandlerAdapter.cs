@@ -312,6 +312,8 @@ namespace System.Web.Http.Owin
             HttpContent responseContent = response.Content;
             if (responseContent == null)
             {
+                // Set the content-length to 0 to prevent the server from sending back the response chunked
+                responseHeaders["Content-Length"] = new string[] { "0" };
                 return TaskHelpers.Completed();
             }
             else

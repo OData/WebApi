@@ -174,7 +174,9 @@ namespace System.Web.Http.Tracing
                             // Assume these are called before starting app.
                             // Tracer does not need to see them,
                             // and inner will uses its copies in read or write
-                            "SetSerializer", "RemoveSerializer"
+                            "SetSerializer", "RemoveSerializer",
+                            "GetSerializer", "GetDeserializer",
+                            "CreateXmlWriter", "CreateXmlReader"
                         }
                     },
                 };

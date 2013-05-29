@@ -251,18 +251,11 @@ namespace System.Net.Http.Formatting
                 return GetDefaultValueForType(type);
             }
 
-            // Get the character encoding for the content
-            Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
-            object serializer = GetSerializerForType(type);
+            object serializer = GetDeserializer(type, content);
 
             try
             {
-#if NETFX_CORE
-                    // Force a preamble into the stream, since CreateTextReader in WinRT only supports auto-detecting encoding.
-                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new ReadOnlyStreamWithEncodingPreamble(readStream, effectiveEncoding), _readerQuotas))
-#else
-                using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new NonClosingDelegatingStream(readStream), effectiveEncoding, _readerQuotas, null))
-#endif
+                using (XmlReader reader = CreateXmlReader(readStream, content))
                 {
                     XmlSerializer xmlSerializer = serializer as XmlSerializer;
                     if (xmlSerializer != null)
@@ -271,7 +264,11 @@ namespace System.Net.Http.Formatting
                     }
                     else
                     {
-                        XmlObjectSerializer xmlObjectSerializer = (XmlObjectSerializer)serializer;
+                        XmlObjectSerializer xmlObjectSerializer = serializer as XmlObjectSerializer;
+                        if (xmlObjectSerializer == null)
+                        {
+                            ThrowInvalidSerializerException(serializer, "GetDeserializer");
+                        }
                         return xmlObjectSerializer.ReadObject(reader);
                     }
                 }
@@ -285,6 +282,35 @@ namespace System.Net.Http.Formatting
                 formatterLogger.LogError(String.Empty, e);
                 return GetDefaultValueForType(type);
             }
+        }
+
+        /// <summary>
+        /// Called during deserialization to get the XML serializer to use for deserializing objects.
+        /// </summary>
+        /// <param name="type">The type of object to deserialize.</param>
+        /// <param name="content">The <see cref="HttpContent"/> for the content being read.</param>
+        /// <returns>An instance of <see cref="XmlObjectSerializer"/> or <see cref="XmlSerializer"/> to use for deserializing the object.</returns>
+        protected internal virtual object GetDeserializer(Type type, HttpContent content)
+        {
+            return GetSerializerForType(type);
+        }
+
+        /// <summary>
+        /// Called during deserialization to get the XML reader to use for reading objects from the stream.
+        /// </summary>
+        /// <param name="readStream">The <see cref="Stream"/> to read from.</param>
+        /// <param name="content">The <see cref="HttpContent"/> for the content being read.</param>
+        /// <returns>The <see cref="XmlReader"/> to use for reading objects.</returns>
+        protected internal virtual XmlReader CreateXmlReader(Stream readStream, HttpContent content)
+        {
+            // Get the character encoding for the content
+            Encoding effectiveEncoding = SelectCharacterEncoding(content == null ? null : content.Headers);
+#if NETFX_CORE
+            // Force a preamble into the stream, since CreateTextReader in WinRT only supports auto-detecting encoding.
+            return XmlDictionaryReader.CreateTextReader(new ReadOnlyStreamWithEncodingPreamble(readStream, effectiveEncoding), _readerQuotas));
+#else
+            return XmlDictionaryReader.CreateTextReader(new NonClosingDelegatingStream(readStream), effectiveEncoding, _readerQuotas, null);
+#endif
         }
 
         /// <summary>
@@ -312,7 +338,7 @@ namespace System.Net.Http.Formatting
 
             try
             {
-                WriteToStream(ref type, ref value, writeStream, content);
+                WriteToStream(type, value, writeStream, content);
                 return TaskHelpers.Completed();
             }
             catch (Exception e)
@@ -321,7 +347,7 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        private void WriteToStream(ref Type type, ref object value, Stream writeStream, HttpContent content)
+        private void WriteToStream(Type type, object value, Stream writeStream, HttpContent content)
         {
             bool isRemapped = false;
             if (UseXmlSerializer)
@@ -338,6 +364,47 @@ namespace System.Net.Http.Formatting
                 value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
             }
 
+            object serializer = GetSerializer(type, value, content);
+
+            using (XmlWriter writer = CreateXmlWriter(writeStream, content))
+            {
+                XmlSerializer xmlSerializer = serializer as XmlSerializer;
+                if (xmlSerializer != null)
+                {
+                    xmlSerializer.Serialize(writer, value);
+                }
+                else
+                {
+                    XmlObjectSerializer xmlObjectSerializer = serializer as XmlObjectSerializer;
+                    if (xmlObjectSerializer == null)
+                    {
+                        ThrowInvalidSerializerException(serializer, "GetSerializer");
+                    }
+                    xmlObjectSerializer.WriteObject(writer, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called during serialization to get the XML serializer to use for serializing objects.
+        /// </summary>
+        /// <param name="type">The type of object to serialize.</param>
+        /// <param name="value">The object to serialize.</param>
+        /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
+        /// <returns>An instance of <see cref="XmlObjectSerializer"/> or <see cref="XmlSerializer"/> to use for serializing the object.</returns>
+        protected internal virtual object GetSerializer(Type type, object value, HttpContent content)
+        {
+            return GetSerializerForType(type);
+        }
+
+        /// <summary>
+        /// Called during serialization to get the XML writer to use for writing objects to the stream.
+        /// </summary>
+        /// <param name="writeStream">The <see cref="Stream"/> to write to.</param>
+        /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
+        /// <returns>The <see cref="XmlWriter"/> to use for writing objects.</returns>
+        protected internal virtual XmlWriter CreateXmlWriter(Stream writeStream, HttpContent content)
+        {
             Encoding effectiveEncoding = SelectCharacterEncoding(content != null ? content.Headers : null);
             XmlWriterSettings writerSettings = new XmlWriterSettings
             {
@@ -347,21 +414,7 @@ namespace System.Net.Http.Formatting
                 CloseOutput = false
             };
 
-            object serializer = GetSerializerForType(type);
-
-            using (XmlWriter writer = XmlWriter.Create(writeStream, writerSettings))
-            {
-                XmlSerializer xmlSerializer = serializer as XmlSerializer;
-                if (xmlSerializer != null)
-                {
-                    xmlSerializer.Serialize(writer, value);
-                }
-                else
-                {
-                    XmlObjectSerializer xmlObjectSerializer = (XmlObjectSerializer)serializer;
-                    xmlObjectSerializer.WriteObject(writer, value);
-                }
-            }
+            return XmlWriter.Create(writeStream, writerSettings);
         }
 
         private object CreateDefaultSerializer(Type type, bool throwOnError)
@@ -466,6 +519,18 @@ namespace System.Net.Http.Formatting
 
             Contract.Assert(serializer is XmlSerializer || serializer is XmlObjectSerializer, "Only XmlSerializer or XmlObjectSerializer are supported.");
             return serializer;
+        }
+
+        private static void ThrowInvalidSerializerException(object serializer, string getSerializerMethodName)
+        {
+            if (serializer == null)
+            {
+                throw Error.InvalidOperation(Properties.Resources.XmlMediaTypeFormatter_NullReturnedSerializer, getSerializerMethodName);
+            }
+            else
+            {
+                throw Error.InvalidOperation(Properties.Resources.XmlMediaTypeFormatter_InvalidSerializerType, serializer.GetType().Name, getSerializerMethodName);
+            }
         }
     }
 }

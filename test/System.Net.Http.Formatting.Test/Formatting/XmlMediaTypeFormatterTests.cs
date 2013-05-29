@@ -8,8 +8,11 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.TestCommon;
+using Moq;
+using Newtonsoft.Json;
 
 namespace System.Net.Http.Formatting
 {
@@ -258,6 +261,49 @@ namespace System.Net.Http.Formatting
             return ReadFromStreamAsync_UsesCorrectCharacterEncodingHelper(formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
+        [Fact]
+        public void ReadFromStreamAsync_UsesGetDeserializerAndCreateXmlReader()
+        {
+            Type type = typeof(string);
+            string xml = "<string xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/\">x</string>";
+            Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(xml));
+            var serializer = new Mock<XmlObjectSerializer>() { CallBase = true };
+            var reader = new Mock<XmlReader>() { CallBase = true };
+            var formatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
+            formatter.Setup(f => f.GetDeserializer(type, null)).Returns(serializer.Object);
+            formatter.Setup(f => f.CreateXmlReader(stream, null)).Returns(reader.Object);
+
+            formatter.Object.ReadFromStreamAsync(type, stream, content: null, formatterLogger: null).Wait();
+
+            serializer.Verify(s => s.ReadObject(reader.Object));
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_ThrowsException_WhenGetDeserializerReturnsNull()
+        {
+            Type type = typeof(string);
+            string xml = "<string xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/\">x</string>";
+            var formatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
+            formatter.Setup(f => f.GetDeserializer(type, null)).Returns(null);
+
+            Assert.Throws<InvalidOperationException>(
+                () => formatter.Object.ReadFromStreamAsync(type, new MemoryStream(Encoding.UTF8.GetBytes(xml)), content: null, formatterLogger: null).Wait(),
+                "The object returned by GetDeserializer must not be a null value.");
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_ThrowsException_WhenGetDeserializerReturnsInvalidType()
+        {
+            Type type = typeof(string);
+            string xml = "<string xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/\">x</string>";
+            var formatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
+            formatter.Setup(f => f.GetDeserializer(type, null)).Returns(new JsonSerializer());
+
+            Assert.Throws<InvalidOperationException>(
+                () => formatter.Object.ReadFromStreamAsync(type, new MemoryStream(Encoding.UTF8.GetBytes(xml)), content: null, formatterLogger: null).Wait(),
+                "The object of type 'JsonSerializer' returned by GetDeserializer must be an instance of either XmlObjectSerializer or XmlSerializer.");
+        }
+
         [Theory]
         [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
@@ -276,6 +322,49 @@ namespace System.Net.Http.Formatting
 
             // Act & assert
             return WriteToStreamAsync_UsesCorrectCharacterEncodingHelper(formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
+        }
+
+        [Fact]
+        public void WriteToStreamAsync_UsesGetSerializerAndCreateXmlWriter()
+        {
+            Type type = typeof(string);
+            object value = "x";
+            Stream stream = new MemoryStream();
+            var serializer = new Mock<XmlObjectSerializer>() { CallBase = true };
+            var writer = new Mock<XmlWriter>() { CallBase = true };
+            var formatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
+            formatter.Setup(f => f.GetSerializer(type, value, null)).Returns(serializer.Object);
+            formatter.Setup(f => f.CreateXmlWriter(stream, null)).Returns(writer.Object);
+
+            formatter.Object.WriteToStreamAsync(type, value, stream, content: null, transportContext: null).Wait();
+
+            serializer.Verify(s => s.WriteObject(writer.Object, value));
+        }
+
+        [Fact]
+        public void WriteToStreamAsync_ThrowsException_WhenGetSerializerReturnsNull()
+        {
+            Type type = typeof(string);
+            object value = "x";
+            var formatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
+            formatter.Setup(f => f.GetSerializer(type, value, null)).Returns(null);
+
+            Assert.Throws<InvalidOperationException>(
+                () => formatter.Object.WriteToStreamAsync(type, value, new MemoryStream(), content: null, transportContext: null).Wait(),
+                "The object returned by GetSerializer must not be a null value.");
+        }
+
+        [Fact]
+        public void WriteToStreamAsync_ThrowsException_WhenGetSerializerReturnsInvalidType()
+        {
+            Type type = typeof(string);
+            object value = "x";
+            var formatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
+            formatter.Setup(f => f.GetSerializer(type, value, null)).Returns(new JsonSerializer());
+
+            Assert.Throws<InvalidOperationException>(
+                () => formatter.Object.WriteToStreamAsync(type, value, new MemoryStream(), content: null, transportContext: null).Wait(),
+                "The object of type 'JsonSerializer' returned by GetSerializer must be an instance of either XmlObjectSerializer or XmlSerializer.");
         }
 
 #if !NETFX_CORE // Different behavior in portable libraries due to no DataContract validation

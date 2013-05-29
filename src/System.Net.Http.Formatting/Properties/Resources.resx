@@ -312,4 +312,10 @@
   <data name="ByteRangeStreamEmpty" xml:space="preserve">
     <value>The stream over which '{0}' provides a range view must have a length greater than or equal to 1.</value>
   </data>
+  <data name="XmlMediaTypeFormatter_InvalidSerializerType" xml:space="preserve">
+    <value>The object of type '{0}' returned by {1} must be an instance of either XmlObjectSerializer or XmlSerializer.</value>
+  </data>
+  <data name="XmlMediaTypeFormatter_NullReturnedSerializer" xml:space="preserve">
+    <value>The object returned by {0} must not be a null value.</value>
+  </data>
 </root>

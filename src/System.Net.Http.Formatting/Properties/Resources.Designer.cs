@@ -649,5 +649,23 @@ namespace System.Net.Http.Properties {
                 return ResourceManager.GetString("UnsupportedIndent", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The object of type &apos;{0}&apos; returned by {1} must be an instance of either XmlObjectSerializer or XmlSerializer..
+        /// </summary>
+        internal static string XmlMediaTypeFormatter_InvalidSerializerType {
+            get {
+                return ResourceManager.GetString("XmlMediaTypeFormatter_InvalidSerializerType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The object returned by {0} must not be a null value..
+        /// </summary>
+        internal static string XmlMediaTypeFormatter_NullReturnedSerializer {
+            get {
+                return ResourceManager.GetString("XmlMediaTypeFormatter_NullReturnedSerializer", resourceCulture);
+            }
+        }
     }
 }

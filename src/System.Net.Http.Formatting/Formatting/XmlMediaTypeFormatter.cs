@@ -307,7 +307,7 @@ namespace System.Net.Http.Formatting
             Encoding effectiveEncoding = SelectCharacterEncoding(content == null ? null : content.Headers);
 #if NETFX_CORE
             // Force a preamble into the stream, since CreateTextReader in WinRT only supports auto-detecting encoding.
-            return XmlDictionaryReader.CreateTextReader(new ReadOnlyStreamWithEncodingPreamble(readStream, effectiveEncoding), _readerQuotas));
+            return XmlDictionaryReader.CreateTextReader(new ReadOnlyStreamWithEncodingPreamble(readStream, effectiveEncoding), _readerQuotas);
 #else
             return XmlDictionaryReader.CreateTextReader(new NonClosingDelegatingStream(readStream), effectiveEncoding, _readerQuotas, null);
 #endif

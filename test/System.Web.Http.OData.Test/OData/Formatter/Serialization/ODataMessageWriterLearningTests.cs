@@ -12,7 +12,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     public class ODataMessageWriterLearningTests
     {
         [Fact]
-        public void TestCreateODataCollectionWriter_InJsonLight_WithoutTypeReference_Throws()
+        public void TestCreateODataCollectionWriter_InJsonLight_WithoutTypeReference_DoesNotThrow()
         {
             // Arrange
             IODataResponseMessage response = CreateResponse();
@@ -22,7 +22,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => writer.CreateODataCollectionWriter());
+                Assert.DoesNotThrow(() => writer.CreateODataCollectionWriter());
             }
         }
 
@@ -43,7 +43,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestCreateODataEntryWriter_InJsonLight_WithoutEntitySetOrType_Throws()
+        public void TestCreateODataEntryWriter_InJsonLight_WithoutEntitySetOrType_DoesNotThrow()
         {
             // Arrange
             IODataResponseMessage response = CreateResponse();
@@ -53,7 +53,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => writer.CreateODataEntryWriter());
+                Assert.DoesNotThrow(() => writer.CreateODataEntryWriter());
             }
         }
 
@@ -74,7 +74,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestCreateODataFeedWriter_InJsonLight_WithoutEntitySetOrType_Throws()
+        public void TestCreateODataFeedWriter_InJsonLight_WithoutEntitySetOrType_DoesNotThrow()
         {
             // Arrange
             IODataResponseMessage response = CreateResponse();
@@ -84,7 +84,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => writer.CreateODataFeedWriter());
+                Assert.DoesNotThrow(() => writer.CreateODataFeedWriter());
             }
         }
 

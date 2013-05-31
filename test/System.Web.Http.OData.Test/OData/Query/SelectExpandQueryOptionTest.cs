@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Serialization.Models;
@@ -89,8 +90,8 @@ namespace System.Web.Http.OData.Query
             SelectExpandClause selectExpandClause = option.SelectExpandClause;
 
             // Assert
-            Assert.NotNull(selectExpandClause.Selection);
-            Assert.NotNull(selectExpandClause.Expansion);
+            Assert.NotEmpty(selectExpandClause.SelectedItems.OfType<PathSelectItem>());
+            Assert.NotEmpty(selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>());
         }
 
         [Theory]

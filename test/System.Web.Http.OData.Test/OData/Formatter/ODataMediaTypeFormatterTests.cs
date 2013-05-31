@@ -353,7 +353,7 @@ namespace System.Web.Http.OData.Formatter
             // Arrange
             var model = CreateModel();
             SelectExpandClause selectExpandClause =
-                new SelectExpandClause(AllSelection.Instance, new Expansion(new ExpandItem[0]));
+                new SelectExpandClause(new SelectItem[0], allSelected: true);
 
             Mock<ODataSerializer> serializer = new Mock<ODataSerializer>(ODataPayloadKind.Property);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();

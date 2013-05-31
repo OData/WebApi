@@ -19,6 +19,7 @@ namespace System.Net.Http
         private Stream _outputStream;
         private MultipartStreamProvider _streamProvider;
         private HttpContent _parentContent;
+        private HttpContent _content;
         private HttpContentHeaders _headers;
 
         /// <summary>
@@ -52,18 +53,17 @@ namespace System.Net.Http
         /// <value>
         /// The part's content, or null if the part had no content.
         /// </value>
-        public HttpContent CreateHttpContent()
+        public HttpContent GetCompletedHttpContent()
         {
             Contract.Assert(IsComplete);
 
-            if (_outputStream == null)
+            if (_content == null)
             {
                 return null;
             }
 
-            HttpContent content = new StreamContent(_outputStream);
-            _headers.CopyTo(content.Headers);
-            return content;
+            _headers.CopyTo(_content.Headers);
+            return _content;
         }
 
         /// <summary>
@@ -124,6 +124,7 @@ namespace System.Net.Http
                 {
                     throw Error.InvalidOperation(Properties.Resources.ReadAsMimeMultipartStreamProviderReadOnly, _streamProvider.GetType().Name, _streamType.Name);
                 }
+                _content = new StreamContent(_outputStream);
             }
 
             return _outputStream;
@@ -147,10 +148,25 @@ namespace System.Net.Http
             if (disposing)
             {
                 CleanupOutputStream();
+                CleanupHttpContent();
                 _parentContent = null;
                 HeaderParser = null;
                 Segments.Clear();
             }
+        }
+
+        /// <summary>
+        /// In the success case, the HttpContent is to be used after this Part has been parsed and disposed of.
+        /// Only if Dispose has been called on a non-completed part, the parsed HttpContent needs to be disposed of as well.
+        /// </summary>
+        private void CleanupHttpContent()
+        {
+            if (!IsComplete && _content != null)
+            {
+                _content.Dispose();
+            }
+
+            _content = null;
         }
 
         /// <summary>

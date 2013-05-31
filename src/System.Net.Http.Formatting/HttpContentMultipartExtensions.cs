@@ -189,7 +189,7 @@ namespace System.Net.Http
             Contract.Assert(result != null, "result cannot be null.");
             if (part.IsComplete)
             {
-                HttpContent partContent = part.CreateHttpContent();
+                HttpContent partContent = part.GetCompletedHttpContent();
                 if (partContent != null)
                 {
                     result.Add(partContent);

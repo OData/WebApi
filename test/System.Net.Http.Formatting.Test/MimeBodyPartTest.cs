@@ -52,7 +52,7 @@ namespace System.Net.Http
             bodypart.IsComplete = true;
 
             // Act
-            bodypart.CreateHttpContent();
+            bodypart.GetCompletedHttpContent();
             bodypart.Dispose();
 
             // Assert
@@ -73,7 +73,7 @@ namespace System.Net.Http
             bodypart.IsComplete = true;
 
             // Act
-            bodypart.CreateHttpContent();
+            bodypart.GetCompletedHttpContent();
             bodypart.Dispose();
 
             // Assert

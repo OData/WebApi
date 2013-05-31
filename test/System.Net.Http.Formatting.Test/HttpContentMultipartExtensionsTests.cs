@@ -79,8 +79,17 @@ namespace System.Net.Http
                 Assert.Equal(DefaultContentDisposition, content.Headers.ContentDisposition.DispositionType);
                 Assert.Equal(String.Format("\"N{0}\"", cnt), content.Headers.ContentDisposition.FileName);
 
+                AssertContentLengthHeaderValue(content);
+
                 cnt++;
             }
+        }
+
+        private static void AssertContentLengthHeaderValue(HttpContent content)
+        {
+            long contentLength = content.ReadAsByteArrayAsync().Result.LongLength;
+            long contentLengthHeaderValue = content.Headers.ContentLength.GetValueOrDefault();
+            Assert.Equal(contentLength, contentLengthHeaderValue);
         }
 
         [Fact]

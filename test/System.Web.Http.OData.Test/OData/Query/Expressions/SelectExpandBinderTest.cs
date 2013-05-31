@@ -19,8 +19,6 @@ namespace System.Web.Http.OData.Query.Expressions
 {
     public class SelectExpandBinderTest
     {
-        private static readonly Expansion _emptyExpansion = new Expansion(Enumerable.Empty<ExpandItem>());
-
         private readonly SelectExpandBinder _binder;
         private readonly CustomersModelWithInheritance _model;
         private readonly IQueryable<Customer> _queryable;
@@ -88,7 +86,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             Order order = new Order();
-            SelectExpandClause selectExpand = new SelectExpandClause(selection: null, expansion: _emptyExpansion);
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             Expression source = Expression.Constant(order);
 
             // Act
@@ -105,9 +103,11 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             _settings.HandleNullPropagation = HandleNullPropagationOption.True;
-            ExpandItem expandItem = new ExpandItem(new ODataPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single())), _model.Customers);
-            Expansion expansion = new Expansion(new[] { expandItem });
-            SelectExpandClause selectExpand = new SelectExpandClause(selection: null, expansion: expansion);
+            ExpandedNavigationSelectItem expandItem = new ExpandedNavigationSelectItem(
+                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), entitySet: _model.Customers)),
+                _model.Customers,
+                selectExpandOption: null);
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
             Expression source = Expression.Constant(null, typeof(Order));
 
             // Act
@@ -125,9 +125,11 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             _settings.HandleNullPropagation = HandleNullPropagationOption.False;
-            ExpandItem expandItem = new ExpandItem(new ODataPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single())), _model.Customers);
-            Expansion expansion = new Expansion(new[] { expandItem });
-            SelectExpandClause selectExpand = new SelectExpandClause(selection: null, expansion: expansion);
+            ExpandedNavigationSelectItem expandItem = new ExpandedNavigationSelectItem(
+                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), entitySet: _model.Customers)),
+                _model.Customers,
+                selectExpandOption: null);
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
             Expression source = Expression.Constant(null, typeof(Order));
 
             // Act
@@ -144,7 +146,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             Order[] orders = new Order[] { new Order() };
-            SelectExpandClause selectExpand = new SelectExpandClause(selection: null, expansion: _emptyExpansion);
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             Expression source = Expression.Constant(orders);
 
             // Act
@@ -161,9 +163,11 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             Order order = new Order();
-            ExpandItem expandItem = new ExpandItem(new ODataPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single())), _model.Customers);
-            Expansion expansion = new Expansion(new[] { expandItem });
-            SelectExpandClause selectExpand = new SelectExpandClause(selection: null, expansion: expansion);
+            ExpandedNavigationSelectItem expandItem = new ExpandedNavigationSelectItem(
+                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), entitySet: _model.Customers)),
+                _model.Customers,
+                selectExpandOption: null);
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
             Expression source = Expression.Constant(order);
 
             // Act
@@ -180,7 +184,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             _settings.HandleNullPropagation = HandleNullPropagationOption.True;
-            SelectExpandClause selectExpand = new SelectExpandClause(selection: null, expansion: _emptyExpansion);
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             Expression source = Expression.Constant(null, typeof(Order[]));
 
             // Act
@@ -196,7 +200,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             _settings.HandleNullPropagation = HandleNullPropagationOption.False;
-            SelectExpandClause selectExpand = new SelectExpandClause(selection: null, expansion: _emptyExpansion);
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             Expression source = Expression.Constant(null, typeof(Order[]));
 
             // Act
@@ -213,7 +217,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             Customer customer = new Customer();
-            SelectExpandClause selectExpand = new SelectExpandClause(selection: null, expansion: _emptyExpansion);
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             Expression source = Expression.Constant(customer);
 
             // Act
@@ -233,7 +237,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             Customer customer = new Customer();
-            SelectExpandClause selectExpand = ODataUriParser.ParseSelectAndExpand(select, "Orders", _model.Model, _model.Customer);
+            SelectExpandClause selectExpand = new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, "Orders", _model.Customer, _model.Customers);
             Expression source = Expression.Constant(customer);
 
             // Act
@@ -251,7 +255,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             Customer customer = new Customer();
-            SelectExpandClause selectExpand = ODataUriParser.ParseSelectAndExpand("ID,Orders", "Orders", _model.Model, _model.Customer);
+            SelectExpandClause selectExpand = new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand("ID,Orders", "Orders", _model.Customer, _model.Customers);
             Expression source = Expression.Constant(customer);
 
             // Act
@@ -269,7 +273,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             Customer customer = new Customer { Name = "OData" };
-            SelectExpandClause selectExpand = ODataUriParser.ParseSelectAndExpand("Name,Orders", "Orders", _model.Model, _model.Customer);
+            SelectExpandClause selectExpand = new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand("Name,Orders", "Orders", _model.Customer, _model.Customers);
             Expression source = Expression.Constant(customer);
 
             // Act
@@ -285,7 +289,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Arrange
             Customer customer = new Customer { ID = 42, FirstName = "OData" };
-            SelectExpandClause selectExpand = ODataUriParser.ParseSelectAndExpand("Name,Orders", "Orders", _model.Model, _model.Customer);
+            SelectExpandClause selectExpand = new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand("Name,Orders", "Orders", _model.Customer, _model.Customers);
             Expression source = Expression.Constant(customer);
 
             // Act

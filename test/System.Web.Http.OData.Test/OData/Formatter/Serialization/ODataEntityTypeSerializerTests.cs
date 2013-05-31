@@ -296,12 +296,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             IEdmEntityType customerType = _customerSet.ElementType;
             IEdmNavigationProperty ordersProperty = customerType.NavigationProperties().Single(p => p.Name == "Orders");
-            SelectExpandClause selectExpandClause = ODataUriParser.ParseSelectAndExpand("Orders", "Orders", _model, customerType, _customerSet);
+            SelectExpandClause selectExpandClause = new ODataUriParser(_model, serviceRoot: null).ParseSelectAndExpand("Orders", "Orders", customerType, _customerSet);
             SelectExpandNode selectExpandNode = new SelectExpandNode
             {
                 ExpandedNavigationProperties = 
                 { 
-                    { ordersProperty, selectExpandClause.Expansion.ExpandItems.Single().SelectExpandOption }
+                    { ordersProperty, selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand }
                 }
             };
             Mock<ODataWriter> writer = new Mock<ODataWriter>();
@@ -348,9 +348,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             customer.Setup(c => c.TryGetValue("Orders", out ordersValue)).Returns(true);
             customer.Setup(c => c.GetEdmType()).Returns(customerType.AsReference());
 
-            SelectExpandClause selectExpandClause = ODataUriParser.ParseSelectAndExpand("Orders", "Orders", _model, customerType, _customerSet);
+            SelectExpandClause selectExpandClause = new ODataUriParser(_model, serviceRoot: null).ParseSelectAndExpand("Orders", "Orders", customerType, _customerSet);
             SelectExpandNode selectExpandNode = new SelectExpandNode();
-            selectExpandNode.ExpandedNavigationProperties[ordersProperty] = selectExpandClause.Expansion.ExpandItems.Single().SelectExpandOption;
+            selectExpandNode.ExpandedNavigationProperties[ordersProperty] = selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand;
 
             Mock<ODataWriter> writer = new Mock<ODataWriter>();
 
@@ -1153,7 +1153,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 ExpandedNavigationProperties = 
                 {
-                     { ordersProperty, new SelectExpandClause(AllSelection.Instance, new Expansion(Enumerable.Empty<ExpandItem>())) }
+                     { ordersProperty, new SelectExpandClause(new SelectItem[0], allSelected: true) }
                 }
             };
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, serializerProvider.Object);

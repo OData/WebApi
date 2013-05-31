@@ -178,7 +178,7 @@ namespace System.Net.Http
 
         private SelectExpandClause GetMockSelectExpandClause()
         {
-            return new SelectExpandClause(new Mock<Selection>().Object, new Expansion(Enumerable.Empty<ExpandItem>()));
+            return new SelectExpandClause(new SelectItem[0], allSelected: true);
         }
     }
 }

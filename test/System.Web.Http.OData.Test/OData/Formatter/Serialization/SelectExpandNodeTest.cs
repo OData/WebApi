@@ -15,21 +15,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
     public class SelectExpandNodeTest
     {
         private CustomersModelWithInheritance _model = new CustomersModelWithInheritance();
-        private Expansion _emptyExpansion = new Expansion(new ExpandItem[0]);
 
         [Fact]
-        public void BuildSelectExpandNode_ThrowsArgumentNull_EntityType()
+        public void Ctor_ThrowsArgumentNull_EntityType()
         {
             Assert.ThrowsArgumentNull(
-                () => SelectExpandNode.BuildSelectExpandNode(selectExpandClause: null, entityType: null, model: EdmCoreModel.Instance),
+                () => new SelectExpandNode(selectExpandClause: null, entityType: null, model: EdmCoreModel.Instance),
                 "entityType");
         }
 
         [Fact]
-        public void BuildSelectExpandNode_ThrowsArgumentNull_Model()
+        public void Ctor_ThrowsArgumentNull_Model()
         {
             Assert.ThrowsArgumentNull(
-                () => SelectExpandNode.BuildSelectExpandNode(
+                () => new SelectExpandNode(
                     selectExpandClause: null,
                     entityType: new Mock<IEdmEntityTypeReference>().Object,
                     model: null),
@@ -48,6 +47,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [InlineData("ID,*", null, true, "Address,ID,Name,SpecialCustomerProperty")] // simple select with wild card and duplicate -> select all, no duplicates
         [InlineData("ID,Name", null, false, "ID,Name")] // multiple select -> select requested
         [InlineData("ID,Name", null, true, "ID,Name")] // multiple select on derived type -> select requested
+        [InlineData("Orders", "Orders", false, "")] // only expand -> select no structural property
+        [InlineData("Orders", "Orders", true, "")] // only expand -> select no structural property
         [InlineData(null, "Orders", false, "Address,ID,Name")] // simple expand -> select all
         [InlineData(null, "Orders", true, "Address,ID,Name,SpecialCustomerProperty")] // simple expand on derived type -> select all
         [InlineData("ID,Name,Orders", "Orders", false, "ID,Name")] // expand and select -> select requested
@@ -60,11 +61,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             SelectExpandClause selectExpandClause =
-                ODataUriParser.ParseSelectAndExpand(select, expand, _model.Model, _model.Customer, _model.Customers);
+                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand,  _model.Customer, _model.Customers);
             IEdmEntityTypeReference entityType = new EdmEntityTypeReference((specialCustomer ? _model.SpecialCustomer : _model.Customer), false);
 
             // Act
-            SelectExpandNode selectExpandNode = SelectExpandNode.BuildSelectExpandNode(selectExpandClause, entityType, _model.Model);
+            SelectExpandNode selectExpandNode = new SelectExpandNode(selectExpandClause, entityType, _model.Model);
             var result = selectExpandNode.SelectedStructuralProperties;
 
             // Assert
@@ -76,18 +77,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [InlineData("ID,Name,Orders", "Orders", true, "Amount,ID,SpecialOrderProperty")] // expand and select on derived type -> select all
         [InlineData("ID,Name,Orders/ID", "Orders", false, "ID")] // expand and select properties on expand -> select requested
         [InlineData("ID,Name,Orders/ID", "Orders", true, "ID")] // expand and select properties on expand on derived type -> select requested
+        [InlineData("Orders,Orders/Customer", "Orders,Orders/Customer", false, "Amount,ID")]
+        [InlineData("Orders,Orders/Customer", "Orders,Orders/Customer", true, "Amount,ID,SpecialOrderProperty")]
         public void GetPropertiesToBeSelected_Selects_ExpectedProperties_OnExpandedOrders(
             string select, string expand, bool specialOrder, string structuralPropertiesToSelect)
         {
             // Arrange
             SelectExpandClause selectExpandClause =
-                ODataUriParser.ParseSelectAndExpand(select, expand, _model.Model, _model.Customer, _model.Customers);
-            SelectExpandClause nestedSelectExpandClause = selectExpandClause.Expansion.ExpandItems.SingleOrDefault().SelectExpandOption;
+                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
+            SelectExpandClause nestedSelectExpandClause = selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand;
 
             IEdmEntityTypeReference entityType = new EdmEntityTypeReference((specialOrder ? _model.SpecialOrder : _model.Order), false);
 
             // Act
-            SelectExpandNode selectExpandNode = SelectExpandNode.BuildSelectExpandNode(nestedSelectExpandClause, entityType, _model.Model);
+            SelectExpandNode selectExpandNode = new SelectExpandNode(nestedSelectExpandClause, entityType, _model.Model);
             var result = selectExpandNode.SelectedStructuralProperties;
 
             // Assert
@@ -114,12 +117,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             SelectExpandClause selectExpandClause =
-                ODataUriParser.ParseSelectAndExpand(select, expand, _model.Model, _model.Customer, _model.Customers);
+                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
 
             IEdmEntityTypeReference entityType = new EdmEntityTypeReference((specialCustomer ? _model.SpecialCustomer : _model.Customer), false);
 
             // Act
-            SelectExpandNode selectExpandNode = SelectExpandNode.BuildSelectExpandNode(selectExpandClause, entityType, _model.Model);
+            SelectExpandNode selectExpandNode = new SelectExpandNode(selectExpandClause, entityType, _model.Model);
             var result = selectExpandNode.SelectedNavigationProperties;
 
             // Assert
@@ -137,6 +140,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [InlineData(null, "Orders,Orders,Orders", true, "Orders")] // duplicate expand on derived type -> expand requested
         [InlineData("ID", "Orders", false, "")] // simple expand and expand not in select -> expand none
         [InlineData("ID", "Orders", true, "")] // simple expand and expand not in select on derived type -> expand none
+        [InlineData("Orders", "Orders", false, "Orders")] // only expand -> expand requested
         [InlineData("ID,Orders", "Orders", false, "Orders")] // simple expand and expand in select -> expand requested
         [InlineData("ID,Orders", "Orders", true, "Orders")] // simple expand and expand in select on derived type -> expand requested
         [InlineData(null, "NS.SpecialCustomer/SpecialOrders", false, "")] // expand derived navigation property -> expand non
@@ -146,12 +150,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             SelectExpandClause selectExpandClause =
-                ODataUriParser.ParseSelectAndExpand(select, expand, _model.Model, _model.Customer, _model.Customers);
+                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
 
             IEdmEntityTypeReference entityType = new EdmEntityTypeReference((specialCustomer ? _model.SpecialCustomer : _model.Customer), false);
 
             // Act
-            SelectExpandNode selectExpandNode = SelectExpandNode.BuildSelectExpandNode(selectExpandClause, entityType, _model.Model);
+            SelectExpandNode selectExpandNode = new SelectExpandNode(selectExpandClause, entityType, _model.Model);
             var result = selectExpandNode.ExpandedNavigationProperties.Keys;
 
             // Assert
@@ -159,21 +163,27 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(null, null, "upgrade")] // no select and no expand -> select all actions
-        [InlineData("*", null, "")] // select * -> select no actions
-        //[InlineData("ModelWithInheritance.Upgrade", null, "upgrade")] // select single actions -> select requested action
-        //[InlineData("ModelWithInheritance.Upgrade,ModelWithInheritance.Upgrade", null, "upgrade")] // select duplicate actions -> de-duplicate
-        //[InlineData("ModelWithInheritance.*", null, "upgrade")] // select wild card actions -> select all
+        [InlineData(null, null, false, "upgrade")] // no select and no expand -> select all actions
+        [InlineData(null, null, true, "specialUpgrade,upgrade")] // no select and no expand -> select all actions
+        [InlineData("*", null, false, "")] // select * -> select no actions
+        [InlineData("*", null, true, "")] // select * -> select no actions
+        [InlineData("ModelWithInheritance.upgrade", null, false, "upgrade")] // select single actions -> select requested action
+        [InlineData("ModelWithInheritance.upgrade", null, true, "upgrade")] // select single actions -> select requested action
+        [InlineData("ModelWithInheritance.specialUpgrade", null, false, "")] // select single derived action on base type -> select nothing
+        [InlineData("ModelWithInheritance.specialUpgrade", null, true, "specialUpgrade")] // select single derived action on derived type  -> select requested action
+        [InlineData("ModelWithInheritance.upgrade,ModelWithInheritance.upgrade", null, false, "upgrade")] // select duplicate actions -> de-duplicate
+        [InlineData("ModelWithInheritance.*", null, false, "upgrade")] // select wild card actions -> select all
+        [InlineData("ModelWithInheritance.*", null, true, "specialUpgrade,upgrade")] // select wild card actions -> select all
         public void GetActionsToBeSelected_Selects_ExpectedActions(
-            string select, string expand, string actionsToSelect)
+            string select, string expand, bool specialCustomer, string actionsToSelect)
         {
             // Arrange
             SelectExpandClause selectExpandClause =
-                ODataUriParser.ParseSelectAndExpand(select, expand, _model.Model, _model.Customer, _model.Customers);
-            IEdmEntityTypeReference entityType = new EdmEntityTypeReference(_model.Customer, false);
+                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
+            IEdmEntityTypeReference entityType = new EdmEntityTypeReference(specialCustomer ? _model.SpecialCustomer : _model.Customer, false);
 
             // Act
-            SelectExpandNode selectExpandNode = SelectExpandNode.BuildSelectExpandNode(selectExpandClause, entityType, _model.Model);
+            SelectExpandNode selectExpandNode = new SelectExpandNode(selectExpandClause, entityType, _model.Model);
             var result = selectExpandNode.SelectedActions;
 
             // Assert
@@ -181,33 +191,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void BuildSelectExpandNode_ThrowsODataException_IfUnknownSelectionIsPresent()
+        public void BuildSelectExpandNode_ThrowsODataException_IfUnknownSelectItemPresent()
         {
-            Selection unknownSelection = new Mock<Selection>().Object;
-            SelectExpandClause selectExpandClause = new SelectExpandClause(unknownSelection, _emptyExpansion);
+            SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[] { new Mock<SelectItem>().Object }, allSelected: false);
             IEdmEntityTypeReference entityType = new EdmEntityTypeReference(_model.Customer, false);
 
             Assert.Throws<ODataException>(
-                () => SelectExpandNode.BuildSelectExpandNode(selectExpandClause, entityType, _model.Model),
-                "$select does not support selections of type 'SelectionProxy'.");
-        }
-
-        [Fact]
-        public void BuildSelectExpandNode_ThrowsODataException_IfUnknownSelectionItemPresent()
-        {
-            Selection selection = new PartialSelection(new[] { new Mock<SelectionItem>().Object });
-            SelectExpandClause selectExpandClause = new SelectExpandClause(selection, _emptyExpansion);
-            IEdmEntityTypeReference entityType = new EdmEntityTypeReference(_model.Customer, false);
-
-            Assert.Throws<ODataException>(
-                () => SelectExpandNode.BuildSelectExpandNode(selectExpandClause, entityType, _model.Model),
-                "$select does not support selections of type 'SelectionItemProxy'.");
+                () => new SelectExpandNode(selectExpandClause, entityType, _model.Model),
+                "$select does not support selections of type 'SelectItemProxy'.");
         }
 
         [Fact]
         public void ValidatePathIsSupported_ThrowsForUnsupportedPath()
         {
-            ODataPath path = new ODataPath(ValueSegment.Instance);
+            ODataPath path = new ODataPath(new ValueSegment(previousType: null));
 
             Assert.Throws<ODataException>(
                 () => SelectExpandNode.ValidatePathIsSupported(path),

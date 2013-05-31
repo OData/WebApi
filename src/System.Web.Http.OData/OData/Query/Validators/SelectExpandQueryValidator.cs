@@ -48,20 +48,16 @@ namespace System.Web.Http.OData.Query.Validators
                 int currentDepth = tuple.Item1;
                 SelectExpandClause currentNode = tuple.Item2;
 
-                if (currentNode.Expansion != null)
+                ExpandedNavigationSelectItem[] expandItems = currentNode.SelectedItems.OfType<ExpandedNavigationSelectItem>().ToArray();
+                if (expandItems.Length > 0 && currentDepth == maxDepth)
                 {
-                    IEnumerable<ExpandItem> expandItems = currentNode.Expansion.ExpandItems;
-                    if (expandItems.Any() && currentDepth == maxDepth)
-                    {
-                        throw new ODataException(
-                            Error.Format(SRResources.MaxExpandDepthExceeded, maxDepth, "MaxExpansionDepth"));
-                    }
+                    throw new ODataException(
+                        Error.Format(SRResources.MaxExpandDepthExceeded, maxDepth, "MaxExpansionDepth"));
+                }
 
-                    IEnumerable<SelectExpandClause> children = expandItems.Select(i => i.SelectExpandOption);
-                    foreach (SelectExpandClause child in children)
-                    {
-                        nodesToVisit.Push(Tuple.Create(currentDepth + 1, child));
-                    }
+                foreach (ExpandedNavigationSelectItem expandItem in expandItems)
+                {
+                    nodesToVisit.Push(Tuple.Create(currentDepth + 1, expandItem.SelectAndExpand));
                 }
             }
         }

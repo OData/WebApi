@@ -55,6 +55,9 @@ namespace System.Web.Http.TestCommon
             EdmFunctionImport upgradeCustomer = container.AddFunctionImport(
                 "upgrade", returnType: null, entitySet: new EdmEntitySetReferenceExpression(customers), sideEffecting: true, composable: false, bindable: true);
             upgradeCustomer.AddParameter("entity", new EdmEntityTypeReference(customer, false));
+            EdmFunctionImport upgradeSpecialCustomer = container.AddFunctionImport(
+                "specialUpgrade", returnType: null, entitySet: new EdmEntitySetReferenceExpression(customers), sideEffecting: true, composable: false, bindable: true);
+            upgradeSpecialCustomer.AddParameter("entity", new EdmEntityTypeReference(specialCustomer, false));
 
             // navigation properties
             customers.AddNavigationTarget(

@@ -38,7 +38,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 Path = new ODataPath(),
                 Request = new HttpRequestMessage(),
                 RootElementName = "somename",
-                SelectExpandClause = new SelectExpandClause(AllSelection.Instance, new Expansion(new ExpandItem[0])),
+                SelectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true),
                 SkipExpensiveAvailabilityChecks = true,
                 Url = new UrlHelper()
             };

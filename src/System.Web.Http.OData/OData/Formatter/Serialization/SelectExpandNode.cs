@@ -31,6 +31,55 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <summary>
+        /// Creates a new instance of the <see cref="SelectExpandNode"/> class describing the set of structural properties,
+        /// navigation properties, and actions to select and expand for the given <paramref name="selectExpandClause"/>.
+        /// </summary>
+        /// <param name="selectExpandClause">The parsed $select and $expand query options.</param>
+        /// <param name="entityType">The entity type of the entry that would be written.</param>
+        /// <param name="model">The <see cref="IEdmModel"/> that contains the given entity type.</param>
+        public SelectExpandNode(SelectExpandClause selectExpandClause, IEdmEntityTypeReference entityType, IEdmModel model)
+            : this()
+        {
+            if (entityType == null)
+            {
+                throw Error.ArgumentNull("entityType");
+            }
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            HashSet<IEdmStructuralProperty> allStructuralProperties = new HashSet<IEdmStructuralProperty>(entityType.StructuralProperties());
+            HashSet<IEdmNavigationProperty> allNavigationProperties = new HashSet<IEdmNavigationProperty>(entityType.NavigationProperties());
+            HashSet<IEdmFunctionImport> allActions = new HashSet<IEdmFunctionImport>(model.GetAvailableProcedures(entityType.EntityDefinition()));
+
+            if (selectExpandClause == null)
+            {
+                SelectedStructuralProperties = allStructuralProperties;
+                SelectedNavigationProperties = allNavigationProperties;
+                SelectedActions = allActions;
+            }
+            else
+            {
+                if (selectExpandClause.AllSelected)
+                {
+                    SelectedStructuralProperties = allStructuralProperties;
+                    SelectedNavigationProperties = allNavigationProperties;
+                    SelectedActions = allActions;
+                }
+                else
+                {
+                    BuildSelections(selectExpandClause, allStructuralProperties, allNavigationProperties, allActions);
+                }
+
+                BuildExpansions(selectExpandClause, allNavigationProperties);
+
+                // remove expanded navigation properties from the selected navigation properties.
+                SelectedNavigationProperties.ExceptWith(ExpandedNavigationProperties.Keys);
+            }
+        }
+
+        /// <summary>
         /// Gets the list of EDM structural properties to be included in the response.
         /// </summary>
         public ISet<IEdmStructuralProperty> SelectedStructuralProperties { get; private set; }
@@ -50,148 +99,102 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// </summary>
         public ISet<IEdmFunctionImport> SelectedActions { get; private set; }
 
-        /// <summary>
-        /// Builds the <see cref="SelectExpandNode"/> describing the set of structural properties and navigation properties and actions to select
-        /// and navigation properties to expand while writing an entry of type <paramref name="entityType"/> for the given 
-        /// <paramref name="selectExpandClause"/>.
-        /// </summary>
-        /// <param name="selectExpandClause">The parsed $select and $expand query options.</param>
-        /// <param name="entityType">The entity type of the entry that would be written.</param>
-        /// <param name="model">The <see cref="IEdmModel"/> that contains the given entity type.</param>
-        /// <returns>The built <see cref="SelectExpandNode"/>.</returns>
-        public static SelectExpandNode BuildSelectExpandNode(SelectExpandClause selectExpandClause, IEdmEntityTypeReference entityType, IEdmModel model)
+        private void BuildExpansions(SelectExpandClause selectExpandClause, HashSet<IEdmNavigationProperty> allNavigationProperties)
         {
-            if (entityType == null)
+            foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
-                throw Error.ArgumentNull("entityType");
-            }
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
-
-            SelectExpandNode selectExpandNode = new SelectExpandNode();
-            if (selectExpandClause != null && selectExpandClause.Expansion != null)
-            {
-                selectExpandNode.BuildExpansions(selectExpandClause.Expansion, entityType);
-            }
-            selectExpandNode.BuildSelections(selectExpandClause == null ? null : selectExpandClause.Selection, entityType, model);
-
-            // remove expanded navigation properties from the selected navigation properties.
-            IEnumerable<IEdmNavigationProperty> expandedNavigationProperties = selectExpandNode.ExpandedNavigationProperties.Keys;
-            selectExpandNode.SelectedNavigationProperties.ExceptWith(expandedNavigationProperties);
-
-            return selectExpandNode;
-        }
-
-        private void BuildExpansions(Expansion expansion, IEdmEntityTypeReference entityType)
-        {
-            IEnumerable<IEdmNavigationProperty> allNavigationProperties = entityType.NavigationProperties();
-            ExpandedNavigationProperties = new Dictionary<IEdmNavigationProperty, SelectExpandClause>();
-            foreach (ExpandItem expandItem in expansion.ExpandItems)
-            {
-                ValidatePathIsSupported(expandItem.PathToNavigationProperty);
-                NavigationPropertySegment navigationSegment = (NavigationPropertySegment)expandItem.PathToNavigationProperty.LastSegment;
-                if (allNavigationProperties.Contains(navigationSegment.NavigationProperty))
+                ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
+                if (expandItem != null)
                 {
-                    ExpandedNavigationProperties.Add(navigationSegment.NavigationProperty, expandItem.SelectExpandOption);
+                    ValidatePathIsSupported(expandItem.PathToNavigationProperty);
+                    NavigationPropertySegment navigationSegment = (NavigationPropertySegment)expandItem.PathToNavigationProperty.LastSegment;
+                    IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
+                    if (allNavigationProperties.Contains(navigationProperty))
+                    {
+                        ExpandedNavigationProperties.Add(navigationProperty, expandItem.SelectAndExpand);
+                    }
                 }
             }
         }
 
-        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "SelectExpandNode deals with SelectExpandClaus from ODataLib. Class coupling acceptable here.")]
-        private void BuildSelections(Selection selection, IEdmEntityTypeReference entityType, IEdmModel model)
+        private void BuildSelections(SelectExpandClause selectExpandClause, HashSet<IEdmStructuralProperty> allStructuralProperties, HashSet<IEdmNavigationProperty> allNavigationProperties, HashSet<IEdmFunctionImport> allActions)
         {
-            Contract.Assert(entityType != null);
-            Contract.Assert(model != null);
-
-            HashSet<IEdmStructuralProperty> allStructuralProperties = new HashSet<IEdmStructuralProperty>(entityType.StructuralProperties());
-            HashSet<IEdmNavigationProperty> allNavigationProperties = new HashSet<IEdmNavigationProperty>(entityType.NavigationProperties());
-            HashSet<IEdmFunctionImport> allActions = new HashSet<IEdmFunctionImport>(model.GetAvailableProcedures(entityType.EntityDefinition()));
-
-            if (selection == null || selection == AllSelection.Instance)
+            foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
-                SelectedStructuralProperties = allStructuralProperties;
-                SelectedNavigationProperties = allNavigationProperties;
-                SelectedActions = allActions;
-            }
-            else if (selection == ExpansionsOnly.Instance)
-            {
-                // nothing to select.
-            }
-            else
-            {
-                PartialSelection partialSelection = selection as PartialSelection;
-                if (partialSelection == null)
+                if (selectItem is ExpandedNavigationSelectItem)
                 {
-                    throw new ODataException(Error.Format(SRResources.SelectionTypeNotSupported, selection.GetType().Name));
+                    continue;
                 }
 
-                HashSet<IEdmStructuralProperty> selectedStructuralProperties = new HashSet<IEdmStructuralProperty>();
-                HashSet<IEdmNavigationProperty> selectedNavigationProperties = new HashSet<IEdmNavigationProperty>();
-                HashSet<IEdmFunctionImport> selectedActions = new HashSet<IEdmFunctionImport>();
+                PathSelectItem pathSelectItem = selectItem as PathSelectItem;
 
-                foreach (SelectionItem selectionItem in partialSelection.SelectedItems)
+                if (pathSelectItem != null)
                 {
-                    PathSelectionItem pathSelection = selectionItem as PathSelectionItem;
+                    ValidatePathIsSupported(pathSelectItem.SelectedPath);
+                    ODataPathSegment segment = pathSelectItem.SelectedPath.LastSegment;
 
-                    if (pathSelection != null)
+                    NavigationPropertySegment navigationPropertySegment = segment as NavigationPropertySegment;
+                    if (navigationPropertySegment != null)
                     {
-                        ValidatePathIsSupported(pathSelection.SelectedPath);
-                        Segment segment = pathSelection.SelectedPath.LastSegment;
-
-                        NavigationPropertySegment navigationPropertySegment = segment as NavigationPropertySegment;
-                        if (navigationPropertySegment != null)
+                        IEdmNavigationProperty navigationProperty = navigationPropertySegment.NavigationProperty;
+                        if (allNavigationProperties.Contains(navigationProperty))
                         {
-                            if (allNavigationProperties.Contains(navigationPropertySegment.NavigationProperty))
-                            {
-                                selectedNavigationProperties.Add(navigationPropertySegment.NavigationProperty);
-                            }
-                            continue;
-                        }
-
-                        PropertySegment structuralPropertySegment = segment as PropertySegment;
-                        if (structuralPropertySegment != null)
-                        {
-                            if (allStructuralProperties.Contains(structuralPropertySegment.Property))
-                            {
-                                selectedStructuralProperties.Add(structuralPropertySegment.Property);
-                            }
-                            continue;
-                        }
-
-                        throw new ODataException(Error.Format(SRResources.SelectionTypeNotSupported, segment.GetType().Name));
-                    }
-
-                    WildcardSelectionItem wildCardSelection = selectionItem as WildcardSelectionItem;
-                    if (wildCardSelection != null)
-                    {
-                        selectedStructuralProperties = allStructuralProperties;
-                        selectedNavigationProperties = allNavigationProperties;
-                        continue;
-                    }
-
-                    ContainerQualifiedWildcardSelectionItem wildCardActionSelection = selectionItem as ContainerQualifiedWildcardSelectionItem;
-                    if (wildCardActionSelection != null)
-                    {
-                        IEnumerable<IEdmFunctionImport> actionsInThisContainer = allActions.Where(a => a.Container == wildCardActionSelection.Container);
-                        foreach (IEdmFunctionImport action in actionsInThisContainer)
-                        {
-                            selectedActions.Add(action);
+                            SelectedNavigationProperties.Add(navigationProperty);
                         }
                         continue;
                     }
 
-                    throw new ODataException(Error.Format(SRResources.SelectionTypeNotSupported, selectionItem.GetType().Name));
+                    PropertySegment structuralPropertySegment = segment as PropertySegment;
+                    if (structuralPropertySegment != null)
+                    {
+                        IEdmStructuralProperty structuralProperty = structuralPropertySegment.Property;
+                        if (allStructuralProperties.Contains(structuralProperty))
+                        {
+                            SelectedStructuralProperties.Add(structuralProperty);
+                        }
+                        continue;
+                    }
+
+                    OperationSegment operationSegment = segment as OperationSegment;
+                    if (operationSegment != null)
+                    {
+                        foreach (IEdmFunctionImport action in operationSegment.Operations)
+                        {
+                            if (allActions.Contains(action))
+                            {
+                                SelectedActions.Add(action);
+                            }
+                        }
+                        continue;
+                    }
+
+                    throw new ODataException(Error.Format(SRResources.SelectionTypeNotSupported, segment.GetType().Name));
                 }
 
-                SelectedStructuralProperties = selectedStructuralProperties;
-                SelectedNavigationProperties = selectedNavigationProperties;
-                SelectedActions = selectedActions;
+                WildcardSelectItem wildCardSelectItem = selectItem as WildcardSelectItem;
+                if (wildCardSelectItem != null)
+                {
+                    SelectedStructuralProperties = allStructuralProperties;
+                    SelectedNavigationProperties = allNavigationProperties;
+                    continue;
+                }
+
+                ContainerQualifiedWildcardSelectItem wildCardActionSelection = selectItem as ContainerQualifiedWildcardSelectItem;
+                if (wildCardActionSelection != null)
+                {
+                    IEnumerable<IEdmFunctionImport> actionsInThisContainer = allActions.Where(a => a.Container == wildCardActionSelection.Container);
+                    foreach (IEdmFunctionImport action in actionsInThisContainer)
+                    {
+                        SelectedActions.Add(action);
+                    }
+                    continue;
+                }
+
+                throw new ODataException(Error.Format(SRResources.SelectionTypeNotSupported, selectItem.GetType().Name));
             }
         }
 
-        // we only support paths of type 'cast/structuralOrNavProperty' and 'structuralOrNavProperty'.
+        // we only support paths of type 'cast/structuralOrNavPropertyOrAction' and 'structuralOrNavPropertyOrAction'.
         internal static void ValidatePathIsSupported(ODataPath path)
         {
             int segmentCount = path.Count();
@@ -209,7 +212,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 }
             }
 
-            if (!(path.LastSegment is NavigationPropertySegment || path.LastSegment is PropertySegment))
+            ODataPathSegment lastSegment = path.LastSegment;
+            if (!(lastSegment is NavigationPropertySegment
+                || lastSegment is PropertySegment
+                || lastSegment is OperationSegment))
             {
                 throw new ODataException(SRResources.UnsupportedSelectExpandPath);
             }

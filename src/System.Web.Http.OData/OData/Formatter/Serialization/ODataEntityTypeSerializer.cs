@@ -115,7 +115,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             ODataSerializerContext writeContext = entityInstanceContext.SerializerContext;
-            return SelectExpandNode.BuildSelectExpandNode(writeContext.SelectExpandClause, EntityType, writeContext.Model);
+            return new SelectExpandNode(writeContext.SelectExpandClause, EntityType, writeContext.Model);
         }
 
         /// <summary>

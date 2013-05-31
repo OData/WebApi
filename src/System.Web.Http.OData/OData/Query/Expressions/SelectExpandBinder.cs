@@ -415,10 +415,10 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Dictionary<IEdmNavigationProperty, SelectExpandClause> properties = new Dictionary<IEdmNavigationProperty, SelectExpandClause>();
 
-            Expansion expansion = selectExpandClause.Expansion;
-            if (expansion != null)
+            foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
-                foreach (ExpandItem expandItem in expansion.ExpandItems)
+                ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
+                if (expandItem != null)
                 {
                     SelectExpandNode.ValidatePathIsSupported(expandItem.PathToNavigationProperty);
                     NavigationPropertySegment navigationSegment = expandItem.PathToNavigationProperty.LastSegment as NavigationPropertySegment;
@@ -427,7 +427,7 @@ namespace System.Web.Http.OData.Query.Expressions
                         throw new ODataException(SRResources.UnsupportedSelectExpandPath);
                     }
 
-                    properties[navigationSegment.NavigationProperty] = expandItem.SelectExpandOption;
+                    properties[navigationSegment.NavigationProperty] = expandItem.SelectAndExpand;
                 }
             }
 
@@ -440,14 +440,14 @@ namespace System.Web.Http.OData.Query.Expressions
             autoSelectedProperties = new HashSet<IEdmStructuralProperty>();
             HashSet<IEdmStructuralProperty> propertiesToInclude = new HashSet<IEdmStructuralProperty>();
 
-            PartialSelection selection = selectExpandClause.Selection as PartialSelection;
-            if (selection != null && !selection.SelectedItems.OfType<WildcardSelectionItem>().Any())
+            IEnumerable<SelectItem> selectedItems = selectExpandClause.SelectedItems;
+            if (!selectedItems.OfType<WildcardSelectItem>().Any())
             {
                 // only select requested properties and keys.
-                foreach (PathSelectionItem pathSelectionItem in selection.SelectedItems.OfType<PathSelectionItem>())
+                foreach (PathSelectItem pathSelectItem in selectedItems.OfType<PathSelectItem>())
                 {
-                    SelectExpandNode.ValidatePathIsSupported(pathSelectionItem.SelectedPath);
-                    PropertySegment structuralPropertySegment = pathSelectionItem.SelectedPath.LastSegment as PropertySegment;
+                    SelectExpandNode.ValidatePathIsSupported(pathSelectItem.SelectedPath);
+                    PropertySegment structuralPropertySegment = pathSelectItem.SelectedPath.LastSegment as PropertySegment;
                     if (structuralPropertySegment != null)
                     {
                         propertiesToInclude.Add(structuralPropertySegment.Property);
@@ -467,17 +467,14 @@ namespace System.Web.Http.OData.Query.Expressions
             return propertiesToInclude;
         }
 
-        private static bool IsSelectAll(SelectExpandClause selectExpandCaluse)
+        private static bool IsSelectAll(SelectExpandClause selectExpandClause)
         {
-            if (selectExpandCaluse == null
-                || selectExpandCaluse.Selection == null
-                || selectExpandCaluse.Selection == AllSelection.Instance)
+            if (selectExpandClause == null)
             {
                 return true;
             }
 
-            PartialSelection partialSelection = selectExpandCaluse.Selection as PartialSelection;
-            if (partialSelection != null && partialSelection.SelectedItems.OfType<WildcardSelectionItem>().Any())
+            if (selectExpandClause.AllSelected || selectExpandClause.SelectedItems.OfType<WildcardSelectItem>().Any())
             {
                 return true;
             }

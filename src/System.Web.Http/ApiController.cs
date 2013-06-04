@@ -291,11 +291,9 @@ namespace System.Web.Http
         private async Task<HttpResponseMessage> ExecuteAction(HttpActionBinding actionBinding, HttpActionContext actionContext,
             CancellationToken cancellationToken, IActionFilter[] actionFilters, ServicesContainer controllerServices)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             await actionBinding.ExecuteBindingAsync(actionContext, cancellationToken);
 
             _modelState = actionContext.ModelState;
-            cancellationToken.ThrowIfCancellationRequested();
             ActionInvoker actionInvoker = new ActionInvoker(actionContext, cancellationToken, controllerServices);
             // Empty filters is the default case so avoid delegates
             // Ensure empty case remains the same as the filtered case
@@ -352,7 +350,6 @@ namespace System.Web.Http
             for (int i = filters.Length - 1; i >= 0; i--)
             {
                 IExceptionFilter exceptionFilter = filters[i];
-                cancellationToken.ThrowIfCancellationRequested();
                 await exceptionFilter.ExecuteExceptionFilterAsync(executedContext, cancellationToken);
             }
 
@@ -389,7 +386,6 @@ namespace System.Web.Http
             for (int i = 0; i < filters.Length; i++)
             {
                 IAuthenticationFilter filter = filters[i];
-                cancellationToken.ThrowIfCancellationRequested();
                 IAuthenticationResult result = await filter.AuthenticateAsync(authenticationContext,
                     cancellationToken);
 
@@ -417,12 +413,10 @@ namespace System.Web.Http
             for (int i = 0; i < filters.Length; i++)
             {
                 IAuthenticationFilter filter = filters[i];
-                cancellationToken.ThrowIfCancellationRequested();
                 innerResult = await filter.ChallengeAsync(actionContext, innerResult, cancellationToken) ??
                     innerResult;
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
             return await innerResult.ExecuteAsync(cancellationToken);
         }
 

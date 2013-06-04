@@ -44,8 +44,6 @@ namespace System.Web.Http.OData.Batch
                 throw Error.ArgumentNull("invoker");
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             Dictionary<string, string> contentIdToLocationMapping = new Dictionary<string, string>();
             List<HttpResponseMessage> responses = new List<HttpResponseMessage>();
 

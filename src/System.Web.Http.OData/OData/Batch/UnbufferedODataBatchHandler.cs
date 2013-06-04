@@ -32,8 +32,6 @@ namespace System.Web.Http.OData.Batch
                 throw Error.ArgumentNull("request");
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             ValidateRequest(request);
 
             ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings
@@ -43,6 +41,7 @@ namespace System.Web.Http.OData.Batch
                 BaseUri = GetBaseUri(request)
             };
 
+            cancellationToken.ThrowIfCancellationRequested();
             ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(oDataReaderSettings);
             request.RegisterForDispose(reader);
 
@@ -81,6 +80,7 @@ namespace System.Web.Http.OData.Batch
                 throw;
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
             return await CreateResponseMessageAsync(responses, request);
         }
 
@@ -104,8 +104,8 @@ namespace System.Web.Http.OData.Batch
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-
             HttpRequestMessage operationRequest = await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: false);
+
             operationRequest.CopyBatchRequestProperties(originalRequest);
             OperationRequestItem operation = new OperationRequestItem(operationRequest);
             try

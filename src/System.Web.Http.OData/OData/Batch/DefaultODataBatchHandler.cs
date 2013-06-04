@@ -35,15 +35,15 @@ namespace System.Web.Http.OData.Batch
                 throw Error.ArgumentNull("request");
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             ValidateRequest(request);
 
+            cancellationToken.ThrowIfCancellationRequested();
             IList<ODataBatchRequestItem> subRequests = await ParseBatchRequestsAsync(request);
 
             try
             {
                 IList<ODataBatchResponseItem> responses = await ExecuteRequestMessagesAsync(subRequests, cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
                 return await CreateResponseMessageAsync(responses, request);
             }
             finally
@@ -69,8 +69,6 @@ namespace System.Web.Http.OData.Batch
             {
                 throw Error.ArgumentNull("requests");
             }
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             IList<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
 

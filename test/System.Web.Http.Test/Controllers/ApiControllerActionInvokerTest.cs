@@ -31,17 +31,6 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void InvokeActionAsync_Cancels_IfCancellationTokenRequested()
-        {
-            CancellationTokenSource cancellationSource = new CancellationTokenSource();
-            cancellationSource.Cancel();
-
-            var response = _actionInvoker.InvokeActionAsync(ContextUtil.CreateActionContext(), cancellationSource.Token);
-
-            Assert.Equal<TaskStatus>(TaskStatus.Canceled, response.Status);
-        }
-
-        [Fact]
         public void InvokeActionAsync_Throws_IfContextIsNull()
         {
             Assert.ThrowsArgumentNull(

@@ -80,7 +80,6 @@ namespace System.Web.Http.Controllers
 
             try
             {
-                cancellationToken.ThrowIfCancellationRequested();
                 object actionResult = await actionDescriptor.ExecuteAsync(controllerContext,
                     actionContext.ActionArguments, cancellationToken);
                 return actionDescriptor.ResultConverter.Convert(controllerContext, actionResult);

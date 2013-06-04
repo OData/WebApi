@@ -46,8 +46,6 @@ namespace System.Web.Http.Batch
                 throw Error.ArgumentNull("request");
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             request.Properties[HttpPropertyKeys.IsBatchRequest] = true;
 
             try

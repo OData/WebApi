@@ -44,8 +44,6 @@ namespace System.Web.Http.OData.Batch
                 throw Error.ArgumentNull("invoker");
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             HttpResponseMessage response = await SendMessageAsync(invoker, Request, cancellationToken, null);
             return new OperationResponseItem(response);
         }

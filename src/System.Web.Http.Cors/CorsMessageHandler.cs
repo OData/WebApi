@@ -43,8 +43,6 @@ namespace System.Web.Http.Cors
         /// </returns>
         protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             CorsRequestContext corsRequestContext = request.GetCorsRequestContext();
             if (corsRequestContext != null)
             {
@@ -84,7 +82,6 @@ namespace System.Web.Http.Cors
         /// </exception>
         public virtual async Task<HttpResponseMessage> HandleCorsRequestAsync(HttpRequestMessage request, CorsRequestContext corsRequestContext, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             if (request == null)
             {
                 throw new ArgumentNullException("request");
@@ -95,6 +92,7 @@ namespace System.Web.Http.Cors
             }
 
             HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             CorsPolicy corsPolicy = await GetCorsPolicyAsync(request);
             if (corsPolicy != null)
             {
@@ -124,7 +122,6 @@ namespace System.Web.Http.Cors
         /// </exception>
         public virtual async Task<HttpResponseMessage> HandleCorsPreflightRequestAsync(HttpRequestMessage request, CorsRequestContext corsRequestContext, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             if (request == null)
             {
                 throw new ArgumentNullException("request");
@@ -152,6 +149,7 @@ namespace System.Web.Http.Cors
                         corsRequestContext.AccessControlRequestMethod));
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
             CorsPolicy corsPolicy = await GetCorsPolicyAsync(request);
             if (corsPolicy != null)
             {

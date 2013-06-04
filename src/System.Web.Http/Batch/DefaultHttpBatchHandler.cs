@@ -99,15 +99,15 @@ namespace System.Web.Http.Batch
                 throw Error.ArgumentNull("request");
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             ValidateRequest(request);
 
+            cancellationToken.ThrowIfCancellationRequested();
             IList<HttpRequestMessage> subRequests = await ParseBatchRequestsAsync(request);
 
             try
             {
                 IList<HttpResponseMessage> responses = await ExecuteRequestMessagesAsync(subRequests, cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
                 return await CreateResponseMessageAsync(responses, request);
             }
             finally
@@ -133,8 +133,6 @@ namespace System.Web.Http.Batch
             {
                 throw Error.ArgumentNull("requests");
             }
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             List<HttpResponseMessage> responses = new List<HttpResponseMessage>();
 

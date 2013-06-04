@@ -32,7 +32,6 @@ namespace System.Web.Http.OData.Batch
                 throw Error.ArgumentNull("request");
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
             if (contentIdToLocationMapping != null)
             {
                 string resolvedRequestUrl = ContentIdHelpers.ResolveContentId(request.RequestUri.OriginalString, contentIdToLocationMapping);

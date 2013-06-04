@@ -109,7 +109,6 @@ namespace System.Web.Http.Controllers
             {
                 HttpParameterBinding parameterBinder = ParameterBindings[index];
 
-                cancellationToken.ThrowIfCancellationRequested();
                 await parameterBinder.ExecuteBindingAsync(_metadataProvider, actionContext, cancellationToken);
             }
         }

@@ -258,16 +258,25 @@ namespace System.Web.Http.Owin
 
         private static async Task<HttpResponseMessage> BufferResponseBodyAsync(HttpRequestMessage request, HttpResponseMessage response)
         {
+            Exception exception = null;
             try
             {
                 await response.Content.LoadIntoBufferAsync();
-                return response;
             }
-            catch (Exception exception)
+            catch (Exception e)
+            {
+                exception = e;
+            }
+
+            // If the content can't be buffered, create a buffered error response for the exception
+            // This code will commonly run when a formatter throws during the process of serialization
+            if (exception != null)
             {
                 response.Dispose();
-                return request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception);
+                response = request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception);
+                await response.Content.LoadIntoBufferAsync();
             }
+            return response;
         }
 
         // Responsible for setting Content-Length and Transfer-Encoding if needed

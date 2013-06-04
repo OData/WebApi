@@ -56,6 +56,7 @@ namespace System.Web.Http.Owin
                 JObject json = Assert.IsType<JObject>(JToken.Parse(response.Content.ReadAsStringAsync().Result));
                 JToken exceptionMessage;
                 Assert.True(json.TryGetValue("ExceptionMessage", out exceptionMessage));
+                Assert.Null(response.Headers.TransferEncodingChunked);
             }
         }
 

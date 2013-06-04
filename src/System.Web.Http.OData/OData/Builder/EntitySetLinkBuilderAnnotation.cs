@@ -9,7 +9,11 @@ using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
-    internal class EntitySetLinkBuilderAnnotation
+    /// <summary>
+    /// <see cref="EntitySetLinkBuilderAnnotation" /> is a class used to annotate an <see cref="IEdmEntitySet" /> inside an <see cref="IEdmModel" />
+    /// with information about how to build links related to that entity set.
+    /// </summary>
+    public class EntitySetLinkBuilderAnnotation
     {
         private readonly Func<FeedContext, Uri> _feedSelfLinkBuilder;
 
@@ -17,15 +21,42 @@ namespace System.Web.Http.OData.Builder
         private readonly SelfLinkBuilder<Uri> _editLinkBuilder;
         private readonly SelfLinkBuilder<Uri> _readLinkBuilder;
 
-        private readonly Dictionary<IEdmNavigationProperty, NavigationLinkBuilder> _navigationPropertyLinkBuilderLookup;
-        private readonly EntitySetConfiguration _entitySet;
+        private readonly Dictionary<IEdmNavigationProperty, NavigationLinkBuilder> _navigationPropertyLinkBuilderLookup = new Dictionary<IEdmNavigationProperty, NavigationLinkBuilder>();
+        private readonly string _entitySetName;
 
-        // This constructor is used for unit testing purposes only
+        /// <summary>
+        /// Constructs an instance of an <see cref="EntitySetLinkBuilderAnnotation" /> for testing purposes only.
+        /// </summary>
         public EntitySetLinkBuilderAnnotation()
         {
-            _navigationPropertyLinkBuilderLookup = new Dictionary<IEdmNavigationProperty, NavigationLinkBuilder>();
         }
 
+        /// <summary>
+        /// Constructs an instance of an <see cref="EntitySetLinkBuilderAnnotation" />.
+        /// <remarks>Every parameter must be non-null.</remarks>
+        /// </summary>
+        public EntitySetLinkBuilderAnnotation(
+            IEdmEntitySet entitySet,
+            Func<FeedContext, Uri> feedSelfLinkBuilder,
+            SelfLinkBuilder<string> idLinkBuilder,
+            SelfLinkBuilder<Uri> editLinkBuilder,
+            SelfLinkBuilder<Uri> readLinkBuilder)
+        {
+            if (entitySet == null)
+            {
+                throw Error.ArgumentNull("entitySet");
+            }
+
+            _entitySetName = entitySet.Name;
+            _feedSelfLinkBuilder = feedSelfLinkBuilder;
+            _idLinkBuilder = idLinkBuilder;
+            _editLinkBuilder = editLinkBuilder;
+            _readLinkBuilder = readLinkBuilder;
+        }
+
+        /// <summary>
+        /// Constructs an instance of an <see cref="EntitySetLinkBuilderAnnotation" /> from an <see cref="EntitySetConfiguration" />.
+        /// </summary>
         public EntitySetLinkBuilderAnnotation(EntitySetConfiguration entitySet)
         {
             if (entitySet == null)
@@ -33,20 +64,24 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("entitySet");
             }
 
-            _entitySet = entitySet;
+            _entitySetName = entitySet.Name;
             _feedSelfLinkBuilder = entitySet.GetFeedSelfLink();
             _idLinkBuilder = entitySet.GetIdLink();
-
             _editLinkBuilder = entitySet.GetEditLink();
             _readLinkBuilder = entitySet.GetReadLink();
-            _navigationPropertyLinkBuilderLookup = new Dictionary<IEdmNavigationProperty, NavigationLinkBuilder>();
         }
 
+        /// <summary>
+        /// Register a link builder for a <see cref="IEdmNavigationProperty" /> that navigates from Entities in this EntitySet. 
+        /// </summary>
         public void AddNavigationPropertyLinkBuilder(IEdmNavigationProperty navigationProperty, NavigationLinkBuilder linkBuilder)
         {
             _navigationPropertyLinkBuilderLookup[navigationProperty] = linkBuilder;
         }
 
+        /// <summary>
+        /// Build a self-link URI given a <see cref="FeedContext" />.
+        /// </summary>
         public virtual Uri BuildFeedSelfLink(FeedContext context)
         {
             if (context == null)
@@ -62,6 +97,9 @@ namespace System.Web.Http.OData.Builder
             return _feedSelfLinkBuilder(context);
         }
 
+        /// <summary>
+        /// Constructs the <see cref="EntitySelfLinks" /> for a particular <see cref="EntityInstanceContext" /> and <see cref="ODataMetadataLevel" />.
+        /// </summary>
         public virtual EntitySelfLinks BuildEntitySelfLinks(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
         {
             EntitySelfLinks selfLinks = new EntitySelfLinks();
@@ -71,6 +109,9 @@ namespace System.Web.Http.OData.Builder
             return selfLinks;
         }
 
+        /// <summary>
+        /// Constructs the IdLink for a particular <see cref="EntityInstanceContext" /> and <see cref="ODataMetadataLevel" />.
+        /// </summary>
         public virtual string BuildIdLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
         {
             if (instanceContext == null)
@@ -80,7 +121,7 @@ namespace System.Web.Http.OData.Builder
 
             if (_idLinkBuilder == null)
             {
-                throw Error.InvalidOperation(SRResources.NoIdLinkFactoryFound, _entitySet.Name);
+                throw Error.InvalidOperation(SRResources.NoIdLinkFactoryFound, _entitySetName);
             }
 
             if (IsDefaultOrFull(metadataLevel) || (IsMinimal(metadataLevel) && !_idLinkBuilder.FollowsConventions))
@@ -94,6 +135,9 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        /// <summary>
+        /// Constructs the EditLink URL for a particular <see cref="EntityInstanceContext" /> and <see cref="ODataMetadataLevel" />.
+        /// </summary>
         public virtual Uri BuildEditLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, string idLink)
         {
             if (instanceContext == null)
@@ -121,6 +165,9 @@ namespace System.Web.Http.OData.Builder
             return null;
         }
 
+        /// <summary>
+        /// Constructs a ReadLink URL for a particular <see cref="EntityInstanceContext" /> and <see cref="ODataMetadataLevel" />.
+        /// </summary>
         public virtual Uri BuildReadLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, Uri editLink)
         {
             if (instanceContext == null)
@@ -148,6 +195,9 @@ namespace System.Web.Http.OData.Builder
             return null;
         }
 
+        /// <summary>
+        /// Constructs a NavigationLink for a particular <see cref="EntityInstanceContext" />, <see cref="IEdmNavigationProperty" /> and <see cref="ODataMetadataLevel" />.
+        /// </summary>
         public virtual Uri BuildNavigationLink(EntityInstanceContext instanceContext, IEdmNavigationProperty navigationProperty, ODataMetadataLevel metadataLevel)
         {
             if (instanceContext == null)
@@ -163,7 +213,7 @@ namespace System.Web.Http.OData.Builder
             NavigationLinkBuilder navigationLinkBuilder;
             if (!_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder))
             {
-                throw Error.Argument("navigationProperty", SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _entitySet.Name);
+                throw Error.Argument("navigationProperty", SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _entitySetName);
             }
             Contract.Assert(navigationLinkBuilder != null);
 

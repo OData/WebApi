@@ -366,6 +366,34 @@ namespace System.Web.Http.OData
             Assert.Equal(expectedValue, value);
         }
 
+        public static TheoryDataSet<Type> Delta_Returns_Correct_ExpectedType_And_ActualType_DataSet
+        {
+            get
+            {
+                return new TheoryDataSet<Type>()
+                {
+                    { typeof(Customer) },
+                    { typeof(BellevueCustomer) } 
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("Delta_Returns_Correct_ExpectedType_And_ActualType_DataSet")]
+        public void Delta_Returns_Correct_ExpectedType_And_ActualType(Type actualType)
+        { 
+            // Arrange 
+            Delta delta = new Delta<Customer>(actualType);
+
+            // Act
+            Type actualActualType = delta.EntityType;
+            Type actualExpectedType = delta.ExpectedType;
+
+            // Assert
+            Assert.Equal(typeof(Customer), actualExpectedType);
+            Assert.Equal(actualType, actualActualType);
+        }
+
         public static T GetDefaultValue<T>()
         {
             return default(T);

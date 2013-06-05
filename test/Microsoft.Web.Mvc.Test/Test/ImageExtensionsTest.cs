@@ -117,7 +117,7 @@ namespace Microsoft.Web.Mvc.Test
         {
             HtmlHelper html = MvcHelper.GetHtmlHelperWithPath(new ViewDataDictionary(), "/app");
             MvcHtmlString imageResult = html.Image("~/system/web/mvc.jpg");
-            Assert.Equal("<img src=\"/$(SESSION)/app/system/web/mvc.jpg\" />", imageResult.ToHtmlString());
+            Assert.Equal("<img src=\"/app/system/web/mvc.jpg\" />", imageResult.ToHtmlString());
         }
 
         [Fact]
@@ -125,7 +125,7 @@ namespace Microsoft.Web.Mvc.Test
         {
             HtmlHelper html = MvcHelper.GetHtmlHelperWithPath(new ViewDataDictionary(), "/");
             MvcHtmlString imageResult = html.Image("~/system/web/mvc.jpg");
-            Assert.Equal("<img src=\"/$(SESSION)/system/web/mvc.jpg\" />", imageResult.ToHtmlString());
+            Assert.Equal("<img src=\"/system/web/mvc.jpg\" />", imageResult.ToHtmlString());
         }
     }
 }

@@ -45,7 +45,7 @@ namespace Microsoft.Web.Mvc.Test
         {
             HtmlHelper html = MvcHelper.GetHtmlHelperWithPath(new ViewDataDictionary(), "/app");
             MvcHtmlString button = html.SubmitImage("button-name", "~/mvc.gif");
-            Assert.Equal("<input id=\"button-name\" name=\"button-name\" src=\"/$(SESSION)/app/mvc.gif\" type=\"image\" />", button.ToHtmlString());
+            Assert.Equal("<input id=\"button-name\" name=\"button-name\" src=\"/app/mvc.gif\" type=\"image\" />", button.ToHtmlString());
         }
 
         [Fact]

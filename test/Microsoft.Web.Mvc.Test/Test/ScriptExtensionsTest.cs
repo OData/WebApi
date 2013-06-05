@@ -39,7 +39,7 @@ namespace Microsoft.Web.Mvc.Test
             MvcHtmlString result = html.Script("~/Correct/Path.js", "~/Correct/Debug/Path.js");
 
             // Assert
-            Assert.Equal("<script src=\"/$(SESSION)/Correct/Path.js\" type=\"text/javascript\"></script>", result.ToHtmlString());
+            Assert.Equal("<script src=\"/Correct/Path.js\" type=\"text/javascript\"></script>", result.ToHtmlString());
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace Microsoft.Web.Mvc.Test
             MvcHtmlString result = html.Script("Correct/Path.js", "Correct/Debug/Path.js");
 
             // Assert
-            Assert.Equal("<script src=\"/$(SESSION)/Scripts/Correct/Path.js\" type=\"text/javascript\"></script>", result.ToHtmlString());
+            Assert.Equal("<script src=\"/Scripts/Correct/Path.js\" type=\"text/javascript\"></script>", result.ToHtmlString());
         }
 
         [Fact]
@@ -118,7 +118,7 @@ namespace Microsoft.Web.Mvc.Test
             MvcHtmlString result = html.Script("Correct/Path.js", "Correct/Debug/Path.js");
 
             // Assert
-            Assert.Equal("<script src=\"/$(SESSION)/Scripts/Correct/Debug/Path.js\" type=\"text/javascript\"></script>", result.ToHtmlString());
+            Assert.Equal("<script src=\"/Scripts/Correct/Debug/Path.js\" type=\"text/javascript\"></script>", result.ToHtmlString());
         }
     }
 }

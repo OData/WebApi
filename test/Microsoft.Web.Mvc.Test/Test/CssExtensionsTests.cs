@@ -29,7 +29,7 @@ namespace Microsoft.Web.Mvc.Test
             MvcHtmlString result = html.Css("~/Correct/Path.css");
 
             // Assert
-            Assert.Equal("<link href=\"/$(SESSION)/Correct/Path.css\" rel=\"stylesheet\" type=\"text/css\" />", result.ToHtmlString());
+            Assert.Equal("<link href=\"/Correct/Path.css\" rel=\"stylesheet\" type=\"text/css\" />", result.ToHtmlString());
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace Microsoft.Web.Mvc.Test
             MvcHtmlString result = html.Css("Correct/Path.css");
 
             // Assert
-            Assert.Equal("<link href=\"/$(SESSION)/Content/Correct/Path.css\" rel=\"stylesheet\" type=\"text/css\" />", result.ToHtmlString());
+            Assert.Equal("<link href=\"/Content/Correct/Path.css\" rel=\"stylesheet\" type=\"text/css\" />", result.ToHtmlString());
         }
 
         [Fact]
@@ -81,7 +81,7 @@ namespace Microsoft.Web.Mvc.Test
             MvcHtmlString result = html.Css("Correct/Path.css", null);
 
             // Assert
-            Assert.Equal("<link href=\"/$(SESSION)/Content/Correct/Path.css\" rel=\"stylesheet\" type=\"text/css\" />", result.ToHtmlString());
+            Assert.Equal("<link href=\"/Content/Correct/Path.css\" rel=\"stylesheet\" type=\"text/css\" />", result.ToHtmlString());
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace Microsoft.Web.Mvc.Test
             MvcHtmlString result = html.Css("Correct/Path.css", String.Empty);
 
             // Assert
-            Assert.Equal("<link href=\"/$(SESSION)/Content/Correct/Path.css\" media=\"\" rel=\"stylesheet\" type=\"text/css\" />", result.ToHtmlString());
+            Assert.Equal("<link href=\"/Content/Correct/Path.css\" media=\"\" rel=\"stylesheet\" type=\"text/css\" />", result.ToHtmlString());
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace Microsoft.Web.Mvc.Test
             MvcHtmlString result = html.Css("Correct/Path.css", "Print");
 
             // Assert
-            Assert.Equal("<link href=\"/$(SESSION)/Content/Correct/Path.css\" media=\"Print\" rel=\"stylesheet\" type=\"text/css\" />", result.ToHtmlString());
+            Assert.Equal("<link href=\"/Content/Correct/Path.css\" media=\"Print\" rel=\"stylesheet\" type=\"text/css\" />", result.ToHtmlString());
         }
 
         [Fact]

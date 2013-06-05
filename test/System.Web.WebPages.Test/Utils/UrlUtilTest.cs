@@ -142,10 +142,11 @@ namespace System.Web.WebPages.Test
             var expected = "This%20is%20a%20really%20bad%20name%20for%20a%20page";
 
             // Act
-            var actual = UrlUtil.BuildUrl(page);
+            string query;
+            var path = UrlUtil.BuildUrl(page, out query);
 
             // Assert
-            Assert.Equal(actual.Item1 + actual.Item2, expected);
+            Assert.Equal(path + query, expected);
         }
 
         [Fact]
@@ -156,10 +157,11 @@ namespace System.Web.WebPages.Test
             var page = "home";
 
             // Act
-            var actual = UrlUtil.BuildUrl(page, pathParts);
+            string query;
+            var path = UrlUtil.BuildUrl(page, out query, pathParts);
 
             // Assert
-            Assert.Equal(actual.Item1 + actual.Item2, page + "/part/1/1.25");
+            Assert.Equal(path + query, page + "/part/1/1.25");
         }
 
         [Fact]
@@ -170,10 +172,11 @@ namespace System.Web.WebPages.Test
             var page = "home";
 
             // Act
-            var actual = UrlUtil.BuildUrl(page, pathParts);
+            string query;
+            var path = UrlUtil.BuildUrl(page, out query, pathParts);
 
             // Assert
-            Assert.Equal(actual.Item1 + actual.Item2, page + "/path%20portion/%ce%b6");
+            Assert.Equal(path + query, page + "/path%20portion/%ce%b6");
         }
 
         [Fact]
@@ -184,10 +187,11 @@ namespace System.Web.WebPages.Test
             var queryString = new { sort = "FName", dir = "desc" };
 
             // Act
-            var actual = UrlUtil.BuildUrl(page, queryString);
+            string query;
+            var path = UrlUtil.BuildUrl(page, out query, queryString);
 
             // Assert
-            Assert.Equal(actual.Item1 + actual.Item2, page + "?sort=FName&dir=desc");
+            Assert.Equal(path + query, page + "?sort=FName&dir=desc");
         }
 
         [Fact]
@@ -199,10 +203,11 @@ namespace System.Web.WebPages.Test
             var queryString2 = new { view = "Activities", page = 7 };
 
             // Act
-            var actual = UrlUtil.BuildUrl(page, queryString1, queryString2);
+            string query;
+            var path = UrlUtil.BuildUrl(page, out query, queryString1, queryString2);
 
             // Assert
-            Assert.Equal(actual.Item1 + actual.Item2, page + "?sort=FName&dir=desc&view=Activities&page=7");
+            Assert.Equal(path + query, page + "?sort=FName&dir=desc&view=Activities&page=7");
         }
 
         [Fact]
@@ -213,10 +218,11 @@ namespace System.Web.WebPages.Test
             var queryString = new { ζ = "my=value&", mykey = "<π" };
 
             // Act
-            var actual = UrlUtil.BuildUrl(page, queryString);
+            string query;
+            var path = UrlUtil.BuildUrl(page, out query, queryString);
 
             // Assert
-            Assert.Equal(actual.Item1 + actual.Item2, page + "?%ce%b6=my%3dvalue%26&mykey=%3c%cf%80");
+            Assert.Equal(path + query, page + "?%ce%b6=my%3dvalue%26&mykey=%3c%cf%80");
         }
 
         [Fact]
@@ -226,10 +232,11 @@ namespace System.Web.WebPages.Test
             var page = "home";
 
             // Act
-            var actual = UrlUtil.BuildUrl(page, "products", new { cat = 37 }, "furniture", new { sort = "name", dir = "desc" });
+            string query;
+            var path = UrlUtil.BuildUrl(page, out query, "products", new { cat = 37 }, "furniture", new { sort = "name", dir = "desc" });
 
             // Assert
-            Assert.Equal(actual.Item1 + actual.Item2, page + "/products/furniture?cat=37&sort=name&dir=desc");
+            Assert.Equal(path + query, page + "/products/furniture?cat=37&sort=name&dir=desc");
         }
 
         [Fact]
@@ -288,7 +295,7 @@ namespace System.Web.WebPages.Test
             string returnedUrl = UrlUtil.GenerateClientUrl(mockHttpContext.Object, "~/foo/bar?alpha=bravo");
 
             // Assert
-            Assert.Equal("/myapp/(S(session))/foo/bar?alpha=bravo", returnedUrl);
+            Assert.Equal("/myapp/foo/bar?alpha=bravo", returnedUrl);
         }
 
         [Fact]
@@ -470,17 +477,6 @@ namespace System.Web.WebPages.Test
             if (includeRewriterServerVar)
             {
                 serverVars[UrlRewriterHelper.UrlWasRewrittenServerVar] = "Got rewritten!";
-                mockContext
-                    .Setup(c => c.Response.ApplyAppPathModifier(It.IsAny<string>()))
-                    .Returns(
-                        delegate(string input) { return input; });
-            }
-            else
-            {
-                mockContext
-                    .Setup(c => c.Response.ApplyAppPathModifier(It.IsAny<string>()))
-                    .Returns(
-                        delegate(string input) { return "/myapp/(S(session))" + input.Substring("/myapp".Length); });
             }
 
             return mockContext;

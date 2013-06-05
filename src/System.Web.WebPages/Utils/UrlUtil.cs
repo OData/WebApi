@@ -23,21 +23,54 @@ namespace System.Web.WebPages
             string query;
             contentPath = StripQuery(contentPath, out query);
 
-            return GenerateClientUrlInternal(httpContext, contentPath) + query;
+            // many of the methods we call internally can't handle query strings properly, so tack it on after processing
+            // the virtual app path and url rewrites
+            if (String.IsNullOrEmpty(query))
+            {
+                return GenerateClientUrlInternal(httpContext, contentPath);
+            }
+            else
+            {
+                return GenerateClientUrlInternal(httpContext, contentPath) + query;
+            }
         }
 
         public static string GenerateClientUrl(HttpContextBase httpContext, string basePath, string path, params object[] pathParts)
         {
+            if (String.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+
+            if (pathParts != null)
+            {
+                for (int i = 0; i < pathParts.Length; i++)
+                {
+                    if (pathParts[i] == null)
+                    {
+                        throw new ArgumentNullException("pathParts");
+                    }
+                }
+            }
+
             if (basePath != null)
             {
                 path = VirtualPathUtility.Combine(basePath, path);
             }
 
-            Tuple<string, string> contentPathAndQuery = BuildUrl(path, pathParts);
+            string query;
+            string processedPath = BuildUrl(path, out query, pathParts);
 
-            // many of the methods we call internally can't handle query strings properly, so take it on after processing
+            // many of the methods we call internally can't handle query strings properly, so tack it on after processing
             // the virtual app path and url rewrites
-            return GenerateClientUrlInternal(httpContext, contentPathAndQuery.Item1) + contentPathAndQuery.Item2;
+            if (String.IsNullOrEmpty(query))
+            {
+                return GenerateClientUrlInternal(httpContext, processedPath);
+            }
+            else
+            {
+                return GenerateClientUrlInternal(httpContext, processedPath) + query;
+            }
         }
 
         private static string GenerateClientUrlInternal(HttpContextBase httpContext, string contentPath)
@@ -52,8 +85,7 @@ namespace System.Web.WebPages
             if (isAppRelative)
             {
                 string absoluteContentPath = VirtualPathUtility.ToAbsolute(contentPath, httpContext.Request.ApplicationPath);
-                string modifiedAbsoluteContentPath = httpContext.Response.ApplyAppPathModifier(absoluteContentPath);
-                return GenerateClientUrlInternal(httpContext, modifiedAbsoluteContentPath);
+                return GenerateClientUrlInternal(httpContext, absoluteContentPath);
             }
 
             // we only want to manipulate the path if URL rewriting is active for this request, else we risk breaking the generated URL
@@ -114,50 +146,103 @@ namespace System.Web.WebPages
             _urlRewriterHelper = new UrlRewriterHelper();
         }
 
-        internal static Tuple<string, string> BuildUrl(string path, params object[] pathParts)
+        internal static string BuildUrl(string path, out string query, params object[] pathParts)
         {
-            path = HttpUtility.UrlPathEncode(path);
-            StringBuilder queryString = new StringBuilder();
-
-            foreach (var pathPart in pathParts)
+            // Performance senstive 
+            // 
+            // This code branches on the number of path-parts to either favor string.Concat or StringBuilder 
+            // for performance. The most common case (for WebPages) will provide a single int value as a 
+            // path-part - string.Concat can be more efficient when we know the number of strings to join.
+            if (pathParts == null || pathParts.Length == 0)
             {
-                Type partType = pathPart.GetType();
-                if (IsDisplayableType(partType))
+                query = String.Empty;
+                return HttpUtility.UrlPathEncode(path);
+            }
+            else if (pathParts.Length == 1)
+            {
+                object pathPart = pathParts[0];
+                if (IsDisplayableType(pathPart.GetType()))
                 {
-                    var displayablePath = Convert.ToString(pathPart, CultureInfo.InvariantCulture);
-                    path += "/" + HttpUtility.UrlPathEncode(displayablePath);
+                    string displayablePath = Convert.ToString(pathPart, CultureInfo.InvariantCulture);
+                    path = path + "/" + displayablePath;
+                    query = String.Empty;
+                    return HttpUtility.UrlPathEncode(path);
                 }
                 else
                 {
-                    // If it smells like an anonymous object, treat it as query string name/value pairs instead of path info parts
-                    // REVIEW: this is hacky!
-                    var dictionary = new RouteValueDictionary(pathPart);
-                    foreach (var item in dictionary)
-                    {
-                        if (queryString.Length == 0)
-                        {
-                            queryString.Append('?');
-                        }
-                        else
-                        {
-                            queryString.Append('&');
-                        }
+                    StringBuilder queryBuilder = new StringBuilder();
+                    AppendToQueryString(queryBuilder, pathPart);
 
-                        string stringValue = Convert.ToString(item.Value, CultureInfo.InvariantCulture);
-
-                        queryString.Append(HttpUtility.UrlEncode(item.Key))
-                            .Append('=')
-                            .Append(HttpUtility.UrlEncode(stringValue));
-                    }
+                    query = queryBuilder.ToString();
+                    return HttpUtility.UrlPathEncode(path);
                 }
             }
-            return Tuple.Create(path, queryString.ToString());
+            else
+            {
+                StringBuilder pathBuilder = new StringBuilder(path);
+                StringBuilder queryBuilder = new StringBuilder();
+
+                for (int i = 0; i < pathParts.Length; i++)
+                {
+                    object pathPart = pathParts[i];
+                    if (IsDisplayableType(pathPart.GetType()))
+                    {
+                        var displayablePath = Convert.ToString(pathPart, CultureInfo.InvariantCulture);
+                        pathBuilder.Append('/');
+                        pathBuilder.Append(displayablePath);
+                    }
+                    else
+                    {
+                        AppendToQueryString(queryBuilder, pathPart);
+                    }
+                }
+
+                query = queryBuilder.ToString();
+                return HttpUtility.UrlPathEncode(pathBuilder.ToString());
+            }
         }
 
+        private static void AppendToQueryString(StringBuilder queryString, object obj)
+        {
+            // If this method is called, then obj isn't a type that we can put in the path, instead
+            // we want to format it as key-value pairs for the query string. The mostly likely 
+            // user scenario for this is an anonymous type.
+            RouteValueDictionary dictionary = new RouteValueDictionary(obj);
+
+            foreach (var item in dictionary)
+            {
+                if (queryString.Length == 0)
+                {
+                    queryString.Append('?');
+                }
+                else
+                {
+                    queryString.Append('&');
+                }
+
+                string stringValue = Convert.ToString(item.Value, CultureInfo.InvariantCulture);
+
+                queryString.Append(HttpUtility.UrlEncode(item.Key))
+                    .Append('=')
+                    .Append(HttpUtility.UrlEncode(stringValue));
+            }
+        }
+
+        /// <summary>
+        /// Determines if a type is displayable as part of a Url path.
+        /// </summary>
+        /// <remarks>
+        /// If a type is a displayable type, then we format values of that type as part of the Url Path. If not, then
+        /// we attempt to create a RouteValueDictionary, and encode the value as key-value pairs in the query string.
+        /// 
+        /// We determine if a type is displayable by whether or not it implements any interfaces. The built-in simple
+        /// types like Int32 implement IFormattable, which will be used to convert it to a string. 
+        /// 
+        /// Primarily we do this check to allow anonymous types to represent key-value pairs (anonymous types don't 
+        /// implement any interfaces). 
+        /// </remarks>
         private static bool IsDisplayableType(Type t)
         {
-            // If it doesn't support any interfaces (e.g. IFormattable), we probably can't display it.  It's likely an anonymous type.
-            // REVIEW: this is hacky!
             return t.GetInterfaces().Length > 0;
         }
     }

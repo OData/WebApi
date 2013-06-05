@@ -342,7 +342,7 @@ namespace System.Web.Mvc.Test
             string url = urlHelper.Content("~/Content/Image.jpg");
 
             // Assert
-            Assert.Equal(MvcHelper.AppPathModifier + "/app/Content/Image.jpg", url);
+            Assert.Equal("/app/Content/Image.jpg", url);
         }
 
         [Fact]

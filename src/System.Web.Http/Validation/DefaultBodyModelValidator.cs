@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Formatting;
@@ -85,9 +86,22 @@ namespace System.Web.Http.Validation
             return !MediaTypeFormatterCollection.IsTypeExcludedFromValidation(type);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "See comment below")]
         private bool ValidateNodeAndChildren(ModelMetadata metadata, ValidationContext validationContext, object container)
-        {            
-            object model = metadata.Model;
+        {
+            object model = null;
+            try
+            {
+                model = metadata.Model;
+            }
+            catch
+            {
+                // Retrieving the model failed - typically caused by a property getter throwing
+                // Being unable to retrieve a property is not a validation error - many properties can only be retrieved if certain conditions are met
+                // For example, Uri.AbsoluteUri throws for relative URIs but it shouldn't be considered a validation error
+                return true;
+            }
+
             bool isValid = true;
 
             // We don't need to recursively traverse the graph for null values

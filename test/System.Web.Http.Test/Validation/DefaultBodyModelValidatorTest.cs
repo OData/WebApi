@@ -107,6 +107,9 @@ namespace System.Web.Http.Validation
                             { "Profession", "The Profession field is required." }
                         }
                     },
+
+                    // Testing that we don't bubble up exceptions when property getters throw
+                    { new Uri("/api/values", UriKind.Relative), typeof(Uri), new Dictionary<string, string>() },
                     
                     // Testing that excluded types don't result in any errors
                     { typeof(string), typeof(Type), new Dictionary<string, string>() },

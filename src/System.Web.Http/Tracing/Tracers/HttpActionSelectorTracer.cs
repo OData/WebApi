@@ -41,25 +41,30 @@ namespace System.Web.Http.Tracing.Tracers
         {
             HttpActionDescriptor actionDescriptor = null;
 
-              _traceWriter.TraceBeginEnd(
-                        controllerContext.Request, 
-                        TraceCategories.ActionCategory, 
-                        TraceLevel.Info,
-                        _innerSelector.GetType().Name,
-                        SelectActionMethodName,
-                        beginTrace: null,
-                        execute: () => { actionDescriptor = _innerSelector.SelectAction(controllerContext); },
-                        endTrace: (tr) =>
-                        {
-                            tr.Message = Error.Format(
-                                SRResources.TraceActionSelectedMessage,
-                                FormattingUtilities.ActionDescriptorToString(actionDescriptor));
-                        },
+            _traceWriter.TraceBeginEnd(
+                    controllerContext.Request,
+                    TraceCategories.ActionCategory,
+                    TraceLevel.Info,
+                    _innerSelector.GetType().Name,
+                    SelectActionMethodName,
+                    beginTrace: null,
+                    execute: () => { actionDescriptor = _innerSelector.SelectAction(controllerContext); },
+                    endTrace: (tr) =>
+                    {
+                        tr.Message = Error.Format(
+                            SRResources.TraceActionSelectedMessage,
+                            FormattingUtilities.ActionDescriptorToString(actionDescriptor));
+                    },
 
-                        errorTrace: null);
+                    errorTrace: null);
 
             // Intercept returned HttpActionDescriptor with a tracing version
-            return actionDescriptor == null ? null : new HttpActionDescriptorTracer(controllerContext, actionDescriptor, _traceWriter);
+            if (actionDescriptor != null && !(actionDescriptor is HttpActionDescriptorTracer))
+            {
+                return new HttpActionDescriptorTracer(controllerContext, actionDescriptor, _traceWriter);
+            }
+
+            return actionDescriptor;
         }
     }
 }

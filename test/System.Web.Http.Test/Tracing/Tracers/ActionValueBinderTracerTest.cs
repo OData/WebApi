@@ -59,12 +59,12 @@ namespace System.Web.Http.Tracing.Tracers
             HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(request: new HttpRequestMessage());
             controllerContext.ControllerDescriptor = controllerDescriptor;
 
-            Mock<IActionValueBinder> mockBinder = new Mock<IActionValueBinder>() {CallBase = true};
+            Mock<IActionValueBinder> mockBinder = new Mock<IActionValueBinder>() { CallBase = true };
             mockBinder.Setup(b => b.GetBinding(It.IsAny<HttpActionDescriptor>())).Returns(actionBinding);
             ActionValueBinderTracer tracer = new ActionValueBinderTracer(mockBinder.Object, new TestTraceWriter());
 
             // Act
-            HttpActionBinding actualBinding = ((IActionValueBinder) tracer).GetBinding(mockActionDescriptor.Object);
+            HttpActionBinding actualBinding = ((IActionValueBinder)tracer).GetBinding(mockActionDescriptor.Object);
 
             // Assert
             Assert.IsAssignableFrom<HttpParameterBindingTracer>(actualBinding.ParameterBindings[0]);
@@ -97,7 +97,29 @@ namespace System.Web.Http.Tracing.Tracers
             // Assert
             Assert.IsAssignableFrom<FormatterParameterBindingTracer>(actualBinding.ParameterBindings[0]);
         }
-        
+
+        [Fact]
+        public void GetBinding_DoesNotWrapHttpActionBindingTracer()
+        {
+            // Arrange
+            Mock<HttpActionDescriptor> mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
+            Mock<HttpParameterDescriptor> mockParameterDescriptor = new Mock<HttpParameterDescriptor>() { CallBase = true };
+            Mock<FormatterParameterBinding> mockParameterBinding = new Mock<FormatterParameterBinding>(mockParameterDescriptor.Object, new MediaTypeFormatterCollection(), null) { CallBase = true };
+            HttpActionBinding actionBinding = new HttpActionBinding(mockActionDescriptor.Object, new HttpParameterBinding[] { mockParameterBinding.Object });
+
+            ITraceWriter traceWriter = new TestTraceWriter();
+            HttpActionBindingTracer actionBindingTracer = new HttpActionBindingTracer(actionBinding, traceWriter);
+            Mock<IActionValueBinder> mockBinder = new Mock<IActionValueBinder>() { CallBase = true };
+            mockBinder.Setup(b => b.GetBinding(It.IsAny<HttpActionDescriptor>())).Returns(actionBindingTracer);
+            ActionValueBinderTracer tracer = new ActionValueBinderTracer(mockBinder.Object, traceWriter);
+
+            // Act
+            HttpActionBinding actualBinding = ((IActionValueBinder)tracer).GetBinding(mockActionDescriptor.Object);
+
+            // Assert
+            Assert.Same(actionBindingTracer, actualBinding);
+        }
+
         [Fact]
         public void Inner_Property_On_ActionValueBinderTracer_Returns_IActionValueBinder()
         {

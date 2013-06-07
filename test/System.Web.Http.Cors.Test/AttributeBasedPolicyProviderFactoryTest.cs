@@ -195,5 +195,26 @@ namespace System.Web.Http.Cors
             Assert.Equal(1, enableCorsAttribute.Origins.Count());
             Assert.Equal("http://example.com", enableCorsAttribute.Origins.First());
         }
+
+        [Fact]
+        public void GetCorsPolicyProvider_Preflight_DoesNotUseRouteDataOnTheRequest()
+        {
+            AttributeBasedPolicyProviderFactory providerFactory = new AttributeBasedPolicyProviderFactory();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Options, "http://localhost/sample");
+            request.Headers.Add("Origin", "http://localhost");
+            request.Headers.Add(CorsConstants.AccessControlRequestMethod, "Put");
+            HttpConfiguration config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            var route = config.Routes.MapHttpRoute("default", "{controller}/{id}", new { id = RouteParameter.Optional });
+            request.SetRouteData(new HttpRouteData(route, new HttpRouteValueDictionary(new { action = "Options", controller = "sample", id = 2 })));
+
+            ICorsPolicyProvider provider = providerFactory.GetCorsPolicyProvider(request);
+
+            Assert.True(request.GetCorsRequestContext().IsPreflight);
+            EnableCorsAttribute enableCorsAttribute = Assert.IsType<EnableCorsAttribute>(provider);
+            Assert.Equal(2, enableCorsAttribute.Origins.Count());
+            Assert.Equal("http://example.com", enableCorsAttribute.Origins[0]);
+            Assert.Equal("http://localhost", enableCorsAttribute.Origins[1]);
+        }
     }
 }

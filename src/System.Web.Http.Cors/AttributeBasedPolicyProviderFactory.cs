@@ -18,6 +18,8 @@ namespace System.Web.Http.Cors
     /// </summary>
     public class AttributeBasedPolicyProviderFactory : ICorsPolicyProviderFactory
     {
+        private const string HttpContextBaseKey = "MS_HttpContext";
+
         /// <summary>
         /// Gets or sets the default <see cref="ICorsPolicyProvider"/>.
         /// </summary>
@@ -48,7 +50,13 @@ namespace System.Web.Http.Cors
                 {
                     foreach (var property in request.Properties)
                     {
-                        targetRequest.Properties.Add(property.Key, property.Value);
+                        // The RouteData and HttpContext from the preflight request properties contain information
+                        // relevant to the preflight request and not the actual request, therefore we need to exclude them.
+                        if (property.Key != HttpPropertyKeys.HttpRouteDataKey &&
+                            property.Key != HttpContextBaseKey)
+                        {
+                            targetRequest.Properties.Add(property.Key, property.Value);
+                        }
                     }
                     actionDescriptor = SelectAction(targetRequest);
                 }
@@ -130,16 +138,12 @@ namespace System.Web.Http.Cors
                 throw new InvalidOperationException(SRResources.NoConfiguration);
             }
 
-            IHttpRouteData routeData = request.GetRouteData();
+            IHttpRouteData routeData = config.Routes.GetRouteData(request);
             if (routeData == null)
             {
-                routeData = config.Routes.GetRouteData(request);
-                if (routeData == null)
-                {
-                    throw new InvalidOperationException(SRResources.NoRouteData);
-                }
-                request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+                throw new InvalidOperationException(SRResources.NoRouteData);
             }
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
 
             RemoveOptionalRoutingParameters(routeData.Values);
 

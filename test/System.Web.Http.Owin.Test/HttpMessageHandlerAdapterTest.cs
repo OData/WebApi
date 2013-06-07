@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
+using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -93,6 +94,35 @@ namespace System.Web.Http.Owin
             Assert.Throws<InvalidOperationException>(
                 () => adapter.Invoke(environment).Wait(),
                 "The OWIN environment does not contain a value for the required 'Host' header.");
+        }
+
+        [Theory]
+        [InlineData("a b")]
+        // reserved characters
+        [InlineData("!*'();:@&=$,[]")]
+        // common unreserved characters
+        [InlineData(@"-_.~+""<>^`{|}")]
+        // random unicode characters
+        [InlineData("激光這")]
+        // Disabled tests until we can rely on a Microsoft.Owin implementation that provides a
+        // URI that handles the following encoded characters: % \ ? #
+        // Tracked by https://aspnetwebstack.codeplex.com/workitem/1054
+        //[InlineData("%24")]
+        //[InlineData(@"\")]
+        //[InlineData("?#")]
+        public void Invoke_CreatesUri_ThatGeneratesCorrectlyDecodedStrings(string decodedId)
+        {
+            var handler = CreateOKHandlerStub();
+            var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
+            var environment = CreateEnvironment("GET", "http", "localhost", "/vroot", "/api/customers/" + decodedId);
+            var adapter = new HttpMessageHandlerAdapter(env => TaskHelpers.Completed(), handler, bufferPolicySelector);
+            var route = new HttpRoute("api/customers/{id}");
+            
+            adapter.Invoke(environment).Wait();
+            IHttpRouteData routeData = route.GetRouteData("/vroot", handler.Request);
+
+            Assert.NotNull(routeData);
+            Assert.Equal(decodedId, routeData.Values["id"]);
         }
 
         [Fact]

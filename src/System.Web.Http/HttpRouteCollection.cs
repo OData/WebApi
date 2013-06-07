@@ -40,7 +40,7 @@ namespace System.Web.Http
 
             // Validate virtual path
             Uri address = new Uri(_referenceBaseAddress, virtualPathRoot);
-            _virtualPathRoot = address.AbsolutePath;
+            _virtualPathRoot = "/" + address.GetComponents(UriComponents.Path, UriFormat.Unescaped);
         }
 
         public virtual string VirtualPathRoot

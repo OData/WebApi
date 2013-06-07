@@ -105,7 +105,7 @@ namespace System.Web.Http.Routing
             }
 
             // Note: we don't validate host/port as this is expected to be done at the host level
-            string requestPath = request.RequestUri.AbsolutePath;
+            string requestPath = "/" + request.RequestUri.GetComponents(UriComponents.Path, UriFormat.Unescaped);
             if (!requestPath.StartsWith(virtualPathRoot, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
@@ -122,8 +122,7 @@ namespace System.Web.Http.Routing
                 relativeRequestPath = requestPath.Substring(virtualPathLength);
             }
 
-            string decodedRelativeRequestPath = UriQueryUtility.UrlDecode(relativeRequestPath);
-            HttpRouteValueDictionary values = ParsedRoute.Match(decodedRelativeRequestPath, _defaults);
+            HttpRouteValueDictionary values = ParsedRoute.Match(relativeRequestPath, _defaults);
             if (values == null)
             {
                 // If we got back a null value set, that means the URI did not match

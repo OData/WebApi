@@ -66,9 +66,10 @@ namespace System.Web.Http.Batch
         /// </summary>
         /// <param name="responses">The responses for the batch requests.</param>
         /// <param name="request">The original request containing all the batch requests.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The batch response message.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing the object.")]
-        public virtual Task<HttpResponseMessage> CreateResponseMessageAsync(IList<HttpResponseMessage> responses, HttpRequestMessage request)
+        public virtual Task<HttpResponseMessage> CreateResponseMessageAsync(IList<HttpResponseMessage> responses, HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (responses == null)
             {
@@ -101,14 +102,12 @@ namespace System.Web.Http.Batch
 
             ValidateRequest(request);
 
-            cancellationToken.ThrowIfCancellationRequested();
-            IList<HttpRequestMessage> subRequests = await ParseBatchRequestsAsync(request);
+            IList<HttpRequestMessage> subRequests = await ParseBatchRequestsAsync(request, cancellationToken);
 
             try
             {
                 IList<HttpResponseMessage> responses = await ExecuteRequestMessagesAsync(subRequests, cancellationToken);
-                cancellationToken.ThrowIfCancellationRequested();
-                return await CreateResponseMessageAsync(responses, request);
+                return await CreateResponseMessageAsync(responses, request, cancellationToken);
             }
             finally
             {
@@ -171,9 +170,10 @@ namespace System.Web.Http.Batch
         /// Converts the incoming batch request into a collection of request messages.
         /// </summary>
         /// <param name="request">The request containing the batch request messages.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A collection of <see cref="HttpRequestMessage"/>.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "We need to return a collection of request messages asynchronously.")]
-        public virtual async Task<IList<HttpRequestMessage>> ParseBatchRequestsAsync(HttpRequestMessage request)
+        public virtual async Task<IList<HttpRequestMessage>> ParseBatchRequestsAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (request == null)
             {
@@ -181,9 +181,11 @@ namespace System.Web.Http.Batch
             }
 
             List<HttpRequestMessage> requests = new List<HttpRequestMessage>();
+            cancellationToken.ThrowIfCancellationRequested();
             MultipartStreamProvider streamProvider = await request.Content.ReadAsMultipartAsync();
             foreach (HttpContent httpContent in streamProvider.Contents)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 HttpRequestMessage innerRequest = await httpContent.ReadAsHttpRequestMessageAsync();
                 innerRequest.CopyBatchRequestProperties(request);
                 requests.Add(innerRequest);

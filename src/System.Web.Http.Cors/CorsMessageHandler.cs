@@ -92,8 +92,7 @@ namespace System.Web.Http.Cors
             }
 
             HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-            CorsPolicy corsPolicy = await GetCorsPolicyAsync(request);
+            CorsPolicy corsPolicy = await GetCorsPolicyAsync(request, cancellationToken);
             if (corsPolicy != null)
             {
                 CorsResult result;
@@ -149,8 +148,7 @@ namespace System.Web.Http.Cors
                         corsRequestContext.AccessControlRequestMethod));
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-            CorsPolicy corsPolicy = await GetCorsPolicyAsync(request);
+            CorsPolicy corsPolicy = await GetCorsPolicyAsync(request, cancellationToken);
             if (corsPolicy != null)
             {
                 HttpResponseMessage response = null;
@@ -188,14 +186,14 @@ namespace System.Web.Http.Cors
             return request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception);
         }
 
-        private async Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request)
+        private async Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             CorsPolicy corsPolicy = null;
             ICorsPolicyProviderFactory corsPolicyProviderFactory = _httpConfiguration.GetCorsPolicyProviderFactory();
             ICorsPolicyProvider corsPolicyProvider = corsPolicyProviderFactory.GetCorsPolicyProvider(request);
             if (corsPolicyProvider != null)
             {
-                corsPolicy = await corsPolicyProvider.GetCorsPolicyAsync(request);
+                corsPolicy = await corsPolicyProvider.GetCorsPolicyAsync(request, cancellationToken);
             }
             return corsPolicy;
         }

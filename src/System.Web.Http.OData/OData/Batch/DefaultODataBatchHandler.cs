@@ -37,14 +37,12 @@ namespace System.Web.Http.OData.Batch
 
             ValidateRequest(request);
 
-            cancellationToken.ThrowIfCancellationRequested();
-            IList<ODataBatchRequestItem> subRequests = await ParseBatchRequestsAsync(request);
+            IList<ODataBatchRequestItem> subRequests = await ParseBatchRequestsAsync(request, cancellationToken);
 
             try
             {
                 IList<ODataBatchResponseItem> responses = await ExecuteRequestMessagesAsync(subRequests, cancellationToken);
-                cancellationToken.ThrowIfCancellationRequested();
-                return await CreateResponseMessageAsync(responses, request);
+                return await CreateResponseMessageAsync(responses, request, cancellationToken);
             }
             finally
             {
@@ -98,9 +96,10 @@ namespace System.Web.Http.OData.Batch
         /// Converts the incoming OData batch request into a collection of request messages.
         /// </summary>
         /// <param name="request">The request containing the batch request messages.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A collection of <see cref="ODataBatchRequestItem"/>.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "We need to return a collection of request messages asynchronously.")]
-        public virtual async Task<IList<ODataBatchRequestItem>> ParseBatchRequestsAsync(HttpRequestMessage request)
+        public virtual async Task<IList<ODataBatchRequestItem>> ParseBatchRequestsAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (request == null)
             {
@@ -114,6 +113,7 @@ namespace System.Web.Http.OData.Batch
                 BaseUri = GetBaseUri(request)
             };
 
+            cancellationToken.ThrowIfCancellationRequested();
             ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(oDataReaderSettings);
             request.RegisterForDispose(reader);
 
@@ -124,7 +124,7 @@ namespace System.Web.Http.OData.Batch
             {
                 if (batchReader.State == ODataBatchReaderState.ChangesetStart)
                 {
-                    IList<HttpRequestMessage> changeSetRequests = await batchReader.ReadChangeSetRequestAsync(batchId);
+                    IList<HttpRequestMessage> changeSetRequests = await batchReader.ReadChangeSetRequestAsync(batchId, cancellationToken);
                     foreach (HttpRequestMessage changeSetRequest in changeSetRequests)
                     {
                         changeSetRequest.CopyBatchRequestProperties(request);
@@ -133,7 +133,7 @@ namespace System.Web.Http.OData.Batch
                 }
                 else if (batchReader.State == ODataBatchReaderState.Operation)
                 {
-                    HttpRequestMessage operationRequest = await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: true);
+                    HttpRequestMessage operationRequest = await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: true, cancellationToken: cancellationToken);
                     operationRequest.CopyBatchRequestProperties(request);
                     requests.Add(new OperationRequestItem(operationRequest));
                 }
@@ -147,9 +147,11 @@ namespace System.Web.Http.OData.Batch
         /// </summary>
         /// <param name="responses">The responses for the batch requests.</param>
         /// <param name="request">The original request containing all the batch requests.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The batch response message.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing the object.")]
-        public virtual Task<HttpResponseMessage> CreateResponseMessageAsync(IEnumerable<ODataBatchResponseItem> responses, HttpRequestMessage request)
+        public virtual Task<HttpResponseMessage> CreateResponseMessageAsync(
+            IEnumerable<ODataBatchResponseItem> responses, HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (request == null)
             {

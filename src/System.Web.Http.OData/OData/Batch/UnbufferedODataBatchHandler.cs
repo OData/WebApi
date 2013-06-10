@@ -80,8 +80,7 @@ namespace System.Web.Http.OData.Batch
                 throw;
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-            return await CreateResponseMessageAsync(responses, request);
+            return await CreateResponseMessageAsync(responses, request, cancellationToken);
         }
 
         /// <summary>
@@ -187,9 +186,11 @@ namespace System.Web.Http.OData.Batch
         /// </summary>
         /// <param name="responses">The responses for the batch requests.</param>
         /// <param name="request">The original request containing all the batch requests.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The batch response message.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing the object.")]
-        public virtual Task<HttpResponseMessage> CreateResponseMessageAsync(IEnumerable<ODataBatchResponseItem> responses, HttpRequestMessage request)
+        public virtual Task<HttpResponseMessage> CreateResponseMessageAsync(
+            IEnumerable<ODataBatchResponseItem> responses, HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (request == null)
             {

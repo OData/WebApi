@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Cors;
 using System.Web.Http.Tracing;
@@ -18,7 +19,7 @@ namespace System.Web.Http.Cors.Tracing
             Mock<ITraceWriter> traceWriterMock = new Mock<ITraceWriter>();
             Mock<ICorsPolicyProvider> policyProviderMock = new Mock<ICorsPolicyProvider>();
             policyProviderMock
-                .Setup(f => f.GetCorsPolicyAsync(It.IsAny<HttpRequestMessage>()))
+                .Setup(f => f.GetCorsPolicyAsync(It.IsAny<HttpRequestMessage>(), CancellationToken.None))
                 .Returns(() =>
                 {
                     innerIsCalled = true;
@@ -26,7 +27,7 @@ namespace System.Web.Http.Cors.Tracing
                 });
             CorsPolicyProviderTracer tracer = new CorsPolicyProviderTracer(policyProviderMock.Object, traceWriterMock.Object);
 
-            tracer.GetCorsPolicyAsync(new HttpRequestMessage()).Wait();
+            tracer.GetCorsPolicyAsync(new HttpRequestMessage(), CancellationToken.None).Wait();
 
             Assert.True(innerIsCalled);
         }
@@ -57,7 +58,7 @@ namespace System.Web.Http.Cors.Tracing
             requestMessage.Method = HttpMethod.Get;
             requestMessage.Headers.Add(CorsConstants.Origin, "http://example.com");
 
-            tracer.GetCorsPolicyAsync(requestMessage).Wait();
+            tracer.GetCorsPolicyAsync(requestMessage, CancellationToken.None).Wait();
 
             Assert.NotNull(beginTrace);
             Assert.Equal(TraceCategories.CorsCategory, beginTrace.Category);

@@ -37,7 +37,7 @@ namespace System.Web.Http
         {
             DefaultHttpBatchHandler batchHandler = new DefaultHttpBatchHandler(new HttpServer());
             Assert.ThrowsArgumentNull(
-                () => batchHandler.CreateResponseMessageAsync(null, new HttpRequestMessage()).Wait(),
+                () => batchHandler.CreateResponseMessageAsync(null, new HttpRequestMessage(), CancellationToken.None).Wait(),
                 "responses");
         }
 
@@ -46,7 +46,7 @@ namespace System.Web.Http
         {
             DefaultHttpBatchHandler batchHandler = new DefaultHttpBatchHandler(new HttpServer());
             Assert.ThrowsArgumentNull(
-                () => batchHandler.CreateResponseMessageAsync(new HttpResponseMessage[0], null).Wait(),
+                () => batchHandler.CreateResponseMessageAsync(new HttpResponseMessage[0], null, CancellationToken.None).Wait(),
                 "request");
         }
 
@@ -60,7 +60,7 @@ namespace System.Web.Http
                 new HttpResponseMessage(HttpStatusCode.BadRequest)
             };
 
-            HttpResponseMessage response = batchHandler.CreateResponseMessageAsync(responses, new HttpRequestMessage()).Result;
+            HttpResponseMessage response = batchHandler.CreateResponseMessageAsync(responses, new HttpRequestMessage(), CancellationToken.None).Result;
 
             MultipartContent content = Assert.IsType<MultipartContent>(response.Content);
             List<HttpResponseMessage> nestedResponses = new List<HttpResponseMessage>();
@@ -254,7 +254,7 @@ namespace System.Web.Http
         {
             DefaultHttpBatchHandler batchHandler = new DefaultHttpBatchHandler(new HttpServer());
             Assert.ThrowsArgumentNull(
-                () => batchHandler.ParseBatchRequestsAsync(null).Wait(),
+                () => batchHandler.ParseBatchRequestsAsync(null, CancellationToken.None).Wait(),
                 "request");
         }
 
@@ -271,7 +271,7 @@ namespace System.Web.Http
                 }
             };
 
-            IList<HttpRequestMessage> requests = batchHandler.ParseBatchRequestsAsync(request).Result;
+            IList<HttpRequestMessage> requests = batchHandler.ParseBatchRequestsAsync(request, CancellationToken.None).Result;
 
             Assert.Equal(2, requests.Count);
             Assert.Equal(HttpMethod.Get, requests[0].Method);
@@ -297,7 +297,7 @@ namespace System.Web.Http
             request.SetUrlHelper(new UrlHelper());
             request.RegisterForDispose(new StringContent(String.Empty));
 
-            IList<HttpRequestMessage> requests = batchHandler.ParseBatchRequestsAsync(request).Result;
+            IList<HttpRequestMessage> requests = batchHandler.ParseBatchRequestsAsync(request, CancellationToken.None).Result;
 
             Assert.Equal(2, requests.Count);
             Assert.Equal(HttpMethod.Get, requests[0].Method);

@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Cors;
 using System.Web.Http.Cors.Properties;
@@ -160,14 +161,8 @@ namespace System.Web.Http.Cors
             }
         }
 
-        /// <summary>
-        /// Gets the <see cref="CorsPolicy" />.
-        /// </summary>
-        /// <param name="request">The request.</param>
-        /// <returns>
-        /// The <see cref="CorsPolicy" />.
-        /// </returns>
-        public Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request)
+        /// <inheritDoc />
+        public Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             return Task.FromResult(_corsPolicy);
         }

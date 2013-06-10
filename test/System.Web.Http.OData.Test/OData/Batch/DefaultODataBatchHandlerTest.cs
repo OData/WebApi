@@ -37,7 +37,7 @@ namespace System.Web.Http
         {
             DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(new HttpServer());
             Assert.ThrowsArgumentNull(
-                () => batchHandler.CreateResponseMessageAsync(null, new HttpRequestMessage()).Wait(),
+                () => batchHandler.CreateResponseMessageAsync(null, new HttpRequestMessage(), CancellationToken.None).Wait(),
                 "responses");
         }
 
@@ -46,7 +46,7 @@ namespace System.Web.Http
         {
             DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(new HttpServer());
             Assert.ThrowsArgumentNull(
-                () => batchHandler.CreateResponseMessageAsync(new ODataBatchResponseItem[0], null).Wait(),
+                () => batchHandler.CreateResponseMessageAsync(new ODataBatchResponseItem[0], null, CancellationToken.None).Wait(),
                 "request");
         }
 
@@ -59,7 +59,7 @@ namespace System.Web.Http
                 new OperationResponseItem(new HttpResponseMessage(HttpStatusCode.OK))
             };
 
-            HttpResponseMessage response = batchHandler.CreateResponseMessageAsync(responses, new HttpRequestMessage()).Result;
+            HttpResponseMessage response = batchHandler.CreateResponseMessageAsync(responses, new HttpRequestMessage(), CancellationToken.None).Result;
 
             var batchContent = Assert.IsType<ODataBatchContent>(response.Content);
             Assert.Equal(1, batchContent.Responses.Count());
@@ -185,7 +185,7 @@ namespace System.Web.Http
         {
             DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(new HttpServer());
             Assert.ThrowsArgumentNull(
-                () => batchHandler.ParseBatchRequestsAsync(null).Wait(),
+                () => batchHandler.ParseBatchRequestsAsync(null, CancellationToken.None).Wait(),
                 "request");
         }
 
@@ -205,7 +205,7 @@ namespace System.Web.Http
                 }
             };
 
-            IList<ODataBatchRequestItem> requests = batchHandler.ParseBatchRequestsAsync(batchRequest).Result;
+            IList<ODataBatchRequestItem> requests = batchHandler.ParseBatchRequestsAsync(batchRequest, CancellationToken.None).Result;
 
             Assert.Equal(2, requests.Count);
 
@@ -238,7 +238,7 @@ namespace System.Web.Http
             batchRequest.RegisterForDispose(new StringContent(String.Empty));
             batchRequest.SetUrlHelper(new UrlHelper());
 
-            IList<ODataBatchRequestItem> requests = batchHandler.ParseBatchRequestsAsync(batchRequest).Result;
+            IList<ODataBatchRequestItem> requests = batchHandler.ParseBatchRequestsAsync(batchRequest, CancellationToken.None).Result;
 
             Assert.Equal(2, requests.Count);
 

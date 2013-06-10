@@ -3,6 +3,7 @@
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Cors;
 using System.Web.Http.Cors.Properties;
@@ -25,7 +26,7 @@ namespace System.Web.Http.Cors.Tracing
             _traceWriter = traceWriter;
         }
 
-        public Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request)
+        public Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             return _traceWriter.TraceBeginEndAsync<CorsPolicy>(
                 request,
@@ -37,7 +38,7 @@ namespace System.Web.Http.Cors.Tracing
                 {
                     tr.Message = String.Format(CultureInfo.CurrentCulture, SRResources.TraceCorsRequestContext, request.GetCorsRequestContext());
                 },
-                execute: () => _innerPolicyProvider.GetCorsPolicyAsync(request),
+                execute: () => _innerPolicyProvider.GetCorsPolicyAsync(request, cancellationToken),
                 endTrace: (tr, policy) =>
                 {
                     if (policy != null)

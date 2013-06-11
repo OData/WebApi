@@ -6,7 +6,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>System.Web.Helpers</RootNamespace>
     <AssemblyName>System.Web.Helpers</AssemblyName>
-    <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\WebHelpers.ruleset</CodeAnalysisRuleSet>

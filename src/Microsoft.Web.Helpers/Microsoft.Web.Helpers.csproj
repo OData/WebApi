@@ -7,7 +7,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Web.Helpers</RootNamespace>
     <AssemblyName>Microsoft.Web.Helpers</AssemblyName>
-    <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\WebHelpers.ruleset</CodeAnalysisRuleSet>

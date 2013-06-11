@@ -7,8 +7,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>ROOT_PROJECT_NAMESPACE</RootNamespace>
     <AssemblyName>WebApiHelpPageVB</AssemblyName>
-    <OutputPath>..\..\..\bin\$(Configuration)\</OutputPath>
-    <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
+    <DocumentationFile>$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\..\Strict.ruleset</CodeAnalysisRuleSet>
     <MyType>Windows</MyType>

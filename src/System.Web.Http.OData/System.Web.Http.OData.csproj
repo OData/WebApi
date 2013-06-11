@@ -6,7 +6,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>System.Web.Http.OData</RootNamespace>
     <AssemblyName>System.Web.Http.OData</AssemblyName>
-    <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>

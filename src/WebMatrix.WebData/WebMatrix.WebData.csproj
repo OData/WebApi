@@ -6,7 +6,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>WebMatrix.WebData</RootNamespace>
     <AssemblyName>WebMatrix.WebData</AssemblyName>
-    <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>

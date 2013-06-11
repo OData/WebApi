@@ -6,7 +6,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>System.Web.Razor</RootNamespace>
     <AssemblyName>System.Web.Razor</AssemblyName>
-    <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>

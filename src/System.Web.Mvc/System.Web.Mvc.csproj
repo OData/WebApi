@@ -7,7 +7,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Web.Mvc</RootNamespace>
     <AssemblyName>System.Web.Mvc</AssemblyName>
-    <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>

@@ -8,7 +8,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebApiHelpPage</RootNamespace>
     <AssemblyName>WebApiHelpPage</AssemblyName>
-    <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>

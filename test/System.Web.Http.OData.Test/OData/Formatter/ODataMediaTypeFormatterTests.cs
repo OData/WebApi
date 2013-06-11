@@ -134,15 +134,13 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Theory]
-        // Slight inconsistency between direct link generation and Url.Link adds a "/" at the end when the OData path is empty
-        // Tracked by Work Item 793
-        [InlineData("prefix", "http://localhost/prefix", "http://localhost/prefix/")]
-        [InlineData("{a}", "http://localhost/prefix", "http://localhost/prefix")]
-        [InlineData("{a}/{b}", "http://localhost/prefix/prefix2", "http://localhost/prefix/prefix2")]
-        public void WriteToStreamAsync_ReturnsCorrectBaseUri(string routePrefix, string requestUri, string expectedBaseUri)
+        [InlineData("prefix", "http://localhost/prefix")]
+        [InlineData("{a}", "http://localhost/prefix")]
+        [InlineData("{a}/{b}", "http://localhost/prefix/prefix2")]
+        public void WriteToStreamAsync_ReturnsCorrectBaseUri(string routePrefix, string baseUri)
         {
             IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, baseUri);
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
             configuration.Routes.MapODataRoute(routeName, routePrefix, model);
@@ -159,7 +157,7 @@ namespace System.Web.Http.OData.Formatter
             var content = new ObjectContent<ODataWorkspace>(new ODataWorkspace(), formatter);
 
             string actualContent = content.ReadAsStringAsync().Result;
-            Assert.Contains("xml:base=\"" + expectedBaseUri + "\"", actualContent);
+            Assert.Contains("xml:base=\"" + baseUri + "\"", actualContent);
         }
 
         [Fact]

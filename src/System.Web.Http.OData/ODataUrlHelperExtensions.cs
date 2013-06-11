@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Http.OData;
 using System.Web.Http.OData.Properties;
@@ -121,13 +122,9 @@ namespace System.Web.Http
                             // Use the virtual path root on the request if one is specified
                             // Otherwise, fall back on the virtual path root for the configuration
                             string virtualPathRoot = request.GetVirtualPathRoot() ?? config.VirtualPathRoot;
-                            if (!virtualPathRoot.EndsWith("/", StringComparison.Ordinal))
-                            {
-                                virtualPathRoot += "/";
-                            }
-
                             string routePrefix = routeTemplate.Substring(0, odataPathTemplateIndex);
-                            string link = virtualPathRoot + routePrefix + odataPath;
+
+                            string link = CombinePathSegments(virtualPathRoot, routePrefix, odataPath);
                             link = UriEncode(link);
                             return new Uri(request.RequestUri, link).AbsoluteUri;
                         }
@@ -135,6 +132,31 @@ namespace System.Web.Http
                 }
             }
             return null;
+        }
+
+        private static string CombinePathSegments(string virtualPathRoot, string routePrefix, string odataPath)
+        {
+            StringBuilder pathBuilder = new StringBuilder();
+            pathBuilder.Append(virtualPathRoot);
+            if (!virtualPathRoot.EndsWith("/", StringComparison.Ordinal))
+            {
+                pathBuilder.Append("/");
+            }
+
+            if (routePrefix.EndsWith("/", StringComparison.Ordinal) && odataPath.Length == 0)
+            {
+                // Avoid adding a separator to the end of the prefix if the OData path is empty.
+                // This is consistent with the behavior of Url.Link.
+                pathBuilder.Append(routePrefix.Substring(0, routePrefix.Length - 1));
+            }
+            else
+            {
+                pathBuilder.Append(routePrefix);
+            }
+
+            pathBuilder.Append(odataPath);
+
+            return pathBuilder.ToString();
         }
 
         private static string UriEncode(string str)

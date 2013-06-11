@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http;
+using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.Owin;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Net.Http
+namespace System.Web.Http
 {
     public class OwinHttpConfigurationExtensionsTest
     {

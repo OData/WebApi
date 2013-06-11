@@ -3,11 +3,10 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Web.Http;
 using System.Web.Http.Filters;
 using System.Web.Http.Owin;
 
-namespace System.Net.Http
+namespace System.Web.Http
 {
     /// <summary>Provides extension methods for the <see cref="HttpConfiguration"/> class.</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]

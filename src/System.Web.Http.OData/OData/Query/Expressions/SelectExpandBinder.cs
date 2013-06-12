@@ -152,8 +152,6 @@ namespace System.Web.Http.OData.Query.Expressions
             IEdmEntityType declaringType = property.DeclaringType as IEdmEntityType;
             Contract.Assert(declaringType != null, "only entity types are projected.");
 
-            Expression propertyValue;
-
             // derived property using cast
             if (elementType != declaringType)
             {
@@ -163,30 +161,10 @@ namespace System.Web.Http.OData.Query.Expressions
                     throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType, declaringType.FullName()));
                 }
 
-                // Expression
-                //          source is propertyDeclaringType ? (source as propertyDeclaringType).propertyName : null
-                Expression derivedPropertyAccess = Expression.Property(Expression.TypeAs(source, castType), property.Name);
+                source = Expression.TypeAs(source, castType);
+            }
 
-                if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
-                {
-                    propertyValue =
-                        Expression.Condition(
-                            Expression.TypeIs(source, castType),
-                            derivedPropertyAccess,
-                                ExpressionHelpers.Default(derivedPropertyAccess.Type));
-                }
-                else
-                {
-                    // need to cast this to nullable as EF would fail while materializing if the property is not nullable and is not present.
-                    propertyValue = ExpressionHelpers.ToNullable(derivedPropertyAccess);
-                }
-            }
-            else
-            {
-                // Expression
-                //      source.PropertyName
-                propertyValue = Expression.Property(source, property.Name);
-            }
+            Expression propertyValue = Expression.Property(source, property.Name);
 
             if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
@@ -195,6 +173,11 @@ namespace System.Web.Http.OData.Query.Expressions
                         test: Expression.Equal(source, Expression.Constant(null)),
                         ifTrue: Expression.Constant(null, propertyValue.Type.ToNullable()),
                         ifFalse: ExpressionHelpers.ToNullable(propertyValue));
+            }
+            else
+            {
+                // need to cast this to nullable as EF would fail while materializing if the property is not nullable and source is null.
+                propertyValue = ExpressionHelpers.ToNullable(propertyValue);
             }
 
             return propertyValue;
@@ -272,6 +255,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
                 Expression propertyName = CreatePropertyNameExpression(elementType, propertyToExpand, source);
                 Expression propertyValue = CreatePropertyValueExpression(elementType, propertyToExpand, source);
+                Expression nullCheck = Expression.Equal(propertyValue, Expression.Constant(null));
 
                 // projection can be null if the expanded navigation property is not further projected or expanded.
                 if (projection != null)
@@ -279,7 +263,14 @@ namespace System.Web.Http.OData.Query.Expressions
                     propertyValue = ProjectAsWrapper(propertyValue, projection, propertyToExpand.ToEntityType());
                 }
 
-                includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue, autoSelected: false));
+                if (projection != null && !propertyToExpand.Type.IsCollection())
+                {
+                    includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue, nullCheck));
+                }
+                else
+                {
+                    includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue, autoSelected: false));
+                }
             }
 
             foreach (IEdmStructuralProperty propertyToInclude in propertiesToInclude)

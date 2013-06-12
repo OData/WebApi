@@ -11,18 +11,38 @@ namespace System.Web.Http.OData.Query.Expressions
     internal class NamedPropertyExpression
     {
         public NamedPropertyExpression(Expression name, Expression value, bool autoSelected = false)
+            : this(name, value)
+        {
+            AutoSelected = autoSelected;
+        }
+
+        public NamedPropertyExpression(Expression name, Expression value, Expression nullCheck)
+            : this(name, value)
+        {
+            Contract.Assert(nullCheck != null);
+            NullCheck = nullCheck;
+        }
+
+        private NamedPropertyExpression(Expression name, Expression value)
         {
             Contract.Assert(name != null);
             Contract.Assert(value != null);
 
             Name = name;
             Value = value;
-            AutoSelected = autoSelected;
         }
 
         public Expression Name { get; private set; }
 
         public Expression Value { get; private set; }
+
+        // Checks whether this property is null or not. This is required for expanded navigation properties that are null as entityframework cannot
+        // create null's of type SelectExpandWrapper<ExpandedProperty> i.e. an expression like 
+        //       => new NamedProperty<Customer> { Value = order.Customer == null : null : new SelectExpandWrapper<Customer> { .... } } 
+        // cannot be translated by EF. So, we generate the following expression instead,
+        //       => new ExpandProperty<Customer> { Value = new SelectExpandWrapper<Customer> { .... }, IsNull = nullCheck }
+        // and use Value only if IsNull is false.
+        public Expression NullCheck { get; private set; }
 
         public bool AutoSelected { get; private set; }
     }

@@ -180,6 +180,28 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Fact]
+        public void ProjectAsWrapper_NullExpandedProperty_HasNullValueInProjectedWrapper()
+        {
+            // Arrange
+            Order order = new Order();
+            ExpandedNavigationSelectItem expandItem = new ExpandedNavigationSelectItem(
+                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), entitySet: _model.Customers)),
+                _model.Customers,
+                selectExpandOption: null);
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
+            Expression source = Expression.Constant(order);
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+
+            // Assert
+            SelectExpandWrapper<Order> projectedOrder = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Order>;
+            Assert.NotNull(projectedOrder);
+            Assert.Contains("Customer", projectedOrder.Container.ToDictionary().Keys);
+            Assert.Null(projectedOrder.Container.ToDictionary()["Customer"]);
+        }
+
+        [Fact]
         public void ProjectAsWrapper_Collection_ProjectedValueNullAndHandleNullPropagationTrue()
         {
             // Arrange
@@ -399,6 +421,19 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Assert.Equal(ExpressionType.Conditional, property.NodeType);
             Assert.Equal(String.Format("IIF(({0} == null), null, Convert({0}.ID))", customer.ToString()), property.ToString());
+        }
+
+        [Fact]
+        public void CreatePropertyValueExpression_HandleNullPropagationFalse_ConvertsToNullableType()
+        {
+            _settings.HandleNullPropagation = HandleNullPropagationOption.False;
+            Expression customer = Expression.Constant(new Customer());
+            IEdmProperty idProperty = _model.Customer.StructuralProperties().Single(p => p.Name == "ID");
+
+            Expression property = _binder.CreatePropertyValueExpression(_model.Customer, idProperty, customer);
+
+            Assert.Equal(String.Format("Convert({0}.ID)", customer.ToString()), property.ToString());
+            Assert.Equal(typeof(int?), property.Type);
         }
 
         [Fact]

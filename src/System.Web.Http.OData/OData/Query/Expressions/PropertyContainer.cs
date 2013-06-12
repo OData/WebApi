@@ -69,12 +69,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert(property != null);
             Contract.Assert(property.Value != null);
 
-            Type namedPropertyGenericType =
-                next == null
-                    ? property.AutoSelected ? typeof(AutoSelectedNamedProperty<>) : typeof(NamedProperty<>)
-                    : property.AutoSelected ? typeof(AutoSelectedNamedPropertyWithNext<>) : typeof(NamedPropertyWithNext<>);
-            Type namedPropertyType = namedPropertyGenericType.MakeGenericType(property.Value.Type);
-
+            Type namedPropertyType = GetNamedPropertyType(property, next);
             List<MemberBinding> memberBindings = new List<MemberBinding>
             {
                 Expression.Bind(namedPropertyType.GetProperty("Name"), property.Name),
@@ -85,8 +80,50 @@ namespace System.Web.Http.OData.Query.Expressions
             {
                 memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Next"), next));
             }
+            if (property.NullCheck != null)
+            {
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("IsNull"), property.NullCheck));
+            }
 
             return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
+        }
+
+        private static Type GetNamedPropertyType(NamedPropertyExpression property, Expression next)
+        {
+            Type namedPropertyGenericType;
+
+            if (next == null)
+            {
+                if (property.NullCheck != null)
+                {
+                    namedPropertyGenericType = typeof(SingleExpandedProperty<>);
+                }
+                else if (property.AutoSelected)
+                {
+                    namedPropertyGenericType = typeof(AutoSelectedNamedProperty<>);
+                }
+                else
+                {
+                    namedPropertyGenericType = typeof(NamedProperty<>);
+                }
+            }
+            else
+            {
+                if (property.NullCheck != null)
+                {
+                    namedPropertyGenericType = typeof(SingleExpandedPropertyWithNext<>);
+                }
+                else if (property.AutoSelected)
+                {
+                    namedPropertyGenericType = typeof(AutoSelectedNamedPropertyWithNext<>);
+                }
+                else
+                {
+                    namedPropertyGenericType = typeof(NamedPropertyWithNext<>);
+                }
+            }
+
+            return namedPropertyGenericType.MakeGenericType(property.Value.Type);
         }
 
         private class NamedProperty<T> : PropertyContainer
@@ -116,6 +153,26 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
+        private class SingleExpandedProperty<T> : NamedProperty<T>
+        {
+            public bool IsNull { get; set; }
+
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
+            {
+                if (Name != null && (includeAutoSelected || !AutoSelected))
+                {
+                    if (!IsNull)
+                    {
+                        dictionary.Add(Name, Value);
+                    }
+                    else
+                    {
+                        dictionary.Add(Name, null);
+                    }
+                }
+            }
+        }
+
         // Entityframework requires that the two different type initializers for a given type in the same query have the same set of properties in the same order.
         // A $select=Prop1,Prop2 where Prop1 and Prop2 are of the same type without this extra NamedPropertyWithNext type results in an select expression that looks like,
         //      c => new NamedProperty<int> { Name = "Prop1", Value = c.Prop1, Next = new NamedProperty<int> { Name = "Prop2", Value = c.Prop2 } };
@@ -135,6 +192,17 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         private class AutoSelectedNamedPropertyWithNext<T> : AutoSelectedNamedProperty<T>
+        {
+            public PropertyContainer Next { get; set; }
+
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
+            {
+                base.ToDictionaryCore(dictionary, includeAutoSelected);
+                Next.ToDictionaryCore(dictionary, includeAutoSelected);
+            }
+        }
+
+        private class SingleExpandedPropertyWithNext<T> : SingleExpandedProperty<T>
         {
             public PropertyContainer Next { get; set; }
 

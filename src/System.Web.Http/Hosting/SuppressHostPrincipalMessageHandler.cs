@@ -6,10 +6,17 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Filters;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Hosting
 {
+    /// <summary>Represents a message handler that suppresses host authentication results.</summary>
+    /// <remarks>
+    /// This message handler sets the current principal to anonymous upon entry. As a result, any authentication
+    /// performed by the host is ignored. The subsequent pipeline, including <see cref="IAuthenticationFilter"/>s, is
+    /// then the exclusive authority for authentication.
+    /// </remarks>
     public class SuppressHostPrincipalMessageHandler : DelegatingHandler
     {
         private static readonly Lazy<IPrincipal> _anonymousPrincipal = new Lazy<IPrincipal>(

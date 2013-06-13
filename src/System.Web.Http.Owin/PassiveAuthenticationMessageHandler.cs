@@ -16,7 +16,7 @@ namespace System.Web.Http.Owin
 {
     /// <summary>Represents a message handler that treats all OWIN authentication middleware as passive.</summary>
     /// <remarks>
-    /// This message handler sets the current principal is to anonymous upon entry and disables the default OWIN
+    /// This message handler sets the current principal to anonymous upon entry and disables the default OWIN
     /// authentication middleware challenges. As a result, any default authentication performed by the host is ignored.
     /// The subsequent pipeline, including <see cref="IAuthenticationFilter"/>s, is then the exclusive authority for
     /// authentication.

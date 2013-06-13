@@ -11,7 +11,7 @@ namespace System.Web.Http.Owin
         public static Task<HttpResponseMessage> SendAsync(this HttpMessageHandler handler, HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            HttpMessageInvoker invoker = new HttpMessageInvoker(handler, false);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(handler, disposeHandler: false);
             return invoker.SendAsync(request, cancellationToken);
         }
     }

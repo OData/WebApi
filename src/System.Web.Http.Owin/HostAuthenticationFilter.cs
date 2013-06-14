@@ -68,7 +68,7 @@ namespace System.Web.Http
         }
 
         /// <inheritdoc />
-        public Task<IHttpActionResult> ChallengeAsync(HttpActionContext context, IHttpActionResult result,
+        public Task<IHttpActionResult> ChallengeAsync(HttpActionContext context, IHttpActionResult innerResult,
             CancellationToken cancellationToken)
         {
             if (context == null)
@@ -90,7 +90,7 @@ namespace System.Web.Http
                 response.AuthenticationResponseChallenge, _authenticationType);
 
             // Otherwise, return the provided result as-is.
-            return Task.FromResult(result);
+            return Task.FromResult(innerResult);
         }
 
         /// <inheritdoc />

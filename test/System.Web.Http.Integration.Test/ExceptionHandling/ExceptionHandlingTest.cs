@@ -74,6 +74,10 @@ namespace System.Web.Http
         }
 
         [Theory]
+        [InlineData("AuthenticationFilterAuthenticate")]
+        [InlineData("AuthenticationFilterAuthenticateResult")]
+        [InlineData("AuthenticationFilterChallenge")]
+        [InlineData("AuthenticationFilterChallengeResult")]
         [InlineData("AuthorizationFilter")]
         [InlineData("ActionFilter")]
         [InlineData("ExceptionFilter")]
@@ -96,6 +100,10 @@ namespace System.Web.Http
         }
 
         [Theory]
+        [InlineData("AuthenticationFilterAuthenticate", HttpStatusCode.Ambiguous)]
+        [InlineData("AuthenticationFilterAuthenticateResult", HttpStatusCode.BadGateway)]
+        [InlineData("AuthenticationFilterChallenge", HttpStatusCode.BadRequest)]
+        [InlineData("AuthenticationFilterChallengeResult", HttpStatusCode.Conflict)]
         [InlineData("AuthorizationFilter", HttpStatusCode.Forbidden)]
         [InlineData("ActionFilter", HttpStatusCode.NotAcceptable)]
         [InlineData("ExceptionFilter", HttpStatusCode.NotImplemented)]

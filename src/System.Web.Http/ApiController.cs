@@ -112,6 +112,11 @@ namespace System.Web.Http
 
                 return _modelState;
             }
+            internal set
+            {
+                Contract.Assert(value != null);
+                _modelState = value;
+            }
         }
 
         /// <summary>
@@ -204,15 +209,16 @@ namespace System.Web.Http
             IAuthorizationFilter[] authorizationFilters = filterGrouping.AuthorizationFilters;
             IExceptionFilter[] exceptionFilters = filterGrouping.ExceptionFilters;
 
-            Func<Task<HttpResponseMessage>> result;
-            result = () => ExecuteAction(actionDescriptor.ActionBinding, actionContext, cancellationToken, actionFilters, controllerServices);
+            IHttpActionResult result = new ActionFilterResult(actionDescriptor.ActionBinding, actionContext, this,
+                controllerServices, actionFilters);
             if (authorizationFilters.Length > 0)
             {
-                result = InvokeActionWithAuthorizationFilters(actionContext, cancellationToken, authorizationFilters, result);
+                result = new AuthorizationFilterResult(actionContext, authorizationFilters, result);
             }
             if (authenticationFilters.Length > 0)
             {
-                result = InvokeActionWithAuthenticationFilters(actionContext, cancellationToken, authenticationFilters, result);
+                result = new AuthenticationFilterResult(actionContext, authenticationFilters, _principalService,
+                    controllerContext.Request, result);
             }
 
             return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
@@ -286,24 +292,6 @@ namespace System.Web.Http
             return new StatusCodeResult(status, this);
         }
 
-        private async Task<HttpResponseMessage> ExecuteAction(HttpActionBinding actionBinding, HttpActionContext actionContext,
-            CancellationToken cancellationToken, IActionFilter[] actionFilters, ServicesContainer controllerServices)
-        {
-            await actionBinding.ExecuteBindingAsync(actionContext, cancellationToken);
-
-            _modelState = actionContext.ModelState;
-            ActionInvoker actionInvoker = new ActionInvoker(actionContext, cancellationToken, controllerServices);
-            // Empty filters is the default case so avoid delegates
-            // Ensure empty case remains the same as the filtered case
-            if (actionFilters.Length == 0)
-            {
-                return await actionInvoker.InvokeActionAsync();
-            }
-            // Ensure delegate continues to use the C# Compiler static delegate caching optimization
-            Func<ActionInvoker, Task<HttpResponseMessage>> invokeCallback = (innerInvoker) => innerInvoker.InvokeActionAsync();
-            return await InvokeActionWithActionFilters(actionContext, cancellationToken, actionFilters, invokeCallback, actionInvoker)();
-        }
-
         protected virtual void Initialize(HttpControllerContext controllerContext)
         {
             if (controllerContext == null)
@@ -321,17 +309,17 @@ namespace System.Web.Http
             }
         }
 
-        internal static async Task<HttpResponseMessage> InvokeActionWithExceptionFilters(Func<Task<HttpResponseMessage>> innerAction, HttpActionContext actionContext, CancellationToken cancellationToken, IExceptionFilter[] filters)
+        internal static async Task<HttpResponseMessage> InvokeActionWithExceptionFilters(IHttpActionResult innerResult,
+            HttpActionContext actionContext, CancellationToken cancellationToken, IExceptionFilter[] filters)
         {
-            Contract.Assert(innerAction != null);
+            Contract.Assert(innerResult != null);
             Contract.Assert(actionContext != null);
             Contract.Assert(filters != null);
 
             Exception exception = null;
             try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                return await innerAction();
+                return await innerResult.ExecuteAsync(cancellationToken);
             }
             catch (Exception e)
             {
@@ -359,113 +347,6 @@ namespace System.Web.Http
             {
                 throw executedContext.Exception;
             }
-        }
-
-        internal Func<Task<HttpResponseMessage>> InvokeActionWithAuthenticationFilters(
-            HttpActionContext actionContext, CancellationToken cancellationToken,
-            IAuthenticationFilter[] filters, Func<Task<HttpResponseMessage>> innerAction)
-        {
-            return () => InvokeActionWithAuthenticationFiltersAsync(actionContext, cancellationToken, filters,
-                innerAction);
-        }
-
-        internal async Task<HttpResponseMessage> InvokeActionWithAuthenticationFiltersAsync(
-            HttpActionContext actionContext, CancellationToken cancellationToken,
-            IAuthenticationFilter[] filters, Func<Task<HttpResponseMessage>> innerAction)
-        {
-            Contract.Assert(actionContext != null);
-            Contract.Assert(filters != null);
-            Contract.Assert(innerAction != null);
-
-            IHttpActionResult innerResult = new ContinuationResult(innerAction);
-            HttpAuthenticationContext authenticationContext = new HttpAuthenticationContext(actionContext);
-            authenticationContext.Principal = _principalService.GetCurrentPrincipal(Request);
-
-            for (int i = 0; i < filters.Length; i++)
-            {
-                IAuthenticationFilter filter = filters[i];
-                IAuthenticationResult result = await filter.AuthenticateAsync(authenticationContext,
-                    cancellationToken);
-
-                if (result != null)
-                {
-                    IHttpActionResult error = result.ErrorResult;
-
-                    // Short-circuit on the first authentication filter to provide an error result.
-                    if (error != null)
-                    {
-                        innerResult = error;
-                        break;
-                    }
-
-                    IPrincipal principal = result.Principal;
-
-                    if (principal != null)
-                    {
-                        authenticationContext.Principal = principal;
-                        _principalService.SetCurrentPrincipal(principal, Request);
-                    }
-                }
-            }
-
-            for (int i = 0; i < filters.Length; i++)
-            {
-                IAuthenticationFilter filter = filters[i];
-                innerResult = await filter.ChallengeAsync(actionContext, innerResult, cancellationToken) ??
-                    innerResult;
-            }
-
-            return await innerResult.ExecuteAsync(cancellationToken);
-        }
-
-        internal static Func<Task<HttpResponseMessage>> InvokeActionWithAuthorizationFilters(
-            HttpActionContext actionContext, CancellationToken cancellationToken,
-            IAuthorizationFilter[] filters, Func<Task<HttpResponseMessage>> innerAction)
-        {
-            Contract.Assert(actionContext != null);
-            Contract.Assert(filters != null);
-            Contract.Assert(innerAction != null);
-
-            // We need to reverse the filter list so that least specific filters (Global) get run first and the most specific filters (Action) get run last.
-            Func<Task<HttpResponseMessage>> result = innerAction;
-            for (int i = filters.Length - 1; i >= 0; i--)
-            {
-                IAuthorizationFilter filter = filters[i];
-                Func<Func<Task<HttpResponseMessage>>, IAuthorizationFilter, Func<Task<HttpResponseMessage>>> chainContinuation = (continuation, innerFilter) =>
-                {
-                    return () => innerFilter.ExecuteAuthorizationFilterAsync(actionContext, cancellationToken, continuation);
-                };
-                result = chainContinuation(result, filter);
-            }
-
-            return result;
-        }
-
-        private static Func<Task<HttpResponseMessage>> InvokeActionWithActionFilters<T>(HttpActionContext actionContext, CancellationToken cancellationToken, IActionFilter[] filters, Func<T, Task<HttpResponseMessage>> innerAction, T state)
-        {
-            return InvokeActionWithActionFilters(actionContext, cancellationToken, filters, () => innerAction(state));
-        }
-
-        internal static Func<Task<HttpResponseMessage>> InvokeActionWithActionFilters(HttpActionContext actionContext, CancellationToken cancellationToken, IActionFilter[] filters, Func<Task<HttpResponseMessage>> innerAction)
-        {
-            Contract.Assert(actionContext != null);
-            Contract.Assert(filters != null);
-            Contract.Assert(innerAction != null);
-
-            // Because the continuation gets built from the inside out we need to reverse the filter list
-            // so that least specific filters (Global) get run first and the most specific filters (Action) get run last.
-            Func<Task<HttpResponseMessage>> result = innerAction;
-            for (int i = filters.Length - 1; i >= 0; i--)
-            {
-                IActionFilter filter = filters[i];
-                Func<Func<Task<HttpResponseMessage>>, IActionFilter, Func<Task<HttpResponseMessage>>> chainContinuation = (continuation, innerFilter) =>
-                {
-                    return () => innerFilter.ExecuteActionFilterAsync(actionContext, cancellationToken, continuation);
-                };
-                result = chainContinuation(result, filter);
-            }
-
-            return result;
         }
 
         #region IDisposable
@@ -496,28 +377,6 @@ namespace System.Web.Http
             {
                 throw Error.InvalidOperation(SRResources.RequestIsNull, GetType().Name);
             }
-        }
-
-        // Keep as struct to avoid allocation
-        private struct ActionInvoker
-        {
-            private readonly HttpActionContext _actionContext;
-            private readonly CancellationToken _cancellationToken;
-            private readonly ServicesContainer _controllerServices;
-
-            public ActionInvoker(HttpActionContext actionContext, CancellationToken cancellationToken, ServicesContainer controllerServices)
-            {
-                Contract.Assert(controllerServices != null);
-
-                _actionContext = actionContext;
-                _cancellationToken = cancellationToken;
-                _controllerServices = controllerServices;
-            }
-
-            public Task<HttpResponseMessage> InvokeActionAsync()
-            {
-                return _controllerServices.GetActionInvoker().InvokeActionAsync(_actionContext, _cancellationToken);
-            } 
         }
     }
 }

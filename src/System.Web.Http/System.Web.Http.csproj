@@ -74,6 +74,9 @@
     <Compile Include="Batch\HttpBatchHandler.cs" />
     <Compile Include="Batch\DefaultHttpBatchHandler.cs" />
     <Compile Include="Batch\BatchHttpRequestMessageExtensions.cs" />
+    <Compile Include="Controllers\ActionFilterResult.cs" />
+    <Compile Include="Controllers\AuthenticationFilterResult.cs" />
+    <Compile Include="Controllers\AuthorizationFilterResult.cs" />
     <Compile Include="Controllers\HttpControllerSettings.cs" />
     <Compile Include="Controllers\HttpParameterDescriptorExtensions.cs" />
     <Compile Include="Controllers\IActionResultConverter.cs" />

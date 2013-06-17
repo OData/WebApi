@@ -41,6 +41,7 @@ namespace System.Web.Http
         /// <inheritdoc />
         public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return _continuation();
         }
     }

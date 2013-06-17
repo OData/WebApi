@@ -73,9 +73,11 @@
     <Compile Include="AuthorizeAttributeTest.cs" />
     <Compile Include="Batch\HttpBatchHandlerTest.cs" />
     <Compile Include="Batch\DefaultHttpBatchHandlerTest.cs" />
+    <Compile Include="Controllers\ActionFilterResultTests.cs" />
     <Compile Include="Controllers\ApiControllerTestabilityTest.cs" />
     <Compile Include="Controllers\Apis\User.cs" />
     <Compile Include="Controllers\Apis\UsersRpcController.cs" />
+    <Compile Include="Controllers\AuthorizationFilterResultTests.cs" />
     <Compile Include="Controllers\HttpParameterBindingTest.cs" />
     <Compile Include="Controllers\ParameterBindingExtensionsTest.cs" />
     <Compile Include="Controllers\ResponseMessageResultConverterTest.cs" />

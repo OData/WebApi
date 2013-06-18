@@ -15,6 +15,7 @@ using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
+using System.Web.Http.Results;
 using System.Web.Http.Routing;
 
 namespace System.Web.Http
@@ -274,14 +275,14 @@ namespace System.Web.Http
             return new FormattedContentResult<T>(statusCode, value, formatter, mediaType, this);
         }
 
-        /// <summary>Creates a <see cref="MessageResult"/> with the specified response.</summary>
+        /// <summary>Creates a <see cref="ResponseMessageResult"/> with the specified response.</summary>
         /// <param name="response">The HTTP response message.</param>
-        /// <returns>A <see cref="MessageResult"/> for the specified response.</returns>
+        /// <returns>A <see cref="ResponseMessageResult"/> for the specified response.</returns>
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic",
             Justification = "Consistency and discoverability are better with an instance method.")]
-        public MessageResult Message(HttpResponseMessage response)
+        public ResponseMessageResult ResponseMessage(HttpResponseMessage response)
         {
-            return new MessageResult(response);
+            return new ResponseMessageResult(response);
         }
 
         /// <summary>Creates a <see cref="StatusCodeResult"/> with the specified status code.</summary>

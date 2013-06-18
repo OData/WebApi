@@ -5,15 +5,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http
+namespace System.Web.Http.Results
 {
-    public class MessageResultTests
+    public class ResponseMessageResultTests
     {
         [Fact]
         public void Constructor_Throws_WhenResponseIsNull()
         {
             // Arrange, Act & Assert
-            Assert.ThrowsArgumentNull(() => { new MessageResult(null); }, "response");
+            Assert.ThrowsArgumentNull(() => { new ResponseMessageResult(null); }, "response");
         }
 
         [Fact]
@@ -22,7 +22,7 @@ namespace System.Web.Http
             // Arrange
             using (HttpResponseMessage expectedResponse = CreateResponse())
             {
-                MessageResult result = new MessageResult(expectedResponse);
+                ResponseMessageResult result = new ResponseMessageResult(expectedResponse);
 
                 // Act
                 HttpResponseMessage response = result.Response;
@@ -38,7 +38,7 @@ namespace System.Web.Http
             // Arrange
             using (HttpResponseMessage expectedResponse = CreateResponse())
             {
-                IHttpActionResult result = new MessageResult(expectedResponse);
+                IHttpActionResult result = new ResponseMessageResult(expectedResponse);
 
                 // Act
                 Task<HttpResponseMessage> task = result.ExecuteAsync(CancellationToken.None);
@@ -63,7 +63,7 @@ namespace System.Web.Http
                 ApiController controller = CreateController();
 
                 // Act
-                MessageResult result = controller.Message(expectedResponse);
+                ResponseMessageResult result = controller.ResponseMessage(expectedResponse);
 
                 // Assert
                 Assert.NotNull(result);

@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http
+namespace System.Web.Http.Results
 {
     public class FormattedContentResultTests
     {

@@ -90,9 +90,9 @@
     <Compile Include="Hosting\SuppressHostPrincipalMessageHandlerTest.cs" />
     <Compile Include="Hosting\ThreadCurrentPrincipalContext.cs" />
     <Compile Include="Hosting\ThreadPrincipalServiceTest.cs" />
-    <Compile Include="NegotiatedContentResultTests.cs" />
-    <Compile Include="FormattedContentResultTests.cs" />
-    <Compile Include="StatusCodeResultTests.cs" />
+    <Compile Include="Results\NegotiatedContentResultTests.cs" />
+    <Compile Include="Results\FormattedContentResultTests.cs" />
+    <Compile Include="Results\StatusCodeResultTests.cs" />
     <Compile Include="HttpConfigurationExtensionsTest.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerTypeResolverTest.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerSelectorTest.cs" />
@@ -107,7 +107,7 @@
     <Compile Include="HttpServerTest.cs" />
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensionsTest.cs" />
-    <Compile Include="MessageResultTests.cs" />
+    <Compile Include="Results\ResponseMessageResultTests.cs" />
     <Compile Include="Metadata\Providers\AssociatedMetadataProviderTest.cs" />
     <Compile Include="ModelBinding\FormatterParameterBindingTest.cs" />
     <Compile Include="ModelBinding\HttpParameterBindingExtensionsTest.cs" />

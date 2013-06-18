@@ -5,12 +5,12 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace System.Web.Http
+namespace System.Web.Http.Results
 {
     /// <summary>
     /// Represents an action result that returns the results of a specified continuation function.
     /// </summary>
-    public class ContinuationResult : IHttpActionResult
+    internal class ContinuationResult : IHttpActionResult
     {
         private readonly Func<Task<HttpResponseMessage>> _continuation;
 

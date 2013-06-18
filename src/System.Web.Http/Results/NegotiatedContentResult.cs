@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
 
-namespace System.Web.Http
+namespace System.Web.Http.Results
 {
     /// <summary>Represents an action result that performs content negotiation.</summary>
     /// <typeparam name="T">The type of content in the entity body.</typeparam>

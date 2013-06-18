@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Properties;
 
-namespace System.Web.Http
+namespace System.Web.Http.Results
 {
     /// <summary>Represents an action result that returns a specified HTTP status code.</summary>
     public class StatusCodeResult : IHttpActionResult

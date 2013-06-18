@@ -14,6 +14,7 @@ using System.Web.Http.Dependencies;
 using System.Web.Http.Hosting;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
+using System.Web.Http.Results;
 using System.Web.Http.Routing;
 
 namespace System.Net.Http

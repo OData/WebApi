@@ -13,7 +13,7 @@ using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http
+namespace System.Web.Http.Results
 {
     public class NegotiatedContentResultTests
     {

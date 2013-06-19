@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Security.Principal;
 using System.Web.Http.Controllers;
@@ -32,7 +33,8 @@ namespace System.Web.Http.Filters
         {
             get
             {
-                return (ActionContext != null && ActionContext.Request != null) ? ActionContext.Request : null;
+                Contract.Assert(ActionContext != null);
+                return ActionContext.Request;
             }
         }
     }

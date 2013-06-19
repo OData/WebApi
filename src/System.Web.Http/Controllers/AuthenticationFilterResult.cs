@@ -39,6 +39,7 @@ namespace System.Web.Http.Controllers
             IHttpActionResult result = _innerResult;
             HttpAuthenticationContext authenticationContext = new HttpAuthenticationContext(_context);
             authenticationContext.Principal = _principalService.GetCurrentPrincipal(_request);
+            bool setPrincipal = false;
 
             for (int i = 0; i < _filters.Length; i++)
             {
@@ -61,11 +62,22 @@ namespace System.Web.Http.Controllers
 
                     if (principal != null)
                     {
+                        // Pass the principal from earlier filters into later filters, but only set the principal on
+                        // the host once for performance reasons.
                         authenticationContext.Principal = principal;
-                        _principalService.SetCurrentPrincipal(principal, _request);
+                        setPrincipal = true;
                     }
                 }
             }
+
+            if (setPrincipal)
+            {
+                _principalService.SetCurrentPrincipal(authenticationContext.Principal, _request);
+            }
+
+            // Run challenge on all filters (passing the result of each into the next). If a filter failed, the
+            // challenges run on the failure result. If no filter failed, the challenges run on the original inner
+            // result.
 
             for (int i = 0; i < _filters.Length; i++)
             {

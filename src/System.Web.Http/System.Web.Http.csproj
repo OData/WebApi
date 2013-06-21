@@ -93,7 +93,7 @@
     <Compile Include="Results\ContinuationResult.cs" />
     <Compile Include="HttpErrorKeys.cs" />
     <Compile Include="HttpVerbAttribute.cs" />
-    <Compile Include="FilterGrouping.cs" />
+    <Compile Include="Controllers\FilterGrouping.cs" />
     <Compile Include="RoutePrefixAttribute.cs" />
     <Compile Include="Filters\HttpAuthenticationContext.cs" />
     <Compile Include="Results\ResponseMessageResult.cs" />

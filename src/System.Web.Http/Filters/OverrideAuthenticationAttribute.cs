@@ -2,6 +2,9 @@
 
 namespace System.Web.Http.Filters
 {
+    /// <summary>
+    /// Represents a filter attribute that overrides authentication filters defined at a higher level.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
     public sealed class OverrideAuthenticationAttribute : Attribute, IOverrideFilter
     {

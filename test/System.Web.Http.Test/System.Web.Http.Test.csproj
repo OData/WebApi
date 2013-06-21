@@ -79,6 +79,7 @@
     <Compile Include="Controllers\Apis\UsersRpcController.cs" />
     <Compile Include="Controllers\AuthorizationFilterResultTests.cs" />
     <Compile Include="Controllers\AuthenticationFilterResultTests.cs" />
+    <Compile Include="Controllers\FilterGroupingTests.cs" />
     <Compile Include="Controllers\HttpParameterBindingTest.cs" />
     <Compile Include="Controllers\ParameterBindingExtensionsTest.cs" />
     <Compile Include="Controllers\ResponseMessageResultConverterTest.cs" />

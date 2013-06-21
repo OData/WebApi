@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
@@ -25,10 +26,60 @@ namespace System.Web.Http.OData.Builder
         private readonly string _entitySetName;
 
         /// <summary>
-        /// Constructs an instance of an <see cref="EntitySetLinkBuilderAnnotation" /> for testing purposes only.
+        /// Initializes a new instance of the <see cref="EntitySetLinkBuilderAnnotation" /> class.
         /// </summary>
+        /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
         public EntitySetLinkBuilderAnnotation()
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntitySetLinkBuilderAnnotation"/> class.
+        /// </summary>
+        /// <param name="entitySet">The entity set for which the link builder is being constructed.</param>
+        /// <param name="model">The EDM model that this entity set belongs to.</param>
+        /// <remarks>This constructor creates a link builder that generates URL's that follow OData conventions for the given entity set.</remarks>
+        public EntitySetLinkBuilderAnnotation(IEdmEntitySet entitySet, IEdmModel model)
+        {
+            if (entitySet == null)
+            {
+                throw Error.ArgumentNull("entitySet");
+            }
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            IEdmEntityType elementType = entitySet.ElementType;
+            IEnumerable<IEdmEntityType> derivedTypes = model.FindAllDerivedTypes(elementType).Cast<IEdmEntityType>();
+            bool derivedTypesDefineNavigationProperty = false;
+
+            // Add navigation link builders for all navigation properties of entity.
+            foreach (IEdmNavigationProperty navigationProperty in elementType.NavigationProperties())
+            {
+                Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationLinkFactory =
+                    (entityInstanceContext, navProperty) => entityInstanceContext.GenerateNavigationPropertyLink(navProperty, includeCast: false);
+                AddNavigationPropertyLinkBuilder(navigationProperty, new NavigationLinkBuilder(navigationLinkFactory, followsConventions: true));
+            }
+
+            // Add navigation link builders for all navigation properties in derived types.
+            foreach (IEdmEntityType derivedEntityType in derivedTypes)
+            {
+                foreach (IEdmNavigationProperty navigationProperty in derivedEntityType.DeclaredNavigationProperties())
+                {
+                    derivedTypesDefineNavigationProperty = true;
+                    Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationLinkFactory =
+                    (entityInstanceContext, navProperty) => entityInstanceContext.GenerateNavigationPropertyLink(navProperty, includeCast: true);
+                    AddNavigationPropertyLinkBuilder(navigationProperty, new NavigationLinkBuilder(navigationLinkFactory, followsConventions: true));
+                }
+            }
+
+            _entitySetName = entitySet.Name;
+            _feedSelfLinkBuilder = (feedContext) => feedContext.GenerateFeedSelfLink();
+
+            Func<EntityInstanceContext, string> selfLinkFactory =
+                (entityInstanceContext) => entityInstanceContext.GenerateSelfLink(includeCast: derivedTypesDefineNavigationProperty);
+            _idLinkBuilder = new SelfLinkBuilder<string>(selfLinkFactory, followsConventions: true);
         }
 
         /// <summary>

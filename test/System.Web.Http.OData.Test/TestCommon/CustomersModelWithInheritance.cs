@@ -107,6 +107,7 @@ namespace System.Web.Http.TestCommon
             Orders = orders;
             Customers = customers;
             UpgradeCustomer = upgradeCustomer;
+            UpgradeSpecialCustomer = upgradeSpecialCustomer;
         }
 
         public IEdmModel Model { get; private set; }
@@ -128,5 +129,7 @@ namespace System.Web.Http.TestCommon
         public IEdmEntityContainer Container { get; private set; }
 
         public IEdmFunctionImport UpgradeCustomer { get; private set; }
+
+        public IEdmFunctionImport UpgradeSpecialCustomer { get; private set; }
     }
 }

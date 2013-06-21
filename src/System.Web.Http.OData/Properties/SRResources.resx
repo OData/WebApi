@@ -210,9 +210,6 @@
   <data name="CannotAutoCreateMultipleCandidates" xml:space="preserve">
     <value>Cannot automatically bind the navigation property '{0}' on entity type '{1}' for the source entity set '{2}' because there are two or more matching target entity sets. The matching entity sets are: {3}.</value>
   </data>
-  <data name="EntitySetHasNoBuildLinkAnnotation" xml:space="preserve">
-    <value>The entity set '{0}' is missing link generation configuration. Check that the self and edit links are configured during model building.</value>
-  </data>
   <data name="PropertyDoesNotBelongToType" xml:space="preserve">
     <value>The property '{0}' does not belong to the type '{1}'.</value>
   </data>
@@ -636,6 +633,9 @@
   </data>
   <data name="UrlHelperNull" xml:space="preserve">
     <value>The property 'Url' of {0} cannot be null.</value>
+  </data>
+  <data name="ActionNotBoundToEntity" xml:space="preserve">
+    <value>The action '{0}' is not bound to an entity. Only actions that are bound to entities can have action links.</value>
   </data>
   <data name="ODataPathInvalid" xml:space="preserve">
     <value>The OData path is invalid.</value>

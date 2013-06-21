@@ -433,7 +433,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                         return feedSelfLink;
                     }
             };
-            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkBuilder);
+            _model.SetEntitySetLinkBuilder(_customerSet, linkBuilder);
 
             // Act
             ODataFeed feed = serializer.CreateODataFeed(feedInstance, writeContext);

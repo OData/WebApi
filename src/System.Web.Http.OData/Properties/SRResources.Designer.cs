@@ -97,6 +97,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The action &apos;{0}&apos; is not bound to an entity. Only actions that are bound to entities can have action links..
+        /// </summary>
+        internal static string ActionNotBoundToEntity {
+            get {
+                return ResourceManager.GetString("ActionNotBoundToEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Action resolution failed. Multiple actions matching the action identifier &apos;{0}&apos; were found. The matching actions are: {1}..
         /// </summary>
         internal static string ActionResolutionFailed {
@@ -534,15 +543,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string EntitySetControllerUnsupportedUpdate {
             get {
                 return ResourceManager.GetString("EntitySetControllerUnsupportedUpdate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The entity set &apos;{0}&apos; is missing link generation configuration. Check that the self and edit links are configured during model building..
-        /// </summary>
-        internal static string EntitySetHasNoBuildLinkAnnotation {
-            get {
-                return ResourceManager.GetString("EntitySetHasNoBuildLinkAnnotation", resourceCulture);
             }
         }
         

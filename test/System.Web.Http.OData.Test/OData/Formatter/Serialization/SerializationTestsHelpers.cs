@@ -42,8 +42,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             orderSet.AddNavigationTarget(orderType.NavigationProperties().Single(np => np.Name == "Customer"), customerSet);
 
             EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation();
-            model.SetEntitySetLinkBuilderAnnotation(customerSet, linkAnnotation);
-            model.SetEntitySetLinkBuilderAnnotation(orderSet, linkAnnotation);
+            model.SetEntitySetLinkBuilder(customerSet, linkAnnotation);
+            model.SetEntitySetLinkBuilder(orderSet, linkAnnotation);
 
             model.AddElement(container);
             return model;

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
@@ -84,7 +83,7 @@ namespace System.Web.Http.OData.Builder
             {
                 EdmEntitySet entitySet = iter.EntitySet;
                 model.SetAnnotationValue<EntitySetUrlAnnotation>(entitySet, iter.Annotations.Url);
-                model.SetAnnotationValue<EntitySetLinkBuilderAnnotation>(entitySet, iter.Annotations.LinkBuilder);
+                model.SetEntitySetLinkBuilder(entitySet, iter.Annotations.LinkBuilder);
 
                 AddNavigationBindings(iter.Configuration, iter.EntitySet, iter.Annotations.LinkBuilder, builder, edmTypeMap, edmEntitySetMap);
             }
@@ -136,7 +135,7 @@ namespace System.Web.Http.OData.Builder
                                 Func<EntityInstanceContext, Uri> actionFactory = action.GetActionLink();
                                 if (actionFactory != null)
                                 {
-                                    model.SetAnnotationValue<ActionLinkBuilder>(functionImport, new ActionLinkBuilder(actionFactory, action.FollowsConventions));
+                                    model.SetActionLinkBuilder(functionImport, new ActionLinkBuilder(actionFactory, action.FollowsConventions));
                                 }
                             }
                         }
@@ -274,22 +273,6 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        internal static EntitySetLinkBuilderAnnotation GetEntitySetLinkBuilder(this IEdmModel model, IEdmEntitySet entitySet)
-        {
-            EntitySetLinkBuilderAnnotation annotation = model.GetAnnotationValue<EntitySetLinkBuilderAnnotation>(entitySet);
-            if (annotation == null)
-            {
-                throw Error.NotSupported(SRResources.EntitySetHasNoBuildLinkAnnotation, entitySet.Name);
-            }
-
-            return annotation;
-        }
-
-        internal static void SetEntitySetLinkBuilderAnnotation(this IEdmModel model, IEdmEntitySet entitySet, EntitySetLinkBuilderAnnotation entitySetLinkBuilder)
-        {
-            model.SetAnnotationValue(entitySet, entitySetLinkBuilder);
-        }
-
         internal static string GetEntitySetUrl(this IEdmModel model, IEdmEntitySet entitySet)
         {
             if (model == null)
@@ -328,28 +311,11 @@ namespace System.Web.Http.OData.Builder
             BindableProcedureFinder annotation = model.GetAnnotationValue<BindableProcedureFinder>(model);
             if (annotation == null)
             {
-                return Enumerable.Empty<IEdmFunctionImport>();
-            }
-            else
-            {
-                return annotation.FindProcedures(entityType);
-            }
-        }
-
-        internal static ActionLinkBuilder GetActionLinkBuilder(this IEdmModel model, IEdmFunctionImport action)
-        {
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
+                annotation = new BindableProcedureFinder(model);
+                model.SetAnnotationValue(model, annotation);
             }
 
-            if (action == null)
-            {
-                throw Error.ArgumentNull("action");
-            }
-
-            ActionLinkBuilder annotation = model.GetAnnotationValue<ActionLinkBuilder>(action);
-            return annotation;
+            return annotation.FindProcedures(entityType);
         }
     }
 }

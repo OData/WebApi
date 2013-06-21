@@ -567,7 +567,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 NavigationLinkBuilder = (ctxt, property, metadataLevel) => navigationLinkUri
             };
-            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
+            _model.SetEntitySetLinkBuilder(_customerSet, linkAnnotation);
 
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             serializer.CallBase = true;
@@ -614,14 +614,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateODataAction_ReturnsNull_IfModelDoesntHaveActionLinkBuilder()
-        {
-            Mock<IEdmFunctionImport> action = new Mock<IEdmFunctionImport>();
-            Assert.Null(
-                _serializer.CreateODataAction(action.Object, new EntityInstanceContext { EdmModel = EdmCoreModel.Instance }));
-        }
-
-        [Fact]
         public void CreateEntry_WritesCorrectIdLink()
         {
             // Arrange
@@ -637,7 +629,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 },
                 followsConventions: false)
             };
-            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
+            _model.SetEntitySetLinkBuilder(_customerSet, linkAnnotation);
 
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             serializer.CallBase = true;
@@ -666,7 +658,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 },
                 followsConventions: false)
             };
-            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
+            _model.SetEntitySetLinkBuilder(_customerSet, linkAnnotation);
 
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             serializer.CallBase = true;
@@ -696,7 +688,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 followsConventions: false)
             };
 
-            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
+            _model.SetEntitySetLinkBuilder(_customerSet, linkAnnotation);
 
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, _serializerProvider);
             serializer.CallBase = true;

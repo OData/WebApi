@@ -1,9 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Net.Http;
 using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Formatter.Serialization.Models;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
@@ -253,6 +257,104 @@ namespace System.Web.Http.OData.Builder
             Assert.Null(selfLinks.IdLink);
             Assert.Null(selfLinks.EditLink);
             Assert.Equal(readLink, selfLinks.ReadLink);
+        }
+
+        [Fact]
+        public void Ctor_FollowingConventions_GeneratesSelfLinkWithCast_IfDerivedTypeHasNavigationProperty()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            HttpRequestMessage request = GetODataRequest(model.Model);
+            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, EntitySet = model.Customers, Url = request.GetUrlHelper() };
+            EntityInstanceContext instanceContext = new EntityInstanceContext(serializerContext, model.Customer.AsReference(), new { ID = 42 });
+
+            // Act
+            EntitySetLinkBuilderAnnotation linkBuilder = new EntitySetLinkBuilderAnnotation(model.Customers, model.Model);
+            string result = linkBuilder.BuildIdLink(instanceContext, ODataMetadataLevel.Default);
+
+            // Assert
+            Assert.Equal("http://localhost/Customers(42)/NS.Customer", result);
+        }
+
+        [Fact]
+        public void Ctor_FollowingConventions_GeneratesSelfLinkWithoutCast_IfDerivedTypesHaveNoNavigationProperty()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            IEdmEntitySet specialCustomers = new EdmEntitySet(model.Container, "SpecialCustomers", model.SpecialCustomer);
+            HttpRequestMessage request = GetODataRequest(model.Model);
+            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, EntitySet = specialCustomers, Url = request.GetUrlHelper() };
+            EntityInstanceContext instanceContext = new EntityInstanceContext(serializerContext, model.Customer.AsReference(), new { ID = 42 });
+
+            // Act
+            EntitySetLinkBuilderAnnotation linkBuilder = new EntitySetLinkBuilderAnnotation(specialCustomers, model.Model);
+            string result = linkBuilder.BuildIdLink(instanceContext, ODataMetadataLevel.Default);
+
+            // Assert
+            Assert.Equal("http://localhost/SpecialCustomers(42)", result);
+        }
+
+        [Fact]
+        public void Ctor_FollowingConventions_GeneratesNavigationLinkWithoutCast_ForNavigationPropertyOnBaseType()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            HttpRequestMessage request = GetODataRequest(model.Model);
+            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, EntitySet = model.Customers, Url = request.GetUrlHelper() };
+            EntityInstanceContext instanceContext = new EntityInstanceContext(serializerContext, model.Customer.AsReference(), new { ID = 42 });
+            IEdmNavigationProperty ordersProperty = model.Customer.NavigationProperties().First(p => p.Name == "Orders");
+
+            // Act
+            EntitySetLinkBuilderAnnotation linkBuilder = new EntitySetLinkBuilderAnnotation(model.Customers, model.Model);
+            Uri result = linkBuilder.BuildNavigationLink(instanceContext, ordersProperty, ODataMetadataLevel.Default);
+
+            // Assert
+            Assert.Equal("http://localhost/Customers(42)/Orders", result.AbsoluteUri);
+        }
+
+        [Fact]
+        public void Ctor_FollowingConventions_GeneratesNavigationLinkWithCast_ForDerivedNavigationProperty()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            HttpRequestMessage request = GetODataRequest(model.Model);
+            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, EntitySet = model.Customers, Url = request.GetUrlHelper() };
+            EntityInstanceContext instanceContext = new EntityInstanceContext(serializerContext, model.SpecialCustomer.AsReference(), new { ID = 42 });
+            IEdmNavigationProperty ordersProperty = model.SpecialCustomer.NavigationProperties().First(p => p.Name == "SpecialOrders");
+
+            // Act
+            EntitySetLinkBuilderAnnotation linkBuilder = new EntitySetLinkBuilderAnnotation(model.Customers, model.Model);
+            Uri result = linkBuilder.BuildNavigationLink(instanceContext, ordersProperty, ODataMetadataLevel.Default);
+
+            // Assert
+            Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/SpecialOrders", result.AbsoluteUri);
+        }
+
+        [Fact]
+        public void Ctor_FollowingConventions_GeneratesFeedSelfLinkFollowingConventions()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            HttpRequestMessage request = GetODataRequest(model.Model);
+
+            // Act
+            EntitySetLinkBuilderAnnotation linkBuilder = new EntitySetLinkBuilderAnnotation(model.Customers, model.Model);
+            Uri result = linkBuilder.BuildFeedSelfLink(new FeedContext { EntitySet = model.Customers, Url = request.GetUrlHelper() });
+
+            // Assert
+            Assert.Equal("http://localhost/Customers", result.AbsoluteUri);
+        }
+
+        private static HttpRequestMessage GetODataRequest(IEdmModel model)
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, model);
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
+            request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
+            return request;
         }
     }
 }

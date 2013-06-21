@@ -29,5 +29,12 @@ namespace System.Web.Http.Description
         /// <param name="parameterDescriptor">The parameter descriptor.</param>
         /// <returns>Documentation for the parameter.</returns>
         string GetDocumentation(HttpParameterDescriptor parameterDescriptor);
+
+        /// <summary>
+        /// Gets the response documentation based on <see cref="HttpActionDescriptor"/>.
+        /// </summary>
+        /// <param name="actionDescriptor">The action descriptor.</param>
+        /// <returns>Documentation for the action response.</returns>
+        string GetResponseDocumentation(HttpActionDescriptor actionDescriptor);
     }
 }

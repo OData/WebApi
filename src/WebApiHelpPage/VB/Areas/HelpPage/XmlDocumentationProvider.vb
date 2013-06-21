@@ -32,12 +32,12 @@ Namespace Areas.HelpPage
 
         Public Function GetDocumentation(controllerDescriptor As HttpControllerDescriptor) As String Implements IDocumentationProvider.GetDocumentation
             Dim typeNode As XPathNavigator = GetTypeNode(controllerDescriptor)
-            Return GetSummary(typeNode)
+            Return GetTagValue(typeNode, "summary")
         End Function
 
         Public Function GetDocumentation(actionDescriptor As HttpActionDescriptor) As String Implements IDocumentationProvider.GetDocumentation
             Dim methodNode As XPathNavigator = GetMethodNode(actionDescriptor)
-            Return GetSummary(methodNode)
+            Return GetTagValue(methodNode, "summary")
         End Function
 
         Public Function GetDocumentation(parameterDescriptor As HttpParameterDescriptor) As String Implements IDocumentationProvider.GetDocumentation
@@ -54,6 +54,11 @@ Namespace Areas.HelpPage
             End If
 
             Return Nothing
+        End Function
+
+        Public Function GetResponseDocumentation(actionDescriptor As HttpActionDescriptor) As String Implements IDocumentationProvider.GetResponseDocumentation
+            Dim methodNode As XPathNavigator = GetMethodNode(actionDescriptor)
+            Return GetTagValue(methodNode, "returns")
         End Function
 
         Private Function GetMethodNode(actionDescriptor As HttpActionDescriptor) As XPathNavigator
@@ -77,11 +82,11 @@ Namespace Areas.HelpPage
             Return name
         End Function
 
-        Private Shared Function GetSummary(parentNode As XPathNavigator) As String
+        Private Shared Function GetTagValue(parentNode As XPathNavigator, tagName As String) As String
             If (Not parentNode Is Nothing) Then
-                Dim summaryNode As XPathNavigator = parentNode.SelectSingleNode("summary")
-                If (Not summaryNode Is Nothing) Then
-                    Return summaryNode.Value.Trim()
+                Dim node As XPathNavigator = parentNode.SelectSingleNode(tagName)
+                If (Not node Is Nothing) Then
+                    Return node.Value.Trim()
                 End If
             End If
 

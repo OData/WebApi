@@ -11,7 +11,6 @@ using System.Text.RegularExpressions;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Internal;
-using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
 
@@ -278,7 +277,8 @@ namespace System.Web.Http.Description
                 Enumerable.Empty<MediaTypeFormatter>();
 
             // response formatters
-            Type returnType = actionDescriptor.ReturnType;
+            ResponseDescription responseDescription = CreateResponseDescription(actionDescriptor);
+            Type returnType = responseDescription.ResponseType ?? responseDescription.DeclaredType;
             IEnumerable<MediaTypeFormatter> supportedResponseFormatters = returnType != null ?
                 actionDescriptor.Configuration.Formatters.Where(f => f.CanWriteType(returnType)) :
                 Enumerable.Empty<MediaTypeFormatter>();
@@ -301,9 +301,23 @@ namespace System.Web.Http.Description
                     Route = route,
                     SupportedResponseFormatters = new Collection<MediaTypeFormatter>(supportedResponseFormatters.ToList()),
                     SupportedRequestBodyFormatters = new Collection<MediaTypeFormatter>(supportedRequestBodyFormatters.ToList()),
-                    ParameterDescriptions = new Collection<ApiParameterDescription>(parameterDescriptions)
+                    ParameterDescriptions = new Collection<ApiParameterDescription>(parameterDescriptions),
+                    ResponseDescription = responseDescription
                 });
             }
+        }
+
+        private ResponseDescription CreateResponseDescription(HttpActionDescriptor actionDescriptor)
+        {
+            Collection<ResponseTypeAttribute> responseTypeAttribute = actionDescriptor.GetCustomAttributes<ResponseTypeAttribute>();
+            Type responseType = responseTypeAttribute.Select(attribute => attribute.ResponseType).FirstOrDefault();
+
+            return new ResponseDescription
+            {
+                DeclaredType = actionDescriptor.ReturnType,
+                ResponseType = responseType,
+                Documentation = GetApiResponseDocumentation(actionDescriptor)
+            };
         }
 
         private static IEnumerable<MediaTypeFormatter> GetInnerFormatters(IEnumerable<MediaTypeFormatter> mediaTypeFormatters)
@@ -398,23 +412,34 @@ namespace System.Web.Http.Description
         private string GetApiDocumentation(HttpActionDescriptor actionDescriptor)
         {
             IDocumentationProvider documentationProvider = DocumentationProvider ?? actionDescriptor.Configuration.Services.GetDocumentationProvider();
-            if (documentationProvider == null)
+            if (documentationProvider != null)
             {
-                return String.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, actionDescriptor.ActionName);
+                return documentationProvider.GetDocumentation(actionDescriptor);
             }
 
-            return documentationProvider.GetDocumentation(actionDescriptor);
+            return null;
         }
 
         private string GetApiParameterDocumentation(HttpParameterDescriptor parameterDescriptor)
         {
             IDocumentationProvider documentationProvider = DocumentationProvider ?? parameterDescriptor.Configuration.Services.GetDocumentationProvider();
-            if (documentationProvider == null)
+            if (documentationProvider != null)
             {
-                return String.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, parameterDescriptor.Prefix ?? parameterDescriptor.ParameterName);
+                return documentationProvider.GetDocumentation(parameterDescriptor);
             }
 
-            return documentationProvider.GetDocumentation(parameterDescriptor);
+            return null;
+        }
+
+        private string GetApiResponseDocumentation(HttpActionDescriptor actionDescriptor)
+        {
+            IDocumentationProvider documentationProvider = DocumentationProvider ?? actionDescriptor.Configuration.Services.GetDocumentationProvider();
+            if (documentationProvider != null)
+            {
+                return documentationProvider.GetResponseDocumentation(actionDescriptor);
+            }
+
+            return null;
         }
 
         // remove ApiDescription that will lead to ambiguous action matching.

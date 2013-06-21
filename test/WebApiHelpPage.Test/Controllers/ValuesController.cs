@@ -16,7 +16,7 @@ namespace WebApiHelpPageWebHost.UnitTest.Controllers
         /// <summary>
         /// Gets all the values.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A list of values.</returns>
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
@@ -26,7 +26,7 @@ namespace WebApiHelpPageWebHost.UnitTest.Controllers
         /// Gets the value by id.
         /// </summary>
         /// <param name="id">The id.</param>
-        /// <returns></returns>
+        /// <returns>A value string.</returns>
         public string Get(int id)
         {
             return "value";
@@ -36,7 +36,7 @@ namespace WebApiHelpPageWebHost.UnitTest.Controllers
         /// Gets the value by name.
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <returns></returns>
+        /// <returns>A value identified by name.</returns>
         public string Get(string name)
         {
             return "name";
@@ -46,7 +46,7 @@ namespace WebApiHelpPageWebHost.UnitTest.Controllers
         /// Create a new value.
         /// </summary>
         /// <param name="value">The value.</param>
-        /// <returns></returns>
+        /// <returns>A response.</returns>
         public HttpResponseMessage Post([FromBody]string value)
         {
             return Request.CreateResponse<string>(HttpStatusCode.OK, "hello");
@@ -89,7 +89,7 @@ namespace WebApiHelpPageWebHost.UnitTest.Controllers
         /// Returns the options.
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <returns></returns>
+        /// <returns>All the options.</returns>
         public string Options(HttpRequestMessage request)
         {
             return "options";

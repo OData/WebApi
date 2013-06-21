@@ -35,13 +35,13 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         public string GetDocumentation(HttpControllerDescriptor controllerDescriptor)
         {
             XPathNavigator typeNode = GetTypeNode(controllerDescriptor);
-            return GetSummary(typeNode);
+            return GetTagValue(typeNode, "summary");
         }
 
         public virtual string GetDocumentation(HttpActionDescriptor actionDescriptor)
         {
             XPathNavigator methodNode = GetMethodNode(actionDescriptor);
-            return GetSummary(methodNode);
+            return GetTagValue(methodNode, "summary");
         }
 
         public virtual string GetDocumentation(HttpParameterDescriptor parameterDescriptor)
@@ -62,6 +62,12 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
             }
 
             return null;
+        }
+
+        public string GetResponseDocumentation(HttpActionDescriptor actionDescriptor)
+        {
+            XPathNavigator methodNode = GetMethodNode(actionDescriptor);
+            return GetTagValue(methodNode, "returns");
         }
 
         private XPathNavigator GetMethodNode(HttpActionDescriptor actionDescriptor)
@@ -89,14 +95,14 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
             return name;
         }
 
-        private static string GetSummary(XPathNavigator parentNode)
+        private static string GetTagValue(XPathNavigator parentNode, string tagName)
         {
             if (parentNode != null)
             {
-                XPathNavigator summaryNode = parentNode.SelectSingleNode("summary");
-                if (summaryNode != null)
+                XPathNavigator node = parentNode.SelectSingleNode(tagName);
+                if (node != null)
                 {
-                    return summaryNode.Value.Trim();
+                    return node.Value.Trim();
                 }
             }
 

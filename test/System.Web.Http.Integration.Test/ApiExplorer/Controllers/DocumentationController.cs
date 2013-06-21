@@ -7,6 +7,7 @@ namespace System.Web.Http.ApiExplorer
     public class DocumentationController : ApiController
     {
         [ApiDocumentation("Get action")]
+        [ApiResponseDocumentation("Get response")]
         public string Get()
         {
             return string.Empty;

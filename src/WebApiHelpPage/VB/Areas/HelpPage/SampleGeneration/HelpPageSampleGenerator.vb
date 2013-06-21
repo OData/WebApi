@@ -211,7 +211,7 @@ Namespace Areas.HelpPage
                         formatters = api.SupportedRequestBodyFormatters
                     Case Else
                         'Case sampleDirection.Response
-                        type = api.ActionDescriptor.ReturnType
+                        type = If(api.ResponseDescription.ResponseType, api.ResponseDescription.DeclaredType)
                         formatters = api.SupportedResponseFormatters
                 End Select
             End If

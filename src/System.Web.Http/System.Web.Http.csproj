@@ -82,6 +82,8 @@
     <Compile Include="Controllers\IActionResultConverter.cs" />
     <Compile Include="Controllers\HttpActionContext.cs" />
     <Compile Include="Controllers\IControllerConfiguration.cs" />
+    <Compile Include="Description\ResponseTypeAttribute.cs" />
+    <Compile Include="Description\ResponseDescription.cs" />
     <Compile Include="Hosting\IHostPrincipalService.cs" />
     <Compile Include="Filters\FailedAuthenticationResult.cs" />
     <Compile Include="Filters\SucceededAuthenticationResult.cs" />

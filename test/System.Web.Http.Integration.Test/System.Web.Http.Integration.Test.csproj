@@ -43,8 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiExplorer\Controllers\AmbiguousActionController.cs" />
+    <Compile Include="ApiExplorer\Controllers\ResponseTypeController.cs" />
     <Compile Include="ApiExplorer\Controllers\DocumentationController.cs" />
     <Compile Include="ApiExplorer\Controllers\ParameterSourceController.cs" />
+    <Compile Include="ApiExplorer\ResponseTypeAttributeTest.cs" />
     <Compile Include="ApiExplorer\DocumentationProviders\AttributeDocumentationProvider.cs" />
     <Compile Include="ApiExplorer\FormattersTest.cs" />
     <Compile Include="ApiExplorer\Formatters\ItemFormatter.cs" />

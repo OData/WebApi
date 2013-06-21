@@ -30,7 +30,12 @@ End Code
     End If
 
     @If hasResponseSamples Then
-        @<h2>Response Information</h2> 
+        @<h2>Response Information</h2>
+        If Not description.ResponseDescription.Documentation Is Nothing Then
+            @<p>@description.ResponseDescription.Documentation</p>
+        Else
+            @<p>No documentation available.</p>
+        End If
         @<h3>Response body formats</h3>
         @Html.DisplayFor(Function(apiModel) apiModel.SampleResponses, "Samples")
     End If

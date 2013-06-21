@@ -138,5 +138,62 @@ namespace WebApiHelpPageWebHost.UnitTest
             string documentationString = provider.GetDocumentation(controllerDescriptor);
             Assert.Equal(expectedString, documentationString);
         }
+
+        public static IEnumerable<object[]> GetDocumentationForActionResponse_PropertyData
+        {
+            get
+            {
+                ValuesController controller = new ValuesController();
+
+                Func<IEnumerable<string>> getAction = controller.Get;
+                HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(new HttpControllerDescriptor(), getAction.Method);
+                yield return new object[] { actionDescriptor, "A list of values." };
+
+                Func<int, string> getIdAction = controller.Get;
+                actionDescriptor = new ReflectedHttpActionDescriptor(new HttpControllerDescriptor(), getIdAction.Method);
+                yield return new object[] { actionDescriptor, "A value string." };
+
+                Func<string, string> getNameAction = controller.Get;
+                actionDescriptor = new ReflectedHttpActionDescriptor(new HttpControllerDescriptor(), getNameAction.Method);
+                yield return new object[] { actionDescriptor, "A value identified by name." };
+
+                Func<string, HttpResponseMessage> postAction = controller.Post;
+                actionDescriptor = new ReflectedHttpActionDescriptor(new HttpControllerDescriptor(), postAction.Method);
+                yield return new object[] { actionDescriptor, "A response." };
+
+                Action<int, string> putAction = controller.Put;
+                actionDescriptor = new ReflectedHttpActionDescriptor(new HttpControllerDescriptor(), putAction.Method);
+                yield return new object[] { actionDescriptor, null };
+
+                Action<List<Tuple<int, string>>> putCollectionAction = controller.Put;
+                actionDescriptor = new ReflectedHttpActionDescriptor(new HttpControllerDescriptor(), putCollectionAction.Method);
+                yield return new object[] { actionDescriptor, null };
+
+                Action<int?> deleteAction = controller.Delete;
+                actionDescriptor = new ReflectedHttpActionDescriptor(new HttpControllerDescriptor(), deleteAction.Method);
+                yield return new object[] { actionDescriptor, null };
+
+                Action<Tuple<int, string>> patchAction = controller.Patch;
+                actionDescriptor = new ReflectedHttpActionDescriptor(new HttpControllerDescriptor(), patchAction.Method);
+                yield return new object[] { actionDescriptor, null };
+
+                Func<HttpRequestMessage, string> optionsAction = controller.Options;
+                actionDescriptor = new ReflectedHttpActionDescriptor(new HttpControllerDescriptor(), optionsAction.Method);
+                yield return new object[] { actionDescriptor, "All the options." };
+
+                Func<int, string[]> headAction = controller.HeadNoDocumentation;
+                actionDescriptor = new ReflectedHttpActionDescriptor(new HttpControllerDescriptor(), headAction.Method);
+                yield return new object[] { actionDescriptor, null };
+            }
+        }
+
+        [Theory]
+        [PropertyData("GetDocumentationForActionResponse_PropertyData")]
+        public void GetDocumentationForActionResponse(HttpActionDescriptor actionDescriptor, string expectedString)
+        {
+            XmlDocumentationProvider provider = new XmlDocumentationProvider("WebApiHelpPage.Test.XML");
+            string documentationString = provider.GetResponseDocumentation(actionDescriptor);
+            Assert.Equal(expectedString, documentationString);
+        }
     }
 }

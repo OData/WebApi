@@ -512,9 +512,9 @@ namespace System.Web.Http.Controllers
         {
             Mock<IHttpActionResult> mock = new Mock<IHttpActionResult>(MockBehavior.Strict);
             CancellationToken cancellationToken;
-            var setup = mock.Setup(r => r.ExecuteAsync(It.IsAny<CancellationToken>()));
-            var callback = setup.Callback<CancellationToken>((t) => { cancellationToken = t; });
-            callback.Returns(() => executeAsync.Invoke(cancellationToken));
+            mock.Setup(r => r.ExecuteAsync(It.IsAny<CancellationToken>()))
+                .Callback<CancellationToken>((t) => { cancellationToken = t; })
+                .Returns(() => executeAsync.Invoke(cancellationToken));
             return mock.Object;
         }
 
@@ -524,20 +524,18 @@ namespace System.Web.Http.Controllers
             Mock<IAuthenticationFilter> mock = new Mock<IAuthenticationFilter>();
             HttpAuthenticationContext authenticationContext = null;
             CancellationToken cancellationToken = default(CancellationToken);
-            var setup = mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(),
-                It.IsAny<CancellationToken>()));
-            var callback = setup.Callback<HttpAuthenticationContext, CancellationToken>((a, c) =>
-            {
-                authenticationContext = a;
-                cancellationToken = c;
-            });
-            callback.Returns(() => authenticateAsync.Invoke(authenticationContext, cancellationToken));
-            var challengeSetup = mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(),
-                It.IsAny<IHttpActionResult>(), It.IsAny<CancellationToken>()));
+            mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(), It.IsAny<CancellationToken>()))
+                .Callback<HttpAuthenticationContext, CancellationToken>((a, c) =>
+                {
+                    authenticationContext = a;
+                    cancellationToken = c;
+                })
+                .Returns(() => authenticateAsync.Invoke(authenticationContext, cancellationToken));
             IHttpActionResult innerResult = null;
-            var challengeCallback = challengeSetup.Callback<HttpActionContext, IHttpActionResult, CancellationToken>(
-                (a, r, c) => { innerResult = r; });
-            challengeCallback.Returns(() => Task.FromResult(innerResult));
+            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(),
+                It.IsAny<CancellationToken>()))
+                .Callback<HttpActionContext, IHttpActionResult, CancellationToken>((a, r, c) => { innerResult = r; })
+                .Returns(() => Task.FromResult(innerResult));
             return mock.Object;
         }
 
@@ -548,18 +546,17 @@ namespace System.Web.Http.Controllers
             HttpActionContext actionContext = null;
             IHttpActionResult innerResult = null;
             CancellationToken cancellationToken = default(CancellationToken);
-            var authenticateSetup = mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(),
-                It.IsAny<CancellationToken>()));
-            authenticateSetup.Returns(() => Task.FromResult<IAuthenticationResult>(null));
-            var setup = mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(),
-                It.IsAny<CancellationToken>()));
-            var callback = setup.Callback<HttpActionContext, IHttpActionResult, CancellationToken>((a, r, c) =>
-            {
-                actionContext = a;
-                innerResult = r;
-                cancellationToken = c;
-            });
-            callback.Returns(() => challengeAsync.Invoke(actionContext, innerResult, cancellationToken));
+            mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(), It.IsAny<CancellationToken>()))
+                .Returns(() => Task.FromResult<IAuthenticationResult>(null));
+            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(),
+                It.IsAny<CancellationToken>()))
+                .Callback<HttpActionContext, IHttpActionResult, CancellationToken>((a, r, c) =>
+                {
+                    actionContext = a;
+                    innerResult = r;
+                    cancellationToken = c;
+                })
+                .Returns(() => challengeAsync.Invoke(actionContext, innerResult, cancellationToken));
             return mock.Object;
         }
 
@@ -570,30 +567,25 @@ namespace System.Web.Http.Controllers
             Mock<IAuthenticationFilter> mock = new Mock<IAuthenticationFilter>();
             HttpAuthenticationContext authenticationContext = null;
             CancellationToken authenticateCancellationToken = default(CancellationToken);
-            var authenticateSetup = mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(),
-                It.IsAny<CancellationToken>()));
-            var authenticateCallback = authenticateSetup.Callback<HttpAuthenticationContext, CancellationToken>(
-                (a, c) =>
-                {
-                    authenticationContext = a;
-                    authenticateCancellationToken = c;
-                });
-            authenticateCallback.Returns(() => authenticateAsync.Invoke(authenticationContext,
-                authenticateCancellationToken));
+            mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(), It.IsAny<CancellationToken>()))
+                .Callback<HttpAuthenticationContext, CancellationToken>((a, c) =>
+                    {
+                        authenticationContext = a;
+                        authenticateCancellationToken = c;
+                    })
+                .Returns(() => authenticateAsync.Invoke(authenticationContext, authenticateCancellationToken));
             HttpActionContext actionContext = null;
             IHttpActionResult innerResult = null;
             CancellationToken challengeCancellationToken = default(CancellationToken);
-            var challengeSetup = mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(),
-                It.IsAny<IHttpActionResult>(), It.IsAny<CancellationToken>()));
-            var challengeCallback = challengeSetup.Callback<HttpActionContext, IHttpActionResult, CancellationToken>(
-                (a, r, c) =>
-                {
-                    actionContext = a;
-                    innerResult = r;
-                    challengeCancellationToken = c;
-                });
-            challengeCallback.Returns(() => challengeAsync.Invoke(actionContext, innerResult,
-                challengeCancellationToken));
+            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(),
+                It.IsAny<CancellationToken>()))
+                .Callback<HttpActionContext, IHttpActionResult, CancellationToken>((a, r, c) =>
+                    {
+                        actionContext = a;
+                        innerResult = r;
+                        challengeCancellationToken = c;
+                    })
+                .Returns(() => challengeAsync.Invoke(actionContext, innerResult, challengeCancellationToken));
             return mock.Object;
         }
 
@@ -621,10 +613,10 @@ namespace System.Web.Http.Controllers
             Func<HttpRequestMessage, IPrincipal> getCurrentPrincipal)
         {
             Mock<IHostPrincipalService> mock = new Mock<IHostPrincipalService>();
-            var setup = mock.Setup(s => s.GetCurrentPrincipal(It.IsAny<HttpRequestMessage>()));
             HttpRequestMessage request = null;
-            var callback = setup.Callback<HttpRequestMessage>(r => { request = r; });
-            callback.Returns(() => getCurrentPrincipal.Invoke(request));
+            mock.Setup(s => s.GetCurrentPrincipal(It.IsAny<HttpRequestMessage>()))
+                .Callback<HttpRequestMessage>(r => { request = r; })
+                .Returns(() => getCurrentPrincipal.Invoke(request));
             return mock.Object;
         }
 
@@ -632,8 +624,8 @@ namespace System.Web.Http.Controllers
             Action<IPrincipal, HttpRequestMessage> setCurrentPrincipal)
         {
             Mock<IHostPrincipalService> mock = new Mock<IHostPrincipalService>();
-            var setup = mock.Setup(s => s.SetCurrentPrincipal(It.IsAny<IPrincipal>(), It.IsAny<HttpRequestMessage>()));
-            setup.Callback<IPrincipal, HttpRequestMessage>((p, r) => { setCurrentPrincipal.Invoke(p, r); });
+            mock.Setup(s => s.SetCurrentPrincipal(It.IsAny<IPrincipal>(), It.IsAny<HttpRequestMessage>()))
+                .Callback<IPrincipal, HttpRequestMessage>((p, r) => { setCurrentPrincipal.Invoke(p, r); });
             return mock.Object;
         }
 
@@ -665,16 +657,14 @@ namespace System.Web.Http.Controllers
         private static IAuthenticationFilter CreateStubFilter()
         {
             Mock<IAuthenticationFilter> mock = new Mock<IAuthenticationFilter>(MockBehavior.Strict);
-            var authenticateSetup = mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(),
-                It.IsAny<CancellationToken>()));
             IAuthenticationResult authenticateResult = null;
-            authenticateSetup.Returns(() => Task.FromResult(authenticateResult));
-            var challengeSetup = mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(),
-                It.IsAny<IHttpActionResult>(), It.IsAny<CancellationToken>()));
+            mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(), It.IsAny<CancellationToken>()))
+                .Returns(() => Task.FromResult(authenticateResult));
             IHttpActionResult innerResult = null;
-            var challengeCallback = challengeSetup.Callback<HttpActionContext, IHttpActionResult, CancellationToken>(
-                (a, i, c) => { innerResult = i; });
-            challengeCallback.Returns(() => Task.FromResult(innerResult));
+            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(),
+                It.IsAny<CancellationToken>()))
+                .Callback<HttpActionContext, IHttpActionResult, CancellationToken>((a, i, c) => { innerResult = i; })
+                .Returns(() => Task.FromResult(innerResult));
             return mock.Object;
         }
 

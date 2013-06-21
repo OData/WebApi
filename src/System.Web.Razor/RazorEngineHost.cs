@@ -3,6 +3,7 @@
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Web.Razor.Generator;
 using System.Web.Razor.Parser;
 
@@ -29,6 +30,8 @@ namespace System.Web.Razor
 
         private bool _instrumentationActive = false;
         private Func<ParserBase> _markupParserFactory;
+
+        private int _tabSize = 4;
 
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "The code path is safe, it is a property setter and not dependent on other state")]
         protected RazorEngineHost()
@@ -115,6 +118,30 @@ namespace System.Web.Razor
             // Always disable instrumentation in DesignTimeMode.
             get { return !DesignTimeMode && _instrumentationActive; }
             set { _instrumentationActive = value; }
+        }
+
+        /// <summary>
+        /// In design time, is the host editor inserting tabs when the tab key is being hit.
+        /// Otherwise the assumption is that spaces are being inserted.
+        /// </summary>
+        public virtual bool IsIndentingWithTabs { get; set; }
+
+        /// <summary>
+        /// Tab size used by the hosting editor, when indenting with tabs.
+        /// </summary>
+        public virtual int TabSize
+        {
+            get
+            {
+                return _tabSize;
+            }
+
+            set
+            {
+                Contract.Assert(value > 0);
+
+                _tabSize = Math.Max(value, 1);
+            }
         }
 
         /// <summary>

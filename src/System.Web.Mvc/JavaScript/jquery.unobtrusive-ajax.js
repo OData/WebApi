@@ -138,10 +138,10 @@
     });
 
     $(document).on("click", "form[data-ajax=true] :submit", function (evt) {
-        var name = evt.target.name,
+        var name = evt.currentTarget.name,
             form = $(evt.target).parents("form")[0];
 
-        $(form).data(data_click, name ? [{ name: name, value: evt.target.value }] : []);
+        $(form).data(data_click, name ? [{ name: name, value: evt.currentTarget.value }] : []);
 
         setTimeout(function () {
             $(form).removeData(data_click);

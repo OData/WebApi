@@ -1,9 +1,19 @@
 @Imports System.Web.Http
+@Imports System.Web.Http.Controllers
 @Imports System.Web.Http.Description
 @Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage
-@ModelType IGrouping(Of String, ApiDescription)
+@ModelType IGrouping(Of HttpControllerDescriptor, ApiDescription)
 
-<h2 id="@Model.Key">@Model.Key</h2>
+@Code
+    Dim controllerDocumentation As String = If(Not ViewData("DocumentationProvider") Is Nothing,
+        ViewData("DocumentationProvider").GetDocumentation(Model.Key),
+        Nothing)
+End Code
+
+<h2 id="@Model.Key">@Model.Key.ControllerName</h2>
+@If Not controllerDocumentation Is Nothing Then
+    @<p>@controllerDocumentation</p>
+End If
 <table class="help-page-table">
     <thead>
         <tr><th>API</th><th>Description</th></tr>

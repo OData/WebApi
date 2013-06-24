@@ -53,6 +53,9 @@ namespace System.Web.Http.ApiExplorer
             foreach (ApiDescription description in explorer.ApiDescriptions)
             {
                 Assert.Equal(
+                    "Documentation controller", 
+                    documentationProvider.GetDocumentation(description.ActionDescriptor.ControllerDescriptor));
+                Assert.Equal(
                     String.Format("{0} action", description.ActionDescriptor.ActionName),
                     description.Documentation);
                 foreach (ApiParameterDescription param in description.ParameterDescriptions)

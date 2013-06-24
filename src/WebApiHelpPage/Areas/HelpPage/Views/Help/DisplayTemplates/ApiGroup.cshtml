@@ -1,10 +1,21 @@
 ﻿@using System.Web.Http
+@using System.Web.Http.Controllers
 @using System.Web.Http.Description
 @using ROOT_PROJECT_NAMESPACE.Areas.HelpPage
 @using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
-@model IGrouping<string, ApiDescription>
+@model IGrouping<HttpControllerDescriptor, ApiDescription>
 
-<h2 id="@Model.Key">@Model.Key</h2>
+@{
+    var controllerDocumentation = ViewBag.DocumentationProvider != null ? 
+        ViewBag.DocumentationProvider.GetDocumentation(Model.Key) : 
+        null;
+}
+
+<h2 id="@Model.Key">@Model.Key.ControllerName</h2>
+@if (!String.IsNullOrEmpty(controllerDocumentation))
+{
+    <p>@controllerDocumentation</p>
+}
 <table class="help-page-table">
     <thead>
         <tr><th>API</th><th>Description</th></tr>

@@ -3,6 +3,7 @@
 
 namespace System.Web.Http.ApiExplorer
 {
+    [ApiDocumentation("Documentation controller")]
     public class DocumentationController : ApiController
     {
         [ApiDocumentation("Get action")]

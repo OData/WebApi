@@ -8,6 +8,9 @@ using System.Web.Http;
 
 namespace WebApiHelpPageWebHost.UnitTest.Controllers
 {
+    /// <summary>
+    /// Resource for Values.
+    /// </summary>
     public class ValuesController : ApiController
     {
         /// <summary>
@@ -95,6 +98,17 @@ namespace WebApiHelpPageWebHost.UnitTest.Controllers
         public string[] HeadNoDocumentation(int id)
         {
             return new string[] { "value1", "value2" };
+        }
+
+        /// <summary>
+        /// Resource for nested values.
+        /// </summary>
+        public class NestedValuesController : ApiController
+        {
+            public string[] Get()
+            {
+                return new string[] { "nvalue1", "nvalue2" };
+            }
         }
     }
 }

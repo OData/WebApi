@@ -1,4 +1,5 @@
 @Imports System.Web.Http
+@Imports System.Web.Http.Controllers
 @Imports System.Web.Http.Description
 @Imports System.Collections.ObjectModel
 @Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage
@@ -8,7 +9,7 @@
     ViewData("Title") = "ASP.NET Web API Help Page"
     
     ' Group APIs by controller
-    Dim apiGroups As ILookup(Of String, ApiDescription) = Model.ToLookup(Function(api) api.ActionDescriptor.ControllerDescriptor.ControllerName)
+    Dim apiGroups As ILookup(Of HttpControllerDescriptor, ApiDescription) = Model.ToLookup(Function(api) api.ActionDescriptor.ControllerDescriptor)
 End Code
 
 <header>
@@ -28,7 +29,7 @@ End Code
         </div>
     </section>
     <section class="content-wrapper main-content clear-fix">
-        @For Each group As IGrouping(Of String, ApiDescription) In apiGroups
+        @For Each group As IGrouping(Of HttpControllerDescriptor, ApiDescription) In apiGroups
             @Html.DisplayFor(Function(m) group, "ApiGroup")
         Next
     </section>

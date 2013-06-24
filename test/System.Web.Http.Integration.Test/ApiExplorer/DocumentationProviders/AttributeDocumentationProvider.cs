@@ -29,9 +29,20 @@ namespace System.Web.Http.ApiExplorer
 
             return string.Empty;
         }
+
+        public string GetDocumentation(HttpControllerDescriptor controllerDescriptor)
+        {
+            var apiDocumentation = controllerDescriptor.GetCustomAttributes<ApiDocumentationAttribute>().FirstOrDefault();
+            if (apiDocumentation != null)
+            {
+                return apiDocumentation.Description;
+            }
+
+            return string.Empty;
+        }
     }
 
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
     public sealed class ApiDocumentationAttribute : Attribute
     {
         public ApiDocumentationAttribute(string description)

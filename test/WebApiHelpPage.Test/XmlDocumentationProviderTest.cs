@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
@@ -114,6 +115,27 @@ namespace WebApiHelpPageWebHost.UnitTest
         {
             XmlDocumentationProvider provider = new XmlDocumentationProvider("WebApiHelpPage.Test.XML");
             string documentationString = provider.GetDocumentation(parameterDescriptor);
+            Assert.Equal(expectedString, documentationString);
+        }
+
+        public static IEnumerable<object[]> GetDocumentationForController_PropertyData
+        {
+            get
+            {
+                HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "Values", typeof(ValuesController));
+                yield return new object[] { controllerDescriptor, "Resource for Values." };
+
+                controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "NestedValues", typeof(ValuesController.NestedValuesController));
+                yield return new object[] { controllerDescriptor, "Resource for nested values." };
+            }
+        }
+
+        [Theory]
+        [PropertyData("GetDocumentationForController_PropertyData")]
+        public void GetDocumentationForController(HttpControllerDescriptor controllerDescriptor, string expectedString)
+        {
+            XmlDocumentationProvider provider = new XmlDocumentationProvider("WebApiHelpPage.Test.XML");
+            string documentationString = provider.GetDocumentation(controllerDescriptor);
             Assert.Equal(expectedString, documentationString);
         }
     }

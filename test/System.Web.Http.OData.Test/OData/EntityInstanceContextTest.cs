@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
@@ -27,9 +29,7 @@ namespace System.Web.Http.OData
         [Fact]
         public void Property_EntityInstance_RoundTrips()
         {
-#pragma warning disable 618
             Assert.Reflection.Property(_context, (c) => c.EntityInstance, null, allowNull: true, roundTripTestValue: _entityInstance);
-#pragma warning restore 618
         }
 
         [Fact]
@@ -96,9 +96,91 @@ namespace System.Web.Http.OData
                 "The property 'EdmObject' of EntityInstanceContext cannot be null.");
         }
 
+        [Fact]
+        public void Property_EntityInstance_CanBeBuiltFromIEdmObject()
+        {
+            // Arrange
+            EdmEntityType edmType = new EdmEntityType("NS", "Name");
+            edmType.AddStructuralProperty("Property", EdmPrimitiveTypeKind.Int32);
+            EdmModel model = new EdmModel();
+            model.AddElement(edmType);
+            model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(typeof(TestEntity)));
+            Mock<IEdmStructuredObject> edmObject = new Mock<IEdmStructuredObject>();
+            object propertyValue = 42;
+            edmObject.Setup(e => e.TryGetValue("Property", out propertyValue)).Returns(true);
+            edmObject.Setup(e => e.GetEdmType()).Returns(new EdmEntityTypeReference(edmType, isNullable: false));
+
+            EntityInstanceContext entityContext = new EntityInstanceContext { EdmModel = model, EdmObject = edmObject.Object, EntityType = edmType };
+
+            // Act
+            object resource = entityContext.EntityInstance;
+
+            // Assert
+            TestEntity testEntity = Assert.IsType<TestEntity>(resource);
+            Assert.Equal(42, testEntity.Property);
+        }
+
+        [Fact]
+        public void Property_EntityInstance_EdmObjectHasCollectionProperty()
+        {
+            // Arrange
+            EdmEntityType edmType = new EdmEntityType("NS", "Name");
+            edmType.AddStructuralProperty(
+                "CollectionProperty",
+                new EdmCollectionTypeReference(
+                    new EdmCollectionType(EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false)), isNullable: false));
+            EdmModel model = new EdmModel();
+            model.AddElement(edmType);
+            model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(typeof(TestEntity)));
+            Mock<IEdmStructuredObject> edmObject = new Mock<IEdmStructuredObject>();
+            object propertyValue = new List<int> { 42 };
+            edmObject.Setup(e => e.TryGetValue("CollectionProperty", out propertyValue)).Returns(true);
+            edmObject.Setup(e => e.GetEdmType()).Returns(new EdmEntityTypeReference(edmType, isNullable: false));
+
+            EntityInstanceContext entityContext = new EntityInstanceContext { EdmModel = model, EdmObject = edmObject.Object, EntityType = edmType };
+
+            // Act
+            object resource = entityContext.EntityInstance;
+
+            // Assert
+            TestEntity testEntity = Assert.IsType<TestEntity>(resource);
+            Assert.Equal(new[] { 42 }, testEntity.CollectionProperty);
+        }
+
+        [Fact]
+        public void Property_EntityInstance_ThrowsInvalidOp_EntityTypeDoesNotHaveAMapping()
+        {
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            EdmModel model = new EdmModel();
+            IEdmStructuredObject instance = new Mock<IEdmStructuredObject>().Object;
+            EntityInstanceContext entityContext = new EntityInstanceContext { EntityType = entityType, EdmModel = model, EdmObject = instance };
+
+            Assert.Throws<InvalidOperationException>(
+                () => entityContext.EntityInstance, "The provided mapping doesn't contain an entry for the entity type 'NS.Name'.");
+        }
+
+        [Fact]
+        public void Property_EntityInstance_ReturnsNullWhenEdmObjectIsNull()
+        {
+            EntityInstanceContext entityContext = new EntityInstanceContext { EdmObject = null };
+            Assert.Null(entityContext.EntityInstance);
+        }
+
+        [Fact]
+        public void Property_EntityInstance_ReturnsEdmStructuredObjectInstance()
+        {
+            object instance = new object();
+            IEdmEntityTypeReference entityType = new Mock<IEdmEntityTypeReference>().Object;
+            EntityInstanceContext entityContext = new EntityInstanceContext { EdmObject = new EdmStructuredObject(instance, entityType) };
+
+            Assert.Same(instance, entityContext.EntityInstance);
+        }
+
         private class TestEntity
         {
             public int Property { get; set; }
+
+            public int[] CollectionProperty { get; set; }
         }
     }
 }

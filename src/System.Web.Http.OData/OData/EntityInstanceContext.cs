@@ -2,6 +2,7 @@
 
 using System.Net.Http;
 using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.Routing;
@@ -15,6 +16,8 @@ namespace System.Web.Http.OData
     /// </summary>
     public class EntityInstanceContext
     {
+        private object _entityInstance;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityInstanceContext"/> class.
         /// </summary>
@@ -109,8 +112,21 @@ namespace System.Web.Http.OData
         /// <summary>
         /// Gets or sets the value of this entity instance.
         /// </summary>
-        [Obsolete("Entity instance might not be available when the incoming uri has a $select. Use the EdmObject property instead.")]
-        public object EntityInstance { get; set; }
+        public object EntityInstance
+        {
+            get
+            {
+                if (_entityInstance == null)
+                {
+                    _entityInstance = BuildEntityInstance();
+                }
+                return _entityInstance;
+            }
+            set
+            {
+                _entityInstance = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a <see cref="UrlHelper"/> that may be used to generate links while serializing this entity
@@ -175,6 +191,45 @@ namespace System.Web.Http.OData
 
                 throw Error.InvalidOperation(SRResources.PropertyNotFound, edmType.ToTraceString(), propertyName);
             }
+        }
+
+        private object BuildEntityInstance()
+        {
+            if (EdmObject == null)
+            {
+                return null;
+            }
+
+            EdmStructuredObject edmStructuredObject = EdmObject as EdmStructuredObject;
+            if (edmStructuredObject != null)
+            {
+                return edmStructuredObject.Instance;
+            }
+
+            Type clrType = EdmLibHelpers.GetClrType(EntityType, EdmModel);
+            if (clrType == null)
+            {
+                throw new InvalidOperationException(Error.Format(SRResources.MappingDoesNotContainEntityType, EntityType.FullName()));
+            }
+
+            object resource = Activator.CreateInstance(clrType);
+            foreach (IEdmStructuralProperty property in EntityType.StructuralProperties())
+            {
+                object value;
+                if (EdmObject.TryGetValue(property.Name, out value) && value != null)
+                {
+                    if (value.GetType().IsCollection())
+                    {
+                        DeserializationHelpers.SetCollectionProperty(resource, property.Name, isDelta: false, value: value);
+                    }
+                    else
+                    {
+                        DeserializationHelpers.SetProperty(resource, property.Name, isDelta: false, value: value);
+                    }
+                }
+            }
+
+            return resource;
         }
 
         private static IEdmStructuredObject AsEdmStructuredObject(object entityInstance, IEdmEntityTypeReference entityType)

@@ -220,7 +220,7 @@ namespace System.Web.Http.Controllers
         }
 
         [Fact]
-        public void FilterImplementingMultipleType_WhereOneTypeIsOverridden_AppersOnlyInTheOtherList()
+        public void FilterImplementingMultipleType_WhereOneTypeIsOverridden_AppearsOnlyInTheOtherList()
         {
             // Arrange
             IFilter expectedInstance = new ActionAndExceptionFilter();

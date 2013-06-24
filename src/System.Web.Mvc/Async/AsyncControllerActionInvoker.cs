@@ -41,28 +41,19 @@ namespace System.Web.Mvc.Async
                     {
                         AuthenticationContext authenticationContext = InvokeAuthenticationFilters(controllerContext,
                             filterInfo.AuthenticationFilters, actionDescriptor);
-
-                        if (authenticationContext.ErrorResult != null)
+                        if (authenticationContext.Result != null)
                         {
                             // An authentication filter signaled that we should short-circuit the request. Let all
                             // authentication filters contribute to an action result (to combine authentication
                             // challenges). Then, run this action result.
                             AuthenticationChallengeContext challengeContext =
                                 InvokeAuthenticationFiltersChallenge(controllerContext,
-                                filterInfo.AuthenticationFilters, actionDescriptor, authenticationContext.ErrorResult);
+                                filterInfo.AuthenticationFilters, actionDescriptor, authenticationContext.Result);
                             continuation = () => InvokeActionResult(controllerContext,
-                                challengeContext.Result ?? authenticationContext.ErrorResult);
+                                challengeContext.Result ?? authenticationContext.Result);
                         }
                         else
                         {
-                            IPrincipal principal = authenticationContext.Principal;
-
-                            if (principal != null)
-                            {
-                                Thread.CurrentPrincipal = principal;
-                                HttpContext.Current.User = principal;
-                            }
-
                             AuthorizationContext authorizationContext = InvokeAuthorizationFilters(controllerContext, filterInfo.AuthorizationFilters, actionDescriptor);
                             if (authorizationContext.Result != null)
                             {
@@ -72,8 +63,8 @@ namespace System.Web.Mvc.Async
                                 AuthenticationChallengeContext challengeContext =
                                     InvokeAuthenticationFiltersChallenge(controllerContext,
                                     filterInfo.AuthenticationFilters, actionDescriptor, authorizationContext.Result);
-                                continuation = () => InvokeActionResult(controllerContext, challengeContext.Result ??
-                                    authorizationContext.Result);
+                                continuation = () => InvokeActionResult(controllerContext,
+                                    challengeContext.Result ?? authorizationContext.Result);
                             }
                             else
                             {

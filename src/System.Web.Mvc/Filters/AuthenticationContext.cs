@@ -7,8 +7,6 @@ namespace System.Web.Mvc.Filters
     /// <summary>Represents an authentication context containing information for performing authentication.</summary>
     public class AuthenticationContext : ControllerContext
     {
-        private ActionDescriptor _actionDescriptor;
-
         /// <summary>Initializes a new instance of the <see cref="AuthenticationContext"/> class.</summary>
         /// <remarks>This constructor should only be used for unit testing purposes.</remarks>
         public AuthenticationContext()
@@ -18,7 +16,9 @@ namespace System.Web.Mvc.Filters
         /// <summary>Initializes a new instance of the <see cref="AuthenticationContext"/> class.</summary>
         /// <param name="controllerContext">The controller context.</param>
         /// <param name="actionDescriptor">The action descriptor.</param>
-        public AuthenticationContext(ControllerContext controllerContext, ActionDescriptor actionDescriptor)
+        /// <param name="principal">The current principal.</param>
+        public AuthenticationContext(ControllerContext controllerContext, ActionDescriptor actionDescriptor,
+            IPrincipal principal)
             : base(controllerContext)
         {
             if (actionDescriptor == null)
@@ -26,21 +26,12 @@ namespace System.Web.Mvc.Filters
                 throw new ArgumentNullException("actionDescriptor");
             }
 
-            _actionDescriptor = actionDescriptor;
+            ActionDescriptor = actionDescriptor;
+            Principal = principal;
         }
 
-        /// <summary>Gets the action descriptor.</summary>
-        public ActionDescriptor ActionDescriptor
-        {
-            get
-            {
-                return _actionDescriptor;
-            }
-            set
-            {
-                _actionDescriptor = value;
-            }
-        }
+        /// <summary>Gets or sets the action descriptor.</summary>
+        public ActionDescriptor ActionDescriptor { get; set; }
 
         /// <summary>Gets or sets the currently authenticated principal.</summary>
         public IPrincipal Principal { get; set; }
@@ -48,6 +39,6 @@ namespace System.Web.Mvc.Filters
         /// <summary>
         /// Gets or sets the error result, which indicates that authentication was attempted and failed.
         /// </summary>
-        public ActionResult ErrorResult { get; set; }
+        public ActionResult Result { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using System.Web.Mvc.Filters;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -66,6 +67,54 @@ namespace System.Web.Mvc.Async.Test
         }
 
         [Fact]
+        public void InvokeAction_AuthenticationFilterShortCircuits()
+        {
+            // Arrange
+            ControllerContext controllerContext = GetControllerContext();
+            AsyncControllerActionInvoker invoker = new AsyncControllerActionInvoker();
+
+            // Act
+            IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, "AuthenticationFilterShortCircuits", null, null);
+            bool retVal = invoker.EndInvokeAction(asyncResult);
+
+            // Assert
+            Assert.True(retVal);
+            Assert.Equal("From authentication filter", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_AuthenticationFilterChallenges()
+        {
+            // Arrange
+            ControllerContext controllerContext = GetControllerContext();
+            AsyncControllerActionInvoker invoker = new AsyncControllerActionInvoker();
+
+            // Act
+            IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, "AuthenticationFilterChallenges", null, null);
+            bool retVal = invoker.EndInvokeAction(asyncResult);
+
+            // Assert
+            Assert.True(retVal);
+            Assert.Equal("From authentication filter challenge", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_AuthenticationFilterShortCircuitsAndChallenges()
+        {
+            // Arrange
+            ControllerContext controllerContext = GetControllerContext();
+            AsyncControllerActionInvoker invoker = new AsyncControllerActionInvoker();
+
+            // Act
+            IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, "AuthenticationFilterShortCircuitsAndChallenges", null, null);
+            bool retVal = invoker.EndInvokeAction(asyncResult);
+
+            // Assert
+            Assert.True(retVal);
+            Assert.Equal("From authentication filter challenge", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
         public void InvokeAction_AuthorizationFilterShortCircuits()
         {
             // Arrange
@@ -79,6 +128,22 @@ namespace System.Web.Mvc.Async.Test
             // Assert
             Assert.True(retVal);
             Assert.Equal("From authorization filter", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_AuthorizationFilterShortCircuitsAndChallenges()
+        {
+            // Arrange
+            ControllerContext controllerContext = GetControllerContext();
+            AsyncControllerActionInvoker invoker = new AsyncControllerActionInvoker();
+
+            // Act
+            IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, "AuthorizationFilterShortCircuitsAndChallenges", null, null);
+            bool retVal = invoker.EndInvokeAction(asyncResult);
+
+            // Assert
+            Assert.True(retVal);
+            Assert.Equal("From authentication filter challenge", ((TestController)controllerContext.Controller).Log);
         }
 
         [Fact]
@@ -877,6 +942,26 @@ namespace System.Web.Mvc.Async.Test
                 return base.GetFilters(controllerContext, actionDescriptor);
             }
 
+            public virtual AuthenticationContext PublicInvokeAuthenticationFilters(ControllerContext controllerContext, IList<IAuthenticationFilter> filters, ActionDescriptor actionDescriptor)
+            {
+                return base.InvokeAuthenticationFilters(controllerContext, filters, actionDescriptor);
+            }
+
+            protected override AuthenticationContext InvokeAuthenticationFilters(ControllerContext controllerContext, IList<IAuthenticationFilter> filters, ActionDescriptor actionDescriptor)
+            {
+                return PublicInvokeAuthenticationFilters(controllerContext, filters, actionDescriptor);
+            }
+
+            public virtual AuthenticationChallengeContext PublicInvokeAuthenticationFiltersChallenge(ControllerContext controllerContext, IList<IAuthenticationFilter> filters, ActionDescriptor actionDescriptor, ActionResult result)
+            {
+                return base.InvokeAuthenticationFiltersChallenge(controllerContext, filters, actionDescriptor, result);
+            }
+
+            protected override AuthenticationChallengeContext InvokeAuthenticationFiltersChallenge(ControllerContext controllerContext, IList<IAuthenticationFilter> filters, ActionDescriptor actionDescriptor, ActionResult result)
+            {
+                return PublicInvokeAuthenticationFiltersChallenge(controllerContext, filters, actionDescriptor, result);
+            }
+
             protected override AuthorizationContext InvokeAuthorizationFilters(ControllerContext controllerContext, IList<IAuthorizationFilter> filters, ActionDescriptor actionDescriptor)
             {
                 return PublicInvokeAuthorizationFilters(controllerContext, filters, actionDescriptor);
@@ -942,8 +1027,30 @@ namespace System.Web.Mvc.Async.Test
                 return new LoggingActionResult("From action");
             }
 
+            [AuthenticationFilterReturnsResult]
+            public void AuthenticationFilterShortCircuits()
+            {
+            }
+
+            [AuthenticationFilterChallengeSetsResult]
+            public void AuthenticationFilterChallenges()
+            {
+            }
+
+            [AuthenticationFilterReturnsResult]
+            [AuthenticationFilterChallengeSetsResult]
+            public void AuthenticationFilterShortCircuitsAndChallenges()
+            {
+            }
+
             [AuthorizationFilterReturnsResult]
             public void AuthorizationFilterShortCircuits()
+            {
+            }
+
+            [AuthenticationFilterChallengeSetsResult]
+            [AuthorizationFilterReturnsResult]
+            public void AuthorizationFilterShortCircuitsAndChallenges()
             {
             }
 
@@ -977,6 +1084,30 @@ namespace System.Web.Mvc.Async.Test
             public ActionResult ResultThrowsExceptionAndIsNotHandled()
             {
                 return new ActionResultWhichThrowsException();
+            }
+
+            private class AuthenticationFilterChallengeSetsResultAttribute : FilterAttribute, IAuthenticationFilter
+            {
+                public void OnAuthentication(AuthenticationContext filterContext)
+                {
+                }
+
+                public void OnAuthenticationChallenge(AuthenticationChallengeContext filterContext)
+                {
+                    filterContext.Result = new LoggingActionResult("From authentication filter challenge");
+                }
+            }
+
+            private class AuthenticationFilterReturnsResultAttribute : FilterAttribute, IAuthenticationFilter
+            {
+                public void OnAuthentication(AuthenticationContext filterContext)
+                {
+                    filterContext.Result = new LoggingActionResult("From authentication filter");
+                }
+
+                public void OnAuthenticationChallenge(AuthenticationChallengeContext filterContext)
+                {
+                }
             }
 
             private class AuthorizationFilterReturnsResultAttribute : FilterAttribute, IAuthorizationFilter

@@ -39,7 +39,7 @@ namespace System.Web.Mvc.Filters
             _result = result;
         }
 
-        /// <summary>Gets the action descriptor.</summary>
+        /// <summary>Gets or sets the action descriptor.</summary>
         public ActionDescriptor ActionDescriptor
         {
             get

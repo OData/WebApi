@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Security.Principal;
@@ -163,37 +164,28 @@ namespace System.Web.Mvc
                 {
                     AuthenticationContext authenticationContext = InvokeAuthenticationFilters(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor);
 
-                    if (authenticationContext.ErrorResult != null)
+                    if (authenticationContext.Result != null)
                     {
                         // An authentication filter signaled that we should short-circuit the request. Let all
                         // authentication filters contribute to an action result (to combine authentication
                         // challenges). Then, run this action result.
-                        AuthenticationChallengeContext challengeContext =
-                            InvokeAuthenticationFiltersChallenge(controllerContext, filterInfo.AuthenticationFilters,
-                            actionDescriptor, authenticationContext.ErrorResult);
-                        InvokeActionResult(controllerContext, challengeContext.Result ?? authenticationContext.ErrorResult);
+                        AuthenticationChallengeContext challengeContext = InvokeAuthenticationFiltersChallenge(
+                            controllerContext, filterInfo.AuthenticationFilters, actionDescriptor,
+                            authenticationContext.Result);
+                        InvokeActionResult(controllerContext, challengeContext.Result ?? authenticationContext.Result);
                     }
                     else
                     {
-                        IPrincipal principal = authenticationContext.Principal;
-
-                        if (principal != null)
-                        {
-                            Thread.CurrentPrincipal = principal;
-                            HttpContext.Current.User = principal;
-                        }
-
                         AuthorizationContext authorizationContext = InvokeAuthorizationFilters(controllerContext, filterInfo.AuthorizationFilters, actionDescriptor);
                         if (authorizationContext.Result != null)
                         {
                             // An authorization filter signaled that we should short-circuit the request. Let all
                             // authentication filters contribute to an action result (to combine authentication
                             // challenges). Then, run this action result.
-                            AuthenticationChallengeContext challengeContext =
-                                InvokeAuthenticationFiltersChallenge(controllerContext,
-                                filterInfo.AuthenticationFilters, actionDescriptor, authorizationContext.Result);
-                            InvokeActionResult(controllerContext, challengeContext.Result ??
+                            AuthenticationChallengeContext challengeContext = InvokeAuthenticationFiltersChallenge(
+                                controllerContext, filterInfo.AuthenticationFilters, actionDescriptor,
                                 authorizationContext.Result);
+                            InvokeActionResult(controllerContext, challengeContext.Result ?? authorizationContext.Result);
                         }
                         else
                         {
@@ -208,9 +200,9 @@ namespace System.Web.Mvc
                             // The action succeeded. Let all authentication filters contribute to an action result (to
                             // combine authentication challenges; some authentication filters need to do negotiation
                             // even on a successful result). Then, run this action result.
-                            AuthenticationChallengeContext challengeContext =
-                                InvokeAuthenticationFiltersChallenge(controllerContext,
-                                filterInfo.AuthenticationFilters, actionDescriptor, postActionContext.Result);
+                            AuthenticationChallengeContext challengeContext = InvokeAuthenticationFiltersChallenge(
+                                controllerContext, filterInfo.AuthenticationFilters, actionDescriptor,
+                                postActionContext.Result);
                             InvokeActionResultWithFilters(controllerContext, filterInfo.ResultFilters,
                                 challengeContext.Result ?? postActionContext.Result);
                         }
@@ -376,27 +368,46 @@ namespace System.Web.Mvc
             return InvokeActionResultFilterRecursive(filters, startingFilterIndex, preContext, controllerContext, actionResult);
         }
 
-        internal virtual AuthenticationContext InvokeAuthenticationFilters(ControllerContext controllerContext, IList<IAuthenticationFilter> filters, ActionDescriptor actionDescriptor)
+        protected virtual AuthenticationContext InvokeAuthenticationFilters(ControllerContext controllerContext,
+            IList<IAuthenticationFilter> filters, ActionDescriptor actionDescriptor)
         {
-            AuthenticationContext context = new AuthenticationContext(controllerContext, actionDescriptor);
+            if (controllerContext == null)
+            {
+                throw new ArgumentNullException("controllerContext");
+            }
+
+            Contract.Assert(controllerContext.HttpContext != null);
+            IPrincipal originalPrincipal = controllerContext.HttpContext.User;
+            AuthenticationContext context = new AuthenticationContext(controllerContext, actionDescriptor,
+                originalPrincipal);
             foreach (IAuthenticationFilter filter in filters)
             {
                 filter.OnAuthentication(context);
                 // short-circuit evaluation when an error occurs
-                if (context.ErrorResult != null)
+                if (context.Result != null)
                 {
                     break;
                 }
             }
 
+            IPrincipal newPrincipal = context.Principal;
+
+            if (newPrincipal != originalPrincipal)
+            {
+                Contract.Assert(context.HttpContext != null);
+                context.HttpContext.User = newPrincipal;
+                Thread.CurrentPrincipal = newPrincipal;
+            }
+
             return context;
         }
 
-        internal virtual AuthenticationChallengeContext InvokeAuthenticationFiltersChallenge(
+        protected virtual AuthenticationChallengeContext InvokeAuthenticationFiltersChallenge(
             ControllerContext controllerContext, IList<IAuthenticationFilter> filters,
             ActionDescriptor actionDescriptor, ActionResult result)
         {
-            AuthenticationChallengeContext context = new AuthenticationChallengeContext(controllerContext, actionDescriptor, result);
+            AuthenticationChallengeContext context = new AuthenticationChallengeContext(controllerContext,
+                actionDescriptor, result);
             foreach (IAuthenticationFilter filter in filters)
             {
                 filter.OnAuthenticationChallenge(context);

@@ -92,6 +92,26 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [Fact]
+        public void CreateFilterTracers_IFilter_With_IOverrideFilter_Returns_Single_Wrapped_IOverrideFilter()
+        {
+            // Arrange
+            IOverrideFilter expectedInner = new Mock<IOverrideFilter>().Object;
+            ITraceWriter expectedTraceWriter = new TestTraceWriter();
+
+            // Act
+            IEnumerable<IFilter> tracers = FilterTracer.CreateFilterTracers(expectedInner, expectedTraceWriter);
+
+            // Assert
+            Assert.NotNull(tracers);
+            Assert.Equal(1, tracers.Count());
+            IFilter untypedFilter = tracers.Single();
+            Assert.IsType<OverrideFilterTracer>(untypedFilter);
+            OverrideFilterTracer tracer = (OverrideFilterTracer)untypedFilter;
+            Assert.Same(expectedInner, tracer.InnerFilter);
+            Assert.Same(expectedTraceWriter, tracer.TraceWriter);
+        }
+
+        [Fact]
         public void CreateFilterTracers_IFilter_With_ActionFilterAttribute_Returns_Single_Wrapped_Filter()
         {
             // Arrange
@@ -134,7 +154,7 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [Fact]
-        public void CreateFilterTracers_IFilter_With_All_Filter_Interfaces_Returns_4_Wrapped_Filters()
+        public void CreateFilterTracers_IFilter_With_All_Filter_Interfaces_Returns_5_Wrapped_Filters()
         {
             // Arrange
             IFilter filter = new TestFilterAllBehaviors();
@@ -143,11 +163,12 @@ namespace System.Web.Http.Tracing.Tracers
             IFilter[] wrappedFilters = FilterTracer.CreateFilterTracers(filter, new TestTraceWriter()).ToArray();
 
             // Assert
-            Assert.Equal(4, wrappedFilters.Length);
+            Assert.Equal(5, wrappedFilters.Length);
             Assert.Equal(1, wrappedFilters.OfType<ActionFilterTracer>().Count());
             Assert.Equal(1, wrappedFilters.OfType<AuthorizationFilterTracer>().Count());
             Assert.Equal(1, wrappedFilters.OfType<AuthenticationFilterTracer>().Count());
             Assert.Equal(1, wrappedFilters.OfType<ExceptionFilterTracer>().Count());
+            Assert.Equal(1, wrappedFilters.OfType<OverrideFilterTracer>().Count());
         }
 
         [Fact]
@@ -234,6 +255,29 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [Fact]
+        public void CreateFilterTracers_With_IOverrideFilter_Returns_Single_Wrapped_IOverrideFilter()
+        {
+            // Arrange
+            IOverrideFilter expectedInner = new Mock<IOverrideFilter>().Object;
+            FilterInfo inputFilterInfo = new FilterInfo(expectedInner, FilterScope.Action);
+            ITraceWriter expectedTraceWriter = new TestTraceWriter();
+
+            // Act
+            IEnumerable<FilterInfo> filters = FilterTracer.CreateFilterTracers(inputFilterInfo, expectedTraceWriter);
+
+            // Assert
+            Assert.NotNull(filters);
+            Assert.Equal(1, filters.Count());
+            FilterInfo filterInfo = filters.Single();
+            Assert.NotNull(filterInfo);
+            IFilter untypedFilter = filterInfo.Instance;
+            Assert.IsType<OverrideFilterTracer>(untypedFilter);
+            OverrideFilterTracer tracer = (OverrideFilterTracer)untypedFilter;
+            Assert.Same(expectedInner, tracer.InnerFilter);
+            Assert.Same(expectedTraceWriter, tracer.TraceWriter);
+        }
+
+        [Fact]
         public void CreateFilterTracers_With_ActionFilterAttribute_Returns_Single_Wrapped_Filter()
         {
             // Arrange
@@ -279,7 +323,7 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [Fact]
-        public void CreateFilterTracers_With_All_Filter_Interfaces_Returns_4_Wrapped_Filters()
+        public void CreateFilterTracers_With_All_Filter_Interfaces_Returns_5_Wrapped_Filters()
         {
             // Arrange
             FilterInfo filter = new FilterInfo(new TestFilterAllBehaviors(), FilterScope.Action);
@@ -288,11 +332,12 @@ namespace System.Web.Http.Tracing.Tracers
             FilterInfo[] wrappedFilters = FilterTracer.CreateFilterTracers(filter, new TestTraceWriter()).ToArray();
 
             // Assert
-            Assert.Equal(4, wrappedFilters.Length);
+            Assert.Equal(5, wrappedFilters.Length);
             Assert.Equal(1, wrappedFilters.Where(f => f.Instance.GetType() == typeof(ActionFilterTracer)).Count());
             Assert.Equal(1, wrappedFilters.Where(f => f.Instance.GetType() == typeof(AuthorizationFilterTracer)).Count());
             Assert.Equal(1, wrappedFilters.Where(f => f.Instance.GetType() == typeof(AuthenticationFilterTracer)).Count());
             Assert.Equal(1, wrappedFilters.Where(f => f.Instance.GetType() == typeof(ExceptionFilterTracer)).Count());
+            Assert.Equal(1, wrappedFilters.Where(f => f.Instance.GetType() == typeof(OverrideFilterTracer)).Count());
         }
 
         [Fact]
@@ -324,7 +369,8 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         // Test filter class that exposes all filter behaviors will cause separate filters for each
-        class TestFilterAllBehaviors : IActionFilter, IExceptionFilter, IAuthorizationFilter, IAuthenticationFilter
+        class TestFilterAllBehaviors : IActionFilter, IExceptionFilter, IAuthorizationFilter, IAuthenticationFilter,
+            IOverrideFilter
         {
             Task<Net.Http.HttpResponseMessage> IActionFilter.ExecuteActionFilterAsync(Controllers.HttpActionContext actionContext, Threading.CancellationToken cancellationToken, Func<Threading.Tasks.Task<Net.Http.HttpResponseMessage>> continuation)
             {
@@ -354,6 +400,11 @@ namespace System.Web.Http.Tracing.Tracers
             Task<IHttpActionResult> IAuthenticationFilter.ChallengeAsync(HttpActionContext context, IHttpActionResult result, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
+            }
+
+            public Type FiltersToOverride
+            {
+                get { throw new NotImplementedException(); }
             }
         }
     }

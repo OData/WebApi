@@ -171,6 +171,7 @@
     <Compile Include="Tracing\TracerCorrectnessTest.cs" />
     <Compile Include="Tracing\TraceRecordComparer.cs" />
     <Compile Include="Tracing\Tracers\BufferedMediaTypeFormatterTracerTest.cs" />
+    <Compile Include="Tracing\Tracers\OverrideFilterTracerTests.cs" />
     <Compile Include="Tracing\Tracers\ReadWriteMediaTypeFormatterTracerTestBase.cs" />
     <Compile Include="Tracing\Tracers\FormUrlEncodedMediaTypeFormatterTracerTest.cs" />
     <Compile Include="Tracing\Tracers\HttpActionBindingTracerTest.cs" />

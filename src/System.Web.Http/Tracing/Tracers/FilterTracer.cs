@@ -90,6 +90,12 @@ namespace System.Web.Http.Tracing.Tracers
                 filters.Add(new ExceptionFilterTracer(exceptionFilter, traceWriter));
             }
 
+            IOverrideFilter overrideFilter = filter as IOverrideFilter;
+            if (overrideFilter != null)
+            {
+                filters.Add(new OverrideFilterTracer(overrideFilter, traceWriter));
+            }
+
             if (filters.Count == 0)
             {
                 filters.Add(new FilterTracer(filter, traceWriter));

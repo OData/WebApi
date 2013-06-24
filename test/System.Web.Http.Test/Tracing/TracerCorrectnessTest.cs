@@ -39,6 +39,7 @@ namespace System.Web.Http.Tracing
                     { typeof(AuthorizationFilterAttribute), typeof(AuthorizationFilterAttributeTracer), new string[0] },
                     { typeof(IAuthorizationFilter), typeof(AuthorizationFilterTracer), new string[0] },
                     { typeof(IAuthenticationFilter), typeof(AuthenticationFilterTracer), new string[0] },
+                    { typeof(IOverrideFilter), typeof(OverrideFilterTracer), new string[0] },
                     { typeof(BufferedMediaTypeFormatter), typeof(BufferedMediaTypeFormatterTracer), new string[] 
                         {
                             // Values copied in ctor

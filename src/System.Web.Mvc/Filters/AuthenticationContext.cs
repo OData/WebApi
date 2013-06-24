@@ -4,15 +4,20 @@ using System.Security.Principal;
 
 namespace System.Web.Mvc.Filters
 {
+    /// <summary>Represents an authentication context containing information for performing authentication.</summary>
     public class AuthenticationContext : ControllerContext
     {
         private ActionDescriptor _actionDescriptor;
 
-        // parameterless constructor used for mocking
+        /// <summary>Initializes a new instance of the <see cref="AuthenticationContext"/> class.</summary>
+        /// <remarks>This constructor should only be used for unit testing purposes.</remarks>
         public AuthenticationContext()
         {
         }
 
+        /// <summary>Initializes a new instance of the <see cref="AuthenticationContext"/> class.</summary>
+        /// <param name="controllerContext">The controller context.</param>
+        /// <param name="actionDescriptor">The action descriptor.</param>
         public AuthenticationContext(ControllerContext controllerContext, ActionDescriptor actionDescriptor)
             : base(controllerContext)
         {
@@ -24,6 +29,7 @@ namespace System.Web.Mvc.Filters
             _actionDescriptor = actionDescriptor;
         }
 
+        /// <summary>Gets the action descriptor.</summary>
         public ActionDescriptor ActionDescriptor
         {
             get
@@ -36,8 +42,12 @@ namespace System.Web.Mvc.Filters
             }
         }
 
+        /// <summary>Gets or sets the currently authenticated principal.</summary>
         public IPrincipal Principal { get; set; }
 
-        public ActionResult Result { get; set; }
+        /// <summary>
+        /// Gets or sets the error result, which indicates that authentication was attempted and failed.
+        /// </summary>
+        public ActionResult ErrorResult { get; set; }
     }
 }

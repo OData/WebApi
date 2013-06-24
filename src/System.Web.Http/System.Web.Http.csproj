@@ -101,10 +101,10 @@
     <Compile Include="Filters\IAuthenticationFilter.cs" />
     <Compile Include="Filters\IAuthenticationResult.cs" />
     <Compile Include="Filters\IOverrideFilter.cs" />
-    <Compile Include="Filters\OverrideActionFiltersAttribute.cs" />
-    <Compile Include="Filters\OverrideAuthenticationAttribute.cs" />
-    <Compile Include="Filters\OverrideAuthorizationAttribute.cs" />
-    <Compile Include="Filters\OverrideExceptionFiltersAttribute.cs" />
+    <Compile Include="OverrideActionFiltersAttribute.cs" />
+    <Compile Include="OverrideAuthenticationAttribute.cs" />
+    <Compile Include="OverrideAuthorizationAttribute.cs" />
+    <Compile Include="OverrideExceptionFiltersAttribute.cs" />
     <Compile Include="Routing\Constraints\AlphaHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\BoolHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\CompoundHttpRouteConstraint.cs" />

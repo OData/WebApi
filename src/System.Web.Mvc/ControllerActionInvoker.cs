@@ -163,15 +163,15 @@ namespace System.Web.Mvc
                 {
                     AuthenticationContext authenticationContext = InvokeAuthenticationFilters(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor);
 
-                    if (authenticationContext.Result != null)
+                    if (authenticationContext.ErrorResult != null)
                     {
                         // An authentication filter signaled that we should short-circuit the request. Let all
                         // authentication filters contribute to an action result (to combine authentication
                         // challenges). Then, run this action result.
                         AuthenticationChallengeContext challengeContext =
                             InvokeAuthenticationFiltersChallenge(controllerContext, filterInfo.AuthenticationFilters,
-                            actionDescriptor, authenticationContext.Result);
-                        InvokeActionResult(controllerContext, challengeContext.Result ?? authenticationContext.Result);
+                            actionDescriptor, authenticationContext.ErrorResult);
+                        InvokeActionResult(controllerContext, challengeContext.Result ?? authenticationContext.ErrorResult);
                     }
                     else
                     {
@@ -383,7 +383,7 @@ namespace System.Web.Mvc
             {
                 filter.OnAuthentication(context);
                 // short-circuit evaluation when an error occurs
-                if (context.Result != null)
+                if (context.ErrorResult != null)
                 {
                     break;
                 }

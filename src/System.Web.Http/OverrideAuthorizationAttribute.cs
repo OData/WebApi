@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-namespace System.Web.Http.Filters
+using System.Web.Http.Filters;
+
+namespace System.Web.Http
 {
     /// <summary>
     /// Represents a filter attribute that overrides authorization filters defined at a higher level.

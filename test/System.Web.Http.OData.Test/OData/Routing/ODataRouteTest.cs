@@ -38,7 +38,7 @@ namespace System.Web.Http.OData.Routing
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/vpath/prefix/Customers");
             HttpConfiguration config = new HttpConfiguration(new HttpRouteCollection("http://localhost/vpath"));
             request.SetConfiguration(config);
-            
+
             IHttpRoute httpRoute = config.Routes.CreateRoute("prefix/{*odataPath}", defaults: null, constraints: null);
             ODataRoute odataRoute = new ODataRoute("prefix", pathConstraint: null);
 

@@ -68,17 +68,9 @@ namespace System.Web.Http.OData.Routing
 
         private static string GetRouteTemplate(string prefix)
         {
-            if (!String.IsNullOrEmpty(prefix))
-            {
-                int routePrefixLastCharIndex = prefix.Length - 1;
-                if (prefix[routePrefixLastCharIndex] != '/')
-                {
-                    // Add the last trailing slash if it doesn't have one.
-                    prefix += "/";
-                }
-            }
-
-            return prefix + ODataRouteConstants.ODataPathTemplate;
+            return String.IsNullOrEmpty(prefix) ?
+                ODataRouteConstants.ODataPathTemplate :
+                prefix + '/' + ODataRouteConstants.ODataPathTemplate;
         }
 
         /// <inheritDoc />

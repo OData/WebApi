@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Http.OData;
 using System.Web.Http.OData.Properties;
@@ -19,9 +18,6 @@ namespace System.Web.Http
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ODataUrlHelperExtensions
     {
-        private static readonly string _escapedHashMark = Uri.HexEscape('#');
-        private static readonly string _escapedQuestionMark = Uri.HexEscape('?');
-
         /// <summary>
         /// Generates an OData link using the request's OData route name and path handler.
         /// </summary>
@@ -81,90 +77,9 @@ namespace System.Web.Http
             }
 
             string odataPath = pathHandler.Link(new ODataPath(segments));
-
-            string directLink = urlHelper.GenerateLinkDirectly(routeName, odataPath);
-            if (directLink != null)
-            {
-                return directLink;
-            }
-
-            // Slow path : use urlHelper.Link because the fast path failed
             return urlHelper.Link(
                 routeName,
                 new HttpRouteValueDictionary() { { ODataRouteConstants.ODataPath, odataPath } });
-        }
-
-        // Fast path link generation where we recognize an OData route of the form "prefix/{*odataPath}".
-        // Link generation using HttpRoute.GetVirtualPath can consume up to 30% of processor time
-        // This is incredibly brittle code and should be removed whenever OData is upgraded to the next version of the runtime
-        // The right long-term fix is to remove this code and introduce an ODataRoute class that computes GetVirtualPath much faster
-        // But the long-term fix cannot be implemented because of a critical bug in WebAPI routing that affects custom routes in WebHost
-        // Removing this fast path is tracked by Issue 713
-        internal static string GenerateLinkDirectly(this UrlHelper urlHelper, string linkRouteName, string odataPath)
-        {
-            HttpRequestMessage request = urlHelper.Request;
-            HttpConfiguration config = request.GetConfiguration();
-            if (config != null)
-            {
-                IHttpRoute odataRoute;
-                if (config.Routes.TryGetValue(linkRouteName, out odataRoute))
-                {
-                    string routeTemplate = odataRoute.RouteTemplate;
-                    if (routeTemplate.EndsWith(ODataRouteConstants.ODataPathTemplate, StringComparison.Ordinal))
-                    {
-                        int odataPathTemplateIndex = routeTemplate.Length - ODataRouteConstants.ODataPathTemplate.Length;
-                        int indexOfFirstOpenBracket = routeTemplate.IndexOf('{');
-
-                        // We can only fast-path if there are no open brackets in the route prefix that need to be replaced
-                        // If there are, fall back to the slow path.
-                        if (indexOfFirstOpenBracket == odataPathTemplateIndex)
-                        {
-                            // Use the virtual path root on the request if one is specified
-                            // Otherwise, fall back on the virtual path root for the configuration
-                            string virtualPathRoot = request.GetVirtualPathRoot() ?? config.VirtualPathRoot;
-                            string routePrefix = routeTemplate.Substring(0, odataPathTemplateIndex);
-
-                            string link = CombinePathSegments(virtualPathRoot, routePrefix, odataPath);
-                            link = UriEncode(link);
-                            return new Uri(request.RequestUri, link).AbsoluteUri;
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        private static string CombinePathSegments(string virtualPathRoot, string routePrefix, string odataPath)
-        {
-            StringBuilder pathBuilder = new StringBuilder();
-            pathBuilder.Append(virtualPathRoot);
-            if (!virtualPathRoot.EndsWith("/", StringComparison.Ordinal))
-            {
-                pathBuilder.Append("/");
-            }
-
-            if (routePrefix.EndsWith("/", StringComparison.Ordinal) && odataPath.Length == 0)
-            {
-                // Avoid adding a separator to the end of the prefix if the OData path is empty.
-                // This is consistent with the behavior of Url.Link.
-                pathBuilder.Append(routePrefix.Substring(0, routePrefix.Length - 1));
-            }
-            else
-            {
-                pathBuilder.Append(routePrefix);
-            }
-
-            pathBuilder.Append(odataPath);
-
-            return pathBuilder.ToString();
-        }
-
-        private static string UriEncode(string str)
-        {
-            string escape = Uri.EscapeUriString(str);
-            escape = escape.Replace("#", _escapedHashMark);
-            escape = escape.Replace("?", _escapedQuestionMark);
-            return escape;
         }
     }
 }

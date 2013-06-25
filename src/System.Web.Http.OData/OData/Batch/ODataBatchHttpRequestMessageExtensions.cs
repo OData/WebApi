@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.OData;
 
@@ -199,7 +200,7 @@ namespace System.Web.Http.OData.Batch
             else
             {
                 UrlHelper helper = request.GetUrlHelper();
-                string baseAddress = helper.GenerateLinkDirectly(oDataRouteName, String.Empty);
+                string baseAddress = helper.Link(oDataRouteName, new HttpRouteValueDictionary() { { ODataRouteConstants.ODataPath, String.Empty } });
                 if (baseAddress == null)
                 {
                     throw new InvalidOperationException(SRResources.UnableToDetermineBaseUrl);

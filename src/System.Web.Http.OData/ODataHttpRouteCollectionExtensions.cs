@@ -76,26 +76,14 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("routes");
             }
 
-            if (!String.IsNullOrEmpty(routePrefix))
-            {
-                int routePrefixLastCharIndex = routePrefix.Length - 1;
-                if (routePrefix[routePrefixLastCharIndex] != '/')
-                {
-                    // Add the last trailing slash if it doesn't have one.
-                    routePrefix += "/";
-                }
-            }
-
             if (batchHandler != null)
             {
                 batchHandler.ODataRouteName = routeName;
-                routes.MapHttpBatchRoute(routeName + "Batch", routePrefix + ODataRouteConstants.Batch, batchHandler);
+                routes.MapHttpBatchRoute(routeName + "Batch", routePrefix + '/' + ODataRouteConstants.Batch, batchHandler);
             }
 
-            string routeTemplate = routePrefix + ODataRouteConstants.ODataPathTemplate;
-            IHttpRouteConstraint routeConstraint = new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);
-            HttpRouteValueDictionary constraintDictionary = new HttpRouteValueDictionary() { { ODataRouteConstants.ConstraintName, routeConstraint } };
-            routes.MapHttpRoute(routeName, routeTemplate, defaults: null, constraints: constraintDictionary);
+            ODataPathRouteConstraint routeConstraint = new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);
+            routes.Add(routeName, new ODataRoute(routePrefix, routeConstraint));
         }
     }
 }

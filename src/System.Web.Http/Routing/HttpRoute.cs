@@ -22,7 +22,7 @@ namespace System.Web.Http.Routing
         /// Key used to signify that a route URL generation request should include HTTP routes (e.g. Web API).
         /// If this key is not specified then no HTTP routes will match.
         /// </summary>
-        internal const string HttpRouteKey = "httproute";
+        public static readonly string HttpRouteKey = "httproute";
 
         private const string HttpMethodParameterName = "httpMethod";
 

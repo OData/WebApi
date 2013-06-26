@@ -392,12 +392,12 @@ namespace System.Web.Http.Tracing.Tracers
                 throw new NotImplementedException();
             }
 
-            Task<IAuthenticationResult> IAuthenticationFilter.AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
+            Task IAuthenticationFilter.AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }
 
-            Task<IHttpActionResult> IAuthenticationFilter.ChallengeAsync(HttpActionContext context, IHttpActionResult result, CancellationToken cancellationToken)
+            Task IAuthenticationFilter.ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }

@@ -81,16 +81,16 @@ namespace System.Web.Http
 
         private class AuthenticationFilterAttribute : Attribute, IAuthenticationFilter
         {
-            public virtual Task<IAuthenticationResult> AuthenticateAsync(HttpAuthenticationContext context,
+            public virtual Task AuthenticateAsync(HttpAuthenticationContext context,
                 CancellationToken cancellationToken)
             {
-                return Task.FromResult<IAuthenticationResult>(null);
+                return Task.FromResult<object>(null);
             }
 
-            public virtual Task<IHttpActionResult> ChallengeAsync(HttpActionContext context,
-                IHttpActionResult innerResult, CancellationToken cancellationToken)
+            public virtual Task ChallengeAsync(HttpAuthenticationChallengeContext context,
+                CancellationToken cancellationToken)
             {
-                return Task.FromResult(innerResult);
+                return Task.FromResult<object>(null);
             }
 
             public bool AllowMultiple
@@ -118,7 +118,7 @@ namespace System.Web.Http
 
         private class AuthenticationFilterAuthenticateThrows : AuthenticationFilterAttribute
         {
-            public override Task<IAuthenticationResult> AuthenticateAsync(HttpAuthenticationContext context,
+            public override Task AuthenticateAsync(HttpAuthenticationContext context,
                 CancellationToken cancellationToken)
             {
                 TryThrowHttpResponseException(context.ActionContext);
@@ -128,31 +128,31 @@ namespace System.Web.Http
 
         private class AuthenticationFilterAuthenticateResultThrows : AuthenticationFilterAttribute
         {
-            public override Task<IAuthenticationResult> AuthenticateAsync(HttpAuthenticationContext context,
+            public override Task AuthenticateAsync(HttpAuthenticationContext context,
                 CancellationToken cancellationToken)
             {
-                IAuthenticationResult result = new FailedAuthenticationResult(new AuthenticationErrorResult(
-                    context.ActionContext));
-                return Task.FromResult(result);
+                context.ErrorResult = new AuthenticationErrorResult(context.ActionContext);
+                return Task.FromResult<object>(null);
             }
         }
 
         private class AuthenticationFilterChallengeThrows : AuthenticationFilterAttribute
         {
-            public override Task<IHttpActionResult> ChallengeAsync(HttpActionContext context,
-                IHttpActionResult innerResult, CancellationToken cancellationToken)
+            public override Task ChallengeAsync(HttpAuthenticationChallengeContext context,
+                CancellationToken cancellationToken)
             {
-                TryThrowHttpResponseException(context);
+                TryThrowHttpResponseException(context.ActionContext);
                 throw new ArgumentException("authentication");
             }
         }
 
         private class AuthenticationFilterChallengeResultThrows : AuthenticationFilterAttribute
         {
-            public override Task<IHttpActionResult> ChallengeAsync(HttpActionContext context, IHttpActionResult innerResult, CancellationToken cancellationToken)
+            public override Task ChallengeAsync(HttpAuthenticationChallengeContext context,
+                CancellationToken cancellationToken)
             {
-                IHttpActionResult result = new AuthenticationErrorResult(context);
-                return Task.FromResult(result);
+                context.Result = new AuthenticationErrorResult(context.ActionContext);
+                return Task.FromResult<object>(null);
             }
         }
 

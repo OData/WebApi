@@ -57,7 +57,7 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
-        public void AuthenticateAsync_ReturnsClaimsPrincipal_WhenOwinAuthenticateReturnsIdentity()
+        public void AuthenticateAsync_SetsClaimsPrincipal_WhenOwinAuthenticateReturnsIdentity()
         {
             // Arrange
             string authenticationType = "AuthenticationType";
@@ -72,21 +72,19 @@ namespace System.Web.Http.Owin
 
                     return Task.FromResult<object>(null);
                 });
-
-            IAuthenticationResult result;
+            HttpAuthenticationContext context;
 
             using (HttpRequestMessage request = CreateRequest(environment))
             {
-                HttpAuthenticationContext context = CreateAuthenticationContext(request);
+                context = CreateAuthenticationContext(request);
 
                 // Act
-                result = filter.AuthenticateAsync(context, CancellationToken.None).Result;
+                filter.AuthenticateAsync(context, CancellationToken.None).Wait();
             }
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Null(result.ErrorResult);
-            IPrincipal principal = result.Principal;
+            Assert.Null(context.ErrorResult);
+            IPrincipal principal = context.Principal;
             Assert.IsType<ClaimsPrincipal>(principal);
             ClaimsPrincipal claimsPrincipal = (ClaimsPrincipal)principal;
             IIdentity identity = claimsPrincipal.Identity;
@@ -94,7 +92,7 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
-        public void AuthenticateAsync_ReturnsNullResult_WhenOwinAuthenticateDoesNotReturnIdentity()
+        public void AuthenticateAsync_SetsNoPrincipalOrError_WhenOwinAuthenticateDoesNotReturnIdentity()
         {
             // Arrange
             string authenticationType = "AuthenticationType";
@@ -102,19 +100,21 @@ namespace System.Web.Http.Owin
             IIdentity expectedIdentity = CreateDummyIdentity();
             IDictionary<string, object> environment = CreateOwinEnvironment((ignore1, ignore2, ignore3) =>
                 Task.FromResult<object>(null));
+            IPrincipal expectedPrincipal = CreateDummyPrincipal();
 
-            IAuthenticationResult result;
+            HttpAuthenticationContext context;
 
             using (HttpRequestMessage request = CreateRequest(environment))
             {
-                HttpAuthenticationContext context = CreateAuthenticationContext(request);
+                context = CreateAuthenticationContext(request, expectedPrincipal);
 
                 // Act
-                result = filter.AuthenticateAsync(context, CancellationToken.None).Result;
+                filter.AuthenticateAsync(context, CancellationToken.None).Wait();
             }
 
             // Assert
-            Assert.Null(result);
+            Assert.Null(context.ErrorResult);
+            Assert.Same(expectedPrincipal, context.Principal);
         }
 
         [Fact]
@@ -171,28 +171,6 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
-        public void ChallengeAsync_ReturnsResultProvided()
-        {
-            // Arrange
-            IAuthenticationFilter filter = CreateProductUnderTest();
-            IHttpActionResult expectedResult = CreateDummyActionResult();
-            IDictionary<string, object> environment = CreateOwinEnvironment();
-
-            IHttpActionResult result;
-
-            using (HttpRequestMessage request = CreateRequest(environment))
-            {
-                HttpActionContext context = CreateActionContext(request);
-
-                // Act
-                result = filter.ChallengeAsync(context, expectedResult, CancellationToken.None).Result;
-            }
-
-            // Assert
-            Assert.Same(expectedResult, result);
-        }
-
-        [Fact]
         public void ChallengeAsync_AddsAuthenticationType_WhenOwinChallengeAlreadyExists()
         {
             // Arrange
@@ -208,10 +186,10 @@ namespace System.Web.Http.Owin
 
             using (HttpRequestMessage request = CreateRequest(environment))
             {
-                HttpActionContext context = CreateActionContext(request);
+                HttpAuthenticationChallengeContext context = CreateChallengeContext(request, result);
 
                 // Act
-                IHttpActionResult ignore = filter.ChallengeAsync(context, result, CancellationToken.None).Result;
+                filter.ChallengeAsync(context, CancellationToken.None).Wait();
             }
 
             // Assert
@@ -241,10 +219,10 @@ namespace System.Web.Http.Owin
 
             using (HttpRequestMessage request = CreateRequest(environment))
             {
-                HttpActionContext context = CreateActionContext(request);
+                HttpAuthenticationChallengeContext context = CreateChallengeContext(request, result);
 
                 // Act
-                IHttpActionResult ignore = filter.ChallengeAsync(context, result, CancellationToken.None).Result;
+                filter.ChallengeAsync(context, CancellationToken.None).Wait();
             }
 
             // Assert
@@ -270,10 +248,10 @@ namespace System.Web.Http.Owin
 
             using (HttpRequestMessage request = CreateRequest(environment))
             {
-                HttpActionContext context = CreateActionContext(request);
+                HttpAuthenticationChallengeContext context = CreateChallengeContext(request, result);
 
                 // Act
-                IHttpActionResult ignore = filter.ChallengeAsync(context, result, CancellationToken.None).Result;
+                filter.ChallengeAsync(context, CancellationToken.None).Wait();
             }
 
             // Assert
@@ -294,12 +272,11 @@ namespace System.Web.Http.Owin
         {
             // Arrange
             IAuthenticationFilter filter = CreateProductUnderTest();
-            IHttpActionResult result = CreateDummyActionResult();
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() =>
             {
-                filter.ChallengeAsync(null, result, CancellationToken.None).ThrowIfFaulted();
+                filter.ChallengeAsync(null, CancellationToken.None).ThrowIfFaulted();
             }, "context");
         }
 
@@ -308,14 +285,15 @@ namespace System.Web.Http.Owin
         {
             // Arrange
             IAuthenticationFilter filter = CreateProductUnderTest();
-            HttpActionContext context = new HttpActionContext();
-            Assert.Null(context.Request);
             IHttpActionResult result = CreateDummyActionResult();
+            HttpAuthenticationChallengeContext context = new HttpAuthenticationChallengeContext(
+                new HttpActionContext(), result);
+            Assert.Null(context.Request);
 
             // Act & Assert
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                filter.ChallengeAsync(context, result, CancellationToken.None).ThrowIfFaulted();
+                filter.ChallengeAsync(context, CancellationToken.None).ThrowIfFaulted();
             });
             Assert.Equal("HttpAuthenticationContext.Request must not be null.", exception.Message);
         }
@@ -331,13 +309,28 @@ namespace System.Web.Http.Owin
         private static HttpAuthenticationContext CreateAuthenticationContext()
         {
             HttpActionContext actionContext = new HttpActionContext();
-            return new HttpAuthenticationContext(actionContext);
+            IPrincipal principal = CreateDummyPrincipal();
+            return new HttpAuthenticationContext(actionContext, principal);
         }
 
         private static HttpAuthenticationContext CreateAuthenticationContext(HttpRequestMessage request)
         {
+            IPrincipal principal = CreateDummyPrincipal();
+            return CreateAuthenticationContext(request, principal);
+        }
+
+        private static HttpAuthenticationContext CreateAuthenticationContext(HttpRequestMessage request,
+            IPrincipal principal)
+        {
             HttpActionContext actionContext = CreateActionContext(request);
-            return new HttpAuthenticationContext(actionContext);
+            return new HttpAuthenticationContext(actionContext, principal);
+        }
+
+        private static HttpAuthenticationChallengeContext CreateChallengeContext(HttpRequestMessage request,
+            IHttpActionResult result)
+        {
+            HttpActionContext actionContext = CreateActionContext(request);
+            return new HttpAuthenticationChallengeContext(actionContext, result);
         }
 
         private static HttpActionDescriptor CreateDummyActionDescriptor()
@@ -358,6 +351,11 @@ namespace System.Web.Http.Owin
         private static ClaimsIdentity CreateDummyIdentity()
         {
             return new Mock<ClaimsIdentity>(MockBehavior.Strict).Object;
+        }
+
+        private static IPrincipal CreateDummyPrincipal()
+        {
+            return new Mock<IPrincipal>(MockBehavior.Strict).Object;
         }
 
         private static IDictionary<string, object> CreateOwinEnvironment()

@@ -8,17 +8,28 @@ using Moq;
 
 namespace System.Web.Http.Controllers
 {
-    public class HttpAuthenticationContextTests
+    public class HttpAuthenticationChallengeContextTests
     {
         [Fact]
         public void Constructor_Throws_WhenActionContextIsNull()
         {
             // Arrange
             HttpActionContext actionContext = null;
-            IPrincipal principal = CreateDummyPrincipal();
+            IHttpActionResult result = CreateDummyResult();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => { CreateProductUnderTest(actionContext, principal); }, "actionContext");
+            Assert.ThrowsArgumentNull(() => { CreateProductUnderTest(actionContext, result); }, "actionContext");
+        }
+
+        [Fact]
+        public void Constructor_Throws_WhenResultIsNull()
+        {
+            // Arrange
+            HttpActionContext actionContext = CreateActionContext();
+            IHttpActionResult result = null;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => { CreateProductUnderTest(actionContext, result); }, "result");
         }
 
         [Fact]
@@ -26,8 +37,8 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             HttpActionContext expectedActionContext = CreateActionContext();
-            IPrincipal principal = CreateDummyPrincipal();
-            HttpAuthenticationContext product = CreateProductUnderTest(expectedActionContext, principal);
+            IHttpActionResult result = CreateDummyResult();
+            HttpAuthenticationChallengeContext product = CreateProductUnderTest(expectedActionContext, result);
 
             // Act
             HttpActionContext actionContext = product.ActionContext;
@@ -37,18 +48,18 @@ namespace System.Web.Http.Controllers
         }
 
         [Fact]
-        public void Principal_ReturnsSpecifiedInstance()
+        public void Result_ReturnsSpecifiedInstance()
         {
             // Arrange
             HttpActionContext actionContext = CreateActionContext();
-            IPrincipal expectedPrincipal = CreateDummyPrincipal();
-            HttpAuthenticationContext product = CreateProductUnderTest(actionContext, expectedPrincipal);
+            IHttpActionResult expectedResult = CreateDummyResult();
+            HttpAuthenticationChallengeContext product = CreateProductUnderTest(actionContext, expectedResult);
 
             // Act
-            IPrincipal principal = product.Principal;
+            IHttpActionResult result = product.Result;
 
             // Assert
-            Assert.Same(expectedPrincipal, principal);
+            Assert.Same(expectedResult, result);
         }
 
         [Fact]
@@ -58,8 +69,8 @@ namespace System.Web.Http.Controllers
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
                 HttpActionContext actionContext = CreateActionContext(expectedRequest);
-                IPrincipal principal = CreateDummyPrincipal();
-                HttpAuthenticationContext product = CreateProductUnderTest(actionContext, principal);
+                IHttpActionResult result = CreateDummyResult();
+                HttpAuthenticationChallengeContext product = CreateProductUnderTest(actionContext, result);
 
                 // Act
                 HttpRequestMessage request = product.Request;
@@ -67,6 +78,18 @@ namespace System.Web.Http.Controllers
                 // Assert
                 Assert.Same(expectedRequest, request);
             }
+        }
+
+        [Fact]
+        public void ResultSetter_Throws_WhenNull()
+        {
+            // Arrange
+            HttpActionContext actionContext = CreateActionContext();
+            IHttpActionResult result = CreateDummyResult();
+            HttpAuthenticationChallengeContext product = CreateProductUnderTest(actionContext, result);
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => { product.Result = null; }, "value");
         }
 
         private static HttpActionContext CreateActionContext()
@@ -83,15 +106,15 @@ namespace System.Web.Http.Controllers
             return actionContext;
         }
 
-        private static IPrincipal CreateDummyPrincipal()
+        private static IHttpActionResult CreateDummyResult()
         {
-            return new Mock<IPrincipal>(MockBehavior.Strict).Object;
+            return new Mock<IHttpActionResult>(MockBehavior.Strict).Object;
         }
 
-        private static HttpAuthenticationContext CreateProductUnderTest(HttpActionContext actionContext,
-            IPrincipal principal)
+        private static HttpAuthenticationChallengeContext CreateProductUnderTest(HttpActionContext actionContext,
+            IHttpActionResult result)
         {
-            return new HttpAuthenticationContext(actionContext, principal);
+            return new HttpAuthenticationChallengeContext(actionContext, result);
         }
 
         private static HttpRequestMessage CreateRequest()

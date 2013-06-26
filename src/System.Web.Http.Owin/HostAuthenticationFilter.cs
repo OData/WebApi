@@ -39,8 +39,7 @@ namespace System.Web.Http
         }
 
         /// <inheritdoc />
-        public async Task<IAuthenticationResult> AuthenticateAsync(HttpAuthenticationContext context,
-            CancellationToken cancellationToken)
+        public async Task AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
         {
             if (context == null)
             {
@@ -59,17 +58,14 @@ namespace System.Web.Http
             cancellationToken.ThrowIfCancellationRequested();
             IIdentity identity = await owinRequest.AuthenticateAsync(_authenticationType);
 
-            if (identity == null)
+            if (identity != null)
             {
-                return null;
+                context.Principal = new ClaimsPrincipal(identity);
             }
-
-            return new SucceededAuthenticationResult(new ClaimsPrincipal(identity));
         }
 
         /// <inheritdoc />
-        public Task<IHttpActionResult> ChallengeAsync(HttpActionContext context, IHttpActionResult innerResult,
-            CancellationToken cancellationToken)
+        public Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
         {
             if (context == null)
             {
@@ -89,8 +85,7 @@ namespace System.Web.Http
             response.AuthenticationResponseChallenge = AddChallengeAuthenticationType(
                 response.AuthenticationResponseChallenge, _authenticationType);
 
-            // Otherwise, return the provided result as-is.
-            return Task.FromResult(innerResult);
+            return TaskHelpers.Completed();
         }
 
         /// <inheritdoc />

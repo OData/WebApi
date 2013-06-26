@@ -324,7 +324,7 @@ namespace System.Web.Http
                 It.IsAny<CancellationToken>())).Callback(() =>
                     {
                         log.Add("authN filters authenticate");
-                    }).Returns(() => Task.FromResult<IAuthenticationResult>(null));
+                    }).Returns(() => Task.FromResult<object>(null));
             IHttpActionResult innerResult = null;
             Mock<IHttpActionResult> challengeResultMock = new Mock<IHttpActionResult>();
             challengeResultMock.Setup(r => r.ExecuteAsync(It.IsAny<CancellationToken>())).Returns(async () =>
@@ -333,10 +333,12 @@ namespace System.Web.Http
                 log.Add("authN filters challenge");
                 return response;
             });
-            authenticationFilterMock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(),
-                It.IsAny<IHttpActionResult>(), It.IsAny<CancellationToken>()))
-                .Callback<HttpActionContext, IHttpActionResult, CancellationToken>((i1, r, i2) => { innerResult = r;})
-                .Returns(() => Task.FromResult<IHttpActionResult>(challengeResultMock.Object));
+            authenticationFilterMock.Setup(f => f.ChallengeAsync(It.IsAny<HttpAuthenticationChallengeContext>(),
+                It.IsAny<CancellationToken>()))
+                .Callback<HttpAuthenticationChallengeContext, CancellationToken>((c, t) => {
+                    innerResult = c.Result;
+                    c.Result = challengeResultMock.Object;})
+                .Returns(() => Task.FromResult<object>(null));
 
             var selectorMock = new Mock<IHttpActionSelector>();
 
@@ -669,8 +671,8 @@ namespace System.Web.Http
             ApiController controller = new ExceptionlessController();
             Mock<IAuthenticationFilter> filterMock = new Mock<IAuthenticationFilter>();
             filterMock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(),
-                It.IsAny<CancellationToken>())).Returns(() => Task.FromResult<IAuthenticationResult>(null));
-            filterMock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(),
+                It.IsAny<CancellationToken>())).Returns(() => Task.FromResult<object>(null));
+            filterMock.Setup(f => f.ChallengeAsync(It.IsAny<HttpAuthenticationChallengeContext>(),
                 It.IsAny<CancellationToken>())).Callback(() =>
                 {
                     throw expectedException;

@@ -27,10 +27,9 @@ namespace System.Web.Http.Tracing.Tracers
             get { return _innerFilter; }
         }
 
-        public Task<IAuthenticationResult> AuthenticateAsync(HttpAuthenticationContext context,
-            CancellationToken cancellationToken)
+        public Task AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
         {
-            return TraceWriter.TraceBeginEndAsync<IAuthenticationResult>(
+            return TraceWriter.TraceBeginEndAsync(
                 request: context != null ? context.Request : null,
                 category: TraceCategories.FiltersCategory,
                 level: TraceLevel.Info,
@@ -42,17 +41,16 @@ namespace System.Web.Http.Tracing.Tracers
                 errorTrace: null);
         }
 
-        public Task<IHttpActionResult> ChallengeAsync(HttpActionContext context, IHttpActionResult result,
-            CancellationToken cancellationToken)
+        public Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
         {
-            return TraceWriter.TraceBeginEndAsync<IHttpActionResult>(
+            return TraceWriter.TraceBeginEndAsync(
                 request: context != null ? context.Request : null,
                 category: TraceCategories.FiltersCategory,
                 level: TraceLevel.Info,
                 operatorName: _innerFilter.GetType().Name,
                 operationName: ChallengeAsyncMethodName,
                 beginTrace: null,
-                execute: () => _innerFilter.ChallengeAsync(context, result, cancellationToken),
+                execute: () => _innerFilter.ChallengeAsync(context, cancellationToken),
                 endTrace: null,
                 errorTrace: null);
         }

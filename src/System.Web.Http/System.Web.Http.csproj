@@ -84,9 +84,8 @@
     <Compile Include="Controllers\IControllerConfiguration.cs" />
     <Compile Include="Description\ResponseTypeAttribute.cs" />
     <Compile Include="Description\ResponseDescription.cs" />
+    <Compile Include="Filters\HttpAuthenticationChallengeContext.cs" />
     <Compile Include="Hosting\IHostPrincipalService.cs" />
-    <Compile Include="Filters\FailedAuthenticationResult.cs" />
-    <Compile Include="Filters\SucceededAuthenticationResult.cs" />
     <Compile Include="Results\InvalidModelStateResult.cs" />
     <Compile Include="Results\FormattedContentResult.cs" />
     <Compile Include="Hosting\SuppressHostPrincipalMessageHandler.cs" />
@@ -102,7 +101,6 @@
     <Compile Include="Results\ResponseMessageResult.cs" />
     <Compile Include="Hosting\ThreadPrincipalService.cs" />
     <Compile Include="Filters\IAuthenticationFilter.cs" />
-    <Compile Include="Filters\IAuthenticationResult.cs" />
     <Compile Include="Filters\IOverrideFilter.cs" />
     <Compile Include="OverrideActionFiltersAttribute.cs" />
     <Compile Include="OverrideAuthenticationAttribute.cs" />

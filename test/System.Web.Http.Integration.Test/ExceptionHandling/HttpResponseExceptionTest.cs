@@ -128,18 +128,16 @@ namespace System.Web.Http.ExceptionHandling
             _throwAt = throwAt;
         }
 
-        public Task<IAuthenticationResult> AuthenticateAsync(HttpAuthenticationContext context,
-            CancellationToken cancellationToken)
+        public Task AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
         {
             ExceptionTestsUtility.CheckForThrow(_throwAt, "AuthenticationAuthenticate");
-            return Task.FromResult<IAuthenticationResult>(null);
+            return Task.FromResult<object>(null);
         }
 
-        public Task<IHttpActionResult> ChallengeAsync(HttpActionContext context, IHttpActionResult innerResult,
-            CancellationToken cancellationToken)
+        public Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
         {
             ExceptionTestsUtility.CheckForThrow(_throwAt, "AuthenticationChallenge");
-            return Task.FromResult(innerResult);
+            return Task.FromResult<object>(null);
         }
 
         public bool AllowMultiple

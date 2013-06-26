@@ -24,7 +24,6 @@ namespace System.Web.Http.Controllers
             Contract.Assert(context != null);
             Contract.Assert(filters != null);
             Contract.Assert(principalService != null);
-            Contract.Assert(request != null);
             Contract.Assert(innerResult != null);
 
             _context = context;
@@ -37,40 +36,28 @@ namespace System.Web.Http.Controllers
         public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             IHttpActionResult result = _innerResult;
-            HttpAuthenticationContext authenticationContext = new HttpAuthenticationContext(_context);
-            authenticationContext.Principal = _principalService.GetCurrentPrincipal(_request);
-            bool setPrincipal = false;
+            IPrincipal originalPrincipal = _principalService.GetCurrentPrincipal(_request);
+            HttpAuthenticationContext authenticationContext = new HttpAuthenticationContext(_context,
+                originalPrincipal);
 
             for (int i = 0; i < _filters.Length; i++)
             {
                 IAuthenticationFilter filter = _filters[i];
-                IAuthenticationResult authenticationResult = await filter.AuthenticateAsync(authenticationContext,
-                    cancellationToken);
+                await filter.AuthenticateAsync(authenticationContext, cancellationToken);
 
-                if (authenticationResult != null)
+                IHttpActionResult error = authenticationContext.ErrorResult;
+
+                // Short-circuit on the first authentication filter to provide an error result.
+                if (error != null)
                 {
-                    IHttpActionResult error = authenticationResult.ErrorResult;
-
-                    // Short-circuit on the first authentication filter to provide an error result.
-                    if (error != null)
-                    {
-                        result = error;
-                        break;
-                    }
-
-                    IPrincipal principal = authenticationResult.Principal;
-
-                    if (principal != null)
-                    {
-                        // Pass the principal from earlier filters into later filters, but only set the principal on
-                        // the host once for performance reasons.
-                        authenticationContext.Principal = principal;
-                        setPrincipal = true;
-                    }
+                    result = error;
+                    break;
                 }
             }
 
-            if (setPrincipal)
+            IPrincipal newPrincipal = authenticationContext.Principal;
+
+            if (newPrincipal != originalPrincipal)
             {
                 _principalService.SetCurrentPrincipal(authenticationContext.Principal, _request);
             }
@@ -78,12 +65,17 @@ namespace System.Web.Http.Controllers
             // Run challenge on all filters (passing the result of each into the next). If a filter failed, the
             // challenges run on the failure result. If no filter failed, the challenges run on the original inner
             // result.
+            HttpAuthenticationChallengeContext challengeContext = new HttpAuthenticationChallengeContext(_context,
+                result);
 
             for (int i = 0; i < _filters.Length; i++)
             {
                 IAuthenticationFilter filter = _filters[i];
-                result = await filter.ChallengeAsync(_context, result, cancellationToken) ?? result;
+                await filter.ChallengeAsync(challengeContext, cancellationToken);
             }
+
+            Contract.Assert(challengeContext.Result != null);
+            result = challengeContext.Result;
 
             return await result.ExecuteAsync(cancellationToken);
         }

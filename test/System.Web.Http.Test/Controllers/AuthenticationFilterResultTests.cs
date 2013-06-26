@@ -60,7 +60,7 @@ namespace System.Web.Http.Controllers
             {
                 calls++;
                 request = r;
-                return null;
+                return CreateDummyPrincipal();
             });
             IHttpActionResult innerResult = CreateStubActionResult();
 
@@ -88,13 +88,11 @@ namespace System.Web.Http.Controllers
             int calls = 0;
             HttpAuthenticationContext authenticationContext = null;
             CancellationToken cancellationToken = default(CancellationToken);
-            IAuthenticationFilter filter = CreateAuthenticationFilter((a, c) =>
+            IAuthenticationFilter filter = CreateAuthenticationFilter((c, t) =>
             {
                 calls++;
-                authenticationContext = a;
-                cancellationToken = c;
-                IAuthenticationResult result = null;
-                return Task.FromResult(result);
+                authenticationContext = c;
+                cancellationToken = t;
             });
             IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter };
             IPrincipal expectedPrincipal = CreateDummyPrincipal();
@@ -139,8 +137,10 @@ namespace System.Web.Http.Controllers
                     cancellationToken = t;
                     return Task.FromResult(expectedResponse);
                 });
-                IAuthenticationFilter filter = CreateAuthenticationFilter(
-                    (a, c) => Task.FromResult<IAuthenticationResult>(new FailedAuthenticationResult(errorResult)));
+                IAuthenticationFilter filter = CreateAuthenticationFilter((c, t) =>
+                {
+                    c.ErrorResult = errorResult;
+                });
                 IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter };
                 IHostPrincipalService principalService = CreateStubPrincipalService();
                 IHttpActionResult innerResult = CreateDummyActionResult();
@@ -169,13 +169,14 @@ namespace System.Web.Http.Controllers
             {
                 HttpActionContext context = CreateContext();
                 IHttpActionResult errorResult = CreateActionResult((t) => Task.FromResult(expectedResponse));
-                IAuthenticationFilter firstFilter = CreateAuthenticationFilter(
-                    (a, c) => Task.FromResult<IAuthenticationResult>(new FailedAuthenticationResult(errorResult)));
+                IAuthenticationFilter firstFilter = CreateAuthenticationFilter((c, t) =>
+                {
+                    c.ErrorResult = errorResult;
+                });
                 int calls = 0;
-                IAuthenticationFilter secondFilter = CreateAuthenticationFilter((a, c) =>
+                IAuthenticationFilter secondFilter = CreateAuthenticationFilter((c, t) =>
                     {
                         calls++;
-                        return Task.FromResult<IAuthenticationResult>(null);
                     });
                 IAuthenticationFilter[] filters = new IAuthenticationFilter[] { firstFilter, secondFilter };
                 IHostPrincipalService principalService = CreateStubPrincipalService();
@@ -200,8 +201,10 @@ namespace System.Web.Http.Controllers
             // Arrange
             HttpActionContext context = CreateContext();
             IPrincipal expectedPrincipal = CreateDummyPrincipal();
-            IAuthenticationResult authenticationResult = new SucceededAuthenticationResult(expectedPrincipal);
-            IAuthenticationFilter filter = CreateAuthenticationFilter((a, c) => Task.FromResult(authenticationResult));
+            IAuthenticationFilter filter = CreateAuthenticationFilter((c, t) =>
+            {
+                c.Principal = expectedPrincipal;
+            });
             IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter };
             int calls = 0;
             HttpRequestMessage request = null;
@@ -237,19 +240,18 @@ namespace System.Web.Http.Controllers
             // Arrange
             HttpActionContext context = CreateContext();
             IPrincipal expectedPrincipal = CreateDummyPrincipal();
-            IAuthenticationResult authenticationResult = new SucceededAuthenticationResult(expectedPrincipal);
-            IAuthenticationFilter firstFilter = CreateAuthenticationFilter(
-                (a, c) => Task.FromResult(authenticationResult));
+            IAuthenticationFilter firstFilter = CreateAuthenticationFilter((c, t) =>
+            {
+                c.Principal = expectedPrincipal;
+            });
             IPrincipal principal = null;
-            IAuthenticationFilter secondFilter = CreateAuthenticationFilter((a, c) =>
+            IAuthenticationFilter secondFilter = CreateAuthenticationFilter((c, t) =>
+            {
+                if (c != null)
                 {
-                    if (a != null)
-                    {
-                        principal = a.Principal;
-                    }
-
-                    return Task.FromResult<IAuthenticationResult>(null);
-                });
+                    principal = c.Principal;
+                }
+            });
             IAuthenticationFilter[] filters = new IAuthenticationFilter[] { firstFilter, secondFilter };
             IHostPrincipalService principalService = CreateStubPrincipalService();
             IHttpActionResult innerResult = CreateStubActionResult();
@@ -275,8 +277,10 @@ namespace System.Web.Http.Controllers
             // Arrange
             HttpActionContext context = CreateContext();
             IPrincipal principal = CreateDummyPrincipal();
-            IAuthenticationResult authenticationResult = new SucceededAuthenticationResult(principal);
-            IAuthenticationFilter filter = CreateAuthenticationFilter((a, c) => Task.FromResult(authenticationResult));
+            IAuthenticationFilter filter = CreateAuthenticationFilter((c, t) =>
+            {
+                c.Principal = principal;
+            });
             IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter, filter };
             int calls = 0;
             IHostPrincipalService principalService = CreatePrincipalService((p, r) =>
@@ -306,8 +310,7 @@ namespace System.Web.Http.Controllers
             // Arrange
             HttpActionContext context = CreateContext();
             IPrincipal principal = CreateDummyPrincipal();
-            IAuthenticationResult authenticationResult = null;
-            IAuthenticationFilter filter = CreateAuthenticationFilter((a, c) => Task.FromResult(authenticationResult));
+            IAuthenticationFilter filter = CreateAuthenticationFilter((c, t) => Task.FromResult<object>(null));
             IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter, filter };
             int calls = 0;
             IHostPrincipalService principalService = CreatePrincipalService((p, r) =>
@@ -340,13 +343,12 @@ namespace System.Web.Http.Controllers
             HttpActionContext context = null;
             IHttpActionResult innerResult = null;
             CancellationToken cancellationToken = default(CancellationToken);
-            IAuthenticationFilter filter = CreateAuthenticationFilter((a, r, c) =>
+            IAuthenticationFilter filter = CreateAuthenticationFilterChallenge((c, t) =>
             {
                 calls++;
-                context = a;
-                innerResult = r;
-                cancellationToken = c;
-                return Task.FromResult(r);
+                context = c.ActionContext;
+                innerResult = c.Result;
+                cancellationToken = t;
             });
             IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter };
             IHostPrincipalService principalService = CreateStubPrincipalService();
@@ -382,18 +384,18 @@ namespace System.Web.Http.Controllers
             IHttpActionResult innerResult = null;
             CancellationToken cancellationToken = default(CancellationToken);
             IAuthenticationFilter filter = CreateAuthenticationFilter(
-                (a, c) =>
+                (c, t) =>
                 {
-                    IAuthenticationResult result = new FailedAuthenticationResult(expectedErrorResult);
-                    return Task.FromResult(result);
+                    c.ErrorResult = expectedErrorResult;
                 },
-                (a, r, c) =>
+                (c, t) =>
                 {
                     calls++;
-                    context = a;
-                    innerResult = r;
-                    cancellationToken = c;
-                    return Task.FromResult(CreateStubActionResult());
+                    context = c.ActionContext;
+                    innerResult = c.Result;
+                    cancellationToken = t;
+
+                    c.Result = CreateStubActionResult();
                 });
             IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter };
             IHostPrincipalService principalService = CreateStubPrincipalService();
@@ -426,19 +428,20 @@ namespace System.Web.Http.Controllers
             IHttpActionResult expectedInnerResult = CreateDummyActionResult();
             int calls = 0;
             HttpActionContext context = null;
-            IHttpActionResult innerResult = null;
+            IHttpActionResult result = null;
             CancellationToken cancellationToken = default(CancellationToken);
-            IAuthenticationFilter firstFilter = CreateAuthenticationFilter((a, r, c) =>
+            IAuthenticationFilter firstFilter = CreateAuthenticationFilterChallenge((c, t) =>
             {
-                return Task.FromResult(expectedInnerResult);
+                c.Result = expectedInnerResult;
             });
-            IAuthenticationFilter secondFilter = CreateAuthenticationFilter((a, r, c) =>
+            IAuthenticationFilter secondFilter = CreateAuthenticationFilterChallenge((c, t) =>
             {
                 calls++;
-                context = a;
-                innerResult = r;
-                cancellationToken = c;
-                return Task.FromResult(CreateStubActionResult());
+                context = c.ActionContext;
+                result = c.Result;
+                cancellationToken = t;
+
+                c.Result = CreateStubActionResult();
             });
             IAuthenticationFilter[] filters = new IAuthenticationFilter[] { firstFilter, secondFilter };
             IHostPrincipalService principalService = CreateStubPrincipalService();
@@ -458,51 +461,7 @@ namespace System.Web.Http.Controllers
                 HttpResponseMessage response = task.Result;
                 Assert.Equal(1, calls);
                 Assert.Same(expectedContext, context);
-                Assert.Same(expectedInnerResult, innerResult);
-                Assert.Equal(expectedCancellationToken, cancellationToken);
-            }
-        }
-
-        [Fact]
-        public void ExecuteAsync_CallsSecondFilterChallengeAsync_WithInnerResult_WhenFirstChallengeReturnsNull()
-        {
-            // Arrange
-            HttpActionContext expectedContext = CreateContext();
-            IHttpActionResult expectedInnerResult = CreateDummyActionResult();
-            int calls = 0;
-            HttpActionContext context = null;
-            IHttpActionResult innerResult = null;
-            CancellationToken cancellationToken = default(CancellationToken);
-            IAuthenticationFilter firstFilter = CreateAuthenticationFilter((a, r, c) =>
-            {
-                return Task.FromResult<IHttpActionResult>(null);
-            });
-            IAuthenticationFilter secondFilter = CreateAuthenticationFilter((a, r, c) =>
-            {
-                calls++;
-                context = a;
-                innerResult = r;
-                cancellationToken = c;
-                return Task.FromResult(CreateStubActionResult());
-            });
-            IAuthenticationFilter[] filters = new IAuthenticationFilter[] { firstFilter, secondFilter };
-            IHostPrincipalService principalService = CreateStubPrincipalService();
-            CancellationToken expectedCancellationToken = CreateCancellationToken();
-
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                IHttpActionResult product = CreateProductUnderTest(expectedContext, filters, principalService, request,
-                    expectedInnerResult);
-
-                // Act
-                Task<HttpResponseMessage> task = product.ExecuteAsync(expectedCancellationToken);
-
-                // Assert
-                Assert.NotNull(task);
-                HttpResponseMessage response = task.Result;
-                Assert.Equal(1, calls);
-                Assert.Same(expectedContext, context);
-                Assert.Same(expectedInnerResult, innerResult);
+                Assert.Same(expectedInnerResult, result);
                 Assert.Equal(expectedCancellationToken, cancellationToken);
             }
         }
@@ -518,74 +477,56 @@ namespace System.Web.Http.Controllers
             return mock.Object;
         }
 
-        private static IAuthenticationFilter CreateAuthenticationFilter(Func<HttpAuthenticationContext,
-            CancellationToken, Task<IAuthenticationResult>> authenticateAsync)
+        private static IAuthenticationFilter CreateAuthenticationFilter(
+            Action<HttpAuthenticationContext, CancellationToken> authenticate)
         {
             Mock<IAuthenticationFilter> mock = new Mock<IAuthenticationFilter>();
-            HttpAuthenticationContext authenticationContext = null;
-            CancellationToken cancellationToken = default(CancellationToken);
             mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(), It.IsAny<CancellationToken>()))
-                .Callback<HttpAuthenticationContext, CancellationToken>((a, c) =>
+                .Callback<HttpAuthenticationContext, CancellationToken>((c, t) =>
                 {
-                    authenticationContext = a;
-                    cancellationToken = c;
+                    authenticate.Invoke(c, t);
                 })
-                .Returns(() => authenticateAsync.Invoke(authenticationContext, cancellationToken));
-            IHttpActionResult innerResult = null;
-            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(),
+                .Returns(() => Task.FromResult<object>(null));
+            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpAuthenticationChallengeContext>(),
                 It.IsAny<CancellationToken>()))
-                .Callback<HttpActionContext, IHttpActionResult, CancellationToken>((a, r, c) => { innerResult = r; })
-                .Returns(() => Task.FromResult(innerResult));
+                .Returns(() => Task.FromResult<object>(null));
             return mock.Object;
         }
 
-        private static IAuthenticationFilter CreateAuthenticationFilter(Func<HttpActionContext, IHttpActionResult,
-            CancellationToken, Task<IHttpActionResult>> challengeAsync)
+        private static IAuthenticationFilter CreateAuthenticationFilter(
+            Action<HttpAuthenticationContext, CancellationToken> authenticate,
+            Action<HttpAuthenticationChallengeContext, CancellationToken> challenge)
         {
             Mock<IAuthenticationFilter> mock = new Mock<IAuthenticationFilter>();
-            HttpActionContext actionContext = null;
-            IHttpActionResult innerResult = null;
-            CancellationToken cancellationToken = default(CancellationToken);
             mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(), It.IsAny<CancellationToken>()))
-                .Returns(() => Task.FromResult<IAuthenticationResult>(null));
-            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(),
+                .Callback<HttpAuthenticationContext, CancellationToken>((c, t) =>
+                    {
+                        authenticate.Invoke(c, t);
+                    })
+                .Returns(() => Task.FromResult<object>(null));
+            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpAuthenticationChallengeContext>(),
                 It.IsAny<CancellationToken>()))
-                .Callback<HttpActionContext, IHttpActionResult, CancellationToken>((a, r, c) =>
-                {
-                    actionContext = a;
-                    innerResult = r;
-                    cancellationToken = c;
-                })
-                .Returns(() => challengeAsync.Invoke(actionContext, innerResult, cancellationToken));
+                .Callback<HttpAuthenticationChallengeContext, CancellationToken>((c, t) =>
+                    {
+                        challenge.Invoke(c, t);
+                    })
+                .Returns(() => Task.FromResult<object>(null));
             return mock.Object;
         }
 
-        private static IAuthenticationFilter CreateAuthenticationFilter(Func<HttpAuthenticationContext,
-            CancellationToken, Task<IAuthenticationResult>> authenticateAsync, Func<HttpActionContext,
-            IHttpActionResult, CancellationToken, Task<IHttpActionResult>> challengeAsync)
+        private static IAuthenticationFilter CreateAuthenticationFilterChallenge(
+            Action<HttpAuthenticationChallengeContext, CancellationToken> challenge)
         {
             Mock<IAuthenticationFilter> mock = new Mock<IAuthenticationFilter>();
-            HttpAuthenticationContext authenticationContext = null;
-            CancellationToken authenticateCancellationToken = default(CancellationToken);
             mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(), It.IsAny<CancellationToken>()))
-                .Callback<HttpAuthenticationContext, CancellationToken>((a, c) =>
-                    {
-                        authenticationContext = a;
-                        authenticateCancellationToken = c;
-                    })
-                .Returns(() => authenticateAsync.Invoke(authenticationContext, authenticateCancellationToken));
-            HttpActionContext actionContext = null;
-            IHttpActionResult innerResult = null;
-            CancellationToken challengeCancellationToken = default(CancellationToken);
-            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(),
+                .Returns(() => Task.FromResult<object>(null));
+            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpAuthenticationChallengeContext>(),
                 It.IsAny<CancellationToken>()))
-                .Callback<HttpActionContext, IHttpActionResult, CancellationToken>((a, r, c) =>
-                    {
-                        actionContext = a;
-                        innerResult = r;
-                        challengeCancellationToken = c;
-                    })
-                .Returns(() => challengeAsync.Invoke(actionContext, innerResult, challengeCancellationToken));
+                .Callback<HttpAuthenticationChallengeContext, CancellationToken>((c, t) =>
+                {
+                    challenge.Invoke(c, t);
+                })
+                .Returns(() => Task.FromResult<object>(null));
             return mock.Object;
         }
 
@@ -624,6 +565,7 @@ namespace System.Web.Http.Controllers
             Action<IPrincipal, HttpRequestMessage> setCurrentPrincipal)
         {
             Mock<IHostPrincipalService> mock = new Mock<IHostPrincipalService>();
+            mock.Setup(s => s.GetCurrentPrincipal(It.IsAny<HttpRequestMessage>())).Returns(CreateDummyPrincipal());
             mock.Setup(s => s.SetCurrentPrincipal(It.IsAny<IPrincipal>(), It.IsAny<HttpRequestMessage>()))
                 .Callback<IPrincipal, HttpRequestMessage>((p, r) => { setCurrentPrincipal.Invoke(p, r); });
             return mock.Object;
@@ -657,20 +599,17 @@ namespace System.Web.Http.Controllers
         private static IAuthenticationFilter CreateStubFilter()
         {
             Mock<IAuthenticationFilter> mock = new Mock<IAuthenticationFilter>(MockBehavior.Strict);
-            IAuthenticationResult authenticateResult = null;
             mock.Setup(f => f.AuthenticateAsync(It.IsAny<HttpAuthenticationContext>(), It.IsAny<CancellationToken>()))
-                .Returns(() => Task.FromResult(authenticateResult));
-            IHttpActionResult innerResult = null;
-            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(),
+                .Returns(() => Task.FromResult<object>(null));
+            mock.Setup(f => f.ChallengeAsync(It.IsAny<HttpAuthenticationChallengeContext>(),
                 It.IsAny<CancellationToken>()))
-                .Callback<HttpActionContext, IHttpActionResult, CancellationToken>((a, i, c) => { innerResult = i; })
-                .Returns(() => Task.FromResult(innerResult));
+                .Returns(() => Task.FromResult<object>(null));
             return mock.Object;
         }
 
         private static IHostPrincipalService CreateStubPrincipalService()
         {
-            return CreateStubPrincipalService(null);
+            return CreateStubPrincipalService(CreateDummyPrincipal());
         }
 
         private static IHostPrincipalService CreateStubPrincipalService(IPrincipal principal)

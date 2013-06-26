@@ -89,7 +89,8 @@ namespace System.Web.Http
             if (batchHandler != null)
             {
                 batchHandler.ODataRouteName = routeName;
-                routes.MapHttpBatchRoute(routeName + "Batch", routePrefix + '/' + ODataRouteConstants.Batch, batchHandler);
+                string batchTemplate = String.IsNullOrEmpty(routePrefix) ? ODataRouteConstants.Batch : routePrefix + '/' + ODataRouteConstants.Batch;
+                routes.MapHttpBatchRoute(routeName + "Batch", batchTemplate, batchHandler);
             }
 
             ODataPathRouteConstraint routeConstraint = new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);

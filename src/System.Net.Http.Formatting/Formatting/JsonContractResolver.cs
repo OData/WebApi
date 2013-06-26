@@ -11,9 +11,9 @@ using Newtonsoft.Json.Serialization;
 namespace System.Net.Http.Formatting
 {
     /// <summary>
-    /// The default <see cref="IContractResolver"/> used by <see cref="JsonMediaTypeFormatter"/>. It uses the
-    /// formatter's <see cref="IRequiredMemberSelector"/> to select required members and it recognizes the
-    /// <see cref="SerializableAttribute"/> type annotation.
+    /// Represents the default <see cref="IContractResolver"/> used by <see cref="JsonMediaTypeFormatter"/>.
+    /// It uses the formatter's <see cref="IRequiredMemberSelector"/> to select required members and recognizes
+    /// the <see cref="SerializableAttribute"/> type annotation.
     /// </summary>
     public class JsonContractResolver : DefaultContractResolver
     {

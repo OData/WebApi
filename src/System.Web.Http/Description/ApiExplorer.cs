@@ -23,10 +23,8 @@ namespace System.Web.Http.Description
     {
         private Lazy<Collection<ApiDescription>> _apiDescriptions;
         private readonly HttpConfiguration _config;
-        private const string ActionVariableName = "action";
-        private const string ControllerVariableName = "controller";
-        private static readonly Regex _actionVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", ActionVariableName), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        private static readonly Regex _controllerVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", ControllerVariableName), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex _actionVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteKeys.ActionKey), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex _controllerVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteKeys.ControllerKey), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiExplorer"/> class.
@@ -78,7 +76,7 @@ namespace System.Web.Http.Description
 
             ApiExplorerSettingsAttribute setting = controllerDescriptor.GetCustomAttributes<ApiExplorerSettingsAttribute>().FirstOrDefault();
             return (setting == null || !setting.IgnoreApi) &&
-                MatchRegexConstraint(route, ControllerVariableName, controllerVariableValue);
+                MatchRegexConstraint(route, RouteKeys.ControllerKey, controllerVariableValue);
         }
 
         /// <summary>
@@ -104,7 +102,7 @@ namespace System.Web.Http.Description
             NonActionAttribute nonAction = actionDescriptor.GetCustomAttributes<NonActionAttribute>().FirstOrDefault();
             return (setting == null || !setting.IgnoreApi) &&
                 (nonAction == null) &&
-                MatchRegexConstraint(route, ActionVariableName, actionVariableValue);
+                MatchRegexConstraint(route, RouteKeys.ActionKey, actionVariableValue);
         }
 
         /// <summary>
@@ -196,7 +194,7 @@ namespace System.Web.Http.Description
             else
             {
                 // bound controller variable, {controller = "controllerName"}
-                if (route.Defaults.TryGetValue(ControllerVariableName, out controllerVariableValue))
+                if (route.Defaults.TryGetValue(RouteKeys.ControllerKey, out controllerVariableValue))
                 {
                     HttpControllerDescriptor controllerDescriptor;
                     if (controllerMappings.TryGetValue(controllerVariableValue, out controllerDescriptor) && ShouldExploreController(controllerVariableValue, controllerDescriptor, route))
@@ -227,7 +225,7 @@ namespace System.Web.Http.Description
                         PopulateActionDescriptions(actionMapping, actionVariableValue, route, expandedLocalPath, apiDescriptions);
                     }
                 }
-                else if (route.Defaults.TryGetValue(ActionVariableName, out actionVariableValue))
+                else if (route.Defaults.TryGetValue(RouteKeys.ActionKey, out actionVariableValue))
                 {
                     // bound action variable, { action = "actionName" }
                     PopulateActionDescriptions(actionMappings[actionVariableValue], actionVariableValue, route, localPath, apiDescriptions);

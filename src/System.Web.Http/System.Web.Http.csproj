@@ -126,6 +126,7 @@
     <Compile Include="Routing\Constraints\RangeRouteConstraintBase.cs" />
     <Compile Include="Routing\Constraints\RegexHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\OptionalHttpRouteConstraint.cs" />
+    <Compile Include="Routing\RouteKeys.cs" />
     <Compile Include="Routing\HttpRouteBuilder.cs" />
     <Compile Include="Routing\HttpRouteEntry.cs" />
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />

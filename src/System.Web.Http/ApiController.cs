@@ -225,6 +225,14 @@ namespace System.Web.Http
             return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
         }
 
+        /// <summary>Creates an <see cref="InvalidModelStateResult"/> with the specified model state.</summary>
+        /// <param name="modelState">The model state to include in the error.</param>
+        /// <returns>An <see cref="InvalidModelStateResult"/> with the specified model state.</returns>
+        public InvalidModelStateResult BadRequest(ModelStateDictionary modelState)
+        {
+            return new InvalidModelStateResult(modelState, this);
+        }
+
         /// <summary>Creates a <see cref="NegotiatedContentResult{T}"/> with the specified values.</summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
         /// <param name="statusCode">The HTTP status code for the response message.</param>

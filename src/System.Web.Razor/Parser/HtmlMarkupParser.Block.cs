@@ -192,34 +192,44 @@ namespace System.Web.Razor.Parser
         {
             // Accept "!"
             Assert(HtmlSymbolType.Bang);
-            AcceptAndMoveNext();
-            if (CurrentSymbol.Type == HtmlSymbolType.DoubleHyphen)
+
+            if (AcceptAndMoveNext())
             {
-                AcceptAndMoveNext();
-                return AcceptUntilAll(HtmlSymbolType.DoubleHyphen, HtmlSymbolType.CloseAngle);
+                if (CurrentSymbol.Type == HtmlSymbolType.DoubleHyphen)
+                {
+                    AcceptAndMoveNext();
+                    return AcceptUntilAll(HtmlSymbolType.DoubleHyphen, HtmlSymbolType.CloseAngle);
+                }
+                else if (CurrentSymbol.Type == HtmlSymbolType.LeftBracket)
+                {
+                    if (AcceptAndMoveNext())
+                    {
+                        return CData();
+                    }
+                }
+                else
+                {
+                    AcceptAndMoveNext();
+                    return AcceptUntilAll(HtmlSymbolType.CloseAngle);
+                }
             }
-            else if (CurrentSymbol.Type == HtmlSymbolType.LeftBracket)
-            {
-                AcceptAndMoveNext();
-                return CData();
-            }
-            else
-            {
-                AcceptAndMoveNext();
-                return AcceptUntilAll(HtmlSymbolType.CloseAngle);
-            }
+
+            return false;
         }
 
         private bool CData()
         {
             if (CurrentSymbol.Type == HtmlSymbolType.Text && String.Equals(CurrentSymbol.Content, "cdata", StringComparison.OrdinalIgnoreCase))
             {
-                AcceptAndMoveNext();
-                if (CurrentSymbol.Type == HtmlSymbolType.LeftBracket)
+                if (AcceptAndMoveNext())
                 {
-                    return AcceptUntilAll(HtmlSymbolType.RightBracket, HtmlSymbolType.RightBracket, HtmlSymbolType.CloseAngle);
+                    if (CurrentSymbol.Type == HtmlSymbolType.LeftBracket)
+                    {
+                        return AcceptUntilAll(HtmlSymbolType.RightBracket, HtmlSymbolType.RightBracket, HtmlSymbolType.CloseAngle);
+                    }
                 }
             }
+
             return false;
         }
 

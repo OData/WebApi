@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.Contracts;
 using System.Web.Mvc.Filters;
 
 namespace System.Web.Mvc
@@ -20,22 +20,10 @@ namespace System.Web.Mvc
 
         public FilterInfo(IEnumerable<Filter> filters)
         {
-            // evaluate the 'filters' enumerable only once since the operation can be quite expensive
-            var cache = filters.ToList();
-
-            var overrides = cache.Where(f => f.Instance is IOverrideFilter);
-
-            FilterScope actionOverride = SelectLastOverrideScope<IActionFilter>(overrides);
-            FilterScope authenticationOverride = SelectLastOverrideScope<IAuthenticationFilter>(overrides);
-            FilterScope authorizationOverride = SelectLastOverrideScope<IAuthorizationFilter>(overrides);
-            FilterScope exceptionOverride = SelectLastOverrideScope<IExceptionFilter>(overrides);
-            FilterScope resultOverride = SelectLastOverrideScope<IResultFilter>(overrides);
-
-            _actionFilters.AddRange(SelectAvailable<IActionFilter>(cache, actionOverride));
-            _authenticationFilters.AddRange(SelectAvailable<IAuthenticationFilter>(cache, authenticationOverride));
-            _authorizationFilters.AddRange(SelectAvailable<IAuthorizationFilter>(cache, authorizationOverride));
-            _exceptionFilters.AddRange(SelectAvailable<IExceptionFilter>(cache, exceptionOverride));
-            _resultFilters.AddRange(SelectAvailable<IResultFilter>(cache, resultOverride));
+            // Determine the override scope for each filter type and cache the filters list.
+            OverrideFilterInfo processed = ProcessOverrideFilters(filters);
+            // Split the cached filters list based on filter type and override scope.
+            SplitFilters(processed);
         }
 
         public IList<IActionFilter> ActionFilters
@@ -63,34 +51,117 @@ namespace System.Web.Mvc
             get { return _resultFilters; }
         }
 
-        private static IEnumerable<T> SelectAvailable<T>(List<Filter> filters, FilterScope overrideFiltersBeforeScope)
+        private static OverrideFilterInfo ProcessOverrideFilters(IEnumerable<Filter> filters)
         {
-            // Determine which filters are available for this filter type, given the current overrides in place.
-            // A filter should be processed if:
-            //  1. It implements the appropriate interface for this filter type.
-            //  2. It has not been overridden (its scope is not before the scope of the last override for this type).
-            return filters.Where(f => f.Scope >= overrideFiltersBeforeScope && (f.Instance is T)).Select(
-                f => (T)f.Instance);
-        }
-
-        private static FilterScope SelectLastOverrideScope<T>(IEnumerable<Filter> overrideFilters)
-        {
-            // A filter type (such as action filter) can be overridden, which means every filter of that type at an
-            // earlier scope must be ignored. Determine the scope of the last override filter (if any). Only filters at
-            // this scope or later will be processed.
-
-            Filter lastOverride = overrideFilters.Where(
-                f => ((IOverrideFilter)f.Instance).FiltersToOverride == typeof(T)).LastOrDefault();
-
-            // If no override is present, the filter is not overridden (and filters at any scope, starting with First
-            // are processed). Not overriding a filter is equivalent to placing an override at the First filter scope
-            // (since there's nothing before First to override).
-            if (lastOverride == null)
+            OverrideFilterInfo result = new OverrideFilterInfo
             {
-                return FilterScope.First;
+                ActionOverrideScope = FilterScope.First,
+                AuthenticationOverrideScope = FilterScope.First,
+                AuthorizationOverrideScope = FilterScope.First,
+                ExceptionOverrideScope = FilterScope.First,
+                ResultOverrideScope = FilterScope.First,
+                Filters = new List<Filter>()
+            };
+
+            // Evaluate the 'filters' enumerable only once since the operation can be quite expensive.
+            foreach (Filter filter in filters)
+            {
+                if (filter == null)
+                {
+                    continue;
+                }
+                IOverrideFilter overrideFilter = filter.Instance as IOverrideFilter;
+
+                if (overrideFilter != null)
+                {
+                    if (overrideFilter.FiltersToOverride == typeof(IActionFilter)
+                        && filter.Scope >= result.ActionOverrideScope)
+                    {
+                        result.ActionOverrideScope = filter.Scope;
+                    }
+                    else if (overrideFilter.FiltersToOverride == typeof(IAuthenticationFilter)
+                        && filter.Scope >= result.AuthenticationOverrideScope)
+                    {
+                        result.AuthenticationOverrideScope = filter.Scope;
+                    }
+                    else if (overrideFilter.FiltersToOverride == typeof(IAuthorizationFilter)
+                        && filter.Scope >= result.AuthorizationOverrideScope)
+                    {
+                        result.AuthorizationOverrideScope = filter.Scope;
+                    }
+                    else if (overrideFilter.FiltersToOverride == typeof(IExceptionFilter)
+                        && filter.Scope >= result.ExceptionOverrideScope)
+                    {
+                        result.ExceptionOverrideScope = filter.Scope;
+                    }
+                    else if (overrideFilter.FiltersToOverride == typeof(IResultFilter)
+                        && filter.Scope >= result.ResultOverrideScope)
+                    {
+                        result.ResultOverrideScope = filter.Scope;
+                    }
+                }
+
+                // Cache filters to avoid having to enumerate it again (expensive). Do so here to avoid an extra loop.
+                result.Filters.Add(filter);
             }
 
-            return lastOverride.Scope;
+            return result;
+        }
+
+        private void SplitFilters(OverrideFilterInfo info)
+        {
+            Contract.Assert(info.Filters != null);
+
+            foreach (Filter filter in info.Filters)
+            {
+                Contract.Assert(filter != null);
+
+                IActionFilter actionFilter = filter.Instance as IActionFilter;
+
+                if (actionFilter != null && filter.Scope >= info.ActionOverrideScope)
+                {
+                    _actionFilters.Add(actionFilter);
+                }
+
+                IAuthenticationFilter authenticationFilter = filter.Instance as IAuthenticationFilter;
+
+                if (authenticationFilter != null && filter.Scope >= info.AuthenticationOverrideScope)
+                {
+                    _authenticationFilters.Add(authenticationFilter);
+                }
+
+                IAuthorizationFilter authorizationFilter = filter.Instance as IAuthorizationFilter;
+
+                if (authorizationFilter != null && filter.Scope >= info.AuthorizationOverrideScope)
+                {
+                    _authorizationFilters.Add(authorizationFilter);
+                }
+
+                IExceptionFilter exceptionFilter = filter.Instance as IExceptionFilter;
+
+                if (exceptionFilter != null && filter.Scope >= info.ExceptionOverrideScope)
+                {
+                    _exceptionFilters.Add(exceptionFilter);
+                }
+
+                IResultFilter resultFilter = filter.Instance as IResultFilter;
+
+                if (resultFilter != null && filter.Scope >= info.ResultOverrideScope)
+                {
+                    _resultFilters.Add(resultFilter);
+                }
+            }
+        }
+
+        private struct OverrideFilterInfo
+        {
+            public FilterScope ActionOverrideScope;
+            public FilterScope AuthenticationOverrideScope;
+            public FilterScope AuthorizationOverrideScope;
+            public FilterScope ExceptionOverrideScope;
+            public FilterScope ResultOverrideScope;
+
+            public List<Filter> Filters;
         }
     }
 }

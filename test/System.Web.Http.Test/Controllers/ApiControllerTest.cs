@@ -333,11 +333,10 @@ namespace System.Web.Http
                 log.Add("authN filters challenge");
                 return response;
             });
-            var filterSetup = authenticationFilterMock.Setup(f => f.ChallengeAsync(
-                It.IsAny<HttpActionContext>(), It.IsAny<IHttpActionResult>(), It.IsAny<CancellationToken>()));
-            var filterCallback = filterSetup.Callback<HttpActionContext, IHttpActionResult, CancellationToken>(
-                (i1, r, i2) => { innerResult = r;});
-            filterCallback.Returns(() => Task.FromResult<IHttpActionResult>(challengeResultMock.Object));
+            authenticationFilterMock.Setup(f => f.ChallengeAsync(It.IsAny<HttpActionContext>(),
+                It.IsAny<IHttpActionResult>(), It.IsAny<CancellationToken>()))
+                .Callback<HttpActionContext, IHttpActionResult, CancellationToken>((i1, r, i2) => { innerResult = r;})
+                .Returns(() => Task.FromResult<IHttpActionResult>(challengeResultMock.Object));
 
             var selectorMock = new Mock<IHttpActionSelector>();
 

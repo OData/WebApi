@@ -154,7 +154,7 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [Fact]
-        public void CreateFilterTracers_IFilter_With_All_Filter_Interfaces_Returns_5_Wrapped_Filters()
+        public void CreateFilterTracers_IFilter_With_All_Filter_Interfaces_Returns_Wrapped_Filters_For_Each_Filter()
         {
             // Arrange
             IFilter filter = new TestFilterAllBehaviors();
@@ -323,7 +323,7 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [Fact]
-        public void CreateFilterTracers_With_All_Filter_Interfaces_Returns_5_Wrapped_Filters()
+        public void CreateFilterTracers_With_All_Filter_Interfaces_Returns_Wrapped_Filters_For_Each_Filter()
         {
             // Arrange
             FilterInfo filter = new FilterInfo(new TestFilterAllBehaviors(), FilterScope.Action);

@@ -79,6 +79,11 @@ namespace System.Web.Http.Description
         public Collection<ApiParameterDescription> ParameterDescriptions { get; internal set; }
 
         /// <summary>
+        /// Gets the response description.
+        /// </summary>
+        public ResponseDescription ResponseDescription { get; internal set; }
+
+        /// <summary>
         /// Gets the ID. The ID is unique within <see cref="HttpServer"/>.
         /// </summary>
         public string ID

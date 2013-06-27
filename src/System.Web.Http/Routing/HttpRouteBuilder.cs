@@ -82,8 +82,8 @@ namespace System.Web.Http.Routing
 
             HttpRouteValueDictionary defaults = new HttpRouteValueDictionary
             {
-                { "controller", controllerName },
-                { "action", actionName }
+                { RouteKeys.ControllerKey, controllerName },
+                { RouteKeys.ActionKey, actionName }
             };
 
             HttpRouteValueDictionary constraints = new HttpRouteValueDictionary();

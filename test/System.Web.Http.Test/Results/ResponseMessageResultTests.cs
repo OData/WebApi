@@ -55,7 +55,7 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void ApiControllerMessage_CreatesCorrectMessageResult()
+        public void ApiControllerResponseMessage_CreatesCorrectResponseMessageResult()
         {
             // Arrange
             using (HttpResponseMessage expectedResponse = CreateResponse())

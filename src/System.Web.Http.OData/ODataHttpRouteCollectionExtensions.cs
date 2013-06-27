@@ -78,24 +78,23 @@ namespace System.Web.Http
 
             if (!String.IsNullOrEmpty(routePrefix))
             {
-                int routePrefixLastCharIndex = routePrefix.Length - 1;
-                if (routePrefix[routePrefixLastCharIndex] != '/')
+                int prefixLastIndex = routePrefix.Length - 1;
+                if (routePrefix[prefixLastIndex] == '/')
                 {
-                    // Add the last trailing slash if it doesn't have one.
-                    routePrefix += "/";
+                    // Remove the last trailing slash if it has one.
+                    routePrefix = routePrefix.Substring(0, routePrefix.Length - 1);
                 }
             }
 
             if (batchHandler != null)
             {
                 batchHandler.ODataRouteName = routeName;
-                routes.MapHttpBatchRoute(routeName + "Batch", routePrefix + ODataRouteConstants.Batch, batchHandler);
+                string batchTemplate = String.IsNullOrEmpty(routePrefix) ? ODataRouteConstants.Batch : routePrefix + '/' + ODataRouteConstants.Batch;
+                routes.MapHttpBatchRoute(routeName + "Batch", batchTemplate, batchHandler);
             }
 
-            string routeTemplate = routePrefix + ODataRouteConstants.ODataPathTemplate;
-            IHttpRouteConstraint routeConstraint = new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);
-            HttpRouteValueDictionary constraintDictionary = new HttpRouteValueDictionary() { { ODataRouteConstants.ConstraintName, routeConstraint } };
-            routes.MapHttpRoute(routeName, routeTemplate, defaults: null, constraints: constraintDictionary);
+            ODataPathRouteConstraint routeConstraint = new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);
+            routes.Add(routeName, new ODataRoute(routePrefix, routeConstraint));
         }
     }
 }

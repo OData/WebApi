@@ -78,6 +78,8 @@
     <Compile Include="Controllers\Apis\User.cs" />
     <Compile Include="Controllers\Apis\UsersRpcController.cs" />
     <Compile Include="Controllers\AuthorizationFilterResultTests.cs" />
+    <Compile Include="Controllers\AuthenticationFilterResultTests.cs" />
+    <Compile Include="Controllers\FilterGroupingTests.cs" />
     <Compile Include="Controllers\HttpParameterBindingTest.cs" />
     <Compile Include="Controllers\ParameterBindingExtensionsTest.cs" />
     <Compile Include="Controllers\ResponseMessageResultConverterTest.cs" />
@@ -86,6 +88,7 @@
     <Compile Include="Controllers\HttpControllerContextTest.cs" />
     <Compile Include="Controllers\HttpConfigurationTest.cs" />
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
+    <Compile Include="Filters\HttpAuthenticationContextTests.cs" />
     <Compile Include="Hosting\HttpMessageHandlerExtensions.cs" />
     <Compile Include="Hosting\SuppressHostPrincipalMessageHandlerTest.cs" />
     <Compile Include="Hosting\ThreadCurrentPrincipalContext.cs" />
@@ -172,6 +175,7 @@
     <Compile Include="Tracing\TraceRecordComparer.cs" />
     <Compile Include="Tracing\Tracers\BufferedMediaTypeFormatterTracerTest.cs" />
     <Compile Include="Tracing\Tracers\OverrideFilterTracerTests.cs" />
+    <Compile Include="Tracing\Tracers\AuthenticationFilterTracerTests.cs" />
     <Compile Include="Tracing\Tracers\ReadWriteMediaTypeFormatterTracerTestBase.cs" />
     <Compile Include="Tracing\Tracers\FormUrlEncodedMediaTypeFormatterTracerTest.cs" />
     <Compile Include="Tracing\Tracers\HttpActionBindingTracerTest.cs" />

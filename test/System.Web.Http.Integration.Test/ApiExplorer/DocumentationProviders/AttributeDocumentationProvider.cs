@@ -16,7 +16,7 @@ namespace System.Web.Http.ApiExplorer
                 return apiDocumentation.Description;
             }
 
-            return string.Empty;
+            return String.Empty;
         }
 
         public string GetDocumentation(HttpParameterDescriptor parameterDescriptor)
@@ -27,14 +27,47 @@ namespace System.Web.Http.ApiExplorer
                 return parameterDocumentation.Description;
             }
 
-            return string.Empty;
+            return String.Empty;
+        }
+
+        public string GetDocumentation(HttpControllerDescriptor controllerDescriptor)
+        {
+            var apiDocumentation = controllerDescriptor.GetCustomAttributes<ApiDocumentationAttribute>().FirstOrDefault();
+            if (apiDocumentation != null)
+            {
+                return apiDocumentation.Description;
+            }
+
+            return String.Empty;
+        }
+        
+        public string GetResponseDocumentation(HttpActionDescriptor actionDescriptor)
+        {
+            var apiDocumentation = actionDescriptor.GetCustomAttributes<ApiResponseDocumentationAttribute>().FirstOrDefault();
+            if (apiDocumentation != null)
+            {
+                return apiDocumentation.Description;
+            }
+
+            return String.Empty;
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
     public sealed class ApiDocumentationAttribute : Attribute
     {
         public ApiDocumentationAttribute(string description)
+        {
+            Description = description;
+        }
+
+        public string Description { get; private set; }
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    public sealed class ApiResponseDocumentationAttribute : Attribute
+    {
+        public ApiResponseDocumentationAttribute(string description)
         {
             Description = description;
         }

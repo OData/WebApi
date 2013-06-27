@@ -8,6 +8,7 @@ using System.Web.Http.Dependencies;
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
+using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
 using System.Web.Http.Metadata.Providers;
 using System.Web.Http.ModelBinding;
@@ -59,6 +60,7 @@ namespace System.Web.Http.Services
             Assert.IsType<TraceManager>(defaultServices.GetService(typeof(ITraceManager)));
             Assert.IsType<DataAnnotationsModelMetadataProvider>(defaultServices.GetService(typeof(ModelMetadataProvider)));
             Assert.IsType<ModelValidatorCache>(defaultServices.GetService(typeof(IModelValidatorCache)));
+            Assert.IsType<ThreadPrincipalService>(defaultServices.GetService(typeof(IHostPrincipalService)));
 
             object[] filterProviders = defaultServices.GetServices(typeof(IFilterProvider)).ToArray();
             Assert.Equal(2, filterProviders.Length);

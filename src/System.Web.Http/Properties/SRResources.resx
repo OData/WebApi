@@ -297,9 +297,6 @@
   <data name="RouteCollection_NameNotFound" xml:space="preserve">
     <value>A route named '{0}' could not be found in the route collection.</value>
   </data>
-  <data name="ApiExplorer_DefaultDocumentation" xml:space="preserve">
-    <value>Documentation for '{0}'.</value>
-  </data>
   <data name="ParameterBindingCantHaveMultipleBodyParameters" xml:space="preserve">
     <value>Can't bind multiple parameters ('{0}' and '{1}') to the request's content.</value>
   </data>

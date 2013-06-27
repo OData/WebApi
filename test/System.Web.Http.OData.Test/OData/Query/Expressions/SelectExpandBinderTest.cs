@@ -284,12 +284,15 @@ namespace System.Web.Http.OData.Query.Expressions
             Assert.Equal(customer.Name, customerWrapper.Container.ToDictionary()["Name"]);
         }
 
-        [Fact]
-        public void ProjectAsWrapper_Element_ProjectedValueContains_KeyPropertiesEvenIfNotPresentInSelectClause()
+        [Theory]
+        [InlineData("Name")]
+        [InlineData("ModelWithInheritance.upgrade")]
+        public void ProjectAsWrapper_Element_ProjectedValueContains_KeyPropertiesEvenIfNotPresentInSelectClause(string select)
         {
             // Arrange
             Customer customer = new Customer { ID = 42, FirstName = "OData" };
-            SelectExpandClause selectExpand = new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand("Name,Orders", "Orders", _model.Customer, _model.Customers);
+            SelectExpandClause selectExpand =
+                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, null, _model.Customer, _model.Customers);
             Expression source = Expression.Constant(customer);
 
             // Act

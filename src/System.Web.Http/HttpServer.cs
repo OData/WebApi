@@ -18,7 +18,8 @@ namespace System.Web.Http
     /// </summary>
     public class HttpServer : DelegatingHandler
     {
-        private static readonly Lazy<IPrincipal> _anonymousPrincipal = new Lazy<IPrincipal>(() => new GenericPrincipal(new GenericIdentity(String.Empty), new string[0]), isThreadSafe: true);
+        // _anonymousPrincipal needs thread-safe intialization so use a static field initializer
+        private static readonly IPrincipal _anonymousPrincipal = new GenericPrincipal(new GenericIdentity(String.Empty), new string[0]);
         private readonly HttpConfiguration _configuration;
         private readonly HttpMessageHandler _dispatcher;
         private bool _disposed;
@@ -74,6 +75,10 @@ namespace System.Web.Http
             {
                 throw Error.ArgumentNull("dispatcher");
             }
+
+            // Read the thread principal to work around a problem up to .NET 4.5.1 that CurrentPrincipal creates a new instance each time it is read in async 
+            // code if it has not been queried from the spawning thread.
+            IPrincipal principal = Thread.CurrentPrincipal;
 
             _dispatcher = dispatcher;
             _configuration = configuration;
@@ -149,7 +154,7 @@ namespace System.Web.Http
             IPrincipal originalPrincipal = Thread.CurrentPrincipal;
             if (originalPrincipal == null)
             {
-                Thread.CurrentPrincipal = _anonymousPrincipal.Value;
+                Thread.CurrentPrincipal = _anonymousPrincipal;
             }
 
             try

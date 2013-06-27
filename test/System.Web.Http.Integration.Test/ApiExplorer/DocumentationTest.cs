@@ -2,7 +2,6 @@
 
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.Properties;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.ApiExplorer
@@ -23,14 +22,10 @@ namespace System.Web.Http.ApiExplorer
             IApiExplorer explorer = config.Services.GetApiExplorer();
             foreach (ApiDescription description in explorer.ApiDescriptions)
             {
-                Assert.Equal(
-                    String.Format(SRResources.ApiExplorer_DefaultDocumentation, description.ActionDescriptor.ActionName),
-                    description.Documentation);
+                Assert.Null(description.Documentation);
                 foreach (ApiParameterDescription param in description.ParameterDescriptions)
                 {
-                    Assert.Equal(
-                        String.Format(SRResources.ApiExplorer_DefaultDocumentation, param.Name),
-                        param.Documentation);
+                    Assert.Null(param.Documentation);
                 }
             }
         }
@@ -53,6 +48,9 @@ namespace System.Web.Http.ApiExplorer
             foreach (ApiDescription description in explorer.ApiDescriptions)
             {
                 Assert.Equal(
+                    "Documentation controller",
+                    documentationProvider.GetDocumentation(description.ActionDescriptor.ControllerDescriptor));
+                Assert.Equal(
                     String.Format("{0} action", description.ActionDescriptor.ActionName),
                     description.Documentation);
                 foreach (ApiParameterDescription param in description.ParameterDescriptions)
@@ -60,6 +58,12 @@ namespace System.Web.Http.ApiExplorer
                     Assert.Equal(
                         String.Format("{0} parameter", param.Name),
                         param.Documentation);
+                }
+                if (description.ResponseDescription.DeclaredType != null)
+                {
+                    Assert.Equal(
+                        String.Format("{0} response", description.ActionDescriptor.ActionName),
+                        description.ResponseDescription.Documentation);
                 }
             }
         }

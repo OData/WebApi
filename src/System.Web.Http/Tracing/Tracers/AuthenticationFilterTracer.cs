@@ -31,11 +31,11 @@ namespace System.Web.Http.Tracing.Tracers
             CancellationToken cancellationToken)
         {
             return TraceWriter.TraceBeginEndAsync<IAuthenticationResult>(
-                context != null ? context.Request : null,
-                TraceCategories.FiltersCategory,
-                TraceLevel.Info,
-                _innerFilter.GetType().Name,
-                AuthenticateAsyncMethodName,
+                request: context != null ? context.Request : null,
+                category: TraceCategories.FiltersCategory,
+                level: TraceLevel.Info,
+                operatorName: _innerFilter.GetType().Name,
+                operationName: AuthenticateAsyncMethodName,
                 beginTrace: null,
                 execute: () => _innerFilter.AuthenticateAsync(context, cancellationToken),
                 endTrace: null,
@@ -46,11 +46,11 @@ namespace System.Web.Http.Tracing.Tracers
             CancellationToken cancellationToken)
         {
             return TraceWriter.TraceBeginEndAsync<IHttpActionResult>(
-                context != null ? context.Request : null,
-                TraceCategories.FiltersCategory,
-                TraceLevel.Info,
-                _innerFilter.GetType().Name,
-                ChallengeAsyncMethodName,
+                request: context != null ? context.Request : null,
+                category: TraceCategories.FiltersCategory,
+                level: TraceLevel.Info,
+                operatorName: _innerFilter.GetType().Name,
+                operationName: ChallengeAsyncMethodName,
                 beginTrace: null,
                 execute: () => _innerFilter.ChallengeAsync(context, result, cancellationToken),
                 endTrace: null,

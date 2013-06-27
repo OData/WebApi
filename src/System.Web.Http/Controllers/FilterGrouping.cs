@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.Filters;
 
-namespace System.Web.Http
+namespace System.Web.Http.Controllers
 {
     /// <summary>
     /// Quickly split filters into different types
@@ -12,26 +12,26 @@ namespace System.Web.Http
     internal class FilterGrouping
     {
         private IActionFilter[] _actionFilters;
+        private IAuthorizationFilter[] _authorizationFilters;
         private IAuthenticationFilter[] _authenticationFilters;
-        private IAuthorizationFilter[]_authorizationFilters;
         private IExceptionFilter[] _exceptionFilters;
 
         public FilterGrouping(IEnumerable<FilterInfo> filters)
         {
             // evaluate the 'filters' enumerable only once since the operation can be quite expensive
-            var cache = filters.ToList();
+            List<FilterInfo> orderedCache = filters.ToList();
 
-            var overrides = cache.Where(f => f.Instance is IOverrideFilter);
+            List<FilterInfo> overrides = orderedCache.Where(f => f.Instance is IOverrideFilter).ToList();
 
             FilterScope actionOverride = SelectLastOverrideScope<IActionFilter>(overrides);
-            FilterScope authenticationOverride = SelectLastOverrideScope<IAuthenticationFilter>(overrides);
             FilterScope authorizationOverride = SelectLastOverrideScope<IAuthorizationFilter>(overrides);
+            FilterScope authenticationOverride = SelectLastOverrideScope<IAuthenticationFilter>(overrides);
             FilterScope exceptionOverride = SelectLastOverrideScope<IExceptionFilter>(overrides);
 
-            _actionFilters = SelectAvailable<IActionFilter>(cache, actionOverride).ToArray();
-            _authenticationFilters = SelectAvailable<IAuthenticationFilter>(cache, authenticationOverride).ToArray();
-            _authorizationFilters = SelectAvailable<IAuthorizationFilter>(cache, authorizationOverride).ToArray();
-            _exceptionFilters = SelectAvailable<IExceptionFilter>(cache, exceptionOverride).ToArray();
+            _actionFilters = SelectAvailable<IActionFilter>(orderedCache, actionOverride);
+            _authorizationFilters = SelectAvailable<IAuthorizationFilter>(orderedCache, authorizationOverride);
+            _authenticationFilters = SelectAvailable<IAuthenticationFilter>(orderedCache, authenticationOverride);
+            _exceptionFilters = SelectAvailable<IExceptionFilter>(orderedCache, exceptionOverride);
         }
 
         public IActionFilter[] ActionFilters
@@ -39,14 +39,14 @@ namespace System.Web.Http
             get { return _actionFilters; }
         }
 
-        public IAuthenticationFilter[] AuthenticationFilters
-        {
-            get { return _authenticationFilters; }
-        }
-
         public IAuthorizationFilter[] AuthorizationFilters
         {
             get { return _authorizationFilters; }
+        }
+
+        public IAuthenticationFilter[] AuthenticationFilters
+        {
+            get { return _authenticationFilters; }
         }
 
         public IExceptionFilter[] ExceptionFilters
@@ -54,8 +54,7 @@ namespace System.Web.Http
             get { return _exceptionFilters; }
         }
 
-        private static IEnumerable<T> SelectAvailable<T>(List<FilterInfo> filters,
-            FilterScope overrideFiltersBeforeScope)
+        private static T[] SelectAvailable<T>(List<FilterInfo> filters, FilterScope overrideFiltersBeforeScope)
         {
             // Determine which filters are available for this filter type, given the current overrides in place.
             // A filter should be processed if:
@@ -63,10 +62,10 @@ namespace System.Web.Http
             //  2. It has not been overridden (its scope is not before the scope of the last override for this
             //     type).
             return filters.Where(f => f.Scope >= overrideFiltersBeforeScope
-                && (f.Instance is T)).Select(f => (T)f.Instance);
+                && (f.Instance is T)).Select(f => (T)f.Instance).ToArray();
         }
 
-        private static FilterScope SelectLastOverrideScope<T>(IEnumerable<FilterInfo> overrideFilters)
+        private static FilterScope SelectLastOverrideScope<T>(List<FilterInfo> overrideFilters)
         {
             // A filter type (such as action filter) can be overridden, which means every filter of that type at an
             // earlier scope must be ignored. Determine the scope of the last override filter (if any). Only

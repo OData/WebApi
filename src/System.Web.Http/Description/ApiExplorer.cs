@@ -11,7 +11,6 @@ using System.Text.RegularExpressions;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Internal;
-using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
 
@@ -24,10 +23,8 @@ namespace System.Web.Http.Description
     {
         private Lazy<Collection<ApiDescription>> _apiDescriptions;
         private readonly HttpConfiguration _config;
-        private const string ActionVariableName = "action";
-        private const string ControllerVariableName = "controller";
-        private static readonly Regex _actionVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", ActionVariableName), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        private static readonly Regex _controllerVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", ControllerVariableName), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex _actionVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteKeys.ActionKey), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex _controllerVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteKeys.ControllerKey), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiExplorer"/> class.
@@ -79,7 +76,7 @@ namespace System.Web.Http.Description
 
             ApiExplorerSettingsAttribute setting = controllerDescriptor.GetCustomAttributes<ApiExplorerSettingsAttribute>().FirstOrDefault();
             return (setting == null || !setting.IgnoreApi) &&
-                MatchRegexConstraint(route, ControllerVariableName, controllerVariableValue);
+                MatchRegexConstraint(route, RouteKeys.ControllerKey, controllerVariableValue);
         }
 
         /// <summary>
@@ -105,7 +102,7 @@ namespace System.Web.Http.Description
             NonActionAttribute nonAction = actionDescriptor.GetCustomAttributes<NonActionAttribute>().FirstOrDefault();
             return (setting == null || !setting.IgnoreApi) &&
                 (nonAction == null) &&
-                MatchRegexConstraint(route, ActionVariableName, actionVariableValue);
+                MatchRegexConstraint(route, RouteKeys.ActionKey, actionVariableValue);
         }
 
         /// <summary>
@@ -197,7 +194,7 @@ namespace System.Web.Http.Description
             else
             {
                 // bound controller variable, {controller = "controllerName"}
-                if (route.Defaults.TryGetValue(ControllerVariableName, out controllerVariableValue))
+                if (route.Defaults.TryGetValue(RouteKeys.ControllerKey, out controllerVariableValue))
                 {
                     HttpControllerDescriptor controllerDescriptor;
                     if (controllerMappings.TryGetValue(controllerVariableValue, out controllerDescriptor) && ShouldExploreController(controllerVariableValue, controllerDescriptor, route))
@@ -228,7 +225,7 @@ namespace System.Web.Http.Description
                         PopulateActionDescriptions(actionMapping, actionVariableValue, route, expandedLocalPath, apiDescriptions);
                     }
                 }
-                else if (route.Defaults.TryGetValue(ActionVariableName, out actionVariableValue))
+                else if (route.Defaults.TryGetValue(RouteKeys.ActionKey, out actionVariableValue))
                 {
                     // bound action variable, { action = "actionName" }
                     PopulateActionDescriptions(actionMappings[actionVariableValue], actionVariableValue, route, localPath, apiDescriptions);
@@ -278,7 +275,8 @@ namespace System.Web.Http.Description
                 Enumerable.Empty<MediaTypeFormatter>();
 
             // response formatters
-            Type returnType = actionDescriptor.ReturnType;
+            ResponseDescription responseDescription = CreateResponseDescription(actionDescriptor);
+            Type returnType = responseDescription.ResponseType ?? responseDescription.DeclaredType;
             IEnumerable<MediaTypeFormatter> supportedResponseFormatters = returnType != null ?
                 actionDescriptor.Configuration.Formatters.Where(f => f.CanWriteType(returnType)) :
                 Enumerable.Empty<MediaTypeFormatter>();
@@ -301,9 +299,23 @@ namespace System.Web.Http.Description
                     Route = route,
                     SupportedResponseFormatters = new Collection<MediaTypeFormatter>(supportedResponseFormatters.ToList()),
                     SupportedRequestBodyFormatters = new Collection<MediaTypeFormatter>(supportedRequestBodyFormatters.ToList()),
-                    ParameterDescriptions = new Collection<ApiParameterDescription>(parameterDescriptions)
+                    ParameterDescriptions = new Collection<ApiParameterDescription>(parameterDescriptions),
+                    ResponseDescription = responseDescription
                 });
             }
+        }
+
+        private ResponseDescription CreateResponseDescription(HttpActionDescriptor actionDescriptor)
+        {
+            Collection<ResponseTypeAttribute> responseTypeAttribute = actionDescriptor.GetCustomAttributes<ResponseTypeAttribute>();
+            Type responseType = responseTypeAttribute.Select(attribute => attribute.ResponseType).FirstOrDefault();
+
+            return new ResponseDescription
+            {
+                DeclaredType = actionDescriptor.ReturnType,
+                ResponseType = responseType,
+                Documentation = GetApiResponseDocumentation(actionDescriptor)
+            };
         }
 
         private static IEnumerable<MediaTypeFormatter> GetInnerFormatters(IEnumerable<MediaTypeFormatter> mediaTypeFormatters)
@@ -398,23 +410,34 @@ namespace System.Web.Http.Description
         private string GetApiDocumentation(HttpActionDescriptor actionDescriptor)
         {
             IDocumentationProvider documentationProvider = DocumentationProvider ?? actionDescriptor.Configuration.Services.GetDocumentationProvider();
-            if (documentationProvider == null)
+            if (documentationProvider != null)
             {
-                return String.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, actionDescriptor.ActionName);
+                return documentationProvider.GetDocumentation(actionDescriptor);
             }
 
-            return documentationProvider.GetDocumentation(actionDescriptor);
+            return null;
         }
 
         private string GetApiParameterDocumentation(HttpParameterDescriptor parameterDescriptor)
         {
             IDocumentationProvider documentationProvider = DocumentationProvider ?? parameterDescriptor.Configuration.Services.GetDocumentationProvider();
-            if (documentationProvider == null)
+            if (documentationProvider != null)
             {
-                return String.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, parameterDescriptor.Prefix ?? parameterDescriptor.ParameterName);
+                return documentationProvider.GetDocumentation(parameterDescriptor);
             }
 
-            return documentationProvider.GetDocumentation(parameterDescriptor);
+            return null;
+        }
+
+        private string GetApiResponseDocumentation(HttpActionDescriptor actionDescriptor)
+        {
+            IDocumentationProvider documentationProvider = DocumentationProvider ?? actionDescriptor.Configuration.Services.GetDocumentationProvider();
+            if (documentationProvider != null)
+            {
+                return documentationProvider.GetResponseDocumentation(actionDescriptor);
+            }
+
+            return null;
         }
 
         // remove ApiDescription that will lead to ambiguous action matching.

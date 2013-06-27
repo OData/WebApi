@@ -244,7 +244,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
                 ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, out autoSelectedProperties);
 
-                if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0)
+                if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0)
                 {
                     wrapperProperty = wrapperType.GetProperty("Container");
                     Contract.Assert(wrapperProperty != null);

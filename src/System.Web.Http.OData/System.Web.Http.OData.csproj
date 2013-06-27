@@ -110,6 +110,7 @@
     <Compile Include="OData\Routing\Conventions\ActionMapExtensions.cs" />
     <Compile Include="OData\Routing\Conventions\ODataRoutingConventions.cs" />
     <Compile Include="OData\Routing\Conventions\PropertyRoutingConvention.cs" />
+    <Compile Include="OData\Routing\ODataRoute.cs" />
     <Compile Include="OData\Routing\ODataPathExtensions.cs" />
     <Compile Include="OData\ODataFormattingAttribute.cs" />
     <Compile Include="OData\ODataController.cs" />

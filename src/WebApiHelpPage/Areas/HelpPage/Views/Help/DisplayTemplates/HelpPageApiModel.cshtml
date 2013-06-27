@@ -36,7 +36,15 @@
 
     @if (hasResponseSamples)
     {
-        <h2>Response Information</h2> 
+        <h2>Response Information</h2>
+        if (description.ResponseDescription.Documentation != null)
+        {
+            <p>@description.ResponseDescription.Documentation</p>
+        }
+        else
+        {
+            <p>No documentation available.</p>
+        }
         <h3>Response body formats</h3>
         @Html.DisplayFor(apiModel => apiModel.SampleResponses, "Samples")
     }

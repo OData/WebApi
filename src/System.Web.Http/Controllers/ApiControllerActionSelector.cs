@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Web.Http.Internal;
 using System.Web.Http.Properties;
+using System.Web.Http.Routing;
 
 namespace System.Web.Http.Controllers
 {
@@ -23,9 +24,6 @@ namespace System.Web.Http.Controllers
     /// </summary>
     public class ApiControllerActionSelector : IHttpActionSelector
     {
-        private const string ActionRouteKey = "action";
-        private const string ControllerRouteKey = "controller";
-
         private ActionSelectorCacheItem _fastCache;
         private readonly object _cacheKey = new object();
 
@@ -155,7 +153,7 @@ namespace System.Web.Http.Controllers
             {
                 // Performance-sensitive
                 string actionName;
-                bool useActionName = controllerContext.RouteData.Values.TryGetValue(ActionRouteKey, out actionName);
+                bool useActionName = controllerContext.RouteData.Values.TryGetValue(RouteKeys.ActionKey, out actionName);
 
                 ReflectedHttpActionDescriptor[] actionsFoundByHttpMethods;
 
@@ -232,10 +230,10 @@ namespace System.Web.Http.Controllers
             {
                 IDictionary<string, object> routeValues = controllerContext.RouteData.Values;
                 HashSet<string> routeParameterNames = new HashSet<string>(routeValues.Keys, StringComparer.OrdinalIgnoreCase);
-                routeParameterNames.Remove(ControllerRouteKey);
+                routeParameterNames.Remove(RouteKeys.ControllerKey);
                 if (hasActionRouteKey)
                 {
-                    routeParameterNames.Remove(ActionRouteKey);
+                    routeParameterNames.Remove(RouteKeys.ActionKey);
                 }
 
                 HttpRequestMessage request = controllerContext.Request;

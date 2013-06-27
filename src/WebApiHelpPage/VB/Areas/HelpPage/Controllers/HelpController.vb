@@ -30,6 +30,7 @@ Namespace Areas.HelpPage.Controllers
         End Property
 
         Public Function Index() As ActionResult
+            ViewData("DocumentationProvider") = Configuration.Services.GetDocumentationProvider()
             Return View(Configuration.Services.GetApiExplorer().ApiDescriptions)
         End Function
 

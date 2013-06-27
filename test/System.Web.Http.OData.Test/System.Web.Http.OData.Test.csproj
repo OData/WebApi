@@ -121,7 +121,7 @@
     <Compile Include="OData\Query\SelectExpandQueryOptionTest.cs" />
     <Compile Include="OData\Query\Validators\SelectExpandQueryValidatorTest.cs" />
     <Compile Include="OData\Routing\ODataPathRouteConstraintTest.cs" />
-    <Compile Include="OData\Routing\ODataUrlHelperExtensionsTest.cs" />
+    <Compile Include="OData\Routing\ODataRouteTest.cs" />
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
     <Compile Include="OData\Builder\ActionLinkBuilderTests.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinderAnnotationTest.cs" />

@@ -51,13 +51,6 @@ namespace System.Web.Http.Controllers
                 actionInvoker)();
         }
 
-        private static Func<Task<HttpResponseMessage>> InvokeActionWithActionFilters<T>(
-            HttpActionContext actionContext, CancellationToken cancellationToken, IActionFilter[] filters,
-            Func<T, Task<HttpResponseMessage>> innerAction, T state)
-        {
-            return InvokeActionWithActionFilters(actionContext, cancellationToken, filters, () => innerAction(state));
-        }
-
         public static Func<Task<HttpResponseMessage>> InvokeActionWithActionFilters(HttpActionContext actionContext,
             CancellationToken cancellationToken, IActionFilter[] filters, Func<Task<HttpResponseMessage>> innerAction)
         {
@@ -81,6 +74,13 @@ namespace System.Web.Http.Controllers
             }
 
             return result;
+        }
+
+        private static Func<Task<HttpResponseMessage>> InvokeActionWithActionFilters<T>(
+            HttpActionContext actionContext, CancellationToken cancellationToken, IActionFilter[] filters,
+            Func<T, Task<HttpResponseMessage>> innerAction, T state)
+        {
+            return InvokeActionWithActionFilters(actionContext, cancellationToken, filters, () => innerAction(state));
         }
 
         // Keep as struct to avoid allocation

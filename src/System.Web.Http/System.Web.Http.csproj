@@ -82,6 +82,8 @@
     <Compile Include="Controllers\IActionResultConverter.cs" />
     <Compile Include="Controllers\HttpActionContext.cs" />
     <Compile Include="Controllers\IControllerConfiguration.cs" />
+    <Compile Include="Description\ResponseTypeAttribute.cs" />
+    <Compile Include="Description\ResponseDescription.cs" />
     <Compile Include="Hosting\IHostPrincipalService.cs" />
     <Compile Include="Filters\FailedAuthenticationResult.cs" />
     <Compile Include="Filters\SucceededAuthenticationResult.cs" />
@@ -93,7 +95,7 @@
     <Compile Include="Results\ContinuationResult.cs" />
     <Compile Include="HttpErrorKeys.cs" />
     <Compile Include="HttpVerbAttribute.cs" />
-    <Compile Include="FilterGrouping.cs" />
+    <Compile Include="Controllers\FilterGrouping.cs" />
     <Compile Include="RoutePrefixAttribute.cs" />
     <Compile Include="Filters\HttpAuthenticationContext.cs" />
     <Compile Include="Results\ResponseMessageResult.cs" />
@@ -101,10 +103,10 @@
     <Compile Include="Filters\IAuthenticationFilter.cs" />
     <Compile Include="Filters\IAuthenticationResult.cs" />
     <Compile Include="Filters\IOverrideFilter.cs" />
-    <Compile Include="Filters\OverrideActionFiltersAttribute.cs" />
-    <Compile Include="Filters\OverrideAuthenticationAttribute.cs" />
-    <Compile Include="Filters\OverrideAuthorizationAttribute.cs" />
-    <Compile Include="Filters\OverrideExceptionFiltersAttribute.cs" />
+    <Compile Include="OverrideActionFiltersAttribute.cs" />
+    <Compile Include="OverrideAuthenticationAttribute.cs" />
+    <Compile Include="OverrideAuthorizationAttribute.cs" />
+    <Compile Include="OverrideExceptionFiltersAttribute.cs" />
     <Compile Include="Routing\Constraints\AlphaHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\BoolHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\CompoundHttpRouteConstraint.cs" />
@@ -124,6 +126,7 @@
     <Compile Include="Routing\Constraints\RangeRouteConstraintBase.cs" />
     <Compile Include="Routing\Constraints\RegexHttpRouteConstraint.cs" />
     <Compile Include="Routing\Constraints\OptionalHttpRouteConstraint.cs" />
+    <Compile Include="Routing\RouteKeys.cs" />
     <Compile Include="Routing\HttpRouteBuilder.cs" />
     <Compile Include="Routing\HttpRouteEntry.cs" />
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />

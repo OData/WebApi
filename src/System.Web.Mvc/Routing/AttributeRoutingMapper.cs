@@ -43,9 +43,9 @@ namespace System.Web.Mvc.Routing
 
         internal List<RouteEntry> MapMvcAttributeRoutes(ReflectedAsyncControllerDescriptor controllerDescriptor)
         {
-            RoutePrefixAttribute prefixAttribute = GetPrefixFrom(controllerDescriptor);
-            string prefix = prefixAttribute != null ? prefixAttribute.Prefix : null;
-            int prefixOrder = prefixAttribute != null ? prefixAttribute.Order : 0;
+            RoutePrefixAttribute[] prefixAttributes = GetPrefixsFrom(controllerDescriptor)
+                .DefaultIfEmpty()
+                .ToArray();
             RouteAreaAttribute area = GetAreaFrom(controllerDescriptor);
             string areaName = GetAreaName(controllerDescriptor, area);
             string areaPrefix = area != null ? area.AreaPrefix ?? area.AreaName : null;
@@ -74,10 +74,15 @@ namespace System.Web.Mvc.Routing
 
                 foreach (var routeAttribute in routeAttributes)
                 {
-                    string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.RouteTemplate);
-                    Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute.Verbs, controllerName,
-                                                                 actionName, method, areaName);
-                    RouteEntry entry = new RouteEntry
+                    foreach (var prefixAttribute in prefixAttributes)
+                    {
+                        string prefix = prefixAttribute != null ? prefixAttribute.Prefix : null;
+                        int prefixOrder = prefixAttribute != null ? prefixAttribute.Order : 0;
+
+                        string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.RouteTemplate);
+                        Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute.Verbs, controllerName,
+                                                                     actionName, method, areaName);
+                        RouteEntry entry = new RouteEntry
                         {
                             Name = routeAttribute.RouteName ?? template,
                             Route = route,
@@ -86,7 +91,8 @@ namespace System.Web.Mvc.Routing
                             Order = routeAttribute.RouteOrder,
                             PrefixOrder = prefixOrder,
                         };
-                    routeEntries.Add(entry);
+                        routeEntries.Add(entry);
+                    }
                 }
             }
 
@@ -132,15 +138,12 @@ namespace System.Web.Mvc.Routing
             return areaAttribute;
         }
 
-        private static RoutePrefixAttribute GetPrefixFrom(ReflectedAsyncControllerDescriptor controllerDescriptor)
+        private static IEnumerable<RoutePrefixAttribute> GetPrefixsFrom(ReflectedAsyncControllerDescriptor controllerDescriptor)
         {
             // this only happens once per controller type, for the lifetime of the application,
             // so we do not need to cache the results
-            RoutePrefixAttribute prefixAttribute =
-                controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute), false)
-                                    .Cast<RoutePrefixAttribute>()
-                                    .FirstOrDefault();
-            return prefixAttribute;
+           return controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute), false)
+                                    .Cast<RoutePrefixAttribute>();
         }
 
         internal static string CombinePrefixAndAreaWithTemplate(string areaPrefix, string prefix, string template)

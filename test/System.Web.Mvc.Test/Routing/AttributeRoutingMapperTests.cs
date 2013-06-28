@@ -94,11 +94,37 @@ namespace System.Web.Routing
             // Assert
             Assert.Equal(1, routes.Length);
 
-            Route route = routes.Cast<Route>().Single();
+            Route route = routes.Single();
             Assert.Equal("prefpref/getme", route.Url);
             Assert.Equal("GetMe", route.GetTargetActionMethod().Name);
         }
 
+        [Fact]
+        public void MapAttributeRoutesFromController_WithMultiPrefixedController()
+        {
+            // Arrange
+            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(MultiPrefixedController));
+
+            // Act
+            var routes = GetMapper().MapMvcAttributeRoutes(controllerDescriptor)
+                .Select(e => e.Route)
+                .ToArray();
+
+            // Assert
+            Assert.Equal(4, routes.Length);
+
+            var actualRouteUrls = routes.Select(route => route.Url).OrderBy(url => url).ToArray();
+            var expectedRouteUrls = new[]
+                {
+                    "pref1/getme",
+                    "pref1/getmeaswell",
+                    "pref2/getme",
+                    "pref2/getmeaswell",
+                };
+
+            Assert.Equal(expectedRouteUrls, actualRouteUrls);
+        }
+        
         [Fact]
         public void MapAttributeRoutesFromController_WithArea()
         {
@@ -113,7 +139,7 @@ namespace System.Web.Routing
             // Assert
             Assert.Equal(1, routes.Length);
 
-            Route route = routes.Cast<Route>().Single();
+            Route route = routes.Single();
 
             Assert.Equal("puget-sound/getme", route.Url);
             Assert.Equal("PugetSound", route.DataTokens["area"]);
@@ -136,7 +162,7 @@ namespace System.Web.Routing
             // Assert
             Assert.Equal(1, routes.Length);
 
-            Route route = routes.Cast<Route>().Single();
+            Route route = routes.Single();
 
             Assert.Equal("puget-sound/prefpref/getme", route.Url);
             Assert.Equal("PugetSound", route.DataTokens["area"]);
@@ -251,6 +277,23 @@ namespace System.Web.Routing
         private class PrefixedPugetSoundController : Controller
         {
             [HttpGet("getme")]
+            public ActionResult GetMe()
+            {
+                throw new NotImplementedException();
+            }
+
+            public ActionResult IDontGetARoute()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        [RoutePrefix("pref1")]
+        [RoutePrefix("pref2")]
+        private class MultiPrefixedController : Controller
+        {
+            [HttpGet("getme")]
+            [HttpGet("getmeaswell")]
             public ActionResult GetMe()
             {
                 throw new NotImplementedException();

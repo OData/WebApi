@@ -86,6 +86,7 @@
     <Compile Include="Description\ResponseDescription.cs" />
     <Compile Include="Filters\HttpAuthenticationChallengeContext.cs" />
     <Compile Include="Hosting\IHostPrincipalService.cs" />
+    <Compile Include="Results\BadRequestResult.cs" />
     <Compile Include="Results\InvalidModelStateResult.cs" />
     <Compile Include="Results\FormattedContentResult.cs" />
     <Compile Include="Hosting\SuppressHostPrincipalMessageHandler.cs" />

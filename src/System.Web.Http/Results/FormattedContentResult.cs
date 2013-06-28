@@ -7,7 +7,6 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Properties;
 
 namespace System.Web.Http.Results
 {
@@ -19,7 +18,7 @@ namespace System.Web.Http.Results
         private readonly T _content;
         private readonly MediaTypeFormatter _formatter;
         private readonly MediaTypeHeaderValue _mediaType;
-        private readonly IDependencyProvider _dependencies;
+        private readonly StatusCodeResult.IDependencyProvider _dependencies;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FormattedContentResult{T}"/> class with the values provided.
@@ -34,18 +33,19 @@ namespace System.Web.Http.Results
         /// <param name="request">The request message which led to this result.</param>
         public FormattedContentResult(HttpStatusCode statusCode, T content, MediaTypeFormatter formatter,
             MediaTypeHeaderValue mediaType, HttpRequestMessage request)
-            : this(statusCode, content, formatter, mediaType, new DirectDependencyProvider(request))
+            : this(statusCode, content, formatter, mediaType, new StatusCodeResult.DirectDependencyProvider(request))
         {
         }
 
         internal FormattedContentResult(HttpStatusCode statusCode, T content, MediaTypeFormatter formatter,
             MediaTypeHeaderValue mediaType, ApiController controller)
-            : this(statusCode, content, formatter, mediaType, new ApiControllerDependencyProvider(controller))
+            : this(statusCode, content, formatter, mediaType, new StatusCodeResult.ApiControllerDependencyProvider(
+                controller))
         {
         }
 
         private FormattedContentResult(HttpStatusCode statusCode, T content, MediaTypeFormatter formatter,
-            MediaTypeHeaderValue mediaType, IDependencyProvider dependencies)
+            MediaTypeHeaderValue mediaType, StatusCodeResult.IDependencyProvider dependencies)
         {
             if (formatter == null)
             {
@@ -128,77 +128,6 @@ namespace System.Web.Http.Results
             }
 
             return response;
-        }
-
-        /// <summary>Defines a provider for dependencies that are not always directly available.</summary>
-        /// <remarks>
-        /// This abstraction supports the unit testing scenario of creating the result without creating a request
-        /// message. (The ApiController provider implementation does lazy evaluation to make that scenario work.)
-        /// </remarks>
-        private interface IDependencyProvider
-        {
-            HttpRequestMessage Request { get; }
-        }
-
-        private sealed class DirectDependencyProvider : IDependencyProvider
-        {
-            private readonly HttpRequestMessage _request;
-
-            public DirectDependencyProvider(HttpRequestMessage request)
-            {
-                if (request == null)
-                {
-                    throw new ArgumentNullException("request");
-                }
-
-                _request = request;
-            }
-
-            public HttpRequestMessage Request
-            {
-                get { return _request; }
-            }
-        }
-
-        private sealed class ApiControllerDependencyProvider : IDependencyProvider
-        {
-            private readonly ApiController _controller;
-
-            private HttpRequestMessage _request;
-
-            public ApiControllerDependencyProvider(ApiController controller)
-            {
-                if (controller == null)
-                {
-                    throw new ArgumentNullException("controller");
-                }
-
-                _controller = controller;
-            }
-
-            public HttpRequestMessage Request
-            {
-                get
-                {
-                    EnsureResolved();
-                    return _request;
-                }
-            }
-
-            private void EnsureResolved()
-            {
-                if (_request == null)
-                {
-                    HttpRequestMessage request = _controller.Request;
-
-                    if (request == null)
-                    {
-                        throw new InvalidOperationException(SRResources.ApiController_RequestMustNotBeNull);
-                    }
-
-                    _request = request;
-                }
-            }
         }
     }
 }

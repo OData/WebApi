@@ -95,6 +95,7 @@
     <Compile Include="Hosting\SuppressHostPrincipalMessageHandlerTest.cs" />
     <Compile Include="Hosting\ThreadCurrentPrincipalContext.cs" />
     <Compile Include="Hosting\ThreadPrincipalServiceTest.cs" />
+    <Compile Include="Results\BadRequestResultTests.cs" />
     <Compile Include="Results\InvalidModelStateResultTests.cs" />
     <Compile Include="Results\NegotiatedContentResultTests.cs" />
     <Compile Include="Results\FormattedContentResultTests.cs" />

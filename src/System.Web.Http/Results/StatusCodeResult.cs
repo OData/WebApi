@@ -56,12 +56,17 @@ namespace System.Web.Http.Results
 
         private HttpResponseMessage Execute()
         {
-            HttpResponseMessage mutableResponse = new HttpResponseMessage(_statusCode);
+            return Execute(_statusCode, _dependencies.Request);
+        }
+
+        internal static HttpResponseMessage Execute(HttpStatusCode statusCode, HttpRequestMessage request)
+        {
+            HttpResponseMessage mutableResponse = new HttpResponseMessage(statusCode);
             HttpResponseMessage response = null;
 
             try
             {
-                mutableResponse.RequestMessage = _dependencies.Request;
+                mutableResponse.RequestMessage = request;
 
                 response = mutableResponse;
                 mutableResponse = null;
@@ -82,12 +87,12 @@ namespace System.Web.Http.Results
         /// This abstraction supports the unit testing scenario of creating the result without creating a request
         /// message. (The ApiController provider implementation does lazy evaluation to make that scenario work.)
         /// </remarks>
-        private interface IDependencyProvider
+        internal interface IDependencyProvider
         {
             HttpRequestMessage Request { get; }
         }
 
-        private sealed class DirectDependencyProvider : IDependencyProvider
+        internal sealed class DirectDependencyProvider : IDependencyProvider
         {
             private readonly HttpRequestMessage _request;
 
@@ -107,7 +112,7 @@ namespace System.Web.Http.Results
             }
         }
 
-        private sealed class ApiControllerDependencyProvider : IDependencyProvider
+        internal sealed class ApiControllerDependencyProvider : IDependencyProvider
         {
             private readonly ApiController _controller;
 

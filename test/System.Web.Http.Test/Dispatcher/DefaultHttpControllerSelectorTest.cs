@@ -214,6 +214,48 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
+        public void SelectController_RespectsDirectRoutes()
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
+            HttpRequestMessage request = new HttpRequestMessage();
+            var controllerDescriptor = new HttpControllerDescriptor();
+            var action1Descriptor = new ReflectedHttpActionDescriptor() { ControllerDescriptor = controllerDescriptor };
+            var action2Descriptor = new ReflectedHttpActionDescriptor() { ControllerDescriptor = controllerDescriptor };
+            IHttpRouteData routeData = GetRouteData();
+            routeData.Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { action1Descriptor, action2Descriptor });
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;            
+
+            DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
+
+            // Act 
+            var selectedController = selector.SelectController(request);
+
+            // Assert
+            Assert.Same(controllerDescriptor, selectedController);
+        }
+
+        [Fact]
+        public void SelectController_DoesNotRecognizeDirectRoutesWithDifferentControllers()
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
+            HttpRequestMessage request = new HttpRequestMessage();
+            var action1Descriptor = new ReflectedHttpActionDescriptor() { ControllerDescriptor = new HttpControllerDescriptor() };
+            var action2Descriptor = new ReflectedHttpActionDescriptor() { ControllerDescriptor = new HttpControllerDescriptor() };
+            IHttpRouteData routeData = GetRouteData();
+            routeData.Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { action1Descriptor, action2Descriptor });
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+
+            DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
+
+            // Act 
+            var ex = Assert.Throws<HttpResponseException>(
+                () => selector.SelectController(request));
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, ex.Response.StatusCode);
+        }
+
+        [Fact]
         public void SelectController_Throws_NotFound_NoRouteData()
         {
             HttpConfiguration configuration = new HttpConfiguration();
@@ -298,8 +340,8 @@ namespace System.Web.Http.Dispatcher
 
         private static IHttpRouteData GetRouteData()
         {
-            IHttpRoute mockRoute = new Mock<IHttpRoute>().Object;
-            HttpRouteData routeData = new HttpRouteData(mockRoute);
+            HttpRoute route = new HttpRoute();
+            HttpRouteData routeData = new HttpRouteData(route);
 
             return routeData;
         }

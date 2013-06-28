@@ -52,6 +52,17 @@ namespace System.Web.Http.Dispatcher
                 throw Error.ArgumentNull("request");
             }
 
+            IHttpRouteData routeData = request.GetRouteData();
+            HttpControllerDescriptor controllerDescriptor;
+            if (routeData != null)
+            {
+                controllerDescriptor = GetDirectRouteController(routeData);
+                if (controllerDescriptor != null)
+                {
+                    return controllerDescriptor;
+                }
+            }
+
             string controllerName = GetControllerName(request);
             if (String.IsNullOrEmpty(controllerName))
             {
@@ -61,7 +72,6 @@ namespace System.Web.Http.Dispatcher
                     Error.Format(SRResources.ControllerNameNotFound, request.RequestUri)));
             }
 
-            HttpControllerDescriptor controllerDescriptor;
             if (_controllerInfoCache.Value.TryGetValue(controllerName, out controllerDescriptor))
             {
                 return controllerDescriptor;
@@ -85,6 +95,30 @@ namespace System.Web.Http.Dispatcher
                 // multiple matching types
                 throw CreateAmbiguousControllerException(request.GetRouteData().Route, controllerName, matchingTypes);
             }
+        }
+
+        private static HttpControllerDescriptor GetDirectRouteController(IHttpRouteData routeData)
+        {
+            ReflectedHttpActionDescriptor[] directRouteActions = routeData.GetDirectRouteActions();
+            if (directRouteActions != null)
+            {
+                // Set the controller descriptor for the first action descriptor
+                Contract.Assert(directRouteActions.Length > 0);
+                HttpControllerDescriptor controllerDescriptor = directRouteActions[0].ControllerDescriptor;
+
+                // Check that all other action descriptors share the same controller descriptor
+                for (int i = 1; i < directRouteActions.Length; i++)
+                {
+                    if (directRouteActions[i].ControllerDescriptor != controllerDescriptor)
+                    {
+                        return null;
+                    }
+                }
+
+                return controllerDescriptor;
+            }
+
+            return null;
         }
 
         public virtual IDictionary<string, HttpControllerDescriptor> GetControllerMapping()

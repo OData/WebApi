@@ -152,49 +152,13 @@ namespace System.Web.Http.Controllers
             public HttpActionDescriptor SelectAction(HttpControllerContext controllerContext)
             {
                 // Performance-sensitive
-                string actionName;
-                bool useActionName = controllerContext.RouteData.Values.TryGetValue(RouteKeys.ActionKey, out actionName);
-
-                ReflectedHttpActionDescriptor[] actionsFoundByHttpMethods;
-
-                HttpMethod incomingMethod = controllerContext.Request.Method;
-
-                // First get an initial candidate list.
-                if (useActionName)
-                {
-                    // We have an explicit {action} value, do traditional binding. Just lookup by actionName
-                    ReflectedHttpActionDescriptor[] actionsFoundByName = _actionNameMapping[actionName].ToArray();
-
-                    // Throws HttpResponseException with NotFound status because no action matches the Name
-                    if (actionsFoundByName.Length == 0)
-                    {
-                        throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
-                            HttpStatusCode.NotFound,
-                            Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
-                            Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
-                    }
-
-                    actionsFoundByHttpMethods = FilterIncompatibleVerbs(incomingMethod, actionsFoundByName);
-                }
-                else
-                {
-                    // No {action} parameter, infer it from the verb.
-                    actionsFoundByHttpMethods = FindActionsForVerb(incomingMethod);
-                }
-
-                // Throws HttpResponseException with MethodNotAllowed status because no action matches the Http Method
-                if (actionsFoundByHttpMethods.Length == 0)
-                {
-                    throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
-                        HttpStatusCode.MethodNotAllowed,
-                        Error.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, incomingMethod)));
-                }
+                ReflectedHttpActionDescriptor[] candidateActions = GetInitialCandidateList(controllerContext);
 
                 // Make sure the action parameter matches the route and query parameters. Overload resolution logic is applied when needed.
-                List<ReflectedHttpActionDescriptor> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, actionsFoundByHttpMethods, useActionName);
+                List<ReflectedHttpActionDescriptor> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidateActions);
 
                 List<ReflectedHttpActionDescriptor> selectedActions = RunSelectionFilters(controllerContext, actionsFoundByParams);
-                actionsFoundByHttpMethods = null;
+                candidateActions = null;
                 actionsFoundByParams = null;
 
                 switch (selectedActions.Count)
@@ -216,6 +180,53 @@ namespace System.Web.Http.Controllers
                 }
             }
 
+            [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
+            private ReflectedHttpActionDescriptor[] GetInitialCandidateList(HttpControllerContext controllerContext)
+            {
+                IHttpRouteData routeData = controllerContext.RouteData;
+
+                ReflectedHttpActionDescriptor[] actions = routeData.GetDirectRouteActions();
+                if (actions != null)
+                {
+                    return actions;
+                }
+
+                HttpMethod incomingMethod = controllerContext.Request.Method;
+
+                string actionName;
+                if (routeData.Values.TryGetValue(RouteKeys.ActionKey, out actionName))
+                {
+                    // We have an explicit {action} value, do traditional binding. Just lookup by actionName
+                    ReflectedHttpActionDescriptor[] actionsFoundByName = _actionNameMapping[actionName].ToArray();
+
+                    // Throws HttpResponseException with NotFound status because no action matches the Name
+                    if (actionsFoundByName.Length == 0)
+                    {
+                        throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
+                            HttpStatusCode.NotFound,
+                            Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
+                            Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
+                    }
+
+                    actions = FilterIncompatibleVerbs(incomingMethod, actionsFoundByName);
+                }
+                else
+                {
+                    // No direct routing or {action} parameter, infer it from the verb.
+                    actions = FindActionsForVerb(incomingMethod);
+                }
+
+                // Throws HttpResponseException with MethodNotAllowed status because no action matches the Http Method
+                if (actions.Length == 0)
+                {
+                    throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
+                        HttpStatusCode.MethodNotAllowed,
+                        Error.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, incomingMethod)));
+                }
+
+                return actions;
+            }
+
             private static ReflectedHttpActionDescriptor[] FilterIncompatibleVerbs(HttpMethod incomingMethod, ReflectedHttpActionDescriptor[] actionsFoundByName)
             {
                 return actionsFoundByName.Where(actionDescriptor => actionDescriptor.SupportedHttpMethods.Contains(incomingMethod)).ToArray();
@@ -226,15 +237,12 @@ namespace System.Web.Http.Controllers
                 return new LookupAdapter() { Source = _actionNameMapping };
             }
 
-            private List<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, ReflectedHttpActionDescriptor[] actionsFound, bool hasActionRouteKey)
+            private List<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, ReflectedHttpActionDescriptor[] actionsFound)
             {
                 IDictionary<string, object> routeValues = controllerContext.RouteData.Values;
                 HashSet<string> routeParameterNames = new HashSet<string>(routeValues.Keys, StringComparer.OrdinalIgnoreCase);
                 routeParameterNames.Remove(RouteKeys.ControllerKey);
-                if (hasActionRouteKey)
-                {
-                    routeParameterNames.Remove(RouteKeys.ActionKey);
-                }
+                routeParameterNames.Remove(RouteKeys.ActionKey);
 
                 HttpRequestMessage request = controllerContext.Request;
                 Uri requestUri = request.RequestUri;

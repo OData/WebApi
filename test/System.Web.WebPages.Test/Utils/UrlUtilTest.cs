@@ -259,7 +259,7 @@ namespace System.Web.WebPages.Test
         public void GenerateClientUrlWithAbsoluteContentPathAndRewritingDisabled()
         {
             // Arrange
-            Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(includeRewriterServerVar: false);
+            Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(isUrlRewriteOn: false);
 
             // Act
             string returnedUrl = UrlUtil.GenerateClientUrl(mockHttpContext.Object, "should remain unchanged");
@@ -274,7 +274,7 @@ namespace System.Web.WebPages.Test
             UrlUtil.ResetUrlRewriterHelper(); // Reset the "is URL rewriting enabled?" cache
 
             // Arrange
-            Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(includeRewriterServerVar: true);
+            Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(isUrlRewriteOn: true);
             mockHttpContext.Setup(c => c.Request.RawUrl).Returns("/quux/foo/bar/baz");
             mockHttpContext.Setup(c => c.Request.Path).Returns("/myapp/foo/bar/baz");
 
@@ -289,7 +289,7 @@ namespace System.Web.WebPages.Test
         public void GenerateClientUrlWithAppRelativeContentPathAndRewritingDisabled()
         {
             // Arrange
-            Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(includeRewriterServerVar: false);
+            Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(isUrlRewriteOn: false);
 
             // Act
             string returnedUrl = UrlUtil.GenerateClientUrl(mockHttpContext.Object, "~/foo/bar?alpha=bravo");
@@ -304,7 +304,7 @@ namespace System.Web.WebPages.Test
             UrlUtil.ResetUrlRewriterHelper(); // Reset the "is URL rewriting enabled?" cache
 
             // Arrange
-            Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(includeRewriterServerVar: true);
+            Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(isUrlRewriteOn: true);
             mockHttpContext.Setup(c => c.Request.RawUrl).Returns("/quux/foo/baz");
             mockHttpContext.Setup(c => c.Request.Path).Returns("/myapp/foo/baz");
 
@@ -465,19 +465,23 @@ namespace System.Web.WebPages.Test
             Assert.Equal("./?foo=bar", returnedUrl);
         }
 
-        internal static Mock<HttpContextBase> GetMockHttpContext(bool includeRewriterServerVar)
+        internal static Mock<HttpContextBase> GetMockHttpContext(bool isUrlRewriteOn)
         {
             Mock<HttpContextBase> mockContext = new Mock<HttpContextBase>();
 
+            Mock<HttpWorkerRequest> mockWorkerRequest = new Mock<HttpWorkerRequest>();
+            mockContext.As<IServiceProvider>().Setup(sp => sp.GetService(typeof(HttpWorkerRequest))).Returns(mockWorkerRequest.Object);
+            mockWorkerRequest.Setup(wr => wr.GetServerVariable(UrlRewriterHelper.UrlRewriterEnabledServerVar)).Returns("On!");
+            if (isUrlRewriteOn)
+            {
+                mockWorkerRequest.Setup(wr => wr.GetServerVariable(UrlRewriterHelper.UrlWasRewrittenServerVar)).Returns("Yup!");
+            }
+
             NameValueCollection serverVars = new NameValueCollection();
-            serverVars[UrlRewriterHelper.UrlRewriterEnabledServerVar] = "I'm on!";
             mockContext.Setup(c => c.Request.ServerVariables).Returns(serverVars);
             mockContext.Setup(c => c.Request.ApplicationPath).Returns("/myapp");
 
-            if (includeRewriterServerVar)
-            {
-                serverVars[UrlRewriterHelper.UrlWasRewrittenServerVar] = "Got rewritten!";
-            }
+            mockContext.Setup(c => c.Items).Returns(new HybridDictionary());
 
             return mockContext;
         }

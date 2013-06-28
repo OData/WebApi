@@ -10,15 +10,35 @@ namespace System.Web.WebPages
         internal const string UrlWasRewrittenServerVar = "IIS_WasUrlRewritten";
         internal const string UrlRewriterEnabledServerVar = "IIS_UrlRewriteModule";
 
+        internal const string UrlWasRequestRewrittenTrueValue = "true";
+        internal const string UrlWasRequestRewrittenFalseValue = "false";
+
         private object _lockObject = new object();
         private bool _urlRewriterIsTurnedOnValue;
         private volatile bool _urlRewriterIsTurnedOnCalculated = false;
 
         private static bool WasThisRequestRewritten(HttpContextBase httpContext)
         {
-            NameValueCollection serverVars = httpContext.Request.ServerVariables;
-            bool requestWasRewritten = (serverVars != null && serverVars[UrlWasRewrittenServerVar] != null);
-            return requestWasRewritten;
+            if (httpContext.Items.Contains(UrlWasRewrittenServerVar))
+            {
+                return Object.Equals(httpContext.Items[UrlWasRewrittenServerVar], UrlWasRequestRewrittenTrueValue);
+            }
+            else
+            {
+                HttpWorkerRequest httpWorkerRequest = (HttpWorkerRequest)httpContext.GetService(typeof(HttpWorkerRequest));
+                bool requestWasRewritten = (httpWorkerRequest != null && httpWorkerRequest.GetServerVariable(UrlWasRewrittenServerVar) != null);
+
+                if (requestWasRewritten)
+                {
+                    httpContext.Items.Add(UrlWasRewrittenServerVar, UrlWasRequestRewrittenTrueValue);
+                }
+                else
+                {
+                    httpContext.Items.Add(UrlWasRewrittenServerVar, UrlWasRequestRewrittenFalseValue);
+                }
+
+                return requestWasRewritten;
+            }
         }
 
         private bool IsUrlRewriterTurnedOn(HttpContextBase httpContext)
@@ -30,8 +50,8 @@ namespace System.Web.WebPages
                 {
                     if (!_urlRewriterIsTurnedOnCalculated)
                     {
-                        NameValueCollection serverVars = httpContext.Request.ServerVariables;
-                        bool urlRewriterIsEnabled = (serverVars != null && serverVars[UrlRewriterEnabledServerVar] != null);
+                        HttpWorkerRequest httpWorkerRequest = (HttpWorkerRequest)httpContext.GetService(typeof(HttpWorkerRequest));
+                        bool urlRewriterIsEnabled = (httpWorkerRequest != null && httpWorkerRequest.GetServerVariable(UrlRewriterEnabledServerVar) != null);
                         _urlRewriterIsTurnedOnValue = urlRewriterIsEnabled;
                         _urlRewriterIsTurnedOnCalculated = true;
                     }

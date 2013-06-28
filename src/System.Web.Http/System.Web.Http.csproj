@@ -169,7 +169,9 @@
       <Link>Routing\RouteInlineParser.cs</Link>
     </Compile>
     <Compile Include="Routing\HttpRouteBuilder.cs" />
-    <Compile Include="Routing\HttpRouteEntry.cs" />
+    <Compile Include="..\Common\Routing\HttpRouteEntry.cs">
+      <Link>Routing\HttpRouteEntry.cs</Link>
+    </Compile>
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />
     <Compile Include="Routing\IInlineConstraintResolver.cs" />
     <Compile Include="Services\Decorator.cs" />
@@ -269,17 +271,31 @@
     <Compile Include="Routing\HttpRoute.cs" />
     <Compile Include="Routing\HttpRouteData.cs" />
     <Compile Include="Routing\HttpRouteDirection.cs" />
-    <Compile Include="Routing\HttpRouteParser.cs" />
+    <Compile Include="..\Common\Routing\HttpRouteParser.cs">
+      <Link>Routing\HttpRouteParser.cs</Link>
+    </Compile>
     <Compile Include="Routing\HttpRouteValueDictionary.cs" />
     <Compile Include="Routing\HttpVirtualPathData.cs" />
     <Compile Include="Routing\IHttpRouteConstraint.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensions.cs" />
-    <Compile Include="Routing\PathContentSegment.cs" />
-    <Compile Include="Routing\PathLiteralSubsegment.cs" />
-    <Compile Include="Routing\PathParameterSubsegment.cs" />
-    <Compile Include="Routing\PathSegment.cs" />
-    <Compile Include="Routing\PathSeparatorSegment.cs" />
-    <Compile Include="Routing\PathSubsegment.cs" />
+    <Compile Include="..\Common\Routing\PathContentSegment.cs">
+      <Link>Routing\PathContentSegment.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\PathLiteralSubsegment.cs">
+      <Link>Routing\PathLiteralSubsegment.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\PathParameterSubsegment.cs">
+      <Link>Routing\PathParameterSubsegment.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\PathSegment.cs">
+      <Link>Routing\PathSegment.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\PathSeparatorSegment.cs">
+      <Link>Routing\PathSeparatorSegment.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\PathSubsegment.cs">
+      <Link>Routing\PathSubsegment.cs</Link>
+    </Compile>
     <Compile Include="NonActionAttribute.cs" />
     <Compile Include="Routing\UriPathExtensionMapping.cs" />
     <Compile Include="Routing\UrlHelper.cs" />

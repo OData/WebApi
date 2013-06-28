@@ -3,22 +3,53 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+#if ASPNETWEBAPI
+#else
+using System.Web.Routing;
+#endif
 
+#if ASPNETWEBAPI
 namespace System.Web.Http.Routing
+#else
+namespace System.Web.Mvc.Routing
+#endif
 {
     /// <summary>
     /// Route information used to name and order routes for attribute routing. Applies ordering based on the prefix order
     /// and the attribute order first, then applies a default order that registers more specific routes earlier.
     /// </summary>
+#if ASPNETWEBAPI
     internal class HttpRouteEntry : IComparable<HttpRouteEntry>
+#else
+    internal class RouteEntry : IComparable<RouteEntry>
+#endif
     {
+#if ASPNETWEBAPI
         public IHttpRoute Route { get; set; }
+
+        public HttpParsedRoute ParsedRoute
+        {
+            get
+            {
+                HttpRoute route = Route as HttpRoute;
+                Contract.Assert(route != null);
+                return route.ParsedRoute;
+            }
+        }
+#else
+        public Route Route { get; set; }
+        public ParsedRoute ParsedRoute { get; set; }
+#endif
         public string Name { get; set; }
         public string RouteTemplate { get; set; }
         public int PrefixOrder { get; set; }
         public int Order { get; set; }
 
+#if ASPNETWEBAPI
         public int CompareTo(HttpRouteEntry other)
+#else
+        public int CompareTo(RouteEntry other)
+#endif
         {
             Contract.Assert(other != null);
 
@@ -42,11 +73,16 @@ namespace System.Web.Http.Routing
                 return -1;
             }
 
+#if ASPNETWEBAPI
             HttpRoute httpRoute1 = Route as HttpRoute;
             HttpRoute httpRoute2 = other.Route as HttpRoute;
+#else
+            Route httpRoute1 = Route;
+            Route httpRoute2 = other.Route;
+#endif
             if (httpRoute1 != null && httpRoute2 != null)
             {
-                int comparison = Compare(httpRoute1, httpRoute2);
+                int comparison = Compare(this, other);
                 if (comparison != 0)
                 {
                     return comparison;
@@ -58,10 +94,19 @@ namespace System.Web.Http.Routing
         }
 
         // Default ordering goes through segments one by one and tries to apply an ordering
-        private static int Compare(HttpRoute httpRoute1, HttpRoute httpRoute2)
+#if ASPNETWEBAPI
+        private static int Compare(HttpRouteEntry entry1, HttpRouteEntry entry2)
+#else
+        private static int Compare(RouteEntry entry1, RouteEntry entry2)
+#endif
         {
-            HttpParsedRoute parsedRoute1 = httpRoute1.ParsedRoute;
-            HttpParsedRoute parsedRoute2 = httpRoute2.ParsedRoute;
+#if ASPNETWEBAPI
+            HttpParsedRoute parsedRoute1 = entry1.ParsedRoute;
+            HttpParsedRoute parsedRoute2 = entry2.ParsedRoute;
+#else
+            ParsedRoute parsedRoute1 = entry1.ParsedRoute;
+            ParsedRoute parsedRoute2 = entry2.ParsedRoute;
+#endif
 
             IList<PathContentSegment> segments1 = parsedRoute1.PathSegments.OfType<PathContentSegment>().ToArray();
             IList<PathContentSegment> segments2 = parsedRoute2.PathSegments.OfType<PathContentSegment>().ToArray();
@@ -71,8 +116,8 @@ namespace System.Web.Http.Routing
                 PathContentSegment segment1 = segments1[i];
                 PathContentSegment segment2 = segments2[i];
 
-                int order1 = GetOrder(segment1, httpRoute1.Constraints);
-                int order2 = GetOrder(segment2, httpRoute2.Constraints);
+                int order1 = GetOrder(segment1, entry1.Route.Constraints);
+                int order2 = GetOrder(segment2, entry2.Route.Constraints);
 
                 if (order1 > order2)
                 {

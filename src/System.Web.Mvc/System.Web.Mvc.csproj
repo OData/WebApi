@@ -121,6 +121,31 @@
     <Compile Include="..\Common\Routing\RouteInlineParser.cs">
       <Link>Routing\RouteInlineParser.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\HttpRouteEntry.cs">
+      <Link>Routing\RouteParsing\HttpRouteEntry.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\HttpRouteParser.cs">
+      <Link>Routing\RouteParsing\HttpRouteParser.cs</Link>
+    </Compile>
+    <Compile Include="Routing\RouteParsing\ParsedRoute.cs" />
+    <Compile Include="..\Common\Routing\PathContentSegment.cs">
+      <Link>Routing\RouteParsing\PathContentSegment.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\PathLiteralSubsegment.cs">
+      <Link>Routing\RouteParsing\PathLiteralSubsegment.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\PathParameterSubsegment.cs">
+      <Link>Routing\RouteParsing\PathParameterSubsegment.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\PathSegment.cs">
+      <Link>Routing\RouteParsing\PathSegment.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\PathSeparatorSegment.cs">
+      <Link>Routing\RouteParsing\PathSeparatorSegment.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\PathSubsegment.cs">
+      <Link>Routing\RouteParsing\PathSubsegment.cs</Link>
+    </Compile>
     <Compile Include="..\TransparentCommonAssemblyInfo.cs">
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
     </Compile>
@@ -172,6 +197,7 @@
     <Compile Include="Razor\SetModelTypeCodeGenerator.cs" />
     <Compile Include="ReflectedAttributeCache.cs" />
     <Compile Include="RouteAreaAttribute.cs" />
+    <Compile Include="Routing\AttributeRoutingMapper.cs" />
     <Compile Include="Routing\DirectRouteExtensions.cs" />
     <Compile Include="Routing\HttpVerbsRoutingAttribute.cs" />
     <Compile Include="Routing\IDirectRouteInfoProvider.cs" />

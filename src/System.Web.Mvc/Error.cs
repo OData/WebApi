@@ -92,5 +92,15 @@ namespace System.Web.Mvc
             string message = String.Format(CultureInfo.CurrentCulture, messageFormat, args);
             return new InvalidOperationException(message);
         }
+
+        internal static string Format(string format, params object[] args)
+        {
+            return String.Format(CultureInfo.CurrentCulture, format, args);
+        }
+
+        internal static ArgumentException Argument(string parameterName, string messageFormat, params object[] messageArgs)
+        {
+            return new ArgumentException(Error.Format(messageFormat, messageArgs), parameterName);
+        }
     }
 }

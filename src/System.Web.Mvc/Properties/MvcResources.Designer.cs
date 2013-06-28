@@ -889,6 +889,78 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A path segment that contains more than one section, such as a literal section or a parameter, cannot contain a catch-all parameter..
+        /// </summary>
+        internal static string Route_CannotHaveCatchAllInMultiSegment {
+            get {
+                return ResourceManager.GetString("Route_CannotHaveCatchAllInMultiSegment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A path segment cannot contain two consecutive parameters. They must be separated by a &apos;/&apos; or by a literal string..
+        /// </summary>
+        internal static string Route_CannotHaveConsecutiveParameters {
+            get {
+                return ResourceManager.GetString("Route_CannotHaveConsecutiveParameters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The route template separator character &apos;/&apos; cannot appear consecutively. It must be separated by either a parameter or a literal value..
+        /// </summary>
+        internal static string Route_CannotHaveConsecutiveSeparators {
+            get {
+                return ResourceManager.GetString("Route_CannotHaveConsecutiveSeparators", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A catch-all parameter can only appear as the last segment of the route template..
+        /// </summary>
+        internal static string Route_CatchAllMustBeLast {
+            get {
+                return ResourceManager.GetString("Route_CatchAllMustBeLast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The route parameter name &apos;{0}&apos; is invalid. Route parameter names must be non-empty and cannot contain these characters: &quot;{{&quot;, &quot;}}&quot;, &quot;/&quot;, &quot;?&quot;.
+        /// </summary>
+        internal static string Route_InvalidParameterName {
+            get {
+                return ResourceManager.GetString("Route_InvalidParameterName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The route template cannot start with a &apos;/&apos; or &apos;~&apos; character and it cannot contain a &apos;?&apos; character..
+        /// </summary>
+        internal static string Route_InvalidRouteTemplate {
+            get {
+                return ResourceManager.GetString("Route_InvalidRouteTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is an incomplete parameter in this path segment: &apos;{0}&apos;. Check that each &apos;{{&apos; character has a matching &apos;}}&apos; character..
+        /// </summary>
+        internal static string Route_MismatchedParameter {
+            get {
+                return ResourceManager.GetString("Route_MismatchedParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The route parameter name &apos;{0}&apos; appears more than one time in the route template..
+        /// </summary>
+        internal static string Route_RepeatedParameter {
+            get {
+                return ResourceManager.GetString("Route_RepeatedParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The route template &apos;{0}&apos; cannot begin or end with a forward slash..
         /// </summary>
         internal static string RouteTemplate_CannotStartOrEnd_WithForwardSlash {

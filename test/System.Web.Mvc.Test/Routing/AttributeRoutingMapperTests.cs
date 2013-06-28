@@ -10,17 +10,18 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Routing
 {
-    public class RouteCollectionAttributeRoutingExtensionsTests
+    public class AttributeRoutingMapperTests
     {
         [Fact]
         public void MapAttributeRoutesFromController_MapRouteAttributes()
         {
             // Arrange
-            var routes = new RouteCollection();
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(SimpleRoutingController));
 
             // Act
-            routes.MapAttributeRoutesFromController(controllerDescriptor);
+            var routes = GetMapper().MapMvcAttributeRoutes(controllerDescriptor)
+                .Select(e => e.Route)
+                .ToArray();
 
             // Assert
             var expectedResults = new List<Tuple<string, string, string[]>>
@@ -39,9 +40,9 @@ namespace System.Web.Routing
                 var url = expected.Item1;
                 var methodName = expected.Item2;
                 var expectedHttpMethods = expected.Item3;
-                Route route = routes.Cast<Route>().Single(r => r.Url == url);
+                Route route = routes.Single(r => r.Url == url);
                 Assert.Equal(methodName, route.GetTargetActionMethod().Name);
-                var httpMethodConstraint = route.Constraints["httpMethod"] as HttpMethodConstraint;
+                var httpMethodConstraint = (HttpMethodConstraint)route.Constraints["httpMethod"];
                 if (expectedHttpMethods == null)
                 {
                     Assert.Null(httpMethodConstraint);
@@ -62,14 +63,15 @@ namespace System.Web.Routing
         public void MapAttributeRoutesFromController_WithInlineConstraints_ParseConstraintsDefaultsAndOptionals()
         {
             // Arrange
-            var routes = new RouteCollection();
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(SimpleRoutingController));
 
             // Act
-            routes.MapAttributeRoutesFromController(controllerDescriptor);
+            var routes = GetMapper().MapMvcAttributeRoutes(controllerDescriptor)
+                .Select(e => e.Route)
+                .ToArray();
 
             // Assert
-            Route route = routes.Cast<Route>().Single(r => r.GetTargetActionMethod().Name == "Parameterized");
+            Route route = routes.Single(r => r.GetTargetActionMethod().Name == "Parameterized");
             Assert.NotNull(route);
 
             Assert.Equal("i/{have}/{id}/{defaultsto}/{name}", route.Url);
@@ -82,14 +84,15 @@ namespace System.Web.Routing
         public void MapAttributeRoutesFromController_WithPrefixedController()
         {
             // Arrange
-            var routes = new RouteCollection();
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(PrefixedController));
 
             // Act
-            routes.MapAttributeRoutesFromController(controllerDescriptor);
+            var routes = GetMapper().MapMvcAttributeRoutes(controllerDescriptor)
+                .Select(e => e.Route)
+                .ToArray();
 
             // Assert
-            Assert.Equal(1, routes.Count);
+            Assert.Equal(1, routes.Length);
 
             Route route = routes.Cast<Route>().Single();
             Assert.Equal("prefpref/getme", route.Url);
@@ -100,14 +103,15 @@ namespace System.Web.Routing
         public void MapAttributeRoutesFromController_WithArea()
         {
             // Arrange
-            var routes = new RouteCollection();
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(PugetSoundController));
 
             // Act
-            routes.MapAttributeRoutesFromController(controllerDescriptor);
+            var routes = GetMapper().MapMvcAttributeRoutes(controllerDescriptor)
+                .Select(e => e.Route)
+                .ToArray();
 
             // Assert
-            Assert.Equal(1, routes.Count);
+            Assert.Equal(1, routes.Length);
 
             Route route = routes.Cast<Route>().Single();
 
@@ -122,14 +126,15 @@ namespace System.Web.Routing
         public void MapAttributeRoutesFromController_WithPrefixedArea()
         {
             // Arrange
-            var routes = new RouteCollection();
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(PrefixedPugetSoundController));
 
             // Act
-            routes.MapAttributeRoutesFromController(controllerDescriptor);
+            var routes = GetMapper().MapMvcAttributeRoutes(controllerDescriptor)
+                .Select(e => e.Route)
+                .ToArray();
 
             // Assert
-            Assert.Equal(1, routes.Count);
+            Assert.Equal(1, routes.Length);
 
             Route route = routes.Cast<Route>().Single();
 
@@ -161,9 +166,14 @@ namespace System.Web.Routing
         [InlineData("puget-sound", "pref", "whatever", "puget-sound/pref/whatever")]
         public void CombinePrefixAndAreaWithTemplate(string areaPrefix, string prefix, string template, string expected)
         {
-            var result = RouteCollectionAttributeRoutingExtensions.CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, template);
+            var result = AttributeRoutingMapper.CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, template);
 
             Assert.Equal(expected, result);
+        }
+
+        private static AttributeRoutingMapper GetMapper()
+        {
+            return new AttributeRoutingMapper(new RouteBuilder());
         }
 
         private class SimpleRoutingController : Controller

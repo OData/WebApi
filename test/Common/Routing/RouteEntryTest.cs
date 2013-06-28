@@ -1,13 +1,17 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
+#if ASPNETWEBAPI
 using System.Net.Http;
-using System.Web.Http.Routing.Constraints;
+#endif
 using Microsoft.TestCommon;
 
+#if ASPNETWEBAPI
 namespace System.Web.Http.Routing
+#else
+namespace System.Web.Mvc.Routing
+#endif
 {
-    public class HttpRouteEntryTest
+    public class RouteEntryTest
     {
         [Theory]
         [InlineData(1, 2, 1, 2, -1)]
@@ -22,8 +26,18 @@ namespace System.Web.Http.Routing
         [InlineData(Int32.MaxValue, Int32.MinValue, 0, 0, 1)]
         public void CompareTo_RespectsOrder(int prefixOrder1, int prefixOrder2, int order1, int order2, int expectedValue)
         {
-            HttpRouteEntry x = new HttpRouteEntry() { PrefixOrder = prefixOrder1, Order = order1 };
-            HttpRouteEntry y = new HttpRouteEntry() { PrefixOrder = prefixOrder2, Order = order2 };
+#if ASPNETWEBAPI
+            var x = new HttpRouteEntry();
+            var y = new HttpRouteEntry();
+#else
+            var x = new RouteEntry();
+            var y = new RouteEntry();
+#endif
+
+            x.PrefixOrder = prefixOrder1;
+            x.Order = order1;
+            y.PrefixOrder = prefixOrder2;
+            y.Order = order2;
 
             Assert.Equal(expectedValue, x.CompareTo(y));
         }
@@ -31,8 +45,8 @@ namespace System.Web.Http.Routing
         [Fact]
         public void CompareTo_Returns0_ForEquivalentRoutes()
         {
-            HttpRouteEntry x = CreateRouteEntry("Employees/{id}");
-            HttpRouteEntry y = CreateRouteEntry("Employees/{id}");
+            var x = CreateRouteEntry("Employees/{id}");
+            var y = CreateRouteEntry("Employees/{id}");
 
             Assert.Equal(0, x.CompareTo(y));
         }
@@ -61,17 +75,30 @@ namespace System.Web.Http.Routing
         [InlineData("abc/{x}", "abc/{*x}")]
         public void CompareTo_ComparesCorrectly(string earlier, string later)
         {
-            HttpRouteEntry x = CreateRouteEntry(earlier);
-            HttpRouteEntry y = CreateRouteEntry(later);
+            var x = CreateRouteEntry(earlier);
+            var y = CreateRouteEntry(later);
 
             Assert.True(x.CompareTo(y) < 0);
             Assert.True(y.CompareTo(x) > 0);
         }
-        
+
+#if ASPNETWEBAPI
         private static HttpRouteEntry CreateRouteEntry(string routeTemplate)
         {
             IHttpRoute route = new HttpRouteBuilder().BuildHttpRoute(routeTemplate, new HttpMethod[] { HttpMethod.Get }, "Controller", "Action");
             return new HttpRouteEntry() { Route = route, RouteTemplate = routeTemplate };
         }
+#else
+       private static RouteEntry CreateRouteEntry(string routeTemplate)
+       {
+           var route = new RouteBuilder().BuildDirectRoute(routeTemplate, new[] { "GET" }, "Controller", "Action", null, null);
+           return new RouteEntry()
+           {
+               Route = route,
+               RouteTemplate = routeTemplate,
+               ParsedRoute = RouteParser.Parse(route.Url)
+           };
+       }
+#endif
     }
 }

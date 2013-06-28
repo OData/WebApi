@@ -4,7 +4,11 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
+#if ASPNETWEBAPI
 namespace System.Web.Http.Routing
+#else
+namespace System.Web.Mvc.Routing
+#endif
 {
     // Represents a segment of a URI that is not a separator. It contains subsegments such as literals and parameters.
     internal sealed class PathContentSegment : PathSegment

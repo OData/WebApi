@@ -53,12 +53,15 @@
     <Compile Include="Razor\Test\MvcCSharpRazorCodeGeneratorTest.cs" />
     <Compile Include="Routing\DirectRouteTestHelpers.cs" />
     <Compile Include="Routing\HttpRouteAttributeTests.cs" />
-    <Compile Include="Routing\RouteCollectionAttributeRoutingExtensionsTests.cs" />
     <Compile Include="..\Common\Routing\RouteConstraintsTests.cs">
       <Link>Routing\RouteConstraintsTests.cs</Link>
     </Compile>
     <Compile Include="..\Common\Routing\DefaultInlineConstraintResolverTest.cs">
       <Link>Routing\DefaultInlineConstraintResolverTest.cs</Link>
+    </Compile>
+    <Compile Include="Routing\AttributeRoutingMapperTests.cs" />
+    <Compile Include="..\Common\Routing\RouteEntryTest.cs">
+      <Link>Routing\RouteEntryTest.cs</Link>
     </Compile>
     <Compile Include="Test\AjaxHelperOfTModelTest.cs" />
     <Compile Include="Test\CancellationTokenModelBinderTest.cs" />

@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Web.Mvc.Routing;
 using System.Web.Routing;
 
 namespace System.Web.Mvc
@@ -178,7 +179,7 @@ namespace System.Web.Mvc
 
             if ((namespaces != null) && (namespaces.Length > 0))
             {
-                route.DataTokens["Namespaces"] = namespaces;
+                route.DataTokens[RouteDataTokenKeys.Namespaces] = namespaces;
             }
 
             routes.Add(name, route);

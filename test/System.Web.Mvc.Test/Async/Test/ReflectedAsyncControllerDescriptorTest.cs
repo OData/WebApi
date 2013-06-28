@@ -39,7 +39,7 @@ namespace System.Web.Mvc.Async.Test
             ReflectedAsyncControllerDescriptor cd = new ReflectedAsyncControllerDescriptor(controllerType);
 
             // Act
-            ActionDescriptor ad = cd.FindAction(new Mock<ControllerContext>().Object, "NewName");
+            ActionDescriptor ad = cd.FindAction(new ControllerContext(), "NewName");
 
             // Assert
             Assert.Equal("NewName", ad.ActionName);
@@ -58,7 +58,7 @@ namespace System.Web.Mvc.Async.Test
             ReflectedAsyncControllerDescriptor cd = new ReflectedAsyncControllerDescriptor(controllerType);
 
             // Act
-            ActionDescriptor ad = cd.FindAction(new Mock<ControllerContext>().Object, "NonExistent");
+            ActionDescriptor ad = cd.FindAction(new ControllerContext(), "NonExistent");
 
             // Assert
             Assert.Null(ad);
@@ -73,7 +73,7 @@ namespace System.Web.Mvc.Async.Test
 
             // Act & assert
             Assert.ThrowsArgumentNullOrEmpty(
-                delegate { cd.FindAction(new Mock<ControllerContext>().Object, ""); }, "actionName");
+                delegate { cd.FindAction(new ControllerContext(), ""); }, "actionName");
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace System.Web.Mvc.Async.Test
 
             // Act & assert
             Assert.ThrowsArgumentNullOrEmpty(
-                delegate { cd.FindAction(new Mock<ControllerContext>().Object, null); }, "actionName");
+                delegate { cd.FindAction(new ControllerContext(), null); }, "actionName");
         }
 
         [Fact]

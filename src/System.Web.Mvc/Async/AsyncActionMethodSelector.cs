@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc.Properties;
+using System.Web.Mvc.Routing;
+using System.Web.Routing;
 
 namespace System.Web.Mvc.Async
 {
@@ -16,7 +18,7 @@ namespace System.Web.Mvc.Async
         // Set to true for classes that derive from AsyncController. In this case, FooAsync/FooCompleted is 
         // bound as a single async action pair "Foo". If false, they're bound as 2 separate sync actions. 
         // Practically, if this is false, then IsAsyncSuffixedMethod and IsCompeltedSuffixedMethod return false.
-        private bool _allowLegacyAsyncActions;
+        private readonly bool _allowLegacyAsyncActions;
 
         public AsyncActionMethodSelector(Type controllerType, bool allowLegacyAsyncActions = true)
         {
@@ -61,8 +63,23 @@ namespace System.Web.Mvc.Async
 
         public ActionDescriptorCreator FindAction(ControllerContext controllerContext, string actionName)
         {
-            List<MethodInfo> finalMethods = ActionMethodSelector.FindActionMethods(controllerContext, actionName, AliasedMethods, NonAliasedMethods);
+            if (controllerContext == null)
+            {
+                throw Error.ArgumentNull("controllerContext");
+            }
 
+            if (controllerContext.RouteData != null)
+            {
+                MethodInfo target = controllerContext.RouteData.GetTargetActionMethod();
+                if (target != null)
+                {
+                    // short circuit the selection process if a direct route was matched.
+                    return GetActionDescriptorDelegate(target);
+                }
+            }
+
+            List<MethodInfo> finalMethods = ActionMethodSelector.FindActionMethods(controllerContext, actionName, AliasedMethods, NonAliasedMethods);
+            
             switch (finalMethods.Count)
             {
                 case 0:
@@ -75,6 +92,11 @@ namespace System.Web.Mvc.Async
                 default:
                     throw CreateAmbiguousActionMatchException(finalMethods, actionName);
             }
+        }
+
+        internal bool AllowLegacyAsyncActions
+        {
+            get { return _allowLegacyAsyncActions; }
         }
 
         private ActionDescriptorCreator GetActionDescriptorDelegate(MethodInfo entryMethod)

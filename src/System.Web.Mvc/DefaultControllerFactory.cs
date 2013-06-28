@@ -2,10 +2,13 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Web.Mvc.Properties;
+using System.Web.Mvc.Routing;
 using System.Web.Routing;
 using System.Web.SessionState;
 
@@ -173,10 +176,21 @@ namespace System.Web.Mvc
                 throw new ArgumentException(MvcResources.Common_NullOrEmpty, "controllerName");
             }
 
+            if (requestContext != null && requestContext.RouteData != null)
+            {
+                MethodInfo target = requestContext.RouteData.GetTargetActionMethod();
+
+                if (target != null)
+                {
+                    // short circuit controller resolution if a direct route was matched.
+                    return target.DeclaringType;
+                }
+            }
+
             // first search in the current route's namespace collection
             object routeNamespacesObj;
             Type match;
-            if (requestContext != null && requestContext.RouteData.DataTokens.TryGetValue("Namespaces", out routeNamespacesObj))
+            if (requestContext != null && requestContext.RouteData.DataTokens.TryGetValue(RouteDataTokenKeys.Namespaces, out routeNamespacesObj))
             {
                 IEnumerable<string> routeNamespaces = routeNamespacesObj as IEnumerable<string>;
                 if (routeNamespaces != null && routeNamespaces.Any())
@@ -185,7 +199,7 @@ namespace System.Web.Mvc
                     match = GetControllerTypeWithinNamespaces(requestContext.RouteData.Route, controllerName, namespaceHash);
 
                     // the UseNamespaceFallback key might not exist, in which case its value is implicitly "true"
-                    if (match != null || false.Equals(requestContext.RouteData.DataTokens["UseNamespaceFallback"]))
+                    if (match != null || false.Equals(requestContext.RouteData.DataTokens[RouteDataTokenKeys.UseNamespaceFallback]))
                     {
                         // got a match or the route requested we stop looking
                         return match;
@@ -237,6 +251,12 @@ namespace System.Web.Mvc
             {
                 disposable.Dispose();
             }
+        }
+
+        internal IReadOnlyList<Type> GetControllerTypes()
+        {
+            ControllerTypeCache.EnsureInitialized(BuildManager);
+            return ControllerTypeCache.GetControllerTypes();
         }
 
         SessionStateBehavior IControllerFactory.GetControllerSessionBehavior(RequestContext requestContext, string controllerName)

@@ -7,6 +7,12 @@ namespace System.Web.Mvc
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public abstract class ActionMethodSelectorAttribute : Attribute
     {
+        /// <summary>
+        /// Determines whether the action method selection is valid for the specified controller context.
+        /// </summary>
+        /// <param name="controllerContext">The controller context.</param>
+        /// <param name="methodInfo">Information about the action method.</param>
+        /// <returns><see langword="true"/> if the action method selection is valid for the specified controller context; otherwise, <see langword="false"/>.</returns>
         public abstract bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo);
     }
 }

@@ -74,5 +74,23 @@ namespace System.Web.Mvc
                                            modelType);
             return new InvalidOperationException(message);
         }
+
+        public static ArgumentOutOfRangeException ArgumentMustBeGreaterThanOrEqualTo(string parameterName, int actualValue, int minValue)
+        {
+            string message = String.Format(CultureInfo.CurrentCulture, MvcResources.ArgumentMustBeGreaterThanOrEqualTo,
+                                           minValue);
+            return new ArgumentOutOfRangeException(parameterName, actualValue, message);
+        }
+
+        public static Exception ArgumentNull(string parameterName)
+        {
+            return new ArgumentNullException(parameterName);
+        }
+
+        public static InvalidOperationException InvalidOperation(string messageFormat, params object[] args)
+        {
+            string message = String.Format(CultureInfo.CurrentCulture, messageFormat, args);
+            return new InvalidOperationException(message);
+        }
     }
 }

@@ -61,6 +61,66 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\Constraints\AlphaRouteConstraint.cs">
+      <Link>Routing\Constraints\AlphaRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\BoolRouteConstraint.cs">
+      <Link>Routing\Constraints\BoolRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\CompoundRouteConstraint.cs">
+      <Link>Routing\Constraints\CompoundRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\DateTimeRouteConstraint.cs">
+      <Link>Routing\Constraints\DateTimeRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\DecimalRouteConstraint.cs">
+      <Link>Routing\Constraints\DecimalRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\DoubleRouteConstraint.cs">
+      <Link>Routing\Constraints\DoubleRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\FloatRouteConstraint.cs">
+      <Link>Routing\Constraints\FloatRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\GuidRouteConstraint.cs">
+      <Link>Routing\Constraints\GuidRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\IntRouteConstraint.cs">
+      <Link>Routing\Constraints\IntRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\LengthRouteConstraint.cs">
+      <Link>Routing\Constraints\LengthRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\LongRouteConstraint.cs">
+      <Link>Routing\Constraints\LongRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\MaxLengthRouteConstraint.cs">
+      <Link>Routing\Constraints\MaxLengthRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\MaxRouteConstraint.cs">
+      <Link>Routing\Constraints\MaxRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\MinLengthRouteConstraint.cs">
+      <Link>Routing\Constraints\MinLengthRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\MinRouteConstraint.cs">
+      <Link>Routing\Constraints\MinRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\RangeRouteConstraintBase.cs">
+      <Link>Routing\Constraints\RangeRouteConstraintBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\RegexRouteConstraint.cs">
+      <Link>Routing\Constraints\RegexRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\OptionalRouteConstraint.cs">
+      <Link>Routing\Constraints\OptionalRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\DefaultInlineConstraintResolver.cs">
+      <Link>Routing\DefaultInlineConstraintResolver.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\RouteInlineParser.cs">
+      <Link>Routing\RouteInlineParser.cs</Link>
+    </Compile>
     <Compile Include="..\TransparentCommonAssemblyInfo.cs">
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
     </Compile>
@@ -89,6 +149,8 @@
     <Compile Include="Filters\IAuthenticationFilter.cs" />
     <Compile Include="Filters\IOverrideFilter.cs" />
     <Compile Include="Html5DateRenderingMode.cs" />
+    <Compile Include="HttpVerbAttribute.cs" />
+    <Compile Include="HttpRouteAttribute.cs" />
     <Compile Include="MembershipPasswordAttributeAdapter.cs" />
     <Compile Include="CompareAttribute.cs" />
     <Compile Include="ChildActionValueProvider.cs" />
@@ -109,6 +171,15 @@
     <Compile Include="Razor\MvcCSharpRazorCodeGenerator.cs" />
     <Compile Include="Razor\SetModelTypeCodeGenerator.cs" />
     <Compile Include="ReflectedAttributeCache.cs" />
+    <Compile Include="RouteAreaAttribute.cs" />
+    <Compile Include="Routing\DirectRouteExtensions.cs" />
+    <Compile Include="Routing\HttpVerbsRoutingAttribute.cs" />
+    <Compile Include="Routing\IDirectRouteInfoProvider.cs" />
+    <Compile Include="Routing\RouteBuilder.cs" />
+    <Compile Include="Routing\IInlineConstraintResolver.cs" />
+    <Compile Include="Routing\RouteCollectionAttributeRoutingExtensions.cs" />
+    <Compile Include="RoutePrefixAttribute.cs" />
+    <Compile Include="Routing\RouteDataTokenKeys.cs" />
     <Compile Include="SessionStateAttribute.cs" />
     <Compile Include="AllowHtmlAttribute.cs" />
     <Compile Include="UnvalidatedRequestValuesAccessor.cs" />
@@ -478,6 +549,7 @@
     <None Include="JavaScript\jquery.validate.unobtrusive.js" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <ItemGroup>

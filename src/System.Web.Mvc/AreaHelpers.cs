@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Mvc.Routing;
 using System.Web.Routing;
 
 namespace System.Web.Mvc
@@ -17,7 +18,7 @@ namespace System.Web.Mvc
             Route castRoute = route as Route;
             if (castRoute != null && castRoute.DataTokens != null)
             {
-                return castRoute.DataTokens["area"] as string;
+                return castRoute.DataTokens[RouteDataTokenKeys.Area] as string;
             }
 
             return null;
@@ -26,7 +27,7 @@ namespace System.Web.Mvc
         public static string GetAreaName(RouteData routeData)
         {
             object area;
-            if (routeData.DataTokens.TryGetValue("area", out area))
+            if (routeData.DataTokens.TryGetValue(RouteDataTokenKeys.Area, out area))
             {
                 return area as string;
             }

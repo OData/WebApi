@@ -18,7 +18,7 @@ namespace System.Web.Http.Routing
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             Assert.Equal("8675309", route.Defaults["param"]);
-            Assert.IsType<IntHttpRouteConstraint>(route.Constraints["param"]);
+            Assert.IsType<IntRouteConstraint>(route.Constraints["param"]);
         }
 
         [Fact]
@@ -28,8 +28,8 @@ namespace System.Web.Http.Routing
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             Assert.Equal("8675309", route.Defaults["param"]);
-            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
-            Assert.Equal(@"\d+", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+            Assert.IsType<RegexRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@"\d+", ((RegexRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]
@@ -41,9 +41,9 @@ namespace System.Web.Http.Routing
 
             Assert.Equal(RouteParameter.Optional, route.Defaults["param"]);
 
-            Assert.IsType<OptionalHttpRouteConstraint>(route.Constraints["param"]);
-            var constraint = (OptionalHttpRouteConstraint)route.Constraints["param"];
-            Assert.IsType<IntHttpRouteConstraint>(constraint.InnerConstraint);
+            Assert.IsType<OptionalRouteConstraint>(route.Constraints["param"]);
+            var constraint = (OptionalRouteConstraint)route.Constraints["param"];
+            Assert.IsType<IntRouteConstraint>(constraint.InnerConstraint);
         }
 
         [Fact]
@@ -55,9 +55,9 @@ namespace System.Web.Http.Routing
 
             Assert.Equal(RouteParameter.Optional, route.Defaults["param"]);
 
-            Assert.IsType<OptionalHttpRouteConstraint>(route.Constraints["param"]);
-            var constraint = (OptionalHttpRouteConstraint)route.Constraints["param"];
-            Assert.Equal(@"\d+", ((RegexHttpRouteConstraint)constraint.InnerConstraint).Pattern);
+            Assert.IsType<OptionalRouteConstraint>(route.Constraints["param"]);
+            var constraint = (OptionalRouteConstraint)route.Constraints["param"];
+            Assert.Equal(@"\d+", ((RegexRouteConstraint)constraint.InnerConstraint).Pattern);
         }
 
         [Fact]
@@ -67,10 +67,10 @@ namespace System.Web.Http.Routing
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             
-            Assert.IsType<CompoundHttpRouteConstraint>(route.Constraints["param"]);
-            CompoundHttpRouteConstraint constraint = (CompoundHttpRouteConstraint)route.Constraints["param"];
-            Assert.Equal(@"\d+", ((RegexHttpRouteConstraint)constraint.Constraints.ElementAt(0)).Pattern);
-            Assert.Equal(@"\w+", ((RegexHttpRouteConstraint)constraint.Constraints.ElementAt(1)).Pattern);
+            Assert.IsType<CompoundRouteConstraint>(route.Constraints["param"]);
+            CompoundRouteConstraint constraint = (CompoundRouteConstraint)route.Constraints["param"];
+            Assert.Equal(@"\d+", ((RegexRouteConstraint)constraint.Constraints.ElementAt(0)).Pattern);
+            Assert.Equal(@"\w+", ((RegexRouteConstraint)constraint.Constraints.ElementAt(1)).Pattern);
         }
 
         [Fact]
@@ -80,8 +80,8 @@ namespace System.Web.Http.Routing
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
-            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
-            Assert.Equal(@"\d+", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+            Assert.IsType<RegexRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@"\d+", ((RegexRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]
@@ -95,10 +95,10 @@ namespace System.Web.Http.Routing
             Assert.Equal("abc", route.Defaults["p2"]);
             Assert.Equal(RouteParameter.Optional, route.Defaults["p3"]);
 
-            Assert.IsType<CompoundHttpRouteConstraint>(route.Constraints["p1"]);
-            CompoundHttpRouteConstraint constraint = (CompoundHttpRouteConstraint)route.Constraints["p1"];
-            Assert.IsType<AlphaHttpRouteConstraint>(constraint.Constraints.ElementAt(0));
-            Assert.IsType<LengthHttpRouteConstraint>(constraint.Constraints.ElementAt(1));
+            Assert.IsType<CompoundRouteConstraint>(route.Constraints["p1"]);
+            CompoundRouteConstraint constraint = (CompoundRouteConstraint)route.Constraints["p1"];
+            Assert.IsType<AlphaRouteConstraint>(constraint.Constraints.ElementAt(0));
+            Assert.IsType<LengthRouteConstraint>(constraint.Constraints.ElementAt(1));
         }
 
         [Fact]
@@ -134,8 +134,8 @@ namespace System.Web.Http.Routing
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
-            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
-            Assert.Equal(@"\}", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+            Assert.IsType<RegexRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@"\}", ((RegexRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]
@@ -145,8 +145,8 @@ namespace System.Web.Http.Routing
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
-            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
-            Assert.Equal(@"\)", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+            Assert.IsType<RegexRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@"\)", ((RegexRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]
@@ -155,8 +155,8 @@ namespace System.Web.Http.Routing
             IHttpRoute route = BuildRoute(@"hello/{param:regex(:)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
-            Assert.Equal(@":", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+            Assert.IsType<RegexRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@":", ((RegexRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]
@@ -165,8 +165,8 @@ namespace System.Web.Http.Routing
             IHttpRoute route = BuildRoute(@"hello/{param:regex(\w,\w)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
-            Assert.Equal(@"\w,\w", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+            Assert.IsType<RegexRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@"\w,\w", ((RegexRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]
@@ -177,8 +177,8 @@ namespace System.Web.Http.Routing
             Assert.Equal("hello/{param}", route.RouteTemplate);
 
             Assert.DoesNotContain("param", route.Defaults.Keys);
-            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
-            Assert.Equal(@"=", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+            Assert.IsType<RegexRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@"=", ((RegexRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]
@@ -187,8 +187,8 @@ namespace System.Web.Http.Routing
             IHttpRoute route = BuildRoute(@"hello/{param:regex(\{)}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
-            Assert.Equal(@"\{", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+            Assert.IsType<RegexRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@"\{", ((RegexRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]
@@ -197,8 +197,8 @@ namespace System.Web.Http.Routing
             IHttpRoute route = BuildRoute(@"hello/{param:regex(\()}");
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
-            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
-            Assert.Equal(@"\(", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+            Assert.IsType<RegexRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@"\(", ((RegexRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]
@@ -208,8 +208,8 @@ namespace System.Web.Http.Routing
 
             Assert.Equal("hello/{param}", route.RouteTemplate);
             Assert.DoesNotContain("param", route.Defaults.Keys);
-            Assert.IsType<RegexHttpRouteConstraint>(route.Constraints["param"]);
-            Assert.Equal(@"\?", ((RegexHttpRouteConstraint)route.Constraints["param"]).Pattern);
+            Assert.IsType<RegexRouteConstraint>(route.Constraints["param"]);
+            Assert.Equal(@"\?", ((RegexRouteConstraint)route.Constraints["param"]).Pattern);
         }
 
         [Fact]

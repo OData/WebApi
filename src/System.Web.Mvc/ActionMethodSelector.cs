@@ -8,6 +8,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Web.Mvc.Properties;
+using System.Web.Mvc.Routing;
+using System.Web.Routing;
 
 namespace System.Web.Mvc
 {
@@ -42,6 +44,21 @@ namespace System.Web.Mvc
 
         public MethodInfo FindActionMethod(ControllerContext controllerContext, string actionName)
         {
+            if (controllerContext == null)
+            {
+                throw Error.ArgumentNull("controllerContext");
+            }
+
+            if (controllerContext.RouteData != null)
+            {
+                MethodInfo target = controllerContext.RouteData.GetTargetActionMethod();
+                if (target != null)
+                {
+                    // short circuit the selection process if a direct route was matched.
+                    return target;
+                }
+            }
+
             List<MethodInfo> finalMethods = FindActionMethods(controllerContext, actionName, AliasedMethods, NonAliasedMethods);
 
             switch (finalMethods.Count)

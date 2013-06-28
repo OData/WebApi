@@ -39,7 +39,7 @@ namespace System.Web.Mvc.Test
             ReflectedControllerDescriptor cd = new ReflectedControllerDescriptor(controllerType);
 
             // Act
-            ActionDescriptor ad = cd.FindAction(new Mock<ControllerContext>().Object, "NewName");
+            ActionDescriptor ad = cd.FindAction(new ControllerContext(), "NewName");
 
             // Assert
             Assert.Equal("NewName", ad.ActionName);
@@ -56,7 +56,7 @@ namespace System.Web.Mvc.Test
             ReflectedControllerDescriptor cd = new ReflectedControllerDescriptor(controllerType);
 
             // Act
-            ActionDescriptor ad = cd.FindAction(new Mock<ControllerContext>().Object, "NonExistent");
+            ActionDescriptor ad = cd.FindAction(new ControllerContext(), "NonExistent");
 
             // Assert
             Assert.Null(ad);

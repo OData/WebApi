@@ -11,7 +11,7 @@
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>$(DefineConstants);ASPNETMVC</DefineConstants>
+    <DefineConstants>$(DefineConstants);ASPNETMVC;ASPNETWEBAPI</DefineConstants>
     <NoWarn>1591</NoWarn>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
@@ -107,26 +107,67 @@
     <Compile Include="OverrideAuthenticationAttribute.cs" />
     <Compile Include="OverrideAuthorizationAttribute.cs" />
     <Compile Include="OverrideExceptionFiltersAttribute.cs" />
-    <Compile Include="Routing\Constraints\AlphaHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\BoolHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\CompoundHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\DateTimeHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\DecimalHttpRouteConstraint.cs" />
-    <Compile Include="Routing\DefaultInlineConstraintResolver.cs" />
-    <Compile Include="Routing\Constraints\DoubleHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\FloatHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\GuidHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\IntHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\LengthHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\LongHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\MaxLengthHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\MaxHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\MinLengthHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\MinHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\RangeRouteConstraintBase.cs" />
-    <Compile Include="Routing\Constraints\RegexHttpRouteConstraint.cs" />
-    <Compile Include="Routing\Constraints\OptionalHttpRouteConstraint.cs" />
     <Compile Include="Routing\RouteKeys.cs" />
+    <Compile Include="..\Common\Routing\Constraints\AlphaRouteConstraint.cs">
+      <Link>Routing\Constraints\AlphaRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\BoolRouteConstraint.cs">
+      <Link>Routing\Constraints\BoolRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\CompoundRouteConstraint.cs">
+      <Link>Routing\Constraints\CompoundRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\DateTimeRouteConstraint.cs">
+      <Link>Routing\Constraints\DateTimeRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\DecimalRouteConstraint.cs">
+      <Link>Routing\Constraints\DecimalRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\DoubleRouteConstraint.cs">
+      <Link>Routing\Constraints\DoubleRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\FloatRouteConstraint.cs">
+      <Link>Routing\Constraints\FloatRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\GuidRouteConstraint.cs">
+      <Link>Routing\Constraints\GuidRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\IntRouteConstraint.cs">
+      <Link>Routing\Constraints\IntRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\LengthRouteConstraint.cs">
+      <Link>Routing\Constraints\LengthRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\LongRouteConstraint.cs">
+      <Link>Routing\Constraints\LongRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\MaxLengthRouteConstraint.cs">
+      <Link>Routing\Constraints\MaxLengthRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\MaxRouteConstraint.cs">
+      <Link>Routing\Constraints\MaxRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\MinLengthRouteConstraint.cs">
+      <Link>Routing\Constraints\MinLengthRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\MinRouteConstraint.cs">
+      <Link>Routing\Constraints\MinRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\RangeRouteConstraintBase.cs">
+      <Link>Routing\Constraints\RangeRouteConstraintBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\RegexRouteConstraint.cs">
+      <Link>Routing\Constraints\RegexRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\Constraints\OptionalRouteConstraint.cs">
+      <Link>Routing\Constraints\OptionalRouteConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\DefaultInlineConstraintResolver.cs">
+      <Link>Routing\DefaultInlineConstraintResolver.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\RouteInlineParser.cs">
+      <Link>Routing\RouteInlineParser.cs</Link>
+    </Compile>
     <Compile Include="Routing\HttpRouteBuilder.cs" />
     <Compile Include="Routing\HttpRouteEntry.cs" />
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />

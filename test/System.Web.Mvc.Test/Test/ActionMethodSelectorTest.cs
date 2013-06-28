@@ -2,7 +2,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
+using System.Web.Mvc.Routing;
+using System.Web.Routing;
 using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.Test
@@ -45,7 +49,7 @@ namespace System.Web.Mvc.Test
             ActionMethodSelector selector = new ActionMethodSelector(controllerType);
 
             // Act
-            MethodInfo matchedMethod = selector.FindActionMethod(null, "OneMatch");
+            MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "OneMatch");
 
             // Assert
             Assert.Equal("OneMatch", matchedMethod.Name);
@@ -63,7 +67,7 @@ namespace System.Web.Mvc.Test
             ActionMethodSelector selector = new ActionMethodSelector(controllerType);
 
             // Act
-            MethodInfo matchedMethod = selector.FindActionMethod(null, "ShouldMatchMethodWithSelectionAttribute");
+            MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "ShouldMatchMethodWithSelectionAttribute");
 
             // Assert
             Assert.Equal("MethodHasSelectionAttribute1", matchedMethod.Name);
@@ -77,7 +81,7 @@ namespace System.Web.Mvc.Test
             ActionMethodSelector selector = new ActionMethodSelector(controllerType);
 
             // Act
-            MethodInfo matchedMethod = selector.FindActionMethod(null, "MiddleMatch");
+            MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "MiddleMatch");
 
             // Assert
             Assert.Equal("MiddleMatch", matchedMethod.Name);
@@ -91,7 +95,7 @@ namespace System.Web.Mvc.Test
             ActionMethodSelector selector = new ActionMethodSelector(controllerType);
 
             // Act
-            MethodInfo matchedMethod = selector.FindActionMethod(null, "MiddleMatch");
+            MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "MiddleMatch");
 
             // Assert
             Assert.Equal("MiddleMatch", matchedMethod.Name);
@@ -105,10 +109,39 @@ namespace System.Web.Mvc.Test
             ActionMethodSelector selector = new ActionMethodSelector(controllerType);
 
             // Act
-            MethodInfo matchedMethod = selector.FindActionMethod(null, "Match");
+            MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "Match");
 
             // Assert
             Assert.Equal("Match", matchedMethod.Name);
+        }
+
+        [Fact]
+        public void FindActionMethod_NullContext_Throws()
+        {
+            // Arrange
+            Type controllerType = typeof(WithRoutingAttributeController);
+            ActionMethodSelector selector = new ActionMethodSelector(controllerType);
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => selector.FindActionMethod(null, "Action"));
+        }
+
+        [Fact]
+        public void FindActionMethod_MultipleMethodsSameActionOneWithRouteAttributeAndRouteWasMatched_ReturnsMethodWithRoutingAttribute()
+        {
+            // Arrange
+            Type controllerType = typeof(WithRoutingAttributeController);
+            ActionMethodSelector selector = new ActionMethodSelector(controllerType);
+
+            var context = new ControllerContext();
+            context.RouteData = new RouteData();
+            context.RouteData.Route = DirectRouteTestHelpers.BuildDirectRouteStubsFrom<WithRoutingAttributeController>(c => c.Action())[0];
+
+            // Act
+            MethodInfo matchedMethod = selector.FindActionMethod(context, "Action");
+
+            // Assert
+            Assert.Equal("Action", matchedMethod.Name);
         }
 
         [Fact]
@@ -119,7 +152,7 @@ namespace System.Web.Mvc.Test
             ActionMethodSelector selector = new ActionMethodSelector(controllerType);
 
             // Act
-            MethodInfo matchedMethod = selector.FindActionMethod(null, "ZeroMatch");
+            MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "ZeroMatch");
 
             // Assert
             Assert.Null(matchedMethod);
@@ -134,7 +167,7 @@ namespace System.Web.Mvc.Test
 
             // Act & veriy
             Assert.Throws<AmbiguousMatchException>(
-                delegate { selector.FindActionMethod(null, "TwoMatch"); },
+                delegate { selector.FindActionMethod(new ControllerContext(), "TwoMatch"); },
                 "The current request for action 'TwoMatch' on controller type 'SelectionAttributeController' is ambiguous between the following action methods:" + Environment.NewLine
               + "Void TwoMatch2() on type System.Web.Mvc.Test.ActionMethodSelectorTest+SelectionAttributeController" + Environment.NewLine
               + "Void TwoMatch() on type System.Web.Mvc.Test.ActionMethodSelectorTest+SelectionAttributeController");
@@ -303,6 +336,20 @@ namespace System.Web.Mvc.Test
 
             [ActionName("ShouldMatchMethodWithSelectionAttribute")]
             public void MethodDoesNotHaveSelectionAttribute1()
+            {
+            }
+        }
+
+        private class WithRoutingAttributeController : Controller
+        {
+            [HttpRoute("route")]
+            [ActionName("Action")] // to make things confusing
+            public void ActionWithoutRoute()
+            {
+            }
+
+            [HttpRoute("route")]
+            public void Action()
             {
             }
         }

@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Web.Mvc.Routing;
 using System.Web.Routing;
 
 namespace System.Web.Mvc
@@ -82,12 +83,12 @@ namespace System.Web.Mvc
             }
 
             Route route = Routes.MapRoute(name, url, defaults, constraints, namespaces);
-            route.DataTokens["area"] = AreaName;
+            route.DataTokens[RouteDataTokenKeys.Area] = AreaName;
 
             // disabling the namespace lookup fallback mechanism keeps this areas from accidentally picking up
             // controllers belonging to other areas
             bool useNamespaceFallback = (namespaces == null || namespaces.Length == 0);
-            route.DataTokens["UseNamespaceFallback"] = useNamespaceFallback;
+            route.DataTokens[RouteDataTokenKeys.UseNamespaceFallback] = useNamespaceFallback;
 
             return route;
         }

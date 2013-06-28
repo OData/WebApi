@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace System.Web.Mvc
@@ -26,6 +27,11 @@ namespace System.Web.Mvc
                 }
                 return count;
             }
+        }
+
+        internal IReadOnlyList<Type> GetControllerTypes()
+        {
+            return new ReadOnlyCollection<Type>(_cache.Values.SelectMany(lookup => lookup.SelectMany(t => t)).ToList());
         }
 
         public void EnsureInitialized(IBuildManager buildManager)

@@ -685,6 +685,30 @@ namespace System.Web.Mvc.Test
             Assert.Same(returnedController, expectedController);
         }
 
+        [Fact]
+        public void GetControllerType_WithMatchedDirectRoute_UseTargetMethodType()
+        {
+            // Arrange
+            var requestContext = new RequestContext();
+            requestContext.RouteData = new RouteData();
+            requestContext.RouteData.Route = DirectRouteTestHelpers.BuildDirectRouteStubsFrom<WithRoutingAttributeController>(c => c.Action())[0]; 
+            
+            var expectedControllerType = typeof(WithRoutingAttributeController);
+
+            var controllerActivator = new Mock<IControllerActivator>(MockBehavior.Strict).Object;
+            var activatorResolver = new Resolver<IControllerActivator>();
+
+            var factory = new DefaultControllerFactory(controllerActivator, activatorResolver, null);
+
+            // Act
+            // if it would not get the controller type from the DirectRoute, then it would not 
+            // be able to find any controller
+            var type = factory.GetControllerType(requestContext, "no_such_controller");
+
+            // Assert
+            Assert.Equal(expectedControllerType, type);
+        }
+
         class NoParameterlessCtor : IController
         {
             public NoParameterlessCtor(int x)
@@ -765,5 +789,13 @@ namespace System.Web.Mvc.Test
     // GOOD: 'Controller' suffix should be case-insensitive
     public class Goodcontroller : Controller
     {
+    }
+
+    public class WithRoutingAttributeController : Controller
+    {
+        [HttpRoute("route")]
+        public void Action()
+        {
+        }
     }
 }

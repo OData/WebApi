@@ -8,6 +8,7 @@
     <RootNamespace>System.Web.Http</RootNamespace>
     <AssemblyName>System.Web.Http.Test</AssemblyName>
     <OutputPath>..\..\bin\$(Configuration)\Test\</OutputPath>
+    <DefineConstants>$(DefineConstants);ASPNETWEBAPI</DefineConstants>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
@@ -132,29 +133,14 @@
     <Compile Include="ModelBinding\FormDataCollectionExtensionsTest.cs" />
     <Compile Include="ModelBinding\ModelBinderAttributeTest.cs" />
     <Compile Include="Routing\AttributeRoutingTest.cs" />
-    <Compile Include="Routing\Constraints\AlphaHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\BoolHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\CompoundHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\DateTimeHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\DecimalHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\DoubleHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\FloatHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\GuidHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\HttpRouteConstraintTestBase.cs" />
-    <Compile Include="Routing\Constraints\IntHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\LengthHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\LengthRangeHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\LongHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\MaxHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\MaxLengthHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\MinHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\MinLengthHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\OptionalHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\RangeHttpRouteConstraintTest.cs" />
-    <Compile Include="Routing\Constraints\RegexHttpRouteConstraintTest.cs" />
+    <Compile Include="..\Common\Routing\RouteConstraintsTests.cs">
+      <Link>Routing\RouteConstraintsTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\DefaultInlineConstraintResolverTest.cs">
+      <Link>Routing\DefaultInlineConstraintResolverTest.cs</Link>
+    </Compile>
     <Compile Include="Routing\HttpRouteEntryTest.cs" />
     <Compile Include="Routing\HttpRouteBuilderTest.cs" />
-    <Compile Include="Routing\DefaultInlineConstraintResolverTest.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />

@@ -1,17 +1,28 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Reflection;
-
 namespace System.Web.Mvc
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public sealed class HttpOptionsAttribute : ActionMethodSelectorAttribute
+    /// <summary>
+    /// Specifies that an action supports the OPTIONS HTTP method.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    public sealed class HttpOptionsAttribute : HttpVerbAttribute
     {
-        private static readonly AcceptVerbsAttribute _innerAttribute = new AcceptVerbsAttribute(HttpVerbs.Options);
-
-        public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpOptionsAttribute" /> class.
+        /// </summary>
+        public HttpOptionsAttribute()
+            : base(HttpVerbs.Options)
         {
-            return _innerAttribute.IsValidForRequest(controllerContext, methodInfo);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpOptionsAttribute" /> class.
+        /// </summary>
+        /// <param name="routeTemplate">The route template describing the URI pattern to match against.</param>
+        public HttpOptionsAttribute(string routeTemplate)
+            : base(HttpVerbs.Options, routeTemplate)
+        {
         }
     }
 }

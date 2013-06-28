@@ -1,17 +1,28 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Reflection;
-
 namespace System.Web.Mvc
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public sealed class HttpPatchAttribute : ActionMethodSelectorAttribute
+    /// <summary>
+    /// Specifies that an action supports the PATCH HTTP method.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    public sealed class HttpPatchAttribute : HttpVerbAttribute
     {
-        private static readonly AcceptVerbsAttribute _innerAttribute = new AcceptVerbsAttribute(HttpVerbs.Patch);
-
-        public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpPatchAttribute" /> class.
+        /// </summary>
+        public HttpPatchAttribute()
+            : base(HttpVerbs.Patch)
         {
-            return _innerAttribute.IsValidForRequest(controllerContext, methodInfo);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpPatchAttribute" /> class.
+        /// </summary>
+        /// <param name="routeTemplate">The route template describing the URI pattern to match against.</param>
+        public HttpPatchAttribute(string routeTemplate)
+            : base(HttpVerbs.Patch, routeTemplate)
+        {
         }
     }
 }

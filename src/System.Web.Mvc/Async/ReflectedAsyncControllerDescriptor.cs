@@ -28,6 +28,11 @@ namespace System.Web.Mvc.Async
             get { return _controllerType; }
         }
 
+        internal AsyncActionMethodSelector Selector
+        {
+            get { return _selector; }
+        }
+
         /// <summary>
         /// Determines if we should bind "Foo" to FooAsync/FooCompleted pattern. 
         /// </summary>

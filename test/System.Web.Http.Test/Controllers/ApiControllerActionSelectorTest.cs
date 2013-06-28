@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
@@ -33,6 +34,22 @@ namespace System.Web.Http
 
             Assert.Equal("Get", getActionDescriptor.ActionName);
             Assert.Equal("Post", postActionDescriptor.ActionName);
+        }
+
+        [Fact]
+        public void SelectAction_RespectsDirectRoutes()
+        {
+            var actionSelector = new ApiControllerActionSelector();
+            HttpControllerContext context = ContextUtil.CreateControllerContext();
+            context.Request = new HttpRequestMessage { Method = HttpMethod.Get };
+            var controllerDescriptor = new HttpControllerDescriptor(context.Configuration, "Users", typeof(UsersController));
+            context.ControllerDescriptor = controllerDescriptor;
+            ReflectedHttpActionDescriptor directRouteAction = (ReflectedHttpActionDescriptor)actionSelector.GetActionMapping(controllerDescriptor)["Delete"].First();
+            context.RouteData.Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { directRouteAction });
+
+            HttpActionDescriptor actionDescriptor = actionSelector.SelectAction(context);
+
+            Assert.Same(directRouteAction, actionDescriptor);
         }
 
         [Fact]

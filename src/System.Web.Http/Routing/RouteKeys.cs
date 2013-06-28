@@ -7,7 +7,11 @@ namespace System.Web.Http.Routing
     /// </summary>
     internal static class RouteKeys
     {
+        // Used to provide the action and controller name in the route values
         public const string ActionKey = "action";
         public const string ControllerKey = "controller";
+
+        // Used to provide the action descriptors to consider in the route data tokens
+        public const string ActionsDataTokenKey = "actions";
     }
 }

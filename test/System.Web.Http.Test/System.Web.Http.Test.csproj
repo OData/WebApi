@@ -141,6 +141,9 @@
     <Compile Include="..\Common\Routing\DefaultInlineConstraintResolverTest.cs">
       <Link>Routing\DefaultInlineConstraintResolverTest.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\InlineRouteTemplateParserTests.cs">
+      <Link>Routing\InlineRouteTemplateParserTests.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Routing\RouteEntryTest.cs">
       <Link>Routing\RouteEntryTest.cs</Link>
     </Compile>

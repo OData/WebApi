@@ -22,7 +22,7 @@ namespace System.Web.Mvc.Routing
     /// This class is used by the AttributeRouting mapper, during configuration,
     /// to parse and strip defaults and constraints from the template.
     /// </summary>
-    internal class RouteInlineParser
+    internal class InlineRouteTemplateParser
     {
         // One or more characters, matches "id"
         private const string ParameterNameRegex = @"(?<parameterName>.+?)";

@@ -165,8 +165,8 @@
     <Compile Include="..\Common\Routing\DefaultInlineConstraintResolver.cs">
       <Link>Routing\DefaultInlineConstraintResolver.cs</Link>
     </Compile>
-    <Compile Include="..\Common\Routing\RouteInlineParser.cs">
-      <Link>Routing\RouteInlineParser.cs</Link>
+    <Compile Include="..\Common\Routing\InlineRouteTemplateParser.cs">
+      <Link>Routing\InlineRouteTemplateParser.cs</Link>
     </Compile>
     <Compile Include="Routing\HttpRouteBuilder.cs" />
     <Compile Include="..\Common\Routing\HttpRouteEntry.cs">

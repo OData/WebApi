@@ -88,7 +88,7 @@ namespace System.Web.Mvc.Routing
                 }
             }
 
-            string detokenizedRouteTemplate = RouteInlineParser.ParseRouteTemplate(routeTemplate, defaults, constraints, ConstraintResolver);
+            string detokenizedRouteTemplate = InlineRouteTemplateParser.ParseRouteTemplate(routeTemplate, defaults, constraints, ConstraintResolver);
 
             return BuildDirectRoute(defaults, constraints, dataTokens, detokenizedRouteTemplate, targetMethod);
         }

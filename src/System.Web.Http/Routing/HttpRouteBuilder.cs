@@ -74,7 +74,7 @@ namespace System.Web.Http.Routing
                 constraints.Add("httpMethod", new HttpMethodConstraint(httpMethods.ToArray()));
             }
 
-            string detokenizedRouteTemplate = RouteInlineParser.ParseRouteTemplate(routeTemplate, defaults, constraints, ConstraintResolver);
+            string detokenizedRouteTemplate = InlineRouteTemplateParser.ParseRouteTemplate(routeTemplate, defaults, constraints, ConstraintResolver);
 
             return BuildHttpRoute(defaults, constraints, detokenizedRouteTemplate);
         }

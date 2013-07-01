@@ -91,7 +91,7 @@ namespace System.Web.Http.OData.Query.Expressions
             wrapper.Instance = new TestEntity();
 
             object value;
-            bool result = wrapper.TryGetValue("SampleProperty", out value);
+            bool result = wrapper.TryGetPropertyValue("SampleProperty", out value);
 
             Assert.True(result);
             Assert.Same(expectedPropertyValue, value);
@@ -106,7 +106,7 @@ namespace System.Web.Http.OData.Query.Expressions
             wrapper.Instance = new TestEntity { SampleProperty = expectedPropertyValue };
 
             object value;
-            bool result = wrapper.TryGetValue("SampleProperty", out value);
+            bool result = wrapper.TryGetPropertyValue("SampleProperty", out value);
 
             Assert.True(result);
             Assert.Same(expectedPropertyValue, value);
@@ -120,7 +120,7 @@ namespace System.Web.Http.OData.Query.Expressions
             wrapper.Instance = new TestEntity { SampleProperty = expectedPropertyValue };
 
             object value;
-            bool result = wrapper.TryGetValue("SampleProperty", out value);
+            bool result = wrapper.TryGetPropertyValue("SampleProperty", out value);
 
             Assert.True(result);
             Assert.Same(expectedPropertyValue, value);
@@ -132,7 +132,7 @@ namespace System.Web.Http.OData.Query.Expressions
             SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>();
 
             object value;
-            bool result = wrapper.TryGetValue("SampleProperty", out value);
+            bool result = wrapper.TryGetPropertyValue("SampleProperty", out value);
 
             Assert.False(result);
         }
@@ -143,7 +143,7 @@ namespace System.Web.Http.OData.Query.Expressions
             SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>();
 
             object value;
-            bool result = wrapper.TryGetValue("SampleNotPresentProperty", out value);
+            bool result = wrapper.TryGetPropertyValue("SampleNotPresentProperty", out value);
 
             Assert.False(result);
         }

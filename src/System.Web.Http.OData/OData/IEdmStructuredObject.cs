@@ -19,6 +19,6 @@ namespace System.Web.Http.OData
         /// <returns><see langword="true"/> if the instance contains the property with the given name; otherwise, <see langword="false"/>.</returns>
         [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate",
             Justification = "Generics not appropriate here as this interface supports typeless")]
-        bool TryGetValue(string propertyName, out object value);
+        bool TryGetPropertyValue(string propertyName, out object value);
     }
 }

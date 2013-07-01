@@ -8,8 +8,6 @@ namespace System.Web.Http.OData
     /// <summary>
     /// Represents an instance of an <see cref="IEdmType"/>.
     /// </summary>
-    // TODO: how should we represent null's in this model? post-poning for now as entities and feeds are the only edm objects we support and 
-    // both of them cannot be null.
     public interface IEdmObject
     {
         /// <summary>

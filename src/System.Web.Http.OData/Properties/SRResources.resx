@@ -595,9 +595,6 @@
   <data name="PropertyNotFound" xml:space="preserve">
     <value>The EDM instance of type '{0}' is missing the property '{1}'.</value>
   </data>
-  <data name="EdmObjectCannotBeSerialized" xml:space="preserve">
-    <value>{0} does not support serializing an {1} of EDM type '{2}'.</value>
-  </data>
   <data name="EdmTypeCannotBeNull" xml:space="preserve">
     <value>The EDM type of the object of type '{0}' is null. The EDM type of an {1} cannot be null.</value>
   </data>
@@ -633,6 +630,9 @@
   </data>
   <data name="UrlHelperNull" xml:space="preserve">
     <value>The property 'Url' of {0} cannot be null.</value>
+  </data>
+  <data name="EdmComplexObjectNullRef" xml:space="preserve">
+    <value>Cannot get property '{0}' of a null EDM object of type '{1}'.</value>
   </data>
   <data name="ActionNotBoundToEntity" xml:space="preserve">
     <value>The action '{0}' is not bound to an entity. Only actions that are bound to entities can have action links.</value>

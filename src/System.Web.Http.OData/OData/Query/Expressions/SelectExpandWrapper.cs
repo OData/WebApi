@@ -16,7 +16,7 @@ namespace System.Web.Http.OData.Query.Expressions
     /// </summary>
     /// <typeparam name="TElement">The element being selected and expanded.</typeparam>
     [JsonConverter(typeof(SelectExpandWrapperConverter))]
-    internal class SelectExpandWrapper<TElement> : IEdmStructuredObject, IDictionaryConvertible
+    internal class SelectExpandWrapper<TElement> : IEdmEntityObject, IDictionaryConvertible
     {
         private Dictionary<string, object> _containerDict;
 
@@ -65,7 +65,7 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         /// <inheritdoc />
-        public bool TryGetValue(string propertyName, out object value)
+        public bool TryGetPropertyValue(string propertyName, out object value)
         {
             // look into the container first to see if it has that property. container would have it 
             // if the property was expanded.
@@ -106,7 +106,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 foreach (IEdmStructuralProperty property in GetEdmType().AsStructured().StructuralProperties())
                 {
                     object propertyValue;
-                    if (TryGetValue(property.Name, out propertyValue))
+                    if (TryGetPropertyValue(property.Name, out propertyValue))
                     {
                         dictionary[property.Name] = propertyValue;
                     }

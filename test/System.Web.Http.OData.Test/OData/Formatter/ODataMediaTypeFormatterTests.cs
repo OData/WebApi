@@ -440,33 +440,70 @@ namespace System.Web.Http.OData.Formatter
             deserializer.Verify();
         }
 
-        public static TheoryDataSet<IEnumerable<ODataPayloadKind>, Type, bool> CanWriteType_ReturnsExpectedResult_ForEdmObjects_TestData
+        public static TheoryDataSet<ODataPayloadKind, Type> CanWriteType_ReturnsExpectedResult_ForEdmObjects_TestData
         {
             get
             {
-                IEnumerable<ODataPayloadKind> allPayloadKinds = Enum.GetValues(typeof(ODataPayloadKind)).Cast<ODataPayloadKind>();
-                return new TheoryDataSet<IEnumerable<ODataPayloadKind>, Type, bool>
+                Type entityCollectionEdmObjectType = new Mock<IEdmObject>().As<IEnumerable<IEdmEntityObject>>().Object.GetType();
+                Type complexCollectionEdmObjectType = new Mock<IEdmObject>().As<IEnumerable<IEdmComplexObject>>().Object.GetType();
+
+                return new TheoryDataSet<ODataPayloadKind, Type>
                 {
-                    { new[] { ODataPayloadKind.Entry }, typeof(IEdmObject), true },
-                    { allPayloadKinds.Except(new[] { ODataPayloadKind.Entry }), typeof(IEdmObject), false },
-                    { new[] { ODataPayloadKind.Feed }, typeof(IEdmObject), false },
-                    { new[] { ODataPayloadKind.Entry }, typeof(FeedEdmObject), false },
-                    { allPayloadKinds.Except(new[] { ODataPayloadKind.Feed }), typeof(FeedEdmObject), false },
-                    { new[] { ODataPayloadKind.Feed }, typeof(FeedEdmObject), true }
+                    { ODataPayloadKind.Entry , typeof(IEdmEntityObject) },
+                    { ODataPayloadKind.Entry , typeof(TypedEdmEntityObject) },
+                    { ODataPayloadKind.Feed , entityCollectionEdmObjectType },
+                    { ODataPayloadKind.Property , typeof(IEdmComplexObject) },
+                    { ODataPayloadKind.Property , typeof(TypedEdmComplexObject) },
+                    { ODataPayloadKind.Collection , complexCollectionEdmObjectType },
+                    { ODataPayloadKind.Property, typeof(NullEdmComplexObject) }
                 };
             }
         }
 
         [Theory]
         [PropertyData("CanWriteType_ReturnsExpectedResult_ForEdmObjects_TestData")]
-        public void CanWriteType_ReturnsExpectedResult_ForEdmObjects(IEnumerable<ODataPayloadKind> payloadKinds, Type type, bool canWrite)
+        public void CanWriteType_ReturnsTrueForEdmObjects_WithRightPayload(ODataPayloadKind payloadKind, Type type)
+        {
+            // Arrange
+            IEnumerable<ODataPayloadKind> allPayloadKinds = Enum.GetValues(typeof(ODataPayloadKind)).Cast<ODataPayloadKind>();
+            var model = CreateModel();
+            var request = CreateFakeODataRequest(model);
+
+            var formatterWithGivenPayload = new ODataMediaTypeFormatter(new[] { payloadKind }) { Request = request };
+            var formatterWithoutGivenPayload = new ODataMediaTypeFormatter(allPayloadKinds.Except(new[] { payloadKind })) { Request = request };
+
+            // Act & Assert
+            Assert.True(formatterWithGivenPayload.CanWriteType(type));
+            Assert.False(formatterWithoutGivenPayload.CanWriteType(type));
+        }
+
+        public static TheoryDataSet<Type> InvalidIEdmObjectImplementationTypes
+        {
+            get
+            {
+                return new TheoryDataSet<Type>
+                {
+                    typeof(IEdmObject),
+                    typeof(TypedEdmStructuredObject),
+                    new Mock<IEdmObject>().Object.GetType(),
+                    new Mock<IEdmObject>().As<IEnumerable<IEdmObject>>().Object.GetType()
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("InvalidIEdmObjectImplementationTypes")]
+        public void CanWriteType_ReturnsFalse_ForInvalidIEdmObjectImplementations_NoMatterThePayload(Type type)
         {
             var model = CreateModel();
             var request = CreateFakeODataRequest(model);
-            var formatter = new ODataMediaTypeFormatter(payloadKinds);
+            IEnumerable<ODataPayloadKind> allPayloadKinds = Enum.GetValues(typeof(ODataPayloadKind)).Cast<ODataPayloadKind>();
+            var formatter = new ODataMediaTypeFormatter(allPayloadKinds);
             formatter.Request = request;
 
-            Assert.Equal(canWrite, formatter.CanWriteType(type));
+            var result = formatter.CanWriteType(type);
+
+            Assert.False(result);
         }
 
         [Fact]
@@ -484,24 +521,6 @@ namespace System.Web.Http.OData.Formatter
                     .WriteToStreamAsync(typeof(int), edmObject.Object, new MemoryStream(), new Mock<HttpContent>().Object, transportContext: null)
                     .Wait(),
                 "The EDM type of the object of type 'System.Int32' is null. The EDM type of an IEdmObject cannot be null.");
-        }
-
-        [Fact]
-        public void WriteToStreamAsync_ThrowsSerializationException_IfEdmTypeIsNotEntityOrFeed()
-        {
-            var model = CreateModel();
-            var request = CreateFakeODataRequest(model);
-            var formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[0]);
-            formatter.Request = request;
-
-            Mock<IEdmObject> edmObject = new Mock<IEdmObject>();
-            edmObject.Setup(e => e.GetEdmType()).Returns(EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false));
-
-            Assert.Throws<SerializationException>(
-                () => formatter
-                    .WriteToStreamAsync(typeof(int), edmObject.Object, new MemoryStream(), new Mock<HttpContent>().Object, transportContext: null)
-                    .Wait(),
-                "ODataMediaTypeFormatter does not support serializing an IEdmObject of EDM type '[Edm.Int32 Nullable=False]'.");
         }
 
         [Fact]
@@ -697,19 +716,6 @@ namespace System.Web.Http.OData.Formatter
 
         private class TypeNotInModel
         {
-        }
-
-        private class FeedEdmObject : IEdmObject, IEnumerable
-        {
-            public IEnumerator GetEnumerator()
-            {
-                throw new NotImplementedException();
-            }
-
-            public IEdmTypeReference GetEdmType()
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

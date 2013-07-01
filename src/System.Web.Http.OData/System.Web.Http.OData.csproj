@@ -81,10 +81,12 @@
     <Compile Include="OData\Batch\ODataBatchContent.cs" />
     <Compile Include="OData\Batch\DefaultODataBatchHandler.cs" />
     <Compile Include="OData\DeltaOfTEntityType.cs" />
-    <Compile Include="OData\Formatter\EdmStructuredObject.cs" />
+    <Compile Include="OData\Formatter\Serialization\TypedEdmComplexObject.cs" />
+    <Compile Include="OData\Formatter\Serialization\TypedEdmEntityObject.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpers.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkBase.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataItemBase.cs" />
+    <Compile Include="OData\Formatter\Serialization\TypedEdmStructuredObject.cs" />
     <Compile Include="OData\Formatter\ODataBinaryValueMediaTypeMapping.cs" />
     <Compile Include="OData\Formatter\ODataPrimitiveValueMediaTypeMapping.cs" />
     <Compile Include="OData\Formatter\ODataValueExtensions.cs" />
@@ -92,6 +94,9 @@
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinksSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataRawValueSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\RawValueSerializerProvider.cs" />
+    <Compile Include="OData\IEdmComplexObject.cs" />
+    <Compile Include="OData\IEdmEntityObject.cs" />
+    <Compile Include="OData\NullEdmComplexObject.cs" />
     <Compile Include="OData\ODataNullValueAttribute.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProviderExtensions.cs" />
     <Compile Include="OData\Formatter\Serialization\SelectExpandNode.cs" />

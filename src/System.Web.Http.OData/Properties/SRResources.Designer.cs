@@ -358,11 +358,11 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} does not support serializing an {1} of EDM type &apos;{2}&apos;..
+        ///   Looks up a localized string similar to Cannot get property &apos;{0}&apos; of a null EDM object of type &apos;{1}&apos;..
         /// </summary>
-        internal static string EdmObjectCannotBeSerialized {
+        internal static string EdmComplexObjectNullRef {
             get {
-                return ResourceManager.GetString("EdmObjectCannotBeSerialized", resourceCulture);
+                return ResourceManager.GetString("EdmComplexObjectNullRef", resourceCulture);
             }
         }
         

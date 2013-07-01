@@ -105,9 +105,9 @@ namespace System.Web.Http.OData
             EdmModel model = new EdmModel();
             model.AddElement(edmType);
             model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(typeof(TestEntity)));
-            Mock<IEdmStructuredObject> edmObject = new Mock<IEdmStructuredObject>();
+            Mock<IEdmEntityObject> edmObject = new Mock<IEdmEntityObject>();
             object propertyValue = 42;
-            edmObject.Setup(e => e.TryGetValue("Property", out propertyValue)).Returns(true);
+            edmObject.Setup(e => e.TryGetPropertyValue("Property", out propertyValue)).Returns(true);
             edmObject.Setup(e => e.GetEdmType()).Returns(new EdmEntityTypeReference(edmType, isNullable: false));
 
             EntityInstanceContext entityContext = new EntityInstanceContext { EdmModel = model, EdmObject = edmObject.Object, EntityType = edmType };
@@ -132,9 +132,9 @@ namespace System.Web.Http.OData
             EdmModel model = new EdmModel();
             model.AddElement(edmType);
             model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(typeof(TestEntity)));
-            Mock<IEdmStructuredObject> edmObject = new Mock<IEdmStructuredObject>();
+            Mock<IEdmEntityObject> edmObject = new Mock<IEdmEntityObject>();
             object propertyValue = new List<int> { 42 };
-            edmObject.Setup(e => e.TryGetValue("CollectionProperty", out propertyValue)).Returns(true);
+            edmObject.Setup(e => e.TryGetPropertyValue("CollectionProperty", out propertyValue)).Returns(true);
             edmObject.Setup(e => e.GetEdmType()).Returns(new EdmEntityTypeReference(edmType, isNullable: false));
 
             EntityInstanceContext entityContext = new EntityInstanceContext { EdmModel = model, EdmObject = edmObject.Object, EntityType = edmType };
@@ -152,7 +152,7 @@ namespace System.Web.Http.OData
         {
             EdmEntityType entityType = new EdmEntityType("NS", "Name");
             EdmModel model = new EdmModel();
-            IEdmStructuredObject instance = new Mock<IEdmStructuredObject>().Object;
+            IEdmEntityObject instance = new Mock<IEdmEntityObject>().Object;
             EntityInstanceContext entityContext = new EntityInstanceContext { EntityType = entityType, EdmModel = model, EdmObject = instance };
 
             Assert.Throws<InvalidOperationException>(
@@ -171,7 +171,7 @@ namespace System.Web.Http.OData
         {
             object instance = new object();
             IEdmEntityTypeReference entityType = new Mock<IEdmEntityTypeReference>().Object;
-            EntityInstanceContext entityContext = new EntityInstanceContext { EdmObject = new EdmStructuredObject(instance, entityType) };
+            EntityInstanceContext entityContext = new EntityInstanceContext { EdmObject = new TypedEdmEntityObject(instance, entityType) };
 
             Assert.Same(instance, entityContext.EntityInstance);
         }

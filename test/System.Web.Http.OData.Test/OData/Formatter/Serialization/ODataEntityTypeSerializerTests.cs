@@ -344,8 +344,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             orders.Setup(o => o.GetEdmType()).Returns(ordersProperty.Type);
             object ordersValue = orders.Object;
 
-            Mock<IEdmStructuredObject> customer = new Mock<IEdmStructuredObject>();
-            customer.Setup(c => c.TryGetValue("Orders", out ordersValue)).Returns(true);
+            Mock<IEdmEntityObject> customer = new Mock<IEdmEntityObject>();
+            customer.Setup(c => c.TryGetPropertyValue("Orders", out ordersValue)).Returns(true);
             customer.Setup(c => c.GetEdmType()).Returns(customerType.AsReference());
 
             SelectExpandClause selectExpandClause = new ODataUriParser(_model, serviceRoot: null).ParseSelectAndExpand("Orders", "Orders", customerType, _customerSet);
@@ -488,7 +488,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             propertyType.Setup(t => t.Definition).Returns(new EdmEntityType("Namespace", "Name"));
             Mock<IEdmStructuralProperty> property = new Mock<IEdmStructuralProperty>();
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
-            IEdmStructuredObject entity = new Mock<IEdmStructuredObject>().Object;
+            IEdmEntityObject entity = new Mock<IEdmEntityObject>().Object;
             property.Setup(p => p.Type).Returns(propertyType.Object);
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(propertyType.Object)).Returns<ODataEdmTypeSerializer>(null);
 
@@ -531,7 +531,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         private bool Verify(EntityInstanceContext instanceContext, object instance, ODataSerializerContext writeContext)
         {
-            Assert.Same(instance, (instanceContext.EdmObject as EdmStructuredObject).Instance);
+            Assert.Same(instance, (instanceContext.EdmObject as TypedEdmEntityObject).Instance);
             Assert.Equal(writeContext.Model, instanceContext.EdmModel);
             Assert.Equal(writeContext.EntitySet, instanceContext.EntitySet);
             Assert.Equal(writeContext.Request, instanceContext.Request);

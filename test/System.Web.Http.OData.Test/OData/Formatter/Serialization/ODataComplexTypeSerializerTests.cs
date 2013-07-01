@@ -144,14 +144,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateODataValue_ReturnsNull_ForNullValue()
-        {
-            var odataValue = _serializer.CreateODataValue(null, new ODataSerializerContext());
-
-            Assert.Null(odataValue);
-        }
-
-        [Fact]
         public void CreateODataComplexValue_ThrowsArgumentNull_WriteContext()
         {
             Assert.ThrowsArgumentNull(
@@ -186,6 +178,17 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void CreateODataComplexValue_ReturnsNull_ForNullEdmComplexObject()
+        {
+            IEdmComplexTypeReference edmType = new EdmComplexTypeReference(_addressType, isNullable: true);
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(edmType, new DefaultODataSerializerProvider());
+
+            var result = serializer.CreateODataComplexValue(new NullEdmComplexObject(edmType), new ODataSerializerContext());
+
+            Assert.Null(result);
+        }
+
+        [Fact]
         public void CreateODataComplexValue_ThrowsTypeCannotBeSerialized()
         {
             IEdmPrimitiveTypeReference stringType = EdmCoreModel.Instance.GetString(isNullable: true);
@@ -196,6 +199,25 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Throws<NotSupportedException>(
                 () => serializer.CreateODataComplexValue(_address, new ODataSerializerContext()),
                 "'Edm.String' cannot be serialized using the ODataMediaTypeFormatter.");
+        }
+
+        [Fact]
+        public void CreateODataComplexValue_Understands_IEdmComplexTypeObject()
+        {
+            // Arrange
+            EdmComplexType complexEdmType = new EdmComplexType("NS", "ComplexType");
+            complexEdmType.AddStructuralProperty("Property", EdmPrimitiveTypeKind.Int32);
+            IEdmComplexTypeReference edmTypeReference = new EdmComplexTypeReference(complexEdmType, isNullable: false);
+
+            TypedEdmComplexObject edmObject = new TypedEdmComplexObject(new { Property = 42 }, edmTypeReference);
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(edmTypeReference, new DefaultODataSerializerProvider());
+
+            // Act
+            ODataComplexValue result = serializer.CreateODataComplexValue(edmObject, new ODataSerializerContext());
+
+            // Assert
+            Assert.Equal("Property", result.Properties.Single().Name);
+            Assert.Equal(42, result.Properties.Single().Value);
         }
 
         [Fact]

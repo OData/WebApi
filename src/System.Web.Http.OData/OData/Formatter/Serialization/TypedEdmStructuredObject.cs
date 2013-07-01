@@ -4,24 +4,26 @@ using System.Diagnostics.Contracts;
 using System.Reflection;
 using Microsoft.Data.Edm;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.Http.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="IEdmStructuredObject"/> backed by a CLR object with a one-to-one mapping.
     /// </summary>
-    internal class EdmStructuredObject : IEdmStructuredObject
+    internal abstract class TypedEdmStructuredObject : IEdmStructuredObject
     {
+        private IEdmStructuredTypeReference _edmType;
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+        /// Initializes a new instance of the <see cref="TypedEdmStructuredObject"/> class.
         /// </summary>
         /// <param name="instance">The backing CLR instance.</param>
         /// <param name="edmType">The <see cref="IEdmStructuredType"/> of this object.</param>
-        public EdmStructuredObject(object instance, IEdmStructuredTypeReference edmType)
+        protected TypedEdmStructuredObject(object instance, IEdmStructuredTypeReference edmType)
         {
             Contract.Assert(edmType != null);
 
             Instance = instance;
-            EdmType = edmType;
+            _edmType = edmType;
         }
 
         /// <summary>
@@ -29,19 +31,14 @@ namespace System.Web.Http.OData.Formatter
         /// </summary>
         public object Instance { get; private set; }
 
-        /// <summary>
-        /// Gets the <see cref="IEdmStructuredType"/> of this object.
-        /// </summary>
-        public IEdmStructuredTypeReference EdmType { get; private set; }
-
         /// <inheritdoc/>
         public IEdmTypeReference GetEdmType()
         {
-            return EdmType;
+            return _edmType;
         }
 
         /// <inheritdoc/>
-        public bool TryGetValue(string propertyName, out object value)
+        public bool TryGetPropertyValue(string propertyName, out object value)
         {
             if (Instance == null)
             {

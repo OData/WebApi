@@ -221,6 +221,29 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void CreateODataCollectionValue_CanSerialize_IEdmObjects()
+        {
+            // Arrange
+            IEdmComplexObject[] collection = new IEdmComplexObject[] { new Mock<IEdmComplexObject>().Object };
+            ODataSerializerContext serializerContext = new ODataSerializerContext();
+            IEdmComplexTypeReference elementType = new EdmComplexTypeReference(new EdmComplexType("NS", "ComplexType"), isNullable: true);
+            IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType), isNullable: false);
+
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
+            Mock<ODataComplexTypeSerializer> elementSerializer = new Mock<ODataComplexTypeSerializer>(MockBehavior.Strict, elementType, serializerProvider.Object);
+            serializerProvider.Setup(s => s.GetEdmTypeSerializer(elementType)).Returns(elementSerializer.Object);
+            elementSerializer.Setup(s => s.CreateODataComplexValue(collection[0], serializerContext)).Returns(new ODataComplexValue()).Verifiable();
+
+            ODataCollectionSerializer serializer = new ODataCollectionSerializer(collectionType, serializerProvider.Object);
+
+            // Act
+            var result = serializer.CreateODataCollectionValue(collection, serializerContext);
+
+            // Assert
+            elementSerializer.Verify();
+        }
+
+        [Fact]
         public void CreateODataCollectionValue_Returns_EmptyODataCollectionValue_ForNull()
         {
             var oDataValue = _serializer.CreateODataCollectionValue(null, new ODataSerializerContext());

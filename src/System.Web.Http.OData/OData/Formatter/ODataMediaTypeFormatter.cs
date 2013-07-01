@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -246,46 +245,20 @@ namespace System.Web.Http.OData.Formatter
                 IEdmModel model = Request.GetEdmModel();
                 if (model != null)
                 {
-                    ODataPayloadKind payloadKind;
+                    ODataPayloadKind? payloadKind;
 
-                    // TODO: We need the actual instance of the IEdmObject to figure out its EDM type which is needed to figure out the
-                    // payload kind. We cannot get access to the instance in CanWriteType unless we change the content-negotiator. This works
-                    // for now as we support writing IEdmObject's representing only entity or feed.This will have to change once we support type-less.
                     if (typeof(IEdmObject).IsAssignableFrom(type))
                     {
-                        if (typeof(IEnumerable).IsAssignableFrom(type))
-                        {
-                            // feed
-                            payloadKind = ODataPayloadKind.Feed;
+                        payloadKind = GetEdmObjectPayloadKind(type);
                         }
                         else
                         {
-                            // entry
-                            payloadKind = ODataPayloadKind.Entry;
-                        }
-                    }
-                    else
-                    {
-                        // SingleResult<T> should be serialized as T.
-                        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleResult<>))
-                        {
-                            type = type.GetGenericArguments()[0];
+                        payloadKind = GetClrObjectPayloadKind(type, model);
                         }
 
-                        ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type);
-                        if (serializer != null)
-                        {
-                            payloadKind = serializer.ODataPayloadKind;
+                    return payloadKind == null ? false : _payloadKinds.Contains(payloadKind.Value);
                         }
-                        else
-                        {
-                            return false;
                         }
-                    }
-
-                    return _payloadKinds.Contains(payloadKind);
-                }
-            }
 
             return false;
         }
@@ -317,6 +290,18 @@ namespace System.Web.Http.OData.Formatter
             {
                 return TaskHelpers.FromError<object>(ex);
             }
+        }
+
+        private ODataPayloadKind? GetClrObjectPayloadKind(Type type, IEdmModel model)
+        {
+            // SingleResult<T> should be serialized as T.
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleResult<>))
+            {
+                type = type.GetGenericArguments()[0];
+            }
+
+            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type);
+            return serializer == null ? null : (ODataPayloadKind?)serializer.ODataPayloadKind;
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "ODataMessageReader disposed later with request.")]
@@ -514,6 +499,35 @@ namespace System.Web.Http.OData.Formatter
             return null;
         }
 
+        private static ODataPayloadKind? GetEdmObjectPayloadKind(Type type)
+        {
+            Type elementType;
+            if (type.IsCollection(out elementType))
+            {
+                if (typeof(IEdmComplexObject).IsAssignableFrom(elementType))
+                {
+                    return ODataPayloadKind.Collection;
+                }
+                else if (typeof(IEdmEntityObject).IsAssignableFrom(elementType))
+                {
+                    return ODataPayloadKind.Feed;
+                }
+            }
+            else
+            {
+                if (typeof(IEdmComplexObject).IsAssignableFrom(elementType))
+                {
+                    return ODataPayloadKind.Property;
+                }
+                else if (typeof(IEdmEntityObject).IsAssignableFrom(elementType))
+                {
+                    return ODataPayloadKind.Entry;
+                }
+            }
+
+            return null;
+        }
+
         private static ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider)
         {
             ODataSerializer serializer;
@@ -526,14 +540,6 @@ namespace System.Web.Http.OData.Formatter
                 {
                     throw new SerializationException(
                         Error.Format(SRResources.EdmTypeCannotBeNull, type.FullName, typeof(IEdmObject).Name));
-                }
-
-                // we support IEdmObject for entities and feeds only right now. validate and throw.
-                if (!IsEntityOrFeed(edmType))
-                {
-                    string message = Error.Format(
-                        SRResources.EdmObjectCannotBeSerialized, typeof(ODataMediaTypeFormatter).Name, typeof(IEdmObject).Name, edmType.ToTraceString());
-                    throw new SerializationException(message);
                 }
 
                 serializer = serializerProvider.GetEdmTypeSerializer(edmType);

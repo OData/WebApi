@@ -79,10 +79,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            if (graph == null)
+            if (graph == null || graph is NullEdmComplexObject)
             {
                 return null;
             }
+
+            IEdmComplexObject complexObject = graph as IEdmComplexObject ?? new TypedEdmComplexObject(graph, ComplexType);
 
             List<ODataProperty> propertyCollection = new List<ODataProperty>();
             foreach (IEdmProperty property in _edmComplexType.ComplexDefinition().Properties())
@@ -94,10 +96,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     throw Error.NotSupported(SRResources.TypeCannotBeSerialized, propertyType.FullName(), typeof(ODataMediaTypeFormatter).Name);
                 }
 
-                // TODO 453795: [OData]Cleanup reflection code in the ODataFormatter.
-                object propertyValue = graph.GetType().GetProperty(property.Name).GetValue(graph, index: null);
-
-                propertyCollection.Add(propertySerializer.CreateProperty(propertyValue, property.Name, writeContext));
+                object propertyValue;
+                if (complexObject.TryGetPropertyValue(property.Name, out propertyValue))
+                {
+                    propertyCollection.Add(propertySerializer.CreateProperty(propertyValue, property.Name, writeContext));
+                }
             }
 
             string typeName = _edmComplexType.FullName();

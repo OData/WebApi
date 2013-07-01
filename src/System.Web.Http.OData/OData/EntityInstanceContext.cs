@@ -33,11 +33,11 @@ namespace System.Web.Http.OData
         /// <param name="entityType">The EDM entity type of this instance context.</param>
         /// <param name="entityInstance">The object representing the instance of this context.</param>
         public EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, object entityInstance)
-            : this(serializerContext, entityType, AsEdmStructuredObject(entityInstance, entityType))
+            : this(serializerContext, entityType, AsEdmEntityObject(entityInstance, entityType))
         {
         }
 
-        private EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, IEdmStructuredObject edmObject)
+        private EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, IEdmEntityObject edmObject)
         {
             if (serializerContext == null)
             {
@@ -105,9 +105,9 @@ namespace System.Web.Http.OData
         public IEdmEntityType EntityType { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IEdmStructuredObject"/> backing this instance.
+        /// Gets or sets the <see cref="IEdmEntityObject"/> backing this instance.
         /// </summary>
-        public IEdmStructuredObject EdmObject { get; set; }
+        public IEdmEntityObject EdmObject { get; set; }
 
         /// <summary>
         /// Gets or sets the value of this entity instance.
@@ -177,7 +177,7 @@ namespace System.Web.Http.OData
             }
 
             object value;
-            if (EdmObject.TryGetValue(propertyName, out value))
+            if (EdmObject.TryGetPropertyValue(propertyName, out value))
             {
                 return value;
             }
@@ -200,10 +200,10 @@ namespace System.Web.Http.OData
                 return null;
             }
 
-            EdmStructuredObject edmStructuredObject = EdmObject as EdmStructuredObject;
-            if (edmStructuredObject != null)
+            TypedEdmEntityObject edmEntityObject = EdmObject as TypedEdmEntityObject;
+            if (edmEntityObject != null)
             {
-                return edmStructuredObject.Instance;
+                return edmEntityObject.Instance;
             }
 
             Type clrType = EdmLibHelpers.GetClrType(EntityType, EdmModel);
@@ -216,7 +216,7 @@ namespace System.Web.Http.OData
             foreach (IEdmStructuralProperty property in EntityType.StructuralProperties())
             {
                 object value;
-                if (EdmObject.TryGetValue(property.Name, out value) && value != null)
+                if (EdmObject.TryGetPropertyValue(property.Name, out value) && value != null)
                 {
                     if (value.GetType().IsCollection())
                     {
@@ -232,21 +232,21 @@ namespace System.Web.Http.OData
             return resource;
         }
 
-        private static IEdmStructuredObject AsEdmStructuredObject(object entityInstance, IEdmEntityTypeReference entityType)
+        private static IEdmEntityObject AsEdmEntityObject(object entityInstance, IEdmEntityTypeReference entityType)
         {
             if (entityType == null)
             {
                 throw Error.ArgumentNull("entityType");
             }
 
-            IEdmStructuredObject edmObject = entityInstance as IEdmStructuredObject;
-            if (edmObject != null)
+            IEdmEntityObject edmEntityObject = entityInstance as IEdmEntityObject;
+            if (edmEntityObject != null)
             {
-                return edmObject;
+                return edmEntityObject;
             }
             else
             {
-                return new EdmStructuredObject(entityInstance, entityType);
+                return new TypedEdmEntityObject(entityInstance, entityType);
             }
         }
     }

@@ -961,7 +961,25 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The route template &apos;{0}&apos; cannot begin or end with a forward slash..
+        ///   Looks up a localized string similar to The prefix &apos;{0}&apos; of the route area named &apos;{1}&apos; on the controller named &apos;{2}&apos; cannot begin or end with a forward slash..
+        /// </summary>
+        internal static string RouteAreaPrefix_CannotStartOrEnd_WithForwardSlash {
+            get {
+                return ResourceManager.GetString("RouteAreaPrefix_CannotStartOrEnd_WithForwardSlash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The route prefix &apos;{0}&apos; on the controller named &apos;{1}&apos; cannot begin or end with a forward slash..
+        /// </summary>
+        internal static string RoutePrefix_CannotStartOrEnd_WithForwardSlash {
+            get {
+                return ResourceManager.GetString("RoutePrefix_CannotStartOrEnd_WithForwardSlash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The route template &apos;{0}&apos; on the action named &apos;{1}&apos; on the controller named &apos;{2}&apos; cannot begin or end with a forward slash..
         /// </summary>
         internal static string RouteTemplate_CannotStartOrEnd_WithForwardSlash {
             get {

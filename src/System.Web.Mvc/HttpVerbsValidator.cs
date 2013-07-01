@@ -4,51 +4,33 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Web.Mvc.Properties;
 
-namespace System.Web.Mvc.Routing
+namespace System.Web.Mvc
 {
     /// <summary>
     /// Basic implementation for attributes used for defining routes on an action, optionally specifying that the action supports particular HTTP methods.
     /// </summary>
-    public abstract class HttpVerbsRoutingAttribute : ActionMethodSelectorAttribute
+    internal class HttpVerbsValidator
     {
         private readonly ICollection<string> _verbs;
         private static readonly ConcurrentDictionary<HttpVerbs, ReadOnlyCollection<string>> _verbsToVerbCollections = new ConcurrentDictionary<HttpVerbs, ReadOnlyCollection<string>>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HttpVerbsRoutingAttribute" /> class.
-        /// </summary>
-        protected HttpVerbsRoutingAttribute()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpVerbsRoutingAttribute" /> class.
+        /// Initializes a new instance of the <see cref="HttpVerbsValidator" /> class.
         /// </summary>
         /// <param name="verbs">The HTTP methods the action supports.</param>
-        protected HttpVerbsRoutingAttribute(HttpVerbs verbs)
+        public HttpVerbsValidator(HttpVerbs verbs)
             : this(ConvertVerbs(verbs))
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HttpVerbsRoutingAttribute" /> class.
+        /// Initializes a new instance of the <see cref="HttpVerbsValidator" /> class.
         /// </summary>
         /// <param name="verbs">The HTTP methods the action supports.</param>
-        protected HttpVerbsRoutingAttribute(params string[] verbs)
-            : this((IList<string>)verbs)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpVerbsRoutingAttribute" /> class.
-        /// </summary>
-        /// <param name="verbs">The HTTP methods the action supports.</param>
-        private HttpVerbsRoutingAttribute(IList<string> verbs)
+        public HttpVerbsValidator(IList<string> verbs)
         {
             ValidateVerbs(verbs);
             _verbs = verbs as ReadOnlyCollection<string>;
@@ -59,16 +41,6 @@ namespace System.Web.Mvc.Routing
         }
 
         /// <summary>
-        /// Gets or sets the name of the route to generate for this action.
-        /// </summary>
-        public string RouteName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the order of the route relative to other routes. The default order is 0.
-        /// </summary>
-        public int RouteOrder { get; set; }
-
-        /// <summary>
         /// Gets the set of allowed HTTP methods for that route. If the route allow any method to be used, the value is null.
         /// </summary>
         public ICollection<string> Verbs
@@ -77,7 +49,7 @@ namespace System.Web.Mvc.Routing
         }
 
         /// <inheritdoc />
-        public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
+        public bool IsValidForRequest(ControllerContext controllerContext)
         {
             if (controllerContext == null)
             {
@@ -136,30 +108,6 @@ namespace System.Web.Mvc.Routing
             {
                 Contract.Assert(verbList != null);
                 verbList.Add(entryText);
-            }
-        }
-
-        protected static void ValidateRouteTemplateProperty(string routeTemplate)
-        {
-            ValidateRouteTemplate(routeTemplate, "RouteTemplate");
-        }
-
-        protected static void ValidateRouteTemplateArgument(string routeTemplate)
-        {
-            ValidateRouteTemplate(routeTemplate, "routeTemplate");
-        }
-
-        private static void ValidateRouteTemplate(string routeTemplate, string routeTemplateArgumentName)
-        {
-            if (routeTemplate == null)
-            {
-                throw new ArgumentNullException(routeTemplateArgumentName);
-            }
-
-            if (routeTemplate.StartsWith("/", StringComparison.Ordinal) || routeTemplate.EndsWith("/", StringComparison.Ordinal))
-            {
-                string errorMessage = String.Format(CultureInfo.CurrentCulture, MvcResources.RouteTemplate_CannotStartOrEnd_WithForwardSlash, routeTemplate);
-                throw new ArgumentException(errorMessage, routeTemplateArgumentName);
             }
         }
     }

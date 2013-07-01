@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -43,12 +44,18 @@ namespace System.Web.Mvc.Routing
 
         internal List<RouteEntry> MapMvcAttributeRoutes(ReflectedAsyncControllerDescriptor controllerDescriptor)
         {
-            RoutePrefixAttribute[] prefixAttributes = GetPrefixsFrom(controllerDescriptor)
+            RoutePrefixAttribute[] prefixAttributes = GetPrefixesFrom(controllerDescriptor)
                 .DefaultIfEmpty()
                 .ToArray();
+            foreach (RoutePrefixAttribute prefixAttribute in prefixAttributes)
+            {
+                ValidatePrefixTemplate(prefixAttribute, controllerDescriptor);
+            }
+
             RouteAreaAttribute area = GetAreaFrom(controllerDescriptor);
             string areaName = GetAreaName(controllerDescriptor, area);
             string areaPrefix = area != null ? area.AreaPrefix ?? area.AreaName : null;
+            ValidateAreaPrefixTemplate(areaPrefix, areaName, controllerDescriptor);
 
             string controllerName = controllerDescriptor.ControllerName;
 
@@ -74,6 +81,7 @@ namespace System.Web.Mvc.Routing
 
                 foreach (var routeAttribute in routeAttributes)
                 {
+                    ValidateTemplate(routeAttribute, actionName, controllerDescriptor);
                     foreach (var prefixAttribute in prefixAttributes)
                     {
                         string prefix = prefixAttribute != null ? prefixAttribute.Prefix : null;
@@ -97,6 +105,43 @@ namespace System.Web.Mvc.Routing
             }
 
             return routeEntries;
+        }
+
+        private static void ValidatePrefixTemplate(RoutePrefixAttribute prefixAttribute, ControllerDescriptor controllerDescriptor)
+        {
+            if (prefixAttribute != null && !IsValidTemplate(prefixAttribute.Prefix))
+            {
+                string errorMessage = Error.Format(MvcResources.RoutePrefix_CannotStartOrEnd_WithForwardSlash,
+                                                   prefixAttribute.Prefix, controllerDescriptor.ControllerName);
+                throw new InvalidOperationException(errorMessage);
+            }
+        }
+
+        private static void ValidateAreaPrefixTemplate(string areaPrefix, string areaName, ControllerDescriptor controllerDescriptor)
+        {
+            if (areaPrefix != null && !IsValidTemplate(areaPrefix))
+            {
+                string errorMessage = Error.Format(MvcResources.RouteAreaPrefix_CannotStartOrEnd_WithForwardSlash,
+                                                   areaPrefix, areaName, controllerDescriptor.ControllerName);
+                throw new InvalidOperationException(errorMessage);
+            }
+        }
+
+        private static void ValidateTemplate(IDirectRouteInfoProvider routeInfoProvider, string actionName, ControllerDescriptor controllerDescriptor)
+        {
+            if (!IsValidTemplate(routeInfoProvider.RouteTemplate))
+            {
+                string errorMessage = Error.Format(MvcResources.RouteTemplate_CannotStartOrEnd_WithForwardSlash,
+                                                   routeInfoProvider.RouteTemplate, actionName,
+                                                   controllerDescriptor.ControllerName);
+                throw new InvalidOperationException(errorMessage);
+            }
+        }
+
+        private static bool IsValidTemplate(string template)
+        {
+            return !template.StartsWith("/", StringComparison.Ordinal) &&
+                   !template.EndsWith("/", StringComparison.Ordinal);
         }
 
         private static IEnumerable<IDirectRouteInfoProvider> GetRouteAttributes(MethodInfo methodInfo)
@@ -138,11 +183,11 @@ namespace System.Web.Mvc.Routing
             return areaAttribute;
         }
 
-        private static IEnumerable<RoutePrefixAttribute> GetPrefixsFrom(ReflectedAsyncControllerDescriptor controllerDescriptor)
+        private static IEnumerable<RoutePrefixAttribute> GetPrefixesFrom(ReflectedAsyncControllerDescriptor controllerDescriptor)
         {
             // this only happens once per controller type, for the lifetime of the application,
             // so we do not need to cache the results
-           return controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute), false)
+           return controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute), inherit: false)
                                     .Cast<RoutePrefixAttribute>();
         }
 

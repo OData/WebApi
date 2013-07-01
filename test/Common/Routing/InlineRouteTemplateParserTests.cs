@@ -26,20 +26,20 @@ namespace System.Web.Mvc.Routing
         [Fact]
         public void ParseRouteTemplate_ChainedConstraintAndDefault()
         {
-            var result = Act(@"hello/{param:int=8675309}");
+            var result = Act(@"hello/{param:int=111111}");
 
             Assert.Equal("hello/{param}", result.RouteUrl);
-            Assert.Equal("8675309", result.Defaults["param"]);
+            Assert.Equal("111111", result.Defaults["param"]);
             Assert.IsType<IntRouteConstraint>(result.Constraints["param"]);
         }
 
         [Fact]
         public void ParseRouteTemplate_ChainedConstraintWithArgumentsAndDefault()
         {
-            var result = Act(@"hello/{param:regex(\d+)=8675309}");
+            var result = Act(@"hello/{param:regex(\d+)=111111}");
 
             Assert.Equal("hello/{param}", result.RouteUrl);
-            Assert.Equal("8675309", result.Defaults["param"]);
+            Assert.Equal("111111", result.Defaults["param"]);
             Assert.IsType<RegexRouteConstraint>(result.Constraints["param"]);
             Assert.Equal(@"\d+", ((RegexRouteConstraint)result.Constraints["param"]).Pattern);
         }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Web.Mvc.Routing;
 
 namespace System.Web.Mvc
@@ -8,7 +9,7 @@ namespace System.Web.Mvc
     /// Represents a route for an action method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class HttpRouteAttribute : HttpVerbsRoutingAttribute, IDirectRouteInfoProvider
+    public sealed class HttpRouteAttribute : Attribute, IDirectRouteInfoProvider
     {
         private readonly string _routeTemplate;
 
@@ -18,7 +19,6 @@ namespace System.Web.Mvc
         /// <param name="routeTemplate">The route template describing the URI pattern to match against.</param>
         public HttpRouteAttribute(string routeTemplate)
         {
-            ValidateRouteTemplateArgument(routeTemplate);
             _routeTemplate = routeTemplate;
         }
 
@@ -26,6 +26,22 @@ namespace System.Web.Mvc
         public string RouteTemplate
         {
             get { return _routeTemplate; }
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the route to generate for this action.
+        /// </summary>
+        public string RouteName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the order of the route relative to other routes. The default order is 0.
+        /// </summary>
+        public int RouteOrder { get; set; }
+
+        /// <inheritdoc />
+        public ICollection<string> Verbs
+        {
+            get { return null; }
         }
     }
 }

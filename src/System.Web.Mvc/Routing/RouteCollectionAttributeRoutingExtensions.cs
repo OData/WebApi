@@ -1,9 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Web.Mvc.Routing;
 using System.Web.Routing;
 
-namespace System.Web.Mvc.Routing
+namespace System.Web.Mvc
 {
     public static class RouteCollectionAttributeRoutingExtensions
     {

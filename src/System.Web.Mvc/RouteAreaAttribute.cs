@@ -24,7 +24,6 @@ namespace System.Web.Mvc
         /// <param name="areaName">The name of the area. 
         /// If the value is null, an attempt will be made to infer the area name from the target controller's namespace.
         /// </param>
-        /// <seealso cref="AttributeRoutingMapper.GetAreaName"/>
         public RouteAreaAttribute(string areaName)
         {
             AreaName = areaName;
@@ -34,7 +33,6 @@ namespace System.Web.Mvc
         /// The area name to set for all the routes defined in the controller.
         /// If the value is null, an attempt will be made to infer the area name from the target controller's namespace.
         /// </summary>
-        /// <seealso cref="AttributeRoutingMapper.GetAreaName"/>
         public string AreaName { get; private set; }
 
         /// <summary>

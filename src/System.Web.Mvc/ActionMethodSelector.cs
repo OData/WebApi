@@ -44,10 +44,7 @@ namespace System.Web.Mvc
 
         public MethodInfo FindActionMethod(ControllerContext controllerContext, string actionName)
         {
-            if (controllerContext == null)
-            {
-                throw Error.ArgumentNull("controllerContext");
-            }
+            Contract.Assert(controllerContext != null);
 
             if (controllerContext.RouteData != null)
             {

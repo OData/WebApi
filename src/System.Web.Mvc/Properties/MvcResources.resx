@@ -475,9 +475,15 @@
     <value>The inline constraint resolver of type '{0}' was unable to resolve the following inline constraint: '{1}'.</value>
   </data>
   <data name="RouteTemplate_CannotStartOrEnd_WithForwardSlash" xml:space="preserve">
-    <value>The route template '{0}' cannot begin or end with a forward slash.</value>
+    <value>The route template '{0}' on the action named '{1}' on the controller named '{2}' cannot begin or end with a forward slash.</value>
   </data>
   <data name="AttributeRouting_CouldNotInferAreaNameFromMissingNamespace" xml:space="preserve">
     <value>Could not infer area name for the controller '{0}' because it does not have a namespace.</value>
+  </data>
+  <data name="RouteAreaPrefix_CannotStartOrEnd_WithForwardSlash" xml:space="preserve">
+    <value>The prefix '{0}' of the route area named '{1}' on the controller named '{2}' cannot begin or end with a forward slash.</value>
+  </data>
+  <data name="RoutePrefix_CannotStartOrEnd_WithForwardSlash" xml:space="preserve">
+    <value>The route prefix '{0}' on the controller named '{1}' cannot begin or end with a forward slash.</value>
   </data>
 </root>

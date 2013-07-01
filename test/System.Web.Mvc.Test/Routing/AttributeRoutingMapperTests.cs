@@ -197,6 +197,22 @@ namespace System.Web.Routing
             Assert.Equal(expected, result);
         }
 
+        [Theory]
+        [InlineData(typeof(Bad1Controller), "The route prefix '/pref' on the controller named 'Bad1' cannot begin or end with a forward slash.")]
+        [InlineData(typeof(Bad2Controller), "The route prefix 'pref/' on the controller named 'Bad2' cannot begin or end with a forward slash.")]
+        [InlineData(typeof(Bad3Controller), "The route template '/getme' on the action named 'GetMe' on the controller named 'Bad3' cannot begin or end with a forward slash.")]
+        [InlineData(typeof(Bad4Controller), "The route template 'getme/' on the action named 'GetMe' on the controller named 'Bad4' cannot begin or end with a forward slash.")]
+        [InlineData(typeof(Bad5Controller), "The prefix '/puget-sound' of the route area named 'PugetSound' on the controller named 'Bad5' cannot begin or end with a forward slash.")]
+        [InlineData(typeof(Bad6Controller), "The prefix 'puget-sound/' of the route area named 'PugetSound' on the controller named 'Bad6' cannot begin or end with a forward slash.")]
+        public void TemplatesAreValidated(Type controllerType, string expectedErrorMessage)
+        {
+            // Arrange
+            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(controllerType);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => GetMapper().MapMvcAttributeRoutes(controllerDescriptor), expectedErrorMessage);
+        }
+
         private static AttributeRoutingMapper GetMapper()
         {
             return new AttributeRoutingMapper(new RouteBuilder());
@@ -303,6 +319,54 @@ namespace System.Web.Routing
             {
                 throw new NotImplementedException();
             }
+        }
+
+        [RoutePrefix("/pref")]
+        private class Bad1Controller : Controller
+        {
+            [HttpGet("getme")]
+            public ActionResult GetMe()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        [RoutePrefix("pref/")]
+        private class Bad2Controller : Controller
+        {
+            [HttpGet("getme")]
+            public ActionResult GetMe()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class Bad3Controller : Controller
+        {
+            [HttpGet("/getme")]
+            public ActionResult GetMe()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class Bad4Controller : Controller
+        {
+            [HttpGet("getme/")]
+            public ActionResult GetMe()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        [RouteArea("PugetSound", AreaPrefix = "/puget-sound")]
+        private class Bad5Controller : Controller
+        {
+        }
+
+        [RouteArea("PugetSound", AreaPrefix = "puget-sound/")]
+        private class Bad6Controller : Controller
+        {
         }
     }
 }

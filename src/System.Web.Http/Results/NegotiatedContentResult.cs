@@ -142,7 +142,7 @@ namespace System.Web.Http.Results
         /// negotiator, request message, or formatters. (The ApiController provider implementation does lazy evaluation
         /// to make that scenario work.)
         /// </remarks>
-        private interface IDependencyProvider
+        internal interface IDependencyProvider
         {
             IContentNegotiator ContentNegotiator { get; }
 
@@ -151,7 +151,7 @@ namespace System.Web.Http.Results
             IEnumerable<MediaTypeFormatter> Formatters { get; }
         }
 
-        private sealed class DirectDependencyProvider : IDependencyProvider
+        internal sealed class DirectDependencyProvider : IDependencyProvider
         {
             private readonly IContentNegotiator _contentNegotiator;
             private readonly HttpRequestMessage _request;
@@ -196,7 +196,7 @@ namespace System.Web.Http.Results
             }
         }
 
-        private sealed class ApiControllerDependencyProvider : IDependencyProvider
+        internal sealed class ApiControllerDependencyProvider : IDependencyProvider
         {
             private readonly ApiController _controller;
 

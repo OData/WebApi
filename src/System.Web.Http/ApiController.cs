@@ -290,6 +290,15 @@ namespace System.Web.Http
             return new FormattedContentResult<T>(statusCode, value, formatter, mediaType, this);
         }
 
+        /// <summary>Creates an <see cref="OkNegotiatedContentResult{T}"/> with the specified values.</summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="value">The content value to negotiate and format in the entity body.</param>
+        /// <returns>An <see cref="OkNegotiatedContentResult{T}"/> with the specified values.</returns>
+        public OkNegotiatedContentResult<T> Ok<T>(T value)
+        {
+            return new OkNegotiatedContentResult<T>(value, this);
+        }
+
         /// <summary>Creates a <see cref="ResponseMessageResult"/> with the specified response.</summary>
         /// <param name="response">The HTTP response message.</param>
         /// <returns>A <see cref="ResponseMessageResult"/> for the specified response.</returns>

@@ -110,7 +110,7 @@
   
     <Target Name="RunTests" DependsOnTargets="CheckSkipStrongNames">
       <ItemGroup>
-        <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll;bin\$(Configuration)\Test\NetCore\*.Test.dll" Exclude="**\SPA.Test.dll" />
+        <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll;bin\$(Configuration)\Test\NetCore\*.Test.dll" />
         <XunitProject Include="tools\WebStack.xunit.targets">
           <Properties>TestAssembly=%(TestDLLsXunit.FullPath);XmlPath=$(TestResultsDirectory)%(TestDLLsXunit.FileName)-XunitResults.xml</Properties>
         </XunitProject>

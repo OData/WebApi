@@ -436,7 +436,7 @@
     <value>Cannot use Delta of type '{0}' on an entity of type '{1}'.</value>
   </data>
   <data name="DeltaEntityTypeNotAssignable" xml:space="preserve">
-    <value>The entity type '{0}' is not assignable to the Delta type '{1}'.</value>
+    <value>The actual entity type '{0}' is not assignable to the expected type '{1}'.</value>
   </data>
   <data name="EntitySetControllerErrorMessageLanguage" xml:space="preserve">
     <value>en-US</value>
@@ -633,6 +633,12 @@
   </data>
   <data name="EdmComplexObjectNullRef" xml:space="preserve">
     <value>Cannot get property '{0}' of a null EDM object of type '{1}'.</value>
+  </data>
+  <data name="UnsupportedEdmType" xml:space="preserve">
+    <value>The EDM type '{0}' of kind '{1}' is not supported.</value>
+  </data>
+  <data name="UnexpectedElementType" xml:space="preserve">
+    <value>The element type '{0}' of the given collection type '{1}' is not of the type '{2}'.</value>
   </data>
   <data name="ActionNotBoundToEntity" xml:space="preserve">
     <value>The action '{0}' is not bound to an entity. Only actions that are bound to entities can have action links.</value>

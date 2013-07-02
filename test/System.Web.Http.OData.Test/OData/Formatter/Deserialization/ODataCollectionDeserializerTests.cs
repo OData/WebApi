@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Serialization;
@@ -63,6 +65,24 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Assert.ThrowsArgumentNull(
                 () => deserializer.Read(messageReader: null, readContext: new ODataDeserializerContext()),
                 "messageReader");
+        }
+
+        [Fact]
+        public void Read_ReturnsEdmComplexObjectCollection_TypelessMode()
+        {
+            // Arrange
+            HttpContent content = new StringContent("{ 'value': [ { 'City' : 'Redmond' } ] }");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            IODataRequestMessage request = new ODataMessageWrapper(content.ReadAsStreamAsync().Result, content.Headers);
+            ODataMessageReader reader = new ODataMessageReader(request, new ODataMessageReaderSettings(), _model);
+            var deserializer = new ODataCollectionDeserializer(_addressCollectionType, new DefaultODataDeserializerProvider());
+
+            // Act
+            var result = deserializer.Read(reader, new ODataDeserializerContext { Model = _model, ResourceType = typeof(IEdmObject) });
+
+            // Assert
+            IEdmObject edmObject = Assert.IsType<EdmComplexObjectCollection>(result);
+            Assert.Equal(_addressCollectionType, edmObject.GetEdmType());
         }
 
         [Fact]

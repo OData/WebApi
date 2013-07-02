@@ -8,6 +8,7 @@ using System.Web.Http.OData.Formatter.Serialization.Models;
 using System.Web.Http.OData.Query.Expressions;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter
@@ -129,6 +130,41 @@ namespace System.Web.Http.OData.Formatter
         public void IsNullable_RecognizesClassesAndInterfacesAndNullableOfTs(Type type, bool isNullable)
         {
             Assert.Equal(isNullable, EdmLibHelpers.IsNullable(type));
+        }
+
+
+        public static TheoryDataSet<IEdmType, bool, Type> ToEdmTypeReferenceTestData
+        {
+            get
+            {
+                IEdmEntityType entity = new EdmEntityType("NS", "Entity");
+                IEdmComplexType complex = new EdmComplexType("NS", "Complex");
+                IEdmPrimitiveType primitive = EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32);
+                IEdmCollectionType collection = new EdmCollectionType(new EdmEntityTypeReference(entity, isNullable: false));
+
+                return new TheoryDataSet<IEdmType, bool, Type>
+                {
+                    { primitive, true, typeof(IEdmPrimitiveTypeReference) },
+                    { primitive, false, typeof(IEdmPrimitiveTypeReference) },
+                    { entity, true, typeof(IEdmEntityTypeReference) },
+                    { entity, false, typeof(IEdmEntityTypeReference) },
+                    { complex, true, typeof(IEdmComplexTypeReference) },
+                    { complex, false, typeof(IEdmComplexTypeReference) },
+                    { collection, true, typeof(IEdmCollectionTypeReference) },
+                    { collection, false, typeof(IEdmCollectionTypeReference) }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("ToEdmTypeReferenceTestData")]
+        public void ToEdmTypeReference_InstantiatesRightEdmTypeReference(IEdmType edmType, bool isNullable, Type expectedType)
+        {
+            IEdmTypeReference result = EdmLibHelpers.ToEdmTypeReference(edmType, isNullable);
+
+            Assert.Equal(isNullable, result.IsNullable);
+            Assert.Equal(edmType, result.Definition);
+            Assert.IsAssignableFrom(expectedType, result);
         }
 
         private static IEdmModel GetEdmModel()

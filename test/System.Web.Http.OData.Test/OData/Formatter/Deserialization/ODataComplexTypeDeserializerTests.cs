@@ -160,8 +160,35 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void CreateResource_Throws_MappingDoesNotContainEntityType()
         {
             Assert.Throws<InvalidOperationException>(
-                () => ODataComplexTypeDeserializer.CreateResource(_addressEdmType.ComplexDefinition(), EdmCoreModel.Instance),
+                () => ODataComplexTypeDeserializer.CreateResource(_addressEdmType, new ODataDeserializerContext { Model = EdmCoreModel.Instance }),
                 "The provided mapping doesn't contain an entry for the entity type 'ODataDemo.Address'.");
+        }
+
+        [Fact]
+        public void CreateResource_CreatesEdmComplexObject_UnTypedMode()
+        {
+            // Arrange
+            ODataDeserializerContext context = new ODataDeserializerContext { ResourceType = typeof(IEdmObject) };
+
+            // Act
+            var resource = ODataComplexTypeDeserializer.CreateResource(_addressEdmType, context);
+
+            // Assert
+            EdmComplexObject complexObject = Assert.IsType<EdmComplexObject>(resource);
+            Assert.Equal(_addressEdmType, complexObject.GetEdmType(), new EdmTypeReferenceEqualityComparer());
+        }
+
+        [Fact]
+        public void CreateResource_CreatesAddress_TypedMode()
+        {
+            // Arrange
+            ODataDeserializerContext context = new ODataDeserializerContext { Model = _edmModel };
+
+            // Act
+            var resource = ODataComplexTypeDeserializer.CreateResource(_addressEdmType, context);
+
+            // Assert
+            Assert.IsType<ODataEntityDeserializerTests.Address>(resource);
         }
     }
 }

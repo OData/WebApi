@@ -219,9 +219,7 @@ namespace System.Web.Http.OData.Formatter
                 IEdmModel model = Request.GetEdmModel();
                 if (model != null)
                 {
-                    TryGetInnerTypeForDelta(ref type);
-                    ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(model, type);
-
+                    ODataDeserializer deserializer = GetDeserializer(type, Request.GetODataPath(), model, _deserializerProvider);
                     if (deserializer != null)
                     {
                         return _payloadKinds.Contains(deserializer.ODataPayloadKind);
@@ -253,7 +251,7 @@ namespace System.Web.Http.OData.Formatter
                         }
                         else
                         {
-                        payloadKind = GetClrObjectPayloadKind(type, model);
+                        payloadKind = GetClrObjectResponsePayloadKind(type, model);
                         }
 
                     return payloadKind == null ? false : _payloadKinds.Contains(payloadKind.Value);
@@ -292,7 +290,7 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
-        private ODataPayloadKind? GetClrObjectPayloadKind(Type type, IEdmModel model)
+        private ODataPayloadKind? GetClrObjectResponsePayloadKind(Type type, IEdmModel model)
         {
             // SingleResult<T> should be serialized as T.
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleResult<>))
@@ -324,9 +322,7 @@ namespace System.Web.Http.OData.Formatter
                     throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
                 }
 
-                Type originalType = type;
-                bool isPatchMode = TryGetInnerTypeForDelta(ref type);
-                ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(model, type);
+                ODataDeserializer deserializer = GetDeserializer(type, Request.GetODataPath(), model, _deserializerProvider);
                 if (deserializer == null)
                 {
                     throw Error.Argument("type", SRResources.FormatterReadIsNotSupportedForType, type.FullName, GetType().FullName);
@@ -349,16 +345,11 @@ namespace System.Web.Http.OData.Formatter
                     ODataPath path = Request.GetODataPath();
                     ODataDeserializerContext readContext = new ODataDeserializerContext
                     {
-                        IsPatchMode = isPatchMode,
                         Path = path,
                         Model = model,
-                        Request = Request
+                        Request = Request,
+                        ResourceType = type
                     };
-
-                    if (isPatchMode)
-                    {
-                        readContext.PatchEntityType = originalType;
-                    }
 
                     result = deserializer.Read(oDataMessageReader, readContext);
                 }
@@ -523,6 +514,40 @@ namespace System.Web.Http.OData.Formatter
                 {
                     return ODataPayloadKind.Entry;
                 }
+            }
+
+            return null;
+        }
+
+        private static ODataDeserializer GetDeserializer(Type type, ODataPath path, IEdmModel model, ODataDeserializerProvider deserializerProvider)
+        {
+            if (typeof(IEdmObject).IsAssignableFrom(type))
+            {
+                // typeless mode. figure out the expected payload type from the OData Path.
+                IEdmType edmType = path.EdmType;
+                if (edmType != null)
+                {
+                    IEdmTypeReference expectedPayloadType = EdmLibHelpers.ToEdmTypeReference(edmType, isNullable: false);
+                    if (expectedPayloadType.TypeKind() == EdmTypeKind.Collection)
+                    {
+                        IEdmTypeReference elementType = expectedPayloadType.AsCollection().ElementType();
+                        if (elementType.IsEntity())
+                        {
+                            // collection of entities cannot be CREATE/UPDATEd. Instead, the request would contain a single entry.
+                            expectedPayloadType = elementType;
+                        }
+                    }
+
+                    if (expectedPayloadType != null)
+                    {
+                        return deserializerProvider.GetEdmTypeDeserializer(expectedPayloadType);
+                    }
+                }
+            }
+            else
+            {
+                TryGetInnerTypeForDelta(ref type);
+                return deserializerProvider.GetODataDeserializer(model, type);
             }
 
             return null;

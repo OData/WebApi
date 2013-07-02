@@ -3,7 +3,6 @@
 using System.Diagnostics.Contracts;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
@@ -78,7 +77,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
             }
 
-            object complexResource = CreateResource(ComplexType.ComplexDefinition(), readContext.Model);
+            object complexResource = CreateResource(ComplexType, readContext);
             foreach (ODataProperty complexProperty in complexValue.Properties)
             {
                 DeserializationHelpers.ApplyProperty(complexProperty, ComplexType, complexResource, DeserializerProvider, readContext);
@@ -86,18 +85,24 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return complexResource;
         }
 
-        internal static object CreateResource(IEdmComplexType edmComplexType, IEdmModel edmModel)
+        internal static object CreateResource(IEdmComplexTypeReference edmComplexType, ODataDeserializerContext readContext)
         {
             Contract.Assert(edmComplexType != null);
-            Contract.Assert(edmModel != null);
 
-            Type clrType = EdmLibHelpers.GetClrType(new EdmComplexTypeReference(edmComplexType, isNullable: true), edmModel);
-            if (clrType == null)
+            if (readContext.IsUntyped)
             {
-                throw Error.InvalidOperation(SRResources.MappingDoesNotContainEntityType, edmComplexType.FullName());
+                return new EdmComplexObject(edmComplexType);
             }
+            else
+            {
+                Type clrType = EdmLibHelpers.GetClrType(edmComplexType, readContext.Model);
+                if (clrType == null)
+                {
+                    throw Error.InvalidOperation(SRResources.MappingDoesNotContainEntityType, edmComplexType.FullName());
+                }
 
-            return Activator.CreateInstance(clrType);
+                return Activator.CreateInstance(clrType);
+            }
         }
     }
 }

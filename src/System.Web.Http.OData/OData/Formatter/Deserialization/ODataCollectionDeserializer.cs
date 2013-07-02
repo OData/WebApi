@@ -44,8 +44,18 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("messageReader");
             }
 
-            ODataCollectionValue value = ReadCollection(messageReader);
-            return ReadInline(value, readContext);
+            IEnumerable result = ReadInline(ReadCollection(messageReader), readContext) as IEnumerable;
+            if (result != null && readContext.IsUntyped && ElementType.IsComplex())
+            {
+                EdmComplexObjectCollection complexCollection = new EdmComplexObjectCollection(CollectionType);
+                foreach (EdmComplexObject complexObject in result)
+                {
+                    complexCollection.Add(complexObject);
+                }
+                return complexCollection;
+            }
+
+            return result;
         }
 
         /// <inheritdoc />

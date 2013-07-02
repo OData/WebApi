@@ -18,16 +18,6 @@ namespace System.Web.Http.OData
     public abstract class Delta : DynamicObject, IDelta 
     {
         /// <summary>
-        /// The actual type of the entity for which the changes are tracked.
-        /// </summary>
-        public abstract Type EntityType { get; }
-
-        /// <summary>
-        /// The expected type of the entity for which the changes are tracked.
-        /// </summary>
-        public abstract Type ExpectedType { get; }
-
-        /// <summary>
         /// Clears the Delta and resets the underlying Entity.
         /// </summary>
         public abstract void Clear();
@@ -35,7 +25,7 @@ namespace System.Web.Http.OData
         /// <summary>
         /// Attempts to set the Property called <paramref name="name"/> to the <paramref name="value"/> specified.
         /// <remarks>
-        /// Only properties that exist on <see cref="EntityType"/> can be set.
+        /// Only properties that exist on Entity can be set.
         /// If there is a type mismatch the request will fail.
         /// </remarks>
         /// </summary>
@@ -47,7 +37,7 @@ namespace System.Web.Http.OData
         /// <summary>
         /// Attempts to get the value of the Property called <paramref name="name"/> from the underlying Entity.
         /// <remarks>
-        /// Only properties that exist on <see cref="EntityType"/> can be retrieved.
+        /// Only properties that exist on Entity can be retrieved.
         /// Both modified and unmodified properties can be retrieved.
         /// </remarks>
         /// </summary>
@@ -59,7 +49,7 @@ namespace System.Web.Http.OData
         /// <summary>
         /// Attempts to get the <see cref="Type"/> of the Property called <paramref name="name"/> from the underlying Entity.
         /// <remarks>
-        /// Only properties that exist on <see cref="EntityType"/> can be retrieved.
+        /// Only properties that exist on Entity can be retrieved.
         /// Both modified and unmodified properties can be retrieved.
         /// </remarks>
         /// </summary>
@@ -70,7 +60,7 @@ namespace System.Web.Http.OData
 
         /// <summary>
         /// Overrides the DynamicObject TrySetMember method, so that only the properties
-        /// of <see cref="EntityType"/> can be set.
+        /// of Entity can be set.
         /// </summary>
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
@@ -84,7 +74,7 @@ namespace System.Web.Http.OData
 
         /// <summary>
         /// Overrides the DynamicObject TryGetMember method, so that only the properties
-        /// of <see cref="EntityType"/> can be got.
+        /// of Entity can be got.
         /// </summary>
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {

@@ -322,7 +322,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The entity type &apos;{0}&apos; is not assignable to the Delta type &apos;{1}&apos;..
+        ///   Looks up a localized string similar to The actual entity type &apos;{0}&apos; is not assignable to the expected type &apos;{1}&apos;..
         /// </summary>
         internal static string DeltaEntityTypeNotAssignable {
             get {
@@ -1533,6 +1533,24 @@ namespace System.Web.Http.OData.Properties {
         internal static string UnableToDetermineMetadataUrl {
             get {
                 return ResourceManager.GetString("UnableToDetermineMetadataUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The element type &apos;{0}&apos; of the given collection type &apos;{1}&apos; is not of the type &apos;{2}&apos;..
+        /// </summary>
+        internal static string UnexpectedElementType {
+            get {
+                return ResourceManager.GetString("UnexpectedElementType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The EDM type &apos;{0}&apos; of kind &apos;{1}&apos; is not supported..
+        /// </summary>
+        internal static string UnsupportedEdmType {
+            get {
+                return ResourceManager.GetString("UnsupportedEdmType", resourceCulture);
             }
         }
         

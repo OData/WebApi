@@ -18,6 +18,7 @@ using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -438,6 +439,44 @@ namespace System.Web.Http.OData.Formatter
 
             // Assert
             deserializer.Verify();
+        }
+
+        public static TheoryDataSet<ODataPath, ODataPayloadKind> CanReadTypeTypesTestData
+        {
+            get
+            {
+                CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+                EntitySetPathSegment entitySetSegment = new EntitySetPathSegment(model.Customers);
+                KeyValuePathSegment keyValueSegment = new KeyValuePathSegment("42");
+                NavigationPathSegment navSegment = new NavigationPathSegment(model.Customer.FindProperty("Orders") as IEdmNavigationProperty);
+                PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment(model.Customer.FindProperty("Address") as IEdmStructuralProperty);
+
+                return new TheoryDataSet<ODataPath, ODataPayloadKind>
+                {
+                    { new ODataPath(entitySetSegment), ODataPayloadKind.Entry }, // POST ~/entityset
+                    { new ODataPath(entitySetSegment, keyValueSegment), ODataPayloadKind.Entry }, // PUT ~/entityset(key)
+                    { new ODataPath(entitySetSegment, keyValueSegment, navSegment), ODataPayloadKind.Entry }, // PUT ~/entityset(key)/nav
+                    { new ODataPath(entitySetSegment, keyValueSegment, propertySegment), ODataPayloadKind.Property }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("CanReadTypeTypesTestData")]
+        public void CanReadType_ForTypeless_ReturnsExpectedResult_DependingOnODataPathAndPayloadKind(ODataPath path, ODataPayloadKind payloadKind)
+        {
+            // Arrange
+            IEnumerable<ODataPayloadKind> allPayloadKinds = Enum.GetValues(typeof(ODataPayloadKind)).Cast<ODataPayloadKind>();
+            var model = CreateModel();
+            var request = CreateFakeODataRequest(model);
+            request.SetODataPath(path);
+
+            var formatterWithGivenPayload = new ODataMediaTypeFormatter(new[] { payloadKind }) { Request = request };
+            var formatterWithoutGivenPayload = new ODataMediaTypeFormatter(allPayloadKinds.Except(new[] { payloadKind })) { Request = request };
+
+            // Act & Assert
+            Assert.True(formatterWithGivenPayload.CanReadType(typeof(IEdmObject)));
+            Assert.False(formatterWithoutGivenPayload.CanReadType(typeof(IEdmObject)));
         }
 
         public static TheoryDataSet<ODataPayloadKind, Type> CanWriteType_ReturnsExpectedResult_ForEdmObjects_TestData

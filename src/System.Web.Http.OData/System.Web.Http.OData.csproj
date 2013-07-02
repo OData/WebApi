@@ -81,6 +81,11 @@
     <Compile Include="OData\Batch\ODataBatchContent.cs" />
     <Compile Include="OData\Batch\DefaultODataBatchHandler.cs" />
     <Compile Include="OData\DeltaOfTEntityType.cs" />
+    <Compile Include="OData\EdmComplexCollectionObject.cs" />
+    <Compile Include="OData\EdmComplexObject.cs" />
+    <Compile Include="OData\EdmEntityCollectionObject.cs" />
+    <Compile Include="OData\EdmEntityObject.cs" />
+    <Compile Include="OData\EdmStructuredObject.cs" />
     <Compile Include="OData\Formatter\Serialization\TypedEdmComplexObject.cs" />
     <Compile Include="OData\Formatter\Serialization\TypedEdmEntityObject.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpers.cs" />
@@ -295,6 +300,7 @@
     <Compile Include="HttpActionDescriptorExtensions.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />
+    <Compile Include="OData\TypedDelta.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormatter.cs" />
     <Compile Include="OData\Formatter\Serialization\DefaultODataSerializerProvider.cs" />

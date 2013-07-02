@@ -220,11 +220,11 @@ namespace System.Web.Http.OData
                 {
                     if (value.GetType().IsCollection())
                     {
-                        DeserializationHelpers.SetCollectionProperty(resource, property.Name, isDelta: false, value: value);
+                        DeserializationHelpers.SetCollectionProperty(resource, property, value);
                     }
                     else
                     {
-                        DeserializationHelpers.SetProperty(resource, property.Name, isDelta: false, value: value);
+                        DeserializationHelpers.SetProperty(resource, property.Name, value);
                     }
                 }
             }

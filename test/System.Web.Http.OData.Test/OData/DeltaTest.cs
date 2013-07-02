@@ -47,7 +47,7 @@ namespace System.Web.Http.OData
         {
             Assert.Throws<InvalidOperationException>(
                 () => new Delta<Derived>(typeof(AnotherDerived)),
-                "The entity type 'System.Web.Http.OData.DeltaTest+AnotherDerived' is not assignable to the Delta type 'System.Web.Http.OData.DeltaTest+Derived'.");
+                "The actual entity type 'System.Web.Http.OData.DeltaTest+AnotherDerived' is not assignable to the expected type 'System.Web.Http.OData.DeltaTest+Derived'.");
         }
 
         [Fact]
@@ -366,7 +366,7 @@ namespace System.Web.Http.OData
             Assert.Equal(expectedValue, value);
         }
 
-        public static TheoryDataSet<Type> Delta_Returns_Correct_ExpectedType_And_ActualType_DataSet
+        public static TheoryDataSet<Type> TypedDelta_Returns_Correct_ExpectedClrType_And_ActualType_DataSet
         {
             get
             {
@@ -379,15 +379,15 @@ namespace System.Web.Http.OData
         }
 
         [Theory]
-        [PropertyData("Delta_Returns_Correct_ExpectedType_And_ActualType_DataSet")]
-        public void Delta_Returns_Correct_ExpectedType_And_ActualType(Type actualType)
-        { 
+        [PropertyData("TypedDelta_Returns_Correct_ExpectedClrType_And_ActualType_DataSet")]
+        public void TypedDelta_Returns_Correct_ExpectedClrType_And_ActualType(Type actualType)
+        {
             // Arrange 
-            Delta delta = new Delta<Customer>(actualType);
+            TypedDelta delta = new Delta<Customer>(actualType);
 
             // Act
             Type actualActualType = delta.EntityType;
-            Type actualExpectedType = delta.ExpectedType;
+            Type actualExpectedType = delta.ExpectedClrType;
 
             // Assert
             Assert.Equal(typeof(Customer), actualExpectedType);

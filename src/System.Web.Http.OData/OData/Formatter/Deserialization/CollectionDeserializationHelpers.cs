@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
+using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
@@ -66,11 +67,21 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
         }
 
-        public static bool TryCreateInstance(Type collectionType, Type elementType, out IEnumerable instance)
+        public static bool TryCreateInstance(Type collectionType, IEdmCollectionTypeReference edmCollectionType, Type elementType, out IEnumerable instance)
         {
             Contract.Assert(collectionType != null);
 
-            if (collectionType.IsGenericType)
+            if (collectionType == typeof(EdmComplexObjectCollection))
+            {
+                instance = new EdmComplexObjectCollection(edmCollectionType);
+                return true;
+            }
+            else if (collectionType == typeof(EdmEntityObjectCollection))
+            {
+                instance = new EdmEntityObjectCollection(edmCollectionType);
+                return true;
+            }
+            else if (collectionType.IsGenericType)
             {
                 Type genericDefinition = collectionType.GetGenericTypeDefinition();
                 if (genericDefinition == typeof(IEnumerable<>) ||

@@ -131,7 +131,15 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, entityType.FullName(), typeof(ODataMediaTypeFormatter).Name));
                 }
 
-                return deserializer.ReadInline(entryWrapper, readContext);
+                object resource = deserializer.ReadInline(entryWrapper, readContext);
+
+                EdmStructuredObject structuredObject = resource as EdmStructuredObject;
+                if (structuredObject != null)
+                {
+                    structuredObject.ExpectedEdmType = EntityType.EntityDefinition();
+                }
+
+                return resource;
             }
             else
             {
@@ -154,31 +162,33 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
 
             IEdmModel model = readContext.Model;
-
             if (model == null)
             {
                 throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
             }
 
-            Type clrType = EdmLibHelpers.GetClrType(EntityType, model);
-            if (clrType == null)
+            if (readContext.IsUntyped)
             {
-                throw new ODataException(
-                    Error.Format(SRResources.MappingDoesNotContainEntityType, EntityType.FullName()));
-            }
-
-            object resource;
-
-            if (!readContext.IsPatchMode)
-            {
-                resource = Activator.CreateInstance(clrType);
+                return new EdmEntityObject(EntityType);
             }
             else
             {
-                resource = Activator.CreateInstance(readContext.PatchEntityType, clrType);
-            }
+                Type clrType = EdmLibHelpers.GetClrType(EntityType, model);
+                if (clrType == null)
+                {
+                    throw new ODataException(
+                        Error.Format(SRResources.MappingDoesNotContainEntityType, EntityType.FullName()));
+                }
 
-            return resource;
+                if (readContext.IsDeltaOfT)
+                {
+                    return Activator.CreateInstance(readContext.ResourceType, clrType);
+                }
+                else
+                {
+                    return Activator.CreateInstance(clrType);
+                }
+            }
         }
 
         /// <summary>
@@ -425,7 +435,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Contract.Assert(navigationProperty != null && navigationProperty.PropertyKind == EdmPropertyKind.Navigation, "navigationProperty != null && navigationProperty.TypeKind == ResourceTypeKind.EntityType");
             Contract.Assert(entityResource != null, "entityResource != null");
 
-            if (readContext.IsPatchMode)
+            if (readContext.IsDeltaOfT)
             {
                 string message = Error.Format(SRResources.CannotPatchNavigationProperties, navigationProperty.Name, navigationProperty.DeclaringEntityType().FullName());
                 throw new ODataException(message);
@@ -438,7 +448,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
             object value = deserializer.ReadInline(entry, readContext);
 
-            DeserializationHelpers.SetProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
+            DeserializationHelpers.SetProperty(entityResource, navigationProperty.Name, value);
         }
 
         private void ApplyFeedInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataFeedWithEntries feed, ODataDeserializerContext readContext)
@@ -446,7 +456,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Contract.Assert(navigationProperty != null && navigationProperty.PropertyKind == EdmPropertyKind.Navigation, "navigationProperty != null && navigationProperty.TypeKind == ResourceTypeKind.EntityType");
             Contract.Assert(entityResource != null, "entityResource != null");
 
-            if (readContext.IsPatchMode)
+            if (readContext.IsDeltaOfT)
             {
                 string message = Error.Format(SRResources.CannotPatchNavigationProperties, navigationProperty.Name, navigationProperty.DeclaringEntityType().FullName());
                 throw new ODataException(message);
@@ -459,7 +469,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
             object value = deserializer.ReadInline(feed, readContext);
 
-            DeserializationHelpers.SetCollectionProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
+            DeserializationHelpers.SetCollectionProperty(entityResource, navigationProperty, value);
         }
 
         private static IEdmEntitySet GetEntitySet(ODataPath path)

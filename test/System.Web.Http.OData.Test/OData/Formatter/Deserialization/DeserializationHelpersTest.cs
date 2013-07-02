@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
+using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
@@ -23,7 +24,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             object resource = isDelta ? (object)new Delta<GetPropertyType_TestClass>() : new GetPropertyType_TestClass();
             Assert.Equal(
                 expectedPropertyType,
-                DeserializationHelpers.GetPropertyType(resource, propertyName, isDelta));
+                DeserializationHelpers.GetPropertyType(resource, propertyName));
         }
 
         [Theory]
@@ -37,7 +38,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void SetCollectionProperty_CollectionTypeCanBeInstantiated_And_SettableProperty(string propertyName)
         {
             object value = new SampleClassWithSettableCollectionProperties();
-            DeserializationHelpers.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 });
+            IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
+
+            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 });
+
             Assert.Equal(
                 new[] { 1, 2, 3 },
                 value.GetType().GetProperty(propertyName).GetValue(value, index: null) as IEnumerable<int>);
@@ -49,9 +53,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void SetCollectionProperty_CollectionTypeCannotBeInstantiated_And_SettableProperty_Throws(string propertyName)
         {
             object value = new SampleClassWithSettableCollectionProperties();
+            IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
             Assert.Throws<SerializationException>(
-                () => DeserializationHelpers.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 }),
+                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }),
                 String.Format("The property '{0}' on type 'System.Web.Http.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithSettableCollectionProperties' returned a null value. " +
                 "The input stream contains collection items which cannot be added if the instance is null.", propertyName));
         }
@@ -66,7 +71,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void SetCollectionProperty_NonSettableProperty_NonNullValue_WithAddMethod(string propertyName)
         {
             object value = new SampleClassWithNonSettableCollectionProperties();
-            DeserializationHelpers.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 });
+            IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
+
+            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 });
+
             Assert.Equal(
                 new[] { 1, 2, 3 },
                 value.GetType().GetProperty(propertyName).GetValue(value, index: null) as IEnumerable<int>);
@@ -79,9 +87,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             object value = new SampleClassWithNonSettableCollectionProperties();
             Type propertyType = typeof(SampleClassWithNonSettableCollectionProperties).GetProperty(propertyName).PropertyType;
+            IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
             Assert.Throws<SerializationException>(
-                () => DeserializationHelpers.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 }),
+                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }),
                 String.Format("The value of the property '{0}' on type 'System.Web.Http.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' is an array. " +
                 "Consider adding a setter for the property.", propertyName));
         }
@@ -92,8 +101,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             object value = new SampleClassWithNonSettableCollectionProperties();
             Type propertyType = typeof(SampleClassWithNonSettableCollectionProperties).GetProperty(propertyName).PropertyType;
+            IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
+
             Assert.Throws<SerializationException>(
-                () => DeserializationHelpers.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 }),
+                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }),
                 String.Format("The type '{0}' of the property '{1}' on type 'System.Web.Http.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' does not have an Add method. " +
                 "Consider using a collection type that does have an Add method - for example IList<T> or ICollection<T>.", propertyType.FullName, propertyName));
         }
@@ -111,9 +122,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             object value = new SampleClassWithNonSettableCollectionProperties();
             value.GetType().GetProperty(propertyName).SetValue(value, null, null);
+            IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
             Assert.Throws<SerializationException>(
-                 () => DeserializationHelpers.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 }),
+                 () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }),
                  String.Format("The property '{0}' on type 'System.Web.Http.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' returned a null value. " +
                  "The input stream contains collection items which cannot be added if the instance is null.", propertyName));
         }
@@ -122,7 +134,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void SetCollectionProperty_CanConvertNonStandardEdmTypes()
         {
             SampleClassWithDifferentCollectionProperties value = new SampleClassWithDifferentCollectionProperties();
-            DeserializationHelpers.SetCollectionProperty(value, "UnsignedArray", isDelta: false, value: new List<int> { 1, 2, 3 });
+            IEdmProperty edmProperty = GetMockEdmProperty("UnsignedArray", EdmPrimitiveTypeKind.Int32);
+
+            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 });
+
             Assert.Equal(
                 new uint[] { 1, 2, 3 },
                value.UnsignedArray);
@@ -132,7 +147,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void SetCollectionProperty_CanConvertEnumCollection()
         {
             SampleClassWithDifferentCollectionProperties value = new SampleClassWithDifferentCollectionProperties();
-            DeserializationHelpers.SetCollectionProperty(value, "FlagsEnum", isDelta: false, value: new List<string> { "One", "Four, Two" });
+            IEdmProperty edmProperty = GetMockEdmProperty("FlagsEnum", EdmPrimitiveTypeKind.String);
+
+            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<string> { "One", "Four, Two" });
+
             Assert.Equal(
                 new FlagsEnum[] { FlagsEnum.One, FlagsEnum.Four | FlagsEnum.Two },
                value.FlagsEnum);
@@ -145,9 +163,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             object value = new SampleClassWithDifferentCollectionProperties();
             Type propertyType = typeof(SampleClassWithDifferentCollectionProperties).GetProperty(propertyName).PropertyType;
+            IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
             Assert.Throws<SerializationException>(
-            () => DeserializationHelpers.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 }),
+            () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }),
             Error.Format(
             "The type '{0}' of the property '{1}' on type 'System.Web.Http.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithDifferentCollectionProperties' must be a collection.",
             propertyType.FullName,
@@ -170,10 +189,19 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             resource.Setup(r => r.TrySetPropertyValue("Key1", "Value1")).Returns(true).Verifiable();
 
             // Act
-            DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider, new ODataDeserializerContext { IsPatchMode = true });
+            DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider, new ODataDeserializerContext());
 
             // Assert
             resource.Verify();
+        }
+
+        private static IEdmProperty GetMockEdmProperty(string name, EdmPrimitiveTypeKind elementType)
+        {
+            Mock<IEdmProperty> property = new Mock<IEdmProperty>();
+            property.Setup(p => p.Name).Returns(name);
+            IEdmTypeReference elementTypeRefernece = EdmLibHelpers.ToEdmTypeReference(EdmCoreModel.Instance.GetPrimitiveType(elementType), isNullable: false);
+            property.Setup(p => p.Type).Returns(new EdmCollectionTypeReference(new EdmCollectionType(elementTypeRefernece), isNullable: false));
+            return property.Object;
         }
 
         private class GetPropertyType_TestClass

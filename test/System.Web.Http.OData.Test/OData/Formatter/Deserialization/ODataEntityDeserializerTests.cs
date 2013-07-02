@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -31,7 +32,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             _readContext = new ODataDeserializerContext
             {
                 Path = new ODataPath(new EntitySetPathSegment(entitySet)),
-                Model = _edmModel
+                Model = _edmModel,
+                ResourceType = typeof(Product)
             };
             _productEdmType = _edmModel.GetEdmTypeReference(typeof(Product)).AsEntity();
             _supplierEdmType = _edmModel.GetEdmTypeReference(typeof(Supplier)).AsEntity();
@@ -226,6 +228,30 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
+        public void ReadEntry_SetsExpectedAndActualEdmType_OnCreatedEdmObject_TypelessMode()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            IEdmEntityTypeReference customerType = EdmLibHelpers.ToEdmTypeReference(model.Customer, isNullable: false).AsEntity();
+            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model.Model, ResourceType = typeof(IEdmObject) };
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry
+            {
+                TypeName = model.SpecialCustomer.FullName(),
+                Properties = new ODataProperty[0]
+            });
+
+            ODataEntityDeserializer deserializer = new ODataEntityDeserializer(customerType, _deserializerProvider);
+
+            // Act
+            var result = deserializer.ReadEntry(entry, readContext);
+
+            // Assert
+            EdmEntityObject resource = Assert.IsType<EdmEntityObject>(result);
+            Assert.Equal(model.SpecialCustomer, resource.ActualEdmType);
+            Assert.Equal(model.Customer, resource.ExpectedEdmType);
+        }
+
+        [Fact]
         public void ReadEntry_Calls_CreateEntityResource()
         {
             // Arrange
@@ -311,11 +337,29 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataDeserializerContext readContext = new ODataDeserializerContext
             {
                 Model = _readContext.Model,
-                IsPatchMode = true,
-                PatchEntityType = typeof(Delta<Product>)
+                ResourceType = typeof(Delta<Product>)
             };
 
             Assert.IsType<Delta<Product>>(deserializer.CreateEntityResource(readContext));
+        }
+
+        [Fact]
+        public void CreateEntityResource_CreatesEdmEntityObject_IfTypeLessMode()
+        {
+            // Arrange
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = _readContext.Model,
+                ResourceType = typeof(IEdmObject)
+            };
+
+            // Act
+            var result = deserializer.CreateEntityResource(readContext);
+
+            // Assert
+            EdmEntityObject resource = Assert.IsType<EdmEntityObject>(result);
+            Assert.Equal(_productEdmType, resource.GetEdmType(), new EdmTypeReferenceEqualityComparer());
         }
 
         [Fact]
@@ -325,7 +369,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataDeserializerContext readContext = new ODataDeserializerContext
             {
                 Model = _readContext.Model,
-                IsPatchMode = false
+                ResourceType = typeof(Product)
             };
 
             Assert.IsType<Product>(deserializer.CreateEntityResource(readContext));
@@ -396,7 +440,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
             ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Supplier" });
             navigationLink.NestedItems.Add(new ODataEntryWithNavigationLinks(new ODataEntry()));
-            _readContext.IsPatchMode = true;
+            _readContext.ResourceType = typeof(Delta<Supplier>);
 
             Assert.Throws<ODataException>(
                 () => deserializer.ApplyNavigationProperty(42, navigationLink, _readContext),
@@ -409,7 +453,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             var deserializer = new ODataEntityDeserializer(_supplierEdmType, _deserializerProvider);
             ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Products" });
             navigationLink.NestedItems.Add(new ODataFeedWithEntries(new ODataFeed()));
-            _readContext.IsPatchMode = true;
+            _readContext.ResourceType = typeof(Delta<Supplier>);
 
             Assert.Throws<ODataException>(
                 () => deserializer.ApplyNavigationProperty(42, navigationLink, _readContext),
@@ -600,8 +644,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             IEdmEntityType supplierEntityType =
                 EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
-            _readContext.IsPatchMode = true;
-            _readContext.PatchEntityType = typeof(Delta<Supplier>);
+            _readContext.ResourceType = typeof(Delta<Supplier>);
 
             ODataEntityDeserializer deserializer =
                 new ODataEntityDeserializer(_supplierEdmType, _deserializerProvider);

@@ -88,6 +88,10 @@
     <Compile Include="OData\Batch\DefaultODataBatchHandlerTest.cs" />
     <Compile Include="OData\Builder\LinkGenerationHelpersTest.cs" />
     <Compile Include="OData\EdmModelExtensionsTest.cs" />
+    <Compile Include="OData\EdmComplexCollectionObjectTest.cs" />
+    <Compile Include="OData\EdmEntityCollectionObjectTest.cs" />
+    <Compile Include="OData\EdmStructuredObjectTest.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataDeserializerContextTest.cs" />
     <Compile Include="OData\Formatter\ODataMessageWrapperTest.cs" />
     <Compile Include="OData\Formatter\Serialization\EdmEntityObjectTest.cs" />
     <Compile Include="OData\EntityInstanceContextTest.cs" />

@@ -16,7 +16,7 @@ namespace System.Web.Http.OData
     /// </summary>
     /// <typeparam name="TEntityType">TEntityType is the base type of entity this delta tracks changes for.</typeparam>
     [NonValidatingParameterBinding]
-    public class Delta<TEntityType> : Delta, IDelta where TEntityType : class
+    public class Delta<TEntityType> : TypedDelta, IDelta where TEntityType : class
     {
         // cache property accessors for this type and all its derived types.
         private static ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TEntityType>>> _propertyCache = new ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TEntityType>>>();
@@ -54,7 +54,7 @@ namespace System.Web.Http.OData
         }
 
         /// <inheritdoc/>
-        public override Type ExpectedType
+        public override Type ExpectedClrType
         {
             get { return typeof(TEntityType); }
         }

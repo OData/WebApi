@@ -151,28 +151,35 @@ namespace System.Web.Http.OData.Formatter
             if (edmType != null)
             {
                 bool isNullable = IsNullable(clrType);
-                switch (edmType.TypeKind)
-                {
-                    case EdmTypeKind.Collection:
-                        return new EdmCollectionTypeReference(edmType as IEdmCollectionType, isNullable);
-                    case EdmTypeKind.Complex:
-                        return new EdmComplexTypeReference(edmType as IEdmComplexType, isNullable);
-                    case EdmTypeKind.Entity:
-                        return new EdmEntityTypeReference(edmType as IEdmEntityType, isNullable);
-                    case EdmTypeKind.EntityReference:
-                        return new EdmEntityReferenceTypeReference(edmType as IEdmEntityReferenceType, isNullable);
-                    case EdmTypeKind.Enum:
-                        return new EdmEnumTypeReference(edmType as IEdmEnumType, isNullable);
-                    case EdmTypeKind.Primitive:
-                        return _coreModel.GetPrimitive((edmType as IEdmPrimitiveType).PrimitiveKind, isNullable);
-                    case EdmTypeKind.Row:
-                        return new EdmRowTypeReference(edmType as IEdmRowType, isNullable);
-                    default:
-                        throw Error.NotSupported(SRResources.EdmTypeNotSupported, edmType.ToTraceString());
-                }
+                return ToEdmTypeReference(edmType, isNullable);
             }
 
             return null;
+        }
+
+        public static IEdmTypeReference ToEdmTypeReference(this IEdmType edmType, bool isNullable)
+        {
+            Contract.Assert(edmType != null);
+
+            switch (edmType.TypeKind)
+            {
+                case EdmTypeKind.Collection:
+                    return new EdmCollectionTypeReference(edmType as IEdmCollectionType, isNullable);
+                case EdmTypeKind.Complex:
+                    return new EdmComplexTypeReference(edmType as IEdmComplexType, isNullable);
+                case EdmTypeKind.Entity:
+                    return new EdmEntityTypeReference(edmType as IEdmEntityType, isNullable);
+                case EdmTypeKind.EntityReference:
+                    return new EdmEntityReferenceTypeReference(edmType as IEdmEntityReferenceType, isNullable);
+                case EdmTypeKind.Enum:
+                    return new EdmEnumTypeReference(edmType as IEdmEnumType, isNullable);
+                case EdmTypeKind.Primitive:
+                    return _coreModel.GetPrimitive((edmType as IEdmPrimitiveType).PrimitiveKind, isNullable);
+                case EdmTypeKind.Row:
+                    return new EdmRowTypeReference(edmType as IEdmRowType, isNullable);
+                default:
+                    throw Error.NotSupported(SRResources.EdmTypeNotSupported, edmType.ToTraceString());
+            }
         }
 
         public static IEdmCollectionType GetCollection(this IEdmEntityType entityType)

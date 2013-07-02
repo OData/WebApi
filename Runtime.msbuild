@@ -18,9 +18,11 @@
     
     <ItemGroup>            
         <SolutionsToBuild Include="Runtime.sln">
-            <ReleaseRoot>.</ReleaseRoot>
             <BuildInParallel>$(BuildInParallel)</BuildInParallel>
-            <PortableLibrary>RuntimePortable.sln</PortableLibrary>
+        </SolutionsToBuild>    
+        <SolutionsToBuild Include="RuntimePortable.sln">
+            <BuildInParallel>$(BuildInParallel)</BuildInParallel>
+            <Portable>true</Portable>
         </SolutionsToBuild>    
     </ItemGroup>
 
@@ -44,15 +46,11 @@
 
     <Target Name="Clean">
         <MSBuild
-            Projects="%(SolutionsToBuild.PortableLibrary)"
-            Targets="Clean"
-            Condition=" '%(SolutionsToBuild.PortableLibrary)' != '' "
-            Properties="Configuration=$(Configuration);VisualStudioVersion=$(VisualStudioVersion)" />
-        <MSBuild
             Projects="@(SolutionsToBuild)"
             Targets="Clean"
+            Condition=" '%(SolutionsToBuild.Portable)' != 'true' or '$(BuildPortable)' == 'true' "
             Properties="Configuration=$(Configuration);VisualStudioVersion=$(VisualStudioVersion)" />
-        <RemoveDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
+        <RemoveDir Directories="bin\$(Configuration)" />
     </Target>
 
     <Target Name="RestoreSkipStrongNames">
@@ -90,17 +88,12 @@
     <Target Name="Build" DependsOnTargets="Prereq">
         <!-- we need to batch the solution files since they both build Microsoft.TestCommon -->
       <Error Condition=" '$(CodeAnalysis)' == 'true' and '$(Configuration)' == 'Release' " Text="Unable to run code analysis in Release configuration. Release assemblies do not include SuppressMessage attributes (so code analysis would always fail with the errors that are normally suppressed)." />
-      <MakeDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
+      <MakeDir Directories="bin\$(Configuration)" />
       <MSBuild
-            Projects="%(SolutionsToBuild.PortableLibrary)"
+            Projects="@(SolutionsToBuild)"
             BuildInParallel="%(SolutionsToBuild.BuildInParallel)"
             Targets="Build"
-            Condition=" '$(BuildPortable)' == 'true' and '%(SolutionsToBuild.PortableLibrary)' != '' "
-            Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled);VisualStudioVersion=$(VisualStudioVersion)" />
-      <MSBuild
-            Projects="%(SolutionsToBuild.Identity)"
-            BuildInParallel="%(SolutionsToBuild.BuildInParallel)"
-            Targets="Build"
+            Condition=" '%(SolutionsToBuild.Portable)' != 'true' or '$(BuildPortable)' == 'true' "
             Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled);VisualStudioVersion=$(VisualStudioVersion)" />
     </Target>
 

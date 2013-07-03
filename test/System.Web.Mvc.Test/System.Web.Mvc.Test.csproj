@@ -62,7 +62,7 @@
     <Compile Include="..\Common\Routing\InlineRouteTemplateParserTests.cs">
       <Link>Routing\InlineRouteTemplateParserTests.cs</Link>
     </Compile>
-    <Compile Include="Routing\AttributeRoutingMapperTests.cs" />
+    <Compile Include="Routing\RouteCollectionAttributeRoutingExtensionsTests.cs" />
     <Compile Include="..\Common\Routing\RouteEntryTest.cs">
       <Link>Routing\RouteEntryTest.cs</Link>
     </Compile>

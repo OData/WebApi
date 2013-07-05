@@ -389,6 +389,13 @@ namespace System.Web.Http
             return new NotFoundResult(this);
         }
 
+        /// <summary>Creates an <see cref="OkResult"/> (200 OK).</summary>
+        /// <returns>An <see cref="OkResult"/>.</returns>
+        public OkResult Ok()
+        {
+            return new OkResult(this);
+        }
+
         /// <summary>
         /// Creates an <see cref="OkNegotiatedContentResult{T}"/> (200 OK) with the specified values.
         /// </summary>

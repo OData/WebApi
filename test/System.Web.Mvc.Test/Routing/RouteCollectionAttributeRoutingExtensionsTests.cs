@@ -61,18 +61,18 @@ namespace System.Web.Routing
         public void MapMvcAttributeRoutes_CustomConstraintResolver()
         {
             // Arrange
-            var controllerTypes = new[] { typeof(CrazyConstraintController) };
+            var controllerTypes = new[] { typeof(FruitConstraintController) };
             var routes = new RouteCollection();
 
             // Act
-            routes.MapMvcAttributeRoutes(controllerTypes, new CrazyConstraintResolver());
+            routes.MapMvcAttributeRoutes(controllerTypes, new FruitConstraintResolver());
 
             // Assert
             Assert.Equal(1, routes.Count);
             Route route = (Route)routes.Single();
 
-            Assert.Equal("nuts/{nuts}", route.Url);
-            Assert.IsAssignableFrom<CrazyConstraint>(route.Constraints["nuts"]);
+            Assert.Equal("fruits/{apple}", route.Url);
+            Assert.IsAssignableFrom<FruitConstraint>(route.Constraints["apple"]);
         }
 
         [Fact]
@@ -379,30 +379,33 @@ namespace System.Web.Routing
         {
         }
 
-        private class CrazyConstraintController : Controller
+        private class FruitConstraintController : Controller
         {
-            [HttpGet("nuts/{nuts:crazy}")]
-            public ActionResult Crazy(string nuts)
+            [HttpGet("fruits/{apple:fruit}")]
+            public ActionResult Eat(string apple)
             {
                 throw new NotImplementedException();
             }
         }
 
-        class CrazyConstraint : IRouteConstraint
+        class FruitConstraint : IRouteConstraint
         {
             public bool Match(HttpContextBase httpContext, Route route, string parameterName, RouteValueDictionary values,
                               RouteDirection routeDirection)
             {
-                throw new NotImplementedException("CRAZY");
+                throw new NotImplementedException();
             }
         }
 
-        class CrazyConstraintResolver : IInlineConstraintResolver
+        class FruitConstraintResolver : IInlineConstraintResolver
         {
             public IRouteConstraint ResolveConstraint(string inlineConstraint)
             {
-                if (inlineConstraint == "crazy")
-                    return new CrazyConstraint();
+                if (inlineConstraint == "fruit")
+                {
+                    return new FruitConstraint();
+                }
+
                 throw new InvalidOperationException();
             }
         }

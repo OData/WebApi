@@ -290,6 +290,13 @@ namespace System.Web.Http
             return new FormattedContentResult<T>(statusCode, value, formatter, mediaType, this);
         }
 
+        /// <summary>Creates a <see cref="NotFoundResult"/>.</summary>
+        /// <returns>A <see cref="NotFoundResult"/>.</returns>
+        public NotFoundResult NotFound()
+        {
+            return new NotFoundResult(this);
+        }
+
         /// <summary>Creates an <see cref="OkNegotiatedContentResult{T}"/> with the specified values.</summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
         /// <param name="value">The content value to negotiate and format in the entity body.</param>

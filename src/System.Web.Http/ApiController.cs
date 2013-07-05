@@ -232,6 +232,14 @@ namespace System.Web.Http
             return new BadRequestResult(this);
         }
 
+        /// <summary>Creates an <see cref="ErrorMessageResult"/> with the specified error message.</summary>
+        /// <param name="message">The user-visible error message.</param>
+        /// <returns>An <see cref="InvalidModelStateResult"/> with the specified model state.</returns>
+        public ErrorMessageResult BadRequest(string message)
+        {
+            return new ErrorMessageResult(message, this);
+        }
+
         /// <summary>Creates an <see cref="InvalidModelStateResult"/> with the specified model state.</summary>
         /// <param name="modelState">The model state to include in the error.</param>
         /// <returns>An <see cref="InvalidModelStateResult"/> with the specified model state.</returns>

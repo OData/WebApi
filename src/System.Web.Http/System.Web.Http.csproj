@@ -91,6 +91,7 @@
     <Compile Include="Results\JsonResult.cs" />
     <Compile Include="Results\ConflictResult.cs" />
     <Compile Include="Results\UnauthorizedResult.cs" />
+    <Compile Include="Results\ExceptionResult.cs" />
     <Compile Include="Results\NotFoundResult.cs" />
     <Compile Include="Results\CreatedNegotiatedContentResult.cs" />
     <Compile Include="Results\OkNegotiatedContentResult.cs" />

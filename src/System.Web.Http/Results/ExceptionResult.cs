@@ -8,56 +8,63 @@ using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Results
 {
-    /// <summary>Represents an action result that performs content negotiation.</summary>
-    /// <typeparam name="T">The type of content in the entity body.</typeparam>
-    public class NegotiatedContentResult<T> : IHttpActionResult
+    /// <summary>
+    /// Represents an action result that returns a <see cref="HttpStatusCode.InternalServerError"/> response and
+    /// performs content negotiation on an <see cref="HttpError"/> based on an <see cref="Exception"/>.
+    /// </summary>
+    public class ExceptionResult : IHttpActionResult
     {
-        private readonly HttpStatusCode _statusCode;
-        private readonly T _content;
+        private readonly Exception _exception;
         private readonly IDependencyProvider _dependencies;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NegotiatedContentResult{T}"/> class with the values provided.
-        /// </summary>
-        /// <param name="statusCode">The HTTP status code for the response message.</param>
-        /// <param name="content">The content value to negotiate and format in the entity body.</param>
+        /// <summary>Initializes a new instance of the <see cref="ExceptionResult"/> class.</summary>
+        /// <param name="exception">The exception to include in the error.</param>
+        /// <param name="includeErrorDetail">
+        /// <see langword="true"/> if the error should include exception messages; otherwise, <see langword="false"/>.
+        /// </param>
         /// <param name="contentNegotiator">The content negotiator to handle content negotiation.</param>
         /// <param name="request">The request message which led to this result.</param>
         /// <param name="formatters">The formatters to use to negotiate and format the content.</param>
-        public NegotiatedContentResult(HttpStatusCode statusCode, T content, IContentNegotiator contentNegotiator,
+        public ExceptionResult(Exception exception, bool includeErrorDetail, IContentNegotiator contentNegotiator,
             HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
-            : this(statusCode, content, new DirectDependencyProvider(contentNegotiator, request, formatters))
+            : this(exception, new DirectDependencyProvider(includeErrorDetail, contentNegotiator, request,
+                formatters))
         {
         }
 
-        internal NegotiatedContentResult(HttpStatusCode statusCode, T content, ApiController controller)
-            : this(statusCode, content, new ApiControllerDependencyProvider(controller))
+        internal ExceptionResult(Exception exception, ApiController controller)
+            : this(exception, new ApiControllerDependencyProvider(controller))
         {
         }
 
-        private NegotiatedContentResult(HttpStatusCode statusCode, T content, IDependencyProvider dependencies)
+        private ExceptionResult(Exception exception, IDependencyProvider dependencies)
         {
+            if (exception == null)
+            {
+                throw new ArgumentNullException("exception");
+            }
+
             Contract.Assert(dependencies != null);
 
-            _statusCode = statusCode;
-            _content = content;
+            _exception = exception;
             _dependencies = dependencies;
         }
 
-        /// <summary>Gets the HTTP status code for the response message.</summary>
-        public HttpStatusCode StatusCode
+        /// <summary>Gets the exception to include in the error.</summary>
+        public Exception Exception
         {
-            get { return _statusCode; }
+            get { return _exception; }
         }
 
-        /// <summary>Gets the content value to negotiate and format in the entity body.</summary>
-        public T Content
+        /// <summary>Gets a value indicating whether the error should include exception messages.</summary>
+        public bool IncludeErrorDetail
         {
-            get { return _content; }
+            get { return _dependencies.IncludeErrorDetail; }
         }
 
         /// <summary>Gets the content negotiator to handle content negotiation.</summary>
@@ -86,48 +93,9 @@ namespace System.Web.Http.Results
 
         private HttpResponseMessage Execute()
         {
-            return Execute(_statusCode, _content, _dependencies.ContentNegotiator, _dependencies.Request,
-                _dependencies.Formatters);
-        }
-
-        internal static HttpResponseMessage Execute(HttpStatusCode statusCode, T content,
-            IContentNegotiator contentNegotiator, HttpRequestMessage request,
-            IEnumerable<MediaTypeFormatter> formatters)
-        {
-            Contract.Assert(contentNegotiator != null);
-            Contract.Assert(request != null);
-            Contract.Assert(formatters != null);
-
-            // Run content negotiation.
-            ContentNegotiationResult result = contentNegotiator.Negotiate(typeof(T), request, formatters);
-
-            HttpResponseMessage response = new HttpResponseMessage();
-
-            try
-            {
-                if (result == null)
-                {
-                    // A null result from content negotiation indicates that the response should be a 406.
-                    response.StatusCode = HttpStatusCode.NotAcceptable;
-                }
-                else
-                {
-                    response.StatusCode = statusCode;
-                    Contract.Assert(result.Formatter != null);
-                    // At this point mediaType should be a cloned value. (The content negotiator is responsible for
-                    // returning a new copy.)
-                    response.Content = new ObjectContent<T>(content, result.Formatter, result.MediaType);
-                }
-
-                response.RequestMessage = request;
-            }
-            catch
-            {
-                response.Dispose();
-                throw;
-            }
-
-            return response;
+            HttpError error = new HttpError(_exception, _dependencies.IncludeErrorDetail);
+            return NegotiatedContentResult<HttpError>.Execute(HttpStatusCode.BadRequest, error,
+                _dependencies.ContentNegotiator, _dependencies.Request, _dependencies.Formatters);
         }
 
         /// <summary>Defines a provider for dependencies that are not always directly available.</summary>
@@ -138,6 +106,8 @@ namespace System.Web.Http.Results
         /// </remarks>
         internal interface IDependencyProvider
         {
+            bool IncludeErrorDetail { get; }
+
             IContentNegotiator ContentNegotiator { get; }
 
             HttpRequestMessage Request { get; }
@@ -147,12 +117,13 @@ namespace System.Web.Http.Results
 
         internal sealed class DirectDependencyProvider : IDependencyProvider
         {
+            private readonly bool _includeErrorDetail;
             private readonly IContentNegotiator _contentNegotiator;
             private readonly HttpRequestMessage _request;
             private readonly IEnumerable<MediaTypeFormatter> _formatters;
 
-            public DirectDependencyProvider(IContentNegotiator contentNegotiator, HttpRequestMessage request,
-                IEnumerable<MediaTypeFormatter> formatters)
+            public DirectDependencyProvider(bool includeErrorDetail, IContentNegotiator contentNegotiator,
+                HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
             {
                 if (contentNegotiator == null)
                 {
@@ -169,9 +140,15 @@ namespace System.Web.Http.Results
                     throw new ArgumentNullException("formatters");
                 }
 
+                _includeErrorDetail = includeErrorDetail;
                 _contentNegotiator = contentNegotiator;
                 _request = request;
                 _formatters = formatters;
+            }
+
+            public bool IncludeErrorDetail
+            {
+                get { return _includeErrorDetail; }
             }
 
             public IContentNegotiator ContentNegotiator
@@ -204,6 +181,15 @@ namespace System.Web.Http.Results
                 }
 
                 _controller = controller;
+            }
+
+            public bool IncludeErrorDetail
+            {
+                get
+                {
+                    EnsureResolved();
+                    return _resolvedDependencies.IncludeErrorDetail;
+                }
             }
 
             public IContentNegotiator ContentNegotiator
@@ -245,6 +231,15 @@ namespace System.Web.Http.Results
                             SRResources.HttpControllerContext_ConfigurationMustNotBeNull);
                     }
 
+                    HttpRequestMessage request = _controller.Request;
+
+                    if (request == null)
+                    {
+                        throw new InvalidOperationException(SRResources.ApiController_RequestMustNotBeNull);
+                    }
+
+                    bool includeErrorDetail = request.ShouldIncludeErrorDetail();
+
                     ServicesContainer services = configuration.Services;
                     Contract.Assert(services != null);
                     IContentNegotiator contentNegotiator = services.GetContentNegotiator();
@@ -255,17 +250,11 @@ namespace System.Web.Http.Results
                             SRResources.HttpRequestMessageExtensions_NoContentNegotiator, typeof(IContentNegotiator)));
                     }
 
-                    HttpRequestMessage request = _controller.Request;
-
-                    if (request == null)
-                    {
-                        throw new InvalidOperationException(SRResources.ApiController_RequestMustNotBeNull);
-                    }
-
                     IEnumerable<MediaTypeFormatter> formatters = configuration.Formatters;
                     Contract.Assert(formatters != null);
 
-                    _resolvedDependencies = new DirectDependencyProvider(contentNegotiator, request, formatters);
+                    _resolvedDependencies = new DirectDependencyProvider(includeErrorDetail, contentNegotiator, request,
+                        formatters);
                 }
             }
         }

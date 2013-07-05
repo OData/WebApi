@@ -341,6 +341,16 @@ namespace System.Web.Http
             return new CreatedNegotiatedContentResult<T>(location, value, this);
         }
 
+        /// <summary>
+        /// Creates an <see cref="ExceptionResult"/> (500 Internal Server Error) with the specified exception.
+        /// </summary>
+        /// <param name="exception">The exception to include in the error.</param>
+        /// <returns>An <see cref="ExceptionResult"/> with the specified exception.</returns>
+        public ExceptionResult InternalServerError(Exception exception)
+        {
+            return new ExceptionResult(exception, this);
+        }
+
         /// <summary>Creates a <see cref="JsonResult{T}"/> (200 OK) with the specified value.</summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
         /// <param name="value">The content value to serialize in the entity body.</param>

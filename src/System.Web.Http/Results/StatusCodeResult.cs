@@ -61,22 +61,16 @@ namespace System.Web.Http.Results
 
         internal static HttpResponseMessage Execute(HttpStatusCode statusCode, HttpRequestMessage request)
         {
-            HttpResponseMessage mutableResponse = new HttpResponseMessage(statusCode);
-            HttpResponseMessage response = null;
+            HttpResponseMessage response = new HttpResponseMessage(statusCode);
 
             try
             {
-                mutableResponse.RequestMessage = request;
-
-                response = mutableResponse;
-                mutableResponse = null;
+                response.RequestMessage = request;
             }
-            finally
+            catch
             {
-                if (mutableResponse != null)
-                {
-                    mutableResponse.Dispose();
-                }
+                response.Dispose();
+                throw;
             }
 
             return response;

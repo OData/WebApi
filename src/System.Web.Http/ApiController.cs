@@ -290,6 +290,31 @@ namespace System.Web.Http
             return new FormattedContentResult<T>(statusCode, value, formatter, mediaType, this);
         }
 
+        /// <summary>Creates a <see cref="CreatedNegotiatedContentResult{T}"/> with the specified values.</summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="location">The location at which the content has been created.</param>
+        /// <param name="value">The content value to negotiate and format in the entity body.</param>
+        /// <returns>A <see cref="CreatedNegotiatedContentResult{T}"/> with the specified values.</returns>
+        public CreatedNegotiatedContentResult<T> Created<T>(string location, T value)
+        {
+            if (location == null)
+            {
+                throw new ArgumentNullException("location");
+            }
+
+            return Created<T>(new Uri(location), value);
+        }
+
+        /// <summary>Creates a <see cref="CreatedNegotiatedContentResult{T}"/> with the specified values.</summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="location">The location at which the content has been created.</param>
+        /// <param name="value">The content value to negotiate and format in the entity body.</param>
+        /// <returns>A <see cref="CreatedNegotiatedContentResult{T}"/> with the specified values.</returns>
+        public CreatedNegotiatedContentResult<T> Created<T>(Uri location, T value)
+        {
+            return new CreatedNegotiatedContentResult<T>(location, value, this);
+        }
+
         /// <summary>Creates a <see cref="NotFoundResult"/>.</summary>
         /// <returns>A <see cref="NotFoundResult"/>.</returns>
         public NotFoundResult NotFound()

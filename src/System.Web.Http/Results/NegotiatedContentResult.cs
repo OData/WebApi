@@ -101,36 +101,30 @@ namespace System.Web.Http.Results
             // Run content negotiation.
             ContentNegotiationResult result = contentNegotiator.Negotiate(typeof(T), request, formatters);
 
-            HttpResponseMessage mutableResponse = new HttpResponseMessage();
-            HttpResponseMessage response;
+            HttpResponseMessage response = new HttpResponseMessage();
 
             try
             {
                 if (result == null)
                 {
                     // A null result from content negotiation indicates that the response should be a 406.
-                    mutableResponse.StatusCode = HttpStatusCode.NotAcceptable;
+                    response.StatusCode = HttpStatusCode.NotAcceptable;
                 }
                 else
                 {
-                    mutableResponse.StatusCode = statusCode;
+                    response.StatusCode = statusCode;
                     Contract.Assert(result.Formatter != null);
                     // At this point mediaType should be a cloned value. (The content negotiator is responsible for
                     // returning a new copy.)
-                    mutableResponse.Content = new ObjectContent<T>(content, result.Formatter, result.MediaType);
+                    response.Content = new ObjectContent<T>(content, result.Formatter, result.MediaType);
                 }
 
-                mutableResponse.RequestMessage = request;
-
-                response = mutableResponse;
-                mutableResponse = null;
+                response.RequestMessage = request;
             }
-            finally
+            catch
             {
-                if (mutableResponse != null)
-                {
-                    mutableResponse.Dispose();
-                }
+                response.Dispose();
+                throw;
             }
 
             return response;

@@ -97,6 +97,7 @@
     <Compile Include="Hosting\ThreadPrincipalServiceTest.cs" />
     <Compile Include="Results\BadRequestResultTests.cs" />
     <Compile Include="Results\NotFoundResultTests.cs" />
+    <Compile Include="Results\CreatedNegotiatedContentResultTests.cs" />
     <Compile Include="Results\OkNegotiatedContentResultTests.cs" />
     <Compile Include="Results\InvalidModelStateResultTests.cs" />
     <Compile Include="Results\NegotiatedContentResultTests.cs" />

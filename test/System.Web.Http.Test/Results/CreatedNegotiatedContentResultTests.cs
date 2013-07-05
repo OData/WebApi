@@ -10,20 +10,19 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
-using System.Web.Http.ModelBinding;
 using Microsoft.TestCommon;
 using Moq;
 
 namespace System.Web.Http.Results
 {
-    public class InvalidModelStateResultTests
+    public class CreatedNegotiatedContentResultTests
     {
         [Fact]
-        public void Constructor_Throws_WhenModelStateIsNull()
+        public void Constructor_Throws_WhenLocationIsNull()
         {
             // Arrange
-            ModelStateDictionary modelState = null;
-            bool includeErrorDetail = true;
+            Uri location = null;
+            object content = CreateContent();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
@@ -33,8 +32,8 @@ namespace System.Web.Http.Results
                 // Act & Assert
                 Assert.ThrowsArgumentNull(() =>
                 {
-                    CreateProductUnderTest(modelState, includeErrorDetail, contentNegotiator, request, formatters);
-                }, "modelState");
+                    CreateProductUnderTest(location, content, contentNegotiator, request, formatters);
+                }, "location");
             }
         }
 
@@ -42,8 +41,8 @@ namespace System.Web.Http.Results
         public void Constructor_Throws_WhenContentNegotiatorIsNull()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            bool includeErrorDetail = true;
+            Uri location = CreateLocation();
+            object content = CreateContent();
             IContentNegotiator contentNegotiator = null;
 
             using (HttpRequestMessage request = CreateRequest())
@@ -53,7 +52,7 @@ namespace System.Web.Http.Results
                 // Act & Assert
                 Assert.ThrowsArgumentNull(() =>
                 {
-                    CreateProductUnderTest(modelState, includeErrorDetail, contentNegotiator, request, formatters);
+                    CreateProductUnderTest(location, content, contentNegotiator, request, formatters);
                 }, "contentNegotiator");
             }
         }
@@ -62,8 +61,8 @@ namespace System.Web.Http.Results
         public void Constructor_Throws_WhenRequestIsNull()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            bool includeErrorDetail = true;
+            Uri location = CreateLocation();
+            object content = CreateContent();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
             HttpRequestMessage request = null;
             IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
@@ -71,7 +70,7 @@ namespace System.Web.Http.Results
             // Act & Assert
             Assert.ThrowsArgumentNull(() =>
             {
-                CreateProductUnderTest(modelState, includeErrorDetail, contentNegotiator, request, formatters);
+                CreateProductUnderTest(location, content, contentNegotiator, request, formatters);
             }, "request");
         }
 
@@ -79,8 +78,8 @@ namespace System.Web.Http.Results
         public void Constructor_Throws_WhenFormattersIsNull()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            bool includeErrorDetail = true;
+            Uri location = CreateLocation();
+            object content = CreateContent();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
@@ -90,70 +89,70 @@ namespace System.Web.Http.Results
                 // Act & Assert
                 Assert.ThrowsArgumentNull(() =>
                 {
-                    CreateProductUnderTest(modelState, includeErrorDetail, contentNegotiator, request, formatters);
+                    CreateProductUnderTest(location, content, contentNegotiator, request, formatters);
                 }, "formatters");
             }
         }
 
         [Fact]
-        public void ModelState_ReturnsInstanceProvided()
+        public void Location_Returns_InstanceProvided()
         {
             // Arrange
-            ModelStateDictionary expectedModelState = CreateModelState();
-            bool includeErrorDetail = true;
+            Uri expectedLocation = CreateLocation();
+            object content = CreateContent();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                InvalidModelStateResult result = CreateProductUnderTest(expectedModelState, includeErrorDetail,
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(expectedLocation, content,
                     contentNegotiator, request, formatters);
 
                 // Act
-                ModelStateDictionary modelState = result.ModelState;
+                Uri location = result.Location;
 
                 // Assert
-                Assert.Same(expectedModelState, modelState);
+                Assert.Same(expectedLocation, location);
             }
         }
 
         [Fact]
-        public void IncludeErrorDetail_ReturnsValueProvided()
+        public void Content_Returns_InstanceProvided()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            bool expectedIncludeErrorDetail = true;
+            Uri location = CreateLocation();
+            object expectedContent = CreateContent();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, expectedIncludeErrorDetail,
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, expectedContent,
                     contentNegotiator, request, formatters);
 
                 // Act
-                bool includeErrorDetail = result.IncludeErrorDetail;
+                object content = result.Content;
 
                 // Assert
-                Assert.Equal(expectedIncludeErrorDetail, includeErrorDetail);
+                Assert.Same(expectedContent, content);
             }
         }
 
         [Fact]
-        public void ContentNegotiator_ReturnsInstanceProvided()
+        public void ContentNegotiator_Returns_InstanceProvided()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            bool includeErrorDetail = true;
+            Uri location = CreateLocation();
+            object content = CreateContent();
             IContentNegotiator expectedContentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, includeErrorDetail,
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content,
                     expectedContentNegotiator, request, formatters);
 
                 // Act
@@ -165,18 +164,18 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void Request_ReturnsInstanceProvided()
+        public void Request_Returns_InstanceProvided()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            bool includeErrorDetail = true;
+            Uri location = CreateLocation();
+            object content = CreateContent();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, includeErrorDetail,
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content,
                     contentNegotiator, expectedRequest, formatters);
 
                 // Act
@@ -188,18 +187,18 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void Formatters_ReturnsInstanceProvided()
+        public void Formatters_Returns_InstanceProvided()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            bool includeErrorDetail = true;
+            Uri location = CreateLocation();
+            object content = CreateContent();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
             {
                 IEnumerable<MediaTypeFormatter> expectedFormatters = CreateFormatters();
 
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, includeErrorDetail,
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content,
                     contentNegotiator, request, expectedFormatters);
 
                 // Act
@@ -211,15 +210,11 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void ExecuteAsync_ReturnsCorrectResponse_WhenContentNegotiationSucceedsAndIncludeErrorDetailIsTrue()
+        public void ExecuteAsync_Returns_CorrectResponse_WhenContentNegotiationSucceeds()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            string expectedModelStateKey = "ModelStateKey";
-            string expectedModelStateExceptionMessage = "ModelStateExceptionMessage";
-            modelState.AddModelError(expectedModelStateKey, new InvalidOperationException(
-                expectedModelStateExceptionMessage));
-            bool includeErrorDetail = true;
+            Uri expectedLocation = CreateLocation();
+            object expectedContent = CreateContent();
             MediaTypeFormatter expectedFormatter = CreateFormatter();
             MediaTypeHeaderValue expectedMediaType = CreateMediaType();
             ContentNegotiationResult negotiationResult = new ContentNegotiationResult(expectedFormatter,
@@ -230,11 +225,11 @@ namespace System.Web.Http.Results
                 IEnumerable<MediaTypeFormatter> expectedFormatters = CreateFormatters();
 
                 Mock<IContentNegotiator> spy = new Mock<IContentNegotiator>();
-                spy.Setup(n => n.Negotiate(typeof(HttpError), expectedRequest, expectedFormatters)).Returns(
+                spy.Setup(n => n.Negotiate(typeof(object), expectedRequest, expectedFormatters)).Returns(
                     negotiationResult);
                 IContentNegotiator contentNegotiator = spy.Object;
 
-                IHttpActionResult result = CreateProductUnderTest(modelState, includeErrorDetail, contentNegotiator,
+                IHttpActionResult result = CreateProductUnderTest(expectedLocation, expectedContent, contentNegotiator,
                     expectedRequest, expectedFormatters);
 
                 // Act
@@ -247,19 +242,12 @@ namespace System.Web.Http.Results
                 using (HttpResponseMessage response = task.Result)
                 {
                     Assert.NotNull(response);
-                    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+                    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                    Assert.Same(expectedLocation, response.Headers.Location);
                     HttpContent content = response.Content;
-                    Assert.IsType<ObjectContent<HttpError>>(content);
-                    ObjectContent<HttpError> typedContent = (ObjectContent<HttpError>)content;
-                    HttpError error = (HttpError)typedContent.Value;
-                    HttpError modelStateError = error.ModelState;
-                    Assert.NotNull(modelStateError);
-                    Assert.True(modelState.ContainsKey(expectedModelStateKey));
-                    object modelStateValue = modelStateError[expectedModelStateKey];
-                    Assert.IsType(typeof(string[]), modelStateValue);
-                    string[] typedModelStateValue = (string[])modelStateValue;
-                    Assert.Equal(1, typedModelStateValue.Length);
-                    Assert.Same(expectedModelStateExceptionMessage, typedModelStateValue[0]);
+                    Assert.IsType<ObjectContent<object>>(content);
+                    ObjectContent<object> typedContent = (ObjectContent<object>)content;
+                    Assert.Same(expectedContent, typedContent.Value);
                     Assert.Same(expectedFormatter, typedContent.Formatter);
                     Assert.NotNull(typedContent.Headers);
                     Assert.Equal(expectedMediaType, typedContent.Headers.ContentType);
@@ -269,71 +257,11 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void ExecuteAsync_ReturnsCorrectResponse_WhenContentNegotiationSucceedsAndIncludeErrorDetailIsFalse()
+        public void ExecuteAsync_Returns_CorrectResponse_WhenContentNegotiationFails()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            string expectedModelStateKey = "ModelStateKey";
-            string expectedModelStateErrorMessage = "ModelStateErrorMessage";
-            ModelState originalModelStateItem = new ModelState();
-            originalModelStateItem.Errors.Add(new ModelError(new InvalidOperationException(),
-                expectedModelStateErrorMessage));
-            modelState.Add(expectedModelStateKey, originalModelStateItem);
-            bool includeErrorDetail = false;
-            MediaTypeFormatter expectedFormatter = CreateFormatter();
-            MediaTypeHeaderValue expectedMediaType = CreateMediaType();
-            ContentNegotiationResult negotiationResult = new ContentNegotiationResult(expectedFormatter,
-                expectedMediaType);
-
-            using (HttpRequestMessage expectedRequest = CreateRequest())
-            {
-                IEnumerable<MediaTypeFormatter> expectedFormatters = CreateFormatters();
-
-                Mock<IContentNegotiator> spy = new Mock<IContentNegotiator>();
-                spy.Setup(n => n.Negotiate(typeof(HttpError), expectedRequest, expectedFormatters)).Returns(
-                    negotiationResult);
-                IContentNegotiator contentNegotiator = spy.Object;
-
-                IHttpActionResult result = CreateProductUnderTest(modelState, includeErrorDetail, contentNegotiator,
-                    expectedRequest, expectedFormatters);
-
-                // Act
-                Task<HttpResponseMessage> task = result.ExecuteAsync(CancellationToken.None);
-
-                // Assert
-                Assert.NotNull(task);
-                task.WaitUntilCompleted();
-
-                using (HttpResponseMessage response = task.Result)
-                {
-                    Assert.NotNull(response);
-                    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-                    HttpContent content = response.Content;
-                    Assert.IsType<ObjectContent<HttpError>>(content);
-                    ObjectContent<HttpError> typedContent = (ObjectContent<HttpError>)content;
-                    HttpError error = (HttpError)typedContent.Value;
-                    HttpError modelStateError = error.ModelState;
-                    Assert.NotNull(modelStateError);
-                    Assert.True(modelState.ContainsKey(expectedModelStateKey));
-                    object modelStateValue = modelStateError[expectedModelStateKey];
-                    Assert.IsType(typeof(string[]), modelStateValue);
-                    string[] typedModelStateValue = (string[])modelStateValue;
-                    Assert.Equal(1, typedModelStateValue.Length);
-                    Assert.Same(expectedModelStateErrorMessage, typedModelStateValue[0]);
-                    Assert.Same(expectedFormatter, typedContent.Formatter);
-                    Assert.NotNull(typedContent.Headers);
-                    Assert.Equal(expectedMediaType, typedContent.Headers.ContentType);
-                    Assert.Same(expectedRequest, response.RequestMessage);
-                }
-            }
-        }
-
-        [Fact]
-        public void ExecuteAsync_ReturnsCorrectResponse_WhenContentNegotiationFails()
-        {
-            // Arrange
-            ModelStateDictionary modelState = CreateModelStateWithError();
-            bool includeErrorDetail = true;
+            Uri location = CreateLocation();
+            object content = CreateContent();
             ContentNegotiationResult negotiationResult = null;
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
@@ -341,11 +269,11 @@ namespace System.Web.Http.Results
                 IEnumerable<MediaTypeFormatter> expectedFormatters = CreateFormatters();
 
                 Mock<IContentNegotiator> spy = new Mock<IContentNegotiator>();
-                spy.Setup(n => n.Negotiate(typeof(ModelStateDictionary), expectedRequest, expectedFormatters)).Returns(
+                spy.Setup(n => n.Negotiate(typeof(object), expectedRequest, expectedFormatters)).Returns(
                     negotiationResult);
                 IContentNegotiator contentNegotiator = spy.Object;
 
-                IHttpActionResult result = CreateProductUnderTest(modelState, includeErrorDetail, contentNegotiator,
+                IHttpActionResult result = CreateProductUnderTest(location, content, contentNegotiator,
                     expectedRequest, expectedFormatters);
 
                 // Act
@@ -359,6 +287,7 @@ namespace System.Web.Http.Results
                 {
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
+                    Assert.Null(response.Headers.Location);
                     Assert.Same(expectedRequest, response.RequestMessage);
                 }
             }
@@ -368,22 +297,23 @@ namespace System.Web.Http.Results
         public void Constructor_ForApiController_Throws_WhenControllerIsNull()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
+            Uri location = CreateLocation();
+            object content = CreateContent();
             ApiController controller = null;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => { CreateProductUnderTest(modelState, controller); }, "controller");
+            Assert.ThrowsArgumentNull(() =>
+            {
+                CreateProductUnderTest(location, content, controller);
+            }, "controller");
         }
 
         [Fact]
         public void ExecuteAsync_ForApiController_ReturnsCorrectResponse_WhenContentNegotationSucceeds()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            string expectedModelStateKey = "ModelStateKey";
-            string expectedModelStateExceptionMessage = "ModelStateExceptionMessage";
-            modelState.AddModelError(expectedModelStateKey, new InvalidOperationException(
-                expectedModelStateExceptionMessage));
+            Uri expectedLocation = CreateLocation();
+            object expectedContent = CreateContent();
             ApiController controller = CreateController();
             MediaTypeFormatter expectedInputFormatter = CreateFormatter();
             MediaTypeFormatter expectedOutputFormatter = CreateFormatter();
@@ -397,18 +327,17 @@ namespace System.Web.Http.Results
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
                 Mock<IContentNegotiator> spy = new Mock<IContentNegotiator>();
-                spy.Setup(n => n.Negotiate(typeof(HttpError), expectedRequest, It.Is(formattersMatch))).Returns(
+                spy.Setup(n => n.Negotiate(typeof(object), expectedRequest, It.Is(formattersMatch))).Returns(
                     negotiationResult);
                 IContentNegotiator contentNegotiator = spy.Object;
 
                 using (HttpConfiguration configuration = CreateConfiguration(expectedInputFormatter,
                     contentNegotiator))
                 {
-                    configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
                     controller.Configuration = configuration;
                     controller.Request = expectedRequest;
 
-                    IHttpActionResult result = CreateProductUnderTest(modelState, controller);
+                    IHttpActionResult result = CreateProductUnderTest(expectedLocation, expectedContent, controller);
 
                     // Act
                     Task<HttpResponseMessage> task = result.ExecuteAsync(CancellationToken.None);
@@ -420,19 +349,12 @@ namespace System.Web.Http.Results
                     using (HttpResponseMessage response = task.Result)
                     {
                         Assert.NotNull(response);
-                        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+                        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                        Assert.Same(expectedLocation, response.Headers.Location);
                         HttpContent content = response.Content;
-                        Assert.IsType<ObjectContent<HttpError>>(content);
-                        ObjectContent<HttpError> typedContent = (ObjectContent<HttpError>)content;
-                        HttpError error = (HttpError)typedContent.Value;
-                        HttpError modelStateError = error.ModelState;
-                        Assert.NotNull(modelStateError);
-                        Assert.True(modelState.ContainsKey(expectedModelStateKey));
-                        object modelStateValue = modelStateError[expectedModelStateKey];
-                        Assert.IsType(typeof(string[]), modelStateValue);
-                        string[] typedModelStateValue = (string[])modelStateValue;
-                        Assert.Equal(1, typedModelStateValue.Length);
-                        Assert.Same(expectedModelStateExceptionMessage, typedModelStateValue[0]);
+                        Assert.IsType<ObjectContent<object>>(content);
+                        ObjectContent<object> typedContent = (ObjectContent<object>)content;
+                        Assert.Same(expectedContent, typedContent.Value);
                         Assert.Same(expectedOutputFormatter, typedContent.Formatter);
                         Assert.NotNull(typedContent.Headers);
                         Assert.Equal(expectedMediaType, typedContent.Headers.ContentType);
@@ -443,40 +365,11 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void IncludeErrorDetail_ForApiController_EvaluatesLazily()
-        {
-            // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            ApiController controller = CreateController();
-
-            using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
-                CreateDummyContentNegotiator()))
-            {
-                configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-                controller.Configuration = configuration;
-
-                using (HttpRequestMessage request = CreateRequest())
-                {
-                    controller.Request = request;
-
-                    InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
-
-                    configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Never;
-
-                    // Act
-                    IContentNegotiator contentNegotiator = result.ContentNegotiator;
-
-                    // Assert
-                    Assert.Equal(false, result.IncludeErrorDetail);
-                }
-            }
-        }
-
-        [Fact]
         public void ContentNegotiator_ForApiController_EvaluatesLazily()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
+            Uri location = CreateLocation();
+            object content = CreateContent();
             ApiController controller = CreateController();
 
             using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
@@ -488,7 +381,8 @@ namespace System.Web.Http.Results
                 {
                     controller.Request = request;
 
-                    InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
+                    CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content,
+                        controller);
 
                     IContentNegotiator expectedContentNegotiator = CreateDummyContentNegotiator();
                     configuration.Services.Replace(typeof(IContentNegotiator), expectedContentNegotiator);
@@ -506,7 +400,8 @@ namespace System.Web.Http.Results
         public void Request_ForApiController_EvaluatesLazily()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
+            Uri location = CreateLocation();
+            object content = CreateContent();
             MediaTypeFormatter formatter = CreateFormatter();
             MediaTypeHeaderValue mediaType = CreateMediaType();
             ApiController controller = CreateController();
@@ -515,7 +410,7 @@ namespace System.Web.Http.Results
                 CreateDummyContentNegotiator()))
             {
                 controller.Configuration = configuration;
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
 
                 using (HttpRequestMessage expectedRequest = CreateRequest())
                 {
@@ -534,7 +429,8 @@ namespace System.Web.Http.Results
         public void Formatters_ForApiController_EvaluatesLazily()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
+            Uri location = CreateLocation();
+            object content = CreateContent();
             ApiController controller = CreateController();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
@@ -544,7 +440,7 @@ namespace System.Web.Http.Results
                 controller.Configuration = earlyConfiguration;
                 controller.Request = request;
 
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
 
                 MediaTypeFormatter expectedFormatter = CreateFormatter();
 
@@ -564,39 +460,11 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void IncludeErrorDetail_ForApiController_EvaluatesOnce()
-        {
-            // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            ApiController controller = CreateController();
-
-            using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
-                CreateDummyContentNegotiator()))
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-                controller.Configuration = configuration;
-                controller.Request = request;
-
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
-
-                bool ignore = result.IncludeErrorDetail;
-
-                configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Never;
-
-                // Act
-                bool includeErrorDetail = result.IncludeErrorDetail;
-
-                // Assert
-                Assert.Equal(true, includeErrorDetail);
-            }
-        }
-
-        [Fact]
         public void ContentNegotiator_ForApiController_EvaluatesOnce()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
+            Uri location = CreateLocation();
+            object content = CreateContent();
             IContentNegotiator expectedContentNegotiator = CreateDummyContentNegotiator();
             ApiController controller = CreateController();
 
@@ -606,7 +474,7 @@ namespace System.Web.Http.Results
                 controller.Configuration = configuration;
                 controller.Request = request;
 
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
 
                 IContentNegotiator ignore = result.ContentNegotiator;
 
@@ -624,7 +492,8 @@ namespace System.Web.Http.Results
         public void Request_ForApiController_EvaluatesOnce()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
+            Uri location = CreateLocation();
+            object content = CreateContent();
             ApiController controller = CreateController();
 
             using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
@@ -632,7 +501,7 @@ namespace System.Web.Http.Results
             {
                 controller.Configuration = configuration;
 
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
 
                 using (HttpRequestMessage expectedRequest = CreateRequest())
                 {
@@ -657,7 +526,8 @@ namespace System.Web.Http.Results
         public void Formatters_ForApiController_EvaluatesOnce()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
+            Uri location = CreateLocation();
+            object content = CreateContent();
             ApiController controller = CreateController();
             MediaTypeFormatter expectedFormatter = CreateFormatter();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
@@ -668,7 +538,7 @@ namespace System.Web.Http.Results
                 controller.Configuration = earlyConfiguration;
                 controller.Request = request;
 
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
 
                 IEnumerable<MediaTypeFormatter> ignore = result.Formatters;
 
@@ -688,30 +558,11 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void IncludeErrorDetail_ForApiController_Throws_WhenControllerRequestIsNull()
-        {
-            // Arrange
-            ModelStateDictionary modelState = CreateModelState();
-            ApiController controller = CreateController();
-            Assert.Null(controller.Request);
-
-            using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
-                CreateDummyContentNegotiator()))
-            {
-                controller.Configuration = configuration;
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
-
-                // Act & Assert
-                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
-                    { bool ignore = result.IncludeErrorDetail; }, "ApiController.Request must not be null.");
-            }
-        }
-
-        [Fact]
         public void ContentNegotiator_ForApiController_Throws_WhenConfigurationIsNull()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
+            Uri location = CreateLocation();
+            object content = CreateContent();
             ApiController controller = CreateController();
             HttpControllerContext context = new HttpControllerContext();
 
@@ -719,7 +570,7 @@ namespace System.Web.Http.Results
             {
                 controller.ControllerContext = context;
 
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
 
                 // Act & Assert
                 Assert.Throws<InvalidOperationException>(
@@ -732,16 +583,16 @@ namespace System.Web.Http.Results
         public void ContentNegotiator_ForApiController_Throws_WhenServiceIsNull()
         {
             // Arrange
-            ModelStateDictionary modelState = CreateModelState();
+            Uri location = CreateLocation();
+            object content = CreateContent();
             ApiController controller = CreateController();
 
             using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(), null))
             using (HttpRequestMessage request = CreateRequest())
             {
-                controller.Request = request;
                 controller.Configuration = configuration;
 
-                InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
 
                 // Act & Assert
                 Assert.Throws<InvalidOperationException>(
@@ -752,18 +603,79 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void ApiControllerBadRequest_WithModelStateDictionary_CreatesCorrectResult()
+        public void Request_ForApiController_Throws_WhenControllerRequestIsNull()
         {
             // Arrange
-            ModelStateDictionary expectedModelState = CreateModelState();
+            Uri location = CreateLocation();
+            object content = CreateContent();
+            ApiController controller = CreateController();
+            Assert.Null(controller.Request);
+
+            using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
+                CreateDummyContentNegotiator()))
+            {
+                controller.Configuration = configuration;
+                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
+
+                // Act & Assert
+                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+                    { HttpRequestMessage ignore = result.Request; }, "ApiController.Request must not be null.");
+            }
+        }
+
+        [Fact]
+        public void ApiControllerCreated_WithUriAndContent_CreatesCorrectResult()
+        {
+            // Arrange
+            Uri expectedLocation = CreateLocation();
+            object expectedContent = CreateContent();
             ApiController controller = CreateController();
 
             // Act
-            InvalidModelStateResult result = controller.BadRequest(expectedModelState);
+            CreatedNegotiatedContentResult<object> result = controller.Created(expectedLocation, expectedContent);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Same(expectedModelState, result.ModelState);
+            Assert.Same(expectedContent, result.Content);
+            Assert.Same(expectedLocation, result.Location);
+
+            using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
+                CreateDummyContentNegotiator()))
+            using (HttpRequestMessage expectedRequest = CreateRequest())
+            {
+                controller.Configuration = configuration;
+                controller.Request = expectedRequest;
+                Assert.Same(expectedRequest, result.Request);
+            }
+        }
+
+        [Fact]
+        public void ApiControllerCreated_WithStringAndContent_Throws_WhenLocationIsNull()
+        {
+            // Arrange
+            string location = null;
+            object content = CreateContent();
+            ApiController controller = CreateController();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => { controller.Created(location, content); }, "location");
+        }
+
+        [Fact]
+        public void ApiControllerCreated_WithStringAndContent_CreatesCorrectResult()
+        {
+            // Arrange
+            string expectedLocation = CreateLocation().OriginalString;
+            object expectedContent = CreateContent();
+            ApiController controller = CreateController();
+
+            // Act
+            CreatedNegotiatedContentResult<object> result = controller.Created(expectedLocation, expectedContent);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Same(expectedContent, result.Content);
+            Assert.Same(expectedLocation, result.Location.OriginalString);
 
             using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
                 CreateDummyContentNegotiator()))
@@ -783,6 +695,11 @@ namespace System.Web.Http.Results
             configuration.Formatters.Add(formatter);
             configuration.Services.Replace(typeof(IContentNegotiator), contentNegotiator);
             return configuration;
+        }
+
+        private static object CreateContent()
+        {
+            return new object();
         }
 
         private static ApiController CreateController()
@@ -805,35 +722,28 @@ namespace System.Web.Http.Results
             return new MediaTypeFormatter[0];
         }
 
+        private static Uri CreateLocation()
+        {
+            return new Uri("aa://b");
+        }
+
         private static MediaTypeHeaderValue CreateMediaType()
         {
             return new MediaTypeHeaderValue("text/plain");
         }
 
-        private static ModelStateDictionary CreateModelState()
-        {
-            return new ModelStateDictionary();
-        }
-
-        private static ModelStateDictionary CreateModelStateWithError()
-        {
-            ModelStateDictionary modelState = new ModelStateDictionary();
-            modelState.AddModelError(String.Empty, String.Empty);
-            return modelState;
-        }
-
-        private static InvalidModelStateResult CreateProductUnderTest(ModelStateDictionary modelState,
-            bool includeErrorDetail, IContentNegotiator contentNegotiator, HttpRequestMessage request,
+        private static CreatedNegotiatedContentResult<object> CreateProductUnderTest(Uri location, object content,
+            IContentNegotiator contentNegotiator, HttpRequestMessage request,
             IEnumerable<MediaTypeFormatter> formatters)
         {
-            return new InvalidModelStateResult(modelState, includeErrorDetail, contentNegotiator,
-                request, formatters);
+            return new CreatedNegotiatedContentResult<object>(location, content, contentNegotiator, request,
+                formatters);
         }
 
-        private static InvalidModelStateResult CreateProductUnderTest(ModelStateDictionary modelState,
+        private static CreatedNegotiatedContentResult<object> CreateProductUnderTest(Uri location, object content,
             ApiController controller)
         {
-            return new InvalidModelStateResult(modelState, controller);
+            return new CreatedNegotiatedContentResult<object>(location, content, controller);
         }
 
         private static HttpRequestMessage CreateRequest()

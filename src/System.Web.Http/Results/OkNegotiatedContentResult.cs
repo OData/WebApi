@@ -10,7 +10,10 @@ using System.Threading.Tasks;
 
 namespace System.Web.Http.Results
 {
-    /// <summary>Represents an action result that performs content negotiation.</summary>
+    /// <summary>
+    /// Represents an action result that performs content negotiation and returns an <see cref="HttpStatusCode.OK"/>
+    /// response when it succeeds.
+    /// </summary>
     /// <typeparam name="T">The type of content in the entity body.</typeparam>
     public class OkNegotiatedContentResult<T> : IHttpActionResult
     {

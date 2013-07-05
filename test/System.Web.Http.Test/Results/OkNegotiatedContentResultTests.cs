@@ -265,7 +265,7 @@ namespace System.Web.Http.Results
                 expectedMediaType);
 
             Expression<Func<IEnumerable<MediaTypeFormatter>, bool>> formattersMatch = (f) =>
-                f != null && f.AsArray().Length == 1 && f.AsArray()[0] == expectedInputFormatter ? true : false;
+                f != null && f.AsArray().Length == 1 && f.AsArray()[0] == expectedInputFormatter;
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
@@ -552,7 +552,7 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void ApiControllerOK_WithContent_CreatesCorrectResult()
+        public void ApiControllerOk_WithContent_CreatesCorrectResult()
         {
             // Arrange
             object expectedContent = CreateContent();

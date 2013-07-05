@@ -88,6 +88,7 @@
     <Compile Include="Hosting\IHostPrincipalService.cs" />
     <Compile Include="Results\BadRequestResult.cs" />
     <Compile Include="Results\NotFoundResult.cs" />
+    <Compile Include="Results\CreatedNegotiatedContentResult.cs" />
     <Compile Include="Results\OkNegotiatedContentResult.cs" />
     <Compile Include="Results\InvalidModelStateResult.cs" />
     <Compile Include="Results\FormattedContentResult.cs" />

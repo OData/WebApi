@@ -227,14 +227,16 @@ namespace System.Web.Http
             return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
         }
 
-        /// <summary>Creates a <see cref="BadRequestResult"/>.</summary>
+        /// <summary>Creates a <see cref="BadRequestResult"/> (400 Bad Request).</summary>
         /// <returns>A <see cref="BadRequestResult"/>.</returns>
         public BadRequestResult BadRequest()
         {
             return new BadRequestResult(this);
         }
 
-        /// <summary>Creates an <see cref="ErrorMessageResult"/> with the specified error message.</summary>
+        /// <summary>
+        /// Creates an <see cref="ErrorMessageResult"/> (400 Bad Request) with the specified error message.
+        /// </summary>
         /// <param name="message">The user-visible error message.</param>
         /// <returns>An <see cref="InvalidModelStateResult"/> with the specified model state.</returns>
         public ErrorMessageResult BadRequest(string message)
@@ -242,12 +244,21 @@ namespace System.Web.Http
             return new ErrorMessageResult(message, this);
         }
 
-        /// <summary>Creates an <see cref="InvalidModelStateResult"/> with the specified model state.</summary>
+        /// <summary>
+        /// Creates an <see cref="InvalidModelStateResult"/> (400 Bad Request) with the specified model state.
+        /// </summary>
         /// <param name="modelState">The model state to include in the error.</param>
         /// <returns>An <see cref="InvalidModelStateResult"/> with the specified model state.</returns>
         public InvalidModelStateResult BadRequest(ModelStateDictionary modelState)
         {
             return new InvalidModelStateResult(modelState, this);
+        }
+
+        /// <summary>Creates a <see cref="ConflictResult"/> (409 Conflict).</summary>
+        /// <returns>A <see cref="ConflictResult"/>.</returns>
+        public ConflictResult Conflict()
+        {
+            return new ConflictResult(this);
         }
 
         /// <summary>Creates a <see cref="NegotiatedContentResult{T}"/> with the specified values.</summary>
@@ -300,7 +311,9 @@ namespace System.Web.Http
             return new FormattedContentResult<T>(statusCode, value, formatter, mediaType, this);
         }
 
-        /// <summary>Creates a <see cref="CreatedNegotiatedContentResult{T}"/> with the specified values.</summary>
+        /// <summary>
+        /// Creates a <see cref="CreatedNegotiatedContentResult{T}"/> (201 Created) with the specified values.
+        /// </summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
         /// <param name="location">The location at which the content has been created.</param>
         /// <param name="value">The content value to negotiate and format in the entity body.</param>
@@ -315,7 +328,9 @@ namespace System.Web.Http
             return Created<T>(new Uri(location), value);
         }
 
-        /// <summary>Creates a <see cref="CreatedNegotiatedContentResult{T}"/> with the specified values.</summary>
+        /// <summary>
+        /// Creates a <see cref="CreatedNegotiatedContentResult{T}"/> (201 Created) with the specified values.
+        /// </summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
         /// <param name="location">The location at which the content has been created.</param>
         /// <param name="value">The content value to negotiate and format in the entity body.</param>
@@ -356,14 +371,16 @@ namespace System.Web.Http
             return new JsonResult<T>(value, serializerSettings, encoding, this);
         }
 
-        /// <summary>Creates a <see cref="NotFoundResult"/>.</summary>
+        /// <summary>Creates a <see cref="NotFoundResult"/> (404 Not Found).</summary>
         /// <returns>A <see cref="NotFoundResult"/>.</returns>
         public NotFoundResult NotFound()
         {
             return new NotFoundResult(this);
         }
 
-        /// <summary>Creates an <see cref="OkNegotiatedContentResult{T}"/> with the specified values.</summary>
+        /// <summary>
+        /// Creates an <see cref="OkNegotiatedContentResult{T}"/> (200 OK) with the specified values.
+        /// </summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
         /// <param name="value">The content value to negotiate and format in the entity body.</param>
         /// <returns>An <see cref="OkNegotiatedContentResult{T}"/> with the specified values.</returns>

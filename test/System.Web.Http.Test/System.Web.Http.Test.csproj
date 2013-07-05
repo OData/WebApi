@@ -99,6 +99,7 @@
     <Compile Include="Results\ErrorMessageResultTests.cs" />
     <Compile Include="Results\JsonResultTests.cs" />
     <Compile Include="Results\ConflictResultTests.cs" />
+    <Compile Include="Results\UnauthorizedResultTests.cs" />
     <Compile Include="Results\NotFoundResultTests.cs" />
     <Compile Include="Results\CreatedNegotiatedContentResultTests.cs" />
     <Compile Include="Results\OkNegotiatedContentResultTests.cs" />

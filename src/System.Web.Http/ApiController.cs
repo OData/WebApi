@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net;
@@ -405,6 +406,26 @@ namespace System.Web.Http
         public StatusCodeResult StatusCode(HttpStatusCode status)
         {
             return new StatusCodeResult(status, this);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="UnauthorizedResult"/> (401 Unauthorized) with the specified values.
+        /// </summary>
+        /// <param name="challenges">The WWW-Authenticate challenges.</param>
+        /// <returns>An <see cref="UnauthorizedResult"/> with the specified values.</returns>
+        public UnauthorizedResult Unauthorized(params AuthenticationHeaderValue[] challenges)
+        {
+            return Unauthorized((IEnumerable<AuthenticationHeaderValue>)challenges);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="UnauthorizedResult"/> (401 Unauthorized) with the specified values.
+        /// </summary>
+        /// <param name="challenges">The WWW-Authenticate challenges.</param>
+        /// <returns>An <see cref="UnauthorizedResult"/> with the specified values.</returns>
+        public UnauthorizedResult Unauthorized(IEnumerable<AuthenticationHeaderValue> challenges)
+        {
+            return new UnauthorizedResult(challenges, this);
         }
 
         protected virtual void Initialize(HttpControllerContext controllerContext)

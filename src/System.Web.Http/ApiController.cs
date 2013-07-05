@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Security.Principal;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
@@ -17,6 +18,7 @@ using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 using System.Web.Http.Results;
 using System.Web.Http.Routing;
+using Newtonsoft.Json;
 
 namespace System.Web.Http
 {
@@ -321,6 +323,37 @@ namespace System.Web.Http
         public CreatedNegotiatedContentResult<T> Created<T>(Uri location, T value)
         {
             return new CreatedNegotiatedContentResult<T>(location, value, this);
+        }
+
+        /// <summary>Creates a <see cref="JsonResult{T}"/> (200 OK) with the specified value.</summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="value">The content value to serialize in the entity body.</param>
+        /// <returns>A <see cref="JsonResult{T}"/> with the specified value.</returns>
+        public JsonResult<T> Json<T>(T value)
+        {
+            return Json<T>(value, new JsonSerializerSettings());
+        }
+
+        /// <summary>Creates a <see cref="JsonResult{T}"/> (200 OK) with the specified values.</summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="value">The content value to serialize in the entity body.</param>
+        /// <param name="serializerSettings">The serializer settings.</param>
+        /// <returns>A <see cref="JsonResult{T}"/> with the specified values.</returns>
+        public JsonResult<T> Json<T>(T value, JsonSerializerSettings serializerSettings)
+        {
+            return Json<T>(value, serializerSettings, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false,
+                throwOnInvalidBytes: true));
+        }
+
+        /// <summary>Creates a <see cref="JsonResult{T}"/> (200 OK) with the specified values.</summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="value">The content value to serialize in the entity body.</param>
+        /// <param name="serializerSettings">The serializer settings.</param>
+        /// <param name="encoding">The content encoding.</param>
+        /// <returns>A <see cref="JsonResult{T}"/> with the specified values.</returns>
+        public JsonResult<T> Json<T>(T value, JsonSerializerSettings serializerSettings, Encoding encoding)
+        {
+            return new JsonResult<T>(value, serializerSettings, encoding, this);
         }
 
         /// <summary>Creates a <see cref="NotFoundResult"/>.</summary>

@@ -102,6 +102,7 @@
     <Compile Include="Results\UnauthorizedResultTests.cs" />
     <Compile Include="Results\ExceptionResultTests.cs" />
     <Compile Include="Results\OkResultTests.cs" />
+    <Compile Include="Results\InternalServerErrorResultTests.cs" />
     <Compile Include="Results\NotFoundResultTests.cs" />
     <Compile Include="Results\CreatedNegotiatedContentResultTests.cs" />
     <Compile Include="Results\OkNegotiatedContentResultTests.cs" />

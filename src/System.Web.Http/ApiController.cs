@@ -341,6 +341,13 @@ namespace System.Web.Http
             return new CreatedNegotiatedContentResult<T>(location, value, this);
         }
 
+        /// <summary>Creates an <see cref="InternalServerErrorResult"/> (500 Internal Server Error).</summary>
+        /// <returns>A <see cref="InternalServerErrorResult"/>.</returns>
+        public InternalServerErrorResult InternalServerError()
+        {
+            return new InternalServerErrorResult(this);
+        }
+
         /// <summary>
         /// Creates an <see cref="ExceptionResult"/> (500 Internal Server Error) with the specified exception.
         /// </summary>

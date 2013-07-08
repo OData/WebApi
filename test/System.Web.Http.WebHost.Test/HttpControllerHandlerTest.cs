@@ -122,7 +122,7 @@ namespace System.Web.Http.WebHost
             // Arrange
             using (MemoryStream ignoreStream = new MemoryStream())
             {
-                HttpRequestBase stubRequest = CreateStubRequest("IgnoreMethod", ignoreStream).Object;
+                HttpRequestBase stubRequest = CreateStubRequest("IgnoreMethod", ignoreStream);
                 IDictionary<string, object> expectedEnvironment = new Dictionary<string, object>();
                 IDictionary items = new Hashtable();
                 items.Add(HttpControllerHandler.OwinEnvironmentHttpContextKey, expectedEnvironment);
@@ -145,7 +145,7 @@ namespace System.Web.Http.WebHost
             // Arrange
             using (MemoryStream ignoreStream = new MemoryStream())
             {
-                HttpRequestBase stubRequest = CreateStubRequest("IgnoreMethod", ignoreStream).Object;
+                HttpRequestBase stubRequest = CreateStubRequest("IgnoreMethod", ignoreStream);
                 IDictionary items = new Hashtable();
                 HttpContextBase context = CreateStubContext(stubRequest, items);
 
@@ -167,7 +167,7 @@ namespace System.Web.Http.WebHost
             // Arrange
             using (MemoryStream ignoreStream = new MemoryStream())
             {
-                HttpRequestBase stubRequest = CreateStubRequest("IgnoreMethod", ignoreStream).Object;
+                HttpRequestBase stubRequest = CreateStubRequest("IgnoreMethod", ignoreStream);
                 IDictionary items = null;
                 HttpContextBase context = CreateStubContext(stubRequest, items);
 
@@ -255,19 +255,22 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
-        public void ProcessRequestAsync_Flows_TimedOutCancellationToken()
+        public void ProcessRequestAsync_Flows_ClientDisconnectedCancellationToken()
         {
             // Arrange
             ShortCircuitHandler spy = new ShortCircuitHandler();
-            CancellationToken timedOutToken = new CancellationToken(true);
-            HttpContextBase contextBase = CreateStubContext("Get", Stream.Null, timedOutToken);
+            CancellationToken clientDisconnectedToken = new CancellationToken(true);
+            HttpRequestBase requestBase = CreateStubRequest("Get", Stream.Null);
+            HttpResponseBase responseBase = CreateStubResponse(clientDisconnectedToken);
+            HttpContextBase contextBase = CreateStubContext(requestBase, responseBase);
             HttpControllerHandler handler = new HttpControllerHandler(new RouteData(), spy);
 
             // Act
             var taskResult = handler.ProcessRequestAsyncCore(contextBase);
 
             // Assert
-            Assert.Equal(timedOutToken, spy.CancelToken);
+            taskResult.ThrowIfFaulted();
+            Assert.Equal(clientDisconnectedToken, spy.CancelToken);
         }
 
         private class ShortCircuitHandler : HttpMessageHandler
@@ -724,11 +727,13 @@ namespace System.Web.Http.WebHost
 
             MemoryStream memoryStream = new MemoryStream();
 
-            Mock<HttpResponseBase> responseBaseMock = CreateMockHttpResponseBaseForResponse(memoryStream);
-            responseBaseMock.Setup(m => m.Close()).Verifiable();
-            HttpResponseBase responseBase = responseBaseMock.Object;
+            Mock<HttpRequestBase> requestBaseMock = new Mock<HttpRequestBase>();
+            requestBaseMock.Setup(m => m.Abort()).Verifiable();
+            HttpRequestBase requestBase = requestBaseMock.Object;
+            HttpResponseBase responseBase = CreateMockHttpResponseBaseForResponse(memoryStream).Object;
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
             contextMock.SetupGet(m => m.Response).Returns(responseBase);
+            HttpContextBase contextBase = CreateStubContext(requestBase, responseBase);
 
             HttpRequestMessage request = new HttpRequestMessage();
             request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
@@ -736,11 +741,11 @@ namespace System.Web.Http.WebHost
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
             // Act
-            Task task = HttpControllerHandler.WriteStreamedResponseContentAsync(responseBase, response.Content);
+            Task task = HttpControllerHandler.WriteStreamedResponseContentAsync(contextBase, response.Content);
             task.Wait();
 
             // Assert
-            responseBaseMock.Verify();
+            requestBaseMock.Verify();
         }
 
         [Fact]
@@ -759,11 +764,11 @@ namespace System.Web.Http.WebHost
 
             MemoryStream memoryStream = new MemoryStream();
 
-            Mock<HttpResponseBase> responseBaseMock = CreateMockHttpResponseBaseForResponse(memoryStream);
-            responseBaseMock.Setup(m => m.Close()).Verifiable();
-            HttpResponseBase responseBase = responseBaseMock.Object;
-            Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
-            contextMock.SetupGet(m => m.Response).Returns(responseBase);
+            Mock<HttpRequestBase> requestBaseMock = new Mock<HttpRequestBase>();
+            requestBaseMock.Setup(m => m.Abort()).Verifiable();
+            HttpRequestBase requestBase = requestBaseMock.Object;
+            HttpResponseBase responseBase = CreateMockHttpResponseBaseForResponse(memoryStream).Object;
+            HttpContextBase contextBase = CreateStubContext(requestBase, responseBase);
 
             HttpRequestMessage request = new HttpRequestMessage();
             request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
@@ -771,37 +776,28 @@ namespace System.Web.Http.WebHost
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
             // Act
-            Task task = HttpControllerHandler.WriteStreamedResponseContentAsync(responseBase, response.Content);
+            Task task = HttpControllerHandler.WriteStreamedResponseContentAsync(contextBase, response.Content);
             task.Wait();
 
             // Assert
-            responseBaseMock.Verify();
+            requestBaseMock.Verify();
         }
 
-        private static Mock<HttpRequestBase> CreateStubRequest(string httpMethod, Stream bufferedStream)
+        private static HttpRequestBase CreateStubRequest(string httpMethod, Stream bufferedStream)
         {
             Mock<HttpRequestBase> requestBaseMock = new Mock<HttpRequestBase>() { CallBase = true };
             requestBaseMock.SetupGet(m => m.HttpMethod).Returns(httpMethod);
             requestBaseMock.SetupGet(m => m.Url).Returns(new Uri("Http://localhost"));
             requestBaseMock.SetupGet(m => m.Headers).Returns(new NameValueCollection());
-            requestBaseMock.Setup(m => m.InputStream).Returns(bufferedStream);
-            return requestBaseMock;
+            requestBaseMock.Setup(m => m.GetBufferedInputStream()).Returns(bufferedStream);
+            return requestBaseMock.Object;
         }
 
         private static HttpContextBase CreateStubContext(string httpMethod, Stream bufferedStream)
         {
-            Mock<HttpRequestBase> requestMock = CreateStubRequest(httpMethod, bufferedStream);
+            HttpRequestBase request = CreateStubRequest(httpMethod, bufferedStream);
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
-            contextMock.SetupGet(m => m.Request).Returns(requestMock.Object);
-            return contextMock.Object;
-        }
-
-        private static HttpContextBase CreateStubContext(string httpMethod, Stream bufferedStream, CancellationToken cancellationToken)
-        {
-            Mock<HttpRequestBase> requestMock = CreateStubRequest(httpMethod, bufferedStream);
-            requestMock.Setup(m => m.TimedOutToken).Returns(cancellationToken);
-            Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
-            contextMock.SetupGet(m => m.Request).Returns(requestMock.Object);
+            contextMock.SetupGet(m => m.Request).Returns(request);
             return contextMock.Object;
         }
 
@@ -811,6 +807,21 @@ namespace System.Web.Http.WebHost
             contextMock.SetupGet(m => m.Request).Returns(request);
             contextMock.SetupGet(m => m.Items).Returns(items);
             return contextMock.Object;
+        }
+
+        private static HttpContextBase CreateStubContext(HttpRequestBase request, HttpResponseBase response)
+        {
+            Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>();
+            contextMock.SetupGet(m => m.Request).Returns(request);
+            contextMock.SetupGet(m => m.Response).Returns(response);
+            return contextMock.Object;
+        }
+
+        private static HttpResponseBase CreateStubResponse(CancellationToken clientDisconnectedToken)
+        {
+            Mock<HttpResponseBase> mock = new Mock<HttpResponseBase>();
+            mock.Setup(r => r.ClientDisconnectedToken).Returns(clientDisconnectedToken);
+            return mock.Object;
         }
 
         private static Mock<HttpResponseBase> CreateMockHttpResponseBaseForResponse(Stream outputStream)

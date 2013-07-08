@@ -95,7 +95,7 @@ namespace System.Web.Http.WebHost
             // Add route data
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = _routeData;
 
-            HttpResponseMessage response = await _server.SendAsync(request, contextBase.Request.TimedOutToken);
+            HttpResponseMessage response = await _server.SendAsync(request, contextBase.Response.ClientDisconnectedToken);
             await ConvertResponse(contextBase, response, request);
         }
 
@@ -194,8 +194,8 @@ namespace System.Web.Http.WebHost
             IHostBufferPolicySelector policySelector = _bufferPolicySelector.Value;
             bool isInputBuffered = policySelector == null ? true : policySelector.UseBufferedInputStream(httpContextBase);
             Stream inputStream = isInputBuffered
-                                    ? requestBase.InputStream
-                                    : httpContextBase.ApplicationInstance.Request.GetBufferlessInputStream();
+                                    ? requestBase.GetBufferedInputStream()
+                                    : requestBase.GetBufferlessInputStream();
 
             request.Content = new StreamContent(inputStream);
             foreach (string headerName in requestBase.Headers)
@@ -278,25 +278,26 @@ namespace System.Web.Http.WebHost
 
             return isBuffered
                     ? WriteBufferedResponseContentAsync(httpContextBase, responseContent, request)
-                    : WriteStreamedResponseContentAsync(httpResponseBase, responseContent);
+                    : WriteStreamedResponseContentAsync(httpContextBase, responseContent);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "All exceptions caught here become error responses")]
-        internal static async Task WriteStreamedResponseContentAsync(HttpResponseBase httpResponseBase, HttpContent responseContent)
+        internal static async Task WriteStreamedResponseContentAsync(HttpContextBase httpContextBase, HttpContent responseContent)
         {
-            Contract.Assert(httpResponseBase != null);
+            Contract.Assert(httpContextBase != null);
+            Contract.Assert(httpContextBase.Response != null);
             Contract.Assert(responseContent != null);
 
             try
             {
                 // Copy the HttpContent into the output stream asynchronously.
-                await responseContent.CopyToAsync(httpResponseBase.OutputStream);
+                await responseContent.CopyToAsync(httpContextBase.Response.OutputStream);
             }
             catch
             {
                 // Streamed content may have been written and cannot be recalled.
                 // Our only choice is to abort the connection.
-                AbortConnection(httpResponseBase);
+                httpContextBase.Request.Abort();
             }
         }
 
@@ -476,12 +477,6 @@ namespace System.Web.Http.WebHost
             ClearContentAndHeaders(httpResponseBase);
             httpResponseBase.StatusCode = (int)HttpStatusCode.InternalServerError;
             httpResponseBase.SuppressContent = true;
-        }
-
-        private static void AbortConnection(HttpResponseBase httpResponseBase)
-        {
-            // TODO: DevDiv bug #381233 -- call HttpResponse.Abort when it becomes available in 4.5
-            httpResponseBase.Close();
         }
 
         private static X509Certificate2 RetrieveClientCertificate(HttpRequestMessage request)

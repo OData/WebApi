@@ -21,7 +21,7 @@ namespace System.Web.Http.WebHost.Routing
             contextMock.Setup(o => o.Items).Returns(items);
             var requestMock = new Mock<HttpRequestBase>();
             requestMock.Setup(r => r.HttpMethod).Returns("GET");
-            requestMock.Setup(r => r.InputStream).Returns(new MemoryStream());
+            requestMock.Setup(r => r.GetBufferedInputStream()).Returns(new MemoryStream());
             NameValueCollection col = new NameValueCollection();
             col.Add("customHeader", "customHeaderValue");
             requestMock.Setup(r => r.Headers).Returns(col);

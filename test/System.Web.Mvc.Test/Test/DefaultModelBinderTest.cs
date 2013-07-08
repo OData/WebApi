@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Web.Routing;
 using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 using Moq;
@@ -1952,42 +1953,32 @@ namespace System.Web.Mvc.Test
         public void UpdateDictionaryReturnsEmptyDictionaryIfNoValidElementsFound()
         {
             // Arrange
-            ControllerContext controllerContext = new Mock<ControllerContext>().Object;
+            Mock<ControllerContext> mockController = new Mock<ControllerContext>();
+
+            mockController
+                .Setup(c => c.RouteData)
+                .Returns(
+                    delegate()
+                    {
+                        RouteData routeData = new RouteData();
+                        routeData.Values["controller"] = "controller";
+                        return routeData;
+                    }
+            );
+
+            ControllerContext controllerContext = mockController.Object;
 
             Dictionary<int, string> model = new Dictionary<int, string>();
+
+            RouteDataValueProviderFactory routeDataFactory = new RouteDataValueProviderFactory();
 
             ModelBindingContext bindingContext = new ModelBindingContext()
             {
                 ModelMetadata = ModelMetadataProviders.Current.GetMetadataForType(() => model, model.GetType()),
-                ValueProvider = new SimpleValueProvider()
+                ValueProvider =  routeDataFactory.GetValueProvider(controllerContext)
             };
 
-            Mock<IModelBinder> mockIntBinder = new Mock<IModelBinder>();
-            mockIntBinder
-                .Setup(b => b.BindModel(It.IsAny<ControllerContext>(), It.IsAny<ModelBindingContext>()))
-                .Returns(
-                    delegate(ControllerContext cc, ModelBindingContext bc)
-                    {
-                        return Int32.Parse(bc.ModelName.Substring(4, 1), CultureInfo.InvariantCulture) + 10;
-                    });
-
-            Mock<IModelBinder> mockStringBinder = new Mock<IModelBinder>();
-            mockStringBinder
-                .Setup(b => b.BindModel(It.IsAny<ControllerContext>(), It.IsAny<ModelBindingContext>()))
-                .Returns(
-                    delegate(ControllerContext cc, ModelBindingContext bc)
-                    {
-                        return (Int32.Parse(bc.ModelName.Substring(4, 1), CultureInfo.InvariantCulture) + 10) + "Value";
-                    });
-
-            DefaultModelBinder binder = new DefaultModelBinder()
-            {
-                Binders = new ModelBinderDictionary()
-                {
-                    { typeof(int), mockIntBinder.Object },
-                    { typeof(string), mockStringBinder.Object }
-                }
-            };
+            DefaultModelBinder binder = new DefaultModelBinder();
 
             // Act
             Dictionary<int, string> updatedModel = binder.UpdateDictionary(controllerContext, bindingContext, typeof(int), typeof(string)) as Dictionary<int, string>;

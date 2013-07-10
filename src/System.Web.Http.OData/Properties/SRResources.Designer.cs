@@ -1114,6 +1114,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The OData path is invalid..
+        /// </summary>
+        internal static string ODataPathInvalid {
+            get {
+                return ResourceManager.GetString("ODataPathInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The operation cannot be completed because no ODataPath is available for the request..
         /// </summary>
         internal static string ODataPathMissing {

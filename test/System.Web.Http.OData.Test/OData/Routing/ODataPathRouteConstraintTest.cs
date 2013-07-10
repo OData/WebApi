@@ -1,13 +1,16 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing.Conventions;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
+using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -59,6 +62,25 @@ namespace System.Web.Http.OData.Routing
             Assert.Same(_routeName, _request.GetODataRouteName());
             Assert.Same(_conventions, _request.GetODataRoutingConventions());
             Assert.Same(_pathHandler, _request.GetODataPathHandler());
+        }
+
+        [Fact]
+        public void Match_ThrowsHttpResponseException_IfPathParserThrowsODataException()
+        {
+            var values = new Dictionary<string, object>() { { "odataPath", "" } };
+            _request.SetConfiguration(new HttpConfiguration() { IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always });
+            Mock<IODataPathHandler> pathHandler = new Mock<IODataPathHandler>();
+            string exceptionMessage = "NOOODATA";
+            pathHandler.Setup(handler => handler.Parse(_model, "")).Throws(new ODataException(exceptionMessage));
+            var constraint = new ODataPathRouteConstraint(pathHandler.Object, _model, _routeName, _conventions);
+
+            var ex = Assert.Throws<HttpResponseException>(
+                () => constraint.Match(_request, null, null, values, HttpRouteDirection.UriResolution));
+
+            Assert.Equal(HttpStatusCode.NotFound, ex.Response.StatusCode);
+            HttpError error = ex.Response.Content.ReadAsAsync<HttpError>().Result;
+            Assert.Equal("The OData path is invalid.", error.Message);
+            Assert.Equal(exceptionMessage, error.ExceptionMessage);
         }
     }
 }

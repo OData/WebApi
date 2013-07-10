@@ -1,10 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Net.Http;
+using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing.Conventions;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -95,6 +99,7 @@ namespace System.Web.Http.OData.Routing
         /// <returns>
         /// True if this instance equals a specified route; otherwise, false.
         /// </returns>
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed after being sent.")]
         public virtual bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
             if (request == null)
@@ -119,7 +124,17 @@ namespace System.Web.Http.OData.Routing
                         odataPath = String.Empty;
                     }
 
-                    ODataPath path = PathHandler.Parse(EdmModel, odataPath);
+                    ODataPath path;
+                    try
+                    {
+                        path = PathHandler.Parse(EdmModel, odataPath);
+                    }
+                    catch (ODataException e)
+                    {
+                        throw new HttpResponseException(
+                            request.CreateErrorResponse(HttpStatusCode.NotFound, SRResources.ODataPathInvalid, e));
+                    }
+
                     if (path != null)
                     {
                         // Set all the properties we need for routing, querying, formatting

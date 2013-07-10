@@ -637,4 +637,7 @@
   <data name="UrlHelperNull" xml:space="preserve">
     <value>The property 'Url' of {0} cannot be null.</value>
   </data>
+  <data name="ODataPathInvalid" xml:space="preserve">
+    <value>The OData path is invalid.</value>
+  </data>
 </root>

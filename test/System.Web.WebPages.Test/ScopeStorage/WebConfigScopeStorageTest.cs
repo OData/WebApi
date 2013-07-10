@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Reflection;
 using System.Web.WebPages.Scope;
 using Microsoft.TestCommon;
 
@@ -55,6 +57,31 @@ namespace System.Web.WebPages.Test
 
             // Act and Assert
             Assert.True(dictionary.All(item => item.Value == stateStorage[item.Key] as string));
+        }
+
+        [Fact]
+        public void WebConfigScopeStorage_WithDuplicatesInUnderlyingSettings_ResolveToTheFirst()
+        {
+            // Arrange
+            // Start with a normal NameValueCollection
+            var values = new NameValueCollection();
+            values.Add("foo1", "bar1");
+
+            // Now mess it up
+            // We are simulating what might happen in rare cases (probably during app-start and high load) - 
+            // the AppSettings NameValueCollection gets messed up internally, however keep functioning normally.
+            // The duplication in AllKeys cause the bug https://aspnetwebstack.codeplex.com/workitem/912, 
+            var entryType = typeof(NameObjectCollectionBase).GetNestedType("NameObjectEntry", BindingFlags.NonPublic);
+            var entry = entryType.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)[0].Invoke(new object[] { "foo1", "bar2" });
+            var entriesArray = (ArrayList)typeof(NameObjectCollectionBase).GetField("_entriesArray", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(values);
+            entriesArray.Add(entry);
+            Assert.Equal(2, values.AllKeys.Length);
+
+            // Act - should not throw;
+            var stateStorage = new WebConfigScopeDictionary(values);
+
+            // Assert
+            Assert.Equal("bar1", stateStorage["foo1"]);
         }
 
         private WebConfigScopeDictionary GetWebConfigScopeStorage(IDictionary<string, string> values = null)

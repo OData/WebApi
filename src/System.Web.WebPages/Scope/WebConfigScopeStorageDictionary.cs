@@ -20,7 +20,11 @@ namespace System.Web.WebPages.Scope
 
         public WebConfigScopeDictionary(NameValueCollection appSettings)
         {
-            _items = new Lazy<Dictionary<object, object>>(() => appSettings.AllKeys.ToDictionary(key => key, key => (object)appSettings[key], ScopeStorageComparer.Instance));
+            _items = new Lazy<Dictionary<object, object>>(() => 
+                appSettings
+                    .AllKeys
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(key => key, key => (object)appSettings[key], ScopeStorageComparer.Instance));
         }
 
         private IDictionary<object, object> Items

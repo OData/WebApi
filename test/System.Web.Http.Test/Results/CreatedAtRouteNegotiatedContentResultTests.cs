@@ -10,20 +10,24 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.Hosting;
+using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 using Moq;
 
 namespace System.Web.Http.Results
 {
-    public class CreatedNegotiatedContentResultTests
+    public class CreatedAtRouteNegotiatedContentResultTests
     {
         [Fact]
-        public void Constructor_Throws_WhenLocationIsNull()
+        public void Constructor_Throws_WhenRouteNameIsNull()
         {
             // Arrange
-            Uri location = null;
+            string routeName = null;
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
 
             using (HttpRequestMessage request = CreateRequest())
             {
@@ -32,8 +36,32 @@ namespace System.Web.Http.Results
                 // Act & Assert
                 Assert.ThrowsArgumentNull(() =>
                 {
-                    CreateProductUnderTest(location, content, contentNegotiator, request, formatters);
-                }, "location");
+                    CreateProductUnderTest(routeName, routeValues, content, urlFactory, contentNegotiator, request,
+                        formatters);
+                }, "routeName");
+            }
+        }
+
+        [Fact]
+        public void Constructor_Throws_WhenUrlFactoryIsNull()
+        {
+            // Arrange
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
+            object content = CreateContent();
+            IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
+            UrlHelper urlFactory = null;
+
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
+
+                // Act & Assert
+                Assert.ThrowsArgumentNull(() =>
+                {
+                    CreateProductUnderTest(routeName, routeValues, content, urlFactory, contentNegotiator, request,
+                        formatters);
+                }, "urlFactory");
             }
         }
 
@@ -41,8 +69,10 @@ namespace System.Web.Http.Results
         public void Constructor_Throws_WhenContentNegotiatorIsNull()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
             IContentNegotiator contentNegotiator = null;
 
             using (HttpRequestMessage request = CreateRequest())
@@ -52,7 +82,8 @@ namespace System.Web.Http.Results
                 // Act & Assert
                 Assert.ThrowsArgumentNull(() =>
                 {
-                    CreateProductUnderTest(location, content, contentNegotiator, request, formatters);
+                    CreateProductUnderTest(routeName, routeValues, content, urlFactory, contentNegotiator, request,
+                        formatters);
                 }, "contentNegotiator");
             }
         }
@@ -61,8 +92,10 @@ namespace System.Web.Http.Results
         public void Constructor_Throws_WhenRequestIsNull()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
             HttpRequestMessage request = null;
             IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
@@ -70,7 +103,8 @@ namespace System.Web.Http.Results
             // Act & Assert
             Assert.ThrowsArgumentNull(() =>
             {
-                CreateProductUnderTest(location, content, contentNegotiator, request, formatters);
+                CreateProductUnderTest(routeName, routeValues, content, urlFactory, contentNegotiator, request,
+                    formatters);
             }, "request");
         }
 
@@ -78,8 +112,10 @@ namespace System.Web.Http.Results
         public void Constructor_Throws_WhenFormattersIsNull()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
@@ -89,31 +125,59 @@ namespace System.Web.Http.Results
                 // Act & Assert
                 Assert.ThrowsArgumentNull(() =>
                 {
-                    CreateProductUnderTest(location, content, contentNegotiator, request, formatters);
+                    CreateProductUnderTest(routeName, routeValues, content, urlFactory, contentNegotiator, request,
+                        formatters);
                 }, "formatters");
             }
         }
 
         [Fact]
-        public void Location_Returns_InstanceProvided()
+        public void RouteName_Returns_InstanceProvided()
         {
             // Arrange
-            Uri expectedLocation = CreateLocation();
+            string expectedRouteName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(expectedLocation, content,
-                    contentNegotiator, request, formatters);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(expectedRouteName,
+                    routeValues, content, urlFactory, contentNegotiator, request, formatters);
 
                 // Act
-                Uri location = result.Location;
+                string routeName = result.RouteName;
 
                 // Assert
-                Assert.Same(expectedLocation, location);
+                Assert.Same(expectedRouteName, routeName);
+            }
+        }
+
+        [Fact]
+        public void RouteValues_Returns_InstanceProvided()
+        {
+            // Arrange
+            string routeName = CreateRouteName();
+            IDictionary<string, object> expectedRouteValues = CreateRouteValues();
+            object content = CreateContent();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
+            IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
+
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
+
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName,
+                    expectedRouteValues, content, urlFactory, contentNegotiator, request, formatters);
+
+                // Act
+                IDictionary<string, object> routeValues = result.RouteValues;
+
+                // Assert
+                Assert.Same(expectedRouteValues, routeValues);
             }
         }
 
@@ -121,16 +185,18 @@ namespace System.Web.Http.Results
         public void Content_Returns_InstanceProvided()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object expectedContent = CreateContent();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, expectedContent,
-                    contentNegotiator, request, formatters);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    expectedContent, urlFactory, contentNegotiator, request, formatters);
 
                 // Act
                 object content = result.Content;
@@ -141,19 +207,46 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
+        public void UrlFactory_Returns_InstanceProvided()
+        {
+            // Arrange
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
+            object content = CreateContent();
+            UrlHelper expectedUrlFactory = CreateDummyUrlFactory();
+            IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
+
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
+
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, expectedUrlFactory, contentNegotiator, request, formatters);
+
+                // Act
+                UrlHelper urlFactory = result.UrlFactory;
+
+                // Assert
+                Assert.Same(expectedUrlFactory, urlFactory);
+            }
+        }
+
+        [Fact]
         public void ContentNegotiator_Returns_InstanceProvided()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
             IContentNegotiator expectedContentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content,
-                    expectedContentNegotiator, request, formatters);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, urlFactory, expectedContentNegotiator, request, formatters);
 
                 // Act
                 IContentNegotiator contentNegotiator = result.ContentNegotiator;
@@ -167,16 +260,18 @@ namespace System.Web.Http.Results
         public void Request_Returns_InstanceProvided()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content,
-                    contentNegotiator, expectedRequest, formatters);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, urlFactory, contentNegotiator, expectedRequest, formatters);
 
                 // Act
                 HttpRequestMessage request = result.Request;
@@ -190,16 +285,18 @@ namespace System.Web.Http.Results
         public void Formatters_Returns_InstanceProvided()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
 
             using (HttpRequestMessage request = CreateRequest())
             {
                 IEnumerable<MediaTypeFormatter> expectedFormatters = CreateFormatters();
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content,
-                    contentNegotiator, request, expectedFormatters);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, urlFactory, contentNegotiator, request, expectedFormatters);
 
                 // Act
                 IEnumerable<MediaTypeFormatter> formatters = result.Formatters;
@@ -213,8 +310,13 @@ namespace System.Web.Http.Results
         public void ExecuteAsync_Returns_CorrectResponse_WhenContentNegotiationSucceeds()
         {
             // Arrange
-            Uri expectedLocation = CreateLocation();
+            string expectedRouteName = CreateRouteName();
+            IDictionary<string, object> expectedRouteValues = CreateRouteValues();
             object expectedContent = CreateContent();
+            Mock<UrlHelper> spyUrlFactory = new Mock<UrlHelper>(MockBehavior.Strict);
+            string expectedLocation = CreateLocation().AbsoluteUri;
+            spyUrlFactory.Setup(f => f.Link(expectedRouteName, expectedRouteValues)).Returns(expectedLocation);
+            UrlHelper urlFactory = spyUrlFactory.Object;
             MediaTypeFormatter expectedFormatter = CreateFormatter();
             MediaTypeHeaderValue expectedMediaType = CreateMediaType();
             ContentNegotiationResult negotiationResult = new ContentNegotiationResult(expectedFormatter,
@@ -224,13 +326,13 @@ namespace System.Web.Http.Results
             {
                 IEnumerable<MediaTypeFormatter> expectedFormatters = CreateFormatters();
 
-                Mock<IContentNegotiator> spy = new Mock<IContentNegotiator>();
-                spy.Setup(n => n.Negotiate(typeof(object), expectedRequest, expectedFormatters)).Returns(
-                    negotiationResult);
-                IContentNegotiator contentNegotiator = spy.Object;
+                Mock<IContentNegotiator> spyContentNegotiator = new Mock<IContentNegotiator>();
+                spyContentNegotiator.Setup(n => n.Negotiate(typeof(object), expectedRequest, expectedFormatters))
+                    .Returns(negotiationResult);
+                IContentNegotiator contentNegotiator = spyContentNegotiator.Object;
 
-                IHttpActionResult result = CreateProductUnderTest(expectedLocation, expectedContent, contentNegotiator,
-                    expectedRequest, expectedFormatters);
+                IHttpActionResult result = CreateProductUnderTest(expectedRouteName, expectedRouteValues,
+                    expectedContent, urlFactory, contentNegotiator, expectedRequest, expectedFormatters);
 
                 // Act
                 Task<HttpResponseMessage> task = result.ExecuteAsync(CancellationToken.None);
@@ -243,7 +345,7 @@ namespace System.Web.Http.Results
                 {
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-                    Assert.Same(expectedLocation, response.Headers.Location);
+                    Assert.Same(expectedLocation, response.Headers.Location.OriginalString);
                     HttpContent content = response.Content;
                     Assert.IsType<ObjectContent<object>>(content);
                     ObjectContent<object> typedContent = (ObjectContent<object>)content;
@@ -260,8 +362,10 @@ namespace System.Web.Http.Results
         public void ExecuteAsync_Returns_CorrectResponse_WhenContentNegotiationFails()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
+            UrlHelper urlFactory = CreateDummyUrlFactory();
             ContentNegotiationResult negotiationResult = null;
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
@@ -273,8 +377,8 @@ namespace System.Web.Http.Results
                     negotiationResult);
                 IContentNegotiator contentNegotiator = spy.Object;
 
-                IHttpActionResult result = CreateProductUnderTest(location, content, contentNegotiator,
-                    expectedRequest, expectedFormatters);
+                IHttpActionResult result = CreateProductUnderTest(routeName, routeValues, content, urlFactory,
+                    contentNegotiator, expectedRequest, expectedFormatters);
 
                 // Act
                 Task<HttpResponseMessage> task = result.ExecuteAsync(CancellationToken.None);
@@ -294,17 +398,54 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
+        public void ExecuteAsync_Throws_WhenUrlHelperLinkReturnsNull_AfterContentNegotiationSucceeds()
+        {
+            // Arrange
+            string expectedRouteName = CreateRouteName();
+            IDictionary<string, object> expectedRouteValues = CreateRouteValues();
+            object expectedContent = CreateContent();
+            Mock<UrlHelper> stubUrlFactory = new Mock<UrlHelper>(MockBehavior.Strict);
+            stubUrlFactory.Setup(f => f.Link(expectedRouteName, expectedRouteValues)).Returns((string)null);
+            UrlHelper urlFactory = stubUrlFactory.Object;
+            MediaTypeFormatter expectedFormatter = CreateFormatter();
+            MediaTypeHeaderValue expectedMediaType = CreateMediaType();
+            ContentNegotiationResult negotiationResult = new ContentNegotiationResult(expectedFormatter,
+                expectedMediaType);
+
+            using (HttpRequestMessage expectedRequest = CreateRequest())
+            {
+                IEnumerable<MediaTypeFormatter> expectedFormatters = CreateFormatters();
+
+                Mock<IContentNegotiator> spyContentNegotiator = new Mock<IContentNegotiator>();
+                spyContentNegotiator.Setup(n => n.Negotiate(typeof(object), expectedRequest, expectedFormatters))
+                    .Returns(negotiationResult);
+                IContentNegotiator contentNegotiator = spyContentNegotiator.Object;
+
+                IHttpActionResult result = CreateProductUnderTest(expectedRouteName, expectedRouteValues,
+                    expectedContent, urlFactory, contentNegotiator, expectedRequest, expectedFormatters);
+
+                // Act & Assert
+                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+                    {
+                        HttpResponseMessage ignore = result.ExecuteAsync(CancellationToken.None).Result;
+                    });
+                Assert.Equal("UrlHelper.Link must not return null.", exception.Message);
+            }
+        }
+
+        [Fact]
         public void Constructor_ForApiController_Throws_WhenControllerIsNull()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             ApiController controller = null;
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() =>
             {
-                CreateProductUnderTest(location, content, controller);
+                CreateProductUnderTest(routeName, routeValues, content, controller);
             }, "controller");
         }
 
@@ -312,8 +453,13 @@ namespace System.Web.Http.Results
         public void ExecuteAsync_ForApiController_ReturnsCorrectResponse_WhenContentNegotationSucceeds()
         {
             // Arrange
-            Uri expectedLocation = CreateLocation();
+            string expectedRouteName = CreateRouteName();
+            IDictionary<string, object> expectedRouteValues = CreateRouteValues();
             object expectedContent = CreateContent();
+            Mock<UrlHelper> spyUrlFactory = new Mock<UrlHelper>(MockBehavior.Strict);
+            string expectedLocation = CreateLocation().AbsoluteUri;
+            spyUrlFactory.Setup(f => f.Link(expectedRouteName, expectedRouteValues)).Returns(expectedLocation);
+            UrlHelper urlFactory = spyUrlFactory.Object;
             ApiController controller = CreateController();
             MediaTypeFormatter expectedInputFormatter = CreateFormatter();
             MediaTypeFormatter expectedOutputFormatter = CreateFormatter();
@@ -336,8 +482,10 @@ namespace System.Web.Http.Results
                 {
                     controller.Configuration = configuration;
                     controller.Request = expectedRequest;
+                    controller.Url = urlFactory;
 
-                    IHttpActionResult result = CreateProductUnderTest(expectedLocation, expectedContent, controller);
+                    IHttpActionResult result = CreateProductUnderTest(expectedRouteName, expectedRouteValues,
+                        expectedContent, controller);
 
                     // Act
                     Task<HttpResponseMessage> task = result.ExecuteAsync(CancellationToken.None);
@@ -350,7 +498,7 @@ namespace System.Web.Http.Results
                     {
                         Assert.NotNull(response);
                         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-                        Assert.Same(expectedLocation, response.Headers.Location);
+                        Assert.Same(expectedLocation, response.Headers.Location.OriginalString);
                         HttpContent content = response.Content;
                         Assert.IsType<ObjectContent<object>>(content);
                         ObjectContent<object> typedContent = (ObjectContent<object>)content;
@@ -365,10 +513,42 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
+        public void UrlFactory_ForApiController_EvaluatesLazily()
+        {
+            // Arrange
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
+            object content = CreateContent();
+            ApiController controller = CreateController();
+
+            using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
+                CreateDummyContentNegotiator()))
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                controller.Configuration = configuration;
+                controller.Request = request;
+                controller.Url = CreateDummyUrlFactory();
+
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName,
+                    routeValues, content, controller);
+
+                UrlHelper expectedUrlFactory = CreateDummyUrlFactory();
+                controller.Url = expectedUrlFactory;
+
+                // Act
+                UrlHelper urlFactory = result.UrlFactory;
+
+                // Assert
+                Assert.Same(expectedUrlFactory, urlFactory);
+            }
+        }
+
+        [Fact]
         public void ContentNegotiator_ForApiController_EvaluatesLazily()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             ApiController controller = CreateController();
 
@@ -381,8 +561,8 @@ namespace System.Web.Http.Results
                 {
                     controller.Request = request;
 
-                    CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content,
-                        controller);
+                    CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName,
+                        routeValues, content, controller);
 
                     IContentNegotiator expectedContentNegotiator = CreateDummyContentNegotiator();
                     configuration.Services.Replace(typeof(IContentNegotiator), expectedContentNegotiator);
@@ -400,7 +580,8 @@ namespace System.Web.Http.Results
         public void Request_ForApiController_EvaluatesLazily()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             MediaTypeFormatter formatter = CreateFormatter();
             MediaTypeHeaderValue mediaType = CreateMediaType();
@@ -410,7 +591,8 @@ namespace System.Web.Http.Results
                 CreateDummyContentNegotiator()))
             {
                 controller.Configuration = configuration;
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, controller);
 
                 using (HttpRequestMessage expectedRequest = CreateRequest())
                 {
@@ -429,7 +611,8 @@ namespace System.Web.Http.Results
         public void Formatters_ForApiController_EvaluatesLazily()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             ApiController controller = CreateController();
             IContentNegotiator contentNegotiator = CreateDummyContentNegotiator();
@@ -440,7 +623,8 @@ namespace System.Web.Http.Results
                 controller.Configuration = earlyConfiguration;
                 controller.Request = request;
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, controller);
 
                 MediaTypeFormatter expectedFormatter = CreateFormatter();
 
@@ -460,10 +644,44 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
+        public void UrlFactory_ForApiController_EvaluatesOnce()
+        {
+            // Arrange
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
+            object content = CreateContent();
+            ApiController controller = CreateController();
+
+            using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
+                CreateDummyContentNegotiator()))
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                controller.Configuration = configuration;
+                controller.Request = request;
+                UrlHelper expectedUrlFactory = CreateDummyUrlFactory();
+                controller.Url = expectedUrlFactory;
+
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, controller);
+
+                UrlHelper ignore = result.UrlFactory;
+
+                controller.Url = CreateDummyUrlFactory();
+
+                // Act
+                UrlHelper urlFactory = result.UrlFactory;
+
+                // Assert
+                Assert.Same(expectedUrlFactory, urlFactory);
+            }
+        }
+
+        [Fact]
         public void ContentNegotiator_ForApiController_EvaluatesOnce()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             IContentNegotiator expectedContentNegotiator = CreateDummyContentNegotiator();
             ApiController controller = CreateController();
@@ -474,7 +692,8 @@ namespace System.Web.Http.Results
                 controller.Configuration = configuration;
                 controller.Request = request;
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, controller);
 
                 IContentNegotiator ignore = result.ContentNegotiator;
 
@@ -492,7 +711,8 @@ namespace System.Web.Http.Results
         public void Request_ForApiController_EvaluatesOnce()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             ApiController controller = CreateController();
 
@@ -501,7 +721,8 @@ namespace System.Web.Http.Results
             {
                 controller.Configuration = configuration;
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, controller);
 
                 using (HttpRequestMessage expectedRequest = CreateRequest())
                 {
@@ -526,7 +747,8 @@ namespace System.Web.Http.Results
         public void Formatters_ForApiController_EvaluatesOnce()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             ApiController controller = CreateController();
             MediaTypeFormatter expectedFormatter = CreateFormatter();
@@ -538,7 +760,8 @@ namespace System.Web.Http.Results
                 controller.Configuration = earlyConfiguration;
                 controller.Request = request;
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, controller);
 
                 IEnumerable<MediaTypeFormatter> ignore = result.Formatters;
 
@@ -561,7 +784,8 @@ namespace System.Web.Http.Results
         public void ContentNegotiator_ForApiController_Throws_WhenConfigurationIsNull()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             ApiController controller = CreateController();
             HttpControllerContext context = new HttpControllerContext();
@@ -569,8 +793,10 @@ namespace System.Web.Http.Results
             using (HttpRequestMessage request = CreateRequest())
             {
                 controller.ControllerContext = context;
+                controller.Request = request;
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, controller);
 
                 // Act & Assert
                 Assert.Throws<InvalidOperationException>(
@@ -583,7 +809,8 @@ namespace System.Web.Http.Results
         public void ContentNegotiator_ForApiController_Throws_WhenServiceIsNull()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             ApiController controller = CreateController();
 
@@ -591,8 +818,10 @@ namespace System.Web.Http.Results
             using (HttpRequestMessage request = CreateRequest())
             {
                 controller.Configuration = configuration;
+                controller.Request = request;
 
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, controller);
 
                 // Act & Assert
                 Assert.Throws<InvalidOperationException>(
@@ -606,16 +835,19 @@ namespace System.Web.Http.Results
         public void Request_ForApiController_Throws_WhenControllerRequestIsNull()
         {
             // Arrange
-            Uri location = CreateLocation();
+            string routeName = CreateRouteName();
+            IDictionary<string, object> routeValues = CreateRouteValues();
             object content = CreateContent();
             ApiController controller = CreateController();
-            Assert.Null(controller.Request);
 
             using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
                 CreateDummyContentNegotiator()))
             {
                 controller.Configuration = configuration;
-                CreatedNegotiatedContentResult<object> result = CreateProductUnderTest(location, content, controller);
+                Assert.Null(controller.Request);
+
+                CreatedAtRouteNegotiatedContentResult<object> result = CreateProductUnderTest(routeName, routeValues,
+                    content, controller);
 
                 // Act & Assert
                 InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
@@ -624,19 +856,22 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void ApiControllerCreated_WithUriAndContent_CreatesCorrectResult()
+        public void ApiControllerCreatedAtRoute_WithStringAndDictionary_CreatesCorrectResult()
         {
             // Arrange
-            Uri expectedLocation = CreateLocation();
+            string expectedRouteName = CreateRouteName();
+            IDictionary<string, object> expectedRouteValues = CreateRouteValues();
             object expectedContent = CreateContent();
             ApiController controller = CreateController();
 
             // Act
-            CreatedNegotiatedContentResult<object> result = controller.Created(expectedLocation, expectedContent);
+            CreatedAtRouteNegotiatedContentResult<object> result = controller.CreatedAtRoute(expectedRouteName,
+                expectedRouteValues, expectedContent);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Same(expectedLocation, result.Location);
+            Assert.Same(expectedRouteName, result.RouteName);
+            Assert.Same(expectedRouteValues, result.RouteValues);
             Assert.Same(expectedContent, result.Content);
 
             using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
@@ -650,31 +885,24 @@ namespace System.Web.Http.Results
         }
 
         [Fact]
-        public void ApiControllerCreated_WithStringAndContent_Throws_WhenLocationIsNull()
+        public void ApiControllerCreatedAtRoute_WithStringAndObject_CreatesCorrectResult()
         {
             // Arrange
-            string location = null;
-            object content = CreateContent();
-            ApiController controller = CreateController();
-
-            // Act & Assert
-            Assert.ThrowsArgumentNull(() => { controller.Created(location, content); }, "location");
-        }
-
-        [Fact]
-        public void ApiControllerCreated_WithStringAndContent_CreatesCorrectResult()
-        {
-            // Arrange
-            string expectedLocation = CreateLocation().OriginalString;
+            string expectedRouteName = CreateRouteName();
+            object routeValues = new { id = 1 };
             object expectedContent = CreateContent();
             ApiController controller = CreateController();
 
             // Act
-            CreatedNegotiatedContentResult<object> result = controller.Created(expectedLocation, expectedContent);
+            CreatedAtRouteNegotiatedContentResult<object> result = controller.CreatedAtRoute(expectedRouteName,
+                routeValues, expectedContent);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Same(expectedLocation, result.Location.OriginalString);
+            Assert.Same(expectedRouteName, result.RouteName);
+            Assert.IsType<HttpRouteValueDictionary>(result.RouteValues);
+            Assert.True(result.RouteValues.ContainsKey("id"));
+            Assert.Equal(1, result.RouteValues["id"]);
             Assert.Same(expectedContent, result.Content);
 
             using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),
@@ -712,6 +940,11 @@ namespace System.Web.Http.Results
             return new Mock<IContentNegotiator>(MockBehavior.Strict).Object;
         }
 
+        private static UrlHelper CreateDummyUrlFactory()
+        {
+            return new Mock<UrlHelper>(MockBehavior.Strict).Object;
+        }
+
         private static MediaTypeFormatter CreateFormatter()
         {
             return new StubMediaTypeFormatter();
@@ -732,23 +965,34 @@ namespace System.Web.Http.Results
             return new MediaTypeHeaderValue("text/plain");
         }
 
-        private static CreatedNegotiatedContentResult<object> CreateProductUnderTest(Uri location, object content,
+        private static CreatedAtRouteNegotiatedContentResult<object> CreateProductUnderTest(string routeName,
+            IDictionary<string, object> routeValues, object content, UrlHelper urlFactory,
             IContentNegotiator contentNegotiator, HttpRequestMessage request,
             IEnumerable<MediaTypeFormatter> formatters)
         {
-            return new CreatedNegotiatedContentResult<object>(location, content, contentNegotiator, request,
-                formatters);
+            return new CreatedAtRouteNegotiatedContentResult<object>(routeName, routeValues, content, urlFactory,
+                contentNegotiator, request, formatters);
         }
 
-        private static CreatedNegotiatedContentResult<object> CreateProductUnderTest(Uri location, object content,
-            ApiController controller)
+        private static CreatedAtRouteNegotiatedContentResult<object> CreateProductUnderTest(string routeName,
+            IDictionary<string, object> routeValues, object content, ApiController controller)
         {
-            return new CreatedNegotiatedContentResult<object>(location, content, controller);
+            return new CreatedAtRouteNegotiatedContentResult<object>(routeName, routeValues, content, controller);
         }
 
         private static HttpRequestMessage CreateRequest()
         {
             return new HttpRequestMessage();
+        }
+
+        private static string CreateRouteName()
+        {
+            return "IgnoreRouteName";
+        }
+
+        private static IDictionary<string, object> CreateRouteValues()
+        {
+            return new Dictionary<string, object>();
         }
 
         private class StubMediaTypeFormatter : MediaTypeFormatter

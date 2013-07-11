@@ -462,4 +462,7 @@
   <data name="HttpControllerContext_ConfigurationMustNotBeNull" xml:space="preserve">
     <value>HttpControllerContext.Configuration must not be null.</value>
   </data>
+  <data name="UrlHelper_LinkMustNotReturnNull" xml:space="preserve">
+    <value>UrlHelper.Link must not return null.</value>
+  </data>
 </root>

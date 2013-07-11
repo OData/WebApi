@@ -17,16 +17,16 @@ namespace System.Web.Http.Results
     /// <typeparam name="T">The type of content in the entity body.</typeparam>
     public class CreatedNegotiatedContentResult<T> : IHttpActionResult
     {
-        private readonly T _content;
         private readonly Uri _location;
+        private readonly T _content;
         private readonly NegotiatedContentResult<T>.IDependencyProvider _dependencies;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OkNegotiatedContentResult{T}"/> class with the values
+        /// Initializes a new instance of the <see cref="CreatedNegotiatedContentResult{T}"/> class with the values
         /// provided.
         /// </summary>
-        /// <param name="content">The content value to negotiate and format in the entity body.</param>
         /// <param name="location">The location at which the content has been created.</param>
+        /// <param name="content">The content value to negotiate and format in the entity body.</param>
         /// <param name="contentNegotiator">The content negotiator to handle content negotiation.</param>
         /// <param name="request">The request message which led to this result.</param>
         /// <param name="formatters">The formatters to use to negotiate and format the content.</param>
@@ -52,8 +52,8 @@ namespace System.Web.Http.Results
 
             Contract.Assert(dependencies != null);
 
-            _content = content;
             _location = location;
+            _content = content;
             _dependencies = dependencies;
         }
 

@@ -317,16 +317,16 @@ namespace System.Web.Http
         /// </summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
         /// <param name="location">The location at which the content has been created.</param>
-        /// <param name="value">The content value to negotiate and format in the entity body.</param>
+        /// <param name="content">The content value to negotiate and format in the entity body.</param>
         /// <returns>A <see cref="CreatedNegotiatedContentResult{T}"/> with the specified values.</returns>
-        public CreatedNegotiatedContentResult<T> Created<T>(string location, T value)
+        public CreatedNegotiatedContentResult<T> Created<T>(string location, T content)
         {
             if (location == null)
             {
                 throw new ArgumentNullException("location");
             }
 
-            return Created<T>(new Uri(location), value);
+            return Created<T>(new Uri(location), content);
         }
 
         /// <summary>
@@ -334,11 +334,39 @@ namespace System.Web.Http
         /// </summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
         /// <param name="location">The location at which the content has been created.</param>
-        /// <param name="value">The content value to negotiate and format in the entity body.</param>
+        /// <param name="content">The content value to negotiate and format in the entity body.</param>
         /// <returns>A <see cref="CreatedNegotiatedContentResult{T}"/> with the specified values.</returns>
-        public CreatedNegotiatedContentResult<T> Created<T>(Uri location, T value)
+        public CreatedNegotiatedContentResult<T> Created<T>(Uri location, T content)
         {
-            return new CreatedNegotiatedContentResult<T>(location, value, this);
+            return new CreatedNegotiatedContentResult<T>(location, content, this);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="CreatedAtRouteNegotiatedContentResult{T}"/> (201 Created) with the specified values.
+        /// </summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="routeName">The name of the route to use for generating the URL.</param>
+        /// <param name="routeValues">The route data to use for generating the URL.</param>
+        /// <param name="content">The content value to negotiate and format in the entity body.</param>
+        /// <returns>A <see cref="CreatedAtRouteNegotiatedContentResult{T}"/> with the specified values.</returns>
+        public CreatedAtRouteNegotiatedContentResult<T> CreatedAtRoute<T>(string routeName, object routeValues,
+            T content)
+        {
+            return CreatedAtRoute<T>(routeName, new HttpRouteValueDictionary(routeValues), content);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="CreatedAtRouteNegotiatedContentResult{T}"/> (201 Created) with the specified values.
+        /// </summary>
+        /// <typeparam name="T">The type of content in the entity body.</typeparam>
+        /// <param name="routeName">The name of the route to use for generating the URL.</param>
+        /// <param name="routeValues">The route data to use for generating the URL.</param>
+        /// <param name="content">The content value to negotiate and format in the entity body.</param>
+        /// <returns>A <see cref="CreatedAtRouteNegotiatedContentResult{T}"/> with the specified values.</returns>
+        public CreatedAtRouteNegotiatedContentResult<T> CreatedAtRoute<T>(string routeName,
+            IDictionary<string, object> routeValues, T content)
+        {
+            return new CreatedAtRouteNegotiatedContentResult<T>(routeName, routeValues, content, this);
         }
 
         /// <summary>Creates an <see cref="InternalServerErrorResult"/> (500 Internal Server Error).</summary>
@@ -360,33 +388,33 @@ namespace System.Web.Http
 
         /// <summary>Creates a <see cref="JsonResult{T}"/> (200 OK) with the specified value.</summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
-        /// <param name="value">The content value to serialize in the entity body.</param>
+        /// <param name="content">The content value to serialize in the entity body.</param>
         /// <returns>A <see cref="JsonResult{T}"/> with the specified value.</returns>
-        public JsonResult<T> Json<T>(T value)
+        public JsonResult<T> Json<T>(T content)
         {
-            return Json<T>(value, new JsonSerializerSettings());
+            return Json<T>(content, new JsonSerializerSettings());
         }
 
         /// <summary>Creates a <see cref="JsonResult{T}"/> (200 OK) with the specified values.</summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
-        /// <param name="value">The content value to serialize in the entity body.</param>
+        /// <param name="content">The content value to serialize in the entity body.</param>
         /// <param name="serializerSettings">The serializer settings.</param>
         /// <returns>A <see cref="JsonResult{T}"/> with the specified values.</returns>
-        public JsonResult<T> Json<T>(T value, JsonSerializerSettings serializerSettings)
+        public JsonResult<T> Json<T>(T content, JsonSerializerSettings serializerSettings)
         {
-            return Json<T>(value, serializerSettings, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false,
+            return Json<T>(content, serializerSettings, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false,
                 throwOnInvalidBytes: true));
         }
 
         /// <summary>Creates a <see cref="JsonResult{T}"/> (200 OK) with the specified values.</summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
-        /// <param name="value">The content value to serialize in the entity body.</param>
+        /// <param name="content">The content value to serialize in the entity body.</param>
         /// <param name="serializerSettings">The serializer settings.</param>
         /// <param name="encoding">The content encoding.</param>
         /// <returns>A <see cref="JsonResult{T}"/> with the specified values.</returns>
-        public JsonResult<T> Json<T>(T value, JsonSerializerSettings serializerSettings, Encoding encoding)
+        public JsonResult<T> Json<T>(T content, JsonSerializerSettings serializerSettings, Encoding encoding)
         {
-            return new JsonResult<T>(value, serializerSettings, encoding, this);
+            return new JsonResult<T>(content, serializerSettings, encoding, this);
         }
 
         /// <summary>Creates a <see cref="NotFoundResult"/> (404 Not Found).</summary>
@@ -407,11 +435,11 @@ namespace System.Web.Http
         /// Creates an <see cref="OkNegotiatedContentResult{T}"/> (200 OK) with the specified values.
         /// </summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
-        /// <param name="value">The content value to negotiate and format in the entity body.</param>
+        /// <param name="content">The content value to negotiate and format in the entity body.</param>
         /// <returns>An <see cref="OkNegotiatedContentResult{T}"/> with the specified values.</returns>
-        public OkNegotiatedContentResult<T> Ok<T>(T value)
+        public OkNegotiatedContentResult<T> Ok<T>(T content)
         {
-            return new OkNegotiatedContentResult<T>(value, this);
+            return new OkNegotiatedContentResult<T>(content, this);
         }
 
         /// <summary>Creates a <see cref="ResponseMessageResult"/> with the specified response.</summary>

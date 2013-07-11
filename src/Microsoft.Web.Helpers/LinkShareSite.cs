@@ -5,14 +5,13 @@ namespace Microsoft.Web.Helpers
 {
     public enum LinkShareSite
     {
-        Delicious,
-        Digg,
-        [Obsolete("Google Buzz is no longer supported by the Link Share helper. It will be removed entirely in the next major version.")]
-        GoogleBuzz,
-        Facebook,
-        Reddit,
-        StumbleUpon,
-        Twitter,
-        All
+        Delicious = 0,
+        Digg = 1,
+        // GoogleBuzz = 2, has been deprecated
+        Facebook = 3,
+        Reddit = 4,
+        StumbleUpon = 5,
+        Twitter = 6,
+        All = 7,
     }
 }

@@ -11,7 +11,7 @@
     private static readonly Lazy<IEnumerable<LinkShareSite>> _allSites = new Lazy<IEnumerable<LinkShareSite>>(() =>
         from site in (LinkShareSite[])Enum.GetValues(typeof(LinkShareSite))
 #pragma warning disable 0618
-        where site != LinkShareSite.All && site != LinkShareSite.GoogleBuzz
+        where site != LinkShareSite.All
 #pragma warning restore 0618
         select site
     );
@@ -95,7 +95,7 @@
     /// The items that appear before this appear in the order they are specified. The All is replaced by all items in the enum that were not already specified by the user 
     /// in the order they appear in the enum.
     /// e.g.  sites = [] { Twitter, Facebook, Digg, All }
-    /// Would result in returning {Twitter, Facebook, Digg, Delicious, GoogleBuzz, Reddit, StumbleUpon} 
+    /// Would result in returning {Twitter, Facebook, Digg, Delicious, Reddit, StumbleUpon} 
     /// </remarks>
     internal static IEnumerable<LinkShareSite> GetSitesInOrder(LinkShareSite[] linkSites) {
         var allSites = _allSites.Value;
@@ -160,12 +160,7 @@
             case LinkShareSite.StumbleUpon:
                 <a href="http://www.stumbleupon.com/submit?url=@(pageLinkBack)&amp;title=@(pageTitle)" target="_blank" title="Stumble it!">
                     <img alt="Stumble it!" src="http://cdn.stumble-upon.com/images/16x16_su_round.gif" style="border:0; height:16px; width:16px; margin:0 1px;" title="Stumble it!" /></a>
-                break;
-#pragma warning disable 0618
-            // Obviously we need to use the obsoleted GoogleBuzz enum value to check for it :).
-            case LinkShareSite.GoogleBuzz:
-                throw new NotSupportedException(HelpersToolkitResources.GoogleBuzz_NotSupported);
-#pragma warning restore 0618
+                break;            
             case LinkShareSite.Twitter:
                 string status = String.Empty;
                 if (!twitterUserName.IsEmpty()) {
@@ -179,6 +174,8 @@
                     <img alt="Share on Twitter" src="http://twitter.com/favicon.ico" style="border:0; height:16px; width:16px; margin:0 1px;" title="Share on Twitter" />
                 </a>
                 break;
+            default:
+                throw new NotSupportedException(String.Format(CultureInfo.CurrentUICulture, HelpersToolkitResources.LinkShareValue_NotSupported, site));                
         }
     }
 }

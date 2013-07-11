@@ -129,11 +129,11 @@
   <data name="FileUpload_Upload" xml:space="preserve">
     <value>Upload</value>
   </data>
-  <data name="GoogleBuzz_NotSupported" xml:space="preserve">
-    <value>Google Buzz is no longer supported by the Link Share helper. It will be removed entirely in the next major version.</value>
-  </data>
   <data name="Gravatar_InvalidImageSize" xml:space="preserve">
     <value>The Gravatar image size must be between 1 and 512 pixels.</value>
+  </data>
+  <data name="LinkShareValue_NotSupported" xml:space="preserve">
+    <value>LinkShare value {0} is not supported by the Link Share helper. </value>
   </data>
   <data name="ReCaptcha_RemoteIPNotFound" xml:space="preserve">
     <value>The captcha cannot be validated because the remote address was not found in the request.</value>

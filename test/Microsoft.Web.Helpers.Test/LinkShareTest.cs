@@ -138,9 +138,8 @@ namespace Microsoft.Web.Helpers.Test
             var result = LinkShare.GetSitesInOrder(linkSites: new LinkShareSite[] { LinkShareSite.All });
 
             // Assert
-#pragma warning disable 0618
-            Assert.DoesNotContain(LinkShareSite.GoogleBuzz, result.ToArray());
-#pragma warning restore 0618
+            // 2 is the deprecated value for GoogleBuzz
+            Assert.DoesNotContain(((LinkShareSite)2), result.ToArray());
         }
 
         [Fact]

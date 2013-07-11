@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Web.Http.Controllers;
 
 namespace System.Web.Http.Routing
 {
@@ -40,55 +41,53 @@ namespace System.Web.Http.Routing
         /// </summary>
         /// <param name="routeTemplate">The tokenized route template for the route.</param>
         /// <param name="httpMethods">The HTTP methods supported by the route.</param>
-        /// <param name="controllerName">The name of the associated controller.</param>
-        /// <param name="actionName">The name of the associated action.</param>
+        /// <param name="actions">The actions to invoke for the route.</param>
         /// <returns>The generated <see cref="IHttpRoute"/>.</returns>
-        public virtual IHttpRoute BuildHttpRoute(string routeTemplate, IEnumerable<HttpMethod> httpMethods, string controllerName, string actionName)
+        public virtual IHttpRoute BuildHttpRoute(
+            string routeTemplate,
+            IEnumerable<HttpMethod> httpMethods,
+            IEnumerable<ReflectedHttpActionDescriptor> actions)
         {
             if (routeTemplate == null)
             {
                 throw Error.ArgumentNull("routeTemplate");
             }
 
-            if (controllerName == null)
-            {
-                throw Error.ArgumentNull("controllerName");
-            }
-
-            if (actionName == null)
-            {
-                throw Error.ArgumentNull("actionName");
-            }
-
-            HttpRouteValueDictionary defaults = new HttpRouteValueDictionary
-            {
-                { RouteKeys.ControllerKey, controllerName },
-                { RouteKeys.ActionKey, actionName }
-            };
-
+            HttpRouteValueDictionary defaults = new HttpRouteValueDictionary();
             HttpRouteValueDictionary constraints = new HttpRouteValueDictionary();
             if (httpMethods != null)
             {
                 // Current method constraint implementation is inefficient since it matches before running the constraint.
                 // Consider checking the HTTP method first in a custom route as a performance optimization.
-                constraints.Add("httpMethod", new HttpMethodConstraint(httpMethods.ToArray()));
+                constraints["httpMethod"] = new HttpMethodConstraint(httpMethods.AsArray());
             }
 
             string detokenizedRouteTemplate = InlineRouteTemplateParser.ParseRouteTemplate(routeTemplate, defaults, constraints, ConstraintResolver);
 
-            return BuildHttpRoute(defaults, constraints, detokenizedRouteTemplate);
+            HttpRouteValueDictionary dataTokens = new HttpRouteValueDictionary();
+            if (actions != null)
+            {
+                dataTokens[RouteKeys.ActionsDataTokenKey] = actions.AsArray();
+            }
+
+            return BuildHttpRoute(detokenizedRouteTemplate, defaults, constraints, dataTokens);
         }
 
         /// <summary>
         /// Builds an <see cref="IHttpRoute"/>.
         /// </summary>
+        /// <param name="routeTemplate">The detokenized route template.</param>
         /// <param name="defaults">The route defaults.</param>
         /// <param name="constraints">The route constraints.</param>
-        /// <param name="routeTemplate">The detokenized route template.</param>
+        /// <param name="dataTokens">The route data tokens.</param>
         /// <returns>The generated <see cref="IHttpRoute"/>.</returns>
-        public virtual IHttpRoute BuildHttpRoute(HttpRouteValueDictionary defaults, HttpRouteValueDictionary constraints, string routeTemplate)
+        public virtual IHttpRoute BuildHttpRoute(
+            string routeTemplate,
+            HttpRouteValueDictionary defaults,
+            HttpRouteValueDictionary constraints,
+            HttpRouteValueDictionary dataTokens)
         {
-            return new HttpRoute(routeTemplate, defaults, constraints);
+            return new HttpRoute(routeTemplate, defaults, constraints, dataTokens);
         }
     }
 }

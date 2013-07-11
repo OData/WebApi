@@ -83,22 +83,20 @@ namespace System.Web.Http
             List<HttpRouteEntry> attributeRoutes = new List<HttpRouteEntry>();
 
             IHttpControllerSelector controllerSelector = configuration.Services.GetHttpControllerSelector();
-            IDictionary<string, HttpControllerDescriptor> controllerMapping = controllerSelector.GetControllerMapping();
-            if (controllerMapping != null)
+            IDictionary<string, HttpControllerDescriptor> controllerMap = controllerSelector.GetControllerMapping();
+            if (controllerMap != null)
             {
-                foreach (HttpControllerDescriptor controllerDescriptor in controllerMapping.Values)
+                foreach (HttpControllerDescriptor controllerDescriptor in controllerMap.Values)
                 {
-                    Collection<RoutePrefixAttribute> routePrefixes = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>(inherit: false);
-                    IHttpActionSelector actionSelector = controllerDescriptor.Configuration.Services.GetActionSelector();
-                    ILookup<string, HttpActionDescriptor> actionMapping = actionSelector.GetActionMapping(controllerDescriptor);
-                    if (actionMapping != null)
+                    IEnumerable<HttpRouteEntry> controllerRoutes = CreateRouteEntries(controllerDescriptor);
+
+                    foreach (HttpRouteEntry route in controllerRoutes)
                     {
-                        foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionMapping)
-                        {
-                            string controllerName = controllerDescriptor.ControllerName;
-                            attributeRoutes.AddRange(CreateAttributeRoutes(routeBuilder, controllerName, routePrefixes, actionGrouping));
-                        }
+                        route.Route = routeBuilder.BuildHttpRoute(route.RouteTemplate, route.HttpMethods, route.Actions);
                     }
+
+                    SetDefaultRouteNames(controllerRoutes, controllerDescriptor.ControllerName);
+                    attributeRoutes.AddRange(controllerRoutes);
                 }
 
                 attributeRoutes.Sort();
@@ -131,97 +129,143 @@ namespace System.Web.Http
             configuration.MessageHandlers.Insert(0, new SuppressHostPrincipalMessageHandler(configuration));
         }
 
-        private static List<HttpRouteEntry> CreateAttributeRoutes(HttpRouteBuilder routeBuilder, string controllerName,
-            Collection<RoutePrefixAttribute> routePrefixes, IGrouping<string, HttpActionDescriptor> actionGrouping)
+        private static IEnumerable<HttpRouteEntry> CreateRouteEntries(HttpControllerDescriptor controllerDescriptor)
         {
-            List<HttpRouteEntry> routes = new List<HttpRouteEntry>();
-            string actionName = actionGrouping.Key;
-
-            foreach (HttpActionDescriptor actionDescriptor in actionGrouping)
+            IHttpActionSelector actionSelector = controllerDescriptor.Configuration.Services.GetActionSelector();
+            ILookup<string, HttpActionDescriptor> actionMap = actionSelector.GetActionMapping(controllerDescriptor);
+            if (actionMap == null)
             {
-                IEnumerable<IHttpRouteInfoProvider> routeInfoProviders = actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
+                return Enumerable.Empty<HttpRouteEntry>();
+            }
 
-                // DefaultIfEmpty below is required to add routes when there is a route prefix but no
-                // route provider or when there is a route provider with a template but no route prefix
-                foreach (RoutePrefixAttribute routePrefix in routePrefixes.DefaultIfEmpty())
+            List<HttpRouteEntry> routes = new List<HttpRouteEntry>();
+            Collection<RoutePrefixAttribute> routePrefixes = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>(inherit: false);
+
+            foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionMap)
+            {
+                string actionName = actionGrouping.Key;
+
+                foreach (ReflectedHttpActionDescriptor actionDescriptor in actionGrouping.OfType<ReflectedHttpActionDescriptor>())
                 {
-                    foreach (IHttpRouteInfoProvider routeProvider in routeInfoProviders.DefaultIfEmpty())
+                    IEnumerable<IHttpRouteInfoProvider> routeInfoProviders = actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
+
+                    // DefaultIfEmpty below is required to add routes when there is a route prefix but no
+                    // route provider or when there is a route provider with a template but no route prefix
+                    foreach (RoutePrefixAttribute routePrefix in routePrefixes.DefaultIfEmpty())
                     {
-                        string prefixTemplate = routePrefix == null ? null : routePrefix.Prefix;
-                        string providerTemplate = routeProvider == null ? null : routeProvider.RouteTemplate;
-                        if (prefixTemplate == null && providerTemplate == null)
+                        foreach (IHttpRouteInfoProvider routeProvider in routeInfoProviders.DefaultIfEmpty())
                         {
-                            continue;
-                        }
+                            string routeTemplate = BuildRouteTemplate(routePrefix, routeProvider, controllerDescriptor.ControllerName, actionDescriptor.ActionName);
+                            if (routeTemplate == null)
+                            {
+                                continue;
+                            }
 
-                        ValidateTemplates(prefixTemplate, providerTemplate, actionDescriptor);
+                            // Try to find an entry with the same route template and the same HTTP verbs
+                            HttpRouteEntry existingEntry = null;
+                            foreach (HttpRouteEntry entry in routes)
+                            {
+                                if (String.Equals(routeTemplate, entry.RouteTemplate, StringComparison.OrdinalIgnoreCase) &&
+                                    actionDescriptor.SupportedHttpMethods.SequenceEqual(entry.HttpMethods))
+                                {
+                                    existingEntry = entry;
+                                    break;
+                                }
+                            }
 
-                        string routeTemplate;
-                        if (String.IsNullOrEmpty(prefixTemplate))
-                        {
-                            routeTemplate = providerTemplate ?? String.Empty;
-                        }
-                        else if (String.IsNullOrEmpty(providerTemplate))
-                        {
-                            routeTemplate = prefixTemplate;
-                        }
-                        else
-                        {
-                            // template and prefix both not null - combine them
-                            routeTemplate = prefixTemplate + '/' + providerTemplate;
-                        }
+                            if (existingEntry == null)
+                            {
+                                HttpRouteEntry entry = new HttpRouteEntry()
+                                {
+                                    RouteTemplate = routeTemplate,
+                                    HttpMethods = actionDescriptor.SupportedHttpMethods,
+                                    Actions = new List<ReflectedHttpActionDescriptor>() { actionDescriptor }
+                                };
 
-                        Collection<HttpMethod> httpMethods = actionDescriptor.SupportedHttpMethods;
-                        IHttpRoute route = routeBuilder.BuildHttpRoute(routeTemplate, httpMethods, controllerName, actionName);
-                        HttpRouteEntry entry = new HttpRouteEntry() { Route = route, RouteTemplate = routeTemplate };
-                        if (routeProvider != null)
-                        {
-                            entry.Name = routeProvider.RouteName;
-                            entry.Order = routeProvider.RouteOrder;
+                                if (routeProvider != null)
+                                {
+                                    entry.Name = routeProvider.RouteName;
+                                    entry.Order = routeProvider.RouteOrder;
+                                }
+                                if (routePrefix != null)
+                                {
+                                    entry.PrefixOrder = routePrefix.Order;
+                                }
+                                routes.Add(entry);
+                            }
+                            else
+                            {
+                                existingEntry.Actions.Add(actionDescriptor);
+
+                                // Take the maximum of the two orders as the order
+                                int prefixOrder = routePrefix == null ? 0 : routePrefix.Order;
+                                int order = routeProvider == null ? 0 : routeProvider.RouteOrder;
+
+                                if (prefixOrder > existingEntry.PrefixOrder)
+                                {
+                                    existingEntry.PrefixOrder = prefixOrder;
+                                }
+                                else if (prefixOrder == existingEntry.PrefixOrder && order > existingEntry.Order)
+                                {
+                                    existingEntry.Order = order;
+                                }
+
+                                // Use the provider route name if the route hasn't already been named
+                                if (routeProvider != null && existingEntry.Name == null)
+                                {
+                                    existingEntry.Name = routeProvider.RouteName;
+                                }
+                            }
                         }
-                        if (routePrefix != null)
-                        {
-                            entry.PrefixOrder = routePrefix.Order;
-                        }
-                        routes.Add(entry);
                     }
                 }
             }
 
-            SetDefaultRouteNames(routes, controllerName, actionName);
-
             return routes;
         }
 
-        private static void ValidateTemplates(string prefixTemplate, string providerTemplate, HttpActionDescriptor actionDescriptor)
+        private static string BuildRouteTemplate(RoutePrefixAttribute routePrefix, IHttpRouteInfoProvider routeProvider, string controllerName, string actionName)
         {
+            string prefixTemplate = routePrefix == null ? null : routePrefix.Prefix;
+            string providerTemplate = routeProvider == null ? null : routeProvider.RouteTemplate;
+            if (prefixTemplate == null && providerTemplate == null)
+            {
+                return null;
+            }
+
             if (prefixTemplate != null && prefixTemplate.EndsWith("/", StringComparison.OrdinalIgnoreCase))
             {
-                throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidPrefix, prefixTemplate, actionDescriptor.ControllerDescriptor.ControllerName);
+                throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidPrefix, prefixTemplate, controllerName);
             }
 
             if (providerTemplate != null && providerTemplate.StartsWith("/", StringComparison.OrdinalIgnoreCase))
             {
-                throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidTemplate, providerTemplate, actionDescriptor.ActionName);
+                throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidTemplate, providerTemplate, actionName);
+            }
+
+            if (String.IsNullOrEmpty(prefixTemplate))
+            {
+                return providerTemplate ?? String.Empty;
+            }
+            else if (String.IsNullOrEmpty(providerTemplate))
+            {
+                return prefixTemplate;
+            }
+            else
+            {
+                // template and prefix both not null - combine them
+                return prefixTemplate + '/' + providerTemplate;
             }
         }
 
-        private static void SetDefaultRouteNames(List<HttpRouteEntry> routes, string controllerName, string actionName)
+        private static void SetDefaultRouteNames(IEnumerable<HttpRouteEntry> routes, string controllerName)
         {
-            // Only use a route suffix to disambiguate between multiple routes without a specified route name
-            HttpRouteEntry[] namelessRoutes = routes.Where(entry => entry.Name == null).ToArray();
-            if (namelessRoutes.Length == 1)
+            // Only use a route suffix to disambiguate between routes without a specified route name
+            int routeSuffix = 1;
+            foreach (HttpRouteEntry namelessRoute in routes.Where(entry => entry.Name == null))
             {
-                namelessRoutes[0].Name = controllerName + "." + actionName;
-            }
-            else if (namelessRoutes.Length > 1)
-            {
-                int routeSuffix = 1;
-                foreach (HttpRouteEntry namelessRoute in namelessRoutes)
-                {
-                    namelessRoute.Name = controllerName + "." + actionName + routeSuffix;
-                    routeSuffix++;
-                }
+                namelessRoute.Name = controllerName + routeSuffix;
+                routeSuffix++;
             }
         }
     }

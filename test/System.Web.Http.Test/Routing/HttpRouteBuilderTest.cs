@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -34,14 +35,15 @@ namespace System.Web.Http.Routing
 
         private static IHttpRoute BuildRoute(string routeTemplate, IInlineConstraintResolver constraintResolver = null)
         {
+            ReflectedHttpActionDescriptor[] actions = new ReflectedHttpActionDescriptor[0];
+
             // Act
             HttpRouteBuilder routeBuilder = new HttpRouteBuilder(constraintResolver ?? new DefaultInlineConstraintResolver());
-            IHttpRoute route = routeBuilder.BuildHttpRoute(routeTemplate, new HttpMethod[] { HttpMethod.Get }, "FakeController", "FakeAction");
+            IHttpRoute route = routeBuilder.BuildHttpRoute(routeTemplate, new HttpMethod[] { HttpMethod.Get }, actions: actions);
 
             // Assertions for default, unspecified behavior:
             Assert.NotNull(route);
-            Assert.Equal("FakeController", route.Defaults["controller"]);
-            Assert.Equal("FakeAction", route.Defaults["action"]);
+            Assert.Same(actions, route.DataTokens["actions"]);
             Assert.IsType<HttpMethodConstraint>(route.Constraints["httpMethod"]);
 
             return route;

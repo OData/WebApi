@@ -1,9 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+#if ASPNETWEBAPI
+using System.Collections.ObjectModel;
+#endif
 using System.Diagnostics.Contracts;
 using System.Linq;
 #if ASPNETWEBAPI
+using System.Net.Http;
+using System.Web.Http.Controllers;
 #else
 using System.Web.Routing;
 #endif
@@ -36,6 +41,9 @@ namespace System.Web.Mvc.Routing
                 return route.ParsedRoute;
             }
         }
+
+        public Collection<HttpMethod> HttpMethods { get; set; }
+        public List<ReflectedHttpActionDescriptor> Actions { get; set; }
 #else
         public Route Route { get; set; }
         public ParsedRoute ParsedRoute { get; set; }

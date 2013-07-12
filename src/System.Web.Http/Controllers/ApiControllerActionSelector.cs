@@ -147,8 +147,7 @@ namespace System.Web.Http.Controllers
             {
                 get { return _controllerDescriptor; }
             }
-
-            [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
+                        
             public HttpActionDescriptor SelectAction(HttpControllerContext controllerContext)
             {
                 // Performance-sensitive
@@ -156,7 +155,6 @@ namespace System.Web.Http.Controllers
 
                 // Make sure the action parameter matches the route and query parameters. Overload resolution logic is applied when needed.
                 List<ReflectedHttpActionDescriptor> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidateActions);
-
                 List<ReflectedHttpActionDescriptor> selectedActions = RunSelectionFilters(controllerContext, actionsFoundByParams);
                 candidateActions = null;
                 actionsFoundByParams = null;
@@ -164,12 +162,7 @@ namespace System.Web.Http.Controllers
                 switch (selectedActions.Count)
                 {
                     case 0:
-
-                        // Throws HttpResponseException with NotFound status because no action matches the request
-                        throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
-                            HttpStatusCode.NotFound,
-                            Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
-                            Error.Format(SRResources.ApiControllerActionSelector_ActionNotFound, _controllerDescriptor.ControllerName)));
+                        throw new HttpResponseException(CreateSelectionError(controllerContext));
                     case 1:
                         return selectedActions[0];
                     default:
@@ -180,8 +173,54 @@ namespace System.Web.Http.Controllers
                 }
             }
 
+            // Selection error. Caller has already determined the request is an error, and now we need to provide the best error message. 
+            // If there's another verb that could satisfy this URL, then return 405. 
+            // Else return 404.  
             [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
-            private ReflectedHttpActionDescriptor[] GetInitialCandidateList(HttpControllerContext controllerContext)
+            private HttpResponseMessage CreateSelectionError(HttpControllerContext controllerContext)
+            {                
+                // Check for 405.  
+                ReflectedHttpActionDescriptor[] candidateActions = GetInitialCandidateList(controllerContext, ignoreVerbs: true);
+                List<ReflectedHttpActionDescriptor> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidateActions);
+                List<ReflectedHttpActionDescriptor> selectedActions = RunSelectionFilters(controllerContext, actionsFoundByParams);
+                if (selectedActions.Count > 0)
+                {
+                    return Create405Response(controllerContext, selectedActions);
+                }
+
+                // Throws HttpResponseException with NotFound status because no action matches the request
+                return controllerContext.Request.CreateErrorResponse(
+                    HttpStatusCode.NotFound,
+                    Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
+                    Error.Format(SRResources.ApiControllerActionSelector_ActionNotFound, _controllerDescriptor.ControllerName));
+            }
+
+            // Create a 405 error response with proper headers and message string. 
+            [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
+            private static HttpResponseMessage Create405Response(HttpControllerContext controllerContext, IEnumerable<ReflectedHttpActionDescriptor> allowedActions)
+            {
+                HttpMethod incomingMethod = controllerContext.Request.Method;
+                HttpResponseMessage response = controllerContext.Request.CreateErrorResponse(
+                    HttpStatusCode.MethodNotAllowed,
+                    Error.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, incomingMethod));
+                
+                // 405 must include an Allow content-header with the allowable methods.
+                // See: https://tools.ietf.org/html/rfc2616#section-14.7
+                HashSet<HttpMethod> methods = new HashSet<HttpMethod>();
+                foreach (var action in allowedActions)
+                {
+                    methods.UnionWith(action.SupportedHttpMethods);
+                }                
+                foreach (var method in methods)
+                {
+                    response.Content.Headers.Allow.Add(method.ToString());
+                }
+                
+                return response;
+            }
+
+            [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
+            private ReflectedHttpActionDescriptor[] GetInitialCandidateList(HttpControllerContext controllerContext, bool ignoreVerbs = false)
             {
                 IHttpRouteData routeData = controllerContext.RouteData;
 
@@ -208,20 +247,26 @@ namespace System.Web.Http.Controllers
                             Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
                     }
 
-                    actions = FilterIncompatibleVerbs(incomingMethod, actionsFoundByName);
+                    if (ignoreVerbs)
+                    {
+                        actions = actionsFoundByName;
+                    }
+                    else 
+                    {
+                        actions = FilterIncompatibleVerbs(incomingMethod, actionsFoundByName);
+                    }
                 }
                 else
                 {
-                    // No direct routing or {action} parameter, infer it from the verb.
-                    actions = FindActionsForVerb(incomingMethod);
-                }
-
-                // Throws HttpResponseException with MethodNotAllowed status because no action matches the Http Method
-                if (actions.Length == 0)
-                {
-                    throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
-                        HttpStatusCode.MethodNotAllowed,
-                        Error.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, incomingMethod)));
+                    if (ignoreVerbs)
+                    {
+                        actions = _actionDescriptors;
+                    }
+                    else
+                    {
+                        // No direct routing or {action} parameter, infer it from the verb.
+                        actions = FindActionsForVerb(incomingMethod);
+                    }
                 }
 
                 return actions;

@@ -24,9 +24,9 @@ namespace System.Web.Http
         [InlineData("POST", "Users/Approve", HttpStatusCode.NotFound, "")] // NotFound because it doesn't match the route
         [InlineData("DELETE", "Users/Remove", HttpStatusCode.NotFound, "")] // NotFound because it doesn't match the route
         [InlineData("POST", "Users/DefaultActionWithEmptyActionName", HttpStatusCode.NotFound, "")] // NotFound because it doesn't match the route
-        [InlineData("DELETE", "ParameterTest", HttpStatusCode.NotFound, "")] // NotFound because Delete requires 'id' as parameter
-        [InlineData("Put", "ParameterTest", HttpStatusCode.NotFound, "")] // NotFound because Put requires 'id' and 'value' as parameters
-        [InlineData("Put", "ParameterTest?id=1", HttpStatusCode.NotFound, "")] // NotFound because Put requires 'id' and 'value' as parameters
+        [InlineData("DELETE", "ParameterTest", HttpStatusCode.MethodNotAllowed, "")] // MethodNotAllowed because url is valid, but not for Delete. 
+        [InlineData("Put", "ParameterTest", HttpStatusCode.MethodNotAllowed, "")] // Put requires 'id' and 'value' as parameters, but url is still valid for other verbs (GET, Delete,Post). 
+        [InlineData("Put", "ParameterTest?id=1", HttpStatusCode.MethodNotAllowed, "")] // Put requires 'id' and 'value' as parameters, but url is still valid for other verbs (GET,Post). 
         public void ActionReachability_UsingResourceOrientedRoute(string httpMethod, string requestUrl, HttpStatusCode expectedStatusCode, string expectedActionName)
         {
             HttpConfiguration config = new HttpConfiguration();

@@ -33,18 +33,10 @@ namespace System.Web.Http
         [InlineData("POST", "ActionAttributeTest/RetriveUsers")]
         [InlineData("DELETE", "ActionAttributeTest/RetriveUsers")]
         [InlineData("WHATEVER", "ActionAttributeTest/RetriveUsers")]
-        [InlineData("GET", "ActionAttributeTest/AddUsers")]
-        [InlineData("PUT", "ActionAttributeTest/AddUsers")]
-        [InlineData("WHATEVER", "ActionAttributeTest/AddUsers")]
         [InlineData("GET", "ActionAttributeTest/UpdateUsers")]
         [InlineData("WHATEVER", "ActionAttributeTest/UpdateUsers")]
         [InlineData("POST", "ActionAttributeTest/DeleteUsers")]
         [InlineData("DELETEME", "ActionAttributeTest/DeleteUsers")]
-        [InlineData("GET", "ActionAttributeTest/Users")]
-        [InlineData("POST", "ActionAttributeTest/Users")]
-        [InlineData("PATCHING", "ActionAttributeTest/Users")]
-        [InlineData("NonAction", "ActionAttributeTest/NonAction")]
-        [InlineData("GET", "ActionAttributeTest/NonAction")]
         public void SelectAction_ThrowsMethodNotSupported_OnRouteWithActionParameter(string httpMethod, string requestUrl)
         {
             string routeUrl = "{controller}/{action}/{id}";
@@ -66,6 +58,14 @@ namespace System.Web.Http
         [Theory]
         [InlineData("POST", "ActionAttributeTest/NonAction")]
         [InlineData("ACTION", "ActionAttributeTest/NonActionWitHttpMethod")]
+        [InlineData("GET", "ActionAttributeTest/AddUsers")] // id is required on this action, so url is invalid. 404
+        [InlineData("PUT", "ActionAttributeTest/AddUsers")] // id is required on this action, so url is invalid. 404
+        [InlineData("WHATEVER", "ActionAttributeTest/AddUsers")] // id is required on this action, so url is invalid. 404
+        [InlineData("GET", "ActionAttributeTest/Users")] // key param is required, bad url. 404
+        [InlineData("POST", "ActionAttributeTest/Users")] // key param is required, bad url. 404 
+        [InlineData("PATCHING", "ActionAttributeTest/Users")] // key param is required, bad url. 404
+        [InlineData("NonAction", "ActionAttributeTest/NonAction")] // NonAction, 404
+        [InlineData("GET", "ActionAttributeTest/NonAction")] // NonAction, 404
         public void SelectAction_ThrowsNotFound_OnRouteWithActionParameter(string httpMethod, string requestUrl)
         {
             string routeUrl = "{controller}/{action}/{id}";

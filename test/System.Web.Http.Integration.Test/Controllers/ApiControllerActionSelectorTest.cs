@@ -220,6 +220,7 @@ namespace System.Web.Http
 
             Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
+            AssertAllowedHeaders(exception.Response, HttpMethod.Get);
             Assert.Equal("The requested resource does not support http method 'POST'.", ((HttpError)content.Value).Message);
         }
 
@@ -249,6 +250,17 @@ namespace System.Web.Http
             Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
             Assert.Equal("The requested resource does not support http method 'PUT'.", ((HttpError)content.Value).Message);
+            AssertAllowedHeaders(exception.Response, HttpMethod.Get, new HttpMethod("PATCH"), HttpMethod.Post, HttpMethod.Delete, HttpMethod.Head);
+        }
+
+        // Verify response has all the methods in its Allow header. values are unsorted. 
+        private void AssertAllowedHeaders(HttpResponseMessage response, params HttpMethod[] allowedMethods)
+        {
+            foreach (var method in allowedMethods)
+            {
+                Assert.Contains(method.ToString(), response.Content.Headers.Allow);
+            }
+            Assert.Equal(allowedMethods.Length, response.Content.Headers.Allow.Count);
         }
 
         [Theory]

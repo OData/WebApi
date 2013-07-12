@@ -1975,7 +1975,7 @@ namespace System.Web.Mvc.Test
             ModelBindingContext bindingContext = new ModelBindingContext()
             {
                 ModelMetadata = ModelMetadataProviders.Current.GetMetadataForType(() => model, model.GetType()),
-                ValueProvider =  routeDataFactory.GetValueProvider(controllerContext)
+                ValueProvider = routeDataFactory.GetValueProvider(controllerContext)
             };
 
             DefaultModelBinder binder = new DefaultModelBinder();

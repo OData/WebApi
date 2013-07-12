@@ -103,9 +103,14 @@ namespace System.Web.Http.Owin
         {
             Contract.Assert(request != null);
 
-            OwinResponse response = request.GetOwinResponse();
+            IAuthenticationManager authenticationManager = request.GetAuthenticationManager();
 
-            AuthenticationResponseChallenge currentChallenge = response.AuthenticationResponseChallenge;
+            if (authenticationManager == null)
+            {
+                throw new InvalidOperationException(OwinResources.IAuthenticationManagerNotAvailable);
+            }
+
+            AuthenticationResponseChallenge currentChallenge = authenticationManager.AuthenticationResponseChallenge;
 
             // A null challenge or challenge.AuthenticationTypes == null or empty represents the the default behavior
             // of running all active authentication middleware challenges.
@@ -114,12 +119,12 @@ namespace System.Web.Http.Owin
 
             if (currentChallenge == null)
             {
-                response.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(
+                authenticationManager.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(
                     suppressAuthenticationTypes, new AuthenticationExtra());
             }
             else if (currentChallenge.AuthenticationTypes == null || currentChallenge.AuthenticationTypes.Length == 0)
             {
-                response.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(
+                authenticationManager.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(
                     suppressAuthenticationTypes, currentChallenge.Extra);
             }
         }

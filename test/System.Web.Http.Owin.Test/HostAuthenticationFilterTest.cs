@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using Microsoft.Owin;
+using Microsoft.Owin.Security;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -63,18 +65,25 @@ namespace System.Web.Http.Owin
             string authenticationType = "AuthenticationType";
             IAuthenticationFilter filter = CreateProductUnderTest(authenticationType);
             IIdentity expectedIdentity = CreateDummyIdentity();
-            IDictionary<string, object> environment = CreateOwinEnvironment((authenticationTypes, callback, state) =>
+            IAuthenticationManager authenticationManager = CreateAuthenticationManager((a) =>
                 {
-                    if (authenticationTypes != null && authenticationTypes.Contains(authenticationType))
+                    AuthenticateResult result;
+
+                    if (a == authenticationType)
                     {
-                        callback(expectedIdentity, null, null, state);
+                        result = new AuthenticateResult(expectedIdentity, null, new Dictionary<string, object>());
+                    }
+                    else
+                    {
+                        result = null;
                     }
 
-                    return Task.FromResult<object>(null);
+                    return Task.FromResult(result);
                 });
+            IOwinContext owinContext = CreateOwinContext(authenticationManager);
             HttpAuthenticationContext context;
 
-            using (HttpRequestMessage request = CreateRequest(environment))
+            using (HttpRequestMessage request = CreateRequest(owinContext))
             {
                 context = CreateAuthenticationContext(request);
 
@@ -92,19 +101,47 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
-        public void AuthenticateAsync_SetsNoPrincipalOrError_WhenOwinAuthenticateDoesNotReturnIdentity()
+        public void AuthenticateAsync_SetsNoPrincipalOrError_WhenOwinAuthenticateReturnsNullResult()
         {
             // Arrange
             string authenticationType = "AuthenticationType";
             IAuthenticationFilter filter = CreateProductUnderTest(authenticationType);
             IIdentity expectedIdentity = CreateDummyIdentity();
-            IDictionary<string, object> environment = CreateOwinEnvironment((ignore1, ignore2, ignore3) =>
-                Task.FromResult<object>(null));
+            IAuthenticationManager authenticationManager = CreateAuthenticationManager(
+                (ignore1) => Task.FromResult<AuthenticateResult>(null));
+            IOwinContext owinContext = CreateOwinContext(authenticationManager);
             IPrincipal expectedPrincipal = CreateDummyPrincipal();
 
             HttpAuthenticationContext context;
 
-            using (HttpRequestMessage request = CreateRequest(environment))
+            using (HttpRequestMessage request = CreateRequest(owinContext))
+            {
+                context = CreateAuthenticationContext(request, expectedPrincipal);
+
+                // Act
+                filter.AuthenticateAsync(context, CancellationToken.None).Wait();
+            }
+
+            // Assert
+            Assert.Null(context.ErrorResult);
+            Assert.Same(expectedPrincipal, context.Principal);
+        }
+
+        [Fact]
+        public void AuthenticateAsync_SetsNoPrincipalOrError_WhenOwinAuthenticateReturnsNullIdentity()
+        {
+            // Arrange
+            string authenticationType = "AuthenticationType";
+            IAuthenticationFilter filter = CreateProductUnderTest(authenticationType);
+            IIdentity expectedIdentity = CreateDummyIdentity();
+            IAuthenticationManager authenticationManager = CreateAuthenticationManager(
+                (ignore1) => Task.FromResult(new AuthenticateResult(null, null, new Dictionary<string, object>())));
+            IOwinContext owinContext = CreateOwinContext(authenticationManager);
+            IPrincipal expectedPrincipal = CreateDummyPrincipal();
+
+            HttpAuthenticationContext context;
+
+            using (HttpRequestMessage request = CreateRequest(owinContext))
             {
                 context = CreateAuthenticationContext(request, expectedPrincipal);
 
@@ -147,15 +184,54 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
+        public void AuthenticateAsync_Throws_WhenOwinContextIsNull()
+        {
+            // Arrange
+            IAuthenticationFilter filter = CreateProductUnderTest();
+
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpAuthenticationContext context = CreateAuthenticationContext(request);
+
+                // Act & Assert
+                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+                {
+                    filter.AuthenticateAsync(context, CancellationToken.None).ThrowIfFaulted();
+                });
+                Assert.Equal("No OWIN authentication manager is associated with the request.", exception.Message);
+            }
+        }
+
+        [Fact]
+        public void AuthenticateAsync_Throws_WhenAuthenticationManagerIsNull()
+        {
+            // Arrange
+            IAuthenticationFilter filter = CreateProductUnderTest();
+            IOwinContext owinContext = CreateOwinContext(null);
+
+            using (HttpRequestMessage request = CreateRequest(owinContext))
+            {
+                HttpAuthenticationContext context = CreateAuthenticationContext(request);
+
+                // Act & Assert
+                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+                {
+                    filter.AuthenticateAsync(context, CancellationToken.None).ThrowIfFaulted();
+                });
+                Assert.Equal("No OWIN authentication manager is associated with the request.", exception.Message);
+            }
+        }
+
+        [Fact]
         public void AuthenticateAsync_ReturnsCanceledTask_WhenCancellationIsRequested()
         {
             // Arrange
             IAuthenticationFilter filter = CreateProductUnderTest();
-            IDictionary<string, object> environment = CreateOwinEnvironment();
+            IOwinContext owinContext = CreateOwinContext();
 
             Task task;
 
-            using (HttpRequestMessage request = CreateRequest(environment))
+            using (HttpRequestMessage request = CreateRequest(owinContext))
             {
                 HttpAuthenticationContext context = CreateAuthenticationContext(request);
                 CancellationToken cancellationToken = new CancellationToken(true);
@@ -178,13 +254,13 @@ namespace System.Web.Http.Owin
             IAuthenticationFilter filter = CreateProductUnderTest(expectedAuthenticationType);
             IHttpActionResult result = CreateDummyActionResult();
             string originalAuthenticationType = "FirstChallenge";
-            IDictionary<string, string> originalExtra = CreateDummyExtra();
-            Tuple<string[], IDictionary<string, string>> originalChallenge =
-                new Tuple<string[], IDictionary<string, string>>(new string[] { originalAuthenticationType },
-                    originalExtra);
-            IDictionary<string, object> environment = CreateOwinEnvironment(originalChallenge);
+            AuthenticationExtra originalExtra = CreateExtra();
+            AuthenticationResponseChallenge originalChallenge = new AuthenticationResponseChallenge(
+                new string[] { originalAuthenticationType }, originalExtra);
+            IAuthenticationManager authenticationManager = CreateAuthenticationManager(originalChallenge);
+            IOwinContext owinContext = CreateOwinContext(authenticationManager);
 
-            using (HttpRequestMessage request = CreateRequest(environment))
+            using (HttpRequestMessage request = CreateRequest(owinContext))
             {
                 HttpAuthenticationChallengeContext context = CreateChallengeContext(request, result);
 
@@ -193,15 +269,14 @@ namespace System.Web.Http.Owin
             }
 
             // Assert
-            Tuple<string[], IDictionary<string, string>> challenge =
-                environment.GetOwinValue<Tuple<string[], IDictionary<string, string>>>(ChallengeKey);
+            AuthenticationResponseChallenge challenge = authenticationManager.AuthenticationResponseChallenge;
             Assert.NotNull(challenge);
-            string[] authenticationTypes = challenge.Item1;
+            string[] authenticationTypes = challenge.AuthenticationTypes;
             Assert.NotNull(authenticationTypes);
             Assert.Equal(2, authenticationTypes.Length);
             Assert.Same(originalAuthenticationType, authenticationTypes[0]);
             Assert.Same(expectedAuthenticationType, authenticationTypes[1]);
-            IDictionary<string, string> extra = challenge.Item2;
+            AuthenticationExtra extra = challenge.Extra;
             Assert.Same(originalExtra, extra);
         }
 
@@ -212,12 +287,13 @@ namespace System.Web.Http.Owin
             string expectedAuthenticationType = "AuthenticationType";
             IAuthenticationFilter filter = CreateProductUnderTest(expectedAuthenticationType);
             IHttpActionResult result = CreateDummyActionResult();
-            IDictionary<string, string> originalExtra = CreateDummyExtra();
-            Tuple<string[], IDictionary<string, string>> originalChallenge =
-                new Tuple<string[], IDictionary<string, string>>(null, originalExtra);
-            IDictionary<string, object> environment = CreateOwinEnvironment(originalChallenge);
+            AuthenticationExtra originalExtra = CreateExtra();
+            AuthenticationResponseChallenge originalChallenge = new AuthenticationResponseChallenge(null,
+                originalExtra);
+            IAuthenticationManager authenticationManager = CreateAuthenticationManager(originalChallenge);
+            IOwinContext owinContext = CreateOwinContext(authenticationManager);
 
-            using (HttpRequestMessage request = CreateRequest(environment))
+            using (HttpRequestMessage request = CreateRequest(owinContext))
             {
                 HttpAuthenticationChallengeContext context = CreateChallengeContext(request, result);
 
@@ -226,14 +302,13 @@ namespace System.Web.Http.Owin
             }
 
             // Assert
-            Tuple<string[], IDictionary<string, string>> challenge =
-                environment.GetOwinValue<Tuple<string[], IDictionary<string, string>>>(ChallengeKey);
+            AuthenticationResponseChallenge challenge = authenticationManager.AuthenticationResponseChallenge;
             Assert.NotNull(challenge);
-            string[] authenticationTypes = challenge.Item1;
+            string[] authenticationTypes = challenge.AuthenticationTypes;
             Assert.NotNull(authenticationTypes);
             Assert.Equal(1, authenticationTypes.Length);
             Assert.Same(expectedAuthenticationType, authenticationTypes[0]);
-            IDictionary<string, string> extra = challenge.Item2;
+            AuthenticationExtra extra = challenge.Extra;
             Assert.Same(originalExtra, extra);
         }
 
@@ -244,9 +319,11 @@ namespace System.Web.Http.Owin
             string expectedAuthenticationType = "AuthenticationType";
             IAuthenticationFilter filter = CreateProductUnderTest(expectedAuthenticationType);
             IHttpActionResult result = CreateDummyActionResult();
-            IDictionary<string, object> environment = CreateOwinEnvironment();
+            IAuthenticationManager authenticationManager = CreateAuthenticationManager(
+                (AuthenticationResponseChallenge)null);
+            IOwinContext owinContext = CreateOwinContext(authenticationManager);
 
-            using (HttpRequestMessage request = CreateRequest(environment))
+            using (HttpRequestMessage request = CreateRequest(owinContext))
             {
                 HttpAuthenticationChallengeContext context = CreateChallengeContext(request, result);
 
@@ -255,16 +332,14 @@ namespace System.Web.Http.Owin
             }
 
             // Assert
-            Tuple<string[], IDictionary<string, string>> challenge =
-                environment.GetOwinValue<Tuple<string[], IDictionary<string, string>>>(ChallengeKey);
+            AuthenticationResponseChallenge challenge = authenticationManager.AuthenticationResponseChallenge;
             Assert.NotNull(challenge);
-            string[] authenticationTypes = challenge.Item1;
+            string[] authenticationTypes = challenge.AuthenticationTypes;
             Assert.NotNull(authenticationTypes);
             Assert.Equal(1, authenticationTypes.Length);
             Assert.Same(expectedAuthenticationType, authenticationTypes[0]);
-            IDictionary<string, string> extra = challenge.Item2;
+            AuthenticationExtra extra = challenge.Extra;
             Assert.NotNull(extra);
-            Assert.Equal(0, extra.Count);
         }
 
         [Fact]
@@ -295,7 +370,48 @@ namespace System.Web.Http.Owin
             {
                 filter.ChallengeAsync(context, CancellationToken.None).ThrowIfFaulted();
             });
-            Assert.Equal("HttpAuthenticationContext.Request must not be null.", exception.Message);
+            Assert.Equal("HttpAuthenticationChallengeContext.Request must not be null.", exception.Message);
+        }
+
+        [Fact]
+        public void ChallengeAsync_Throws_WhenOwinContextIsNull()
+        {
+            // Arrange
+            IAuthenticationFilter filter = CreateProductUnderTest();
+            IHttpActionResult result = CreateDummyActionResult();
+
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpAuthenticationChallengeContext context = CreateChallengeContext(request, result);
+
+                // Act & Assert
+                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+                {
+                    filter.ChallengeAsync(context, CancellationToken.None).ThrowIfFaulted();
+                });
+                Assert.Equal("No OWIN authentication manager is associated with the request.", exception.Message);
+            }
+        }
+
+        [Fact]
+        public void ChallengeAsync_Throws_WhenAuthenticationManagerIsNull()
+        {
+            // Arrange
+            IAuthenticationFilter filter = CreateProductUnderTest();
+            IHttpActionResult result = CreateDummyActionResult();
+            IOwinContext owinContext = CreateOwinContext(null);
+
+            using (HttpRequestMessage request = CreateRequest(owinContext))
+            {
+                HttpAuthenticationChallengeContext context = CreateChallengeContext(request, result);
+
+                // Act & Assert
+                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+                {
+                    filter.ChallengeAsync(context, CancellationToken.None).ThrowIfFaulted();
+                });
+                Assert.Equal("No OWIN authentication manager is associated with the request.", exception.Message);
+            }
         }
 
         private static HttpActionContext CreateActionContext(HttpRequestMessage request)
@@ -326,6 +442,27 @@ namespace System.Web.Http.Owin
             return new HttpAuthenticationContext(actionContext, principal);
         }
 
+        private static IAuthenticationManager CreateAuthenticationManager(
+            Func<string, Task<AuthenticateResult>> authenticate)
+        {
+            Mock<IAuthenticationManager> mock = new Mock<IAuthenticationManager>(
+                MockBehavior.Strict);
+            string authenticationType = null;
+            mock.Setup(m => m.AuthenticateAsync(It.IsAny<string>()))
+                .Callback<string>((a) => { authenticationType = a; })
+                .Returns(() => authenticate.Invoke(authenticationType));
+            return mock.Object;
+        }
+
+        private static IAuthenticationManager CreateAuthenticationManager(AuthenticationResponseChallenge challenge)
+        {
+            Mock<IAuthenticationManager> mock = new Mock<IAuthenticationManager>(MockBehavior.Strict);
+            mock.SetupProperty(m => m.AuthenticationResponseChallenge);
+            IAuthenticationManager authenticationManager = mock.Object;
+            authenticationManager.AuthenticationResponseChallenge = challenge;
+            return authenticationManager;
+        }
+
         private static HttpAuthenticationChallengeContext CreateChallengeContext(HttpRequestMessage request,
             IHttpActionResult result)
         {
@@ -343,11 +480,6 @@ namespace System.Web.Http.Owin
             return new Mock<IHttpActionResult>(MockBehavior.Strict).Object;
         }
 
-        private static IDictionary<string, string> CreateDummyExtra()
-        {
-            return new Mock<IDictionary<string, string>>(MockBehavior.Strict).Object;
-        }
-
         private static ClaimsIdentity CreateDummyIdentity()
         {
             return new Mock<ClaimsIdentity>(MockBehavior.Strict).Object;
@@ -358,25 +490,21 @@ namespace System.Web.Http.Owin
             return new Mock<IPrincipal>(MockBehavior.Strict).Object;
         }
 
-        private static IDictionary<string, object> CreateOwinEnvironment()
+        private static AuthenticationExtra CreateExtra()
         {
-            return new Dictionary<string, object>();
+            return new AuthenticationExtra();
         }
 
-        private static IDictionary<string, object> CreateOwinEnvironment(Func<string[], Action<IIdentity,
-            IDictionary<string, string>, IDictionary<string, object>, object>, object, Task> authenticate)
+        private static IOwinContext CreateOwinContext()
         {
-            IDictionary<string, object> environment = CreateOwinEnvironment();
-            environment.Add("security.Authenticate", authenticate);
-            return environment;
+            return new OwinContext();
         }
 
-        private static IDictionary<string, object> CreateOwinEnvironment(Tuple<string[],
-            IDictionary<string, string>> challenge)
+        private static IOwinContext CreateOwinContext(IAuthenticationManager authenticationManager)
         {
-            IDictionary<string, object> environment = CreateOwinEnvironment();
-            environment.Add(ChallengeKey, challenge);
-            return environment;
+            Mock<IOwinContext> mockContext = new Mock<IOwinContext>(MockBehavior.Strict);
+            mockContext.SetupGet(c => c.Authentication).Returns(authenticationManager);
+            return mockContext.Object;
         }
 
         private static HostAuthenticationFilter CreateProductUnderTest()
@@ -389,10 +517,15 @@ namespace System.Web.Http.Owin
             return new HostAuthenticationFilter(authenticationType);
         }
 
-        private static HttpRequestMessage CreateRequest(IDictionary<string, object> owinEnvironment)
+        private static HttpRequestMessage CreateRequest()
+        {
+            return new HttpRequestMessage();
+        }
+
+        private static HttpRequestMessage CreateRequest(IOwinContext owinContext)
         {
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetOwinEnvironment(owinEnvironment);
+            request.SetOwinContext(owinContext);
             return request;
         }
     }

@@ -15,7 +15,7 @@ namespace System.Web.Http.Owin
         [Fact]
         public void SimpleGet_Works()
         {
-            using (WebApplication.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
+            using (WebApp.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
             {
                 HttpClient client = new HttpClient();
 
@@ -30,7 +30,7 @@ namespace System.Web.Http.Owin
         [Fact]
         public void SimplePost_Works()
         {
-            using (WebApplication.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
+            using (WebApp.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
             {
                 HttpClient client = new HttpClient();
                 var content = new StringContent("\"Echo this\"", Encoding.UTF8, "application/json");
@@ -46,7 +46,7 @@ namespace System.Web.Http.Owin
         [Fact]
         public void GetThatThrowsDuringSerializations_RespondsWith500()
         {
-            using (WebApplication.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
+            using (WebApp.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
             {
                 HttpClient client = new HttpClient();
 

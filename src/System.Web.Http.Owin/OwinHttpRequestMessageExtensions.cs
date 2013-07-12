@@ -2,9 +2,8 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Web.Http.Owin;
-using System.Web.Http.Owin.Properties;
 using Microsoft.Owin;
+using Microsoft.Owin.Security;
 
 namespace System.Net.Http
 {
@@ -15,6 +14,55 @@ namespace System.Net.Http
     public static class OwinHttpRequestMessageExtensions
     {
         private const string OwinEnvironmentKey = "MS_OwinEnvironment";
+        private const string OwinContextKey = "MS_OwinContext";
+
+        /// <summary>Gets the OWIN context for the specified request.</summary>
+        /// <param name="request">The HTTP request message.</param>
+        /// <returns>
+        /// The OWIN environment for the specified context, if available; otherwise <see langword="null"/>.
+        /// </returns>
+        public static IOwinContext GetOwinContext(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+
+            IOwinContext context;
+            if (!request.Properties.TryGetValue<IOwinContext>(OwinContextKey, out context))
+            {
+                // If the OWIN context is not available, try to create by upgrading an OWIN environment property
+                // instead.
+                IDictionary<string, object> environment;
+                if (request.Properties.TryGetValue<IDictionary<string, object>>(OwinEnvironmentKey, out environment))
+                {
+                    context = new OwinContext(environment);
+                    SetOwinContext(request, context);
+                    request.Properties.Remove(OwinEnvironmentKey);
+                }
+            }
+            return context;
+        }
+
+        /// <summary>Sets the OWIN context for the specified request.</summary>
+        /// <param name="request">The HTTP request message.</param>
+        /// <param name="context">The OWIN context to set.</param>
+        public static void SetOwinContext(this HttpRequestMessage request, IOwinContext context)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
+
+            request.Properties[OwinContextKey] = context;
+            // Make sure only one of the two properties exists (single source of truth).
+            request.Properties.Remove(OwinEnvironmentKey);
+        }
 
         /// <summary>Gets the OWIN environment for the specified request.</summary>
         /// <param name="request">The HTTP request message.</param>
@@ -23,14 +71,14 @@ namespace System.Net.Http
         /// </returns>
         public static IDictionary<string, object> GetOwinEnvironment(this HttpRequestMessage request)
         {
-            if (request == null)
+            IOwinContext context = GetOwinContext(request);
+
+            if (context == null)
             {
-                throw new ArgumentNullException("request");
+                return null;
             }
 
-            IDictionary<string, object> environment;
-            request.Properties.TryGetValue<IDictionary<string, object>>(OwinEnvironmentKey, out environment);
-            return environment;
+            return context.Environment;
         }
 
         /// <summary>Sets the OWIN environment for the specified request.</summary>
@@ -38,62 +86,19 @@ namespace System.Net.Http
         /// <param name="environment">The OWIN environment to set.</param>
         public static void SetOwinEnvironment(this HttpRequestMessage request, IDictionary<string, object> environment)
         {
-            if (request == null)
-            {
-                throw new ArgumentNullException("request");
-            }
-            if (environment == null)
-            {
-                throw new ArgumentNullException("environment");
-            }
-
-            request.Properties[OwinEnvironmentKey] = environment;
+            SetOwinContext(request, new OwinContext(environment));
         }
 
-        /// <summary>Gets the OWIN request for the specified request.</summary>
-        /// <param name="request">The HTTP request message.</param>
-        /// <returns>The OWIN request for the specified request.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when no OWIN environment is available for the request.
-        /// </exception>
-        public static OwinRequest GetOwinRequest(this HttpRequestMessage request)
+        internal static IAuthenticationManager GetAuthenticationManager(this HttpRequestMessage request)
         {
-            if (request == null)
+            IOwinContext context = GetOwinContext(request);
+
+            if (context == null)
             {
-                throw new ArgumentNullException("request");
+                return null;
             }
 
-            IDictionary<string, object> environment = GetOwinEnvironment(request);
-
-            if (environment == null)
-            {
-                throw new InvalidOperationException(OwinResources.OwinEnvironmentNotAvailable);
-            }
-
-            return new OwinRequest(environment);
-        }
-
-        /// <summary>Gets the OWIN response for with the specified request.</summary>
-        /// <param name="request">The HTTP request message.</param>
-        /// <returns>The OWIN response for with the specified request.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when no OWIN environment is available for the request.
-        /// </exception>
-        public static OwinResponse GetOwinResponse(this HttpRequestMessage request)
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException("request");
-            }
-
-            IDictionary<string, object> environment = GetOwinEnvironment(request);
-
-            if (environment == null)
-            {
-                throw new InvalidOperationException(OwinResources.OwinEnvironmentNotAvailable);
-            }
-
-            return new OwinResponse(environment);
+            return context.Authentication;
         }
     }
 }

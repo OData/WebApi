@@ -64,13 +64,7 @@ namespace System.Web.Http.Routing
 
             string detokenizedRouteTemplate = InlineRouteTemplateParser.ParseRouteTemplate(routeTemplate, defaults, constraints, ConstraintResolver);
 
-            HttpRouteValueDictionary dataTokens = new HttpRouteValueDictionary();
-            if (actions != null)
-            {
-                dataTokens[RouteKeys.ActionsDataTokenKey] = actions.AsArray();
-            }
-
-            return BuildHttpRoute(detokenizedRouteTemplate, defaults, constraints, dataTokens);
+            return BuildHttpRoute(detokenizedRouteTemplate, defaults, constraints, actions);
         }
 
         /// <summary>
@@ -79,15 +73,15 @@ namespace System.Web.Http.Routing
         /// <param name="routeTemplate">The detokenized route template.</param>
         /// <param name="defaults">The route defaults.</param>
         /// <param name="constraints">The route constraints.</param>
-        /// <param name="dataTokens">The route data tokens.</param>
+        /// <param name="actions">The actions to invoke for the route.</param>
         /// <returns>The generated <see cref="IHttpRoute"/>.</returns>
         public virtual IHttpRoute BuildHttpRoute(
             string routeTemplate,
             HttpRouteValueDictionary defaults,
             HttpRouteValueDictionary constraints,
-            HttpRouteValueDictionary dataTokens)
+            IEnumerable<ReflectedHttpActionDescriptor> actions)
         {
-            return new HttpRoute(routeTemplate, defaults, constraints, dataTokens);
+            return new HttpDirectRoute(routeTemplate, defaults, constraints, actions);
         }
     }
 }

@@ -104,17 +104,24 @@ namespace System.Web.Http.ValueProviders
                 throw Error.ArgumentNull("type");
             }
 
-            CultureInfo cultureToUse = culture ?? Culture;
-            return UnwrapPossibleArrayType(cultureToUse, RawValue, type);
-        }
+            object value = RawValue;
+            if (value == null)
+            {
+                // treat null route parameters as though they were the default value for the type
+                return type.IsValueType ? Activator.CreateInstance(type) : null;
+            }
 
-        private static object UnwrapPossibleArrayType(CultureInfo culture, object value, Type destinationType)
-        {
-            if (value == null || destinationType.IsInstanceOfType(value))
+            if (type.IsInstanceOfType(value))
             {
                 return value;
             }
 
+            CultureInfo cultureToUse = culture ?? Culture;
+            return UnwrapPossibleArrayType(cultureToUse, value, type);
+        }
+
+        private static object UnwrapPossibleArrayType(CultureInfo culture, object value, Type destinationType)
+        {
             // array conversion results in four cases, as below
             Array valueAsArray = value as Array;
             if (destinationType.IsArray)

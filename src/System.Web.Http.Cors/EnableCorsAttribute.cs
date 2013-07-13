@@ -161,7 +161,7 @@ namespace System.Web.Http.Cors
             }
         }
 
-        /// <inheritDoc />
+        /// <inheritdoc />
         public Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             return Task.FromResult(_corsPolicy);

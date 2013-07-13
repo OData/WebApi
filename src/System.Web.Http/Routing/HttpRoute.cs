@@ -24,8 +24,6 @@ namespace System.Web.Http.Routing
         /// </summary>
         public static readonly string HttpRouteKey = "httproute";
 
-        private const string HttpMethodParameterName = "httpMethod";
-
         private string _routeTemplate;
         private HttpRouteValueDictionary _defaults;
         private HttpRouteValueDictionary _constraints;

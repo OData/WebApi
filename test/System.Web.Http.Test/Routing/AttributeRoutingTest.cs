@@ -18,7 +18,7 @@ namespace System.Web.Http.Routing
         // Tests optional parameters
         [InlineData("GET", "optional/1/2", "Optional12")]
         [InlineData("GET", "optional/1", "Optional1")]
-        [InlineData("GET", "optional", "Optional")]
+        [InlineData("GET", "optional", "Optional0")]
         [InlineData("GET", "optionalwconstraint", "OptionalWithConstraint")]
         // Tests default values
         [InlineData("GET", "default/1/2", "Default12")]
@@ -80,13 +80,13 @@ namespace System.Web.Http.Routing
         }
 
         [HttpGet("optional/{opt1?}/{opt2?}")]
-        public string Optional(string opt1 = null, string opt2 = null)
+        public string Optional(int opt1, string opt2)
         {
             return "Optional" + opt1 + opt2;
         }
 
         [HttpGet("optionalwconstraint/{opt:int?}")]
-        public string OptionalWithConstraint(string opt = null)
+        public string OptionalWithConstraint(string opt)
         {
             return "OptionalWithConstraint" + opt;
         }

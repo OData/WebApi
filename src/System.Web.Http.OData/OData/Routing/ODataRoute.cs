@@ -73,7 +73,7 @@ namespace System.Web.Http.OData.Routing
                 prefix + '/' + ODataRouteConstants.ODataPathTemplate;
         }
 
-        /// <inheritDoc />
+        /// <inheritdoc />
         public override IHttpVirtualPathData GetVirtualPath(HttpRequestMessage request, IDictionary<string, object> values)
         {
             // Only perform URL generation if the "httproute" key was specified. This allows these

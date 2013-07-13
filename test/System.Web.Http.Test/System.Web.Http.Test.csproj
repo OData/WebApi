@@ -159,6 +159,7 @@
     <Compile Include="..\Common\Routing\RouteEntryTest.cs">
       <Link>Routing\RouteEntryTest.cs</Link>
     </Compile>
+    <Compile Include="Routing\HttpDirectRouteTest.cs" />
     <Compile Include="Routing\HttpRouteBuilderTest.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />
@@ -309,6 +310,7 @@
     <Compile Include="ValueProviders\Providers\QueryStringValueProviderFactoryTest.cs" />
     <Compile Include="ValueProviders\Providers\QueryStringValueProviderTest.cs" />
     <Compile Include="ValueProviders\Providers\RouteDataValueProviderTest.cs" />
+    <Compile Include="ValueProviders\ValueProviderResultTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

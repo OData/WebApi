@@ -50,7 +50,7 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        /// <inheritDoc />
+        /// <inheritdoc />
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
             JsonProperty property = base.CreateProperty(member, memberSerialization);

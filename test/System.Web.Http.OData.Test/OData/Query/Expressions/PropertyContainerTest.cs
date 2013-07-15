@@ -35,7 +35,7 @@ namespace System.Web.Http.OData.Query.Expressions
             // Arrange
             Expression propertyName = Expression.Constant("PropertyName");
             Expression propertyValue = Expression.Constant(42);
-            var properties = new[] { new NamedPropertyExpression(propertyName, propertyValue, autoSelected: true) };
+            var properties = new[] { new NamedPropertyExpression(propertyName, propertyValue) { AutoSelected = true } };
 
             // Act
             Expression containerExpression = PropertyContainer.CreatePropertyContainer(properties);
@@ -57,7 +57,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Expression propertyNameExpression = Expression.Constant(propertyName);
             Expression propertyValueExpression = Expression.Constant(42);
             Expression nullCheckExpression = Expression.Constant(true);
-            var properties = new[] { new NamedPropertyExpression(propertyNameExpression, propertyValueExpression, nullCheckExpression) };
+            var properties = new[] { new NamedPropertyExpression(propertyNameExpression, propertyValueExpression) { NullCheck = nullCheckExpression } };
 
             // Act
             Expression containerExpression = PropertyContainer.CreatePropertyContainer(properties);
@@ -78,7 +78,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Expression propertyNameExpression = Expression.Constant(propertyName);
             Expression propertyValueExpression = Expression.Constant(propertyValue);
             Expression nullCheckExpression = Expression.Constant(false);
-            var properties = new[] { new NamedPropertyExpression(propertyNameExpression, propertyValueExpression, nullCheckExpression) };
+            var properties = new[] { new NamedPropertyExpression(propertyNameExpression, propertyValueExpression) { NullCheck = nullCheckExpression } };
 
             // Act
             Expression containerExpression = PropertyContainer.CreatePropertyContainer(properties);
@@ -96,8 +96,8 @@ namespace System.Web.Http.OData.Query.Expressions
             // Arrange
             var properties = new[] 
             { 
-                new NamedPropertyExpression(name: Expression.Constant("Prop1"), value: Expression.Constant(1), nullCheck: Expression.Constant(true)),
-                new NamedPropertyExpression(name: Expression.Constant("Prop2"), value: Expression.Constant(2), nullCheck: Expression.Constant(false)),
+                new NamedPropertyExpression(name: Expression.Constant("Prop1"), value: Expression.Constant(1)) { NullCheck = Expression.Constant(true) },
+                new NamedPropertyExpression(name: Expression.Constant("Prop2"), value: Expression.Constant(2)) { NullCheck = Expression.Constant(false) },
             };
 
             // Act
@@ -108,6 +108,27 @@ namespace System.Web.Http.OData.Query.Expressions
             var dict = container.ToDictionary();
             Assert.Null(dict["Prop1"]);
             Assert.Equal(2, dict["Prop2"]);
+        }
+
+        [Fact]
+        public void CreatePropertyContainer_PageSize()
+        {
+            // Arrange
+            int pageSize = 5;
+            Expression propertyName = Expression.Constant("PropertyName");
+            Expression propertyValue = Expression.Constant(Enumerable.Range(0, 10));
+            var properties = new[] { new NamedPropertyExpression(propertyName, propertyValue) { PageSize = pageSize } };
+
+            // Act
+            Expression containerExpression = PropertyContainer.CreatePropertyContainer(properties);
+
+            // Assert
+            PropertyContainer container = ToContainer(containerExpression);
+            var result = container.ToDictionary()["PropertyName"];
+            var truncatedCollection = Assert.IsType<TruncatedCollection<int>>(result);
+            Assert.True(truncatedCollection.IsTruncated);
+            Assert.Equal(pageSize, truncatedCollection.PageSize);
+            Assert.Equal(Enumerable.Range(0, pageSize), truncatedCollection);
         }
 
         [Fact]

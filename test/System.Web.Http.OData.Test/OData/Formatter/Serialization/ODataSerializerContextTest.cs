@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Linq;
 using System.Net.Http;
-using System.Reflection;
-using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
@@ -20,21 +21,25 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CopyCtor_ThrowsArgumentNull_Context()
+        public void Ctor_ForNestedContext_ThrowsArgumentNull_Entity()
         {
-            Assert.ThrowsArgumentNull(() => new ODataSerializerContext(context: null), "context");
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
+            IEdmNavigationProperty navProp = new Mock<IEdmNavigationProperty>().Object;
+
+            Assert.ThrowsArgumentNull(
+                () => new ODataSerializerContext(entity: null, selectExpandClause: selectExpand, navigationProperty: navProp), "entity");
         }
 
         [Fact]
-        public void CopyCtor_CopiesAllTheProperties()
+        public void Ctor_ThatBuildsNestedContext_CopiesProperties()
         {
             // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataSerializerContext context = new ODataSerializerContext
             {
-                EntitySet = new Mock<IEdmEntitySet>().Object,
-                IsNested = true,
+                EntitySet = model.Customers,
                 MetadataLevel = ODataMetadataLevel.FullMetadata,
-                Model = new Mock<IEdmModel>().Object,
+                Model = model.Model,
                 Path = new ODataPath(),
                 Request = new HttpRequestMessage(),
                 RootElementName = "somename",
@@ -42,24 +47,41 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 SkipExpensiveAvailabilityChecks = true,
                 Url = new UrlHelper()
             };
+            EntityInstanceContext entity = new EntityInstanceContext { SerializerContext = context };
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
+            IEdmNavigationProperty navProp = model.Customer.NavigationProperties().First();
 
             // Act
-            ODataSerializerContext result = new ODataSerializerContext(context);
+            ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpand, navProp);
 
             // Assert
-            // Check each and every property. This test should fail if someone accidentally adds a new property and 
-            // forgets to update the copy constructor.
-            foreach (PropertyInfo property in typeof(ODataSerializerContext).GetProperties())
-            {
-                if (property.PropertyType.IsValueType)
-                {
-                    Assert.Equal(property.GetValue(context), property.GetValue(result));
-                }
-                else
-                {
-                    Assert.Same(property.GetValue(context), property.GetValue(result));
-                }
-            }
+            Assert.Equal(context.MetadataLevel, nestedContext.MetadataLevel);
+            Assert.Same(context.Model, nestedContext.Model);
+            Assert.Same(context.Path, nestedContext.Path);
+            Assert.Same(context.Request, nestedContext.Request);
+            Assert.Equal(context.RootElementName, nestedContext.RootElementName);
+            Assert.Equal(context.SkipExpensiveAvailabilityChecks, nestedContext.SkipExpensiveAvailabilityChecks);
+            Assert.Same(context.Url, nestedContext.Url);
+        }
+
+        [Fact]
+        public void Ctor_ThatBuildsNestedContext_InitializesRightValues()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
+            IEdmNavigationProperty navProp = model.Customer.NavigationProperties().First();
+            ODataSerializerContext context = new ODataSerializerContext { EntitySet = model.Customers, Model = model.Model };
+            EntityInstanceContext entity = new EntityInstanceContext { SerializerContext = context };
+
+            // Act
+            ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpand, navProp);
+
+            // Assert
+            Assert.Same(entity, nestedContext.ExpandedEntity);
+            Assert.Same(navProp, nestedContext.NavigationProperty);
+            Assert.Same(selectExpand, nestedContext.SelectExpandClause);
+            Assert.Same(model.Orders, nestedContext.EntitySet);
         }
     }
 }

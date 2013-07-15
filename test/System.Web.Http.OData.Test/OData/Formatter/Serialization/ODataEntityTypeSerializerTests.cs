@@ -1132,7 +1132,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteObjectInline_SetsIsNested_ForExpandedNavigationProperties()
+        public void WriteObjectInline_SetsParentContext_ForExpandedNavigationProperties()
         {
             // Arrange
             ODataWriter mockWriter = new Mock<ODataWriter>().Object;
@@ -1157,7 +1157,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             serializer.Object.WriteObjectInline(_customer, mockWriter, _writeContext);
 
             // Assert
-            expandedItemSerializer.Verify(s => s.WriteObjectInline(It.IsAny<object>(), mockWriter, It.Is<ODataSerializerContext>(c => c.IsNested)));
+            expandedItemSerializer.Verify(
+                s => s.WriteObjectInline(It.IsAny<object>(), mockWriter, It.Is<ODataSerializerContext>(c => c.ExpandedEntity.SerializerContext == _writeContext)));
         }
 
         private static IEdmNavigationProperty CreateFakeNavigationProperty(string name, IEdmTypeReference type)

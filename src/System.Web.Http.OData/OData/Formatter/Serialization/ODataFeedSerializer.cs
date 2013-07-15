@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Query;
+using System.Web.Http.OData.Query.Expressions;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Atom;
@@ -185,9 +187,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // TODO: Bug 467590: remove the hardcoded feed id. Get support for it from the model builder ?
             feed.Id = "http://schemas.datacontract.org/2004/07/" + EntityCollectionType.FullName();
 
-            // If we have more OData format specific information apply it now, only if we are the root feed.
-            if (!writeContext.IsNested)
+            if (writeContext.ExpandedEntity == null)
             {
+                // If we have more OData format specific information apply it now, only if we are the root feed.
                 PageResult odataFeedAnnotations = feedInstance as PageResult;
                 if (odataFeedAnnotations != null)
                 {
@@ -205,8 +207,35 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     }
                 }
             }
+            else
+            {
+                // nested feed
+                ITruncatedCollection truncatedCollection = feedInstance as ITruncatedCollection;
+                if (truncatedCollection != null && truncatedCollection.IsTruncated)
+                {
+                    feed.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
+                }
+            }
 
             return feed;
+        }
+
+        private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize)
+        {
+            Contract.Assert(writeContext.ExpandedEntity != null);
+
+            IEdmNavigationProperty expandedProperty = writeContext.NavigationProperty;
+            IEdmEntitySet sourceEntitySet = writeContext.ExpandedEntity.EntitySet;
+            EntitySetLinkBuilderAnnotation linkBuilder = writeContext.Model.GetEntitySetLinkBuilder(sourceEntitySet);
+            Uri navigationLink =
+                linkBuilder.BuildNavigationLink(writeContext.ExpandedEntity, writeContext.NavigationProperty, ODataMetadataLevel.Default);
+
+            if (navigationLink != null)
+            {
+                return ODataQueryOptions.GetNextPageLink(navigationLink, pageSize);
+            }
+
+            return null;
         }
     }
 }

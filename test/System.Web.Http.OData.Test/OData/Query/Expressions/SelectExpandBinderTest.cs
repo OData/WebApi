@@ -159,6 +159,25 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Fact]
+        public void ProjectAsWrapper_Collection_AppliesPageSize()
+        {
+            // Arrange
+            int pageSize = 5;
+            var orders = Enumerable.Range(0, 10).Select(i => new Order());
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
+            Expression source = Expression.Constant(orders);
+            _settings.PageSize = pageSize;
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+
+            // Assert
+            IEnumerable<SelectExpandWrapper<Order>> projectedOrders = Expression.Lambda(projection).Compile().DynamicInvoke() as IEnumerable<SelectExpandWrapper<Order>>;
+            Assert.NotNull(projectedOrders);
+            Assert.Equal(pageSize + 1, projectedOrders.Count());
+        }
+
+        [Fact]
         public void ProjectAsWrapper_ProjectionContainsExpandedProperties()
         {
             // Arrange

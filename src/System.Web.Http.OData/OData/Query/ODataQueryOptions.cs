@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Reflection;
 using System.Text;
 using System.Web.Http.Dispatcher;
@@ -439,32 +440,9 @@ namespace System.Web.Http.OData.Query
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", Justification = "Not intended for public use, only public to enable invokation without security issues.")]
         public static IQueryable<T> LimitResults<T>(IQueryable<T> queryable, int limit, out bool resultsLimited)
         {
-            // Throw an overflow exception if resultsLimited is equal to Int32.MaxValue
-            checked
-            {
-                // Take (limit + 1) items so we can determine whether there are more results or not
-                queryable = queryable.Take(limit + 1);
-            }
-
-            List<T> list = new List<T>();
-            resultsLimited = false;
-            using (IEnumerator<T> enumerator = queryable.GetEnumerator())
-            {
-                while (enumerator.MoveNext())
-                {
-                    list.Add(enumerator.Current);
-                    if (list.Count == limit)
-                    {
-                        // If there are more results on the enumerator, we are limiting the results
-                        if (enumerator.MoveNext())
-                        {
-                            resultsLimited = true;
-                        }
-                        break;
-                    }
-                }
-            }
-            return list.AsQueryable();
+            TruncatedCollection<T> truncatedCollection = new TruncatedCollection<T>(queryable, limit);
+            resultsLimited = truncatedCollection.IsTruncated;
+            return truncatedCollection.AsQueryable();
         }
 
         internal static Uri GetNextPageLink(HttpRequestMessage request, int pageSize)
@@ -473,11 +451,27 @@ namespace System.Web.Http.OData.Query
             Contract.Assert(request.RequestUri != null);
             Contract.Assert(request.RequestUri.IsAbsoluteUri);
 
+            return GetNextPageLink(request.RequestUri, request.GetQueryNameValuePairs(), pageSize);
+        }
+
+        internal static Uri GetNextPageLink(Uri requestUri, int pageSize)
+        {
+            Contract.Assert(requestUri != null);
+            Contract.Assert(requestUri.IsAbsoluteUri);
+
+            return GetNextPageLink(requestUri, new FormDataCollection(requestUri), pageSize);
+        }
+
+        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize)
+        {
+            Contract.Assert(requestUri != null);
+            Contract.Assert(queryParameters != null);
+            Contract.Assert(requestUri.IsAbsoluteUri);
+
             StringBuilder queryBuilder = new StringBuilder();
 
             int nextPageSkip = pageSize;
 
-            IEnumerable<KeyValuePair<string, string>> queryParameters = request.GetQueryNameValuePairs();
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
                 string key = kvp.Key;
@@ -525,7 +519,7 @@ namespace System.Web.Http.OData.Query
 
             queryBuilder.AppendFormat("$skip={0}", nextPageSkip);
 
-            UriBuilder uriBuilder = new UriBuilder(request.RequestUri)
+            UriBuilder uriBuilder = new UriBuilder(requestUri)
             {
                 Query = queryBuilder.ToString()
             };

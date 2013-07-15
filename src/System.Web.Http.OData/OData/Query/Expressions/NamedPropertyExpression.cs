@@ -10,20 +10,7 @@ namespace System.Web.Http.OData.Query.Expressions
     /// </summary>
     internal class NamedPropertyExpression
     {
-        public NamedPropertyExpression(Expression name, Expression value, bool autoSelected = false)
-            : this(name, value)
-        {
-            AutoSelected = autoSelected;
-        }
-
-        public NamedPropertyExpression(Expression name, Expression value, Expression nullCheck)
-            : this(name, value)
-        {
-            Contract.Assert(nullCheck != null);
-            NullCheck = nullCheck;
-        }
-
-        private NamedPropertyExpression(Expression name, Expression value)
+        public NamedPropertyExpression(Expression name, Expression value)
         {
             Contract.Assert(name != null);
             Contract.Assert(value != null);
@@ -42,8 +29,10 @@ namespace System.Web.Http.OData.Query.Expressions
         // cannot be translated by EF. So, we generate the following expression instead,
         //       => new ExpandProperty<Customer> { Value = new SelectExpandWrapper<Customer> { .... }, IsNull = nullCheck }
         // and use Value only if IsNull is false.
-        public Expression NullCheck { get; private set; }
+        public Expression NullCheck { get; set; }
 
-        public bool AutoSelected { get; private set; }
+        public int? PageSize { get; set; }
+
+        public bool AutoSelected { get; set; }
     }
 }

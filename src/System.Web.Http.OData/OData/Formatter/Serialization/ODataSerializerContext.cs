@@ -23,14 +23,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
         /// </summary>
-        /// <param name="context">The <see cref="ODataSerializerContext"/> to copy settings from.</param>
-        /// <remarks>This is a copy constructor.</remarks>
-        public ODataSerializerContext(ODataSerializerContext context)
+        /// <param name="entity">The entity whose navigation property is being expanded.</param>
+        /// <param name="selectExpandClause">The <see cref="SelectExpandClause"/> for the navigation property being expanded.</param>
+        /// <param name="navigationProperty">The navigation property being expanded.</param>
+        /// <remarks>This constructor is used to construct the serializer context for writing expanded properties.</remarks>
+        public ODataSerializerContext(EntityInstanceContext entity, SelectExpandClause selectExpandClause, IEdmNavigationProperty navigationProperty)
         {
-            if (context == null)
+            if (entity == null)
             {
-                throw Error.ArgumentNull("context");
+                throw Error.ArgumentNull("entity");
             }
+            if (navigationProperty == null)
+            {
+                throw Error.ArgumentNull("navigationProperty");
+            }
+
+            ODataSerializerContext context = entity.SerializerContext;
 
             Request = context.Request;
             Url = context.Url;
@@ -40,8 +48,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             RootElementName = context.RootElementName;
             SkipExpensiveAvailabilityChecks = context.SkipExpensiveAvailabilityChecks;
             MetadataLevel = context.MetadataLevel;
-            SelectExpandClause = context.SelectExpandClause;
-            IsNested = context.IsNested;
+
+            ExpandedEntity = entity;
+            SelectExpandClause = selectExpandClause;
+            NavigationProperty = navigationProperty;
+            EntitySet = context.EntitySet.FindNavigationTarget(navigationProperty);
         }
 
         /// <summary>
@@ -91,8 +102,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public SelectExpandClause SelectExpandClause { get; set; }
 
         /// <summary>
-        /// Gets or sets whether the current context is for an expanded (not root level) entry or feed.
+        /// Gets or sets the entity that is being expanded.
         /// </summary>
-        public bool IsNested { get; set; }
+        public EntityInstanceContext ExpandedEntity { get; set; }
+
+        /// <summary>
+        /// Gets or sets the navigation property being expanded.
+        /// </summary>
+        public IEdmNavigationProperty NavigationProperty { get; set; }
     }
 }

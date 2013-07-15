@@ -263,28 +263,34 @@ namespace System.Web.Http.OData.Query.Expressions
                     propertyValue = ProjectAsWrapper(propertyValue, projection, propertyToExpand.ToEntityType());
                 }
 
-                if (projection != null && !propertyToExpand.Type.IsCollection())
+                NamedPropertyExpression propertyExpression = new NamedPropertyExpression(propertyName, propertyValue);
+                if (projection != null)
                 {
-                    includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue, nullCheck));
+                    if (!propertyToExpand.Type.IsCollection())
+                    {
+                        propertyExpression.NullCheck = nullCheck;
+                    }
+                    else if (_settings.PageSize != null)
+                    {
+                        propertyExpression.PageSize = _settings.PageSize.Value;
+                    }
                 }
-                else
-                {
-                    includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue, autoSelected: false));
-                }
+
+                includedProperties.Add(propertyExpression);
             }
 
             foreach (IEdmStructuralProperty propertyToInclude in propertiesToInclude)
             {
                 Expression propertyName = CreatePropertyNameExpression(elementType, propertyToInclude, source);
                 Expression propertyValue = CreatePropertyValueExpression(elementType, propertyToInclude, source);
-                includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue, autoSelected: false));
+                includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
             }
 
             foreach (IEdmStructuralProperty propertyToInclude in autoSelectedProperties)
             {
                 Expression propertyName = CreatePropertyNameExpression(elementType, propertyToInclude, source);
                 Expression propertyValue = CreatePropertyValueExpression(elementType, propertyToInclude, source);
-                includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue, autoSelected: true));
+                includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue) { AutoSelected = true });
             }
 
             // create a property container that holds all these property names and values.
@@ -303,6 +309,13 @@ namespace System.Web.Http.OData.Query.Expressions
             // expression
             //      (ElementType element) => new Wrapper { }
             LambdaExpression selector = Expression.Lambda(projection, element);
+
+            if (_settings.PageSize != null && _settings.PageSize.HasValue)
+            {
+                // nested paging. Take one more than page size as we need to know whether the collection
+                // was truncated or not while generating next page links.
+                source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType, _settings.EnableConstantParameterization);
+            }
 
             // expression
             //      source.Select((ElementType element) => new Wrapper { })

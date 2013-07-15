@@ -1,15 +1,20 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Serialization.Models;
+using System.Web.Http.OData.Query;
+using System.Web.Http.OData.Query.Expressions;
 using System.Web.Http.Routing;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Atom;
+using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -453,9 +458,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage();
             request.SetNextPageLink(nextLink);
             var result = new object[0];
+            IEdmNavigationProperty navProp = new Mock<IEdmNavigationProperty>().Object;
+            SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
+            EntityInstanceContext entity = new EntityInstanceContext
+            {
+                SerializerContext = new ODataSerializerContext { Request = request, EntitySet = _customerSet }
+            };
+            ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, navProp);
 
             // Act
-            ODataFeed feed = serializer.CreateODataFeed(result, new ODataSerializerContext { Request = request, IsNested = true });
+            ODataFeed feed = serializer.CreateODataFeed(result, nestedContext);
 
             // Assert
             Assert.Null(feed.NextPageLink);
@@ -469,12 +481,47 @@ namespace System.Web.Http.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage();
             request.SetInlineCount(42);
             var result = new object[0];
+            IEdmNavigationProperty navProp = new Mock<IEdmNavigationProperty>().Object;
+            SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
+            EntityInstanceContext entity = new EntityInstanceContext
+            {
+                SerializerContext = new ODataSerializerContext { Request = request, EntitySet = _customerSet }
+            };
+            ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, navProp);
 
             // Act
-            ODataFeed feed = serializer.CreateODataFeed(result, new ODataSerializerContext { Request = request, IsNested = true });
+            ODataFeed feed = serializer.CreateODataFeed(result, nestedContext);
 
             // Assert
             Assert.Null(feed.Count);
+        }
+
+        [Fact]
+        public void CreateODataFeed_SetsNextPageLink_WhenWritingTruncatedCollection_ForExpandedProperties()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            IEdmCollectionTypeReference customersType = new EdmCollectionTypeReference(new EdmCollectionType(model.Customer.AsReference()), isNullable: false);
+            ODataFeedSerializer serializer = new ODataFeedSerializer(customersType, new DefaultODataSerializerProvider());
+            SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
+            IEdmNavigationProperty ordersProperty = model.Customer.NavigationProperties().First();
+            EntityInstanceContext entity = new EntityInstanceContext
+            {
+                SerializerContext = new ODataSerializerContext { EntitySet = model.Customers, Model = model.Model }
+            };
+            ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, ordersProperty);
+            TruncatedCollection<Order> orders = new TruncatedCollection<Order>(new[] { new Order(), new Order() }, pageSize: 1);
+
+            Mock<EntitySetLinkBuilderAnnotation> linkBuilder = new Mock<EntitySetLinkBuilderAnnotation>();
+            linkBuilder.Setup(l => l.BuildNavigationLink(entity, ordersProperty, ODataMetadataLevel.Default)).Returns(new Uri("http://navigation-link/"));
+            model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
+            model.Model.SetEntitySetLinkBuilder(model.Orders, new EntitySetLinkBuilderAnnotation());
+
+            // Act
+            ODataFeed feed = serializer.CreateODataFeed(orders, nestedContext);
+
+            // Assert
+            Assert.Equal("http://navigation-link/?$skip=1", feed.NextPageLink.AbsoluteUri);
         }
     }
 }

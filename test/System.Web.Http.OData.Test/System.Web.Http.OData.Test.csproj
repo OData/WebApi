@@ -113,6 +113,7 @@
     <Compile Include="OData\EntitySetControllerHelpersTest.cs" />
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="OData\PerRequestParameterBindingTest.cs" />
+    <Compile Include="OData\Query\TruncatedCollectionTest.cs" />
     <Compile Include="OData\Routing\Conventions\PropertyRoutingConventionTests.cs" />
     <Compile Include="OData\Query\ExpressionHelpersTest.cs" />
     <Compile Include="OData\Query\Expressions\ModelContainerTest.cs" />

@@ -224,10 +224,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             if (propertyValue != null)
             {
                 // create the serializer context for the expanded item.
-                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(writeContext);
-                nestedWriteContext.SelectExpandClause = selectExpandClause;
-                nestedWriteContext.EntitySet = writeContext.EntitySet.FindNavigationTarget(navigationProperty);
-                nestedWriteContext.IsNested = true;
+                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(entityInstanceContext, selectExpandClause, navigationProperty);
 
                 // write object.
                 Type propertyType = propertyValue.GetType();

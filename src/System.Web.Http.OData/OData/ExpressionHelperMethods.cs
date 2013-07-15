@@ -16,7 +16,6 @@ namespace System.Web.Http.OData
         private static MethodInfo _thenByMethod = GenericMethodOf(_ => Queryable.ThenBy<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _thenByDescendingMethod = GenericMethodOf(_ => Queryable.ThenByDescending<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _countMethod = GenericMethodOf(_ => Queryable.LongCount<int>(default(IQueryable<int>)));
-        private static MethodInfo _takeMethod = GenericMethodOf(_ => Queryable.Take<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _skipMethod = GenericMethodOf(_ => Queryable.Skip<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _whereMethod = GenericMethodOf(_ => Queryable.Where<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
 
@@ -33,6 +32,9 @@ namespace System.Web.Http.OData
 
         private static MethodInfo _enumerableSelectMethod = GenericMethodOf(_ => Enumerable.Select<int, int>(default(IEnumerable<int>), i => i));
         private static MethodInfo _queryableSelectMethod = GenericMethodOf(_ => Queryable.Select<int, int>(default(IQueryable<int>), i => i));
+
+        private static MethodInfo _queryableTakeMethod = GenericMethodOf(_ => Queryable.Take<int>(default(IQueryable<int>), default(int)));
+        private static MethodInfo _enumerableTakeMethod = GenericMethodOf(_ => Enumerable.Take<int>(default(IEnumerable<int>), default(int)));
 
         public static MethodInfo QueryableOrderByGeneric
         {
@@ -61,7 +63,12 @@ namespace System.Web.Http.OData
 
         public static MethodInfo QueryableTakeGeneric
         {
-            get { return _takeMethod; }
+            get { return _queryableTakeMethod; }
+        }
+
+        public static MethodInfo EnumerableTakeGeneric
+        {
+            get { return _enumerableTakeMethod; }
         }
 
         public static MethodInfo QueryableSkipGeneric

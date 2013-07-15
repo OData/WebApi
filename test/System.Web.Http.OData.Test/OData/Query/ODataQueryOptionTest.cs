@@ -694,6 +694,13 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
+        public void GetNextPageLink_ThatTakesUri_GetsNextPageLink()
+        {
+            Uri nextPageLink = ODataQueryOptions.GetNextPageLink(new Uri("http://localhost/Customers?$filter=Age ge 18"), 10);
+            Assert.Equal("http://localhost/Customers?$filter=Age%20ge%2018&$skip=10", nextPageLink.AbsoluteUri);
+        }
+
+        [Fact]
         public void CanTurnOffAllValidation()
         {
             // Arrange

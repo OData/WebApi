@@ -28,11 +28,25 @@ namespace System.Web.Http.OData
 
         public static IQueryable Take(IQueryable query, int count, Type type, bool parameterize)
         {
-            MethodInfo takeMethod = ExpressionHelperMethods.QueryableTakeGeneric.MakeGenericMethod(type);
-            Expression takeValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
-
-            Expression takeQuery = Expression.Call(null, takeMethod, new[] { query.Expression, takeValueExpression });
+            Expression takeQuery = Take(query.Expression, count, type, parameterize);
             return query.Provider.CreateQuery(takeQuery);
+        }
+
+        public static Expression Take(Expression source, int count, Type elementType, bool parameterize)
+        {
+            MethodInfo takeMethod;
+            if (typeof(IQueryable).IsAssignableFrom(source.Type))
+            {
+                takeMethod = ExpressionHelperMethods.QueryableTakeGeneric.MakeGenericMethod(elementType);
+            }
+            else
+            {
+                takeMethod = ExpressionHelperMethods.EnumerableTakeGeneric.MakeGenericMethod(elementType);
+            }
+
+            Expression takeValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
+            Expression takeQuery = Expression.Call(null, takeMethod, new[] { source, takeValueExpression });
+            return takeQuery;
         }
 
         public static IQueryable OrderByIt(IQueryable query, OrderByDirection direction, Type type, bool alreadyOrdered = false)

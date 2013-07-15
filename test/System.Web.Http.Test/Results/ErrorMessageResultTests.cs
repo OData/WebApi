@@ -284,7 +284,7 @@ namespace System.Web.Http.Results
                 expectedMediaType);
 
             Expression<Func<IEnumerable<MediaTypeFormatter>, bool>> formattersMatch = (f) =>
-                f != null && f.AsArray().Length == 1 && f.AsArray()[0] == expectedInputFormatter ? true : false;
+                f != null && f.AsArray().Length == 1 && f.AsArray()[0] == expectedInputFormatter;
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {

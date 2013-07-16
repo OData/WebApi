@@ -131,7 +131,6 @@ namespace System.Web.Razor.Generator
             }
         }
 
-
         private static int CollectSpacesAndTabs(Span target, int tabSize)
         {
             Span firstSpanInLine = target;
@@ -142,7 +141,7 @@ namespace System.Web.Razor.Generator
             {
                 // When scanning previous spans we need to be break down the spans with spaces.
                 // Because the parser doesn't so for example a span looking like \n\n\t needs to be broken down, and we should just grab the \t.
-                string previousContent = firstSpanInLine.Previous.Content ?? string.Empty;
+                String previousContent = firstSpanInLine.Previous.Content ?? String.Empty;
 
                 int lastNewLineIndex = previousContent.LastIndexOfAny(_newLineChars);
 
@@ -185,7 +184,7 @@ namespace System.Web.Razor.Generator
                             // iter 2) 2
                             // iter 3) 4 = 2 + (4 - 2)
                             // iter 4) 8 = 4 + (4 - 0)
-                            padding = padding + (tabSize - padding % tabSize);
+                            padding = padding + (tabSize - (padding % tabSize));
                         }
                         else
                         {

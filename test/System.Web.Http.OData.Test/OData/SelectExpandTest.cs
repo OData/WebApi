@@ -46,6 +46,7 @@ namespace System.Web.Http.OData
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers&$select=ID,Orders", result["odata.metadata"]);
             ValidateCustomer(result["value"][0]);
         }
 
@@ -108,6 +109,7 @@ namespace System.Web.Http.OData
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers/@Element&$select=ID,Orders", result["odata.metadata"]);
             ValidateCustomer(result);
         }
 

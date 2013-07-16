@@ -546,6 +546,32 @@ namespace System.Web.Http.OData.Formatter
             Assert.Equal(expectedCanWriteTypeResult, formatter.CanWriteType(type));
         }
 
+        [Fact]
+        public void WriteToStreamAsync_SetsMetadataUriWithSelectClause_OnODataWriterSettings()
+        {
+            // Arrange
+            MemoryStream stream = new MemoryStream();
+            StreamContent content = new StreamContent(stream);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+            IEdmModel model = CreateModel();
+            HttpRequestMessage request = CreateFakeODataRequest(model);
+            request.RequestUri = new Uri("http://localhost/Customers?$select=something");
+            request.SetSelectExpandClause(new SelectExpandClause(new SelectItem[0], allSelected: true));
+
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.Entry);
+
+            // Act
+            formatter.WriteToStreamAsync(typeof(SampleType[]), new SampleType[0], stream, content, transportContext: null);
+
+            // Assert
+            // This is ugly, but ODataWriter doesn't expose the writer settings that it uses. So, validate that
+            // the $select clause shows up in the response payload.
+            stream.Seek(0, SeekOrigin.Begin);
+            string result = content.ReadAsStringAsync().Result;
+            Assert.Contains("$select=something", result);
+        }
+
         private static Encoding CreateEncoding(string name)
         {
             if (name == "utf-8")

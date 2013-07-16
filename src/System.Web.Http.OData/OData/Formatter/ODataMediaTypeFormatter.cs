@@ -471,7 +471,8 @@ namespace System.Web.Http.OData.Formatter
                     throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
                 }
 
-                writerSettings.SetMetadataDocumentUri(new Uri(metadataLink));
+                string selectClause = GetSelectClause(Request);
+                writerSettings.SetMetadataDocumentUri(new Uri(metadataLink), selectClause);
             }
 
             MediaTypeHeaderValue contentType = null;
@@ -497,6 +498,20 @@ namespace System.Web.Http.OData.Formatter
 
                 serializer.WriteObject(value, messageWriter, writeContext);
             }
+        }
+
+        private static string GetSelectClause(HttpRequestMessage request)
+        {
+            Contract.Assert(request != null);
+
+            if (request.GetSelectExpandClause() != null)
+            {
+                // Include the $select clause only if it has been applied.
+                IEnumerable<KeyValuePair<string, string>> queryOptions = request.GetQueryNameValuePairs();
+                return queryOptions.Where(kvp => kvp.Key == "$select").Select(kvp => kvp.Value).FirstOrDefault();
+            }
+
+            return null;
         }
 
         private static ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider)

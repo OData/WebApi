@@ -401,5 +401,16 @@ namespace System.Web.Razor.Test.Generator
                 host.InstrumentedSourceFilePath = String.Format("~/{0}.cshtml", host.DefaultClassName);
             });
         }
+
+        [Fact]
+        public void CSharpCodeGeneratorGeneratesUrlsCorrectlyWithCommentsAndQuotes()
+        {
+            RunTest("HtmlCommentWithQuote_Single",
+                    tabTest: TabTest.NoTabs);
+
+            RunTest("HtmlCommentWithQuote_Double",
+                    tabTest: TabTest.NoTabs);
+
+        }
     }
 }

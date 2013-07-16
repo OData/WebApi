@@ -155,6 +155,8 @@
     <EmbeddedResource Include="TestFiles\CodeGenerator\CS\Output\FunctionsBlock_Tabs.cs" />
     <EmbeddedResource Include="TestFiles\CodeGenerator\CS\Output\FunctionsBlockMinimal.DesignTime.Tabs.cs" />
     <EmbeddedResource Include="TestFiles\CodeGenerator\CS\Output\SimpleUnspacedIf.DesignTime.Tabs.cs" />
+    <EmbeddedResource Include="TestFiles\CodeGenerator\CS\Output\HtmlCommentWithQuote_Single.cs" />
+    <EmbeddedResource Include="TestFiles\CodeGenerator\CS\Output\HtmlCommentWithQuote_Double.cs" />
     <Compile Include="Text\LineTrackingStringBufferTest.cs" />
     <Compile Include="Tokenizer\VBTokenizerLiteralTest.cs" />
     <Compile Include="Tokenizer\VBTokenizerIdentifierTest.cs" />
@@ -403,6 +405,8 @@
     <EmbeddedResource Include="TestFiles\CodeGenerator\CS\Source\FunctionsBlock_Tabs.cshtml" />
     <EmbeddedResource Include="TestFiles\CodeGenerator\CS\Source\FunctionsBlockMinimal.cshtml" />
     <EmbeddedResource Include="TestFiles\CodeGenerator\CS\Source\SimpleUnspacedIf.cshtml" />
+    <EmbeddedResource Include="TestFiles\CodeGenerator\CS\Source\HtmlCommentWithQuote_Double.cshtml" />
+    <EmbeddedResource Include="TestFiles\CodeGenerator\CS\Source\HtmlCommentWithQuote_Single.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="TestFiles\CodeGenerator\VB\Output\Blocks.vb" />

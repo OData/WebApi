@@ -48,6 +48,7 @@
     <Compile Include="Framework\VBHtmlMarkupParserTestBase.cs" />
     <Compile Include="Generator\GeneratedCodeMappingTest.cs" />
     <Compile Include="Generator\PaddingTest.cs" />
+    <Compile Include="Generator\TabTest.cs" />
     <Compile Include="Generator\TestSpan.cs" />
     <Compile Include="Parser\CSharp\CSharpAutoCompleteTest.cs" />
     <Compile Include="Parser\CSharp\CSharpDirectivesTest.cs" />

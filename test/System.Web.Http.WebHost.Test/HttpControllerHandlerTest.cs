@@ -789,7 +789,7 @@ namespace System.Web.Http.WebHost
             requestBaseMock.SetupGet(m => m.HttpMethod).Returns(httpMethod);
             requestBaseMock.SetupGet(m => m.Url).Returns(new Uri("Http://localhost"));
             requestBaseMock.SetupGet(m => m.Headers).Returns(new NameValueCollection());
-            requestBaseMock.Setup(m => m.GetBufferedInputStream()).Returns(bufferedStream);
+            requestBaseMock.Setup(m => m.InputStream).Returns(bufferedStream);
             return requestBaseMock.Object;
         }
 

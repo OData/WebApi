@@ -194,7 +194,7 @@ namespace System.Web.Http.WebHost
             IHostBufferPolicySelector policySelector = _bufferPolicySelector.Value;
             bool isInputBuffered = policySelector == null ? true : policySelector.UseBufferedInputStream(httpContextBase);
             Stream inputStream = isInputBuffered
-                                    ? requestBase.GetBufferedInputStream()
+                                    ? requestBase.InputStream
                                     : requestBase.GetBufferlessInputStream();
 
             request.Content = new StreamContent(inputStream);

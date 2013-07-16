@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Web.Razor.Generator;
+using System.Web.Razor.Parser.SyntaxTree;
 using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Generator
@@ -66,6 +67,7 @@ namespace System.Web.Razor.Test.Generator
         [InlineData("Imports")]
         [InlineData("ExpressionsInCode")]
         [InlineData("FunctionsBlock")]
+        [InlineData("FunctionsBlock_Tabs")]
         [InlineData("Templates")]
         [InlineData("Sections")]
         [InlineData("RazorComments")]
@@ -84,20 +86,24 @@ namespace System.Web.Razor.Test.Generator
             RunTest(testType);
         }
 
-        //// To regenerate individual baselines, uncomment this and set the appropriate test name in the Inline Data.
-        //// Please comment out again after regenerating.
-        //// TODO: Remove this when we go to a Source Control system that doesn't lock files, thus requiring we unlock them to regenerate them :(
-        //[Theory]
-        //[InlineData("ConditionalAttributes")]
-        //public void CSharpCodeGeneratorCorrectlyGeneratesRunTimeCode2(string testType)
-        //{
-        //    RunTest(testType);
-        //}
+        [Fact]
+        public void CSharpCodeGeneratorCorrectlyGeneratesMappingsForSimpleUnspacedIf()
+        {
+            RunTest("SimpleUnspacedIf",
+                    "SimpleUnspacedIf.DesignTime.Tabs",
+                    designTimeMode: true,
+                    tabTest: TabTest.Tabs,
+                    expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+                    {
+                        /* 01 */ new GeneratedCodeMapping(1, 2, 1, 15),
+                        /* 02 */ new GeneratedCodeMapping(3, 13, 7, 3),
+                    });
+        }
 
         [Fact]
         public void CSharpCodeGeneratorCorrectlyGeneratesMappingsForRazorCommentsAtDesignTime()
         {
-            RunTest("RazorComments", "RazorComments.DesignTime", designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            RunTest("RazorComments", "RazorComments.DesignTime", designTimeMode: true, tabTest: TabTest.NoTabs, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
             {
                 /* 01 */ new GeneratedCodeMapping(4, 3, 3, 6),
                 /* 02 */ new GeneratedCodeMapping(5, 40, 39, 22),
@@ -110,9 +116,55 @@ namespace System.Web.Razor.Test.Generator
         }
 
         [Fact]
+        public void CSharpCodeGeneratorCorrectlyGenerateMappingForOpenedCurlyIf()
+        {
+            OpenedIf(withTabs: true);
+        }
+
+        [Fact]
+        public void CSharpCodeGeneratorCorrectlyGenerateMappingForOpenedCurlyIfSpaces()
+        {
+            OpenedIf(withTabs: false);
+        }
+
+        private void OpenedIf(bool withTabs)
+        {
+            int tabOffsetForMapping = 0;
+
+            // where the test is running with tabs, the offset into the CS buffer changes for the whitespace mapping
+            // with spaces we get 7xspace -> offset of 8 (column = offset+1)
+            // with tabs we get tab + 3 spaces -> offset of 4 chars + 1 = 5
+            if (withTabs)
+            {
+                tabOffsetForMapping = 3;
+            }
+
+            RunTest("OpenedIf",
+                "OpenedIf.DesignTime" + (withTabs ? ".Tabs" : ""),
+                    designTimeMode: true,
+                    tabTest: withTabs ? TabTest.Tabs : TabTest.NoTabs,
+                    spans: new TestSpan[]
+            {
+                new TestSpan(SpanKind.Markup, 0, 16),
+                new TestSpan(SpanKind.Transition, 16, 17),
+                new TestSpan(SpanKind.Code, 17, 31),
+                new TestSpan(SpanKind.Markup, 31, 38),
+                new TestSpan(SpanKind.Code, 38, 40),
+                new TestSpan(SpanKind.Markup, 40, 47),
+                new TestSpan(SpanKind.Code, 47, 47),
+            },
+            expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            {
+                /* 01 */ new GeneratedCodeMapping(3, 2, 1, 14),
+                /* 02 */ new GeneratedCodeMapping(4, 8, 8 - tabOffsetForMapping, 2),
+                /* 03 */ new GeneratedCodeMapping(5, 8, 8 - tabOffsetForMapping, 0),
+            });
+        }
+
+        [Fact]
         public void CSharpCodeGeneratorCorrectlyGeneratesImportStatementsAtDesignTime()
         {
-            RunTest("Imports", "Imports.DesignTime", designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            RunTest("Imports", "Imports.DesignTime", designTimeMode: true, tabTest: TabTest.NoTabs, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
             {
                 /* 01 */ new GeneratedCodeMapping(1, 2, 1, 15),
                 /* 02 */ new GeneratedCodeMapping(2, 2, 1, 32),
@@ -125,7 +177,11 @@ namespace System.Web.Razor.Test.Generator
         [Fact]
         public void CSharpCodeGeneratorCorrectlyGeneratesFunctionsBlocksAtDesignTime()
         {
-            RunTest("FunctionsBlock", "FunctionsBlock.DesignTime", designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            RunTest("FunctionsBlock",
+                    "FunctionsBlock.DesignTime",
+                    designTimeMode: true,
+                    tabTest: TabTest.NoTabs,
+                    expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
             {
                 /* 01 */ new GeneratedCodeMapping(1, 13, 13, 4),
                 /* 02 */ new GeneratedCodeMapping(5, 13, 13, 104),
@@ -134,9 +190,37 @@ namespace System.Web.Razor.Test.Generator
         }
 
         [Fact]
+        public void CSharpCodeGeneratorCorrectlyGeneratesFunctionsBlocksAtDesignTimeTabs()
+        {
+            RunTest("FunctionsBlock",
+                    "FunctionsBlock.DesignTime" + ".Tabs",
+                    designTimeMode: true,
+                    tabTest: TabTest.Tabs,
+                    expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            {
+                /* 01 */ new GeneratedCodeMapping(1, 13, 4, 4),
+                /* 02 */ new GeneratedCodeMapping(5, 13, 4, 104),
+                /* 03 */ new GeneratedCodeMapping(12, 26, 14, 11)
+            });
+        }
+
+        [Fact]
+        public void CSharpCodeGeneratorCorrectlyGeneratesMinimalFunctionsBlocksAtDesignTimeTabs()
+        {
+            RunTest("FunctionsBlockMinimal",
+                    "FunctionsBlockMinimal.DesignTime" + ".Tabs",
+                    designTimeMode: true,
+                    tabTest: TabTest.Tabs,
+                    expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            {
+                /* 01 */ new GeneratedCodeMapping(3, 13, 7, 55),
+            });
+        }
+
+        [Fact]
         public void CSharpCodeGeneratorCorrectlyGeneratesHiddenSpansWithinCode()
         {
-            RunTest("HiddenSpansInCode", designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>
+            RunTest("HiddenSpansInCode", designTimeMode: true, tabTest: TabTest.NoTabs, expectedDesignTimePragmas: new List<GeneratedCodeMapping>
             {
                 /* 01 */ new GeneratedCodeMapping(1, 3, 3, 6),
                 /* 02 */ new GeneratedCodeMapping(2, 6, 6, 5)
@@ -161,7 +245,7 @@ namespace System.Web.Razor.Test.Generator
         [Fact]
         public void CSharpCodeGeneratorCorrectlyGeneratesInheritsAtDesigntime()
         {
-            RunTest("Inherits", baselineName: "Inherits.Designtime", designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            RunTest("Inherits", baselineName: "Inherits.Designtime", designTimeMode: true, tabTest: TabTest.NoTabs, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
             {
                 /* 01 */ new GeneratedCodeMapping(1, 2, 7, 5),
                 /* 02 */ new GeneratedCodeMapping(3, 11, 11, 25),
@@ -171,7 +255,7 @@ namespace System.Web.Razor.Test.Generator
         [Fact]
         public void CSharpCodeGeneratorCorrectlyGeneratesDesignTimePragmasForUnfinishedExpressionsInCode()
         {
-            RunTest("UnfinishedExpressionInCode", designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            RunTest("UnfinishedExpressionInCode", tabTest: TabTest.NoTabs, designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
             {
                 /* 01 */ new GeneratedCodeMapping(1, 3, 3, 2),
                 /* 02 */ new GeneratedCodeMapping(2, 2, 7, 9),
@@ -180,9 +264,26 @@ namespace System.Web.Razor.Test.Generator
         }
 
         [Fact]
+        public void CSharpCodeGeneratorCorrectlyGeneratesDesignTimePragmasForUnfinishedExpressionsInCodeTabs()
+        {
+            RunTest("UnfinishedExpressionInCode",
+                    "UnfinishedExpressionInCode.Tabs",
+                    tabTest: TabTest.Tabs,
+                    designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            {
+                /* 01 */ new GeneratedCodeMapping(1, 3, 3, 2),
+                /* 02 */ new GeneratedCodeMapping(2, 2, 7, 9),
+                /* 03 */ new GeneratedCodeMapping(2, 11, 5, 2)
+            });
+        }
+
+        [Fact]
         public void CSharpCodeGeneratorCorrectlyGeneratesDesignTimePragmasMarkupAndExpressions()
         {
-            RunTest("DesignTime", designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            RunTest("DesignTime",
+                designTimeMode: true,
+                tabTest: TabTest.NoTabs,
+                expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
             {
                 /* 01 */ new GeneratedCodeMapping(2, 14, 13, 36),
                 /* 02 */ new GeneratedCodeMapping(3, 23, 23, 1),
@@ -198,6 +299,7 @@ namespace System.Web.Razor.Test.Generator
                 /* 12 */ new GeneratedCodeMapping(21, 1, 1, 1)
             });
         }
+
 
         [Fact]
         public void CSharpCodeGeneratorCorrectlyGeneratesDesignTimePragmasForImplicitExpressionStartedAtEOF()
@@ -238,11 +340,25 @@ namespace System.Web.Razor.Test.Generator
         [Fact]
         public void CSharpCodeGeneratorCorrectlyGeneratesDesignTimePragmasForEmptyImplicitExpressionInCode()
         {
-            RunTest("EmptyImplicitExpressionInCode", designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            RunTest("EmptyImplicitExpressionInCode", tabTest: TabTest.NoTabs, designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
             {
                 /* 01 */ new GeneratedCodeMapping(1, 3, 3, 6),
                 /* 02 */ new GeneratedCodeMapping(2, 6, 7, 0),
                 /* 03 */ new GeneratedCodeMapping(2, 6, 6, 2)
+            });
+        }
+
+        [Fact]
+        public void CSharpCodeGeneratorCorrectlyGeneratesDesignTimePragmasForEmptyImplicitExpressionInCodeTabs()
+        {
+            RunTest("EmptyImplicitExpressionInCode",
+                    "EmptyImplicitExpressionInCode.Tabs",
+                    tabTest: TabTest.Tabs,
+                    designTimeMode: true, expectedDesignTimePragmas: new List<GeneratedCodeMapping>()
+            {
+                /* 01 */ new GeneratedCodeMapping(1, 3, 3, 6),
+                /* 02 */ new GeneratedCodeMapping(2, 6, 7, 0),
+                /* 03 */ new GeneratedCodeMapping(2, 6, 3, 2)
             });
         }
 

@@ -28,12 +28,12 @@ namespace System.Web.Razor.Generator
                     cw.WriteEndStatement();
                 });
 
-                int padding = CalculatePadding(target, generatedCodeStart);
+                int paddingCharCount;
 
                 CodeSnippetStatement stmt = new CodeSnippetStatement(
-                    Pad(code, target, generatedCodeStart))
+                    CodeGeneratorPaddingHelper.Pad(context.Host, code, target, generatedCodeStart, out paddingCharCount))
                 {
-                    LinePragma = context.GenerateLinePragma(target, generatedCodeStart + padding)
+                    LinePragma = context.GenerateLinePragma(target, generatedCodeStart + paddingCharCount)
                 };
                 context.AddDesignTimeHelperStatement(stmt);
             }

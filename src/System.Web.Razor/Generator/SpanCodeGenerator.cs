@@ -5,7 +5,7 @@ using System.Web.Razor.Parser.SyntaxTree;
 
 namespace System.Web.Razor.Generator
 {
-    public abstract class SpanCodeGenerator : CodeGeneratorBase, ISpanCodeGenerator
+    public abstract class SpanCodeGenerator : ISpanCodeGenerator
     {
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "This class has no instance state")]
         public static readonly ISpanCodeGenerator Null = new NullSpanCodeGenerator();

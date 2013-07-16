@@ -12,7 +12,7 @@ using Microsoft.Internal.Web.Utils;
 
 namespace System.Web.Razor.Parser.SyntaxTree
 {
-    public partial class Span : SyntaxTreeNode
+    public class Span : SyntaxTreeNode
     {
         private SourceLocation _start;
 

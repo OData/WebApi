@@ -4,7 +4,7 @@ using System.Web.Razor.Parser.SyntaxTree;
 
 namespace System.Web.Razor.Generator
 {
-    public abstract class HybridCodeGenerator : CodeGeneratorBase, ISpanCodeGenerator, IBlockCodeGenerator
+    public abstract class HybridCodeGenerator : ISpanCodeGenerator, IBlockCodeGenerator
     {
         public virtual void GenerateStartBlockCode(Block target, CodeGeneratorContext context)
         {

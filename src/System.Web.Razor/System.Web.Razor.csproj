@@ -56,7 +56,7 @@
     <Compile Include="Editor\EditorHints.cs" />
     <Compile Include="Generator\AddImportCodeGenerator.cs" />
     <Compile Include="Generator\BlockCodeGenerator.cs" />
-    <Compile Include="Generator\CodeGeneratorBase.cs" />
+    <Compile Include="Generator\CodeGeneratorPaddingHelper.cs" />
     <Compile Include="Generator\CodeGeneratorContext.cs" />
     <Compile Include="Generator\CodeWriter.cs" />
     <Compile Include="Generator\BaseCodeWriter.cs" />

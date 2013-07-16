@@ -5,7 +5,7 @@ using System.Web.Razor.Parser.SyntaxTree;
 
 namespace System.Web.Razor.Generator
 {
-    public abstract class BlockCodeGenerator : CodeGeneratorBase, IBlockCodeGenerator
+    public abstract class BlockCodeGenerator : IBlockCodeGenerator
     {
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "This class has no instance state")]
         public static readonly IBlockCodeGenerator Null = new NullBlockCodeGenerator();

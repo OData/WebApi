@@ -10,12 +10,21 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web.Razor.Generator;
+using System.Web.Razor.Parser.SyntaxTree;
 using System.Web.Razor.Test.Utils;
 using System.Web.WebPages.TestUtils;
 using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Generator
 {
+    [Flags]
+    public enum TabTest
+    {
+        NoTabs = 1,
+        Tabs = 2,
+        Both = 3
+    }
+
     public abstract class RazorCodeGeneratorTest<TLanguage>
         where TLanguage : RazorCodeLanguage, new()
     {
@@ -30,13 +39,65 @@ namespace System.Web.Razor.Test.Generator
             return new RazorEngineHost(new TLanguage());
         }
 
-        protected void RunTest(string name, string baselineName = null, bool generatePragmas = true, bool designTimeMode = false, IList<GeneratedCodeMapping> expectedDesignTimePragmas = null, Action<RazorEngineHost> hostConfig = null)
+        protected void RunTest(string name,
+                               string baselineName = null,
+                               bool generatePragmas = true,
+                               bool designTimeMode = false,
+                               IList<GeneratedCodeMapping> expectedDesignTimePragmas = null,
+                               TestSpan[] spans = null,
+                               TabTest tabTest = TabTest.Both,
+                               Action<RazorEngineHost> hostConfig = null)
+        {
+            bool testRun = false;
+
+            if ((tabTest & TabTest.Tabs) == TabTest.Tabs)
+            {
+                RunTestInternal(
+                    name: name, 
+                    baselineName: baselineName,
+                    generatePragmas: generatePragmas,
+                    designTimeMode: designTimeMode,
+                    expectedDesignTimePragmas: expectedDesignTimePragmas,
+                    spans: spans,
+                    withTabs: true,
+                    hostConfig: hostConfig);
+
+                testRun = true;
+            }
+
+            if ((tabTest & TabTest.NoTabs) == TabTest.NoTabs)
+            {
+                RunTestInternal(
+                    name: name, 
+                    baselineName: baselineName,
+                    generatePragmas: generatePragmas,
+                    designTimeMode: designTimeMode,
+                    expectedDesignTimePragmas: expectedDesignTimePragmas,
+                    spans: spans,
+                    withTabs: false,
+                    hostConfig: hostConfig);
+
+                testRun = true;
+            }
+
+            Assert.True(testRun, "No test was run because TabTest is not set correctly");
+        }
+
+        private void RunTestInternal(string name,
+                               string baselineName,
+                               bool generatePragmas,
+                               bool designTimeMode,
+                               IList<GeneratedCodeMapping> expectedDesignTimePragmas,
+                               TestSpan[] spans,
+                               bool withTabs,
+                               Action<RazorEngineHost> hostConfig)
         {
             // Load the test files
             if (baselineName == null)
             {
                 baselineName = name;
             }
+
             string source = TestFile.Create(String.Format("CodeGenerator.{1}.Source.{0}.{2}", name, LanguageName, FileExtension)).ReadAllText();
             string expectedOutput = TestFile.Create(String.Format("CodeGenerator.{1}.Output.{0}.{2}", baselineName, LanguageName, BaselineExtension)).ReadAllText();
 
@@ -65,6 +126,8 @@ namespace System.Web.Razor.Test.Generator
             {
                 hostConfig(host);
             }
+
+            host.IsIndentingWithTabs = withTabs;
 
             RazorTemplateEngine engine = new RazorTemplateEngine(host);
 
@@ -95,18 +158,34 @@ namespace System.Web.Razor.Test.Generator
 
             WriteBaseline(String.Format(@"test\System.Web.Razor.Test\TestFiles\CodeGenerator\{0}\Output\{1}.{2}", LanguageName, baselineName, BaselineExtension), MiscUtils.StripRuntimeVersion(output.ToString()));
 
-            // Verify code against baseline
 #if !GENERATE_BASELINES
-            Assert.Equal(expectedOutput, MiscUtils.StripRuntimeVersion(output.ToString()));
+            string textOutput = MiscUtils.StripRuntimeVersion(output.ToString());
+
+            //// Verify code against baseline
+            Assert.Equal(expectedOutput, textOutput);
 #endif
+
+            IEnumerable<Span> generatedSpans = results.Document.Flatten();
+
+            foreach (var span in generatedSpans)
+            {
+                VerifyNoBrokenEndOfLines(span.Content);
+            }
 
             // Verify design-time pragmas
             if (designTimeMode)
             {
-                Assert.True(expectedDesignTimePragmas != null || results.DesignTimeLineMappings == null || results.DesignTimeLineMappings.Count == 0);
-                Assert.True(expectedDesignTimePragmas == null || (results.DesignTimeLineMappings != null && results.DesignTimeLineMappings.Count > 0));
+                if (spans != null)
+                {
+                    Assert.Equal(spans, generatedSpans.Select(span => new TestSpan(span)).ToArray());
+                }
+
                 if (expectedDesignTimePragmas != null)
                 {
+                    Assert.True(results.DesignTimeLineMappings != null && results.DesignTimeLineMappings.Count > 0);
+
+                    Assert.Equal(expectedDesignTimePragmas.Count, results.DesignTimeLineMappings.Count);
+
                     Assert.Equal(
                         expectedDesignTimePragmas.ToArray(),
                         results.DesignTimeLineMappings
@@ -142,6 +221,23 @@ namespace System.Web.Razor.Test.Generator
             else
             {
                 return RecursiveFind(path, new DirectoryInfo(start).Parent.FullName);
+            }
+        }
+
+        private void VerifyNoBrokenEndOfLines(string text)
+        {
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] == '\r')
+                {
+                    Assert.True(text.Length > i + 1);
+                    Assert.Equal('\n', text[i + 1]);
+                }
+                else if (text[i] == '\n')
+                {
+                    Assert.True(i > 0);
+                    Assert.Equal('\r', text[i - 1]);
+                }
             }
         }
     }

@@ -121,8 +121,7 @@ namespace System.Web.Razor
         }
 
         /// <summary>
-        /// In design time, is the host editor inserting tabs when the tab key is being hit.
-        /// Otherwise the assumption is that spaces are being inserted.
+        /// Gets or sets whether the design time editor is using tabs or spaces for indentation.
         /// </summary>
         public virtual bool IsIndentingWithTabs { get; set; }
 
@@ -138,8 +137,6 @@ namespace System.Web.Razor
 
             set
             {
-                Contract.Assert(value > 0);
-
                 _tabSize = Math.Max(value, 1);
             }
         }

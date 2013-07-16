@@ -176,7 +176,11 @@ namespace System.Web.Razor.Generator
                 {
                     start = _currentBuffer.GeneratedCodeStart.Value;
                 }
-                string padded = CodeGeneratorBase.Pad(_currentBuffer.Builder.ToString(), sourceSpan, start);
+
+                int paddingLength; // unused, in this case there is enough context in the original code do calculate the right padding length
+                                   // (padded.Length - _currentBuffer.Builder.Length)
+
+                string padded = CodeGeneratorPaddingHelper.Pad(Host, _currentBuffer.Builder.ToString(), sourceSpan, start, out paddingLength);
                 _currentBuffer.GeneratedCodeStart = start + (padded.Length - _currentBuffer.Builder.Length);
                 _currentBuffer.Builder.Clear();
                 _currentBuffer.Builder.Append(padded);

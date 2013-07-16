@@ -17,23 +17,12 @@ namespace System.Web.Razor.Generator
             });
 
             int startGeneratedCode = target.Start.CharacterIndex;
-            generatedCode = Pad(generatedCode, target);
-
-            // Is this the span immediately following "@"?
-            if (context.Host.DesignTimeMode &&
-                !String.IsNullOrEmpty(generatedCode) &&
-                Char.IsWhiteSpace(generatedCode[0]) &&
-                target.Previous != null &&
-                target.Previous.Kind == SpanKind.Transition &&
-                String.Equals(target.Previous.Content, SyntaxConstants.TransitionString))
-            {
-                generatedCode = generatedCode.Substring(1);
-                startGeneratedCode--;
-            }
+            int paddingCharCount;
+            generatedCode = CodeGeneratorPaddingHelper.PadStatement(context.Host, generatedCode, target, ref startGeneratedCode, out paddingCharCount);
 
             context.AddStatement(
                 generatedCode,
-                context.GenerateLinePragma(target, startGeneratedCode));
+                context.GenerateLinePragma(target, paddingCharCount));
         }
 
         public override string ToString()

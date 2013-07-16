@@ -114,29 +114,15 @@ namespace System.Web.Routing
         }
 
         [Fact]
-        public void MapMvcAttributeRoutes_WithMultiPrefixedController()
+        public void RoutePrefixAttribute_IsSingleInstance()
         {
-            // Arrange
-            var controllerTypes = new[] { typeof(MultiPrefixedController) };
-            var routes = new RouteCollection();
+            var attr = typeof(RoutePrefixAttribute);
+            var attrs = attr.GetCustomAttributes(typeof(AttributeUsageAttribute), false);
+            var usage = (AttributeUsageAttribute)attrs[0];
 
-            // Act
-            routes.MapMvcAttributeRoutes(controllerTypes);
-
-
-            // Assert
-            Assert.Equal(4, routes.Count);
-
-            var actualRouteUrls = routes.Cast<Route>().Select(route => route.Url).OrderBy(url => url).ToArray();
-            var expectedRouteUrls = new[]
-                {
-                    "pref1/getme",
-                    "pref1/getmeaswell",
-                    "pref2/getme",
-                    "pref2/getmeaswell",
-                };
-
-            Assert.Equal(expectedRouteUrls, actualRouteUrls);
+            Assert.Equal(AttributeTargets.Class, usage.ValidOn);
+            Assert.False(usage.AllowMultiple); // only 1 per class
+            Assert.False(usage.Inherited); // RoutePrefix is not inherited. 
         }
 
         [Fact]
@@ -303,23 +289,6 @@ namespace System.Web.Routing
         private class PrefixedPugetSoundController : Controller
         {
             [HttpGet("getme")]
-            public ActionResult GetMe()
-            {
-                throw new NotImplementedException();
-            }
-
-            public ActionResult IDontGetARoute()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [RoutePrefix("pref1")]
-        [RoutePrefix("pref2")]
-        private class MultiPrefixedController : Controller
-        {
-            [HttpGet("getme")]
-            [HttpGet("getmeaswell")]
             public ActionResult GetMe()
             {
                 throw new NotImplementedException();

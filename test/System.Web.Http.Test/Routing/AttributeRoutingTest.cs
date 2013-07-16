@@ -57,6 +57,18 @@ namespace System.Web.Http.Routing
             response.TryGetContentValue<T>(out value);
             return value;
         }
+
+        [Fact]
+        public void RoutePrefixAttribute_IsSingleInstance()
+        {
+            var attr = typeof(RoutePrefixAttribute);
+            var attrs = attr.GetCustomAttributes(typeof(AttributeUsageAttribute), false);
+            var usage = (AttributeUsageAttribute)attrs[0];
+
+            Assert.Equal(AttributeTargets.Class, usage.ValidOn);
+            Assert.False(usage.AllowMultiple); // only 1 per class
+            Assert.False(usage.Inherited); // RoutePrefix is not inherited. 
+        }
     }
 
     public class AttributedController : ApiController

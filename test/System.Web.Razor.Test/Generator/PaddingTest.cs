@@ -161,12 +161,7 @@ namespace System.Web.Razor.Test.Generator
         {
             RazorEngineHost host = CreateHost(designTime: designTime, isIndentingWithTabs: isIndentingWithTabs, tabSize: tabSize);
 
-            string text = @"
-<html>
-<body>
-		@if (true) { 
-</body>
-</html>";
+            string text = "\r\n<html>\r\n<body>\r\n\t\t@if (true) { \r\n</body>\r\n</html>";
 
             Span span = GenerateSpan(text, SpanKind.Code, 3, "if (true) { \r\n");
 

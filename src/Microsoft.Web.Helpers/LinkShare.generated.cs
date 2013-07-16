@@ -14,7 +14,7 @@ namespace Microsoft.Web.Helpers
     using System;
     using System.Collections.Generic;
     
-    #line 3 "..\..\LinkShare.cshtml"
+    #line 3 "LinkShare.cshtml"
     using System.Globalization;
     
     #line default
@@ -23,7 +23,7 @@ namespace Microsoft.Web.Helpers
     using System.Linq;
     using System.Net;
     
-    #line 4 "..\..\LinkShare.cshtml"
+    #line 4 "LinkShare.cshtml"
     using System.Text;
     
     #line default
@@ -35,19 +35,19 @@ namespace Microsoft.Web.Helpers
     using System.Web.WebPages;
     using System.Web.WebPages.Html;
     
-    #line 5 "..\..\LinkShare.cshtml"
+    #line 5 "LinkShare.cshtml"
     using System.Web.WebPages.Scope;
     
     #line default
     #line hidden
     
-    #line 6 "..\..\LinkShare.cshtml"
+    #line 6 "LinkShare.cshtml"
     using Microsoft.Internal.Web.Utils;
     
     #line default
     #line hidden
     
-    #line 7 "..\..\LinkShare.cshtml"
+    #line 7 "LinkShare.cshtml"
     using Resources;
     
     #line default
@@ -57,7 +57,7 @@ namespace Microsoft.Web.Helpers
     public class LinkShare : System.Web.WebPages.HelperPage
     {
         
-        #line 8 "..\..\LinkShare.cshtml"
+        #line 8 "LinkShare.cshtml"
 
     internal static readonly object _bitlyApiKey = new object();
     internal static readonly object _bitlyLogin = new object();
@@ -185,7 +185,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 128 "..\..\LinkShare.cshtml"
+#line 128 "LinkShare.cshtml"
                                        
 
     if (pageTitle.IsEmpty()) {
@@ -211,7 +211,7 @@ WriteLiteralTo(@__razor_helper_writer, "                <a href=\"http://delicio
 
 
 
-#line 144 "..\..\LinkShare.cshtml"
+#line 144 "LinkShare.cshtml"
                                                          WriteTo(@__razor_helper_writer, shortenedUrl);
 
 #line default
@@ -221,7 +221,7 @@ WriteLiteralTo(@__razor_helper_writer, "&amp;title=");
 
 
 
-#line 144 "..\..\LinkShare.cshtml"
+#line 144 "LinkShare.cshtml"
                                                                                    WriteTo(@__razor_helper_writer, pageTitle);
 
 #line default
@@ -234,7 +234,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" target=\"_blank\" title=\"Add to del.
 
 
 
-#line 146 "..\..\LinkShare.cshtml"
+#line 146 "LinkShare.cshtml"
                 break;
 
             case LinkShareSite.Digg:
@@ -246,7 +246,7 @@ WriteLiteralTo(@__razor_helper_writer, "                <a href=\"http://digg.co
 
 
 
-#line 149 "..\..\LinkShare.cshtml"
+#line 149 "LinkShare.cshtml"
                       WriteTo(@__razor_helper_writer, pageLinkBack);
 
 #line default
@@ -256,7 +256,7 @@ WriteLiteralTo(@__razor_helper_writer, "&amp;title=");
 
 
 
-#line 149 "..\..\LinkShare.cshtml"
+#line 149 "LinkShare.cshtml"
                                                 WriteTo(@__razor_helper_writer, pageTitle);
 
 #line default
@@ -268,7 +268,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" target=\"_blank\" title=\"Digg!\">\n 
 
 
 
-#line 151 "..\..\LinkShare.cshtml"
+#line 151 "LinkShare.cshtml"
                 break;
             case LinkShareSite.Facebook:
 
@@ -279,7 +279,7 @@ WriteLiteralTo(@__razor_helper_writer, "                <a href=\"http://www.fac
 
 
 
-#line 153 "..\..\LinkShare.cshtml"
+#line 153 "LinkShare.cshtml"
                                 WriteTo(@__razor_helper_writer, shortenedUrl);
 
 #line default
@@ -289,7 +289,7 @@ WriteLiteralTo(@__razor_helper_writer, "&amp;t=");
 
 
 
-#line 153 "..\..\LinkShare.cshtml"
+#line 153 "LinkShare.cshtml"
                                                       WriteTo(@__razor_helper_writer, pageTitle);
 
 #line default
@@ -301,7 +301,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" target=\"_blank\" title=\"Share on Fa
 
 
 
-#line 155 "..\..\LinkShare.cshtml"
+#line 155 "LinkShare.cshtml"
                 break;
             case LinkShareSite.Reddit:
 
@@ -312,7 +312,7 @@ WriteLiteralTo(@__razor_helper_writer, "                <a href=\"http://reddit.
 
 
 
-#line 157 "..\..\LinkShare.cshtml"
+#line 157 "LinkShare.cshtml"
                         WriteTo(@__razor_helper_writer, pageLinkBack);
 
 #line default
@@ -322,7 +322,7 @@ WriteLiteralTo(@__razor_helper_writer, "&amp;title=");
 
 
 
-#line 157 "..\..\LinkShare.cshtml"
+#line 157 "LinkShare.cshtml"
                                                   WriteTo(@__razor_helper_writer, pageTitle);
 
 #line default
@@ -334,7 +334,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" target=\"_blank\" title=\"Reddit!\">\
 
 
 
-#line 159 "..\..\LinkShare.cshtml"
+#line 159 "LinkShare.cshtml"
                 break;
             case LinkShareSite.StumbleUpon:
 
@@ -345,7 +345,7 @@ WriteLiteralTo(@__razor_helper_writer, "                <a href=\"http://www.stu
 
 
 
-#line 161 "..\..\LinkShare.cshtml"
+#line 161 "LinkShare.cshtml"
                                  WriteTo(@__razor_helper_writer, pageLinkBack);
 
 #line default
@@ -355,7 +355,7 @@ WriteLiteralTo(@__razor_helper_writer, "&amp;title=");
 
 
 
-#line 161 "..\..\LinkShare.cshtml"
+#line 161 "LinkShare.cshtml"
                                                            WriteTo(@__razor_helper_writer, pageTitle);
 
 #line default
@@ -367,7 +367,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" target=\"_blank\" title=\"Stumble it!
 
 
 
-#line 163 "..\..\LinkShare.cshtml"
+#line 163 "LinkShare.cshtml"
                 break;            
             case LinkShareSite.Twitter:
                 string status = String.Empty;
@@ -386,7 +386,7 @@ WriteLiteralTo(@__razor_helper_writer, "                <a href=\"http://twitter
 
 
 
-#line 173 "..\..\LinkShare.cshtml"
+#line 173 "LinkShare.cshtml"
                            WriteTo(@__razor_helper_writer, pageTitle);
 
 #line default
@@ -396,7 +396,7 @@ WriteLiteralTo(@__razor_helper_writer, "%3a+");
 
 
 
-#line 173 "..\..\LinkShare.cshtml"
+#line 173 "LinkShare.cshtml"
                                            WriteTo(@__razor_helper_writer, shortenedUrl);
 
 #line default
@@ -404,7 +404,7 @@ WriteLiteralTo(@__razor_helper_writer, "%3a+");
 
 
 
-#line 173 "..\..\LinkShare.cshtml"
+#line 173 "LinkShare.cshtml"
                                                           WriteTo(@__razor_helper_writer, status);
 
 #line default
@@ -416,7 +416,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" target=\"_blank\" title=\"Share on Tw
 
 
 
-#line 176 "..\..\LinkShare.cshtml"
+#line 176 "LinkShare.cshtml"
                 break;
             default:
                 throw new NotSupportedException(String.Format(CultureInfo.CurrentUICulture, HelpersToolkitResources.LinkShareValue_NotSupported, site));                

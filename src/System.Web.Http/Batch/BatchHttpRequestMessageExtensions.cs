@@ -14,13 +14,16 @@ namespace System.Web.Http.Batch
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class BatchHttpRequestMessageExtensions
     {
+        private const string HttpBatchContextKey = "MS_HttpBatchContext";
+
         private static readonly string[] BatchRequestPropertyExclusions =
         {
             HttpPropertyKeys.HttpRouteDataKey,
             HttpPropertyKeys.DisposableRequestResourcesKey,
             HttpPropertyKeys.UrlHelperKey,
             HttpPropertyKeys.SynchronizationContextKey,
-            HttpPropertyKeys.HttpConfigurationKey
+            HttpPropertyKeys.HttpConfigurationKey,
+            HttpBatchContextKey
         };
 
         /// <summary>

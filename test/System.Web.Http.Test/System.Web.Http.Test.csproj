@@ -72,6 +72,7 @@
       <Link>Common\UriQueryUtilityTest.cs</Link>
     </Compile>
     <Compile Include="AuthorizeAttributeTest.cs" />
+    <Compile Include="Batch\BatchHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="Batch\HttpBatchHandlerTest.cs" />
     <Compile Include="Batch\DefaultHttpBatchHandlerTest.cs" />
     <Compile Include="Controllers\ActionFilterResultTests.cs" />

@@ -54,7 +54,6 @@
     <Compile Include="WebApiAppBuilderExtensionsTest.cs" />
     <Compile Include="OwinBufferPolicySelectorTest.cs" />
     <Compile Include="HttpMessageHandlerAdapterTest.cs" />
-    <Compile Include="OwinEnvironmentExtensionsTest.cs" />
     <Compile Include="OwinHostIntegrationTest.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -3,27 +3,23 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
 using System.Web.Http.Owin.Properties;
-using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
+using Microsoft.Owin;
 
 namespace System.Web.Http.Owin
 {
     /// <summary>
     /// Represents an OWIN component that submits requests to an <see cref="HttpMessageHandler"/> when invoked.
     /// </summary>
-    public class HttpMessageHandlerAdapter : IDisposable
+    public class HttpMessageHandlerAdapter : OwinMiddleware, IDisposable
     {
-        private AppFunc _next;
         private HttpMessageInvoker _messageInvoker;
         private IHostBufferPolicySelector _bufferPolicySelector;
         private bool _disposed;
@@ -35,12 +31,9 @@ namespace System.Web.Http.Owin
         /// <param name="messageHandler">The <see cref="HttpMessageHandler" /> to submit requests to.</param>
         /// <param name="bufferPolicySelector">The <see cref="IHostBufferPolicySelector"/> that determines whether or not to buffer requests and responses.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "In accordance with OWIN design")]
-        public HttpMessageHandlerAdapter(AppFunc next, HttpMessageHandler messageHandler, IHostBufferPolicySelector bufferPolicySelector)
+        public HttpMessageHandlerAdapter(OwinMiddleware next, HttpMessageHandler messageHandler, IHostBufferPolicySelector bufferPolicySelector)
+            : base(next)
         {
-            if (next == null)
-            {
-                throw new ArgumentNullException("next");
-            }
             if (messageHandler == null)
             {
                 throw new ArgumentNullException("messageHandler");
@@ -50,39 +43,46 @@ namespace System.Web.Http.Owin
                 throw new ArgumentNullException("bufferPolicySelector");
             }
 
-            _next = next;
             _messageInvoker = new HttpMessageInvoker(messageHandler);
             _bufferPolicySelector = bufferPolicySelector;
         }
 
-        /// <summary>
-        /// Invokes the component within the OWIN pipeline.
-        /// </summary>
-        /// <param name="environment">The OWIN environment for the request.</param>
-        /// <returns>A <see cref="Task"/> that will complete when the request is processed.</returns>
+        /// <inheritdoc />
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "See comment below")]
-        public async Task Invoke(IDictionary<string, object> environment)
+        public async override Task Invoke(IOwinContext context)
         {
-            if (environment == null)
+            if (context == null)
             {
-                throw new ArgumentNullException("environment");
+                throw new ArgumentNullException("context");
             }
 
-            Stream requestBody = environment.GetOwinValue<Stream>(OwinConstants.RequestBodyKey);
-            HttpRequestMessage request = CreateRequestMessage(environment, requestBody);
-            if (!requestBody.CanSeek && _bufferPolicySelector.UseBufferedInputStream(hostContext: environment))
-            {
-                await BufferRequestBodyAsync(environment, request.Content);
-            }
-            CancellationToken cancellationToken = environment.GetOwinValue<CancellationToken>(OwinConstants.CallCancelledKey);
+            IOwinRequest owinRequest = context.Request;
+            IOwinResponse owinResponse = context.Response;
 
-            SetPrincipal(environment);
+            if (owinRequest == null)
+            {
+                throw Error.InvalidOperation(OwinResources.OwinContext_NullRequest);
+            }
+            if (owinResponse == null)
+            {
+                throw Error.InvalidOperation(OwinResources.OwinContext_NullResponse);
+            }
+
+            HttpRequestMessage request = CreateRequestMessage(owinRequest);
+            MapRequestProperties(request, context);
+
+            if (!owinRequest.Body.CanSeek && _bufferPolicySelector.UseBufferedInputStream(hostContext: context))
+            {
+                await BufferRequestBodyAsync(owinRequest, request.Content);
+            }
+
+            SetPrincipal(owinRequest.User);
 
             HttpResponseMessage response = null;
             bool callNext = false;
             try
             {
-                response = await _messageInvoker.SendAsync(request, cancellationToken);
+                response = await _messageInvoker.SendAsync(request, owinRequest.CallCancelled);
 
                 // Handle null responses
                 if (response == null)
@@ -103,7 +103,7 @@ namespace System.Web.Http.Owin
                     }
 
                     FixUpContentLengthHeaders(response);
-                    await SendResponseMessageAsync(environment, response);
+                    await SendResponseMessageAsync(response, owinResponse);
                 }
             }
             finally
@@ -119,125 +119,65 @@ namespace System.Web.Http.Owin
             }
 
             // Call the next component if no route matched
-            if (callNext)
+            if (callNext && Next != null)
             {
-                await _next.Invoke(environment);
+                await Next.Invoke(context);
             }
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Not out of scope")]
-        private static HttpRequestMessage CreateRequestMessage(IDictionary<string, object> environment, Stream requestBody)
+        private static HttpRequestMessage CreateRequestMessage(IOwinRequest owinRequest)
         {
-            string requestMethod = environment.GetOwinValue<string>(OwinConstants.RequestMethodKey);
-            IDictionary<string, string[]> requestHeaders = environment.GetOwinValue<IDictionary<string, string[]>>(OwinConstants.RequestHeadersKey);
-            string requestPathBase;
-            Uri requestUri = CreateRequestUri(environment, requestHeaders, out requestPathBase);
-
             // Create the request
-            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(requestMethod), requestUri);
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(owinRequest.Method), owinRequest.Uri);
 
             // Set the body
-            HttpContent content = new StreamContent(requestBody);
+            HttpContent content = new StreamContent(owinRequest.Body);
             request.Content = content;
 
             // Copy the headers
-            foreach (KeyValuePair<string, string[]> header in requestHeaders)
+            foreach (KeyValuePair<string, string[]> header in owinRequest.Headers)
             {
                 if (!request.Headers.TryAddWithoutValidation(header.Key, header.Value))
                 {
-                    bool success = request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                    bool success = content.Headers.TryAddWithoutValidation(header.Key, header.Value);
                     Contract.Assert(success, "Every header can be added either to the request headers or to the content headers");
                 }
             }
 
-            // Map the OWIN environment keys to the request properties keys that Web API expects
-            MapRequestProperties(request, environment, requestPathBase);
-
             return request;
         }
 
-        // Implements the algorithm for reconstructing a URI according to section 5.4 of the OWIN specification
-        private static Uri CreateRequestUri(IDictionary<string, object> environment, IDictionary<string, string[]> requestHeaders, out string requestPathBase)
+        private static void MapRequestProperties(HttpRequestMessage request, IOwinContext context)
         {
-            StringBuilder uriBuilder = new StringBuilder();
-
-            // Append request scheme
-            string requestScheme = environment.GetOwinValue<string>(OwinConstants.RequestSchemeKey);
-            uriBuilder.Append(requestScheme);
-
-            uriBuilder.Append("://");
-
-            // Append host and port
-            string[] hostHeaderValues;
-            if (requestHeaders.TryGetValue("Host", out hostHeaderValues) && hostHeaderValues.Length > 0)
-            {
-                uriBuilder.Append(hostHeaderValues[0]);
-            }
-            else
-            {
-                throw Error.InvalidOperation(OwinResources.CreateRequestURI_MissingHostHeader);
-            }
-
-            // Append request path
-            requestPathBase = environment.GetOwinValue<string>(OwinConstants.RequestPathBaseKey);
-            uriBuilder.Append(requestPathBase);
-            string requestPath = environment.GetOwinValue<string>(OwinConstants.RequestPathKey);
-            uriBuilder.Append(requestPath);
-
-            // Append query string
-            string requestQueryString = environment.GetOwinValue<string>(OwinConstants.RequestQueryStringKey);
-            if (requestQueryString.Length > 0)
-            {
-                uriBuilder.Append('?');
-                uriBuilder.Append(requestQueryString);
-            }
-
-            return new Uri(uriBuilder.ToString(), UriKind.Absolute);
-        }
-
-        private static void MapRequestProperties(HttpRequestMessage request, IDictionary<string, object> environment, string requestPathBase)
-        {
-            // Set the environment on the request
-            request.SetOwinEnvironment(environment);
+            // Set the OWIN context on the request
+            request.SetOwinContext(context);
 
             // Set the virtual path root for link resolution and link generation to work
             // OWIN spec requires request path base to be either the empty string or start with "/"
-            request.SetVirtualPathRoot(requestPathBase.Length == 0 ? "/" : requestPathBase);
+            string requestPathBase = context.Request.PathBase;
+            request.SetVirtualPathRoot(String.IsNullOrEmpty(requestPathBase) ? "/" : requestPathBase);
 
             // Set a delegate to get the client certificate
             request.Properties[HttpPropertyKeys.RetrieveClientCertificateDelegateKey] = new Func<HttpRequestMessage, X509Certificate2>(
-                req =>
-                {
-                    X509Certificate2 clientCertificate;
-                    return environment.TryGetValue<X509Certificate2>(OwinConstants.ClientCertifiateKey, out clientCertificate) ? clientCertificate : null;
-                });
+                req => context.Get<X509Certificate2>(OwinConstants.ClientCertifiateKey));
 
             // Set a lazily-evaluated way of determining whether the request is local or not
-            Lazy<bool> isLocal = new Lazy<bool>(() =>
-                {
-                    bool local;
-                    if (environment.TryGetValue(OwinConstants.IsLocalKey, out local))
-                    {
-                        return local;
-                    }
-                    return false;
-                }, isThreadSafe: false);
+            Lazy<bool> isLocal = new Lazy<bool>(() => context.Get<bool>(OwinConstants.IsLocalKey), isThreadSafe: false);
             request.Properties[HttpPropertyKeys.IsLocalKey] = isLocal;
         }
 
-        private static async Task BufferRequestBodyAsync(IDictionary<string, object> environment, HttpContent content)
+        private static async Task BufferRequestBodyAsync(IOwinRequest owinRequest, HttpContent content)
         {
             await content.LoadIntoBufferAsync();
             // We need to replace the request body with a buffered stream so that other
             // components can read the stream
-            environment[OwinConstants.RequestBodyKey] = await content.ReadAsStreamAsync();
+            owinRequest.Body = await content.ReadAsStreamAsync();
         }
 
-        private static void SetPrincipal(IDictionary<string, object> environment)
+        private static void SetPrincipal(IPrincipal user)
         {
-            // Set the principal
-            IPrincipal user;
-            if (environment.TryGetValue<IPrincipal>(OwinConstants.UserKey, out user))
+            if (user != null)
             {
                 Thread.CurrentPrincipal = user;
             }
@@ -306,13 +246,13 @@ namespace System.Web.Http.Owin
             }
         }
 
-        private static Task SendResponseMessageAsync(IDictionary<string, object> environment, HttpResponseMessage response)
+        private static Task SendResponseMessageAsync(HttpResponseMessage response, IOwinResponse owinResponse)
         {
-            environment[OwinConstants.ResponseStatusCodeKey] = response.StatusCode;
-            environment[OwinConstants.ResponseReasonPhraseKey] = response.ReasonPhrase;
+            owinResponse.StatusCode = (int)response.StatusCode;
+            owinResponse.ReasonPhrase = response.ReasonPhrase;
 
             // Copy non-content headers
-            IDictionary<string, string[]> responseHeaders = environment.GetOwinValue<IDictionary<string, string[]>>(OwinConstants.ResponseHeadersKey);
+            IDictionary<string, string[]> responseHeaders = owinResponse.Headers;
             foreach (KeyValuePair<string, IEnumerable<string>> header in response.Headers)
             {
                 responseHeaders[header.Key] = header.Value.AsArray();
@@ -334,8 +274,7 @@ namespace System.Web.Http.Owin
                 }
 
                 // Copy body
-                Stream responseBody = environment.GetOwinValue<Stream>(OwinConstants.ResponseBodyKey);
-                return responseContent.CopyToAsync(responseBody);
+                return responseContent.CopyToAsync(owinResponse.Body);
             }
         }
 

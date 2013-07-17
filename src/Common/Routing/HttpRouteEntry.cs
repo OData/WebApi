@@ -50,7 +50,6 @@ namespace System.Web.Mvc.Routing
 #endif
         public string Name { get; set; }
         public string RouteTemplate { get; set; }
-        public int PrefixOrder { get; set; }
         public int Order { get; set; }
 
 #if ASPNETWEBAPI
@@ -59,17 +58,7 @@ namespace System.Web.Mvc.Routing
         public int CompareTo(RouteEntry other)
 #endif
         {
-            Contract.Assert(other != null);
-
-            // Order by prefixes first
-            if (PrefixOrder > other.PrefixOrder)
-            {
-                return 1;
-            }
-            else if (PrefixOrder < other.PrefixOrder)
-            {
-                return -1;
-            }
+            Contract.Assert(other != null);            
 
             // Then order by the attribute order
             if (Order > other.Order)

@@ -26,10 +26,5 @@ namespace System.Web.Http
         /// Gets the route prefix.
         /// </summary>
         public string Prefix { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the order of the routes generated with this prefix relative to other prefixes. The default order is 0.
-        /// </summary>
-        public int Order { get; set; }
     }
 }

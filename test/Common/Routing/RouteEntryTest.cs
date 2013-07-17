@@ -14,17 +14,12 @@ namespace System.Web.Mvc.Routing
     public class RouteEntryTest
     {
         [Theory]
-        [InlineData(1, 2, 1, 2, -1)]
-        [InlineData(1, 2, 2, 1, -1)]
-        [InlineData(2, 1, 1, 2, 1)]
-        [InlineData(2, 1, 2, 1, 1)]
-        [InlineData(0, 0, 1, 2, -1)]
-        [InlineData(0, 0, 2, 1, 1)]
-        [InlineData(0, 0, Int32.MinValue, Int32.MaxValue, -1)]
-        [InlineData(0, 0, Int32.MaxValue, Int32.MinValue, 1)]
-        [InlineData(Int32.MinValue, Int32.MaxValue, 0, 0, -1)]
-        [InlineData(Int32.MaxValue, Int32.MinValue, 0, 0, 1)]
-        public void CompareTo_RespectsOrder(int prefixOrder1, int prefixOrder2, int order1, int order2, int expectedValue)
+        [InlineData(1, 2, -1)]
+        [InlineData(2, 1, 1)]
+        [InlineData(Int32.MinValue, Int32.MaxValue, -1)]
+        [InlineData(Int32.MaxValue, Int32.MinValue, 1)]
+        [InlineData(0, 0, 0)]
+        public void CompareTo_RespectsOrder(int order1, int order2, int expectedValue)
         {
 #if ASPNETWEBAPI
             var x = new HttpRouteEntry();
@@ -34,9 +29,7 @@ namespace System.Web.Mvc.Routing
             var y = new RouteEntry();
 #endif
 
-            x.PrefixOrder = prefixOrder1;
             x.Order = order1;
-            y.PrefixOrder = prefixOrder2;
             y.Order = order2;
 
             Assert.Equal(expectedValue, x.CompareTo(y));

@@ -139,7 +139,8 @@ namespace System.Web.Http
             }
 
             List<HttpRouteEntry> routes = new List<HttpRouteEntry>();
-            Collection<RoutePrefixAttribute> routePrefixes = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>(inherit: false);
+
+            RoutePrefixAttribute routePrefix = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>(inherit: false).SingleOrDefault();
 
             foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionMap)
             {
@@ -149,10 +150,6 @@ namespace System.Web.Http
                 {
                     IEnumerable<IHttpRouteInfoProvider> routeInfoProviders = actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
 
-                    // DefaultIfEmpty below is required to add routes when there is a route prefix but no
-                    // route provider or when there is a route provider with a template but no route prefix
-                    foreach (RoutePrefixAttribute routePrefix in routePrefixes.DefaultIfEmpty())
-                    {
                         foreach (IHttpRouteInfoProvider routeProvider in routeInfoProviders.DefaultIfEmpty())
                         {
                             string routeTemplate = BuildRouteTemplate(routePrefix, routeProvider, controllerDescriptor.ControllerName, actionDescriptor.ActionName);
@@ -187,10 +184,6 @@ namespace System.Web.Http
                                     entry.Name = routeProvider.RouteName;
                                     entry.Order = routeProvider.RouteOrder;
                                 }
-                                if (routePrefix != null)
-                                {
-                                    entry.PrefixOrder = routePrefix.Order;
-                                }
                                 routes.Add(entry);
                             }
                             else
@@ -198,14 +191,9 @@ namespace System.Web.Http
                                 existingEntry.Actions.Add(actionDescriptor);
 
                                 // Take the maximum of the two orders as the order
-                                int prefixOrder = routePrefix == null ? 0 : routePrefix.Order;
                                 int order = routeProvider == null ? 0 : routeProvider.RouteOrder;
 
-                                if (prefixOrder > existingEntry.PrefixOrder)
-                                {
-                                    existingEntry.PrefixOrder = prefixOrder;
-                                }
-                                else if (prefixOrder == existingEntry.PrefixOrder && order > existingEntry.Order)
+                            if (order > existingEntry.Order)
                                 {
                                     existingEntry.Order = order;
                                 }
@@ -219,7 +207,6 @@ namespace System.Web.Http
                         }
                     }
                 }
-            }
 
             return routes;
         }

@@ -39,6 +39,18 @@ namespace System.Web.Http.Routing
             Assert.Equal(responseBody, GetContentValue<string>(response));
         }
 
+        [Fact]
+        public void RoutePrefixAttribute_IsSingleInstance()
+        {
+            var attr = typeof(RoutePrefixAttribute);
+            var attrs = attr.GetCustomAttributes(typeof(AttributeUsageAttribute), false);
+            var usage = (AttributeUsageAttribute)attrs[0];
+
+            Assert.Equal(AttributeTargets.Class, usage.ValidOn);
+            Assert.False(usage.AllowMultiple); // only 1 per class
+            Assert.False(usage.Inherited); // RoutePrefix is not inherited. 
+        }
+
         private static HttpResponseMessage SubmitRequest(HttpRequestMessage request)
         {
             HttpConfiguration config = new HttpConfiguration();
@@ -56,18 +68,6 @@ namespace System.Web.Http.Routing
             T value;
             response.TryGetContentValue<T>(out value);
             return value;
-        }
-
-        [Fact]
-        public void RoutePrefixAttribute_IsSingleInstance()
-        {
-            var attr = typeof(RoutePrefixAttribute);
-            var attrs = attr.GetCustomAttributes(typeof(AttributeUsageAttribute), false);
-            var usage = (AttributeUsageAttribute)attrs[0];
-
-            Assert.Equal(AttributeTargets.Class, usage.ValidOn);
-            Assert.False(usage.AllowMultiple); // only 1 per class
-            Assert.False(usage.Inherited); // RoutePrefix is not inherited. 
         }
     }
 

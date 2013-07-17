@@ -174,27 +174,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void MapHttpAttributeRoutes_AddsMultipleRoutesFromAttributesAndPrefixes()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix1"), new RoutePrefixAttribute("prefix2") };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute("controller/get1"), new HttpGetAttribute("controller/get2") };
-            SetUpConfiguration(config, routePrefixes, routeProviders);
-
-            // Act
-            config.MapHttpAttributeRoutes();
-
-            // Assert
-            HttpRouteCollection routes = config.Routes;
-            Assert.Equal(4, routes.Count);
-            Assert.Single(routes.Where(route => route.RouteTemplate == "prefix1/controller/get1"));
-            Assert.Single(routes.Where(route => route.RouteTemplate == "prefix1/controller/get2"));
-            Assert.Single(routes.Where(route => route.RouteTemplate == "prefix2/controller/get1"));
-            Assert.Single(routes.Where(route => route.RouteTemplate == "prefix2/controller/get2"));
-        }
-
-        [Fact]
         public void MapHttpAttributeRoutes_RespectsRouteOrder()
         {
             // Arrange
@@ -252,42 +231,6 @@ namespace System.Net.Http
             Assert.Equal("action1/route2", routes.ElementAt(0).RouteTemplate);
             Assert.Equal("action2/route1", routes.ElementAt(1).RouteTemplate);
             Assert.Equal("action1/route1", routes.ElementAt(2).RouteTemplate);
-        }
-
-        [Fact]
-        public void MapHttpAttributeRoutes_RespectsRoutePrefixOrder()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>()
-                {
-                    new RoutePrefixAttribute("prefix1") { Order = 1 },
-                    new RoutePrefixAttribute("prefix2"),
-                    new RoutePrefixAttribute("prefix3") { Order = -1 },
-                };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>()
-                {
-                    new HttpGetAttribute("get1") { RouteOrder = 1 },
-                    new HttpGetAttribute("get2"),
-                    new HttpGetAttribute("get3") { RouteOrder = -1 }
-                };
-            SetUpConfiguration(config, routePrefixes, routeProviders);
-
-            // Act
-            config.MapHttpAttributeRoutes();
-
-            // Assert
-            HttpRouteCollection routes = config.Routes;
-            Assert.Equal(9, routes.Count);
-            Assert.Equal("prefix3/get3", routes.ElementAt(0).RouteTemplate);
-            Assert.Equal("prefix3/get2", routes.ElementAt(1).RouteTemplate);
-            Assert.Equal("prefix3/get1", routes.ElementAt(2).RouteTemplate);
-            Assert.Equal("prefix2/get3", routes.ElementAt(3).RouteTemplate);
-            Assert.Equal("prefix2/get2", routes.ElementAt(4).RouteTemplate);
-            Assert.Equal("prefix2/get1", routes.ElementAt(5).RouteTemplate);
-            Assert.Equal("prefix1/get3", routes.ElementAt(6).RouteTemplate);
-            Assert.Equal("prefix1/get2", routes.ElementAt(7).RouteTemplate);
-            Assert.Equal("prefix1/get1", routes.ElementAt(8).RouteTemplate);
         }
 
         [Fact]

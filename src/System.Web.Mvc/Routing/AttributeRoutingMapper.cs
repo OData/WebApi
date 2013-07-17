@@ -44,13 +44,8 @@ namespace System.Web.Mvc.Routing
 
         internal List<RouteEntry> MapMvcAttributeRoutes(ReflectedAsyncControllerDescriptor controllerDescriptor)
         {
-            RoutePrefixAttribute[] prefixAttributes = GetPrefixesFrom(controllerDescriptor)
-                .DefaultIfEmpty()
-                .ToArray();
-            foreach (RoutePrefixAttribute prefixAttribute in prefixAttributes)
-            {
-                ValidatePrefixTemplate(prefixAttribute, controllerDescriptor);
-            }
+            RoutePrefixAttribute prefixAttribute = GetPrefixFrom(controllerDescriptor);
+            ValidatePrefixTemplate(prefixAttribute, controllerDescriptor);            
 
             RouteAreaAttribute area = GetAreaFrom(controllerDescriptor);
             string areaName = GetAreaName(controllerDescriptor, area);
@@ -82,25 +77,22 @@ namespace System.Web.Mvc.Routing
                 foreach (var routeAttribute in routeAttributes)
                 {
                     ValidateTemplate(routeAttribute, actionName, controllerDescriptor);
-                    foreach (var prefixAttribute in prefixAttributes)
-                    {
-                        string prefix = prefixAttribute != null ? prefixAttribute.Prefix : null;
-                        int prefixOrder = prefixAttribute != null ? prefixAttribute.Order : 0;
 
-                        string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.RouteTemplate);
-                        Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute.Verbs, controllerName,
-                                                                     actionName, method, areaName);
-                        RouteEntry entry = new RouteEntry
-                        {
-                            Name = routeAttribute.RouteName ?? template,
-                            Route = route,
-                            RouteTemplate = template,
-                            ParsedRoute = RouteParser.Parse(route.Url),
-                            Order = routeAttribute.RouteOrder,
-                            PrefixOrder = prefixOrder,
-                        };
-                        routeEntries.Add(entry);
-                    }
+                    string prefix = prefixAttribute != null ? prefixAttribute.Prefix : null;
+                    int prefixOrder = prefixAttribute != null ? prefixAttribute.Order : 0;
+
+                    string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.RouteTemplate);
+                    Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute.Verbs, controllerName,
+                                                                    actionName, method, areaName);
+                    RouteEntry entry = new RouteEntry
+                    {
+                        Name = routeAttribute.RouteName ?? template,
+                        Route = route,
+                        RouteTemplate = template,
+                        ParsedRoute = RouteParser.Parse(route.Url),
+                        Order = routeAttribute.RouteOrder                        
+                    };
+                    routeEntries.Add(entry);                    
                 }
             }
 
@@ -183,12 +175,12 @@ namespace System.Web.Mvc.Routing
             return areaAttribute;
         }
 
-        private static IEnumerable<RoutePrefixAttribute> GetPrefixesFrom(ReflectedAsyncControllerDescriptor controllerDescriptor)
+        private static RoutePrefixAttribute GetPrefixFrom(ReflectedAsyncControllerDescriptor controllerDescriptor)
         {
             // this only happens once per controller type, for the lifetime of the application,
             // so we do not need to cache the results
            return controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute), inherit: false)
-                                    .Cast<RoutePrefixAttribute>();
+                                    .Cast<RoutePrefixAttribute>().FirstOrDefault();
         }
 
         internal static string CombinePrefixAndAreaWithTemplate(string areaPrefix, string prefix, string template)

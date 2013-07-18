@@ -38,7 +38,14 @@ namespace System.Web.Http.Results
         {
         }
 
-        internal JsonResult(T content, JsonSerializerSettings serializerSettings, Encoding encoding,
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonResult{T}"/> class with the values provided.
+        /// </summary>
+        /// <param name="content">The content value to serialize in the entity body.</param>
+        /// <param name="serializerSettings">The serializer settings.</param>
+        /// <param name="encoding">The content encoding.</param>
+        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
+        public JsonResult(T content, JsonSerializerSettings serializerSettings, Encoding encoding,
             ApiController controller)
             : this(content, serializerSettings, encoding, new StatusCodeResult.ApiControllerDependencyProvider(
                 controller))
@@ -91,7 +98,7 @@ namespace System.Web.Http.Results
         }
 
         /// <inheritdoc />
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        public virtual Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(Execute());
         }

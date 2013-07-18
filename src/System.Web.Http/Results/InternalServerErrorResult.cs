@@ -22,7 +22,9 @@ namespace System.Web.Http.Results
         {
         }
 
-        internal InternalServerErrorResult(ApiController controller)
+        /// <summary>Initializes a new instance of the <see cref="InternalServerErrorResult"/> class.</summary>
+        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
+        public InternalServerErrorResult(ApiController controller)
             : this(new StatusCodeResult.ApiControllerDependencyProvider(controller))
         {
         }
@@ -41,7 +43,7 @@ namespace System.Web.Http.Results
         }
 
         /// <inheritdoc />
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        public virtual Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(StatusCodeResult.Execute(HttpStatusCode.InternalServerError,
                 _dependencies.Request));

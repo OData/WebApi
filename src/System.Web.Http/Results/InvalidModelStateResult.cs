@@ -36,7 +36,10 @@ namespace System.Web.Http.Results
         {
         }
 
-        internal InvalidModelStateResult(ModelStateDictionary modelState, ApiController controller)
+        /// <summary>Initializes a new instance of the <see cref="InvalidModelStateResult"/> class.</summary>
+        /// <param name="modelState">The model state to include in the error.</param>
+        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
+        public InvalidModelStateResult(ModelStateDictionary modelState, ApiController controller)
             : this(modelState, new ExceptionResult.ApiControllerDependencyProvider(controller))
         {
         }
@@ -86,7 +89,7 @@ namespace System.Web.Http.Results
         }
 
         /// <inheritdoc />
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        public virtual Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(Execute());
         }

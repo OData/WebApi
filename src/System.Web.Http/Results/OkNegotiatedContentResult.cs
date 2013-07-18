@@ -35,7 +35,13 @@ namespace System.Web.Http.Results
         {
         }
 
-        internal OkNegotiatedContentResult(T content, ApiController controller)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OkNegotiatedContentResult{T}"/> class with the values
+        /// provided.
+        /// </summary>
+        /// <param name="content">The content value to negotiate and format in the entity body.</param>
+        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
+        public OkNegotiatedContentResult(T content, ApiController controller)
             : this(content, new NegotiatedContentResult<T>.ApiControllerDependencyProvider(controller))
         {
         }
@@ -73,7 +79,7 @@ namespace System.Web.Http.Results
         }
 
         /// <inheritdoc />
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        public virtual Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(NegotiatedContentResult<T>.Execute(HttpStatusCode.OK, _content,
                 _dependencies.ContentNegotiator, _dependencies.Request, _dependencies.Formatters));

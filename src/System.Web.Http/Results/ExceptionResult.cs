@@ -37,7 +37,10 @@ namespace System.Web.Http.Results
         {
         }
 
-        internal ExceptionResult(Exception exception, ApiController controller)
+        /// <summary>Initializes a new instance of the <see cref="ExceptionResult"/> class.</summary>
+        /// <param name="exception">The exception to include in the error.</param>
+        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
+        public ExceptionResult(Exception exception, ApiController controller)
             : this(exception, new ApiControllerDependencyProvider(controller))
         {
         }
@@ -86,7 +89,7 @@ namespace System.Web.Http.Results
         }
 
         /// <inheritdoc />
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        public virtual Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(Execute());
         }

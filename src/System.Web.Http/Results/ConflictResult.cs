@@ -22,7 +22,9 @@ namespace System.Web.Http.Results
         {
         }
 
-        internal ConflictResult(ApiController controller)
+        /// <summary>Initializes a new instance of the <see cref="ConflictResult"/> class.</summary>
+        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
+        public ConflictResult(ApiController controller)
             : this(new StatusCodeResult.ApiControllerDependencyProvider(controller))
         {
         }
@@ -41,7 +43,7 @@ namespace System.Web.Http.Results
         }
 
         /// <inheritdoc />
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        public virtual Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(StatusCodeResult.Execute(HttpStatusCode.Conflict, _dependencies.Request));
         }

@@ -37,7 +37,18 @@ namespace System.Web.Http.Results
         {
         }
 
-        internal FormattedContentResult(HttpStatusCode statusCode, T content, MediaTypeFormatter formatter,
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FormattedContentResult{T}"/> class with the values provided.
+        /// </summary>
+        /// <param name="statusCode">The HTTP status code for the response message.</param>
+        /// <param name="content">The content value to format in the entity body.</param>
+        /// <param name="formatter">The formatter to use to format the content.</param>
+        /// <param name="mediaType">
+        /// The value for the Content-Type header, or <see langword="null"/> to have the formatter pick a default
+        /// value.
+        /// </param>
+        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
+        public FormattedContentResult(HttpStatusCode statusCode, T content, MediaTypeFormatter formatter,
             MediaTypeHeaderValue mediaType, ApiController controller)
             : this(statusCode, content, formatter, mediaType, new StatusCodeResult.ApiControllerDependencyProvider(
                 controller))
@@ -95,7 +106,7 @@ namespace System.Web.Http.Results
         }
 
         /// <inheritdoc />
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        public virtual Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(Execute());
         }

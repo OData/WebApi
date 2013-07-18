@@ -34,7 +34,13 @@ namespace System.Web.Http.Results
         {
         }
 
-        internal NegotiatedContentResult(HttpStatusCode statusCode, T content, ApiController controller)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NegotiatedContentResult{T}"/> class with the values provided.
+        /// </summary>
+        /// <param name="statusCode">The HTTP status code for the response message.</param>
+        /// <param name="content">The content value to negotiate and format in the entity body.</param>
+        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
+        public NegotiatedContentResult(HttpStatusCode statusCode, T content, ApiController controller)
             : this(statusCode, content, new ApiControllerDependencyProvider(controller))
         {
         }
@@ -79,7 +85,7 @@ namespace System.Web.Http.Results
         }
 
         /// <inheritdoc />
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        public virtual Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(Execute());
         }

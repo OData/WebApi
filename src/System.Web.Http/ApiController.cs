@@ -230,7 +230,7 @@ namespace System.Web.Http
 
         /// <summary>Creates a <see cref="BadRequestResult"/> (400 Bad Request).</summary>
         /// <returns>A <see cref="BadRequestResult"/>.</returns>
-        public BadRequestResult BadRequest()
+        public virtual BadRequestResult BadRequest()
         {
             return new BadRequestResult(this);
         }
@@ -240,7 +240,7 @@ namespace System.Web.Http
         /// </summary>
         /// <param name="message">The user-visible error message.</param>
         /// <returns>An <see cref="InvalidModelStateResult"/> with the specified model state.</returns>
-        public ErrorMessageResult BadRequest(string message)
+        public virtual ErrorMessageResult BadRequest(string message)
         {
             return new ErrorMessageResult(message, this);
         }
@@ -250,14 +250,14 @@ namespace System.Web.Http
         /// </summary>
         /// <param name="modelState">The model state to include in the error.</param>
         /// <returns>An <see cref="InvalidModelStateResult"/> with the specified model state.</returns>
-        public InvalidModelStateResult BadRequest(ModelStateDictionary modelState)
+        public virtual InvalidModelStateResult BadRequest(ModelStateDictionary modelState)
         {
             return new InvalidModelStateResult(modelState, this);
         }
 
         /// <summary>Creates a <see cref="ConflictResult"/> (409 Conflict).</summary>
         /// <returns>A <see cref="ConflictResult"/>.</returns>
-        public ConflictResult Conflict()
+        public virtual ConflictResult Conflict()
         {
             return new ConflictResult(this);
         }
@@ -267,7 +267,7 @@ namespace System.Web.Http
         /// <param name="statusCode">The HTTP status code for the response message.</param>
         /// <param name="value">The content value to negotiate and format in the entity body.</param>
         /// <returns>A <see cref="NegotiatedContentResult{T}"/> with the specified values.</returns>
-        public NegotiatedContentResult<T> Content<T>(HttpStatusCode statusCode, T value)
+        public virtual NegotiatedContentResult<T> Content<T>(HttpStatusCode statusCode, T value)
         {
             return new NegotiatedContentResult<T>(statusCode, value, this);
         }
@@ -306,8 +306,8 @@ namespace System.Web.Http
         /// value.
         /// </param>
         /// <returns>A <see cref="FormattedContentResult{T}"/> with the specified values.</returns>
-        public FormattedContentResult<T> Content<T>(HttpStatusCode statusCode, T value, MediaTypeFormatter formatter,
-            MediaTypeHeaderValue mediaType)
+        public virtual FormattedContentResult<T> Content<T>(HttpStatusCode statusCode, T value,
+            MediaTypeFormatter formatter, MediaTypeHeaderValue mediaType)
         {
             return new FormattedContentResult<T>(statusCode, value, formatter, mediaType, this);
         }
@@ -336,7 +336,7 @@ namespace System.Web.Http
         /// <param name="location">The location at which the content has been created.</param>
         /// <param name="content">The content value to negotiate and format in the entity body.</param>
         /// <returns>A <see cref="CreatedNegotiatedContentResult{T}"/> with the specified values.</returns>
-        public CreatedNegotiatedContentResult<T> Created<T>(Uri location, T content)
+        public virtual CreatedNegotiatedContentResult<T> Created<T>(Uri location, T content)
         {
             return new CreatedNegotiatedContentResult<T>(location, content, this);
         }
@@ -363,7 +363,7 @@ namespace System.Web.Http
         /// <param name="routeValues">The route data to use for generating the URL.</param>
         /// <param name="content">The content value to negotiate and format in the entity body.</param>
         /// <returns>A <see cref="CreatedAtRouteNegotiatedContentResult{T}"/> with the specified values.</returns>
-        public CreatedAtRouteNegotiatedContentResult<T> CreatedAtRoute<T>(string routeName,
+        public virtual CreatedAtRouteNegotiatedContentResult<T> CreatedAtRoute<T>(string routeName,
             IDictionary<string, object> routeValues, T content)
         {
             return new CreatedAtRouteNegotiatedContentResult<T>(routeName, routeValues, content, this);
@@ -371,7 +371,7 @@ namespace System.Web.Http
 
         /// <summary>Creates an <see cref="InternalServerErrorResult"/> (500 Internal Server Error).</summary>
         /// <returns>A <see cref="InternalServerErrorResult"/>.</returns>
-        public InternalServerErrorResult InternalServerError()
+        public virtual InternalServerErrorResult InternalServerError()
         {
             return new InternalServerErrorResult(this);
         }
@@ -381,7 +381,7 @@ namespace System.Web.Http
         /// </summary>
         /// <param name="exception">The exception to include in the error.</param>
         /// <returns>An <see cref="ExceptionResult"/> with the specified exception.</returns>
-        public ExceptionResult InternalServerError(Exception exception)
+        public virtual ExceptionResult InternalServerError(Exception exception)
         {
             return new ExceptionResult(exception, this);
         }
@@ -412,21 +412,21 @@ namespace System.Web.Http
         /// <param name="serializerSettings">The serializer settings.</param>
         /// <param name="encoding">The content encoding.</param>
         /// <returns>A <see cref="JsonResult{T}"/> with the specified values.</returns>
-        public JsonResult<T> Json<T>(T content, JsonSerializerSettings serializerSettings, Encoding encoding)
+        public virtual JsonResult<T> Json<T>(T content, JsonSerializerSettings serializerSettings, Encoding encoding)
         {
             return new JsonResult<T>(content, serializerSettings, encoding, this);
         }
 
         /// <summary>Creates a <see cref="NotFoundResult"/> (404 Not Found).</summary>
         /// <returns>A <see cref="NotFoundResult"/>.</returns>
-        public NotFoundResult NotFound()
+        public virtual NotFoundResult NotFound()
         {
             return new NotFoundResult(this);
         }
 
         /// <summary>Creates an <see cref="OkResult"/> (200 OK).</summary>
         /// <returns>An <see cref="OkResult"/>.</returns>
-        public OkResult Ok()
+        public virtual OkResult Ok()
         {
             return new OkResult(this);
         }
@@ -437,7 +437,7 @@ namespace System.Web.Http
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
         /// <param name="content">The content value to negotiate and format in the entity body.</param>
         /// <returns>An <see cref="OkNegotiatedContentResult{T}"/> with the specified values.</returns>
-        public OkNegotiatedContentResult<T> Ok<T>(T content)
+        public virtual OkNegotiatedContentResult<T> Ok<T>(T content)
         {
             return new OkNegotiatedContentResult<T>(content, this);
         }
@@ -445,9 +445,7 @@ namespace System.Web.Http
         /// <summary>Creates a <see cref="ResponseMessageResult"/> with the specified response.</summary>
         /// <param name="response">The HTTP response message.</param>
         /// <returns>A <see cref="ResponseMessageResult"/> for the specified response.</returns>
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic",
-            Justification = "Consistency and discoverability are better with an instance method.")]
-        public ResponseMessageResult ResponseMessage(HttpResponseMessage response)
+        public virtual ResponseMessageResult ResponseMessage(HttpResponseMessage response)
         {
             return new ResponseMessageResult(response);
         }
@@ -455,7 +453,7 @@ namespace System.Web.Http
         /// <summary>Creates a <see cref="StatusCodeResult"/> with the specified status code.</summary>
         /// <param name="status">The HTTP status code for the response message</param>
         /// <returns>A <see cref="StatusCodeResult"/> with the specified status code.</returns>
-        public StatusCodeResult StatusCode(HttpStatusCode status)
+        public virtual StatusCodeResult StatusCode(HttpStatusCode status)
         {
             return new StatusCodeResult(status, this);
         }
@@ -475,7 +473,7 @@ namespace System.Web.Http
         /// </summary>
         /// <param name="challenges">The WWW-Authenticate challenges.</param>
         /// <returns>An <see cref="UnauthorizedResult"/> with the specified values.</returns>
-        public UnauthorizedResult Unauthorized(IEnumerable<AuthenticationHeaderValue> challenges)
+        public virtual UnauthorizedResult Unauthorized(IEnumerable<AuthenticationHeaderValue> challenges)
         {
             return new UnauthorizedResult(challenges, this);
         }

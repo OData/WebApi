@@ -44,7 +44,15 @@ namespace System.Web.Http.Results
         {
         }
 
-        internal CreatedAtRouteNegotiatedContentResult(string routeName, IDictionary<string, object> routeValues,
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreatedAtRouteNegotiatedContentResult{T}"/> class with the
+        /// values provided.
+        /// </summary>
+        /// <param name="routeName">The name of the route to use for generating the URL.</param>
+        /// <param name="routeValues">The route data to use for generating the URL.</param>
+        /// <param name="content">The content value to negotiate and format in the entity body.</param>
+        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
+        public CreatedAtRouteNegotiatedContentResult(string routeName, IDictionary<string, object> routeValues,
             T content, ApiController controller)
             : this(routeName, routeValues, content, new ApiControllerDependencyProvider(controller))
         {
@@ -109,7 +117,7 @@ namespace System.Web.Http.Results
         }
 
         /// <inheritdoc />
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        public virtual Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(Execute());
         }

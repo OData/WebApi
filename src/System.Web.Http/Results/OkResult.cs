@@ -20,7 +20,9 @@ namespace System.Web.Http.Results
         {
         }
 
-        internal OkResult(ApiController controller)
+        /// <summary>Initializes a new instance of the <see cref="NotFoundResult"/> class.</summary>
+        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
+        public OkResult(ApiController controller)
             : this(new StatusCodeResult.ApiControllerDependencyProvider(controller))
         {
         }
@@ -39,7 +41,7 @@ namespace System.Web.Http.Results
         }
 
         /// <inheritdoc />
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        public virtual Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(StatusCodeResult.Execute(HttpStatusCode.OK, _dependencies.Request));
         }

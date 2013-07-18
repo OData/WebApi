@@ -79,7 +79,6 @@ namespace System.Web.Mvc.Routing
                     ValidateTemplate(routeAttribute, actionName, controllerDescriptor);
 
                     string prefix = prefixAttribute != null ? prefixAttribute.Prefix : null;
-                    int prefixOrder = prefixAttribute != null ? prefixAttribute.Order : 0;
 
                     string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.RouteTemplate);
                     Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute.Verbs, controllerName,
@@ -180,7 +179,7 @@ namespace System.Web.Mvc.Routing
             // this only happens once per controller type, for the lifetime of the application,
             // so we do not need to cache the results
            return controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute), inherit: false)
-                                    .Cast<RoutePrefixAttribute>().FirstOrDefault();
+                                    .Cast<RoutePrefixAttribute>().SingleOrDefault();
         }
 
         internal static string CombinePrefixAndAreaWithTemplate(string areaPrefix, string prefix, string template)

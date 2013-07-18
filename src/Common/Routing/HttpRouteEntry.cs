@@ -59,8 +59,7 @@ namespace System.Web.Mvc.Routing
 #endif
         {
             Contract.Assert(other != null);            
-
-            // Then order by the attribute order
+                        
             if (Order > other.Order)
             {
                 return 1;

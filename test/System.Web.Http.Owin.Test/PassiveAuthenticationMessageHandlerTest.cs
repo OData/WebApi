@@ -232,7 +232,7 @@ namespace System.Web.Http.Owin
             IOwinContext context = CreateOwinContext();
             IAuthenticationManager authenticationManager = context.Authentication;
             IDictionary<string, string> expectedExtra = new Dictionary<string, string>();
-            AuthenticationExtra extraWrapper = new AuthenticationExtra(expectedExtra);
+            AuthenticationProperties extraWrapper = new AuthenticationProperties(expectedExtra);
             context.Authentication.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(null,
                 extraWrapper);
 
@@ -250,9 +250,9 @@ namespace System.Web.Http.Owin
             Assert.Equal(1, authenticationTypes.Length);
             string authenticationType = authenticationTypes[0];
             Assert.Null(authenticationType);
-            AuthenticationExtra actualExtraWrapper = challenge.Extra;
+            AuthenticationProperties actualExtraWrapper = challenge.Properties;
             Assert.NotNull(actualExtraWrapper);
-            Assert.Same(expectedExtra, actualExtraWrapper.Properties);
+            Assert.Same(expectedExtra, actualExtraWrapper.Dictionary);
         }
 
         [Fact]
@@ -264,8 +264,8 @@ namespace System.Web.Http.Owin
             HttpMessageHandler handler = CreateProductUnderTest(principalService, inner);
             IOwinContext context = CreateOwinContext();
             IAuthenticationManager authenticationManager = context.Authentication;
-            AuthenticationExtra extraWrapper = new AuthenticationExtra();
-            IDictionary<string, string> expectedExtra = extraWrapper.Properties;
+            AuthenticationProperties extraWrapper = new AuthenticationProperties();
+            IDictionary<string, string> expectedExtra = extraWrapper.Dictionary;
             authenticationManager.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(new string[0],
                 extraWrapper);
 
@@ -283,9 +283,9 @@ namespace System.Web.Http.Owin
             Assert.Equal(1, authenticationTypes.Length);
             string authenticationType = authenticationTypes[0];
             Assert.Null(authenticationType);
-            AuthenticationExtra actualExtraWrapper = challenge.Extra;
+            AuthenticationProperties actualExtraWrapper = challenge.Properties;
             Assert.NotNull(actualExtraWrapper);
-            Assert.Same(expectedExtra, actualExtraWrapper.Properties);
+            Assert.Same(expectedExtra, actualExtraWrapper.Dictionary);
         }
 
         [Fact]
@@ -297,9 +297,9 @@ namespace System.Web.Http.Owin
             HttpMessageHandler handler = CreateProductUnderTest(principalService, inner);
             IOwinContext context = CreateOwinContext();
             IAuthenticationManager authenticationManager = context.Authentication;
-            AuthenticationExtra extraWrapper = new AuthenticationExtra();
+            AuthenticationProperties extraWrapper = new AuthenticationProperties();
             string[] expectedAuthenticationTypes = new string[] { "Existing" };
-            IDictionary<string, string> expectedExtra = extraWrapper.Properties;
+            IDictionary<string, string> expectedExtra = extraWrapper.Dictionary;
             authenticationManager.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(
                 expectedAuthenticationTypes, extraWrapper);
 
@@ -313,9 +313,9 @@ namespace System.Web.Http.Owin
             AuthenticationResponseChallenge challenge = authenticationManager.AuthenticationResponseChallenge;
             Assert.NotNull(challenge);
             Assert.Same(expectedAuthenticationTypes, challenge.AuthenticationTypes);
-            AuthenticationExtra actualExtraWrapper = challenge.Extra;
+            AuthenticationProperties actualExtraWrapper = challenge.Properties;
             Assert.NotNull(actualExtraWrapper);
-            Assert.Same(expectedExtra, actualExtraWrapper.Properties);
+            Assert.Same(expectedExtra, actualExtraWrapper.Dictionary);
         }
 
         private static HttpMessageHandler CreateDummyHandler()
@@ -340,9 +340,9 @@ namespace System.Web.Http.Owin
             return new Mock<IHostPrincipalService>(MockBehavior.Strict).Object;
         }
 
-        private static AuthenticationExtra CreateExtra()
+        private static AuthenticationProperties CreateExtra()
         {
-            return new AuthenticationExtra();
+            return new AuthenticationProperties();
         }
 
         private static PassiveAuthenticationMessageHandler CreateProductUnderTest(

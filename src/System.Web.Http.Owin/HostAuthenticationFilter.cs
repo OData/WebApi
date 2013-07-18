@@ -104,7 +104,7 @@ namespace System.Web.Http
             Contract.Assert(authenticationType != null);
 
             List<string> authenticationTypes = new List<string>();
-            AuthenticationExtra extra;
+            AuthenticationProperties properties;
 
             if (challenge != null)
             {
@@ -115,16 +115,16 @@ namespace System.Web.Http
                     authenticationTypes.AddRange(currentAuthenticationTypes);
                 }
 
-                extra = challenge.Extra;
+                properties = challenge.Properties;
             }
             else
             {
-                extra = new AuthenticationExtra();
+                properties = new AuthenticationProperties();
             }
 
             authenticationTypes.Add(authenticationType);
 
-            return new AuthenticationResponseChallenge(authenticationTypes.ToArray(), extra);
+            return new AuthenticationResponseChallenge(authenticationTypes.ToArray(), properties);
         }
 
         private static IAuthenticationManager GetAuthenticationManagerOrThrow(HttpRequestMessage request)

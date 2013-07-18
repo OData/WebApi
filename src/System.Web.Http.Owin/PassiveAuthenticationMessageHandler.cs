@@ -120,12 +120,12 @@ namespace System.Web.Http.Owin
             if (currentChallenge == null)
             {
                 authenticationManager.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(
-                    suppressAuthenticationTypes, new AuthenticationExtra());
+                    suppressAuthenticationTypes, new AuthenticationProperties());
             }
             else if (currentChallenge.AuthenticationTypes == null || currentChallenge.AuthenticationTypes.Length == 0)
             {
                 authenticationManager.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(
-                    suppressAuthenticationTypes, currentChallenge.Extra);
+                    suppressAuthenticationTypes, currentChallenge.Properties);
             }
         }
     }

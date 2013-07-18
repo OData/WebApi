@@ -71,7 +71,7 @@ namespace System.Web.Http.Owin
 
                     if (a == authenticationType)
                     {
-                        result = new AuthenticateResult(expectedIdentity, null, new Dictionary<string, object>());
+                        result = new AuthenticateResult(expectedIdentity, new AuthenticationProperties(), new AuthenticationDescription());
                     }
                     else
                     {
@@ -135,7 +135,7 @@ namespace System.Web.Http.Owin
             IAuthenticationFilter filter = CreateProductUnderTest(authenticationType);
             IIdentity expectedIdentity = CreateDummyIdentity();
             IAuthenticationManager authenticationManager = CreateAuthenticationManager(
-                (ignore1) => Task.FromResult(new AuthenticateResult(null, null, new Dictionary<string, object>())));
+                (ignore1) => Task.FromResult(new AuthenticateResult(null, new AuthenticationProperties(), new AuthenticationDescription())));
             IOwinContext owinContext = CreateOwinContext(authenticationManager);
             IPrincipal expectedPrincipal = CreateDummyPrincipal();
 
@@ -254,7 +254,7 @@ namespace System.Web.Http.Owin
             IAuthenticationFilter filter = CreateProductUnderTest(expectedAuthenticationType);
             IHttpActionResult result = CreateDummyActionResult();
             string originalAuthenticationType = "FirstChallenge";
-            AuthenticationExtra originalExtra = CreateExtra();
+            AuthenticationProperties originalExtra = CreateExtra();
             AuthenticationResponseChallenge originalChallenge = new AuthenticationResponseChallenge(
                 new string[] { originalAuthenticationType }, originalExtra);
             IAuthenticationManager authenticationManager = CreateAuthenticationManager(originalChallenge);
@@ -276,7 +276,7 @@ namespace System.Web.Http.Owin
             Assert.Equal(2, authenticationTypes.Length);
             Assert.Same(originalAuthenticationType, authenticationTypes[0]);
             Assert.Same(expectedAuthenticationType, authenticationTypes[1]);
-            AuthenticationExtra extra = challenge.Extra;
+            AuthenticationProperties extra = challenge.Properties;
             Assert.Same(originalExtra, extra);
         }
 
@@ -287,7 +287,7 @@ namespace System.Web.Http.Owin
             string expectedAuthenticationType = "AuthenticationType";
             IAuthenticationFilter filter = CreateProductUnderTest(expectedAuthenticationType);
             IHttpActionResult result = CreateDummyActionResult();
-            AuthenticationExtra originalExtra = CreateExtra();
+            AuthenticationProperties originalExtra = CreateExtra();
             AuthenticationResponseChallenge originalChallenge = new AuthenticationResponseChallenge(null,
                 originalExtra);
             IAuthenticationManager authenticationManager = CreateAuthenticationManager(originalChallenge);
@@ -308,7 +308,7 @@ namespace System.Web.Http.Owin
             Assert.NotNull(authenticationTypes);
             Assert.Equal(1, authenticationTypes.Length);
             Assert.Same(expectedAuthenticationType, authenticationTypes[0]);
-            AuthenticationExtra extra = challenge.Extra;
+            AuthenticationProperties extra = challenge.Properties;
             Assert.Same(originalExtra, extra);
         }
 
@@ -338,7 +338,7 @@ namespace System.Web.Http.Owin
             Assert.NotNull(authenticationTypes);
             Assert.Equal(1, authenticationTypes.Length);
             Assert.Same(expectedAuthenticationType, authenticationTypes[0]);
-            AuthenticationExtra extra = challenge.Extra;
+            AuthenticationProperties extra = challenge.Properties;
             Assert.NotNull(extra);
         }
 
@@ -490,9 +490,9 @@ namespace System.Web.Http.Owin
             return new Mock<IPrincipal>(MockBehavior.Strict).Object;
         }
 
-        private static AuthenticationExtra CreateExtra()
+        private static AuthenticationProperties CreateExtra()
         {
-            return new AuthenticationExtra();
+            return new AuthenticationProperties();
         }
 
         private static IOwinContext CreateOwinContext()

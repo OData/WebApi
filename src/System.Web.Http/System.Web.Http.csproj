@@ -119,7 +119,7 @@
     <Compile Include="OverrideAuthorizationAttribute.cs" />
     <Compile Include="OverrideExceptionFiltersAttribute.cs" />
     <Compile Include="Routing\HttpDirectRoute.cs" />
-    <Compile Include="Routing\HttpRouteDataExtensions.cs" />
+    <Compile Include="Routing\HttpRouteExtensions.cs" />
     <Compile Include="Routing\RouteKeys.cs" />
     <Compile Include="..\Common\Routing\Constraints\AlphaRouteConstraint.cs">
       <Link>Routing\Constraints\AlphaRouteConstraint.cs</Link>

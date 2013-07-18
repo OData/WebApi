@@ -147,9 +147,13 @@ namespace System.Web.Http.Description
             if (controllerMappings != null)
             {
                 ApiDescriptionComparer descriptionComparer = new ApiDescriptionComparer();
-                foreach (var route in _config.Routes)
+                foreach (IHttpRoute route in _config.Routes)
                 {
-                    Collection<ApiDescription> descriptionsFromRoute = ExploreRouteControllers(controllerMappings, route);
+                    ReflectedHttpActionDescriptor[] actions = route.GetDirectRouteActions();
+                    Collection<ApiDescription> descriptionsFromRoute =
+                        (actions == null) ?
+                            ExploreRouteControllers(controllerMappings, route) :
+                            ExploreDirectRoute(route, actions);
 
                     // Remove ApiDescription that will lead to ambiguous action matching.
                     // E.g. a controller with Post() and PostComment(). When the route template is {controller}, it produces POST /controller and POST /controller.
@@ -169,6 +173,13 @@ namespace System.Web.Http.Description
             }
 
             return apiDescriptions;
+        }
+
+        private Collection<ApiDescription> ExploreDirectRoute(IHttpRoute route, ReflectedHttpActionDescriptor[] actions)
+        {
+            Collection<ApiDescription> descriptions = new Collection<ApiDescription>();
+            PopulateActionDescriptions(actions, null, route, route.RouteTemplate, descriptions);
+            return descriptions;
         }
 
         private Collection<ApiDescription> ExploreRouteControllers(IDictionary<string, HttpControllerDescriptor> controllerMappings, IHttpRoute route)
@@ -191,16 +202,13 @@ namespace System.Web.Http.Description
                     }
                 }
             }
-            else
+            else if (route.Defaults.TryGetValue(RouteKeys.ControllerKey, out controllerVariableValue))
             {
                 // bound controller variable, {controller = "controllerName"}
-                if (route.Defaults.TryGetValue(RouteKeys.ControllerKey, out controllerVariableValue))
+                HttpControllerDescriptor controllerDescriptor;
+                if (controllerMappings.TryGetValue(controllerVariableValue, out controllerDescriptor) && ShouldExploreController(controllerVariableValue, controllerDescriptor, route))
                 {
-                    HttpControllerDescriptor controllerDescriptor;
-                    if (controllerMappings.TryGetValue(controllerVariableValue, out controllerDescriptor) && ShouldExploreController(controllerVariableValue, controllerDescriptor, route))
-                    {
-                        ExploreRouteActions(route, routeTemplate, controllerDescriptor, apiDescriptions);
-                    }
+                    ExploreRouteActions(route, routeTemplate, controllerDescriptor, apiDescriptions);
                 }
             }
 

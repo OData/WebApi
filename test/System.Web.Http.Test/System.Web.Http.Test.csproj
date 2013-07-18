@@ -90,6 +90,7 @@
     <Compile Include="Controllers\HttpControllerContextTest.cs" />
     <Compile Include="Controllers\HttpConfigurationTest.cs" />
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
+    <Compile Include="Description\ApiExplorerTest.cs" />
     <Compile Include="Filters\HttpAuthenticationChallengeContextTests.cs" />
     <Compile Include="Filters\HttpAuthenticationContextTests.cs" />
     <Compile Include="Hosting\HttpMessageHandlerExtensions.cs" />
@@ -334,6 +335,7 @@
       <Name>System.Net.Http.Formatting.Test</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>

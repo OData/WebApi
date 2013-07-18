@@ -56,10 +56,14 @@ namespace System.Web.Http.Dispatcher
             HttpControllerDescriptor controllerDescriptor;
             if (routeData != null)
             {
-                controllerDescriptor = GetDirectRouteController(routeData);
-                if (controllerDescriptor != null)
+                IHttpRoute route = routeData.Route;
+                if (route != null)
                 {
-                    return controllerDescriptor;
+                    controllerDescriptor = route.GetDirectRouteController();
+                    if (controllerDescriptor != null)
+                    {
+                        return controllerDescriptor;
+                    }
                 }
             }
 
@@ -95,30 +99,6 @@ namespace System.Web.Http.Dispatcher
                 // multiple matching types
                 throw CreateAmbiguousControllerException(request.GetRouteData().Route, controllerName, matchingTypes);
             }
-        }
-
-        private static HttpControllerDescriptor GetDirectRouteController(IHttpRouteData routeData)
-        {
-            ReflectedHttpActionDescriptor[] directRouteActions = routeData.GetDirectRouteActions();
-            if (directRouteActions != null)
-            {
-                // Set the controller descriptor for the first action descriptor
-                Contract.Assert(directRouteActions.Length > 0);
-                HttpControllerDescriptor controllerDescriptor = directRouteActions[0].ControllerDescriptor;
-
-                // Check that all other action descriptors share the same controller descriptor
-                for (int i = 1; i < directRouteActions.Length; i++)
-                {
-                    if (directRouteActions[i].ControllerDescriptor != controllerDescriptor)
-                    {
-                        return null;
-                    }
-                }
-
-                return controllerDescriptor;
-            }
-
-            return null;
         }
 
         public virtual IDictionary<string, HttpControllerDescriptor> GetControllerMapping()

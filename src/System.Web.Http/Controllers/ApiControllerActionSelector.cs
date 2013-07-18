@@ -224,10 +224,15 @@ namespace System.Web.Http.Controllers
             {
                 IHttpRouteData routeData = controllerContext.RouteData;
 
-                ReflectedHttpActionDescriptor[] actions = routeData.GetDirectRouteActions();
-                if (actions != null)
+                IHttpRoute route = routeData.Route;
+                ReflectedHttpActionDescriptor[] actions;
+                if (route != null)
                 {
-                    return actions;
+                    actions = route.GetDirectRouteActions();
+                    if (actions != null)
+                    {
+                        return actions;
+                    }
                 }
 
                 HttpMethod incomingMethod = controllerContext.Request.Method;

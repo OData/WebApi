@@ -438,6 +438,7 @@
     <Compile Include="Validation\Providers\DataMemberModelValidatorProvider.cs" />
     <Compile Include="Validation\Providers\InvalidModelValidatorProvider.cs" />
     <Compile Include="Validation\Providers\RequiredMemberModelValidatorProvider.cs" />
+    <Compile Include="Validation\ReferenceEqualityComparer.cs" />
     <Compile Include="Validation\Validators\ErrorModelValidator.cs" />
     <Compile Include="Validation\Validators\RequiredMemberModelValidator.cs" />
     <Compile Include="Validation\Validators\ValidatableObjectAdapter.cs" />

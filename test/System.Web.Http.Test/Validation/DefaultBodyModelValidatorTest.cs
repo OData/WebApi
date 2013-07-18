@@ -224,6 +224,20 @@ namespace System.Web.Http.Validation
             Assert.Equal(1, modelState.Errors.Count);
         }
 
+        [Fact]
+        public void Validate_DoesNotUseOverridden_GetHashCodeOrEquals()
+        {
+            // Arrange
+            ModelMetadataProvider metadataProvider = new DataAnnotationsModelMetadataProvider();
+            HttpActionContext actionContext = ContextUtil.CreateActionContext();
+            DefaultBodyModelValidator validator = new DefaultBodyModelValidator();
+            object instance = new[] { new TypeThatOverridesEquals { Funny = "hehe" }, new TypeThatOverridesEquals { Funny = "hehe" } };
+
+            // Act & Assert
+            Assert.DoesNotThrow(
+                () => validator.Validate(instance, typeof(TypeThatOverridesEquals[]), metadataProvider, actionContext, String.Empty));
+        }
+
         public class Person
         {
             [Required]
@@ -271,5 +285,21 @@ namespace System.Web.Http.Validation
                 yield return new ValidationResult("Error3", new[] { "Property2", "Property3" });
             }
         }
-    } 
+
+        public class TypeThatOverridesEquals
+        {
+            [StringLength(2)]
+            public string Funny { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                throw new InvalidOperationException();
+            }
+
+            public override int GetHashCode()
+            {
+                throw new InvalidOperationException();
+            }
+        }
+    }
 }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -69,7 +68,7 @@ namespace System.Web.Http.Validation
                 ActionContext = actionContext,
                 ValidatorCache = actionContext.GetValidatorCache(),
                 ModelState = actionContext.ModelState,
-                Visited = new HashSet<object>(),
+                Visited = new HashSet<object>(ReferenceEqualityComparer.Instance),
                 KeyBuilders = new Stack<IKeyBuilder>(),
                 RootPrefix = keyPrefix
             };

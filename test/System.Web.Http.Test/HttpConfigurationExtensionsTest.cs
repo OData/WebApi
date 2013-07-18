@@ -326,6 +326,35 @@ namespace System.Net.Http
         }
 
         [Fact]
+        public void MapHttpAttributeRoutes_AddsOnlyOneActionToRoute_ForMultipleAttributesOnASingleAction()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            string routeTemplate = "api/values";
+            HttpControllerDescriptor controllerDescriptor = CreateControllerDescriptor(config, "Controller", new Collection<RoutePrefixAttribute>());
+            HttpActionDescriptor actionDescriptor = CreateActionDescriptor(
+                "Action",
+                new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute(routeTemplate), new HttpPostAttribute(routeTemplate) });
+
+            var controllerSelector = CreateControllerSelector(new[] { controllerDescriptor });
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
+            var actionSelector = CreateActionSelector(
+                new Dictionary<HttpControllerDescriptor, IEnumerable<HttpActionDescriptor>>()
+                {
+                    { controllerDescriptor, new HttpActionDescriptor[] { actionDescriptor } }
+                });
+            config.Services.Replace(typeof(IHttpActionSelector), actionSelector);
+
+            // Act
+            config.MapHttpAttributeRoutes();
+
+            // Assert
+            IHttpRoute route = Assert.Single(config.Routes);
+            Assert.Equal(routeTemplate, route.RouteTemplate);
+            Assert.Equal(actionDescriptor, Assert.Single(route.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));
+        }
+
+        [Fact]
         public void SuppressHostPrincipal_InsertsSuppressHostPrincipalMessageHandler()
         {
             // Arrange
@@ -390,6 +419,7 @@ namespace System.Net.Http
             Mock<ReflectedHttpActionDescriptor> actionDescriptor = new Mock<ReflectedHttpActionDescriptor>();
             actionDescriptor.Setup(ad => ad.ActionName).Returns(actionName);
             actionDescriptor.Setup(ad => ad.GetCustomAttributes<IHttpRouteInfoProvider>(false)).Returns(routeProviders);
+            actionDescriptor.Setup(ad => ad.SupportedHttpMethods).Returns(new Collection<HttpMethod>());
             return actionDescriptor.Object;
         }
 

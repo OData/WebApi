@@ -179,7 +179,7 @@ namespace System.Web.Http
                                 {
                                     RouteTemplate = routeTemplate,
                                     HttpMethods = actionDescriptor.SupportedHttpMethods,
-                                    Actions = new List<ReflectedHttpActionDescriptor>() { actionDescriptor }
+                                    Actions = new HashSet<ReflectedHttpActionDescriptor>() { actionDescriptor }
                                 };
 
                                 if (routeProvider != null)

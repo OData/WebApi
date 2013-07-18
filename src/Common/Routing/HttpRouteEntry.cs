@@ -43,7 +43,7 @@ namespace System.Web.Mvc.Routing
         }
 
         public Collection<HttpMethod> HttpMethods { get; set; }
-        public List<ReflectedHttpActionDescriptor> Actions { get; set; }
+        public HashSet<ReflectedHttpActionDescriptor> Actions { get; set; }
 #else
         public Route Route { get; set; }
         public ParsedRoute ParsedRoute { get; set; }

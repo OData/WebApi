@@ -277,7 +277,7 @@ namespace System.Net.Http
             HttpControllerDescriptor controllerDescriptor = CreateControllerDescriptor(config, "Controller", new Collection<RoutePrefixAttribute>());
             HttpActionDescriptor actionDescriptor = CreateActionDescriptor(
                 "Action",
-                new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute(routeTemplate), new HttpPostAttribute(routeTemplate) });
+                new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute(routeTemplate), new HttpGetAttribute(routeTemplate) });
 
             var controllerSelector = CreateControllerSelector(new[] { controllerDescriptor });
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
@@ -295,6 +295,43 @@ namespace System.Net.Http
             IHttpRoute route = Assert.Single(config.Routes);
             Assert.Equal(routeTemplate, route.RouteTemplate);
             Assert.Equal(actionDescriptor, Assert.Single(route.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));
+        }
+
+        [Fact]
+        public void MapHttpAttributeRoutes_AddsMultipleRoutes_ForDifferentVerbsOnTheSameAction()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            string routeTemplate = "api/values";
+            HttpControllerDescriptor controllerDescriptor = CreateControllerDescriptor(config, "Controller", new Collection<RoutePrefixAttribute>());
+            HttpActionDescriptor actionDescriptor = CreateActionDescriptor(
+                "Action",
+                new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute(routeTemplate) { RouteOrder = 1 }, new HttpPostAttribute(routeTemplate) { RouteOrder = 2 } });
+
+            var controllerSelector = CreateControllerSelector(new[] { controllerDescriptor });
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
+            var actionSelector = CreateActionSelector(
+                new Dictionary<HttpControllerDescriptor, IEnumerable<HttpActionDescriptor>>()
+                {
+                    { controllerDescriptor, new HttpActionDescriptor[] { actionDescriptor } }
+                });
+            config.Services.Replace(typeof(IHttpActionSelector), actionSelector);
+
+            // Act
+            config.MapHttpAttributeRoutes();
+
+            // Assert
+            Assert.Equal(2, config.Routes.Count);
+
+            IHttpRoute route1 = config.Routes[0];
+            Assert.Equal(routeTemplate, route1.RouteTemplate);
+            Assert.Equal(actionDescriptor, Assert.Single(route1.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));
+            Assert.Equal(new HttpMethod[] { HttpMethod.Get }, ((HttpMethodConstraint)route1.Constraints["httpMethod"]).AllowedMethods);
+
+            IHttpRoute route2 = config.Routes[1];
+            Assert.Equal(routeTemplate, route2.RouteTemplate);
+            Assert.Equal(actionDescriptor, Assert.Single(route2.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));
+            Assert.Equal(new HttpMethod[] { HttpMethod.Post }, ((HttpMethodConstraint)route2.Constraints["httpMethod"]).AllowedMethods);
         }
 
         [Fact]

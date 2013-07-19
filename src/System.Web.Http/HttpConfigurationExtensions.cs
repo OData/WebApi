@@ -139,7 +139,6 @@ namespace System.Web.Http
             }
 
             List<HttpRouteEntry> routes = new List<HttpRouteEntry>();
-
             RoutePrefixAttribute routePrefix = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>(inherit: false).SingleOrDefault();
 
             foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionMap)
@@ -150,65 +149,75 @@ namespace System.Web.Http
                 {
                     IEnumerable<IHttpRouteInfoProvider> routeInfoProviders = actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
 
-                        foreach (IHttpRouteInfoProvider routeProvider in routeInfoProviders.DefaultIfEmpty())
+                    foreach (IHttpRouteInfoProvider routeProvider in routeInfoProviders.DefaultIfEmpty())
+                    {
+                        string routeTemplate = BuildRouteTemplate(routePrefix, routeProvider, controllerDescriptor.ControllerName, actionDescriptor.ActionName);
+                        if (routeTemplate == null)
                         {
-                            string routeTemplate = BuildRouteTemplate(routePrefix, routeProvider, controllerDescriptor.ControllerName, actionDescriptor.ActionName);
-                            if (routeTemplate == null)
+                            continue;
+                        }
+
+                        // Try to find an entry with the same route template and the same HTTP verbs
+                        HttpRouteEntry existingEntry = null;
+                        foreach (HttpRouteEntry entry in routes)
+                        {
+                            if (String.Equals(routeTemplate, entry.RouteTemplate, StringComparison.OrdinalIgnoreCase) &&
+                                    AreEqual(routeProvider.HttpMethods, entry.HttpMethods))
                             {
-                                continue;
+                                existingEntry = entry;
+                                break;
+                            }
+                        }
+
+                        if (existingEntry == null)
+                        {
+                            HttpRouteEntry entry = new HttpRouteEntry()
+                            {
+                                RouteTemplate = routeTemplate,
+                                Actions = new HashSet<ReflectedHttpActionDescriptor>() { actionDescriptor }
+                            };
+
+                            if (routeProvider != null)
+                            {
+                                entry.HttpMethods = routeProvider.HttpMethods;
+                                entry.Name = routeProvider.RouteName;
+                                entry.Order = routeProvider.RouteOrder;
+                            }
+                            routes.Add(entry);
+                        }
+                        else
+                        {
+                            existingEntry.Actions.Add(actionDescriptor);
+
+                            // Take the minimum of the two orders as the order
+                            int order = routeProvider == null ? 0 : routeProvider.RouteOrder;
+                            if (order < existingEntry.Order)
+                            {
+                                existingEntry.Order = order;
                             }
 
-                            // Try to find an entry with the same route template and the same HTTP verbs
-                            HttpRouteEntry existingEntry = null;
-                            foreach (HttpRouteEntry entry in routes)
+                            // Use the provider route name if the route hasn't already been named
+                            if (routeProvider != null && existingEntry.Name == null)
                             {
-                                if (String.Equals(routeTemplate, entry.RouteTemplate, StringComparison.OrdinalIgnoreCase) &&
-                                    actionDescriptor.SupportedHttpMethods.SequenceEqual(entry.HttpMethods))
-                                {
-                                    existingEntry = entry;
-                                    break;
-                                }
-                            }
-
-                            if (existingEntry == null)
-                            {
-                                HttpRouteEntry entry = new HttpRouteEntry()
-                                {
-                                    RouteTemplate = routeTemplate,
-                                    HttpMethods = actionDescriptor.SupportedHttpMethods,
-                                    Actions = new HashSet<ReflectedHttpActionDescriptor>() { actionDescriptor }
-                                };
-
-                                if (routeProvider != null)
-                                {
-                                    entry.Name = routeProvider.RouteName;
-                                    entry.Order = routeProvider.RouteOrder;
-                                }
-                                routes.Add(entry);
-                            }
-                            else
-                            {
-                                existingEntry.Actions.Add(actionDescriptor);
-
-                                // Take the maximum of the two orders as the order
-                                int order = routeProvider == null ? 0 : routeProvider.RouteOrder;
-
-                            if (order > existingEntry.Order)
-                                {
-                                    existingEntry.Order = order;
-                                }
-
-                                // Use the provider route name if the route hasn't already been named
-                                if (routeProvider != null && existingEntry.Name == null)
-                                {
-                                    existingEntry.Name = routeProvider.RouteName;
-                                }
+                                existingEntry.Name = routeProvider.RouteName;
                             }
                         }
                     }
                 }
+            }
 
             return routes;
+        }
+
+        private static bool AreEqual(IEnumerable<HttpMethod> routeProviderMethods, IEnumerable<HttpMethod> routeEntryMethods)
+        {
+            if (routeProviderMethods == null || routeEntryMethods == null)
+            {
+                return routeProviderMethods == routeEntryMethods;
+            }
+
+            // compare the collections by set equality
+            return new HashSet<HttpMethod>(routeProviderMethods).SetEquals(new HashSet<HttpMethod>(routeEntryMethods));
         }
 
         private static string BuildRouteTemplate(RoutePrefixAttribute routePrefix, IHttpRouteInfoProvider routeProvider, string controllerName, string actionName)

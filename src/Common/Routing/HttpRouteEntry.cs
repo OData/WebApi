@@ -42,7 +42,7 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-        public Collection<HttpMethod> HttpMethods { get; set; }
+        public IEnumerable<HttpMethod> HttpMethods { get; set; }
         public HashSet<ReflectedHttpActionDescriptor> Actions { get; set; }
 #else
         public Route Route { get; set; }

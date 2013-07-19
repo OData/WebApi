@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Web.Http.Controllers;
@@ -47,19 +48,21 @@ namespace System.Web.Http
             }
         }
 
-        /// <summary>
-        /// Gets or sets the name of the route to generate for this action.
-        /// </summary>
+        /// <inheritdoc />
         public string RouteName { get; set; }
 
-        /// <summary>
-        /// Gets or sets the order of the route relative to other routes. The default order is 0.
-        /// </summary>
+        /// <inheritdoc />
         public int RouteOrder { get; set; }
 
-        /// <summary>
-        /// Gets the route template describing the URI pattern to match against.
-        /// </summary>
+        /// <inheritdoc />
         public string RouteTemplate { get; private set; }
+
+        IEnumerable<HttpMethod> IHttpRouteInfoProvider.HttpMethods
+        {
+            get
+            {
+                return _supportedMethods;
+            }
+        }
     }
 }

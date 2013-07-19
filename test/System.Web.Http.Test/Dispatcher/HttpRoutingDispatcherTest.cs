@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
-using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 using Moq;
 using Moq.Protected;
@@ -118,28 +117,6 @@ namespace System.Web.Http.Dispatcher
 
             // Assert
             Assert.Same(routingErrorResponse, result);
-        }
-
-        [Fact]
-        public void SendAsync_HandlesHttpResponseExceptions_FromCustomRoutes()
-        {
-            // Arrange
-            HttpResponseException routingError = new HttpResponseException(new HttpResponseMessage());
-            HttpRequestMessage request = new HttpRequestMessage();
-            Mock<IHttpRoute> customRoute = new Mock<IHttpRoute>();
-            customRoute.Setup(r => r.GetRouteData("/", request)).Throws(routingError);
-
-            HttpConfiguration config = new HttpConfiguration();
-            config.Routes.Add("default", customRoute.Object);
-
-            HttpRoutingDispatcher dispatcher = new HttpRoutingDispatcher(config);
-            HttpMessageInvoker invoker = new HttpMessageInvoker(dispatcher);
-
-            // Act
-            var result = invoker.SendAsync(request, CancellationToken.None).Result;
-
-            // Assert
-            Assert.Same(routingError.Response, result);
         }
 
         private static HttpRequestMessage CreateRequest(HttpConfiguration config, string requestUri)

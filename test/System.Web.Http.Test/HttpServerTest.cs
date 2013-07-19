@@ -6,6 +6,7 @@ using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 using Moq;
 using Moq.Protected;
@@ -217,6 +218,106 @@ namespace System.Web.Http
                               Assert.Same(principal, callbackPrincipal);
                               Assert.Same(principal, Thread.CurrentPrincipal);
                           });
+        }
+
+        [Fact]
+        public void SendAsync_Handles_ExceptionsThrownInMessageHandlers()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            config.MessageHandlers.Add(new ThrowingMessageHandler(new InvalidOperationException()));
+            HttpServer server = new HttpServer(config);
+            var invoker = new HttpMessageInvoker(server);
+
+            // Act
+            var response = invoker.SendAsync(new HttpRequestMessage(), CancellationToken.None).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Fact]
+        public void SendAsync_Handles_HttpResponseExceptionsThrownInMessageHandlers()
+        {
+            // Arrange
+            HttpResponseException exception = new HttpResponseException(new HttpResponseMessage(HttpStatusCode.HttpVersionNotSupported));
+            exception.Response.ReasonPhrase = "whatever";
+            var config = new HttpConfiguration();
+            config.MessageHandlers.Add(new ThrowingMessageHandler(exception));
+            HttpServer server = new HttpServer(config);
+            var invoker = new HttpMessageInvoker(server);
+
+            // Act
+            var response = invoker.SendAsync(new HttpRequestMessage(), CancellationToken.None).Result;
+
+            // Assert
+            Assert.Equal(exception.Response.StatusCode, response.StatusCode);
+            Assert.Equal(exception.Response.ReasonPhrase, response.ReasonPhrase);
+        }
+
+        [Fact]
+        public void SendAsync_Handles_ExceptionsThrownInCustomRoutes()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            config.Routes.Add("throwing route", new ThrowingRoute(new InvalidOperationException()));
+            HttpServer server = new HttpServer(config);
+            var invoker = new HttpMessageInvoker(server);
+
+            // Act
+            var response = invoker.SendAsync(new HttpRequestMessage(), CancellationToken.None).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Fact]
+        public void SendAsync_Handles_HttpResponseExceptionsThrownInCustomRoutes()
+        {
+            // Arrange
+            HttpResponseException exception = new HttpResponseException(new HttpResponseMessage(HttpStatusCode.HttpVersionNotSupported));
+            exception.Response.ReasonPhrase = "whatever";
+            var config = new HttpConfiguration();
+            config.Routes.Add("throwing route", new ThrowingRoute(exception));
+            HttpServer server = new HttpServer(config);
+            var invoker = new HttpMessageInvoker(server);
+
+            // Act
+            var response = invoker.SendAsync(new HttpRequestMessage(), CancellationToken.None).Result;
+
+            // Assert
+            Assert.Equal(exception.Response.StatusCode, response.StatusCode);
+            Assert.Equal(exception.Response.ReasonPhrase, response.ReasonPhrase);
+        }
+
+        private class ThrowingMessageHandler : DelegatingHandler
+        {
+            private Exception _exception;
+
+            public ThrowingMessageHandler(Exception exception)
+            {
+                _exception = exception;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                throw _exception;
+            }
+        }
+
+        private class ThrowingRoute : HttpRoute
+        {
+            private Exception _exception;
+
+            public ThrowingRoute(Exception exception)
+            {
+                _exception = exception;
+            }
+
+            public override IHttpRouteData GetRouteData(string virtualPathRoot, HttpRequestMessage request)
+            {
+                throw _exception;
+            }
         }
     }
 }

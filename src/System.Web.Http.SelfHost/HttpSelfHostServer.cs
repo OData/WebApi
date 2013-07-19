@@ -205,10 +205,6 @@ namespace System.Web.Http.SelfHost
             {
                 return request.CreateErrorResponse(HttpStatusCode.ServiceUnavailable, SRResources.RequestCancelled, operationCanceledException);
             }
-            catch (Exception exception)
-            {
-                return request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception);
-            }
         }
 
         private static HttpRequestMessage CreateHttpRequestMessage(RequestContext requestContext)

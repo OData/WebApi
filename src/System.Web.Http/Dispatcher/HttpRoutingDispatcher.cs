@@ -72,14 +72,7 @@ namespace System.Web.Http.Dispatcher
             IHttpRouteData routeData;
             if (!request.Properties.TryGetValue(HttpPropertyKeys.HttpRouteDataKey, out routeData))
             {
-                try
-                {
-                    routeData = _configuration.Routes.GetRouteData(request);
-                }
-                catch (HttpResponseException e)
-                {
-                    return Task.FromResult(e.Response);
-                }
+                routeData = _configuration.Routes.GetRouteData(request);
 
                 if (routeData != null)
                 {

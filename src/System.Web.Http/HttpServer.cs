@@ -125,6 +125,7 @@ namespace System.Web.Http
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A <see cref="Task{HttpResponseMessage}"/> representing the ongoing operation.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner.")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "we are converting exceptions to error responses.")]
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (request == null)
@@ -160,6 +161,14 @@ namespace System.Web.Http
             try
             {
                 return base.SendAsync(request, cancellationToken);
+            }
+            catch (HttpResponseException exception)
+            {
+                return Task.FromResult(exception.Response);
+            }
+            catch (Exception exception)
+            {
+                return Task.FromResult(request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception));
             }
             finally
             {

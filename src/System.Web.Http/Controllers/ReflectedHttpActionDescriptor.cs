@@ -292,6 +292,40 @@ namespace System.Web.Http.Controllers
             return supportedHttpMethods;
         }
 
+        // Implementing Equals and GetHashCode is needed here because when tracing is enabled, a different set of action descriptors
+        // are available at configuration time for attribute routing and at runtime. This is because the default action selector
+        // clears its action descriptor cache when the controller descriptor is different. And since tracing wraps the controller
+        // descriptor for tracing, the cache gets cleared and new action descriptors get created for tracing. We need to compare
+        // the action descriptors by method info to be able to correlate attribute routing actions to the tracing action descriptors.
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            if (_methodInfo != null)
+            {
+                return _methodInfo.GetHashCode();
+            }
+
+            return base.GetHashCode();
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            if (_methodInfo != null)
+            {
+                ReflectedHttpActionDescriptor otherDescriptor = obj as ReflectedHttpActionDescriptor;
+                if (otherDescriptor == null)
+                {
+                    return false;
+                }
+
+                return _methodInfo.Equals(otherDescriptor._methodInfo);
+            }
+
+            return base.Equals(obj);
+        }
+
         private static ActionExecutor InitializeActionExecutor(MethodInfo methodInfo)
         {
             if (methodInfo.ContainsGenericParameters)

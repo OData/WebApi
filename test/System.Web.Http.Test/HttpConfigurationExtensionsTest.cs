@@ -400,6 +400,7 @@ namespace System.Net.Http
             actionDescriptor.Setup(ad => ad.ActionName).Returns(actionName);
             actionDescriptor.Setup(ad => ad.GetCustomAttributes<IHttpRouteInfoProvider>(false)).Returns(routeProviders);
             actionDescriptor.Setup(ad => ad.SupportedHttpMethods).Returns(new Collection<HttpMethod>());
+            actionDescriptor.CallBase = true;
             return actionDescriptor.Object;
         }
 

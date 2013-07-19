@@ -353,5 +353,29 @@ namespace System.Web.Http
 
             Assert.Equal(expectedReturnType, ReflectedHttpActionDescriptor.GetReturnType(methodMock.Object));
         }
+
+        [Fact]
+        public void GetHashCode_ReturnsTheSameHashCode_ForDifferentInstancesWithTheSameMethodInfo()
+        {
+            Func<string, string, User> echoUserMethod = _controller.EchoUser;
+            HttpConfiguration config = new HttpConfiguration();
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "", typeof(UsersRpcController));
+            ReflectedHttpActionDescriptor actionDescriptor1 = new ReflectedHttpActionDescriptor(controllerDescriptor, echoUserMethod.Method);
+            ReflectedHttpActionDescriptor actionDescriptor2 = new ReflectedHttpActionDescriptor(controllerDescriptor, echoUserMethod.Method);
+
+            Assert.Equal(actionDescriptor1.GetHashCode(), actionDescriptor2.GetHashCode());
+        }
+
+        [Fact]
+        public void Equals_ReturnsTrue_ForDifferentInstancesWithTheSameMethodInfo()
+        {
+            Func<string, string, User> echoUserMethod = _controller.EchoUser;
+            HttpConfiguration config = new HttpConfiguration();
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "", typeof(UsersRpcController));
+            ReflectedHttpActionDescriptor actionDescriptor1 = new ReflectedHttpActionDescriptor(controllerDescriptor, echoUserMethod.Method);
+            ReflectedHttpActionDescriptor actionDescriptor2 = new ReflectedHttpActionDescriptor(controllerDescriptor, echoUserMethod.Method);
+
+            Assert.Equal(actionDescriptor1, actionDescriptor2);
+        }
     }
 }

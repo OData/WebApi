@@ -189,6 +189,7 @@ namespace System.Web.Http.OData
         /// <summary>
         /// This method should be overridden to create a new entity in the entity set.
         /// </summary>
+        /// <remarks>When overriding this method, the GetKey method should also be overridden so that the location header can be generated.</remarks>
         /// <param name="entity">The entity to add to the entity set.</param>
         /// <returns>A <see cref="Task"/> that contains the created entity when it completes.</returns>
         protected internal virtual Task<TEntity> CreateEntityAsync(TEntity entity)

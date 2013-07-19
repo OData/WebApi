@@ -77,6 +77,8 @@ namespace System.Net.Http
         [InlineData("prefix/{prefixId}", "", "prefix/{prefixId}")]
         [InlineData("prefix/{prefixId}", "   ", "prefix/{prefixId}/   ")]
         [InlineData("prefix/{prefixId}", "controller/{id}", "prefix/{prefixId}/controller/{id}")]
+        [InlineData(null, "/controller/{id}", "controller/{id}")]
+        [InlineData("prefix/{prefixId}", "/controller/{id}", "controller/{id}")]
         public void MapHttpAttributeRoutes_AddsRouteFromAttribute(string prefix, string template, string expectedTemplate)
         {
             // Arrange
@@ -118,21 +120,6 @@ namespace System.Net.Http
             Assert.Throws<InvalidOperationException>(
                 () => config.MapHttpAttributeRoutes(),
                 "The route prefix 'prefix/' on the controller named 'Controller' cannot end with a '/' character.");
-        }
-
-        [Fact]
-        public void MapHttpAttributeRoutes_ThrowsForRouteTemplateThatStartsWithSeparator()
-        {
-            // Arrange
-            var config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>() { };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute("/get") };
-            SetUpConfiguration(config, routePrefixes, routeProviders);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => config.MapHttpAttributeRoutes(),
-                "The route template '/get' on the action named 'Action' cannot start with a '/' character.");
         }
 
         [Fact]

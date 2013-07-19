@@ -151,7 +151,7 @@ namespace System.Web.Http
 
                     foreach (IHttpRouteInfoProvider routeProvider in routeInfoProviders.DefaultIfEmpty())
                     {
-                        string routeTemplate = BuildRouteTemplate(routePrefix, routeProvider, controllerDescriptor.ControllerName, actionDescriptor.ActionName);
+                        string routeTemplate = BuildRouteTemplate(routePrefix, routeProvider, controllerDescriptor.ControllerName);
                         if (routeTemplate == null)
                         {
                             continue;
@@ -220,7 +220,7 @@ namespace System.Web.Http
             return new HashSet<HttpMethod>(routeProviderMethods).SetEquals(new HashSet<HttpMethod>(routeEntryMethods));
         }
 
-        private static string BuildRouteTemplate(RoutePrefixAttribute routePrefix, IHttpRouteInfoProvider routeProvider, string controllerName, string actionName)
+        private static string BuildRouteTemplate(RoutePrefixAttribute routePrefix, IHttpRouteInfoProvider routeProvider, string controllerName)
         {
             string prefixTemplate = routePrefix == null ? null : routePrefix.Prefix;
             string providerTemplate = routeProvider == null ? null : routeProvider.RouteTemplate;
@@ -234,9 +234,10 @@ namespace System.Web.Http
                 throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidPrefix, prefixTemplate, controllerName);
             }
 
+            // If the provider's template starts with '/', ignore the route prefix
             if (providerTemplate != null && providerTemplate.StartsWith("/", StringComparison.OrdinalIgnoreCase))
             {
-                throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidTemplate, providerTemplate, actionName);
+                return providerTemplate.Substring(1);
             }
 
             if (String.IsNullOrEmpty(prefixTemplate))

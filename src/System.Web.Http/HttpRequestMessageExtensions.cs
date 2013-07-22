@@ -2,10 +2,12 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Web.Http;
@@ -662,7 +664,13 @@ namespace System.Net.Http
             Guid correlationId;
             if (!request.Properties.TryGetValue<Guid>(HttpPropertyKeys.RequestCorrelationKey, out correlationId))
             {
-                correlationId = Guid.NewGuid();
+                // Check if the Correlation Manager ID is set; otherwise fallback to creating a new GUID
+                correlationId = Trace.CorrelationManager.ActivityId;
+                if (correlationId == Guid.Empty)
+                {
+                    correlationId = Guid.NewGuid();
+                }
+
                 request.Properties.Add(HttpPropertyKeys.RequestCorrelationKey, correlationId);
             }
 

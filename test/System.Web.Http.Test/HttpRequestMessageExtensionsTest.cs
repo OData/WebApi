@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http.Formatting;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
@@ -759,6 +760,42 @@ namespace System.Net.Http
             var result = request.GetRoutingErrorResponse();
 
             Assert.Same(errorResponse, result);
+        }
+
+        [Fact]
+        public void GetCorrelationId_ReturnsTraceCorrelationManagerId_IfSet()
+        {
+            Guid traceId = Guid.NewGuid();
+            using (var scope = new TraceIdScope(traceId))
+            {
+                Assert.Equal(traceId, new HttpRequestMessage().GetCorrelationId());
+            }
+        }
+
+        [Fact]
+        public void GetCorrelationId_ReturnsNewGuid_IfTraceCorrelationManagerIdNotSet()
+        {
+            Guid traceId = Guid.Empty;
+            using (var scope = new TraceIdScope(traceId))
+            {
+                Assert.NotEqual(traceId, new HttpRequestMessage().GetCorrelationId());
+            }
+        }
+
+        private class TraceIdScope : IDisposable
+        {
+            Guid _oldValue;
+
+            public TraceIdScope(Guid traceId)
+            {
+                _oldValue = Trace.CorrelationManager.ActivityId;
+                Trace.CorrelationManager.ActivityId = traceId;
+            }
+
+            public void Dispose()
+            {
+                Trace.CorrelationManager.ActivityId = _oldValue;
+            }
         }
     }
 }

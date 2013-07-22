@@ -60,14 +60,6 @@ namespace System.Web.Http.Dispatcher
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The Web API framework will dispose of the response after sending it")]
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            // check if the request has any routing error. This implies that request matched a route but is not to be
-            // processed further as it is a bad request.
-            HttpResponseMessage routingErrorResponse = request.GetRoutingErrorResponse();
-            if (routingErrorResponse != null)
-            {
-                return Task.FromResult(routingErrorResponse);
-            }
-
             // Lookup route data, or if not found as a request property then we look it up in the route table
             IHttpRouteData routeData;
             if (!request.Properties.TryGetValue(HttpPropertyKeys.HttpRouteDataKey, out routeData))

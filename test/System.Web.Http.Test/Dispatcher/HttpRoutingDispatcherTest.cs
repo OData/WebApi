@@ -102,23 +102,6 @@ namespace System.Web.Http.Dispatcher
             mockHandler.Protected().Verify("SendAsync", Times.Once(), request, CancellationToken.None);
         }
 
-        [Fact]
-        public void SendAsync_Returns_RoutingErrors_IfPresentOnTheRequest()
-        {
-            // Arrange
-            HttpRoutingDispatcher dispatcher = new HttpRoutingDispatcher(new HttpConfiguration());
-            HttpMessageInvoker invoker = new HttpMessageInvoker(dispatcher);
-            HttpRequestMessage request = new HttpRequestMessage();
-            HttpResponseMessage routingErrorResponse = new HttpResponseMessage();
-            request.SetRoutingErrorResponse(routingErrorResponse);
-
-            // Act
-            var result = invoker.SendAsync(request, CancellationToken.None).Result;
-
-            // Assert
-            Assert.Same(routingErrorResponse, result);
-        }
-
         private static HttpRequestMessage CreateRequest(HttpConfiguration config, string requestUri)
         {
             return CreateRequest(config, requestUri, routeHandler: new EmptyResponseHandler());

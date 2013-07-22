@@ -51,6 +51,8 @@ namespace System.Web.Http.WebHost.Routing
             return base.ProcessConstraint(httpContext, constraint, parameterName, values, routeDirection);
         }
 
+        [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask",
+            Justification = "Usage is fine here as it handles error case and that task finishes synchronously in the default code path anyways.")]
         public override RouteData GetRouteData(HttpContextBase httpContext)
         {
             try
@@ -69,10 +71,11 @@ namespace System.Web.Http.WebHost.Routing
             }
             catch (HttpResponseException e)
             {
-                // Treat HttpResponseExceptions as matching routes but bad requests. As IHttpRoute cannot short circuit the response pipeline,
-                // stash the routing error response on the request so that HttpRoutingDispatcher can retrieve it back and return that error response.
-                httpContext.SetRoutingError(e.Response);
-                return new RouteData(this, HttpControllerRouteHandler.Instance);
+                // Task.Wait is fine here as ConvertResponse calls into MediaTypeFormatter.WriteToStreamAsync which happens
+                // synchronously in the default case (our default formatters are synchronous).
+                HttpControllerHandler.ConvertResponse(httpContext, e.Response, httpContext.GetOrCreateHttpRequestMessage()).Wait();
+                httpContext.Response.End();
+                return null;
             }
         }
 

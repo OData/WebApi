@@ -119,6 +119,7 @@ namespace System.Web.Http.Routing
     [RoutePrefix("prefix")]
     public class PrefixedController : ApiController
     {
+        [HttpGet("")]
         public string Get()
         {
             return "PrefixedGet";

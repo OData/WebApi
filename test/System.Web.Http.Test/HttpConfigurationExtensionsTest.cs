@@ -46,11 +46,27 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void MapHttpAttributeRoutes_DoesNotAddRoutesWithoutTemplate()
+        public void MapHttpAttributeRoutes_DoesNotAddRoutesWithoutAttribute()
         {
             // Arrange
             var config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>();
+            var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix") };
+            var routeProviders = new Collection<IHttpRouteInfoProvider>() { };
+            SetUpConfiguration(config, routePrefixes, routeProviders);
+
+            // Act
+            config.MapHttpAttributeRoutes();
+
+            // Assert
+            Assert.Empty(config.Routes);
+        }
+
+        [Fact]
+        public void MapHttpAttributeRoutes_DoesNotRegisterRoute_ForActionsWithPrefixButNoRouteTemplate()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix") };
             var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute() };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
@@ -65,15 +81,12 @@ namespace System.Net.Http
         [InlineData(null, "", "")]
         [InlineData(null, "   ", "   ")]
         [InlineData(null, "controller/{id}", "controller/{id}")]
-        [InlineData("", null, "")]
         [InlineData("", "", "")]
         [InlineData("", "   ", "   ")]
         [InlineData("", "controller/{id}", "controller/{id}")]
-        [InlineData("   ", null, "   ")]
         [InlineData("   ", "", "   ")]
         [InlineData("   ", "   ", "   /   ")]
         [InlineData("   ", "controller/{id}", "   /controller/{id}")]
-        [InlineData("prefix/{prefixId}", null, "prefix/{prefixId}")]
         [InlineData("prefix/{prefixId}", "", "prefix/{prefixId}")]
         [InlineData("prefix/{prefixId}", "   ", "prefix/{prefixId}/   ")]
         [InlineData("prefix/{prefixId}", "controller/{id}", "prefix/{prefixId}/controller/{id}")]
@@ -90,11 +103,7 @@ namespace System.Net.Http
                 routePrefixes.Add(new RoutePrefixAttribute(prefix));
             }
 
-            var routeProviders = new Collection<IHttpRouteInfoProvider>();
-            if (template != null)
-            {
-                routeProviders.Add(new HttpGetAttribute(template));
-            }
+            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute(template) };
 
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
@@ -114,7 +123,7 @@ namespace System.Net.Http
             // Arrange
             var config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix/") };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { };
+            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute("") };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act & Assert
@@ -136,25 +145,6 @@ namespace System.Net.Http
             Assert.Throws<InvalidOperationException>(
                 () => config.MapHttpAttributeRoutes(),
                 "The route template '/get' on the action named 'Action' cannot start with a '/' character.");
-        }
-
-        [Fact]
-        public void MapHttpAttributeRoutes_RegistersRouteForActionsWithPrefixButNoRouteTemplate()
-        {
-            // Arrange
-            var config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix/{prefixId}") };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute() };
-            SetUpConfiguration(config, routePrefixes, routeProviders);
-
-            // Act
-            config.MapHttpAttributeRoutes();
-
-            // Assert
-            HttpRouteCollection routes = config.Routes;
-            IHttpRoute route = Assert.Single(routes);
-            Assert.Equal("prefix/{prefixId}", route.RouteTemplate);
-            Assert.Equal(route, routes["Controller1"]);
         }
 
         [Fact]

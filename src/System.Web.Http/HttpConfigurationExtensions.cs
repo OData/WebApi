@@ -139,7 +139,7 @@ namespace System.Web.Http
             }
 
             List<HttpRouteEntry> routes = new List<HttpRouteEntry>();
-            RoutePrefixAttribute routePrefix = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>(inherit: false).SingleOrDefault();
+            string routePrefix = GetRoutePrefix(controllerDescriptor);
 
             foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionMap)
             {
@@ -147,15 +147,20 @@ namespace System.Web.Http
 
                 foreach (ReflectedHttpActionDescriptor actionDescriptor in actionGrouping.OfType<ReflectedHttpActionDescriptor>())
                 {
-                    IEnumerable<IHttpRouteInfoProvider> routeInfoProviders = actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
-
-                    foreach (IHttpRouteInfoProvider routeProvider in routeInfoProviders.DefaultIfEmpty())
+                    foreach (IHttpRouteInfoProvider routeProvider in actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false))
                     {
-                        string routeTemplate = BuildRouteTemplate(routePrefix, routeProvider, controllerDescriptor.ControllerName, actionDescriptor.ActionName);
-                        if (routeTemplate == null)
+                        string providerTemplate = routeProvider.RouteTemplate;
+                        if (providerTemplate == null)
                         {
                             continue;
                         }
+
+                        if (providerTemplate.StartsWith("/", StringComparison.Ordinal))
+                        {
+                            throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidTemplate, providerTemplate, actionName);
+                        }
+
+                        string routeTemplate = BuildRouteTemplate(routePrefix, providerTemplate);
 
                         // Try to find an entry with the same route template and the same HTTP verbs
                         HttpRouteEntry existingEntry = null;
@@ -177,12 +182,9 @@ namespace System.Web.Http
                                 Actions = new HashSet<ReflectedHttpActionDescriptor>() { actionDescriptor }
                             };
 
-                            if (routeProvider != null)
-                            {
-                                entry.HttpMethods = routeProvider.HttpMethods;
-                                entry.Name = routeProvider.RouteName;
-                                entry.Order = routeProvider.RouteOrder;
-                            }
+                            entry.HttpMethods = routeProvider.HttpMethods;
+                            entry.Name = routeProvider.RouteName;
+                            entry.Order = routeProvider.RouteOrder;
                             routes.Add(entry);
                         }
                         else
@@ -190,14 +192,14 @@ namespace System.Web.Http
                             existingEntry.Actions.Add(actionDescriptor);
 
                             // Take the minimum of the two orders as the order
-                            int order = routeProvider == null ? 0 : routeProvider.RouteOrder;
+                            int order = routeProvider.RouteOrder;
                             if (order < existingEntry.Order)
                             {
                                 existingEntry.Order = order;
                             }
 
                             // Use the provider route name if the route hasn't already been named
-                            if (routeProvider != null && existingEntry.Name == null)
+                            if (existingEntry.Name == null)
                             {
                                 existingEntry.Name = routeProvider.RouteName;
                             }
@@ -209,6 +211,50 @@ namespace System.Web.Http
             return routes;
         }
 
+        private static string GetRoutePrefix(HttpControllerDescriptor controllerDescriptor)
+        {
+            Collection<RoutePrefixAttribute> routePrefixAttributes = controllerDescriptor.GetCustomAttributes<RoutePrefixAttribute>(inherit: false);
+            if (routePrefixAttributes.Count > 0)
+            {
+                string routePrefix = routePrefixAttributes[0].Prefix;
+                if (routePrefix != null)
+                {
+                    if (routePrefix.EndsWith("/", StringComparison.Ordinal))
+                    {
+                        throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidPrefix, routePrefix, controllerDescriptor.ControllerName);
+                    }
+
+                    return routePrefix;
+                }
+            }
+            return null;
+        }
+
+        private static string BuildRouteTemplate(string routePrefix, string routeTemplate)
+        {
+            Contract.Assert(routeTemplate != null);
+
+            // If the provider's template starts with '~/', ignore the route prefix
+            if (routeTemplate.StartsWith("~/", StringComparison.Ordinal))
+            {
+                return routeTemplate.Substring(2);
+            }
+
+            if (String.IsNullOrEmpty(routePrefix))
+            {
+                return routeTemplate;
+            }
+            else if (routeTemplate.Length == 0)
+            {
+                return routePrefix;
+            }
+            else
+            {
+                // template and prefix both not null - combine them
+                return routePrefix + '/' + routeTemplate;
+            }
+        }
+
         private static bool AreEqual(IEnumerable<HttpMethod> routeProviderMethods, IEnumerable<HttpMethod> routeEntryMethods)
         {
             if (routeProviderMethods == null || routeEntryMethods == null)
@@ -218,49 +264,6 @@ namespace System.Web.Http
 
             // compare the collections by set equality
             return new HashSet<HttpMethod>(routeProviderMethods).SetEquals(new HashSet<HttpMethod>(routeEntryMethods));
-        }
-
-        private static string BuildRouteTemplate(RoutePrefixAttribute routePrefix, IHttpRouteInfoProvider routeProvider, string controllerName, string actionName)
-        {
-            string prefixTemplate = routePrefix == null ? null : routePrefix.Prefix;
-            string providerTemplate = routeProvider == null ? null : routeProvider.RouteTemplate;
-            if (prefixTemplate == null && providerTemplate == null)
-            {
-                return null;
-            }
-
-            if (prefixTemplate != null && prefixTemplate.EndsWith("/", StringComparison.Ordinal))
-            {
-                throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidPrefix, prefixTemplate, controllerName);
-            }
-
-            if (providerTemplate != null)
-            {
-                if (providerTemplate.StartsWith("/", StringComparison.Ordinal))
-                {
-                    throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidTemplate, providerTemplate, actionName);
-                }
-
-                // If the provider's template starts with '~/', ignore the route prefix
-                if (providerTemplate.StartsWith("~/", StringComparison.Ordinal))
-                {
-                    return providerTemplate.Substring(2);
-                }
-            }
-
-            if (String.IsNullOrEmpty(prefixTemplate))
-            {
-                return providerTemplate ?? String.Empty;
-            }
-            else if (String.IsNullOrEmpty(providerTemplate))
-            {
-                return prefixTemplate;
-            }
-            else
-            {
-                // template and prefix both not null - combine them
-                return prefixTemplate + '/' + providerTemplate;
-            }
         }
 
         private static void SetDefaultRouteNames(IEnumerable<HttpRouteEntry> routes, string controllerName)

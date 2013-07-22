@@ -438,6 +438,9 @@
   <data name="AttributeRoutes_InvalidPrefix" xml:space="preserve">
     <value>The route prefix '{0}' on the controller named '{1}' cannot end with a '/' character.</value>
   </data>
+  <data name="AttributeRoutes_InvalidTemplate" xml:space="preserve">
+    <value>The route template '{0}' on the action named '{1}' cannot start with a '/' character.</value>
+  </data>
   <data name="BatchMediaTypeNotSupported" xml:space="preserve">
     <value>The batch request of media type '{0}' is not supported.</value>
   </data>

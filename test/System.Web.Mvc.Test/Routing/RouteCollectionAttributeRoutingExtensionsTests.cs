@@ -190,9 +190,11 @@ namespace System.Web.Routing
         [InlineData("puget-sound", "", "whatever", "puget-sound/whatever")]
         [InlineData("puget-sound", "pref", "", "puget-sound/pref")]
         [InlineData("puget-sound", "pref", "whatever", "puget-sound/pref/whatever")]
-        [InlineData(null, null, "/whatever", "whatever")]
-        [InlineData("puget-sound", "pref", "/whatever", "puget-sound/whatever")]
-        [InlineData("puget-sound", null, "/whatever", "puget-sound/whatever")]
+        [InlineData(null, null, "~/whatever", "whatever")]
+        [InlineData("puget-sound", "pref", "~/", "")]
+        [InlineData("puget-sound", "pref", "~/whatever", "whatever")]
+        [InlineData("puget-sound", null, "~/whatever", "whatever")]
+        [InlineData(null, "pref", "~/whatever", "whatever")]
         public void CombinePrefixAndAreaWithTemplate(string areaPrefix, string prefix, string template, string expected)
         {
             var result = AttributeRoutingMapper.CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, template);
@@ -203,8 +205,10 @@ namespace System.Web.Routing
         [Theory]
         [InlineData(typeof(Bad1Controller), "The route prefix '/pref' on the controller named 'Bad1' cannot begin or end with a forward slash.")]
         [InlineData(typeof(Bad2Controller), "The route prefix 'pref/' on the controller named 'Bad2' cannot begin or end with a forward slash.")]
-        [InlineData(typeof(Bad3Controller), "The prefix '/puget-sound' of the route area named 'PugetSound' on the controller named 'Bad3' cannot begin or end with a forward slash.")]
-        [InlineData(typeof(Bad4Controller), "The prefix 'puget-sound/' of the route area named 'PugetSound' on the controller named 'Bad4' cannot begin or end with a forward slash.")]
+        [InlineData(typeof(Bad3Controller), "The route template '/getme' on the action named 'GetMe' on the controller named 'Bad3' cannot begin or end with a forward slash.")]
+        [InlineData(typeof(Bad4Controller), "The route template 'getme/' on the action named 'GetMe' on the controller named 'Bad4' cannot begin or end with a forward slash.")]
+        [InlineData(typeof(Bad5Controller), "The prefix '/puget-sound' of the route area named 'PugetSound' on the controller named 'Bad5' cannot begin or end with a forward slash.")]
+        [InlineData(typeof(Bad6Controller), "The prefix 'puget-sound/' of the route area named 'PugetSound' on the controller named 'Bad6' cannot begin or end with a forward slash.")]
         public void TemplatesAreValidated(Type controllerType, string expectedErrorMessage)
         {
             // Arrange
@@ -321,13 +325,31 @@ namespace System.Web.Routing
             }
         }
 
-        [RouteArea("PugetSound", AreaPrefix = "/puget-sound")]
         private class Bad3Controller : Controller
+        {
+            [HttpGet("/getme")]
+            public ActionResult GetMe()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class Bad4Controller : Controller
+        {
+            [HttpGet("getme/")]
+            public ActionResult GetMe()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        [RouteArea("PugetSound", AreaPrefix = "/puget-sound")]
+        private class Bad5Controller : Controller
         {
         }
 
         [RouteArea("PugetSound", AreaPrefix = "puget-sound/")]
-        private class Bad4Controller : Controller
+        private class Bad6Controller : Controller
         {
         }
 

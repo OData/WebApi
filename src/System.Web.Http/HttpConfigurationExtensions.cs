@@ -151,7 +151,7 @@ namespace System.Web.Http
 
                     foreach (IHttpRouteInfoProvider routeProvider in routeInfoProviders.DefaultIfEmpty())
                     {
-                        string routeTemplate = BuildRouteTemplate(routePrefix, routeProvider, controllerDescriptor.ControllerName);
+                        string routeTemplate = BuildRouteTemplate(routePrefix, routeProvider, controllerDescriptor.ControllerName, actionDescriptor.ActionName);
                         if (routeTemplate == null)
                         {
                             continue;
@@ -220,7 +220,7 @@ namespace System.Web.Http
             return new HashSet<HttpMethod>(routeProviderMethods).SetEquals(new HashSet<HttpMethod>(routeEntryMethods));
         }
 
-        private static string BuildRouteTemplate(RoutePrefixAttribute routePrefix, IHttpRouteInfoProvider routeProvider, string controllerName)
+        private static string BuildRouteTemplate(RoutePrefixAttribute routePrefix, IHttpRouteInfoProvider routeProvider, string controllerName, string actionName)
         {
             string prefixTemplate = routePrefix == null ? null : routePrefix.Prefix;
             string providerTemplate = routeProvider == null ? null : routeProvider.RouteTemplate;
@@ -229,15 +229,23 @@ namespace System.Web.Http
                 return null;
             }
 
-            if (prefixTemplate != null && prefixTemplate.EndsWith("/", StringComparison.OrdinalIgnoreCase))
+            if (prefixTemplate != null && prefixTemplate.EndsWith("/", StringComparison.Ordinal))
             {
                 throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidPrefix, prefixTemplate, controllerName);
             }
 
-            // If the provider's template starts with '/', ignore the route prefix
-            if (providerTemplate != null && providerTemplate.StartsWith("/", StringComparison.OrdinalIgnoreCase))
+            if (providerTemplate != null)
             {
-                return providerTemplate.Substring(1);
+                if (providerTemplate.StartsWith("/", StringComparison.Ordinal))
+                {
+                    throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidTemplate, providerTemplate, actionName);
+                }
+
+                // If the provider's template starts with '~/', ignore the route prefix
+                if (providerTemplate.StartsWith("~/", StringComparison.Ordinal))
+                {
+                    return providerTemplate.Substring(2);
+                }
             }
 
             if (String.IsNullOrEmpty(prefixTemplate))

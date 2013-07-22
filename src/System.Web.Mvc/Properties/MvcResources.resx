@@ -474,6 +474,9 @@
   <data name="HttpRouteBuilder_CouldNotResolveConstraint" xml:space="preserve">
     <value>The inline constraint resolver of type '{0}' was unable to resolve the following inline constraint: '{1}'.</value>
   </data>
+  <data name="RouteTemplate_CannotStartOrEnd_WithForwardSlash" xml:space="preserve">
+    <value>The route template '{0}' on the action named '{1}' on the controller named '{2}' cannot begin or end with a forward slash.</value>
+  </data>
   <data name="AttributeRouting_CouldNotInferAreaNameFromMissingNamespace" xml:space="preserve">
     <value>Could not infer area name for the controller '{0}' because it does not have a namespace.</value>
   </data>

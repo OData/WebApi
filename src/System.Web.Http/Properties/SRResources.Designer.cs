@@ -169,6 +169,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The route template &apos;{0}&apos; on the action named &apos;{1}&apos; cannot start with a &apos;/&apos; character..
+        /// </summary>
+        internal static string AttributeRoutes_InvalidTemplate {
+            get {
+                return ResourceManager.GetString("AttributeRoutes_InvalidTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The request is invalid..
         /// </summary>
         internal static string BadRequest {

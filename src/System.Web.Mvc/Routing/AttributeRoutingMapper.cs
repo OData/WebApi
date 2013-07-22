@@ -76,6 +76,8 @@ namespace System.Web.Mvc.Routing
 
                 foreach (var routeAttribute in routeAttributes)
                 {
+                    ValidateTemplate(routeAttribute, actionName, controllerDescriptor);
+
                     string prefix = prefixAttribute != null ? prefixAttribute.Prefix : null;
 
                     string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.RouteTemplate);
@@ -112,6 +114,17 @@ namespace System.Web.Mvc.Routing
             {
                 string errorMessage = Error.Format(MvcResources.RouteAreaPrefix_CannotStartOrEnd_WithForwardSlash,
                                                    areaPrefix, areaName, controllerDescriptor.ControllerName);
+                throw new InvalidOperationException(errorMessage);
+            }
+        }
+
+        private static void ValidateTemplate(IDirectRouteInfoProvider routeInfoProvider, string actionName, ControllerDescriptor controllerDescriptor)
+        {
+            if (!IsValidTemplate(routeInfoProvider.RouteTemplate))
+            {
+                string errorMessage = Error.Format(MvcResources.RouteTemplate_CannotStartOrEnd_WithForwardSlash,
+                                                   routeInfoProvider.RouteTemplate, actionName,
+                                                   controllerDescriptor.ControllerName);
                 throw new InvalidOperationException(errorMessage);
             }
         }
@@ -173,11 +186,10 @@ namespace System.Web.Mvc.Routing
         {
             Contract.Assert(template != null);
 
-            // If the attribute's template starts with '/', ignore the route prefix
-            if (template.StartsWith("/", StringComparison.Ordinal))
+            // If the attribute's template starts with '~/', ignore the area and controller prefixes
+            if (template.StartsWith("~/", StringComparison.Ordinal))
             {
-                template = template.Substring(1);
-                prefix = null;
+                return template.Substring(2);
             }
 
             if (prefix == null && areaPrefix == null)

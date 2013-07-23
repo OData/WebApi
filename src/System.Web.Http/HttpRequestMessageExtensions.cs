@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Web.Http;

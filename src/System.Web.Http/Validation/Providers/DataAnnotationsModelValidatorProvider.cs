@@ -24,8 +24,6 @@ namespace System.Web.Http.Validation.Providers
     /// for attributes which derive from <see cref="ValidationAttribute"/>. It also provides
     /// a validator for types which implement <see cref="IValidatableObject"/>.
     /// </summary>
-    // [SecuritySafeCritical] because class constructor accesses DataAnnotations types
-    [SecuritySafeCritical]
     public class DataAnnotationsModelValidatorProvider : AssociatedValidatorProvider
     {
         // Factories for validation attributes
@@ -43,8 +41,6 @@ namespace System.Web.Http.Validation.Providers
         internal Dictionary<Type, DataAnnotationsValidatableObjectAdapterFactory> ValidatableFactories =
             new Dictionary<Type, DataAnnotationsValidatableObjectAdapterFactory>();
 
-        // [SecuritySafeCritical] because it uses DataAnnotations type ValidationAttribute and IValidatableObject
-        [SecuritySafeCritical]
         protected override IEnumerable<ModelValidator> GetValidators(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders, IEnumerable<Attribute> attributes)
         {
                 List<ModelValidator> results = new List<ModelValidator>();

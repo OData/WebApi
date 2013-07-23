@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query.Expressions;
 using Microsoft.Data.Edm;
@@ -448,7 +449,7 @@ namespace System.Web.Http.OData.Query.Validators
         public virtual void ValidateQueryNode(QueryNode node, ODataValidationSettings settings)
         {
             // Recursion guard to avoid stack overflows
-            EnsureStackHelper.EnsureStack();
+            RuntimeHelpers.EnsureSufficientExecutionStack();
 
             SingleValueNode singleNode = node as SingleValueNode;
             CollectionNode collectionNode = node as CollectionNode;

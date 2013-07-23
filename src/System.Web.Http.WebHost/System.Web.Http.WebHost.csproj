@@ -58,9 +58,6 @@
     <Compile Include="Routing\HostedHttpVirtualPathData.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="..\TransparentCommonAssemblyInfo.cs">
-      <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="GlobalConfiguration.cs" />
     <Compile Include="Routing\HttpRouteDataExtensions.cs">
       <SubType>Code</SubType>

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -49,7 +50,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
 
             // Recursion guard to avoid stack overflows
-            EnsureStackHelper.EnsureStack();
+            RuntimeHelpers.EnsureSufficientExecutionStack();
 
             return ReadComplexValue(complexValue, readContext);
         }

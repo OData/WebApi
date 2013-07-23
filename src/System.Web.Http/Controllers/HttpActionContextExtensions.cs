@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Validation;
@@ -141,7 +142,7 @@ namespace System.Web.Http.Controllers
             }
 
             // Protects against stack overflow for deeply nested model binding
-            EnsureStackHelper.EnsureStack();
+            RuntimeHelpers.EnsureSufficientExecutionStack();
 
             Type modelType = bindingContext.ModelType;
             HttpConfiguration config = actionContext.ControllerContext.Configuration;

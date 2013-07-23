@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
@@ -74,7 +75,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
 
             // Recursion guard to avoid stack overflows
-            EnsureStackHelper.EnsureStack();
+            RuntimeHelpers.EnsureSufficientExecutionStack();
 
             return ReadCollectionValue(collection, readContext);
         }

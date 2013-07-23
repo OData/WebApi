@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
@@ -116,7 +117,7 @@ namespace System.Web.Http.OData.Query.Expressions
         private Expression Bind(QueryNode node)
         {
             // Recursion guard to avoid stack overflows
-            EnsureStackHelper.EnsureStack();
+            RuntimeHelpers.EnsureSufficientExecutionStack();
 
             CollectionNode collectionNode = node as CollectionNode;
             SingleValueNode singleValueNode = node as SingleValueNode;

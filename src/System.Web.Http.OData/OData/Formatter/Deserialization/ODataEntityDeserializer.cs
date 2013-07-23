@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
@@ -80,7 +81,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
 
             // Recursion guard to avoid stack overflows
-            EnsureStackHelper.EnsureStack();
+            RuntimeHelpers.EnsureSufficientExecutionStack();
 
             return ReadEntry(entryWrapper, readContext);
         }

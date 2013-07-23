@@ -7,8 +7,6 @@ using System.Web.Http.Metadata;
 
 namespace System.Web.Http.Validation.Validators
 {
-    // [SecuritySafeCritical] because it has ctor and properties exposing DataAnnotations types
-    [SecuritySafeCritical]
     public class DataAnnotationsModelValidator : ModelValidator
     {
         public DataAnnotationsModelValidator(IEnumerable<ModelValidatorProvider> validatorProviders, ValidationAttribute attribute)
@@ -26,13 +24,9 @@ namespace System.Web.Http.Validation.Validators
 
         public override bool IsRequired
         {
-            // [SecuritySafeCritical] because it uses DataAnnotations type RequiredAttribute
-            [SecuritySafeCritical]
             get { return Attribute is RequiredAttribute; }
         }
 
-        // [SecuritySafeCritical] because is uses DataAnnotations type ValidationContext
-        [SecuritySafeCritical]
         public override IEnumerable<ModelValidationResult> Validate(ModelMetadata metadata, object container)
         {
             // Per the WCF RIA Services team, instance can never be null (if you have

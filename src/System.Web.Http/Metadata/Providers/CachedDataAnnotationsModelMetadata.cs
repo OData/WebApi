@@ -23,8 +23,6 @@ namespace System.Web.Http.Metadata.Providers
         {
         }
 
-        // [SecuritySafeCritical] because it uses DataAnnotations type
-        [SecuritySafeCritical]
         protected override bool ComputeConvertEmptyStringToNull()
         {
             return PrototypeCache.DisplayFormat != null
@@ -32,8 +30,6 @@ namespace System.Web.Http.Metadata.Providers
                        : base.ComputeConvertEmptyStringToNull();
         }
 
-        // [SecuritySafeCritical] because it uses DataAnnotations type
-        [SecuritySafeCritical]
         protected override string ComputeDescription()
         {
             return PrototypeCache.Display != null
@@ -41,8 +37,6 @@ namespace System.Web.Http.Metadata.Providers
                        : base.ComputeDescription();
         }
 
-        // [SecuritySafeCritical] because it uses DataAnnotations type EditableAttribute
-        [SecuritySafeCritical]
         protected override bool ComputeIsReadOnly()
         {
             if (PrototypeCache.Editable != null)

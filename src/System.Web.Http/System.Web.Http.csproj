@@ -30,9 +30,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\AptcaCommonAssemblyInfo.cs">
-      <Link>Properties\AptcaCommonAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
@@ -41,9 +38,6 @@
     </Compile>
     <Compile Include="..\Common\DictionaryExtensions.cs">
       <Link>Common\DictionaryExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Common\EnsureStackHelper.cs">
-      <Link>Common\EnsureStackHelper.cs</Link>
     </Compile>
     <Compile Include="..\Common\Error.cs">
       <Link>Common\Error.cs</Link>

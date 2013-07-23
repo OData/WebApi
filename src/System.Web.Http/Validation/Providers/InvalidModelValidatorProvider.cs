@@ -46,7 +46,7 @@ namespace System.Web.Http.Validation.Providers
                 // Validate that value-typed properties marked as [Required] are also marked as [DataMember(IsRequired=true)]
                 // Certain formatters may not recognize a member as required if it's marked as [Required] but not [DataMember(IsRequired=true)]
                 // This is not a problem for reference types because [Required] will still cause a model error to be raised after a null value is deserialized
-                if (metadata.ModelType.IsValueType && attributes.Any(IsRequiredAttribute))
+                if (metadata.ModelType.IsValueType && attributes.Any(attribute => attribute is RequiredAttribute))
                 {
                     if (!DataMemberModelValidatorProvider.IsRequiredDataMember(metadata.ContainerType, attributes))
                     {
@@ -54,14 +54,6 @@ namespace System.Web.Http.Validation.Providers
                     }
                 }
             }
-        }
-
-        // SecurityCritical: uses DataAnnotations type RequiredAttribute
-        // SecuritySafe: RequiredAttribute is actually a safe type, mistakenly critical in 4.0
-        [SecuritySafeCritical]
-        private static bool IsRequiredAttribute(Attribute attribute)
-        {
-            return attribute is RequiredAttribute;
         }
     }
 }

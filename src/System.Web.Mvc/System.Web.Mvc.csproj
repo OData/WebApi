@@ -143,9 +143,6 @@
     <Compile Include="..\Common\Routing\PathSubsegment.cs">
       <Link>Routing\RouteParsing\PathSubsegment.cs</Link>
     </Compile>
-    <Compile Include="..\TransparentCommonAssemblyInfo.cs">
-      <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="AdditionalMetaDataAttribute.cs" />
     <Compile Include="AllowAnonymousAttribute.cs" />
     <Compile Include="ActionDescriptorHelper.cs" />

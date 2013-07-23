@@ -32,9 +32,6 @@
     <Compile Include="..\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
-    <Compile Include="..\TransparentCommonAssemblyInfo.cs">
-      <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="Chart\Chart.cs" />
     <Compile Include="Chart\ChartTheme.cs" />
     <Compile Include="Common\VirtualPathUtil.cs" />

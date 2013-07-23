@@ -21,7 +21,6 @@ namespace System.Web.Mvc
 
         private string _inherits;
 
-        [SuppressMessage("Microsoft.Security", "CA2141:TransparentMethodsMustNotSatisfyLinkDemandsFxCopRule", Justification = "System.Web.Mvc is SecurityTransparent and requires medium trust to run, so this downstream link demand is fine")]
         public ViewTypeParserFilter()
         {
         }
@@ -46,7 +45,6 @@ namespace System.Web.Mvc
             get { return -1; }
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2141:TransparentMethodsMustNotSatisfyLinkDemandsFxCopRule", Justification = "System.Web.Mvc is SecurityTransparent and requires medium trust to run, so this downstream link demand is fine")]
         public override void PreprocessDirective(string directiveName, IDictionary attributes)
         {
             base.PreprocessDirective(directiveName, attributes);
@@ -76,7 +74,6 @@ namespace System.Web.Mvc
             }
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2141:TransparentMethodsMustNotSatisfyLinkDemandsFxCopRule", Justification = "System.Web.Mvc is SecurityTransparent and requires medium trust to run, so this downstream link demand is fine")]
         public override void ParseComplete(ControlBuilder rootBuilder)
         {
             base.ParseComplete(rootBuilder);

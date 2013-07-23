@@ -34,9 +34,6 @@
     <Compile Include="..\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
-    <Compile Include="..\TransparentCommonAssemblyInfo.cs">
-      <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="ConfigurationManagerWrapper.cs" />
     <Compile Include="ConnectionConfiguration.cs" />
     <Compile Include="ConnectionEventArgs.cs" />

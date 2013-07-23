@@ -34,9 +34,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>CommonResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="..\TransparentCommonAssemblyInfo.cs">
-      <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="Analytics.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

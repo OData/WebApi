@@ -103,7 +103,11 @@ namespace System.Web.Http
 
                 foreach (HttpRouteEntry attributeRoute in attributeRoutes)
                 {
-                    configuration.Routes.Add(attributeRoute.Name, attributeRoute.Route);
+                    IHttpRoute route = attributeRoute.Route;
+                    if (route != null)
+                    {
+                        configuration.Routes.Add(attributeRoute.Name, attributeRoute.Route);
+                    }
                 }
             }
         }

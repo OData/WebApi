@@ -167,6 +167,30 @@ namespace System.Net.Http
         }
 
         [Fact]
+        public void MapHttpAttributeRoutes_DoesNotAddRoute_WhenRouteBuilderReturnsNull()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            var routePrefixes = new Collection<RoutePrefixAttribute>();
+            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new HttpGetAttribute("values") };
+            SetUpConfiguration(config, routePrefixes, routeProviders);
+
+            var mockRouteBuilder = new Mock<HttpRouteBuilder>();
+            mockRouteBuilder.Setup(
+                routeBuilder => routeBuilder.BuildHttpRoute(
+                    "values",
+                    It.IsAny<IEnumerable<HttpMethod>>(),
+                    It.IsAny<IEnumerable<ReflectedHttpActionDescriptor>>()))
+                .Returns<IHttpRoute>(null);
+
+            // Act
+            config.MapHttpAttributeRoutes(mockRouteBuilder.Object);
+
+            // Assert
+            Assert.Empty(config.Routes);
+        }
+
+        [Fact]
         public void MapHttpAttributeRoutes_RespectsRouteOrder()
         {
             // Arrange

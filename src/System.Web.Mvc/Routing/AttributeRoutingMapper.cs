@@ -44,8 +44,8 @@ namespace System.Web.Mvc.Routing
 
         internal List<RouteEntry> MapMvcAttributeRoutes(ReflectedAsyncControllerDescriptor controllerDescriptor)
         {
-            RoutePrefixAttribute prefixAttribute = GetPrefixFrom(controllerDescriptor);
-            ValidatePrefixTemplate(prefixAttribute, controllerDescriptor);            
+            string prefix = GetPrefixFrom(controllerDescriptor);
+            ValidatePrefixTemplate(prefix, controllerDescriptor);            
 
             RouteAreaAttribute area = GetAreaFrom(controllerDescriptor);
             string areaName = GetAreaName(controllerDescriptor, area);
@@ -76,9 +76,7 @@ namespace System.Web.Mvc.Routing
 
                 foreach (var routeAttribute in routeAttributes)
                 {
-                    ValidateTemplate(routeAttribute, actionName, controllerDescriptor);
-
-                    string prefix = prefixAttribute != null ? prefixAttribute.Prefix : null;
+                    ValidateTemplate(routeAttribute.RouteTemplate, actionName, controllerDescriptor);
 
                     string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.RouteTemplate);
                     Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute.Verbs, controllerName,
@@ -98,41 +96,34 @@ namespace System.Web.Mvc.Routing
             return routeEntries;
         }
 
-        private static void ValidatePrefixTemplate(RoutePrefixAttribute prefixAttribute, ControllerDescriptor controllerDescriptor)
+        private static void ValidatePrefixTemplate(string prefix, ControllerDescriptor controllerDescriptor)
         {
-            if (prefixAttribute != null && !IsValidTemplate(prefixAttribute.Prefix))
+            if (prefix != null && (prefix.StartsWith("/", StringComparison.Ordinal) || prefix.EndsWith("/", StringComparison.Ordinal)))
             {
                 string errorMessage = Error.Format(MvcResources.RoutePrefix_CannotStartOrEnd_WithForwardSlash,
-                                                   prefixAttribute.Prefix, controllerDescriptor.ControllerName);
+                                                   prefix, controllerDescriptor.ControllerName);
                 throw new InvalidOperationException(errorMessage);
             }
         }
 
         private static void ValidateAreaPrefixTemplate(string areaPrefix, string areaName, ControllerDescriptor controllerDescriptor)
         {
-            if (areaPrefix != null && !IsValidTemplate(areaPrefix))
+            if (areaPrefix != null && areaPrefix.EndsWith("/", StringComparison.Ordinal))
             {
-                string errorMessage = Error.Format(MvcResources.RouteAreaPrefix_CannotStartOrEnd_WithForwardSlash,
+                string errorMessage = Error.Format(MvcResources.RouteAreaPrefix_CannotEnd_WithForwardSlash,
                                                    areaPrefix, areaName, controllerDescriptor.ControllerName);
                 throw new InvalidOperationException(errorMessage);
             }
         }
 
-        private static void ValidateTemplate(IDirectRouteInfoProvider routeInfoProvider, string actionName, ControllerDescriptor controllerDescriptor)
+        private static void ValidateTemplate(string routeTemplate, string actionName, ControllerDescriptor controllerDescriptor)
         {
-            if (!IsValidTemplate(routeInfoProvider.RouteTemplate))
+            if (routeTemplate.StartsWith("/", StringComparison.Ordinal))
             {
-                string errorMessage = Error.Format(MvcResources.RouteTemplate_CannotStartOrEnd_WithForwardSlash,
-                                                   routeInfoProvider.RouteTemplate, actionName,
-                                                   controllerDescriptor.ControllerName);
+                string errorMessage = Error.Format(MvcResources.RouteTemplate_CannotStart_WithForwardSlash,
+                                                   routeTemplate, actionName, controllerDescriptor.ControllerName);
                 throw new InvalidOperationException(errorMessage);
             }
-        }
-
-        private static bool IsValidTemplate(string template)
-        {
-            return !template.StartsWith("/", StringComparison.Ordinal) &&
-                   !template.EndsWith("/", StringComparison.Ordinal);
         }
 
         private static IEnumerable<IDirectRouteInfoProvider> GetRouteAttributes(MethodInfo methodInfo)
@@ -174,12 +165,21 @@ namespace System.Web.Mvc.Routing
             return areaAttribute;
         }
 
-        private static RoutePrefixAttribute GetPrefixFrom(ReflectedAsyncControllerDescriptor controllerDescriptor)
+        private static string GetPrefixFrom(ReflectedAsyncControllerDescriptor controllerDescriptor)
         {
             // this only happens once per controller type, for the lifetime of the application,
             // so we do not need to cache the results
-           return controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute), inherit: false)
-                                    .Cast<RoutePrefixAttribute>().SingleOrDefault();
+            object[] routePrefixAttributes = controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute), inherit: false);
+            if (routePrefixAttributes.Length > 0)
+            {
+                RoutePrefixAttribute routePrefixAttribute = routePrefixAttributes[0] as RoutePrefixAttribute;
+                if (routePrefixAttribute != null)
+                {
+                    return routePrefixAttribute.Prefix;
+                }
+            }
+
+            return null;
         }
 
         internal static string CombinePrefixAndAreaWithTemplate(string areaPrefix, string prefix, string template)
@@ -224,6 +224,7 @@ namespace System.Web.Mvc.Routing
 
             return templateBuilder.ToString();
         }
+
         private static string GetCanonicalActionName(MethodInfo method, bool allowLegacyAsyncActions)
         {
             const string AsyncMethodSuffix = "Async";

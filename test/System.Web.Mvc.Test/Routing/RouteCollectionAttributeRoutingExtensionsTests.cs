@@ -205,10 +205,10 @@ namespace System.Web.Routing
         [Theory]
         [InlineData(typeof(Bad1Controller), "The route prefix '/pref' on the controller named 'Bad1' cannot begin or end with a forward slash.")]
         [InlineData(typeof(Bad2Controller), "The route prefix 'pref/' on the controller named 'Bad2' cannot begin or end with a forward slash.")]
-        [InlineData(typeof(Bad3Controller), "The route template '/getme' on the action named 'GetMe' on the controller named 'Bad3' cannot begin or end with a forward slash.")]
-        [InlineData(typeof(Bad4Controller), "The route template 'getme/' on the action named 'GetMe' on the controller named 'Bad4' cannot begin or end with a forward slash.")]
-        [InlineData(typeof(Bad5Controller), "The prefix '/puget-sound' of the route area named 'PugetSound' on the controller named 'Bad5' cannot begin or end with a forward slash.")]
-        [InlineData(typeof(Bad6Controller), "The prefix 'puget-sound/' of the route area named 'PugetSound' on the controller named 'Bad6' cannot begin or end with a forward slash.")]
+        [InlineData(typeof(Bad3Controller), "The route template '/getme' on the action named 'GetMe' on the controller named 'Bad3' cannot begin with a forward slash.")]
+        [InlineData(typeof(Bad4Controller), null)]
+        [InlineData(typeof(Bad5Controller), null)]
+        [InlineData(typeof(Bad6Controller), "The prefix 'puget-sound/' of the route area named 'PugetSound' on the controller named 'Bad6' cannot end with a forward slash.")]
         public void TemplatesAreValidated(Type controllerType, string expectedErrorMessage)
         {
             // Arrange
@@ -216,7 +216,14 @@ namespace System.Web.Routing
             var routes = new RouteCollection();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => routes.MapMvcAttributeRoutes(controllerTypes), expectedErrorMessage);
+            if (expectedErrorMessage == null)
+            {
+                Assert.DoesNotThrow(() => routes.MapMvcAttributeRoutes(controllerTypes));
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => routes.MapMvcAttributeRoutes(controllerTypes), expectedErrorMessage);
+            }
         }
 
         private class SimpleRoutingController : Controller

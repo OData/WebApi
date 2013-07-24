@@ -111,9 +111,10 @@ namespace System.Web.Http.OData.Formatter
                     Type elementClrType = enumerableOfT.GetGenericArguments()[0];
 
                     // IEnumerable<SelectExpandWrapper<T>> is a collection of T.
-                    if (elementClrType.IsGenericType && elementClrType.GetGenericTypeDefinition() == typeof(SelectExpandWrapper<>))
+                    Type entityType;
+                    if (IsSelectExpandWrapper(elementClrType, out entityType))
                     {
-                        elementClrType = elementClrType.GetGenericArguments()[0];
+                        elementClrType = entityType;
                     }
 
                     IEdmTypeReference elementType = GetEdmTypeReference(edmModel, elementClrType);
@@ -478,6 +479,23 @@ namespace System.Web.Http.OData.Formatter
         public static bool IsNullable(Type type)
         {
             return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
+        }
+
+        private static bool IsSelectExpandWrapper(Type type, out Type entityType)
+        {
+            if (type == null)
+            {
+                entityType = null;
+                return false;
+            }
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SelectExpandWrapper<>))
+            {
+                entityType = type.GetGenericArguments()[0];
+                return true;
+            }
+
+            return IsSelectExpandWrapper(type.BaseType, out entityType);
         }
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)

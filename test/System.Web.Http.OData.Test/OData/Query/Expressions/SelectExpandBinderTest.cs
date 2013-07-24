@@ -70,14 +70,14 @@ namespace System.Web.Http.OData.Query.Expressions
             // Assert
             IEnumerator enumerator = queryable.GetEnumerator();
             Assert.True(enumerator.MoveNext());
-            var partialCustomer = Assert.IsType<SelectExpandWrapper<Customer>>(enumerator.Current);
+            var partialCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<Customer>>(enumerator.Current);
             Assert.False(enumerator.MoveNext());
             Assert.Null(partialCustomer.Instance);
             IEnumerable<SelectExpandWrapper<Order>> innerOrders = partialCustomer.Container.ToDictionary()["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
             Assert.NotNull(innerOrders);
             SelectExpandWrapper<Order> partialOrder = innerOrders.Single();
             Assert.Same(_queryable.First().Orders.First(), partialOrder.Instance);
-            SelectExpandWrapper<Customer> innerInnerCustomer = Assert.IsType<SelectExpandWrapper<Customer>>(partialOrder.Container.ToDictionary()["Customer"]);
+            SelectExpandWrapper<Customer> innerInnerCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<Customer>>(partialOrder.Container.ToDictionary()["Customer"]);
             Assert.Same(_queryable.First(), innerInnerCustomer.Instance);
         }
 

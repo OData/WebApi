@@ -83,7 +83,7 @@ namespace System.Web.Mvc.Routing
                                                                     actionName, method, areaName);
                     RouteEntry entry = new RouteEntry
                     {
-                        Name = routeAttribute.RouteName ?? template,
+                        Name = routeAttribute.RouteName,
                         Route = route,
                         RouteTemplate = template,
                         ParsedRoute = RouteParser.Parse(route.Url),

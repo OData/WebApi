@@ -56,7 +56,15 @@ namespace System.Web.Mvc
 
             foreach (var routeEntry in routeEntries)
             {
-                routes.Add(routeEntry.Name, routeEntry.Route);
+                string routeName = routeEntry.Name;
+                if (routeName == null)
+                {
+                    routes.Add(routeEntry.Route);
+                }
+                else
+                {
+                    routes.Add(routeName, routeEntry.Route);
+                }
             }
         }
     }

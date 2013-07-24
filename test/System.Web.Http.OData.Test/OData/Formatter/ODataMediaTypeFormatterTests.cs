@@ -491,9 +491,11 @@ namespace System.Web.Http.OData.Formatter
                     { ODataPayloadKind.Entry , typeof(IEdmEntityObject) },
                     { ODataPayloadKind.Entry , typeof(TypedEdmEntityObject) },
                     { ODataPayloadKind.Feed , entityCollectionEdmObjectType },
+                    { ODataPayloadKind.Feed , typeof(IEnumerable<IEdmEntityObject>) },
                     { ODataPayloadKind.Property , typeof(IEdmComplexObject) },
                     { ODataPayloadKind.Property , typeof(TypedEdmComplexObject) },
                     { ODataPayloadKind.Collection , complexCollectionEdmObjectType },
+                    { ODataPayloadKind.Collection , typeof(IEnumerable<IEdmComplexObject>) },
                     { ODataPayloadKind.Property, typeof(NullEdmComplexObject) }
                 };
             }

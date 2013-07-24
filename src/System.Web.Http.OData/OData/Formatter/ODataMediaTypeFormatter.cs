@@ -245,18 +245,20 @@ namespace System.Web.Http.OData.Formatter
                 {
                     ODataPayloadKind? payloadKind;
 
-                    if (typeof(IEdmObject).IsAssignableFrom(type))
+                    Type elementType;
+                    if (typeof(IEdmObject).IsAssignableFrom(type) ||
+                        (type.IsCollection(out elementType) && typeof(IEdmObject).IsAssignableFrom(elementType)))
                     {
                         payloadKind = GetEdmObjectPayloadKind(type);
-                        }
-                        else
-                        {
+                    }
+                    else
+                    {
                         payloadKind = GetClrObjectResponsePayloadKind(type, model);
-                        }
+                    }
 
                     return payloadKind == null ? false : _payloadKinds.Contains(payloadKind.Value);
-                        }
-                        }
+                }
+            }
 
             return false;
         }

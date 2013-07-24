@@ -117,6 +117,8 @@
     <Compile Include="OData\Query\TruncatedCollectionOfT.cs" />
     <Compile Include="OData\Query\SelectExpandQueryOption.cs" />
     <Compile Include="OData\Query\Validators\SelectExpandQueryValidator.cs" />
+    <Compile Include="OData\Results\CreatedODataResult.cs" />
+    <Compile Include="OData\Results\UpdatedODataResult.cs" />
     <Compile Include="OData\Routing\Conventions\ActionMapExtensions.cs" />
     <Compile Include="OData\Routing\Conventions\ODataRoutingConventions.cs" />
     <Compile Include="OData\Routing\Conventions\PropertyRoutingConvention.cs" />
@@ -356,6 +358,7 @@
       <Name>System.Web.Http</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>

@@ -646,4 +646,10 @@
   <data name="ODataPathInvalid" xml:space="preserve">
     <value>The OData path is invalid.</value>
   </data>
+  <data name="TypeMustBeEntity" xml:space="preserve">
+    <value>{0} is not an entity type. Only entity types are supported.</value>
+  </data>
+  <data name="EditLinkNullForLocationHeader" xml:space="preserve">
+    <value>The edit link builder for the entity set '{0}' returned null. An edit link is required for the location header.</value>
+  </data>
 </root>

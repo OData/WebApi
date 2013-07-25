@@ -71,7 +71,7 @@ namespace System.Web.Mvc.Routing
 
             foreach (var method in actionMethodsInfo)
             {
-                string actionName = GetCanonicalActionName(method, actionSelector.AllowLegacyAsyncActions);
+                string actionName = GetActionName(method, actionSelector.AllowLegacyAsyncActions);
                 IEnumerable<IDirectRouteInfoProvider> routeAttributes = GetRouteAttributes(method);
 
                 foreach (var routeAttribute in routeAttributes)
@@ -225,8 +225,19 @@ namespace System.Web.Mvc.Routing
             return templateBuilder.ToString();
         }
 
-        private static string GetCanonicalActionName(MethodInfo method, bool allowLegacyAsyncActions)
+        private static string GetActionName(MethodInfo method, bool allowLegacyAsyncActions)
         {
+            // Check for ActionName attribute
+            object[] nameAttributes = method.GetCustomAttributes(typeof(ActionNameAttribute), inherit: true);
+            if (nameAttributes.Length > 0)
+            {
+                ActionNameAttribute nameAttribute = nameAttributes[0] as ActionNameAttribute;
+                if (nameAttribute != null)
+                {
+                    return nameAttribute.Name;
+                }
+            }
+
             const string AsyncMethodSuffix = "Async";
             if (allowLegacyAsyncActions && method.Name.EndsWith(AsyncMethodSuffix, StringComparison.OrdinalIgnoreCase))
             {

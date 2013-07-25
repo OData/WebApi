@@ -196,7 +196,7 @@ namespace System.Web.Http.OData.Query
             Assert.Reflection.IntegerProperty(
                 new QueryableAttribute(),
                 o => o.MaxExpansionDepth,
-                expectedDefaultValue: 1,
+                expectedDefaultValue: 2,
                 minLegalValue: 0,
                 illegalLowerValue: -1,
                 illegalUpperValue: null,
@@ -781,7 +781,7 @@ namespace System.Web.Http.OData.Query
             // Arrange
             var customers = Enumerable.Empty<Customer>().AsQueryable();
             SingleResult result = SingleResult.Create(customers);
-            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/",  result);
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", result);
             QueryableAttribute attribute = new QueryableAttribute();
 
             // Act
@@ -797,7 +797,7 @@ namespace System.Web.Http.OData.Query
             // Arrange
             var customers = CustomerList.AsQueryable();
             SingleResult result = SingleResult.Create(customers);
-            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/",  result);
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", result);
             QueryableAttribute attribute = new QueryableAttribute();
 
             // Act and Assert

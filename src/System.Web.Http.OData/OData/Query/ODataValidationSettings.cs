@@ -24,7 +24,7 @@ namespace System.Web.Http.OData.Query
         private int? _maxTop;
         private int _maxAnyAllExpressionDepth = 1;
         private int _maxNodeCount = 100;
-        private int _maxExpansionDepth = 1;
+        private int _maxExpansionDepth = 2;
 
         /// <summary>
         /// Gets or sets a list of allowed arithmetic operators including 'add', 'sub', 'mul', 'div', 'mod'.

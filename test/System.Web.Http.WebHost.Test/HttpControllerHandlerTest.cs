@@ -255,37 +255,6 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
-        public void ProcessRequestAsync_Flows_ClientDisconnectedCancellationToken()
-        {
-            // Arrange
-            ShortCircuitHandler spy = new ShortCircuitHandler();
-            CancellationToken clientDisconnectedToken = new CancellationToken(true);
-            HttpRequestBase requestBase = CreateStubRequest("Get", Stream.Null);
-            HttpResponseBase responseBase = CreateStubResponse(clientDisconnectedToken);
-            HttpContextBase contextBase = CreateStubContext(requestBase, responseBase);
-            HttpControllerHandler handler = new HttpControllerHandler(new RouteData(), spy);
-
-            // Act
-            var taskResult = handler.ProcessRequestAsyncCore(contextBase);
-
-            // Assert
-            taskResult.ThrowIfFaulted();
-            Assert.Equal(clientDisconnectedToken, spy.CancelToken);
-        }
-
-        private class ShortCircuitHandler : HttpMessageHandler
-        {
-            public CancellationToken CancelToken { get; private set; }
-          
-            protected override Task<HttpResponseMessage> SendAsync(
-                    HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                CancelToken = cancellationToken;
-                return Task.FromResult<HttpResponseMessage>(null);
-            }
-        }
-
-        [Fact]
         public void SuppressFormsAuthenticationRedirect_DoesntRequireSuppressRedirect()
         {
             // Arrange

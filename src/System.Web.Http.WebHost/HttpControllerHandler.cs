@@ -95,7 +95,7 @@ namespace System.Web.Http.WebHost
             // Add route data
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = _routeData;
 
-            HttpResponseMessage response = await _server.SendAsync(request, contextBase.Response.ClientDisconnectedToken);
+            HttpResponseMessage response = await _server.SendAsync(request, CancellationToken.None);
             await ConvertResponse(contextBase, response, request);
         }
 

@@ -10,6 +10,7 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Query
 {
@@ -136,6 +137,46 @@ namespace System.Web.Http.OData.Query
             Assert.Throws<ODataException>(
                 () => option.SelectExpandClause.ToString(),
                 error);
+        }
+
+        [Fact]
+        public void Property_SelectExpandClause_WorksWithUnTypedContext()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: context);
+
+            // Act & Assert
+            Assert.NotNull(selectExpand.SelectExpandClause);
+        }
+
+        [Fact]
+        public void ApplyTo_OnQueryable_WithUnTypedContext_Throws_InvalidOperation()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: context);
+            IQueryable queryable = new Mock<IQueryable>().Object;
+
+            // Act & Assert
+            Assert.Throws<NotSupportedException>(() => selectExpand.ApplyTo(queryable, new ODataQuerySettings()),
+                "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
+        }
+
+        [Fact]
+        public void ApplyTo_OnSingleEntity_WithUnTypedContext_Throws_InvalidOperation()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: context);
+            object entity = new object();
+
+            // Act & Assert
+            Assert.Throws<NotSupportedException>(() => selectExpand.ApplyTo(entity, new ODataQuerySettings()),
+                "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
         }
     }
 }

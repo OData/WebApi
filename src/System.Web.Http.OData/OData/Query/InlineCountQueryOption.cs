@@ -80,6 +80,11 @@ namespace System.Web.Http.OData.Query
         /// <returns>The number of entities that satisfy the specified query if the response should include an inline count, or <c>null</c> otherwise.</returns>
         public long? GetEntityCount(IQueryable query)
         {
+            if (Context.ElementClrType == null)
+            {
+                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "GetEntityCount");
+            }
+
             if (Value == InlineCountValue.AllPages)
             {
                 return ExpressionHelpers.Count(query, Context.ElementClrType);

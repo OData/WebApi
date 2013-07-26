@@ -5,8 +5,10 @@ using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Query.Validators;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Query
 {
@@ -148,6 +150,32 @@ namespace System.Web.Http.OData.Query
                 "The limit of '10' for Skip query has been exceeded. The value from the incoming request is '11'.");
             option.Validator = null;
             Assert.DoesNotThrow(() => option.Validate(settings));
+        }
+
+        [Fact]
+        public void Property_Value_WorksWithUnTypedContext()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            SkipQueryOption skip = new SkipQueryOption("42", context);
+
+            // Act & Assert
+            Assert.Equal(42, skip.Value);
+        }
+
+        [Fact]
+        public void ApplyTo_WithUnTypedContext_Throws_InvalidOperation()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            SkipQueryOption skip = new SkipQueryOption("42", context);
+            IQueryable queryable = new Mock<IQueryable>().Object;
+
+            // Act & Assert
+            Assert.Throws<NotSupportedException>(() => skip.ApplyTo(queryable, new ODataQuerySettings()),
+                "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
         }
     }
 }

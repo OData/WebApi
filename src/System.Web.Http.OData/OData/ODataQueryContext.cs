@@ -40,6 +40,26 @@ namespace System.Web.Http.OData
         }
 
         /// <summary>
+        /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" /> and element CLR type.
+        /// </summary>
+        /// <param name="model">The EDM model the given EDM type belongs to.</param>
+        /// <param name="elementType">The EDM type of the element of the collection being queried.</param>
+        public ODataQueryContext(IEdmModel model, IEdmType elementType)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+            if (elementType == null)
+            {
+                throw Error.ArgumentNull("elementType");
+            }
+
+            Model = model;
+            ElementType = elementType;
+        }
+
+        /// <summary>
         /// Gets the given <see cref="IEdmModel"/> that contains the EntitySet.
         /// </summary>
         public IEdmModel Model { get; private set; }

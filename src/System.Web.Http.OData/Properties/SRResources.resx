@@ -652,4 +652,10 @@
   <data name="EditLinkNullForLocationHeader" xml:space="preserve">
     <value>The edit link builder for the entity set '{0}' returned null. An edit link is required for the location header.</value>
   </data>
+  <data name="ApplyToOnUntypedQueryOption" xml:space="preserve">
+    <value>The query option is not bound to any CLR type. '{0}' is only supported with a query option bound to a CLR type.</value>
+  </data>
+  <data name="ElementClrTypeNull" xml:space="preserve">
+    <value>The property 'ElementClrType' of {0} cannot be null.</value>
+  </data>
 </root>

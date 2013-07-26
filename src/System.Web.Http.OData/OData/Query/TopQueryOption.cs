@@ -77,7 +77,7 @@ namespace System.Web.Http.OData.Query
         /// Gets or sets the Top Query Validator.
         /// </summary>
         public TopQueryValidator Validator { get; set; }
- 
+
         /// <summary>
         /// Apply the $top query to the given IQueryable.
         /// </summary>
@@ -119,6 +119,11 @@ namespace System.Web.Http.OData.Query
 
         private IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings)
         {
+            if (Context.ElementClrType == null)
+            {
+                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
+            }
+
             return ExpressionHelpers.Take(query, Value, Context.ElementClrType, querySettings.EnableConstantParameterization);
         }
     }

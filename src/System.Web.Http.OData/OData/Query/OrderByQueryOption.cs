@@ -126,6 +126,11 @@ namespace System.Web.Http.OData.Query
 
         private IOrderedQueryable ApplyToCore(IQueryable query)
         {
+            if (Context.ElementClrType == null)
+            {
+                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
+            }
+
             ICollection<OrderByNode> nodes = OrderByNodes;
 
             bool alreadyOrdered = false;

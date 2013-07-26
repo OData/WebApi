@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query.Expressions;
 using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.Edm;
@@ -106,15 +107,17 @@ namespace System.Web.Http.OData.Query
             {
                 throw Error.ArgumentNull("query");
             }
-
             if (querySettings == null)
             {
                 throw Error.ArgumentNull("querySettings");
             }
-
             if (assembliesResolver == null)
             {
                 throw Error.ArgumentNull("assembliesResolver");
+            }
+            if (Context.ElementClrType == null)
+            {
+                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
 
             FilterClause filterClause = FilterClause;

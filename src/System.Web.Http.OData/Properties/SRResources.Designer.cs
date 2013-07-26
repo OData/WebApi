@@ -115,6 +115,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The query option is not bound to any CLR type. &apos;{0}&apos; is only supported with a query option bound to a CLR type..
+        /// </summary>
+        internal static string ApplyToOnUntypedQueryOption {
+            get {
+                return ResourceManager.GetString("ApplyToOnUntypedQueryOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The argument must be of type &apos;{0}&apos;..
         /// </summary>
         internal static string ArgumentMustBeOfType {
@@ -399,6 +408,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string EdmTypeNotSupported {
             get {
                 return ResourceManager.GetString("EdmTypeNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;ElementClrType&apos; of {0} cannot be null..
+        /// </summary>
+        internal static string ElementClrTypeNull {
+            get {
+                return ResourceManager.GetString("ElementClrTypeNull", resourceCulture);
             }
         }
         

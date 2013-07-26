@@ -119,6 +119,11 @@ namespace System.Web.Http.OData.Query
 
         private IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings)
         {
+            if (Context.ElementClrType == null)
+            {
+                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
+            }
+
             return ExpressionHelpers.Skip(query, Value, Context.ElementClrType, querySettings.EnableConstantParameterization);
         }
     }

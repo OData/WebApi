@@ -106,6 +106,10 @@ namespace System.Web.Http.OData.Query
             {
                 throw Error.ArgumentNull("settings");
             }
+            if (Context.ElementClrType == null)
+            {
+                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
+            }
 
             // Ensure we have decided how to handle null propagation
             ODataQuerySettings updatedSettings = settings;
@@ -133,6 +137,10 @@ namespace System.Web.Http.OData.Query
             if (settings == null)
             {
                 throw Error.ArgumentNull("settings");
+            }
+            if (Context.ElementClrType == null)
+            {
+                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
 
             // Ensure we have decided how to handle null propagation

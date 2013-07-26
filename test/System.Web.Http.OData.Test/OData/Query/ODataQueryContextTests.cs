@@ -6,6 +6,7 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
+using Moq;
 
 namespace System.Web.Http.OData.Query
 {
@@ -53,7 +54,7 @@ namespace System.Web.Http.OData.Query
 
         [Theory]
         [PropertyData("QueryPrimitiveTypes")]
-        public void ConstructorWithPrimitiveTypes(Type type)
+        public void Constructor_TakingClrType_WithPrimitiveTypes(Type type)
         {
             // Arrange & Act
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, type);
@@ -63,7 +64,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void Constructor_Throws_With_Null_Model()
+        public void Constructor_TakingClrType_Throws_With_Null_Model()
         {
             // Arrange & Act & Assert
             Assert.ThrowsArgumentNull(
@@ -72,7 +73,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void Constructor_Throws_With_Null_Type()
+        public void Constructor_TakingClrType_Throws_With_Null_Type()
         {
             // Arrange & Act & Assert
             Assert.ThrowsArgumentNull(
@@ -81,7 +82,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void Constructor()
+        public void Constructor_TakingClrType_SetsProperties()
         {
             // Arrange
             var odataModel = new ODataModelBuilder().Add_Customer_EntityType();
@@ -99,7 +100,7 @@ namespace System.Web.Http.OData.Query
         [Theory]
         [InlineData(typeof(object))]
         [InlineData(typeof(Order))]
-        public void Constructor_Throws_For_UnknownType(Type elementType)
+        public void Constructor_TakingClrType_Throws_For_UnknownType(Type elementType)
         {
             // Arrange
             var odataModel = new ODataModelBuilder().Add_Customer_EntityType();
@@ -111,6 +112,36 @@ namespace System.Web.Http.OData.Query
                 () => new ODataQueryContext(model, elementType),
                 "elementClrType",
                 Error.Format("The given model does not contain the type '{0}'.", elementType.FullName));
+        }
+
+        [Fact]
+        public void Ctor_TakingEdmType_ThrowsArgumentNull_Model()
+        {
+            Assert.ThrowsArgumentNull(() => new ODataQueryContext(model: null, elementType: new Mock<IEdmType>().Object),
+                "model");
+        }
+
+        [Fact]
+        public void Ctor_TakingEdmType_ThrowsArgumentNull_ElementType()
+        {
+            Assert.ThrowsArgumentNull(() => new ODataQueryContext(EdmCoreModel.Instance, elementType: null),
+                "elementType");
+        }
+
+        [Fact]
+        public void Ctor_TakingEdmType_InitializesProperties()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+            IEdmType elementType = new Mock<IEdmType>().Object;
+
+            // Act
+            var context = new ODataQueryContext(model, elementType);
+
+            // Assert
+            Assert.Same(model, context.Model);
+            Assert.Same(elementType, context.ElementType);
+            Assert.Null(context.ElementClrType);
         }
     }
 }

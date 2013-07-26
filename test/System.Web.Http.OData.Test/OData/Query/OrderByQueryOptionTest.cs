@@ -5,9 +5,11 @@ using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Query.Validators;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Query
 {
@@ -281,6 +283,32 @@ namespace System.Web.Http.OData.Query
             Assert.Throws<ODataException>(
                 () => orderbyOption.ApplyTo(Enumerable.Empty<int>().AsQueryable()),
                 "Multiple '$it' nodes are not supported in '$orderby'.");
+        }
+
+        [Fact]
+        public void Property_OrderByNodes_WorksWithUnTypedContext()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            OrderByQueryOption orderBy = new OrderByQueryOption("ID desc", context);
+
+            // Act & Assert
+            Assert.NotNull(orderBy.OrderByNodes);
+        }
+
+        [Fact]
+        public void ApplyTo_WithUnTypedContext_Throws_InvalidOperation()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            OrderByQueryOption orderBy = new OrderByQueryOption("ID desc", context);
+            IQueryable queryable = new Mock<IQueryable>().Object;
+
+            // Act & Assert
+            Assert.Throws<NotSupportedException>(() => orderBy.ApplyTo(queryable),
+                "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
         }
     }
 }

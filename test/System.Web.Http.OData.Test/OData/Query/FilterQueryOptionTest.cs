@@ -7,12 +7,14 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Query.Validators;
 using System.Web.Http.OData.TestCommon;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
+using Moq;
 
 namespace System.Web.Http.OData.Query
 {
@@ -397,6 +399,30 @@ namespace System.Web.Http.OData.Query
                 () => filterOption.ApplyTo(enumModels.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }),
                 exceptionMessage
             );
+        }
+
+        [Fact]
+        public void Property_FilterClause_WorksWithUnTypedContext()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            FilterQueryOption filter = new FilterQueryOption("ID eq 42", context);
+
+            // Act & Assert
+            Assert.NotNull(filter.FilterClause);
+        }
+
+        [Fact]
+        public void ApplyTo_WithUnTypedContext_Throws_InvalidOperation()
+        {
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            FilterQueryOption filter = new FilterQueryOption("Id eq 42", context);
+            IQueryable queryable = new Mock<IQueryable>().Object;
+
+            Assert.Throws<NotSupportedException>(() => filter.ApplyTo(queryable, new ODataQuerySettings()),
+                "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
         }
 
         private static IEdmModel GetEnumModel()

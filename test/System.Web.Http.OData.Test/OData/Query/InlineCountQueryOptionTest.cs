@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Query
 {
@@ -75,6 +77,32 @@ namespace System.Web.Http.OData.Query
             var inlineCount = new InlineCountQueryOption("none", _context);
 
             Assert.Null(inlineCount.GetEntityCount(_customers));
+        }
+
+        [Fact]
+        public void Property_Value_WorksWithUnTypedContext()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            InlineCountQueryOption inlineCount = new InlineCountQueryOption("allpages", context);
+
+            // Act & Assert
+            Assert.Equal(InlineCountValue.AllPages, inlineCount.Value);
+        }
+
+        [Fact]
+        public void GetEntityCount_WithUnTypedContext_Throws_InvalidOperation()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            InlineCountQueryOption inlineCount = new InlineCountQueryOption("allpages", context);
+            IQueryable queryable = new Mock<IQueryable>().Object;
+
+            // Act & Assert
+            Assert.Throws<NotSupportedException>(() => inlineCount.GetEntityCount(queryable),
+                "The query option is not bound to any CLR type. 'GetEntityCount' is only supported with a query option bound to a CLR type.");
         }
     }
 }

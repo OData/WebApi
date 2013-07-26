@@ -23,6 +23,11 @@ namespace System.Web.Http.OData.Query
         public ODataQueryOptions(ODataQueryContext context, HttpRequestMessage request)
             : base(context, request)
         {
+            if (Context.ElementClrType == null)
+            {
+                throw Error.Argument("context", SRResources.ElementClrTypeNull, typeof(ODataQueryContext).Name);
+            }
+
             if (context.ElementClrType != typeof(TEntity))
             {
                 throw Error.Argument("context", SRResources.EntityTypeMismatch, context.ElementClrType.FullName, typeof(TEntity).FullName);

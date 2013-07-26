@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.TestCommon.Models;
+using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query
@@ -21,6 +23,18 @@ namespace System.Web.Http.OData.Query
             Assert.ThrowsArgument(
                 () => new ODataQueryOptions<int>(context, new HttpRequestMessage()),
                 "context", "The entity type 'System.Web.Http.OData.TestCommon.Models.Customer' does not match the expected entity type 'System.Int32' as set on the query context.");
+        }
+
+        [Fact]
+        public void Ctor_Throws_Argument_IfContextIsUnTyped()
+        {
+            IEdmModel model = EdmCoreModel.Instance;
+            IEdmType elementType = EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32);
+            ODataQueryContext context = new ODataQueryContext(model, elementType);
+
+            Assert.ThrowsArgument(
+                () => new ODataQueryOptions<int>(context, new HttpRequestMessage()),
+                "context", "The property 'ElementClrType' of ODataQueryContext cannot be null.");
         }
 
         [Fact]

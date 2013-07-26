@@ -863,6 +863,27 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(nextPageLink, request.GetNextPageLink());
             Assert.Equal(1, (result as IQueryable<int>).Count());
         }
+
+        [Fact]
+        public void ODataQueryOptions_WithUnTypedContext_CanBeBuilt()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/?$filter=Id eq 42&$orderby=Id&$skip=42&$top=42&$inlinecount=allpages&$select=Id&$expand=Orders");
+
+            // Act
+            ODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
+
+            // Assert
+            Assert.NotNull(queryOptions.Filter);
+            Assert.NotNull(queryOptions.OrderBy);
+            Assert.NotNull(queryOptions.Skip);
+            Assert.NotNull(queryOptions.Top);
+            Assert.NotNull(queryOptions.SelectExpand);
+            Assert.NotNull(queryOptions.InlineCount);
+        }
     }
 
     public class ODataQueryOptionTest_ComplexModel

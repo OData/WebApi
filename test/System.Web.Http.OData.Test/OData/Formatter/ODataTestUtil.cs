@@ -113,7 +113,8 @@ namespace System.Web.Http.OData.Formatter
         public static ODataSerializerProvider GetMockODataSerializerProvider(ODataSerializer serializer)
         {
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
-            serializerProvider.Setup(sp => sp.GetODataPayloadSerializer(It.IsAny<IEdmModel>(), It.IsAny<Type>())).Returns(serializer);
+            serializerProvider.Setup(sp => sp.GetODataPayloadSerializer(It.IsAny<IEdmModel>(), It.IsAny<Type>(), It.IsAny<HttpRequestMessage>()))
+                .Returns(serializer);
             return serializerProvider.Object;
         }
     }

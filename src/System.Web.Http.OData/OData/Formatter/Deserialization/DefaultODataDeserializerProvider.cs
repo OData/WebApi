@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Concurrent;
+using System.Net.Http;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
@@ -108,7 +109,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         /// <inheritdoc />
-        public override ODataDeserializer GetODataDeserializer(IEdmModel model, Type type)
+        public override ODataDeserializer GetODataDeserializer(IEdmModel model, Type type, HttpRequestMessage request)
         {
             if (type == null)
             {

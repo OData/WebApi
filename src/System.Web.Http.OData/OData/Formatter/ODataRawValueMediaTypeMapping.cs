@@ -30,7 +30,7 @@ namespace System.Web.Http.OData.Formatter
 
             return (IsRawValueRequest(request) && IsMatch(GetProperty(request))) ? 1 : 0;
         }
-        
+
         /// <summary>
         /// This method determines if the <see cref="System.Net.Http.HttpRequestMessage"/> is an OData Raw value request.
         /// </summary>
@@ -38,7 +38,7 @@ namespace System.Web.Http.OData.Formatter
         /// <returns>True if the request is an OData raw value request.</returns>
         protected abstract bool IsMatch(PropertyAccessPathSegment propertySegment);
 
-        private static bool IsRawValueRequest(HttpRequestMessage request)
+        internal static bool IsRawValueRequest(HttpRequestMessage request)
         {
             ODataPath path = request.GetODataPath();
             return path != null && path.Segments.LastOrDefault() is ValuePathSegment;

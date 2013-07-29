@@ -228,7 +228,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                 // write object.
                 Type propertyType = propertyValue.GetType();
-                ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(writeContext.Model, propertyValue);
+                ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(writeContext.Model, propertyValue, writeContext.Request);
                 if (serializer == null)
                 {
                     throw new SerializationException(

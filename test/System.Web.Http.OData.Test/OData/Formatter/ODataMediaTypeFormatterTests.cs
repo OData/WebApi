@@ -322,11 +322,11 @@ namespace System.Web.Http.OData.Formatter
         {
             // Arrange
             var model = CreateModel();
-
+            var request = CreateFakeODataRequest(model);
             Mock<ODataSerializer> serializer = new Mock<ODataSerializer>(ODataPayloadKind.Property);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
 
-            serializerProvider.Setup(p => p.GetODataPayloadSerializer(model, typeof(int))).Returns(serializer.Object);
+            serializerProvider.Setup(p => p.GetODataPayloadSerializer(model, typeof(int), request)).Returns(serializer.Object);
             serializer
                 .Setup(s => s.WriteObject(42, It.IsAny<ODataMessageWriter>(), It.Is<ODataSerializerContext>(c => c.MetadataLevel == ODataMetadataLevel.FullMetadata)))
                 .Verifiable();
@@ -335,7 +335,7 @@ namespace System.Web.Http.OData.Formatter
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
 
             var formatter = new ODataMediaTypeFormatter(deserializerProvider, serializerProvider.Object, Enumerable.Empty<ODataPayloadKind>());
-            formatter.Request = CreateFakeODataRequest(model);
+            formatter.Request = request;
             HttpContent content = new StringContent("42");
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
 
@@ -351,21 +351,21 @@ namespace System.Web.Http.OData.Formatter
         {
             // Arrange
             var model = CreateModel();
+            var request = CreateFakeODataRequest(model);
             SelectExpandClause selectExpandClause =
                 new SelectExpandClause(new SelectItem[0], allSelected: true);
+            request.SetSelectExpandClause(selectExpandClause);
 
             Mock<ODataSerializer> serializer = new Mock<ODataSerializer>(ODataPayloadKind.Property);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
 
-            serializerProvider.Setup(p => p.GetODataPayloadSerializer(model, typeof(int))).Returns(serializer.Object);
+            serializerProvider.Setup(p => p.GetODataPayloadSerializer(model, typeof(int), request)).Returns(serializer.Object);
             serializer
                 .Setup(s => s.WriteObject(42, It.IsAny<ODataMessageWriter>(), It.Is<ODataSerializerContext>(c => c.SelectExpandClause == selectExpandClause)))
                 .Verifiable();
 
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
 
-            var request = CreateFakeODataRequest(model);
-            request.SetSelectExpandClause(selectExpandClause);
             var formatter = new ODataMediaTypeFormatter(deserializerProvider, serializerProvider.Object, Enumerable.Empty<ODataPayloadKind>());
             formatter.Request = request;
             HttpContent content = new StringContent("42");
@@ -425,7 +425,7 @@ namespace System.Web.Http.OData.Formatter
             var request = CreateFakeODataRequest(model);
             Mock<ODataDeserializer> deserializer = new Mock<ODataDeserializer>(ODataPayloadKind.Property);
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            deserializerProvider.Setup(p => p.GetODataDeserializer(model, typeof(int))).Returns(deserializer.Object);
+            deserializerProvider.Setup(p => p.GetODataDeserializer(model, typeof(int), request)).Returns(deserializer.Object);
             deserializer.Setup(d => d.Read(It.IsAny<ODataMessageReader>(), It.Is<ODataDeserializerContext>(c => c.Request == request))).Verifiable();
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
 

@@ -196,7 +196,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
-            serializerProvider.Setup(s => s.GetODataPayloadSerializer(_model, typeof(int))).Returns<ODataSerializer>(null);
+            HttpRequestMessage request = new HttpRequestMessage();
+            serializerProvider.Setup(s => s.GetODataPayloadSerializer(_model, typeof(int), request)).Returns<ODataSerializer>(null);
             IEnumerable instance = new object[] { 42 };
             ODataFeedSerializer serializer = new ODataFeedSerializer(_customersType, serializerProvider.Object);
 

@@ -95,7 +95,6 @@
     <Compile Include="OData\Formatter\ODataRawValueMediaTypeMapping.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinksSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataRawValueSerializer.cs" />
-    <Compile Include="OData\Formatter\Serialization\RawValueSerializerProvider.cs" />
     <Compile Include="OData\IEdmComplexObject.cs" />
     <Compile Include="OData\IEdmEntityObject.cs" />
     <Compile Include="OData\NullEdmComplexObject.cs" />

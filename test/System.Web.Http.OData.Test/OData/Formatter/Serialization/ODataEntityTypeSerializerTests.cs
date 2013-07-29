@@ -317,7 +317,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 .Verifiable();
 
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
-            serializerProvider.Setup(p => p.GetODataPayloadSerializer(_model, _customer.Orders.GetType())).Returns(innerSerializer.Object);
+            serializerProvider.Setup(p => p.GetODataPayloadSerializer(_model, _customer.Orders.GetType(), _writeContext.Request))
+                .Returns(innerSerializer.Object);
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EdmType, serializerProvider.Object);
             serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
             serializer.CallBase = true;
@@ -1139,7 +1140,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmNavigationProperty ordersProperty = _customerSet.ElementType.DeclaredNavigationProperties().Single();
             Mock<ODataEdmTypeSerializer> expandedItemSerializer = new Mock<ODataEdmTypeSerializer>(ordersProperty.Type, ODataPayloadKind.Feed);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
-            serializerProvider.Setup(p => p.GetODataPayloadSerializer(_model, _customer.Orders.GetType())).Returns(expandedItemSerializer.Object);
+            serializerProvider.Setup(p => p.GetODataPayloadSerializer(_model, _customer.Orders.GetType(), _writeContext.Request))
+                .Returns(expandedItemSerializer.Object);
 
             SelectExpandNode selectExpandNode = new SelectExpandNode
             {

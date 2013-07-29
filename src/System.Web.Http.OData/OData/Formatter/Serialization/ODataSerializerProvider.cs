@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics.Contracts;
+using System.Net.Http;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter.Serialization
@@ -22,7 +22,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// </summary>
         /// <param name="model">The EDM model associated with the request.</param>
         /// <param name="type">The <see cref="Type"/> for which the serializer is being requested.</param>
+        /// <param name="request">The request for which the response is being serialized.</param>
         /// <returns>The <see cref="ODataSerializer"/> for the given type.</returns>
-        public abstract ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type);
+        public abstract ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type, HttpRequestMessage request);
     }
 }

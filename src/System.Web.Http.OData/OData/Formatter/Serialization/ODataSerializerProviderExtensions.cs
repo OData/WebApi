@@ -1,13 +1,15 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Net.Http;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
     internal static class ODataSerializerProviderExtensions
     {
-        public static ODataEdmTypeSerializer GetEdmTypeSerializer(this ODataSerializerProvider serializerProvider, IEdmModel model, object instance)
+        public static ODataEdmTypeSerializer GetEdmTypeSerializer(this ODataSerializerProvider serializerProvider,
+            IEdmModel model, object instance, HttpRequestMessage request)
         {
             Contract.Assert(serializerProvider != null);
             Contract.Assert(model != null);
@@ -21,7 +23,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 return serializerProvider.GetEdmTypeSerializer(edmObject.GetEdmType());
             }
 
-            return serializerProvider.GetODataPayloadSerializer(model, instance.GetType()) as ODataEdmTypeSerializer;
+            return serializerProvider.GetODataPayloadSerializer(model, instance.GetType(), request) as ODataEdmTypeSerializer;
         }
     }
 }

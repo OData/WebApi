@@ -2,6 +2,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net.Http;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
@@ -24,6 +25,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private static readonly ODataEntityReferenceLinksSerializer _entityReferenceLinksSerializer = new ODataEntityReferenceLinksSerializer();
         private static readonly ODataErrorSerializer _errorSerializer = new ODataErrorSerializer();
         private static readonly ODataMetadataSerializer _metadataSerializer = new ODataMetadataSerializer();
+        private static readonly ODataRawValueSerializer _rawValueSerializer = new ODataRawValueSerializer();
 
         private static readonly DefaultODataSerializerProvider _instance = new DefaultODataSerializerProvider();
 
@@ -103,16 +105,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <inheritdoc />
-        public override ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type)
+        public override ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type, HttpRequestMessage request)
         {
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
-
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
+            }
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
             }
 
             // handle the special types.
@@ -150,7 +155,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             if (edmType != null)
             {
-                return GetEdmTypeSerializer(edmType);
+                if (edmType.IsPrimitive() && ODataRawValueMediaTypeMapping.IsRawValueRequest(request))
+                {
+                    return _rawValueSerializer;
+                }
+                else
+                {
+                    return GetEdmTypeSerializer(edmType);
+                }
             }
             else
             {

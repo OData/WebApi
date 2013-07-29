@@ -7,7 +7,6 @@ using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
-using System.Web.Http.OData.Query.Expressions;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Atom;
@@ -131,7 +130,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     throw new SerializationException(SRResources.NullElementInCollection);
                 }
 
-                ODataEdmTypeSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(writeContext.Model, entry);
+                ODataEdmTypeSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(writeContext.Model, entry, writeContext.Request);
                 if (entrySerializer == null)
                 {
                     throw new SerializationException(

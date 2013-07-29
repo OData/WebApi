@@ -44,8 +44,7 @@ namespace System.Web.Http.OData.Formatter
                 CreateApplicationAtomXmlTypeEntry(serializerProvider, deserializerProvider),
                 CreateApplicationXml(serializerProvider, deserializerProvider),
                 CreateTextXml(serializerProvider, deserializerProvider),
-                // Bug #970: Use the SerializerProvider in the parameter instead of RawValueSerializerProvider
-                CreateRawValue(new RawValueSerializerProvider(), deserializerProvider)
+                CreateRawValue(serializerProvider, deserializerProvider)
             };
         }
 

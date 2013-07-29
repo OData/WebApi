@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Net.Http;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
@@ -21,7 +22,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// </summary>
         /// <param name="model">The EDM model.</param>
         /// <param name="type">The CLR type.</param>
+        /// <param name="request">The request being deserialized.</param>
         /// <returns>An <see cref="ODataDeserializer"/> that can deserialize the given type.</returns>
-        public abstract ODataDeserializer GetODataDeserializer(IEdmModel model, Type type);
+        public abstract ODataDeserializer GetODataDeserializer(IEdmModel model, Type type, HttpRequestMessage request);
     }
 }

@@ -108,7 +108,6 @@
     <Compile Include="OData\Formatter\Serialization\ODataEdmTypeSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerTest.cs" />
-    <Compile Include="OData\Formatter\Serialization\RawValueSerializerProviderTests.cs" />
     <Compile Include="OData\NullEdmComplexObjectTest.cs" />
     <Compile Include="OData\ODataNullValueAttributeTests.cs" />
     <Compile Include="OData\Formatter\Serialization\SelectExpandNodeTest.cs" />

@@ -300,7 +300,7 @@ namespace System.Web.Http.OData.Formatter
                 type = type.GetGenericArguments()[0];
             }
 
-            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type);
+            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type, Request);
             return serializer == null ? null : (ODataPayloadKind?)serializer.ODataPayloadKind;
         }
 
@@ -521,7 +521,7 @@ namespace System.Web.Http.OData.Formatter
             return null;
         }
 
-        private static ODataDeserializer GetDeserializer(Type type, ODataPath path, IEdmModel model, ODataDeserializerProvider deserializerProvider)
+        private ODataDeserializer GetDeserializer(Type type, ODataPath path, IEdmModel model, ODataDeserializerProvider deserializerProvider)
         {
             if (typeof(IEdmObject).IsAssignableFrom(type))
             {
@@ -549,13 +549,13 @@ namespace System.Web.Http.OData.Formatter
             else
             {
                 TryGetInnerTypeForDelta(ref type);
-                return deserializerProvider.GetODataDeserializer(model, type);
+                return deserializerProvider.GetODataDeserializer(model, type, Request);
             }
 
             return null;
         }
 
-        private static ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider)
+        private ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider)
         {
             ODataSerializer serializer;
 
@@ -580,7 +580,7 @@ namespace System.Web.Http.OData.Formatter
             {
                 // get the most appropriate serializer given that we support inheritance.
                 type = value == null ? type : value.GetType();
-                serializer = serializerProvider.GetODataPayloadSerializer(model, type);
+                serializer = serializerProvider.GetODataPayloadSerializer(model, type, Request);
                 if (serializer == null)
                 {
                     string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataMediaTypeFormatter).Name);

@@ -8,9 +8,9 @@ using Microsoft.Data.Edm;
 namespace System.Web.Http.OData
 {
     /// <summary>
-    /// Represents an <see cref="IEdmObject"/> that is a collection of <see cref="EdmEntityObject"/>s.
+    /// Represents an <see cref="IEdmObject"/> that is a collection of <see cref="IEdmEntityObject"/>s.
     /// </summary>
-    public class EdmEntityObjectCollection : Collection<EdmEntityObject>, IEdmObject
+    public class EdmEntityObjectCollection : Collection<IEdmEntityObject>, IEdmObject
     {
         private IEdmCollectionTypeReference _edmType;
 
@@ -28,7 +28,7 @@ namespace System.Web.Http.OData
         /// </summary>
         /// <param name="edmType">The edm type of the collection.</param>
         /// <param name="list">The list that is wrapped by the new collection.</param>
-        public EdmEntityObjectCollection(IEdmCollectionTypeReference edmType, IList<EdmEntityObject> list)
+        public EdmEntityObjectCollection(IEdmCollectionTypeReference edmType, IList<IEdmEntityObject> list)
             : base(list)
         {
             Initialize(edmType);

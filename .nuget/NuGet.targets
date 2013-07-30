@@ -79,9 +79,9 @@
             LogStandardErrorAsError="true"
             Condition=" !Exists('$(PackagesDir)\Microsoft.Web.StyleCop.1.0.0') " />
         <Exec
-            Command='$(NuGetCommand) install Microsoft.Bcl.Build -source $(PackageSources) -o "$(PackagesDir)" -Version 1.0.0-rc > NUL'
+            Command='$(NuGetCommand) install Microsoft.Bcl.Build -source $(PackageSources) -o "$(PackagesDir)" -Version 1.0.8 > NUL'
             LogStandardErrorAsError="true"
-            Condition=" !Exists('$(PackagesDir)\Microsoft.Bcl.Build.1.0.0-rc') " />
+            Condition=" !Exists('$(PackagesDir)\Microsoft.Bcl.Build.1.0.8') " />
     </Target>
 
     <Target Name="RestoreSkipStrongNames" DependsOnTargets="CheckPrerequisites" AfterTargets="RestoreBinaryDependencies">

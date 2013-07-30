@@ -120,9 +120,9 @@ namespace System.Web.Http.OData.Query
         }
 
         [Theory]
-        [InlineData("IDD", null, "Type 'NS.Customer' does not have a property 'IDD'.")]
-        [InlineData("ID, Namee", null, "Type 'NS.Customer' does not have a property 'Namee'.")]
-        [InlineData("NSSS.Name", null, "Type 'NS.Customer' does not have a property 'NSSS.Name'.")]
+        [InlineData("IDD", null, "Could not find a property named 'IDD' on type 'NS.Customer'.")]
+        [InlineData("ID, Namee", null, "Could not find a property named 'Namee' on type 'NS.Customer'.")]
+        [InlineData("NSSS.Name", null, "Could not find a property named 'NSSS.Name' on type 'NS.Customer'.")]
         [InlineData("NS+Name", null, "Syntax error: character '+' is not valid at position 2 in 'NS+Name'.")]
         [InlineData("NS.Customerrr/SpecialCustomerProperty", null, "The type 'NS.Customerrr' is not defined in the model.")]
         public void SelectExpandCaluse_ThrowsODataException_InvalidQuery(string select, string expand, string error)

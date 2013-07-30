@@ -358,11 +358,14 @@ namespace System.Web.Http.OData.Formatter
                     XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
 
                     Assert.Equal("error", xml.Name.LocalName);
-                    Assert.Equal("The query specified in the URI is not valid.", xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
+                    Assert.Equal("The query specified in the URI is not valid.",
+                        xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
                     XElement innerErrorXml = xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}innererror"));
                     Assert.NotNull(innerErrorXml);
-                    Assert.Equal("Type 'System.Web.Http.OData.Formatter.FormatterPerson' does not have a property 'abc'.", innerErrorXml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
-                    Assert.Equal("Microsoft.Data.OData.ODataException", innerErrorXml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}type")).Value);
+                    Assert.Equal("Could not find a property named 'abc' on type 'System.Web.Http.OData.Formatter.FormatterPerson'.",
+                        innerErrorXml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
+                    Assert.Equal("Microsoft.Data.OData.ODataException",
+                        innerErrorXml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}type")).Value);
                 }
             }
         }

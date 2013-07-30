@@ -382,7 +382,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization<DataTypes>(filter);
             var result = RunFilter(filters.WithoutNullPropagation, new DataTypes { StringProp = value });
-            
+
             Assert.Equal(result, expectedResult);
         }
 
@@ -1339,13 +1339,13 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("Edm.Int32 eq 123", "Edm.Int32")]
-        [InlineData("ProductName/Edm.String eq 123", "Edm.String")]
-        public void CastToNonEntityType_Throws(string filter, string cast)
+        [InlineData("Edm.Int32 eq 123", "The child type 'Edm.Int32' in a cast was not an entity type. Casts can only be performed on entity types.")]
+        [InlineData("ProductName/Edm.String eq 123", "Can only bind segments that are Navigation, Structural, Complex, or Collections. We found a segment "+ 
+            "'ProductName' that isn't any of those. Please revise the query.")]
+        public void CastToNonEntityType_Throws(string filter, string error)
         {
             Assert.Throws<ODataException>(
-                () => VerifyQueryDeserialization<Product>(filter),
-                Error.Format("The child type '{0}' in a cast was not an entity type. Casts can only be performed on entity types.", cast));
+                () => VerifyQueryDeserialization<Product>(filter), error);
         }
 
         [Theory]

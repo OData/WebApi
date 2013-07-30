@@ -33,7 +33,6 @@
     <Compile Include="DataAttribute.cs" />
     <Compile Include="EnumHelperTestBase.cs" />
     <Compile Include="InlineDataAttribute.cs" />
-    <Compile Include="InstanceCreator.cs" />
     <Compile Include="MatrixTheoryDataSet.cs" />
     <Compile Include="PartialTrustRunner.cs" />
     <Compile Include="Platform.cs" />

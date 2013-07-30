@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Text;
 using System.Web.Http;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
@@ -259,80 +258,6 @@ namespace System.Net.Http.Formatting
             ParseInvalidFormUrlEncoded(encoded);
         }
 
-        /// <summary>
-        /// Tests for parsing generated form-urlencoded data.
-        /// </summary>
-        [Fact]
-        public void GeneratedJTokenTest()
-        {
-            Random rndGen = new Random(1);
-            int oldMaxArray = CreatorSettings.MaxArrayLength;
-            int oldMaxList = CreatorSettings.MaxListLength;
-            int oldMaxStr = CreatorSettings.MaxStringLength;
-            double oldNullProbability = CreatorSettings.NullValueProbability;
-            bool oldCreateAscii = CreatorSettings.CreateOnlyAsciiChars;
-            CreatorSettings.MaxArrayLength = 5;
-            CreatorSettings.MaxListLength = 3;
-            CreatorSettings.MaxStringLength = 3;
-            CreatorSettings.NullValueProbability = 0;
-            CreatorSettings.CreateOnlyAsciiChars = true;
-            JTokenCreatorSurrogate jsonValueCreator = new JTokenCreatorSurrogate();
-            try
-            {
-                for (int i = 0; i < 1000; i++)
-                {
-                    JToken jv = (JToken)jsonValueCreator.CreateInstanceOf(typeof(JToken), rndGen);
-                    if (jv.Type == JTokenType.Array || jv.Type == JTokenType.Object)
-                    {
-                        string jaStr = FormUrlEncoding(jv);
-                        JToken deserJv = ParseFormUrlEncoded(jaStr);
-                        bool compare = true;
-                        if (deserJv is JObject && ((IDictionary<string, JToken>)deserJv).ContainsKey("JV"))
-                        {
-                            compare = JTokenRoundTripComparer.Compare(jv, deserJv["JV"]);
-                        }
-                        else
-                        {
-                            compare = JTokenRoundTripComparer.Compare(jv, deserJv);
-                        }
-
-                        Assert.True(compare, "Comparison failed for test instance " + i);
-                    }
-                }
-            }
-            finally
-            {
-                CreatorSettings.MaxArrayLength = oldMaxArray;
-                CreatorSettings.MaxListLength = oldMaxList;
-                CreatorSettings.MaxStringLength = oldMaxStr;
-                CreatorSettings.NullValueProbability = oldNullProbability;
-                CreatorSettings.CreateOnlyAsciiChars = oldCreateAscii;
-            }
-        }
-
-        private static string FormUrlEncoding(JToken jsonValue)
-        {
-            List<string> results = new List<string>();
-            if (jsonValue is JValue)
-            {
-                return UriQueryUtility.UrlEncode(((JValue)jsonValue).Value.ToString());
-            }
-
-            BuildParams("JV", jsonValue, results);
-            StringBuilder strResult = new StringBuilder();
-            foreach (var result in results)
-            {
-                strResult.Append("&" + result);
-            }
-
-            if (strResult.Length > 0)
-            {
-                return strResult.Remove(0, 1).ToString();
-            }
-
-            return strResult.ToString();
-        }
-
         private static void BuildParams(string prefix, JToken jsonValue, List<string> results)
         {
             if (jsonValue is JValue)
@@ -395,14 +320,6 @@ namespace System.Net.Http.Formatting
             UriBuilder uriBuilder = new UriBuilder("http://some.host");
             uriBuilder.Query = query;
             return uriBuilder.Uri;
-        }
-
-        private static JToken ParseFormUrlEncoded(string encoded)
-        {
-            Uri address = GetQueryUri(encoded);
-            JObject result;
-            Assert.True(address.TryReadQueryAsJson(out result), "Expected parsing to return true");
-            return result;
         }
 
         private static void ParseInvalidFormUrlEncoded(string encoded)

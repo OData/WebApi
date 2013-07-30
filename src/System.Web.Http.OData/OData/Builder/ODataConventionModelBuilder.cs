@@ -57,7 +57,7 @@ namespace System.Web.Http.OData.Builder
         private Lazy<IDictionary<Type, List<Type>>> _allTypesWithDerivedTypeMapping;
 
         /// <summary>
-        /// Initializes a new <see cref="ODataConventionModelBuilder"/>.
+        /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
         /// </summary>
         public ODataConventionModelBuilder()
         {
@@ -73,7 +73,14 @@ namespace System.Web.Http.OData.Builder
         {
         }
 
-        internal ODataConventionModelBuilder(HttpConfiguration configuration, bool isQueryCompositionMode)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
+        /// </summary>
+        /// <param name="configuration">The <see cref="HttpConfiguration"/> to use.</param>
+        /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
+        /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <see langword="true"/> has more relaxed
+        /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
+        public ODataConventionModelBuilder(HttpConfiguration configuration, bool isQueryCompositionMode)
         {
             if (configuration == null)
             {

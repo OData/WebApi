@@ -26,6 +26,7 @@ namespace System.Web.Http.Controllers
         private static readonly object[] _empty = new object[0];
 
         private readonly Lazy<Collection<HttpParameterDescriptor>> _parameters;
+        private ParameterInfo[] _parameterInfos;
 
         private Lazy<ActionExecutor> _actionExecutor;
         private MethodInfo _methodInfo;
@@ -98,6 +99,18 @@ namespace System.Web.Http.Controllers
             }
         }
 
+        private ParameterInfo[] ParameterInfos
+        {
+            get
+            {
+                if (_parameterInfos == null)
+                {
+                    _parameterInfos = _methodInfo.GetParameters();
+                }
+                return _parameterInfos;
+            }
+        }
+
         /// <inheritdoc/>
         public override Type ReturnType
         {
@@ -154,6 +167,7 @@ namespace System.Web.Http.Controllers
         private void InitializeProperties(MethodInfo methodInfo)
         {
             _methodInfo = methodInfo;
+            _parameterInfos = null;
             _returnType = GetReturnType(methodInfo);
             _actionExecutor = new Lazy<ActionExecutor>(() => InitializeActionExecutor(_methodInfo));
             _declaredOnlyAttributeCache = _methodInfo.GetCustomAttributes(inherit: false);
@@ -180,7 +194,7 @@ namespace System.Web.Http.Controllers
         {
             Contract.Assert(_methodInfo != null);
 
-            List<HttpParameterDescriptor> parameterInfos = _methodInfo.GetParameters().Select(
+            List<HttpParameterDescriptor> parameterInfos = ParameterInfos.Select(
                 (item) => new ReflectedHttpParameterDescriptor(this, item)).ToList<HttpParameterDescriptor>();
             return new Collection<HttpParameterDescriptor>(parameterInfos);
         }
@@ -193,7 +207,7 @@ namespace System.Web.Http.Controllers
                 return _empty;
             }
 
-            ParameterInfo[] parameterInfos = MethodInfo.GetParameters();
+            ParameterInfo[] parameterInfos = ParameterInfos;
             int parameterCount = parameterInfos.Length;
             object[] parameterValues = new object[parameterCount];
             for (int parameterIndex = 0; parameterIndex < parameterCount; parameterIndex++)

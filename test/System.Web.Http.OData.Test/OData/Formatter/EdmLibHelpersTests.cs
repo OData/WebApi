@@ -116,6 +116,14 @@ namespace System.Web.Http.OData.Formatter
             Assert.Equal("System.Web.Http.OData.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
         }
 
+        [Fact]
+        public void GetEdmType_ReturnsNull_ForRecursiveCollections()
+        {
+            IEdmModel model = GetEdmModel();
+
+            Assert.Null(model.GetEdmType(typeof(RecursiveCollection)));
+        }
+
         [Theory]
         [InlineData(typeof(string), true)]
         [InlineData(typeof(List<int>), true)]
@@ -198,6 +206,10 @@ namespace System.Web.Http.OData.Formatter
         }
 
         public class TypeNotInModel
+        {
+        }
+
+        public class RecursiveCollection : List<RecursiveCollection>
         {
         }
     }

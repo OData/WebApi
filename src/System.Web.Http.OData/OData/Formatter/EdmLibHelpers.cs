@@ -98,6 +98,14 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("clrType");
             }
 
+            return GetEdmType(edmModel, clrType, testCollections: true);
+        }
+
+        private static IEdmType GetEdmType(IEdmModel edmModel, Type clrType, bool testCollections)
+        {
+            Contract.Assert(edmModel != null);
+            Contract.Assert(clrType != null);
+
             IEdmPrimitiveType primitiveType = GetEdmPrimitiveTypeOrNull(clrType);
             if (primitiveType != null)
             {
@@ -105,22 +113,25 @@ namespace System.Web.Http.OData.Formatter
             }
             else
             {
-                Type enumerableOfT = ExtractGenericInterface(clrType, typeof(IEnumerable<>));
-                if (enumerableOfT != null)
+                if (testCollections)
                 {
-                    Type elementClrType = enumerableOfT.GetGenericArguments()[0];
-
-                    // IEnumerable<SelectExpandWrapper<T>> is a collection of T.
-                    Type entityType;
-                    if (IsSelectExpandWrapper(elementClrType, out entityType))
+                    Type enumerableOfT = ExtractGenericInterface(clrType, typeof(IEnumerable<>));
+                    if (enumerableOfT != null)
                     {
-                        elementClrType = entityType;
-                    }
+                        Type elementClrType = enumerableOfT.GetGenericArguments()[0];
 
-                    IEdmTypeReference elementType = GetEdmTypeReference(edmModel, elementClrType);
-                    if (elementType != null)
-                    {
-                        return new EdmCollectionType(elementType);
+                        // IEnumerable<SelectExpandWrapper<T>> is a collection of T.
+                        Type entityType;
+                        if (IsSelectExpandWrapper(elementClrType, out entityType))
+                        {
+                            elementClrType = entityType;
+                        }
+
+                        IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);
+                        if (elementType != null)
+                        {
+                            return new EdmCollectionType(elementType.ToEdmTypeReference(IsNullable(elementClrType)));
+                        }
                     }
                 }
 
@@ -140,7 +151,7 @@ namespace System.Web.Http.OData.Formatter
                 if (clrType.BaseType != null)
                 {
                     // go up the inheritance tree to see if we have a mapping defined for the base type.
-                    returnType = returnType ?? edmModel.GetEdmType(clrType.BaseType);
+                    returnType = returnType ?? GetEdmType(edmModel, clrType.BaseType, testCollections);
                 }
                 return returnType;
             }

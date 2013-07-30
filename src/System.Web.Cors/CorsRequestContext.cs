@@ -16,6 +16,7 @@ namespace System.Web.Cors
         public CorsRequestContext()
         {
             AccessControlRequestHeaders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            Properties = new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -47,6 +48,11 @@ namespace System.Web.Cors
         /// Gets the Access-Control-Request-Headers header value.
         /// </summary>
         public ISet<string> AccessControlRequestHeaders { get; private set; }
+
+        /// <summary>
+        /// Gets a set of properties for the <see cref="CorsRequestContext"/>.
+        /// </summary>
+        public IDictionary<string, object> Properties { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether this is a preflight request.

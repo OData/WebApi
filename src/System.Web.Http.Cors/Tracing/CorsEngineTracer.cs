@@ -2,6 +2,7 @@
 
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Net.Http;
 using System.Web.Cors;
 using System.Web.Http.Cors.Properties;
 using System.Web.Http.Tracing;
@@ -26,9 +27,11 @@ namespace System.Web.Http.Cors.Tracing
         public CorsResult EvaluatePolicy(CorsRequestContext requestContext, CorsPolicy policy)
         {
             CorsResult corsResult = null;
+            object request;
+            requestContext.Properties.TryGetValue(typeof(HttpRequestMessage).FullName, out request);
 
             _traceWriter.TraceBeginEnd(
-                null,
+                request as HttpRequestMessage,
                 TraceCategories.CorsCategory,
                 TraceLevel.Info,
                 _innerCorsEngine.GetType().Name,

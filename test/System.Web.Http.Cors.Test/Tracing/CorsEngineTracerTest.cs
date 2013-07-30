@@ -70,5 +70,32 @@ namespace System.Web.Http.Cors.Tracing
                 @"CorsResult returned: 'IsValid: True, AllowCredentials: False, PreflightMaxAge: null, AllowOrigin: , AllowExposedHeaders: {}, AllowHeaders: {}, AllowMethods: {}, ErrorMessages: {}'",
                 endTrace.Message);
         }
+
+        [Fact]
+        public void EvaluatePolicy_Trace_ContainsHttpRequest()
+        {
+            // Arrange
+            HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Options, "http://example.com/test");
+            httpRequest.Headers.Add("Origin", "foo");
+            CorsRequestContext corsRequestContext = httpRequest.GetCorsRequestContext();
+
+            Mock<ITraceWriter> traceWriterMock = new Mock<ITraceWriter>();
+            traceWriterMock
+                .Setup(t => t.Trace(httpRequest, It.IsAny<string>(), It.IsAny<TraceLevel>(), It.IsAny<Action<TraceRecord>>()))
+                .Verifiable();
+
+            Mock<ICorsEngine> corsEngineMock = new Mock<ICorsEngine>();
+            corsEngineMock
+                .Setup(engine => engine.EvaluatePolicy(corsRequestContext, It.IsAny<CorsPolicy>()))
+                .Returns(new CorsResult());
+
+            CorsEngineTracer tracer = new CorsEngineTracer(corsEngineMock.Object, traceWriterMock.Object);
+
+            // Act
+            tracer.EvaluatePolicy(corsRequestContext, new CorsPolicy());
+
+            // Assert 
+            traceWriterMock.Verify();
+        }
     }
 }

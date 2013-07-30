@@ -125,5 +125,21 @@ namespace System.Web.Http.Cors.Test
             Assert.Contains("extra", result.AccessControlRequestHeaders);
             Assert.Contains("baz", result.AccessControlRequestHeaders);
         }
+
+        [Fact]
+        public void GetCorsRequestContext_ReturnsHttpRequestInThePropertiesCollection()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Options, "http://example.com/test");
+            request.Headers.Add("Origin", "foo");
+
+            // Act 
+            CorsRequestContext result = request.GetCorsRequestContext();
+
+            // Assert
+            object actualRequest;
+            result.Properties.TryGetValue(typeof(HttpRequestMessage).FullName, out actualRequest);
+            Assert.Equal(request, actualRequest);
+        }
     }
 }

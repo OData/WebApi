@@ -45,6 +45,7 @@ namespace System.Web.Http.Cors
                     Origin = request.GetHeader(CorsConstants.Origin),
                     AccessControlRequestMethod = request.GetHeader(CorsConstants.AccessControlRequestMethod)
                 };
+                requestContext.Properties.Add(typeof(HttpRequestMessage).FullName, request);
 
                 IEnumerable<string> accessControlRequestHeaders = request.GetHeaders(CorsConstants.AccessControlRequestHeaders);
                 foreach (string accessControlRequestHeader in accessControlRequestHeaders)

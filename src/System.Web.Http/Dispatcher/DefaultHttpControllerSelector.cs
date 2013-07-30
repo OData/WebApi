@@ -55,16 +55,12 @@ namespace System.Web.Http.Dispatcher
             IHttpRouteData routeData = request.GetRouteData();
             HttpControllerDescriptor controllerDescriptor;
             if (routeData != null)
-            {
-                IHttpRoute route = routeData.Route;
-                if (route != null)
+            {   
+                controllerDescriptor = routeData.GetDirectRouteController();
+                if (controllerDescriptor != null)
                 {
-                    controllerDescriptor = route.GetDirectRouteController();
-                    if (controllerDescriptor != null)
-                    {
-                        return controllerDescriptor;
-                    }
-                }
+                    return controllerDescriptor;
+                }                
             }
 
             string controllerName = GetControllerName(request);

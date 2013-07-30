@@ -39,13 +39,12 @@ namespace System.Web.Http.Routing
 
             // Act
             HttpRouteBuilder routeBuilder = new HttpRouteBuilder(constraintResolver ?? new DefaultInlineConstraintResolver());
-            IHttpRoute route = routeBuilder.BuildHttpRoute(routeTemplate, new HttpMethod[] { HttpMethod.Get }, actions: actions);
+            IHttpRoute route = routeBuilder.BuildHttpRoute(routeTemplate, actions: actions);
 
             // Assertions for default, unspecified behavior:
             Assert.NotNull(route);
             Assert.Same(actions, route.DataTokens["actions"]);
-            Assert.IsType<HttpMethodConstraint>(route.Constraints["httpMethod"]);
-
+            
             return route;
         }
     }

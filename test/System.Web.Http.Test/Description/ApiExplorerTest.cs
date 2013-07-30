@@ -80,5 +80,36 @@ namespace System.Web.Http.Description
             public void Get() { }
             public void Post() { }
         }
+
+        [Fact]
+        public void Descriptions_RecognizesCompositeRoutes()
+        {
+            var config = new HttpConfiguration();
+            var routeTemplate = "api/values";
+            var controllerDescriptor = new HttpControllerDescriptor(config, "AttributeApiExplorerValues", typeof(AttributeApiExplorerValuesController));
+            var action = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(AttributeApiExplorerValuesController).GetMethod("Action"));
+            var actions = new ReflectedHttpActionDescriptor[] { action };
+
+            var routeCollection = new HttpRouteCollection();
+            routeCollection.Add("testroute", new HttpDirectRoute(routeTemplate, actions));
+
+            RouteCollectionRoute route = new RouteCollectionRoute();
+            route.EnsureInitialized(() => routeCollection);
+
+            config.Routes.Add("Route", route);
+
+            var descriptions = new ApiExplorer(config).ApiDescriptions;
+
+            ApiDescription description = Assert.Single(descriptions);
+            Assert.Equal(HttpMethod.Get, description.HttpMethod);
+            Assert.Equal(routeTemplate, description.RelativePath);
+            Assert.Equal(action, description.ActionDescriptor);
+        }
+
+        public class AttributeApiExplorerValuesController : ApiController
+        {
+            [HttpGet("")]
+            public void Action() { }
+        }
     }
 }

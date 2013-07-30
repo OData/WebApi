@@ -116,6 +116,23 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void EnsureInitialized_CallsInitializerOnce()
+        {
+            // Arrange
+            int count = 0;
+            var config = new HttpConfiguration();
+            config.Initializer = _ => { count++; };
+
+            // Act
+            config.EnsureInitialized();
+            Assert.Equal(1, count);
+
+            config.EnsureInitialized();
+            Assert.Equal(1, count);
+
+        }
+
+        [Fact]
         public void Initializer_Sets_Formatter_RequiredMemberSelector_By_Default()
         {
             // Arrange

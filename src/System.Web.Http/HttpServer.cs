@@ -205,7 +205,7 @@ namespace System.Web.Http
         {
             // Do final initialization of the configuration.
             // It is considered immutable from this point forward.
-            _configuration.Initializer(_configuration);
+            _configuration.EnsureInitialized();
 
             // Create pipeline
             InnerHandler = HttpClientFactory.CreatePipeline(_dispatcher, _configuration.MessageHandlers);

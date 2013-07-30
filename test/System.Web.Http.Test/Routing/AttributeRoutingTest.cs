@@ -39,6 +39,21 @@ namespace System.Web.Http.Routing
             Assert.Equal(responseBody, GetContentValue<string>(response));
         }
 
+        [Theory]
+        [InlineData("controller/42")]
+        [InlineData("default/1/2")]
+        [InlineData("controller/Ethan")]
+        public void AttributeRouting_405(string uri)
+        {
+            // pick valid URLS, but a invalid verb, should get 405 instead of 400.
+            string httpMethod = "MISSING"; 
+            var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
+
+            var response = SubmitRequest(request);
+
+            Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);            
+        }
+
         [Fact]
         public void RoutePrefixAttribute_IsSingleInstance()
         {

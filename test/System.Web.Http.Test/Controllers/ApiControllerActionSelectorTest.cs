@@ -44,7 +44,7 @@ namespace System.Web.Http
             context.Request = new HttpRequestMessage { Method = HttpMethod.Get };
             var controllerDescriptor = new HttpControllerDescriptor(context.Configuration, "Users", typeof(UsersController));
             context.ControllerDescriptor = controllerDescriptor;
-            ReflectedHttpActionDescriptor directRouteAction = (ReflectedHttpActionDescriptor)actionSelector.GetActionMapping(controllerDescriptor)["Delete"].First();
+            ReflectedHttpActionDescriptor directRouteAction = (ReflectedHttpActionDescriptor)actionSelector.GetActionMapping(controllerDescriptor)["Get"].First();
             context.RouteData.Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { directRouteAction });
 
             HttpActionDescriptor actionDescriptor = actionSelector.SelectAction(context);

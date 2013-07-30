@@ -465,4 +465,7 @@
   <data name="RequestIsNull" xml:space="preserve">
     <value>The property 'Request' on '{0}' is null. The property must be initialized with a non-null value.</value>
   </data>
+  <data name="Object_NotYetInitialized" xml:space="preserve">
+    <value>The object has not yet been initialized.</value>
+  </data>
 </root>

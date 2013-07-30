@@ -71,6 +71,7 @@
     <Compile Include="Controllers\ActionFilterResult.cs" />
     <Compile Include="Controllers\AuthenticationFilterResult.cs" />
     <Compile Include="Controllers\AuthorizationFilterResult.cs" />
+    <Compile Include="Controllers\HttpControllerContextExtensions.cs" />
     <Compile Include="Controllers\HttpControllerSettings.cs" />
     <Compile Include="Controllers\HttpParameterDescriptorExtensions.cs" />
     <Compile Include="Controllers\HttpRequestContext.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Controllers\IControllerConfiguration.cs" />
     <Compile Include="Description\ResponseTypeAttribute.cs" />
     <Compile Include="Description\ResponseDescription.cs" />
+    <Compile Include="EmptyReadOnlyDictionary.cs" />
     <Compile Include="Filters\HttpAuthenticationChallengeContext.cs" />
     <Compile Include="Hosting\IHostPrincipalService.cs" />
     <Compile Include="Results\BadRequestResult.cs" />
@@ -113,7 +115,10 @@
     <Compile Include="OverrideAuthenticationAttribute.cs" />
     <Compile Include="OverrideAuthorizationAttribute.cs" />
     <Compile Include="OverrideExceptionFiltersAttribute.cs" />
+    <Compile Include="Routing\RouteCollectionRoute.cs" />
+    <Compile Include="Routing\GenerationRoute.cs" />
     <Compile Include="Routing\HttpDirectRoute.cs" />
+    <Compile Include="Routing\HttpRouteDataExtensions.cs" />
     <Compile Include="Routing\HttpRouteExtensions.cs" />
     <Compile Include="Routing\RouteKeys.cs" />
     <Compile Include="..\Common\Routing\Constraints\AlphaRouteConstraint.cs">

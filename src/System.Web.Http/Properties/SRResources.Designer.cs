@@ -565,6 +565,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The object has not yet been initialized..
+        /// </summary>
+        internal static string Object_NotYetInitialized {
+            get {
+                return ResourceManager.GetString("Object_NotYetInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Optional parameter &apos;{0}&apos; is not supported by &apos;{1}&apos;..
         /// </summary>
         internal static string OptionalBodyParameterNotSupported {

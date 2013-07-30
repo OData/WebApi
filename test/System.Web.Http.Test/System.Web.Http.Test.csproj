@@ -161,6 +161,7 @@
     <Compile Include="..\Common\Routing\RouteEntryTest.cs">
       <Link>Routing\RouteEntryTest.cs</Link>
     </Compile>
+    <Compile Include="Routing\GenerateRouteTest.cs" />
     <Compile Include="Routing\HttpDirectRouteTest.cs" />
     <Compile Include="Routing\HttpRouteBuilderTest.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />

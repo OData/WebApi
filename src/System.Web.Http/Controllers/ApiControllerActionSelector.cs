@@ -164,6 +164,7 @@ namespace System.Web.Http.Controllers
                     case 0:
                         throw new HttpResponseException(CreateSelectionError(controllerContext));
                     case 1:
+                        controllerContext.ElevateRouteData(selectedActions[0]);
                         return selectedActions[0];
                     default:
 
@@ -222,20 +223,24 @@ namespace System.Web.Http.Controllers
             [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
             private ReflectedHttpActionDescriptor[] GetInitialCandidateList(HttpControllerContext controllerContext, bool ignoreVerbs = false)
             {
+                HttpMethod incomingMethod = controllerContext.Request.Method;
                 IHttpRouteData routeData = controllerContext.RouteData;
 
                 IHttpRoute route = routeData.Route;
                 ReflectedHttpActionDescriptor[] actions;
                 if (route != null)
                 {
-                    actions = route.GetDirectRouteActions();
+                    actions = routeData.GetDirectRouteActions();
                     if (actions != null)
                     {
+                        if (!ignoreVerbs)
+                        {                            
+                            actions = FindActionsForVerbWorker(incomingMethod, actions);
+                        }
+
                         return actions;
                     }
                 }
-
-                HttpMethod incomingMethod = controllerContext.Request.Method;
 
                 string actionName;
                 if (routeData.Values.TryGetValue(RouteKeys.ActionKey, out actionName))
@@ -429,14 +434,20 @@ namespace System.Web.Http.Controllers
             }
 
             // This is called when we don't specify an Action name
-            // Get list of actions that match a given verb. This can match by name or IActionHttpMethodSelector.
+            // Given all the actions on the controller, filter it to ones that match a given verb.
+            private ReflectedHttpActionDescriptor[] FindActionsForVerbWorker(HttpMethod verb)
+            {
+                return FindActionsForVerbWorker(verb, _actionDescriptors);
+            }
+
+            // Given a list of actions, filter it to ones that match a given verb. This can match by name or IActionHttpMethodSelector.
             // Since this list is fixed for a given verb type, it can be pre-computed and cached.
             // This function should not do caching. It's the helper that builds the caches.
-            private ReflectedHttpActionDescriptor[] FindActionsForVerbWorker(HttpMethod verb)
+            private static ReflectedHttpActionDescriptor[] FindActionsForVerbWorker(HttpMethod verb, ReflectedHttpActionDescriptor[] actions)
             {
                 List<ReflectedHttpActionDescriptor> listMethods = new List<ReflectedHttpActionDescriptor>();
 
-                foreach (ReflectedHttpActionDescriptor descriptor in _actionDescriptors)
+                foreach (ReflectedHttpActionDescriptor descriptor in actions)
                 {
                     if (descriptor.SupportedHttpMethods.Contains(verb))
                     {
@@ -445,7 +456,7 @@ namespace System.Web.Http.Controllers
                 }
 
                 return listMethods.ToArray();
-            }
+            }            
 
             private static string CreateAmbiguousMatchList(IEnumerable<HttpActionDescriptor> ambiguousDescriptors)
             {

@@ -58,7 +58,8 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            Assert.Empty(config.Routes);
+            var routes = config.GetAttributeRoutes();
+            Assert.Empty(routes);
         }
 
         [Fact]
@@ -74,7 +75,8 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            Assert.Empty(config.Routes);
+            var routes = config.GetAttributeRoutes();
+            Assert.Empty(routes);
         }
 
         [Theory]
@@ -111,7 +113,7 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = config.Routes;
+            HttpRouteCollection routes = config.GetAttributeRoutes();
             IHttpRoute route = Assert.Single(routes);
             Assert.Equal(expectedTemplate, route.RouteTemplate);
             Assert.Equal(route, routes["Controller1"]);
@@ -128,7 +130,7 @@ namespace System.Net.Http
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => config.MapHttpAttributeRoutes(),
+                () => { config.MapHttpAttributeRoutes(); config.EnsureInitialized(); },
                 "The route prefix 'prefix/' on the controller named 'Controller' cannot end with a '/' character.");
         }
 
@@ -143,7 +145,7 @@ namespace System.Net.Http
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => config.MapHttpAttributeRoutes(),
+                () => { config.MapHttpAttributeRoutes(); config.EnsureInitialized(); },
                 "The route template '/get' on the action named 'Action' cannot start with a '/' character.");
         }
 
@@ -160,7 +162,7 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = config.Routes;
+            HttpRouteCollection routes = config.GetAttributeRoutes();
             Assert.Equal(2, routes.Count);
             Assert.Single(routes.Where(route => route.RouteTemplate == "controller/get1"));
             Assert.Single(routes.Where(route => route.RouteTemplate == "controller/get2"));
@@ -179,7 +181,6 @@ namespace System.Net.Http
             mockRouteBuilder.Setup(
                 routeBuilder => routeBuilder.BuildHttpRoute(
                     "values",
-                    It.IsAny<IEnumerable<HttpMethod>>(),
                     It.IsAny<IEnumerable<ReflectedHttpActionDescriptor>>()))
                 .Returns<IHttpRoute>(null);
 
@@ -187,7 +188,27 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes(mockRouteBuilder.Object);
 
             // Assert
-            Assert.Empty(config.Routes);
+            var routes = config.GetAttributeRoutes();
+            Assert.Empty(routes);
+        }
+
+        [Fact]
+        public void MapHttpAttributeRoutes_IsDeferred()
+        {
+            bool called = false;
+            HttpConfiguration config = new HttpConfiguration();
+            
+            config.Initializer = _ => called = true;
+            config.Services.Clear(typeof(IHttpControllerSelector));
+            config.Services.Clear(typeof(IHttpActionSelector));
+            config.Services.Clear(typeof(IActionValueBinder));
+
+            // Call Map, ensure that it's not touching any services yet since all work is deferred. 
+            // This is important since these services aren't ready to be used until after config is finalized. 
+            // Else we may end up caching objects prematurely.
+            config.MapHttpAttributeRoutes();
+
+            Assert.False(called);
         }
 
         [Fact]
@@ -208,11 +229,43 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = config.Routes;
+            HttpRouteCollection routes = config.GetAttributeRoutes();
             Assert.Equal(3, routes.Count);
             Assert.Equal("get3", routes.ElementAt(0).RouteTemplate);
             Assert.Equal("get2", routes.ElementAt(1).RouteTemplate);
             Assert.Equal("get1", routes.ElementAt(2).RouteTemplate);
+        }
+
+        [Fact]
+        public void MapHttpAttributeRoutes_AddsGenerationRoutes()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            var routePrefixes = new Collection<RoutePrefixAttribute>() { };
+            var routeProviders = new Collection<IHttpRouteInfoProvider>()
+                {
+                    new HttpGetAttribute("get1") { RouteName = "one" },
+                    new HttpGetAttribute("get2") { RouteName = "two" },
+                    new HttpGetAttribute("get3") { RouteName = "three" }
+                };
+            SetUpConfiguration(config, routePrefixes, routeProviders);
+
+            // Act
+            config.MapHttpAttributeRoutes();
+            config.Initializer(config);
+
+            // Assert
+            HttpRouteCollection routes = config.Routes;
+            Assert.Equal(4, routes.Count); // 1 attr route, plus 3 generation routes
+            Assert.IsType<RouteCollectionRoute>(routes.ElementAt(0));
+            for (int i = 1; i < 4; i++)
+            {
+                Assert.IsType<GenerateRoute>(routes.ElementAt(i));
+            }
+
+            Assert.IsType<GenerateRoute>(routes["one"]);
+            Assert.IsType<GenerateRoute>(routes["two"]);
+            Assert.IsType<GenerateRoute>(routes["three"]);
         }
 
         [Fact]
@@ -243,7 +296,7 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = config.Routes;
+            HttpRouteCollection routes = config.GetAttributeRoutes();
             Assert.Equal(3, routes.Count);
             Assert.Equal("action1/route2", routes.ElementAt(0).RouteTemplate);
             Assert.Equal("action2/route1", routes.ElementAt(1).RouteTemplate);
@@ -281,7 +334,7 @@ namespace System.Net.Http
             globalConfiguration.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = globalConfiguration.Routes;
+            HttpRouteCollection routes = globalConfiguration.GetAttributeRoutes();
             Assert.Equal("PerController", Assert.Single(routes).RouteTemplate);
         }
 
@@ -309,7 +362,8 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            IHttpRoute route = Assert.Single(config.Routes);
+            HttpRouteCollection routes = config.GetAttributeRoutes();
+            IHttpRoute route = Assert.Single(routes);
             Assert.Equal(routeTemplate, route.RouteTemplate);
             Assert.Equal(actionDescriptor, Assert.Single(route.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));
         }
@@ -338,17 +392,16 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            Assert.Equal(2, config.Routes.Count);
+            HttpRouteCollection routes = config.GetAttributeRoutes();
+            Assert.Equal(2, routes.Count);
 
-            IHttpRoute route1 = config.Routes[0];
+            IHttpRoute route1 = routes[0];
             Assert.Equal(routeTemplate, route1.RouteTemplate);
-            Assert.Equal(actionDescriptor, Assert.Single(route1.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));
-            Assert.Equal(new HttpMethod[] { HttpMethod.Get }, ((HttpMethodConstraint)route1.Constraints["httpMethod"]).AllowedMethods);
+            Assert.Equal(actionDescriptor, Assert.Single(route1.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));            
 
-            IHttpRoute route2 = config.Routes[1];
+            IHttpRoute route2 = routes[1];
             Assert.Equal(routeTemplate, route2.RouteTemplate);
-            Assert.Equal(actionDescriptor, Assert.Single(route2.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));
-            Assert.Equal(new HttpMethod[] { HttpMethod.Post }, ((HttpMethodConstraint)route2.Constraints["httpMethod"]).AllowedMethods);
+            Assert.Equal(actionDescriptor, Assert.Single(route2.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));            
         }
 
         [Fact]

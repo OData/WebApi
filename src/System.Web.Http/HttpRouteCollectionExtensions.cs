@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
@@ -88,6 +89,14 @@ namespace System.Web.Http
         public static IHttpRoute MapHttpBatchRoute(this HttpRouteCollection routes, string routeName, string routeTemplate, HttpBatchHandler batchHandler)
         {
             return routes.MapHttpRoute(routeName, routeTemplate, defaults: null, constraints: null, handler: batchHandler);
+        }
+
+        // Normal route table enumeration doesn't include the route name.
+        internal static IEnumerable<KeyValuePair<string, IHttpRoute>> GetRoutesWithNames(this HttpRouteCollection routes)
+        {
+            KeyValuePair<string, IHttpRoute>[] names = new KeyValuePair<string, IHttpRoute>[routes.Count];
+            routes.CopyTo(names, 0);
+            return names;
         }
     }
 }

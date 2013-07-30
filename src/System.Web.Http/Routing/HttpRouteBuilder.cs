@@ -40,12 +40,10 @@ namespace System.Web.Http.Routing
         /// Builds an <see cref="IHttpRoute"/> for a particular action.
         /// </summary>
         /// <param name="routeTemplate">The tokenized route template for the route.</param>
-        /// <param name="httpMethods">The HTTP methods supported by the route.</param>
         /// <param name="actions">The actions to invoke for the route.</param>
         /// <returns>The generated <see cref="IHttpRoute"/>.</returns>
         public virtual IHttpRoute BuildHttpRoute(
             string routeTemplate,
-            IEnumerable<HttpMethod> httpMethods,
             IEnumerable<ReflectedHttpActionDescriptor> actions)
         {
             if (routeTemplate == null)
@@ -55,12 +53,6 @@ namespace System.Web.Http.Routing
 
             HttpRouteValueDictionary defaults = new HttpRouteValueDictionary();
             HttpRouteValueDictionary constraints = new HttpRouteValueDictionary();
-            if (httpMethods != null)
-            {
-                // Current method constraint implementation is inefficient since it matches before running the constraint.
-                // Consider checking the HTTP method first in a custom route as a performance optimization.
-                constraints["httpMethod"] = new HttpMethodConstraint(httpMethods.AsArray());
-            }
 
             string detokenizedRouteTemplate = InlineRouteTemplateParser.ParseRouteTemplate(routeTemplate, defaults, constraints, ConstraintResolver);
 

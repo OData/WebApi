@@ -2,38 +2,27 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Net.Http;
 using System.Web.Http.Controllers;
 
 namespace System.Web.Http.Routing
 {
     internal static class HttpRouteExtensions
     {
-        public static HttpControllerDescriptor GetDirectRouteController(this IHttpRoute route)
+        // If route is a direct route, get the http method for its actions.
+        // Else return null.
+        public static HttpMethod GetDirectRouteVerb(this IHttpRoute route)
         {
-            Contract.Assert(route != null);
-
-            ReflectedHttpActionDescriptor[] directRouteActions = route.GetDirectRouteActions();
-            if (directRouteActions != null)
+            ReflectedHttpActionDescriptor[] ads = route.GetDirectRouteActions();
+            if (ads != null)
             {
-                // Set the controller descriptor for the first action descriptor
-                Contract.Assert(directRouteActions.Length > 0);
-                HttpControllerDescriptor controllerDescriptor = directRouteActions[0].ControllerDescriptor;
-
-                // Check that all other action descriptors share the same controller descriptor
-                for (int i = 1; i < directRouteActions.Length; i++)
-                {
-                    if (directRouteActions[i].ControllerDescriptor != controllerDescriptor)
-                    {
-                        return null;
-                    }
-                }
-
-                return controllerDescriptor;
+                // All action descriptors on this route have the same method, so just pull the first. 
+                return ads[0].SupportedHttpMethods[0];
             }
-
             return null;
         }
 
+        // If route is a direct route, get the action descriptors it may map to.
         public static ReflectedHttpActionDescriptor[] GetDirectRouteActions(this IHttpRoute route)
         {
             Contract.Assert(route != null);

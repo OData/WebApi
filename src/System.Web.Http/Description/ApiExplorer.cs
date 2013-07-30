@@ -139,6 +139,49 @@ namespace System.Web.Http.Description
             return new Collection<HttpMethod>(supportedMethods);
         }
 
+        private IEnumerable<IHttpRoute> FlattenRoutes(IEnumerable<IHttpRoute> routes)
+        {
+            foreach (IHttpRoute route in routes)
+            {
+                IEnumerable<IHttpRoute> nested = route as IEnumerable<IHttpRoute>;
+                if (nested != null)
+                {
+                    foreach (var subRoute in FlattenRoutes(nested))
+                    {
+                        yield return subRoute;
+                    }
+                }
+                else
+                {
+                    yield return route;
+                }
+            }
+        }
+
+        private static HttpControllerDescriptor GetDirectRouteController(ReflectedHttpActionDescriptor[] directRouteActions)
+        {
+            if (directRouteActions != null)
+            {
+                // Set the controller descriptor for the first action descriptor
+                HttpControllerDescriptor controllerDescriptor = directRouteActions[0].ControllerDescriptor;
+
+                // Check that all other action descriptors share the same controller descriptor
+                for (int i = 1; i < directRouteActions.Length; i++)
+                {
+                    if (directRouteActions[i].ControllerDescriptor != controllerDescriptor)
+                    {
+                        // This can happen if a developer puts the same route template on different actions 
+                        // in different controllers. 
+                        return null;
+                    }
+                }
+
+                return controllerDescriptor;
+            }
+
+            return null;
+        }
+
         private Collection<ApiDescription> InitializeApiDescriptions()
         {
             Collection<ApiDescription> apiDescriptions = new Collection<ApiDescription>();
@@ -147,10 +190,10 @@ namespace System.Web.Http.Description
             if (controllerMappings != null)
             {
                 ApiDescriptionComparer descriptionComparer = new ApiDescriptionComparer();
-                foreach (IHttpRoute route in _config.Routes)
+                foreach (IHttpRoute route in FlattenRoutes(_config.Routes))
                 {
-                    HttpControllerDescriptor directRouteController = route.GetDirectRouteController();
                     ReflectedHttpActionDescriptor[] directRouteActions = route.GetDirectRouteActions();
+                    HttpControllerDescriptor directRouteController = GetDirectRouteController(directRouteActions);
                     Collection<ApiDescription> descriptionsFromRoute =
                         (directRouteController != null && directRouteActions != null) ?
                             ExploreDirectRoute(directRouteController, directRouteActions, route) :

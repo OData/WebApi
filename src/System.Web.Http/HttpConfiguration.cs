@@ -8,6 +8,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dependencies;
 using System.Web.Http.Filters;
@@ -33,6 +34,8 @@ namespace System.Web.Http
 
         private IDependencyResolver _dependencyResolver = EmptyResolver.Instance;
         private Action<HttpConfiguration> _initializer = DefaultInitializer;
+        private bool _initialized;
+
         private List<IDisposable> _resourcesToDispose = new List<IDisposable>();
         private bool _disposed;
 
@@ -276,6 +279,20 @@ namespace System.Web.Http
             }
 
             _resourcesToDispose.Add(resource);
+        }
+
+        /// <summary>
+        /// Invoke the Intializer hook. It is considered immutable from this point forward.
+        /// It's safe to call this multiple times. 
+        /// </summary>
+        public void EnsureInitialized()
+        { 
+            if (_initialized)
+            {
+                return;
+            }
+            _initialized = true;
+            Initializer(this);            
         }
 
         public void Dispose()

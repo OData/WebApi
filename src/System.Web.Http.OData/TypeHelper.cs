@@ -177,7 +177,7 @@ namespace System.Web.Http
 
                 try
                 {
-                    exportedTypes = assembly.GetExportedTypes();
+                    exportedTypes = assembly.GetTypes();
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
@@ -190,7 +190,7 @@ namespace System.Web.Http
 
                 if (exportedTypes != null)
                 {
-                    result.AddRange(exportedTypes.Where(t => t != null));
+                    result.AddRange(exportedTypes.Where(t => t != null && t.IsVisible));
                 }
             }
 

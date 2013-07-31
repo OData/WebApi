@@ -181,7 +181,7 @@ namespace System.Web.Http.Dispatcher
             get { return false; }
         }
 
-        public override Type[] GetExportedTypes()
+        public override Type[] GetTypes()
         {
             switch (_throwException)
             {

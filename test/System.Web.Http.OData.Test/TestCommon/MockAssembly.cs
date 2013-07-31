@@ -23,7 +23,7 @@ namespace System.Web.Http.OData
             _types = types.Select(t => t.Object).ToArray();
         }
 
-        public override Type[] GetExportedTypes()
+        public override Type[] GetTypes()
         {
             return _types;
         }

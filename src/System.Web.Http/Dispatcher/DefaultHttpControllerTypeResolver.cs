@@ -83,7 +83,7 @@ namespace System.Web.Http.Dispatcher
 
                 try
                 {
-                    exportedTypes = assembly.GetExportedTypes();
+                    exportedTypes = assembly.GetTypes();
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
@@ -100,7 +100,7 @@ namespace System.Web.Http.Dispatcher
 
                 if (exportedTypes != null)
                 {
-                    result.AddRange(exportedTypes.Where(x => IsControllerTypePredicate(x)));
+                    result.AddRange(exportedTypes.Where(x => TypeIsVisible(x) && IsControllerTypePredicate(x)));
                 }
             }
 
@@ -117,6 +117,11 @@ namespace System.Web.Http.Dispatcher
             Contract.Assert(controllerType != null);
             string controllerSuffix = DefaultHttpControllerSelector.ControllerSuffix;
             return controllerType.Name.Length > controllerSuffix.Length && controllerType.Name.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool TypeIsVisible(Type type)
+        {
+            return (type != null && type.IsVisible);
         }
     }
 }

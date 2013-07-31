@@ -56,12 +56,6 @@
     <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\JsonNetValidationTest.cs">
       <Link>Formatting\JsonNetValidationTest.cs</Link>
     </Compile>
-    <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\JTokenCreatorSurrogate.cs">
-      <Link>Formatting\JTokenCreatorSurrogate.cs</Link>
-    </Compile>
-    <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\JTokenRoundTripComparer.cs">
-      <Link>Formatting\JTokenRoundTripComparer.cs</Link>
-    </Compile>
     <Compile Include="..\System.Net.Http.Formatting.Test\Internal\ReadOnlyStreamWithEncodingPreambleTest.cs">
       <Link>Internal\ReadOnlyStreamWithEncodingPreambleTest.cs</Link>
     </Compile>

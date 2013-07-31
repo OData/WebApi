@@ -158,7 +158,7 @@ namespace System.Web.Mvc
             // The key is typically too long to be useful, so we use a cryptographic hash
             // as the actual key (better randomization and key distribution, so small vary
             // values will generate dramtically different keys).
-            using (SHA256 sha = SHA256.Create())
+            using (SHA256Cng sha = new SHA256Cng())
             {
                 return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(uniqueIdBuilder.ToString())));
             }

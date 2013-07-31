@@ -63,12 +63,6 @@ namespace System.Web.Mvc
 
             if (underlyingType != null)
             {
-                // we test again to see if we are converting underlying type to it's nullable type.
-                if (destinationType.IsInstanceOfType(value))
-                {
-                    return value;
-                }
-
                 destinationType = underlyingType;
             }
 

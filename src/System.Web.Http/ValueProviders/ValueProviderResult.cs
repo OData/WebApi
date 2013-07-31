@@ -51,7 +51,8 @@ namespace System.Web.Http.ValueProviders
 
             // if this is a user-input value but the user didn't type anything, return no value
             string valueAsString = value as string;
-            if (valueAsString != null && valueAsString.Trim().Length == 0)
+
+            if (valueAsString != null && String.IsNullOrWhiteSpace(valueAsString))
             {
                 return null;
             }

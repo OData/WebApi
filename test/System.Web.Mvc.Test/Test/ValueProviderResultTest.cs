@@ -99,6 +99,34 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void ConvertingNullStringToNullableIntReturnsNull()
+        {
+            // Arrange
+            object original = null;
+            ValueProviderResult vpr = new ValueProviderResult(original, "", CultureInfo.InvariantCulture);
+
+            // Act
+            int? returned = (int?)vpr.ConvertTo(typeof(int?));
+
+            // Assert
+            Assert.Equal(returned, null);
+        }
+
+        [Fact]
+        public void ConvertingWhiteSpaceStringToNullableIntReturnsNull()
+        {
+            // Arrange
+            object original = " ";
+            ValueProviderResult vpr = new ValueProviderResult(original, "", CultureInfo.InvariantCulture);
+
+            // Act
+            int? returned = (int?)vpr.ConvertTo(typeof(int?));
+
+            // Assert
+            Assert.Equal(returned, null);
+        }
+
+        [Fact]
         public void ConvertToChecksTypeConverterCanConvertTo()
         {
             // Arrange

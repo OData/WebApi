@@ -53,21 +53,39 @@ namespace System.Web.Mvc
 
             // if this is a user-input value but the user didn't type anything, return no value
             string valueAsString = value as string;
-            if (valueAsString != null && valueAsString.Trim().Length == 0)
+            if (valueAsString != null && String.IsNullOrWhiteSpace(valueAsString))
             {
                 return null;
             }
 
-            // If the source type implements IConvertible, try that first
-            IConvertible convertible = value as IConvertible;
-            if (convertible != null)
+            // In case of a Nullable object, we extract the underlying type and try to convert it.
+            Type underlyingType = Nullable.GetUnderlyingType(destinationType);
+
+            if (underlyingType != null)
             {
-                try
+                // we test again to see if we are converting underlying type to it's nullable type.
+                if (destinationType.IsInstanceOfType(value))
                 {
-                    return convertible.ToType(destinationType, culture);
+                    return value;
                 }
-                catch
+
+                destinationType = underlyingType;
+            }
+
+            // String doesn't provide convertibles to interesting types, and thus it will typically throw rather than succeed.
+            if (valueAsString == null)
+            {
+                // If the source type implements IConvertible, try that first
+                IConvertible convertible = value as IConvertible;
+                if (convertible != null)
                 {
+                    try
+                    {
+                        return convertible.ToType(destinationType, culture);
+                    }
+                    catch
+                    {
+                    }
                 }
             }
 
@@ -84,13 +102,6 @@ namespace System.Web.Mvc
                 if (destinationType.IsEnum && value is int)
                 {
                     return Enum.ToObject(destinationType, (int)value);
-                }
-
-                // In case of a Nullable object, we try again with its underlying type.
-                Type underlyingType = Nullable.GetUnderlyingType(destinationType);
-                if (underlyingType != null)
-                {
-                    return ConvertSimpleType(culture, value, underlyingType);
                 }
 
                 string message = String.Format(CultureInfo.CurrentCulture, MvcResources.ValueProviderResult_NoConverterExists,

@@ -8,8 +8,13 @@ using Newtonsoft.Json;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    public class JsonMediaTypeFormatterTracerTest 
+    public class JsonMediaTypeFormatterTracerTest : ReadWriteMediaTypeFormatterTracerTestBase<JsonMediaTypeFormatter>
     {
+        public override MediaTypeFormatter CreateTracer(JsonMediaTypeFormatter formatter, HttpRequestMessage request, ITraceWriter traceWriter)
+        {
+            return new JsonMediaTypeFormatterTracer(formatter, traceWriter, request);
+        }
+
         [Fact]
         public void UseDataContractJsonSerializer_Uses_Inners()
         {

@@ -32,6 +32,19 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        void CopyConstructor()
+        {
+            MockBufferedMediaTypeFormatter formatter = new MockBufferedMediaTypeFormatter()
+            {
+                BufferSize = 512
+            };
+
+            MockBufferedMediaTypeFormatter derivedFormatter = new MockBufferedMediaTypeFormatter(formatter);
+
+            Assert.Equal(formatter.BufferSize, derivedFormatter.BufferSize);
+        }
+
+        [Fact]
         public void BufferSize_RoundTrips()
         {
             Assert.Reflection.IntegerProperty(
@@ -142,6 +155,11 @@ namespace System.Net.Http.Formatting
             // Set default supported character encodings
             SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
             SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true));
+        }
+
+        public MockBufferedMediaTypeFormatter(MockBufferedMediaTypeFormatter formatter)
+            : base(formatter)
+        {
         }
 
         public override bool CanReadType(Type type)

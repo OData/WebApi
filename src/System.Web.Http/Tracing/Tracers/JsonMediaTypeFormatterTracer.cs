@@ -20,16 +20,10 @@ namespace System.Web.Http.Tracing.Tracers
         private MediaTypeFormatterTracer _innerTracer;
 
         public JsonMediaTypeFormatterTracer(JsonMediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
+            : base(innerFormatter)
         {
             _inner = innerFormatter;
             _innerTracer = new MediaTypeFormatterTracer(innerFormatter, traceWriter, request);
-
-            // copy values we cannot override
-            _innerTracer.CopyNonOverriableMembersFromInner(this);
-            MaxDepth = innerFormatter.MaxDepth;
-            Indent = innerFormatter.Indent;
-            UseDataContractJsonSerializer = innerFormatter.UseDataContractJsonSerializer;
-            SerializerSettings = innerFormatter.SerializerSettings;
         }
 
         HttpRequestMessage IFormatterTracer.Request
@@ -45,6 +39,18 @@ namespace System.Web.Http.Tracing.Tracers
         public MediaTypeFormatter InnerFormatter
         {
             get { return _innerTracer.InnerFormatter; }
+        }
+
+        public override IRequiredMemberSelector RequiredMemberSelector
+        {
+            get
+            {
+                return _innerTracer.RequiredMemberSelector;
+            }
+            set
+            {
+                _innerTracer.RequiredMemberSelector = value;
+            }
         }
 
         public override bool CanReadType(Type type)

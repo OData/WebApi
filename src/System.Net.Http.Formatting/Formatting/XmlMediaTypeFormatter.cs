@@ -41,6 +41,20 @@ namespace System.Net.Http.Formatting
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="XmlMediaTypeFormatter"/> class.
+        /// </summary>
+        /// <param name="formatter">The <see cref="XmlMediaTypeFormatter"/> instance to copy settings from.</param>
+        protected XmlMediaTypeFormatter(XmlMediaTypeFormatter formatter)
+            : base(formatter)
+        {
+            UseXmlSerializer = formatter.UseXmlSerializer;
+            Indent = formatter.Indent;
+#if !NETFX_CORE // MaxDepth is not supported in portable libraries
+            MaxDepth = formatter.MaxDepth;
+#endif
+        }
+
+        /// <summary>
         /// Gets the default media type for xml, namely "application/xml".
         /// </summary>
         /// <value>

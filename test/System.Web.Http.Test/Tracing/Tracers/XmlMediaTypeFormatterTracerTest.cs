@@ -7,8 +7,13 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    public class XmlMediaTypeFormatterTracerTest
+    public class XmlMediaTypeFormatterTracerTest : ReadWriteMediaTypeFormatterTracerTestBase<XmlMediaTypeFormatter>
     {
+        public override MediaTypeFormatter CreateTracer(XmlMediaTypeFormatter formatter, HttpRequestMessage request, ITraceWriter traceWriter)
+        {
+            return new XmlMediaTypeFormatterTracer(formatter, traceWriter, request);
+        }
+
         [Fact]
         public void UseXmlSerializer_Uses_Inners()
         {

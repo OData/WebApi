@@ -77,6 +77,7 @@ namespace System.Web.Http.OData.Formatter
             // Maxing out the received message size as we depend on the hosting layer to enforce this limit.
             MessageReaderQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
             MessageWriterQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
+
             _version = DefaultODataVersion;
         }
 
@@ -88,11 +89,8 @@ namespace System.Web.Http.OData.Formatter
         /// <param name="request">The <see cref="HttpRequestMessage"/> for the per-request formatter instance.</param>
         /// <remarks>This is a copy constructor to be used in <see cref="GetPerRequestFormatterInstance"/>.</remarks>
         internal ODataMediaTypeFormatter(ODataMediaTypeFormatter formatter, ODataVersion version, HttpRequestMessage request)
+            : base(formatter)
         {
-            if (formatter == null)
-            {
-                throw Error.ArgumentNull("formatter");
-            }
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
@@ -107,33 +105,12 @@ namespace System.Web.Http.OData.Formatter
             // Execept for the other two parameters, this constructor is a copy constructor, and we need to copy
             // everything on the other instance.
 
-            // Parameter 1A: Copy this class's private fields and internal properties.
+            // Copy this class's private fields and internal properties.
             _serializerProvider = formatter._serializerProvider;
             _deserializerProvider = formatter._deserializerProvider;
             _payloadKinds = formatter._payloadKinds;
             MessageReaderQuotas = formatter.MessageReaderQuotas;
             MessageWriterQuotas = formatter.MessageWriterQuotas;
-
-            // Parameter 1B: Copy the base class's properties.
-            foreach (MediaTypeMapping mediaTypeMapping in formatter.MediaTypeMappings)
-            {
-                // MediaTypeMapping doesn't support clone, and its public surface area is immutable anyway.
-                MediaTypeMappings.Add(mediaTypeMapping);
-            }
-
-            RequiredMemberSelector = formatter.RequiredMemberSelector;
-
-            foreach (Encoding supportedEncoding in formatter.SupportedEncodings)
-            {
-                // Per-request formatters share the encoding instances with the parent formatter
-                SupportedEncodings.Add(supportedEncoding);
-            }
-
-            foreach (MediaTypeHeaderValue supportedMediaType in formatter.SupportedMediaTypes)
-            {
-                // Per-request formatters share the media type instances with the parent formatter
-                SupportedMediaTypes.Add(supportedMediaType);
-            }
 
             // Parameter 2: version
             _version = version;

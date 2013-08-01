@@ -34,6 +34,27 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        void CopyConstructor()
+        {
+            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter()
+            {
+                Indent = true,
+#if !NETFX_CORE // We don't support MaxDepth in the portable library
+                MaxDepth = 42,
+#endif
+                UseXmlSerializer = true
+            };
+
+            TestXmlMediaTypeFormatter derivedFormatter = new TestXmlMediaTypeFormatter(formatter);
+
+            Assert.Equal(formatter.Indent, derivedFormatter.Indent);
+#if !NETFX_CORE // We don't support MaxDepth in the portable library
+            Assert.Equal(formatter.MaxDepth, derivedFormatter.MaxDepth);
+#endif
+            Assert.Equal(formatter.UseXmlSerializer, derivedFormatter.UseXmlSerializer);
+        }
+
+        [Fact]
         public void DefaultMediaType_ReturnsApplicationXml()
         {
             MediaTypeHeaderValue mediaType = XmlMediaTypeFormatter.DefaultMediaType;
@@ -413,6 +434,15 @@ namespace System.Net.Http.Formatting
 
         public class TestXmlMediaTypeFormatter : XmlMediaTypeFormatter
         {
+            public TestXmlMediaTypeFormatter()
+            {
+            }
+
+            public TestXmlMediaTypeFormatter(TestXmlMediaTypeFormatter formatter)
+                : base(formatter)
+            {
+            }
+
             public bool CanReadTypeCaller(Type type)
             {
                 return CanReadType(type);

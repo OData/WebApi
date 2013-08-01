@@ -39,8 +39,9 @@ namespace System.Net.Http.Formatting
 
         private readonly List<MediaTypeHeaderValue> _supportedMediaTypes;
         private readonly List<Encoding> _supportedEncodings;
-#if !NETFX_CORE // No MediaTypeMappings in portable library
+#if !NETFX_CORE // No MediaTypeMappings in portable library or IRequiredMemberSelector (no model state on client)
         private readonly List<MediaTypeMapping> _mediaTypeMappings;
+        private IRequiredMemberSelector _requiredMemberSelector;
 #endif
 
         /// <summary>
@@ -55,6 +56,28 @@ namespace System.Net.Http.Formatting
 #if !NETFX_CORE // No MediaTypeMappings in portable library
             _mediaTypeMappings = new List<MediaTypeMapping>();
             MediaTypeMappings = new Collection<MediaTypeMapping>(_mediaTypeMappings);
+#endif
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MediaTypeFormatter"/> class.
+        /// </summary>
+        /// <param name="formatter">The <see cref="MediaTypeFormatter"/> instance to copy settings from.</param>
+        protected MediaTypeFormatter(MediaTypeFormatter formatter)
+        {
+            if (formatter == null)
+            {
+                throw Error.ArgumentNull("formatter");
+            }
+
+            _supportedMediaTypes = formatter._supportedMediaTypes;
+            SupportedMediaTypes = formatter.SupportedMediaTypes;
+            _supportedEncodings = formatter._supportedEncodings;
+            SupportedEncodings = formatter.SupportedEncodings;
+#if !NETFX_CORE // No MediaTypeMappings in portable library or IRequiredMemberSelector (no model state on client)
+            _mediaTypeMappings = formatter._mediaTypeMappings;
+            MediaTypeMappings = formatter.MediaTypeMappings;
+            _requiredMemberSelector = formatter._requiredMemberSelector;
 #endif
         }
 
@@ -120,11 +143,21 @@ namespace System.Net.Http.Formatting
         }
 #endif
 
-#if !NETFX_CORE // IRequiredMemeberSelector is not in portable libraries because there is no model state on the client.
+#if !NETFX_CORE // IRequiredMemberSelector is not in portable libraries because there is no model state on the client.
         /// <summary>
         /// Gets or sets the <see cref="IRequiredMemberSelector"/> used to determine required members.
         /// </summary>
-        public IRequiredMemberSelector RequiredMemberSelector { get; set; }
+        public virtual IRequiredMemberSelector RequiredMemberSelector 
+        {
+            get
+            {
+                return _requiredMemberSelector;
+            }
+            set
+            {
+                _requiredMemberSelector = value;
+            }
+        }
 #endif
 
         internal virtual bool CanWriteAnyTypes

@@ -19,13 +19,10 @@ namespace System.Web.Http.Tracing.Tracers
         private MediaTypeFormatterTracer _innerTracer;
 
         public BufferedMediaTypeFormatterTracer(BufferedMediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
+            : base(innerFormatter)
         {
             _inner = innerFormatter;
             _innerTracer = new MediaTypeFormatterTracer(innerFormatter, traceWriter, request);
-
-            // copy non-overridable members from inner formatter
-            _innerTracer.CopyNonOverriableMembersFromInner(this);
-            BufferSize = innerFormatter.BufferSize;
         }
 
         HttpRequestMessage IFormatterTracer.Request
@@ -41,6 +38,18 @@ namespace System.Web.Http.Tracing.Tracers
         public MediaTypeFormatter InnerFormatter
         {
             get { return _innerTracer.InnerFormatter; }
+        }
+
+        public override IRequiredMemberSelector RequiredMemberSelector
+        {
+            get
+            {
+                return _innerTracer.RequiredMemberSelector;
+            }
+            set
+            {
+                _innerTracer.RequiredMemberSelector = value;
+            }
         }
 
         public override bool CanReadType(Type type)

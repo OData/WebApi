@@ -33,6 +33,18 @@ namespace System.Net.Http.Formatting
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="FormUrlEncodedMediaTypeFormatter"/> class.
+        /// </summary>
+        /// <param name="formatter">The <see cref="FormUrlEncodedMediaTypeFormatter"/> instance to copy settings from.</param>
+        protected FormUrlEncodedMediaTypeFormatter(FormUrlEncodedMediaTypeFormatter formatter)
+            : base(formatter)
+        {
+            MaxDepth = formatter.MaxDepth;
+            ReadBufferSize = formatter.ReadBufferSize;
+            _isDerived = GetType() != typeof(FormUrlEncodedMediaTypeFormatter);
+        }
+
+        /// <summary>
         /// Gets the default media type for HTML Form URL encoded data, namely <c>application/x-www-form-urlencoded</c>.
         /// </summary>
         /// <value>

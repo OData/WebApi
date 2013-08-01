@@ -7,8 +7,13 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    public class FormUrlEncodedMediaTypeFormatterTracerTest
+    public class FormUrlEncodedMediaTypeFormatterTracerTest : ReadWriteMediaTypeFormatterTracerTestBase<FormUrlEncodedMediaTypeFormatter>
     {
+        public override MediaTypeFormatter CreateTracer(FormUrlEncodedMediaTypeFormatter formatter, HttpRequestMessage request, ITraceWriter traceWriter)
+        {
+            return new FormUrlEncodedMediaTypeFormatterTracer(formatter, traceWriter, request);
+        }
+
         [Fact]
         public void MaxDepth_Uses_Inners()
         {

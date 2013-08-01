@@ -55,6 +55,29 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        void CopyConstructor()
+        {
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter()
+            {
+                Indent = true,
+#if !NETFX_CORE // MaxDepth and DCJS not supported in client portable library
+                MaxDepth = 42,
+                UseDataContractJsonSerializer = true
+#endif
+            };
+
+            TestJsonMediaTypeFormatter derivedFormatter = new TestJsonMediaTypeFormatter(formatter);
+
+#if !NETFX_CORE // MaxDepth and DCJS not supported in client portable library
+            Assert.Equal(formatter.MaxDepth, derivedFormatter.MaxDepth);
+            Assert.Equal(formatter.UseDataContractJsonSerializer, derivedFormatter.UseDataContractJsonSerializer);
+#endif
+            Assert.Equal(formatter.Indent, derivedFormatter.Indent);
+            Assert.Same(formatter.SerializerSettings, derivedFormatter.SerializerSettings);
+            Assert.Same(formatter.SerializerSettings.ContractResolver, derivedFormatter.SerializerSettings.ContractResolver);
+        }
+
+        [Fact]
         public void DefaultMediaType_ReturnsApplicationJson()
         {
             MediaTypeHeaderValue mediaType = JsonMediaTypeFormatter.DefaultMediaType;
@@ -269,6 +292,15 @@ namespace System.Net.Http.Formatting
 
         public class TestJsonMediaTypeFormatter : JsonMediaTypeFormatter
         {
+            public TestJsonMediaTypeFormatter()
+            {
+            }
+
+            public TestJsonMediaTypeFormatter(TestJsonMediaTypeFormatter formatter)
+                : base(formatter)
+            {
+            }
+
             public bool CanReadTypeProxy(Type type)
             {
                 return CanReadType(type);

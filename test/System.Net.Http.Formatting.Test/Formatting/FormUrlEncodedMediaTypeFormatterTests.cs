@@ -17,6 +17,21 @@ namespace System.Net.Http.Formatting
         private const int DefaultMaxDepth = 1024;
 
         [Fact]
+        void CopyConstructor()
+        {
+            TestFormUrlEncodedMediaTypeFormatter formatter = new TestFormUrlEncodedMediaTypeFormatter()
+            {
+                MaxDepth = 42,
+                ReadBufferSize = 512
+            };
+
+            TestFormUrlEncodedMediaTypeFormatter derivedFormatter = new TestFormUrlEncodedMediaTypeFormatter(formatter);
+
+            Assert.Equal(formatter.MaxDepth, derivedFormatter.MaxDepth);
+            Assert.Equal(formatter.ReadBufferSize, derivedFormatter.ReadBufferSize);
+        }
+
+        [Fact]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(typeof(FormUrlEncodedMediaTypeFormatter), TypeAssert.TypeProperties.IsPublicVisibleClass);
@@ -198,6 +213,15 @@ namespace System.Net.Http.Formatting
 
         public class TestFormUrlEncodedMediaTypeFormatter : FormUrlEncodedMediaTypeFormatter
         {
+            public TestFormUrlEncodedMediaTypeFormatter()
+            {
+            }
+
+            public TestFormUrlEncodedMediaTypeFormatter(TestFormUrlEncodedMediaTypeFormatter formatter)
+                : base(formatter)
+            {
+            }
+
             public new bool CanReadType(Type type)
             {
                 return base.CanReadType(type);

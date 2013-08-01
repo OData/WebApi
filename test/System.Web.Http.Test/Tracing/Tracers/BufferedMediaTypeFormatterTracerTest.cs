@@ -9,8 +9,13 @@ using Moq;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    public class BufferedMediaTypeFormatterTracerTest
+    public class BufferedMediaTypeFormatterTracerTest : MediaTypeFormatterTracerTestBase<BufferedMediaTypeFormatter>
     {
+        public override MediaTypeFormatter CreateTracer(BufferedMediaTypeFormatter formatter, HttpRequestMessage request, ITraceWriter traceWriter)
+        {
+            return new BufferedMediaTypeFormatterTracer(formatter, traceWriter, request);
+        }
+
         [Fact]
         public void BufferSize_Uses_Inners()
         {

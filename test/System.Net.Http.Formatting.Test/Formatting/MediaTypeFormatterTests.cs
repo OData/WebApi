@@ -54,6 +54,25 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        void CopyConstructor()
+        {
+            TestMediaTypeFormatter formatter = new TestMediaTypeFormatter();
+            TestMediaTypeFormatter derivedFormatter = new TestMediaTypeFormatter(formatter);
+
+#if !NETFX_CORE // No MediaTypeMapping or RequiredMemberSelector in client libraries
+            Assert.Same(formatter.MediaTypeMappings, derivedFormatter.MediaTypeMappings);
+            Assert.Same(formatter.MediaTypeMappingsInternal, derivedFormatter.MediaTypeMappingsInternal);
+            Assert.Equal(formatter.RequiredMemberSelector, derivedFormatter.RequiredMemberSelector);
+#endif
+
+            Assert.Same(formatter.SupportedMediaTypes, derivedFormatter.SupportedMediaTypes);
+            Assert.Same(formatter.SupportedMediaTypesInternal, derivedFormatter.SupportedMediaTypesInternal);
+
+            Assert.Same(formatter.SupportedEncodings, derivedFormatter.SupportedEncodings);
+            Assert.Same(formatter.SupportedEncodingsInternal, derivedFormatter.SupportedEncodingsInternal);
+        }
+
+        [Fact]
         public void MaxCollectionKeySize_RoundTrips()
         {
             Assert.Reflection.IntegerProperty<MediaTypeFormatter, int>(
@@ -313,6 +332,28 @@ namespace System.Net.Http.Formatting
             public TestStruct(int i)
             {
                 I = i + 1;
+            }
+        }
+
+        private class TestMediaTypeFormatter : MediaTypeFormatter
+        {
+            public TestMediaTypeFormatter()
+            {
+            }
+
+            public TestMediaTypeFormatter(TestMediaTypeFormatter formatter)
+                : base(formatter)
+            {
+            }
+
+            public override bool CanReadType(Type type)
+            {
+                return true;
+            }
+
+            public override bool CanWriteType(Type type)
+            {
+                return true;
             }
         }
     }

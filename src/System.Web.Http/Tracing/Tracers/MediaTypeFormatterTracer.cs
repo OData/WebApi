@@ -25,6 +25,7 @@ namespace System.Web.Http.Tracing.Tracers
         private readonly MediaTypeFormatter _inner;
 
         public MediaTypeFormatterTracer(MediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
+            : base(innerFormatter)
         {
             Contract.Assert(innerFormatter != null);
             Contract.Assert(traceWriter != null);
@@ -33,9 +34,6 @@ namespace System.Web.Http.Tracing.Tracers
             TraceWriter = traceWriter;
             Request = request;
             _inner = innerFormatter;
-
-            // copy all non-overridable members from inner formatter
-            CopyNonOverriableMembersFromInner(this);
         }
 
         public MediaTypeFormatter Inner
@@ -48,6 +46,18 @@ namespace System.Web.Http.Tracing.Tracers
         public ITraceWriter TraceWriter { get; set; }
 
         public HttpRequestMessage Request { get; set; }
+
+        public override IRequiredMemberSelector RequiredMemberSelector
+        {
+            get
+            {
+                return InnerFormatter.RequiredMemberSelector;
+            }
+            set
+            {
+                InnerFormatter.RequiredMemberSelector = value;
+            }
+        }
 
         public static MediaTypeFormatter ActualMediaTypeFormatter(MediaTypeFormatter formatter)
         {
@@ -237,29 +247,6 @@ namespace System.Web.Http.Tracing.Tracers
                 execute: () => InnerFormatter.WriteToStreamAsync(type, value, writeStream, content, transportContext),
                 endTrace: null,
                 errorTrace: null);
-        }
-
-        public void CopyNonOverriableMembersFromInner(MediaTypeFormatter toFormatter)
-        {
-            toFormatter.SupportedMediaTypes.Clear();
-            foreach (var mediaType in InnerFormatter.SupportedMediaTypes)
-            {
-                toFormatter.SupportedMediaTypes.Add(mediaType);
-            }
-
-            toFormatter.SupportedEncodings.Clear();
-            foreach (var encoding in InnerFormatter.SupportedEncodings)
-            {
-                toFormatter.SupportedEncodings.Add(encoding);
-            }
-
-            toFormatter.MediaTypeMappings.Clear();
-            foreach (var mapping in InnerFormatter.MediaTypeMappings)
-            {
-                toFormatter.MediaTypeMappings.Add(mapping);
-            }
-
-            toFormatter.RequiredMemberSelector = InnerFormatter.RequiredMemberSelector;
         }
     }
 }

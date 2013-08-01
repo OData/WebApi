@@ -23,6 +23,23 @@ namespace System.Net.Http.Formatting
         private int _bufferSizeInBytes = DefaultBufferSize;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="BufferedMediaTypeFormatter"/> class.
+        /// </summary>
+        protected BufferedMediaTypeFormatter()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BufferedMediaTypeFormatter"/> class.
+        /// </summary>
+        /// <param name="formatter">The <see cref="BufferedMediaTypeFormatter"/> instance to copy settings from.</param>
+        protected BufferedMediaTypeFormatter(BufferedMediaTypeFormatter formatter)
+            : base(formatter)
+        {
+            BufferSize = formatter.BufferSize;
+        }
+
+        /// <summary>
         /// Suggested size of buffer to use with streams, in bytes. The default size is 16K.
         /// </summary>
         public int BufferSize

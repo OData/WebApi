@@ -15,9 +15,8 @@ namespace System.Web.Http.Tracing.Tracers
     // read and write methods and they cannot be overridden by mocks.  This
     // abstract base is used for all MediaTypeFormatters whose read/write methods
     // can be overridden.
-    internal abstract class ReadWriteMediaTypeFormatterTracerTestBase<TFormatter, TTracer> : MediaTypeFormatterTracerTestBase<TFormatter, TTracer>
+    public abstract class ReadWriteMediaTypeFormatterTracerTestBase<TFormatter> : MediaTypeFormatterTracerTestBase<TFormatter>
         where TFormatter : MediaTypeFormatter
-        where TTracer : MediaTypeFormatter
     {
         [Fact]
         public void ReadFromStreamAsync_Traces()

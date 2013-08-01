@@ -47,6 +47,7 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="HostAuthenticationAttribute.cs" />
     <Compile Include="OwinHttpConfigurationExtensions.cs" />
     <Compile Include="HostAuthenticationFilter.cs" />
     <Compile Include="OwinBufferPolicySelector.cs" />

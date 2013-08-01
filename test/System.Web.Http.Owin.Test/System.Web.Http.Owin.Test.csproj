@@ -45,6 +45,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HostAuthenticationAttributeTest.cs" />
     <Compile Include="HostAuthenticationFilterTest.cs" />
     <Compile Include="OwinHttpConfigurationExtensionsTest.cs" />
     <Compile Include="HttpMessageHandlerExtensions.cs" />

@@ -166,6 +166,26 @@ namespace System.Web.WebPages.Test
                 expected: " alt=\"bar\"");
         }
 
+        /// <remarks>
+        /// This is a regression test for Html.Raw behaving incorrectly in attributes - the code here is derived from that generated
+        /// by the Razor engine on input like the following:
+        /// 
+        /// cool="@Html.Raw("this is cool text")"
+        /// </remarks>
+        [Fact]
+        public void WriteAttributeWithRawHtmlString()
+        {
+            string alreadyEncoded = "Show Size 6½-8";
+            WriteAttributeTest(
+                name: "alt",
+                prefix: new PositionTagged<string>(" cool=\"", 33),
+                suffix: new PositionTagged<string>("\"", 70),
+                values: new[] {
+                    AttributeValue.FromTuple(Tuple.Create(Tuple.Create("", 40), Tuple.Create<Object, Int32>(new HtmlString(alreadyEncoded), 40), false)), 
+                },
+                expected: " cool=\"" + alreadyEncoded + "\"");
+        }
+
         private void WriteAttributeTest(string name, PositionTagged<string> prefix, PositionTagged<string> suffix, string expected)
         {
             WriteAttributeTest(name, prefix, suffix, new AttributeValue[0], expected);

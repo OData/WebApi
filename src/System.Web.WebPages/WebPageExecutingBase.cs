@@ -205,50 +205,56 @@ namespace System.Web.WebPages
                         suffix : // End of the list, grab the suffix
                         values[i + 1].Prefix; // Still in the list, grab the next prefix
 
-                    bool? boolVal = null;
-                    if (val.Value is bool)
+                    if (val.Value == null)
                     {
-                        boolVal = (bool)val.Value;
+                        // Nothing to write
+                        continue;
                     }
 
-                    if (val.Value != null && (boolVal == null || boolVal.Value))
+                    // The special cases here are that the value we're writing might already be a string, or that the 
+                    // value might be a bool. If the value is the bool 'true' we want to write the attribute name instead
+                    // of the string 'true'. If the value is the bool 'false' we don't want to write anything.
+                    //
+                    // Otherwise the value is another object (perhaps an IHtmlString), and we'll ask it to format itself.
+                    string stringValue;
+                    bool? boolValue = val.Value as bool?;
+                    if (boolValue == true)
                     {
-                        string valStr = val.Value as string;
-                        if (valStr == null)
-                        {
-                            valStr = val.Value.ToString();
-                        }
-                        if (boolVal != null)
-                        {
-                            Debug.Assert(boolVal.Value);
-                            valStr = name;
-                        }
-
-                        if (first)
-                        {
-                            WritePositionTaggedLiteral(writer, pageVirtualPath, prefix);
-                            first = false;
-                        }
-                        else
-                        {
-                            WritePositionTaggedLiteral(writer, pageVirtualPath, attrVal.Prefix);
-                        }
-
-                        // Calculate length of the source span by the position of the next value (or suffix)
-                        int sourceLength = next.Position - attrVal.Value.Position;
-
-                        BeginContext(writer, pageVirtualPath, attrVal.Value.Position, sourceLength, isLiteral: attrVal.Literal);
-                        if (attrVal.Literal)
-                        {
-                            WriteLiteralTo(writer, valStr);
-                        }
-                        else
-                        {
-                            WriteTo(writer, valStr); // Write value
-                        }
-                        EndContext(writer, pageVirtualPath, attrVal.Value.Position, sourceLength, isLiteral: attrVal.Literal);
-                        wroteSomething = true;
+                        stringValue = name;
                     }
+                    else if (boolValue == false)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        stringValue = val.Value as string;
+                    }
+
+                    if (first)
+                    {
+                        WritePositionTaggedLiteral(writer, pageVirtualPath, prefix);
+                        first = false;
+                    }
+                    else
+                    {
+                        WritePositionTaggedLiteral(writer, pageVirtualPath, attrVal.Prefix);
+                    }
+
+                    // Calculate length of the source span by the position of the next value (or suffix)
+                    int sourceLength = next.Position - attrVal.Value.Position;
+
+                    BeginContext(writer, pageVirtualPath, attrVal.Value.Position, sourceLength, isLiteral: attrVal.Literal);
+                    if (attrVal.Literal)
+                    {
+                        WriteLiteralTo(writer, stringValue ?? val.Value);
+                    }
+                    else
+                    {
+                        WriteTo(writer, stringValue ?? val.Value); // Write value
+                    }
+                    EndContext(writer, pageVirtualPath, attrVal.Value.Position, sourceLength, isLiteral: attrVal.Literal);
+                    wroteSomething = true;
                 }
                 if (wroteSomething)
                 {

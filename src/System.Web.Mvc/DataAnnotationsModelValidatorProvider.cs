@@ -8,6 +8,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Web.Mvc.Properties;
+using System.Web.Security;
+using DataAnnotationsCompareAttribute = System.ComponentModel.DataAnnotations.CompareAttribute;
 
 namespace System.Web.Mvc
 {
@@ -373,22 +375,19 @@ namespace System.Web.Mvc
             AddValidationAttributeAdapter(dict, typeof(StringLengthAttribute),
                 (metadata, context, attribute) => new StringLengthAttributeAdapter(metadata, context, (StringLengthAttribute)attribute));
 
-            AddValidationAttributeAdapter(dict, ValidationAttributeHelpers.MembershipPasswordAttributeType,
-                    (metadata, context, attribute) => new MembershipPasswordAttributeAdapter(metadata, context, attribute));
+            AddValidationAttributeAdapter(dict, typeof(MembershipPasswordAttribute),
+                    (metadata, context, attribute) => new MembershipPasswordAttributeAdapter(metadata, context, (MembershipPasswordAttribute)attribute));
 
-            AddValidationAttributeAdapter(dict, ValidationAttributeHelpers.CompareAttributeType,
-                    (metadata, context, attribute) => new CompareAttributeAdapter(metadata, context, attribute));
+            AddValidationAttributeAdapter(dict, typeof(DataAnnotationsCompareAttribute),
+                    (metadata, context, attribute) => new CompareAttributeAdapter(metadata, context, (DataAnnotationsCompareAttribute)attribute));
 
-            AddValidationAttributeAdapter(dict, ValidationAttributeHelpers.FileExtensionsAttributeType,
-                   (metadata, context, attribute) => new FileExtensionsAttributeAdapter(metadata, context, attribute));
+            AddValidationAttributeAdapter(dict, typeof(FileExtensionsAttribute),
+                   (metadata, context, attribute) => new FileExtensionsAttributeAdapter(metadata, context, (FileExtensionsAttribute)attribute));
 
-            AddValidationAttributeAdapter(dict, ValidationAttributeHelpers.AcceptAttributeType,
-                   (metadata, context, attribute) => new AcceptAttributeAdapter(metadata, context, attribute));
-
-            AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.CreditCardAttributeType, "creditcard");
-            AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.EmailAddressAttributeType, "email");
-            AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.PhoneAttributeType, "phone");
-            AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.UrlAttributeType, "url");
+            AddDataTypeAttributeAdapter(dict, typeof(CreditCardAttribute), "creditcard");
+            AddDataTypeAttributeAdapter(dict, typeof(EmailAddressAttribute), "email");
+            AddDataTypeAttributeAdapter(dict, typeof(PhoneAttribute), "phone");
+            AddDataTypeAttributeAdapter(dict, typeof(UrlAttribute), "url");
 
             return dict;
         }

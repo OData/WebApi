@@ -1,32 +1,20 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.Contracts;
+using System.Web.Security;
 
 namespace System.Web.Mvc
 {
-    internal class MembershipPasswordAttributeAdapter : DataAnnotationsModelValidator
+    internal class MembershipPasswordAttributeAdapter : DataAnnotationsModelValidator<MembershipPasswordAttribute>
     {
-        private static Lazy<Func<ValidationAttribute, int>> minRequiredNonAlphanumericCharacters = GetLazyPropertyDelegate<int>("MinRequiredNonAlphanumericCharacters");
-        private static Lazy<Func<ValidationAttribute, int>> minRequiredPasswordLength = GetLazyPropertyDelegate<int>("MinRequiredPasswordLength");
-        private static Lazy<Func<ValidationAttribute, string>> passwordStrengthRegularExpression = GetLazyPropertyDelegate<string>("PasswordStrengthRegularExpression");
-
-        public MembershipPasswordAttributeAdapter(ModelMetadata metadata, ControllerContext context, ValidationAttribute attribute)
+        public MembershipPasswordAttributeAdapter(ModelMetadata metadata, ControllerContext context, MembershipPasswordAttribute attribute)
             : base(metadata, context, attribute)
         {
-            Contract.Assert(attribute.GetType() == ValidationAttributeHelpers.MembershipPasswordAttributeType);
         }
 
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
-            yield return new ModelClientValidationMembershipPasswordRule(ErrorMessage, minRequiredPasswordLength.Value(Attribute), minRequiredNonAlphanumericCharacters.Value(Attribute), passwordStrengthRegularExpression.Value(Attribute));
-        }
-
-        private static Lazy<Func<ValidationAttribute, TProperty>> GetLazyPropertyDelegate<TProperty>(string propertyName)
-        {
-            return new Lazy<Func<ValidationAttribute, TProperty>>(
-                () => ValidationAttributeHelpers.GetPropertyDelegate<TProperty>(ValidationAttributeHelpers.MembershipPasswordAttributeType, propertyName));
+            yield return new ModelClientValidationMembershipPasswordRule(ErrorMessage, Attribute.MinRequiredPasswordLength, Attribute.MinRequiredNonAlphanumericCharacters, Attribute.PasswordStrengthRegularExpression);
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Web.Mvc.Properties;
 
 namespace System.Web.Mvc
 {
+    [Obsolete("The recommended alternative is to use the System.ComponentModel.DataAnnotations.CompareAttribute type, which has the same functionality as this type.")]
     [AttributeUsage(AttributeTargets.Property)]
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "This attribute is designed to be a base class for other attributes.")]
     public class CompareAttribute : ValidationAttribute, IClientValidatable

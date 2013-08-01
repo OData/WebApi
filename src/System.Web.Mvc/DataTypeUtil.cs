@@ -7,19 +7,22 @@ namespace System.Web.Mvc
 {
     internal static class DataTypeUtil
     {
-        internal static readonly string CurrencyTypeName = DataType.Currency.ToString();
-        internal static readonly string DateTypeName = DataType.Date.ToString();
-        internal static readonly string DateTimeTypeName = DataType.DateTime.ToString();
-        internal static readonly string DurationTypeName = DataType.Duration.ToString();
-        internal static readonly string EmailAddressTypeName = DataType.EmailAddress.ToString();
+        private static readonly string CreditCardTypeName = DataType.CreditCard.ToString();
+        private static readonly string CurrencyTypeName = DataType.Currency.ToString();
+        private static readonly string DateTypeName = DataType.Date.ToString();
+        private static readonly string DateTimeTypeName = DataType.DateTime.ToString();
+        private static readonly string DurationTypeName = DataType.Duration.ToString();
+        private static readonly string EmailAddressTypeName = DataType.EmailAddress.ToString();
         internal static readonly string HtmlTypeName = DataType.Html.ToString();
-        internal static readonly string ImageUrlTypeName = DataType.ImageUrl.ToString();
-        internal static readonly string MultiLineTextTypeName = DataType.MultilineText.ToString();
-        internal static readonly string PasswordTypeName = DataType.Password.ToString();
-        internal static readonly string PhoneNumberTypeName = DataType.PhoneNumber.ToString();
-        internal static readonly string TextTypeName = DataType.Text.ToString();
-        internal static readonly string TimeTypeName = DataType.Time.ToString();
-        internal static readonly string UrlTypeName = DataType.Url.ToString();
+        private static readonly string ImageUrlTypeName = DataType.ImageUrl.ToString();
+        private static readonly string MultiLineTextTypeName = DataType.MultilineText.ToString();
+        private static readonly string PasswordTypeName = DataType.Password.ToString();
+        private static readonly string PhoneNumberTypeName = DataType.PhoneNumber.ToString();
+        private static readonly string PostalCodeTypeName = DataType.PostalCode.ToString();
+        private static readonly string TextTypeName = DataType.Text.ToString();
+        private static readonly string TimeTypeName = DataType.Time.ToString();
+        private static readonly string UploadTypeName = DataType.Upload.ToString();
+        private static readonly string UrlTypeName = DataType.Url.ToString();
 
         private static readonly Lazy<Dictionary<object, string>> _dataTypeToName = new Lazy<Dictionary<object, string>>(CreateDataTypeToName, isThreadSafe: true);
 
@@ -42,8 +45,8 @@ namespace System.Web.Mvc
                 if (name == null)
                 {
                     // Unknown types fallback to a dictionary lookup.
-                    // 4.0 will not enter this code for statically known data types.
-                    // 4.5 will enter this code for the new data types added to 4.5.
+                    // Code running on .NET 4.5 will not enter this code for statically known data types.
+                    // Versions of .NET greater than 4.5 will enter this code for any new data types added to those frameworks
                     _dataTypeToName.Value.TryGetValue(attribute.DataType, out name);
                 }
 
@@ -60,6 +63,8 @@ namespace System.Web.Mvc
         {
             switch (dataType)
             {
+                case DataType.CreditCard:
+                    return CreditCardTypeName;
                 case DataType.Currency:
                     return CurrencyTypeName;
                 case DataType.Date:
@@ -80,10 +85,14 @@ namespace System.Web.Mvc
                     return PasswordTypeName;
                 case DataType.PhoneNumber:
                     return PhoneNumberTypeName;
+                case DataType.PostalCode:
+                    return PostalCodeTypeName;
                 case DataType.Text:
                     return TextTypeName;
                 case DataType.Time:
                     return TimeTypeName;
+                case DataType.Upload:
+                    return UploadTypeName;
                 case DataType.Url:
                     return UrlTypeName;
             }

@@ -3,8 +3,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Web.Security;
 using Microsoft.TestCommon;
 using Moq;
+using DataAnnotationsCompareAttribute = System.ComponentModel.DataAnnotations.CompareAttribute;
 
 namespace System.Web.Mvc.Test
 {
@@ -458,68 +460,49 @@ namespace System.Web.Mvc.Test
 
         // Pre-configured adapters
 
-        [Fact]
-        public void AdapterForRangeAttributeRegistered()
+        public static TheoryDataSet<Type, ValidationAttribute, Type, string> KnownAdapterTypeData
         {
-            // Arrange
-            var metadata = ModelMetadataProviders.Current.GetMetadataForType(() => null, typeof(object));
-            var context = new ControllerContext();
-            var adapters = DataAnnotationsModelValidatorProvider.AttributeFactories;
-            var adapterFactory = adapters.Single(kvp => kvp.Key == typeof(RangeAttribute)).Value;
-
-            // Act
-            var adapter = adapterFactory(metadata, context, new RangeAttribute(1, 100));
-
-            // Assert
-            Assert.IsType<RangeAttributeAdapter>(adapter);
+            get
+            {
+                return new TheoryDataSet<Type, ValidationAttribute, Type, string>
+                {
+                    { typeof(RangeAttribute), new RangeAttribute(1, 100), typeof(RangeAttributeAdapter), null },
+                    { typeof(RegularExpressionAttribute), new RegularExpressionAttribute("abc"), typeof(RegularExpressionAttributeAdapter), null },
+                    { typeof(RequiredAttribute), new RequiredAttribute(), typeof(RequiredAttributeAdapter), null },
+                    { typeof(StringLengthAttribute), new StringLengthAttribute(6), typeof(StringLengthAttributeAdapter), null },
+                    { typeof(MembershipPasswordAttribute), new MembershipPasswordAttribute(), typeof(MembershipPasswordAttributeAdapter), null },
+                    { typeof(DataAnnotationsCompareAttribute), new DataAnnotationsCompareAttribute("other"), typeof(CompareAttributeAdapter), null },
+                    { typeof(FileExtensionsAttribute), new FileExtensionsAttribute(), typeof(FileExtensionsAttributeAdapter), null },
+                    { typeof(CreditCardAttribute), new CreditCardAttribute(), typeof(DataTypeAttributeAdapter), "creditcard" },
+                    { typeof(EmailAddressAttribute), new EmailAddressAttribute(), typeof(DataTypeAttributeAdapter), "email" },
+                    { typeof(PhoneAttribute), new PhoneAttribute(), typeof(DataTypeAttributeAdapter), "phone" },
+                    { typeof(UrlAttribute), new UrlAttribute(), typeof(DataTypeAttributeAdapter), "url" },
+                };
+            }
         }
 
-        [Fact]
-        public void AdapterForRegularExpressionAttributeRegistered()
+        [Theory]
+        [PropertyData("KnownAdapterTypeData")]
+        public void AdapterForKnownTypeRegistered(Type attributeType, ValidationAttribute validationAttr,
+            Type expectedAdapterType, string expectedRuleName)
         {
             // Arrange
             var metadata = ModelMetadataProviders.Current.GetMetadataForType(() => null, typeof(object));
             var context = new ControllerContext();
             var adapters = DataAnnotationsModelValidatorProvider.AttributeFactories;
-            var adapterFactory = adapters.Single(kvp => kvp.Key == typeof(RegularExpressionAttribute)).Value;
+            var adapterFactory = adapters.Single(kvp => kvp.Key == attributeType).Value;
 
             // Act
-            var adapter = adapterFactory(metadata, context, new RegularExpressionAttribute("abc"));
+            var adapter = adapterFactory(metadata, context, validationAttr);
 
             // Assert
-            Assert.IsType<RegularExpressionAttributeAdapter>(adapter);
-        }
-
-        [Fact]
-        public void AdapterForRequiredAttributeRegistered()
-        {
-            // Arrange
-            var metadata = ModelMetadataProviders.Current.GetMetadataForType(() => null, typeof(object));
-            var context = new ControllerContext();
-            var adapters = DataAnnotationsModelValidatorProvider.AttributeFactories;
-            var adapterFactory = adapters.Single(kvp => kvp.Key == typeof(RequiredAttribute)).Value;
-
-            // Act
-            var adapter = adapterFactory(metadata, context, new RequiredAttribute());
-
-            // Assert
-            Assert.IsType<RequiredAttributeAdapter>(adapter);
-        }
-
-        [Fact]
-        public void AdapterForStringLengthAttributeRegistered()
-        {
-            // Arrange
-            var metadata = ModelMetadataProviders.Current.GetMetadataForType(() => null, typeof(object));
-            var context = new ControllerContext();
-            var adapters = DataAnnotationsModelValidatorProvider.AttributeFactories;
-            var adapterFactory = adapters.Single(kvp => kvp.Key == typeof(StringLengthAttribute)).Value;
-
-            // Act
-            var adapter = adapterFactory(metadata, context, new StringLengthAttribute(6));
-
-            // Assert
-            Assert.IsType<StringLengthAttributeAdapter>(adapter);
+            Assert.IsType(expectedAdapterType, adapter);
+            if (expectedRuleName != null)
+            {
+                DataTypeAttributeAdapter dataTypeAdapter = adapter as DataTypeAttributeAdapter;
+                Assert.NotNull(dataTypeAdapter);
+                Assert.Equal(expectedRuleName, dataTypeAdapter.RuleName);
+            }
         }
 
         // Default adapter factory for unknown attribute type

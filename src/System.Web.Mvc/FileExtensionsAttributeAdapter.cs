@@ -2,19 +2,14 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.Contracts;
 
 namespace System.Web.Mvc
 {
-    internal class FileExtensionsAttributeAdapter : DataAnnotationsModelValidator
+    internal class FileExtensionsAttributeAdapter : DataAnnotationsModelValidator<FileExtensionsAttribute>
     {
-        private static Lazy<Func<ValidationAttribute, string>> extensions = new Lazy<Func<ValidationAttribute, string>>(
-                () => ValidationAttributeHelpers.GetPropertyDelegate<string>(ValidationAttributeHelpers.FileExtensionsAttributeType, "Extensions"));
-
-        public FileExtensionsAttributeAdapter(ModelMetadata metadata, ControllerContext context, ValidationAttribute attribute)
+        public FileExtensionsAttributeAdapter(ModelMetadata metadata, ControllerContext context, FileExtensionsAttribute attribute)
             : base(metadata, context, attribute)
         {
-            Contract.Assert(attribute.GetType() == ValidationAttributeHelpers.FileExtensionsAttributeType);
         }
 
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
@@ -24,7 +19,7 @@ namespace System.Web.Mvc
                 ValidationType = "extension",
                 ErrorMessage = ErrorMessage
             };
-            rule.ValidationParameters["extension"] = extensions.Value(Attribute);
+            rule.ValidationParameters["extension"] = Attribute.Extensions;
             yield return rule;
         }
     }

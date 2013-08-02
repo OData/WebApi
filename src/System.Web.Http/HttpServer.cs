@@ -126,7 +126,7 @@ namespace System.Web.Http
         /// <returns>A <see cref="Task{HttpResponseMessage}"/> representing the ongoing operation.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner.")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "we are converting exceptions to error responses.")]
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (request == null)
             {
@@ -135,7 +135,7 @@ namespace System.Web.Http
 
             if (_disposed)
             {
-                return TaskHelpers.FromResult(request.CreateErrorResponse(HttpStatusCode.ServiceUnavailable, SRResources.HttpServerDisposed));
+                return request.CreateErrorResponse(HttpStatusCode.ServiceUnavailable, SRResources.HttpServerDisposed);
             }
 
             // The first request initializes the server
@@ -160,15 +160,15 @@ namespace System.Web.Http
 
             try
             {
-                return base.SendAsync(request, cancellationToken);
+                return await base.SendAsync(request, cancellationToken);
             }
             catch (HttpResponseException exception)
             {
-                return Task.FromResult(exception.Response);
+                return exception.Response;
             }
             catch (Exception exception)
             {
-                return Task.FromResult(request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception));
+                return request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception);
             }
             finally
             {

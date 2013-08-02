@@ -299,8 +299,10 @@ namespace System.Web.Http
                 _exception = exception;
             }
 
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
+                // dummy await so that the task doesn't get completed synchronously.
+                await Task.FromResult(42);
                 throw _exception;
             }
         }

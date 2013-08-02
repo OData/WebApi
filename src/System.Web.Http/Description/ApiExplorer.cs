@@ -386,7 +386,8 @@ namespace System.Web.Http.Description
         private static bool TryExpandUriParameters(IHttpRoute route, string routeTemplate, ICollection<ApiParameterDescription> parameterDescriptions, out string expandedRouteTemplate)
         {
             HttpParsedRoute parsedRoute = HttpRouteParser.Parse(routeTemplate);
-            Dictionary<string, object> parameterValuesForRoute = new Dictionary<string, object>();
+            Dictionary<string, object> parameterValuesForRoute = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
             foreach (ApiParameterDescription parameterDescriptor in parameterDescriptions)
             {
                 Type parameterType = parameterDescriptor.ParameterDescriptor.ParameterType;
@@ -395,6 +396,11 @@ namespace System.Web.Http.Description
                     parameterValuesForRoute.Add(parameterDescriptor.Name, "{" + parameterDescriptor.Name + "}");
                 }
             }
+
+            // Adding non optional route parameters to the parameterValuesForRoute so that we can bind the route template.
+            // We're doing this because route parameters may or may not be part of the action parameters and we want the
+            // template to bind regardless whether the action has the route parameter.
+            AddNonOptionalRouteParameters(route, parsedRoute, parameterValuesForRoute);
 
             BoundRouteTemplate boundRouteTemplate = parsedRoute.Bind(null, parameterValuesForRoute, new HttpRouteValueDictionary(route.Defaults), new HttpRouteValueDictionary(route.Constraints));
             if (boundRouteTemplate == null)
@@ -405,6 +411,32 @@ namespace System.Web.Http.Description
 
             expandedRouteTemplate = Uri.UnescapeDataString(boundRouteTemplate.BoundTemplate);
             return true;
+        }
+
+        private static void AddNonOptionalRouteParameters(IHttpRoute route, HttpParsedRoute parsedRoute, Dictionary<string, object> parameterValuesForRoute)
+        {
+            foreach (var path in parsedRoute.PathSegments)
+            {
+                PathContentSegment content = path as PathContentSegment;
+                if (content != null)
+                {
+                    foreach (var subSegment in content.Subsegments)
+                    {
+                        PathParameterSubsegment parameter = subSegment as PathParameterSubsegment;
+                        if (parameter != null)
+                        {
+                            string parameterName = parameter.ParameterName;
+                            object parameterValue;
+                            if (!parameterValuesForRoute.ContainsKey(parameterName) &&
+                                (!route.Defaults.TryGetValue(parameterName, out parameterValue) ||
+                                parameterValue != RouteParameter.Optional))
+                            {
+                                parameterValuesForRoute.Add(parameterName, "{" + parameterName + "}");
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private IList<ApiParameterDescription> CreateParameterDescriptions(HttpActionDescriptor actionDescriptor)

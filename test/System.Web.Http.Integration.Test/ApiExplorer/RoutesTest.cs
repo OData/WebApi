@@ -259,5 +259,32 @@ namespace System.Web.Http.ApiExplorer
             };
             ApiExplorerHelper.VerifyApiDescriptions(descriptions, expectedResults);
         }
+
+        [Fact]
+        public void VerifyDescriptionIsGenerated_WhenRouteParameterIsNotInAction()
+        {
+            Type controllerType = typeof(ItemController);
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Custom", "{majorVersion}/{minorVersion}/custom", new { controller = "Item" });
+            config.Routes.MapHttpRoute("Default", "{version}/{controller}/{id}", new { id = RouteParameter.Optional });
+            DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, controllerType);
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
+
+            IApiExplorer explorer = config.Services.GetApiExplorer();
+            Collection<ApiDescription> descriptions = explorer.ApiDescriptions;
+
+            List<object> expectedResults = new List<object>
+            {
+                new { HttpMethod = HttpMethod.Get, RelativePath = "{majorVersion}/{minorVersion}/custom?name={name}&series={series}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 2},
+                new { HttpMethod = HttpMethod.Post, RelativePath = "{majorVersion}/{minorVersion}/custom", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 1},
+                new { HttpMethod = HttpMethod.Put, RelativePath = "{majorVersion}/{minorVersion}/custom", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 1},
+                new { HttpMethod = HttpMethod.Delete, RelativePath = "{majorVersion}/{minorVersion}/custom?id={id}", HasRequestFormatters = false, HasResponseFormatters = false, NumberOfParameters = 1},
+                new { HttpMethod = HttpMethod.Get, RelativePath = "{version}/Item?name={name}&series={series}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 2},
+                new { HttpMethod = HttpMethod.Post, RelativePath = "{version}/Item", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 1},
+                new { HttpMethod = HttpMethod.Put, RelativePath = "{version}/Item", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 1},
+                new { HttpMethod = HttpMethod.Delete, RelativePath = "{version}/Item/{id}", HasRequestFormatters = false, HasResponseFormatters = false, NumberOfParameters = 1}
+            };
+            ApiExplorerHelper.VerifyApiDescriptions(descriptions, expectedResults);
+        }
     }
 }

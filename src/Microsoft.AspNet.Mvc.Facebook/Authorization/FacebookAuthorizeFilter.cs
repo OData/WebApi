@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Web;
@@ -37,6 +38,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
         /// Called when authorization is required.
         /// </summary>
         /// <param name="filterContext">The filter context.</param>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Type references are needed for authorization")]
         public virtual void OnAuthorization(AuthorizationContext filterContext)
         {
             if (filterContext == null)
@@ -93,7 +95,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
 
                         if (!String.IsNullOrEmpty(_config.AuthorizationRedirectPath) && hasError)
                         {
-                            UriBuilder authorizationUrlBuilder = new UriBuilder(_config.AppUrl);
+                            UriBuilder authorizationUrlBuilder = new UriBuilder(new Uri(_config.AppUrl));
                             authorizationUrlBuilder.Path += _config.AuthorizationRedirectPath.Substring(1);
                             authorizationUrlBuilder.Query = String.Format(CultureInfo.InvariantCulture,
                                 "originUrl={0}&permissions={1}",
@@ -128,6 +130,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
 
             // Even though we're only JavaScript encoding the redirectUrl, the result is guaranteed to be HTML-safe as well
             facebookAuthResult.Content = String.Format(
+                CultureInfo.InvariantCulture,
                 "<script>window.top.location = '{0}';</script>",
                 HttpUtility.JavaScriptStringEncode(redirectUrl.AbsoluteUri));
             return facebookAuthResult;

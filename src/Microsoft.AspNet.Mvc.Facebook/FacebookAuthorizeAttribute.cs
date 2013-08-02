@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.AspNet.Mvc.Facebook
 {
@@ -9,8 +10,9 @@ namespace Microsoft.AspNet.Mvc.Facebook
     /// Restricts the access to requests with valid Facebook signed request parameter and to users that have the required permissions.
     /// This attribute can be declared on a controller, an action or both.
     /// </summary>
+    [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "The attribute argument is already defined as a ReadOnlyCollection.")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
-    public class FacebookAuthorizeAttribute : Attribute
+    public sealed class FacebookAuthorizeAttribute : Attribute
     {
         private ReadOnlyCollection<string> _permissions;
 

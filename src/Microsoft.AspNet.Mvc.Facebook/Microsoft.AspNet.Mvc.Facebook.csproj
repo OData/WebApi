@@ -10,6 +10,7 @@
     <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <DefineConstants>$(DefineConstants);ASPNETMVC</DefineConstants>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
@@ -36,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Client\FacebookRequestHelper.cs" />
     <Compile Include="FacebookAppSettingKeys.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
     <Compile Include="FacebookAuthenticationModule.cs" />
     <Compile Include="FacebookHtmlHelperExtensions.cs" />

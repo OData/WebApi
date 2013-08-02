@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -18,7 +19,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Realtime
     /// </summary>
     public abstract class FacebookRealtimeUpdateController : ApiController
     {
-        private static readonly string XHubSignatureHeaderName = "X-Hub-Signature";
+        private const string XHubSignatureHeaderName = "X-Hub-Signature";
         private FacebookConfiguration _facebookConfiguration;
 
         /// <summary>
@@ -62,6 +63,8 @@ namespace Microsoft.AspNet.Mvc.Facebook.Realtime
         /// Handles the HTTP GET requests from Facebook for subscription verification.
         /// </summary>
         /// <param name="subscriptionVerification">The subscription verification.</param>
+        [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Needs to be this name to follow routing conventions")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "HttpResponseMessage will be disposed by Web API")]
         public virtual HttpResponseMessage Get(SubscriptionVerification subscriptionVerification)
         {
             try

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Web.Http;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Models
@@ -24,6 +25,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
         /// <value>
         /// The verify_token.
         /// </value>
+        [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", Justification = "This is a shipped API")]
         public string Verify_Token { get; set; }
 
         /// <summary>

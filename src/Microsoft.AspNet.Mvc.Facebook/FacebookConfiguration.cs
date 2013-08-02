@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Microsoft.AspNet.Mvc.Facebook.Providers;
 
@@ -13,7 +14,7 @@ namespace Microsoft.AspNet.Mvc.Facebook
     /// </summary>
     public class FacebookConfiguration
     {
-        private static readonly string FacebookAppBaseUrl = "https://apps.facebook.com";
+        private const string FacebookAppBaseUrl = "https://apps.facebook.com";
         private readonly ConcurrentDictionary<object, object> _properties = new ConcurrentDictionary<object, object>();
         private string _appUrl;
         private string _authorizationRedirectPath;
@@ -45,7 +46,7 @@ namespace Microsoft.AspNet.Mvc.Facebook
             set
             {
                 // Check for '~/' prefix while allowing null or empty value to be set.
-                if (!String.IsNullOrEmpty(value) && !value.StartsWith("~/"))
+                if (!String.IsNullOrEmpty(value) && !value.StartsWith("~/", StringComparison.Ordinal))
                 {
                     throw new ArgumentException(Resources.InvalidAuthorizationRedirectPath, "value");
                 }
@@ -56,6 +57,7 @@ namespace Microsoft.AspNet.Mvc.Facebook
         /// <summary>
         /// Gets or sets the absolute URL for the Facebook App.
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "We prefer strings because this is read from appSettings")]
         public string AppUrl
         {
             get

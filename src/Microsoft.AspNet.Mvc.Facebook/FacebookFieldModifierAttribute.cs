@@ -8,7 +8,7 @@ namespace Microsoft.AspNet.Mvc.Facebook
     /// Allows adding field modifiers when querying Facebook Graph API.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
-    public class FacebookFieldModifierAttribute : Attribute
+    public sealed class FacebookFieldModifierAttribute : Attribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FacebookFieldModifierAttribute" /> class.
@@ -20,8 +20,8 @@ namespace Microsoft.AspNet.Mvc.Facebook
         }
 
         /// <summary>
-        /// Gets or sets the field modifier.
+        /// Gets the field modifier.
         /// </summary>
-        public string FieldModifier { get; set; }
+        public string FieldModifier { get; private set; }
     }
 }

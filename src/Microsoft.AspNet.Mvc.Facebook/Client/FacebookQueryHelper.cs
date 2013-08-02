@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
     /// <summary>
     /// Helper for constructing Facebook Graph API queries.
     /// </summary>
-    public class FacebookQueryHelper
+    public static class FacebookQueryHelper
     {
         /// <summary>
         /// Gets the appropriate "fields" query parameter for the Facebook Graph API based on the public properties of the model type.
@@ -47,6 +48,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
             return String.Empty;
         }
 
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Lowercase is intended for field names.")]
         private static IList<string> GetFieldNames(Type modelType, HashSet<Type> typesVisited)
         {
             Type connectionType;

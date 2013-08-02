@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Facebook;
@@ -72,6 +73,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
         /// </summary>
         /// <param name="client">The client.</param>
         /// <returns>A collection of friends.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Using tasks")]
         public static Task<IList<object>> GetCurrentUserFriendsAsync(this FacebookClient client)
         {
             return GetCurrentUserFriendsAsync<object>(client);
@@ -83,6 +85,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
         /// <typeparam name="TUserFriend">The type of the user friend.</typeparam>
         /// <param name="client">The client.</param>
         /// <returns>A collection of friends.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Using tasks")]
         public static async Task<IList<TUserFriend>> GetCurrentUserFriendsAsync<TUserFriend>(this FacebookClient client) where TUserFriend : class
         {
             FacebookGroupConnection<TUserFriend> friends = await GetFacebookObjectAsync<FacebookGroupConnection<TUserFriend>>(client, "me/friends");
@@ -96,6 +99,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
         /// </summary>
         /// <param name="client">The client.</param>
         /// <returns>A collection of permissions.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Using tasks")]
         public static async Task<IList<string>> GetCurrentUserPermissionsAsync(this FacebookClient client)
         {
             FacebookGroupConnection<IDictionary<string, int>> permissionResults = await client.GetTaskAsync<FacebookGroupConnection<IDictionary<string, int>>>("me/permissions");
@@ -108,6 +112,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
         /// <typeparam name="TStatus">The type of the status.</typeparam>
         /// <param name="client">The client.</param>
         /// <returns>A collection of statuses.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Using tasks")]
         public static async Task<IList<TStatus>> GetCurrentUserStatusesAsync<TStatus>(this FacebookClient client) where TStatus : class
         {
             FacebookGroupConnection<TStatus> statuses = await GetFacebookObjectAsync<FacebookGroupConnection<TStatus>>(client, "me/statuses");
@@ -122,6 +127,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
         /// <typeparam name="TPhotos">The type of the photo.</typeparam>
         /// <param name="client">The client.</param>
         /// <returns>A collection of user photos.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Using tasks")]
         public static async Task<IList<TPhotos>> GetCurrentUserPhotosAsync<TPhotos>(this FacebookClient client) where TPhotos : class
         {
             FacebookGroupConnection<TPhotos> photos = await GetFacebookObjectAsync<FacebookGroupConnection<TPhotos>>(client, "me/photos");

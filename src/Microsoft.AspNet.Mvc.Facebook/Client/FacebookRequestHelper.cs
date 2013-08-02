@@ -7,8 +7,8 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
 {
     internal static class FacebookRequestHelpers
     {
-        private static readonly string SignedRequestKey = "signed_request";
-        private static readonly string ParsedSignedRequestKey = "parsed_signed_request";
+        private const string SignedRequestKey = "signed_request";
+        private const string ParsedSignedRequestKey = "parsed_signed_request";
 
         public static dynamic GetSignedRequest(HttpContextBase context, Func<string, object> parseSignedRequest)
         {

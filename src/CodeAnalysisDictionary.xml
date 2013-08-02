@@ -51,6 +51,7 @@
             <Word>Owin</Word>
             <Word>Unbuffered</Word>
             <Word>Rfc</Word>
+            <Word>Realtime</Word>
         </Recognized>
         <Compound>
             <Term CompoundAlternate="WebPage">WebPage</Term>

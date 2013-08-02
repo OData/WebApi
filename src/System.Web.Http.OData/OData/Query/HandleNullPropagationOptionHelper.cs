@@ -8,7 +8,10 @@ namespace System.Web.Http.OData.Query
     internal static class HandleNullPropagationOptionHelper
     {
         private const string EntityFrameworkQueryProviderNamespace = "System.Data.Entity.Internal.Linq";
-        private const string ObjectContextQueryProviderNamespace = "System.Data.Objects.ELinq";
+
+        private const string ObjectContextQueryProviderNamespaceEF5 = "System.Data.Objects.ELinq";
+        private const string ObjectContextQueryProviderNamespaceEF6 = "System.Data.Entity.Core.Objects.ELinq";
+
         private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
         private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
 
@@ -38,7 +41,8 @@ namespace System.Web.Http.OData.Query
             {
                 case EntityFrameworkQueryProviderNamespace:
                 case Linq2SqlQueryProviderNamespace:
-                case ObjectContextQueryProviderNamespace:
+                case ObjectContextQueryProviderNamespaceEF5:
+                case ObjectContextQueryProviderNamespaceEF6:
                     options = HandleNullPropagationOption.False;
                     break;
 

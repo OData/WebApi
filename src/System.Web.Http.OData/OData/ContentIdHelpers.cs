@@ -18,7 +18,13 @@ namespace System.Web.Http.OData
 
             foreach (KeyValuePair<string, string> location in contentIdToLocationMapping)
             {
-                url = url.Replace("$" + location.Key, location.Value);
+                int index = url.IndexOf("$" + location.Key, StringComparison.Ordinal);
+                if (index != -1)
+                {
+                    // As location headers MUST be absolute URL's, we can ignore everything 
+                    // before the $content-id while resolving it.
+                    return location.Value + url.Substring(index + 1 + location.Key.Length);
+                }
             }
 
             return url;

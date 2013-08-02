@@ -129,9 +129,6 @@
   <data name="NoConfiguration" xml:space="preserve">
     <value>The request does not have an associated configuration object.</value>
   </data>
-  <data name="NoRouteData" xml:space="preserve">
-    <value>No route data was found for this request.</value>
-  </data>
   <data name="TraceCorsRequestContext" xml:space="preserve">
     <value>CorsRequestContext: '{0}'</value>
   </data>

@@ -63,7 +63,7 @@ namespace System.Web.Http.Cors
         }
 
         [Fact]
-        public void GetCorsPolicyProvider_Preflight_NoRouteData_Throws()
+        public void GetCorsPolicyProvider_Preflight_NoRouteData_ReturnsNull()
         {
             AttributeBasedPolicyProviderFactory providerFactory = new AttributeBasedPolicyProviderFactory();
 
@@ -74,9 +74,9 @@ namespace System.Web.Http.Cors
             HttpConfiguration config = new HttpConfiguration();
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
 
-            Assert.Throws<InvalidOperationException>(() =>
-                providerFactory.GetCorsPolicyProvider(request),
-                "No route data was found for this request.");
+            var provider = providerFactory.GetCorsPolicyProvider(request);
+
+            Assert.Null(provider);
         }
 
         [Fact]

@@ -58,7 +58,22 @@ namespace System.Web.Http.Cors
                             targetRequest.Properties.Add(property.Key, property.Value);
                         }
                     }
-                    actionDescriptor = SelectAction(targetRequest);
+
+                    HttpConfiguration config = request.GetConfiguration();
+                    if (config == null)
+                    {
+                        throw new InvalidOperationException(SRResources.NoConfiguration);
+                    }
+
+                    IHttpRouteData routeData = config.Routes.GetRouteData(request);
+                    if (routeData == null)
+                    {
+                        // No route data found for selecting action with EnableCorsAttribute, thus no ICorsPolicyProvider is returned
+                        // and let the CorsMessageHandler flow the request to the normal Web API pipeline.
+                        return null;
+                    }
+
+                    actionDescriptor = SelectAction(targetRequest, routeData, config);
                 }
                 catch
                 {
@@ -130,19 +145,8 @@ namespace System.Web.Http.Cors
             return policyProvider;
         }
 
-        private static HttpActionDescriptor SelectAction(HttpRequestMessage request)
+        private static HttpActionDescriptor SelectAction(HttpRequestMessage request, IHttpRouteData routeData, HttpConfiguration config)
         {
-            HttpConfiguration config = request.GetConfiguration();
-            if (config == null)
-            {
-                throw new InvalidOperationException(SRResources.NoConfiguration);
-            }
-
-            IHttpRouteData routeData = config.Routes.GetRouteData(request);
-            if (routeData == null)
-            {
-                throw new InvalidOperationException(SRResources.NoRouteData);
-            }
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
 
             RemoveOptionalRoutingParameters(routeData.Values);

@@ -149,11 +149,12 @@ namespace System.Web.Http.Description
                 ApiDescriptionComparer descriptionComparer = new ApiDescriptionComparer();
                 foreach (IHttpRoute route in _config.Routes)
                 {
-                    ReflectedHttpActionDescriptor[] actions = route.GetDirectRouteActions();
+                    HttpControllerDescriptor directRouteController = route.GetDirectRouteController();
+                    ReflectedHttpActionDescriptor[] directRouteActions = route.GetDirectRouteActions();
                     Collection<ApiDescription> descriptionsFromRoute =
-                        (actions == null) ?
-                            ExploreRouteControllers(controllerMappings, route) :
-                            ExploreDirectRoute(route, actions);
+                        (directRouteController != null && directRouteActions != null) ?
+                            ExploreDirectRoute(directRouteController, directRouteActions, route) :
+                            ExploreRouteControllers(controllerMappings, route);
 
                     // Remove ApiDescription that will lead to ambiguous action matching.
                     // E.g. a controller with Post() and PostComment(). When the route template is {controller}, it produces POST /controller and POST /controller.
@@ -175,10 +176,15 @@ namespace System.Web.Http.Description
             return apiDescriptions;
         }
 
-        private Collection<ApiDescription> ExploreDirectRoute(IHttpRoute route, ReflectedHttpActionDescriptor[] actions)
+        private Collection<ApiDescription> ExploreDirectRoute(HttpControllerDescriptor controllerDescriptor, ReflectedHttpActionDescriptor[] actions, IHttpRoute route)
         {
             Collection<ApiDescription> descriptions = new Collection<ApiDescription>();
-            PopulateActionDescriptions(actions, null, route, route.RouteTemplate, descriptions);
+
+            if (ShouldExploreController(controllerDescriptor.ControllerName, controllerDescriptor, route))
+            {
+                PopulateActionDescriptions(actions, null, route, route.RouteTemplate, descriptions);
+            }
+
             return descriptions;
         }
 

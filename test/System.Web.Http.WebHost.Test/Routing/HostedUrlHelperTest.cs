@@ -144,7 +144,7 @@ namespace System.Web.Http.WebHost.Routing
             Route apiRoute1 = routes.MapHttpRoute("apiroute1", "api/{controller}/{id}", new { action = "someaction" });
             Route apiRoute2 = routes.MapHttpRoute("apiroute2", "api/{controller}/{action}", new { id = 789 });
             Route webRoute1 = routes.MapRoute("webroute1", "{controller}/{action}/{id}");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration(hostedRoutes);
+            request.SetConfiguration(new HttpConfiguration(hostedRoutes));
 
             RouteData routeData = new RouteData();
             routeData.Values.Add("controller", "people");
@@ -166,7 +166,7 @@ namespace System.Web.Http.WebHost.Routing
                 default:
                     throw new ArgumentException("Invalid route specified.", "whichRoute");
             }
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HostedHttpRouteData(routeData);
+            request.SetRouteData(new HostedHttpRouteData(routeData));
 
             requestContext = new RequestContext(mockHttpContext.Object, routeData);
 

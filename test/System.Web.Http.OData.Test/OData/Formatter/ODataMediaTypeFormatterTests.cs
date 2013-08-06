@@ -152,7 +152,7 @@ namespace System.Web.Http.OData.Formatter
             HttpRouteData routeData = new HttpRouteData(new HttpRoute());
             routeData.Values.Add("a", "prefix");
             routeData.Values.Add("b", "prefix2");
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+            request.SetRouteData(routeData);
 
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.ServiceDocument);
             var content = new ObjectContent<ODataWorkspace>(new ODataWorkspace(), formatter);

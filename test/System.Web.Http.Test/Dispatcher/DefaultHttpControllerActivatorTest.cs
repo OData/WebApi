@@ -19,7 +19,7 @@ namespace System.Web.Http.Dispatcher
             // Arrange
             var config = new HttpConfiguration();
             var request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             var descriptor = new HttpControllerDescriptor(config, "Simple", typeof(SimpleController));
             var activator = new DefaultHttpControllerActivator();
 
@@ -41,7 +41,7 @@ namespace System.Web.Http.Dispatcher
             // Arrange
             var config = new HttpConfiguration();
             var request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             var descriptor = new HttpControllerDescriptor(config, "Simple", typeof(SimpleController));
             var activator = new DefaultHttpControllerActivator();
 
@@ -62,7 +62,7 @@ namespace System.Web.Http.Dispatcher
             mockScope.Setup(r => r.GetService(typeof(ControllerWithCtorParams))).Returns(controller).Verifiable();
             var config = new HttpConfiguration();
             var request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             request.Properties[HttpPropertyKeys.DependencyScope] = mockScope.Object;
             var descriptor = new HttpControllerDescriptor(config, "Name", typeof(ControllerWithCtorParams));
             var activator = new DefaultHttpControllerActivator();
@@ -89,7 +89,7 @@ namespace System.Web.Http.Dispatcher
             }).Verifiable();
             var config = new HttpConfiguration();
             var request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             request.Properties[HttpPropertyKeys.DependencyScope] = mockScope.Object;
             var descriptor = new HttpControllerDescriptor(config, "Name", typeof(ControllerWithCtorParams));
             var activator = new DefaultHttpControllerActivator();
@@ -113,7 +113,7 @@ namespace System.Web.Http.Dispatcher
             mockScope.Setup(r => r.GetService(typeof(ControllerWithCtorParams))).Returns(controller).Verifiable();
             var config = new HttpConfiguration();
             var request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             request.Properties[HttpPropertyKeys.DependencyScope] = mockScope.Object;
             var descriptorControllerWithCtorParamsResult = new HttpControllerDescriptor(config, "Name", typeof(ControllerWithCtorParams));
             var descriptorSimpleController = new HttpControllerDescriptor(config, "Simple", typeof(SimpleController));
@@ -139,7 +139,7 @@ namespace System.Web.Http.Dispatcher
             mockResolver.Setup(resolver => resolver.BeginScope()).Returns((IDependencyScope)null).Verifiable();
             config.DependencyResolver = mockResolver.Object;
             var request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             var descriptorSimpleController = new HttpControllerDescriptor(config, "Simple", typeof(SimpleController));
             var activator = new DefaultHttpControllerActivator();
 

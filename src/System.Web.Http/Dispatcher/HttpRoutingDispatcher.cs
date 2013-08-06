@@ -62,13 +62,13 @@ namespace System.Web.Http.Dispatcher
         {
             // Lookup route data, or if not found as a request property then we look it up in the route table
             IHttpRouteData routeData;
-            if (!request.Properties.TryGetValue(HttpPropertyKeys.HttpRouteDataKey, out routeData))
+            if (!request.TryGetRouteData(out routeData))
             {
                 routeData = _configuration.Routes.GetRouteData(request);
 
                 if (routeData != null)
                 {
-                    request.Properties.Add(HttpPropertyKeys.HttpRouteDataKey, routeData);
+                    request.SetRouteData(routeData);
                 }
                 else
                 {

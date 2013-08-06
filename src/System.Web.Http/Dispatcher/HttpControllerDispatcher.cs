@@ -110,13 +110,13 @@ namespace System.Web.Http.Dispatcher
             HttpConfiguration requestConfig = request.GetConfiguration();
             if (requestConfig == null)
             {
-                request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, httpControllerDescriptor.Configuration);
+                request.SetConfiguration(httpControllerDescriptor.Configuration);
             }
             else
             {
                 if (requestConfig != httpControllerDescriptor.Configuration)
                 {
-                    request.Properties[HttpPropertyKeys.HttpConfigurationKey] = httpControllerDescriptor.Configuration;
+                    request.SetConfiguration(httpControllerDescriptor.Configuration);
                 }
             }
 

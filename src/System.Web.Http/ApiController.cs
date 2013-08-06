@@ -201,7 +201,7 @@ namespace System.Web.Http
 
             if (Request != null)
             {
-                Request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor;
+                Request.SetActionDescriptor(actionDescriptor);
             }
 
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);

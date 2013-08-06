@@ -27,7 +27,7 @@ namespace System.Net.Http
         public HttpRequestMessageExtensionsTest()
         {
             _disposable = _disposableMock.Object;
-            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = _config;
+            _request.SetConfiguration(_config);
         }
 
         [Fact]
@@ -330,7 +330,7 @@ namespace System.Net.Http
         public void CreateResponse_MatchingMediaType_WhenMediaTypeDoesNotMatch_Throws()
         {
             // Arrange
-            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
+            _request.SetConfiguration(new HttpConfiguration());
 
             // Act
             Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, mediaType: "foo/bar"),
@@ -342,7 +342,7 @@ namespace System.Net.Http
         {
             // Arrange
             var config = new HttpConfiguration();
-            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            _request.SetConfiguration(config);
             config.Formatters.Clear();
             Mock<MediaTypeFormatter> formatterMock = new Mock<MediaTypeFormatter> { CallBase = true };
             var formatter = formatterMock.Object;
@@ -520,7 +520,7 @@ namespace System.Net.Http
         public void GetUrlHelper_ReturnsUrlHelper()
         {
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
+            request.SetConfiguration(new HttpConfiguration());
 
             UrlHelper urlHelper = request.GetUrlHelper();
 
@@ -532,7 +532,7 @@ namespace System.Net.Http
         public void GetUrlHelper_Caches_UrlHelperInstance()
         {
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
+            request.SetConfiguration(new HttpConfiguration());
 
             UrlHelper urlHelper1 = request.GetUrlHelper();
             UrlHelper urlHelper2 = request.GetUrlHelper();

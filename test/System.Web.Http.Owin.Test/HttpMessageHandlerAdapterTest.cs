@@ -514,7 +514,7 @@ namespace System.Web.Http.Owin
 
                 if (AddNoRouteMatchedKey)
                 {
-                    request.Properties["MS_NoRouteMatched"] = true;
+                    request.Properties[HttpPropertyKeys.NoRouteMatched] = true;
                 }
 
                 return TaskHelpers.FromResult<HttpResponseMessage>(Response);

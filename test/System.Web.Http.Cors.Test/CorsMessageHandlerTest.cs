@@ -67,7 +67,7 @@ namespace System.Web.Http.Cors
             corsHandler.InnerHandler = server;
             HttpMessageInvoker invoker = new HttpMessageInvoker(corsHandler);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Options, "http://localhost/sample");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             request.Headers.Add(CorsConstants.Origin, "http://localhost");
             request.Headers.Add(CorsConstants.AccessControlRequestMethod, requestedMethod);
             request.Headers.Add(CorsConstants.AccessControlRequestHeaders, requestedHeaders);
@@ -152,7 +152,7 @@ namespace System.Web.Http.Cors
             corsHandler.InnerHandler = server;
             HttpMessageInvoker invoker = new HttpMessageInvoker(corsHandler);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Options, "http://localhost/sample");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             request.Headers.Add(CorsConstants.Origin, "http://localhost");
             request.Headers.Add(CorsConstants.AccessControlRequestMethod, "RandomMethod");
 

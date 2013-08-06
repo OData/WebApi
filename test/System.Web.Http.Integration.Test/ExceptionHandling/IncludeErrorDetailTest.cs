@@ -2,6 +2,7 @@
 
 using System.Net;
 using System.Net.Http;
+using System.Web.Http.Hosting;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -54,10 +55,10 @@ namespace System.Web.Http
             string controllerName = "Exception";
             string requestUrl = String.Format("{0}/{1}/{2}", "http://www.foo.com", controllerName, "ArgumentNull");
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
-            request.Properties["MS_IsLocal"] = new Lazy<bool>(() => isLocal);
+            request.Properties[HttpPropertyKeys.IsLocalKey] = new Lazy<bool>(() => isLocal);
             if (customErrors != null)
             {
-                request.Properties["MS_IncludeErrorDetail"] = new Lazy<bool>(() => !(bool)customErrors);
+                request.Properties[HttpPropertyKeys.IncludeErrorDetailKey] = new Lazy<bool>(() => !(bool)customErrors);
             }
 
             ScenarioHelper.RunTest(

@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Hosting;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
@@ -87,14 +88,14 @@ namespace System.Net.Http
         {
             HttpConfiguration config = new HttpConfiguration() { IncludeErrorDetailPolicy = errorDetail };
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add("MS_HttpConfiguration", config);
+            request.SetConfiguration(config);
             if (isLocal.HasValue)
             {
-                request.Properties.Add("MS_IsLocal", new Lazy<bool>(() => isLocal.Value));
+                request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => isLocal.Value));
             }
             if (includeErrorDetail.HasValue)
             {
-                request.Properties.Add("MS_IncludeErrorDetail", new Lazy<bool>(() => includeErrorDetail.Value));
+                request.Properties.Add(HttpPropertyKeys.IncludeErrorDetailKey, new Lazy<bool>(() => includeErrorDetail.Value));
             }
             ODataError error = new ODataError()
             {

@@ -165,9 +165,9 @@ namespace System.Web.Http.WebHost.Routing
             var mockHandler = new Mock<HttpMessageHandler>();
             var config = new HttpConfiguration();
             var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/api/controllerName");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpDomainRoute domainRoute = new HttpDomainRoute("test", new { controller = "Values", action = "GetTenant" });
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HostedHttpRouteData(domainRoute.GetRouteData(null));
+            request.SetRouteData(new HostedHttpRouteData(domainRoute.GetRouteData(null)));
             var dispatcher = new HttpRoutingDispatcher(config, defaultHandler: mockHandler.Object);
             var invoker = new HttpMessageInvoker(dispatcher);
 
@@ -192,8 +192,8 @@ namespace System.Web.Http.WebHost.Routing
             var config = new HttpConfiguration(_webApiRoutes);
             IHttpRoute route = _webApiRoutes.CreateRoute("api", null, null);
             _webApiRoutes.Add("default", route);
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = _webApiRoutes.GetRouteData(request);
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetRouteData(_webApiRoutes.GetRouteData(request));
+            request.SetConfiguration(config);
 
             IHttpVirtualPathData result = _webApiRoutes.GetVirtualPath(request, null, new HttpRouteValueDictionary { { "httproute", true } });
 
@@ -274,7 +274,7 @@ namespace System.Web.Http.WebHost.Routing
                     {"httproute", true}
                 };
 
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(route, routeValues);
+            request.SetRouteData(new HttpRouteData(route, routeValues));
             
             // Act
             IHttpVirtualPathData httpvPathData = collection.GetVirtualPath(request, "domainRoute", routeValues);

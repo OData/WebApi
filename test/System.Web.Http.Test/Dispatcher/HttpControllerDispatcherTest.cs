@@ -123,8 +123,8 @@ namespace System.Web.Http.Dispatcher
         {
             IHttpRoute route = config.Routes.MapHttpRoute("default", "api/{controller}/{id}", new { id = RouteParameter.Optional });
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = route.GetRouteData("/", request);
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetRouteData(route.GetRouteData("/", request));
+            request.SetConfiguration(config);
             return request;
         }
 

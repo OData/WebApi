@@ -93,7 +93,7 @@ namespace System.Web.Http.WebHost
             HttpRequestMessage request = contextBase.GetHttpRequestMessage() ?? ConvertRequest(contextBase);
 
             // Add route data
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = _routeData;
+            request.SetRouteData(_routeData);
 
             HttpResponseMessage response = await _server.SendAsync(request, CancellationToken.None);
             await ConvertResponse(contextBase, response, request);

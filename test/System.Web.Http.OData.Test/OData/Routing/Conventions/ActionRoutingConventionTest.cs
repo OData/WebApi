@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Routing.Conventions
             ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
             HttpControllerContext controllerContext = new HttpControllerContext();
             controllerContext.Request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/");
-            controllerContext.Request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            controllerContext.Request.SetRouteData(new HttpRouteData(new HttpRoute()));
 
             string selectedAction = new ActionRoutingConvention().SelectAction(odataPath, controllerContext, emptyActionMap);
 

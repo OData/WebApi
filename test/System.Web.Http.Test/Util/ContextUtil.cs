@@ -16,8 +16,8 @@ namespace System.Web.Http
             HttpConfiguration config = configuration ?? new HttpConfiguration();
             IHttpRouteData route = routeData ?? new HttpRouteData(new HttpRoute());
             HttpRequestMessage req = request ?? new HttpRequestMessage();
-            req.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
-            req.Properties[HttpPropertyKeys.HttpRouteDataKey] = route;
+            req.SetConfiguration(config);
+            req.SetRouteData(route);
 
             HttpControllerContext context = new HttpControllerContext(config, route, req);
             if (instance != null)

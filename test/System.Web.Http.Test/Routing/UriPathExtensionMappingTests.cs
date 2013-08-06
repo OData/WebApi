@@ -131,7 +131,7 @@ namespace System.Net.Http.Formatting
             routeData.Values[UriPathExtensionMapping.UriPathExtensionKey] = extensionValue;
 
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+            request.SetRouteData(routeData);
 
             return request;
         }

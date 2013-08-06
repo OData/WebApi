@@ -105,6 +105,16 @@ namespace System.Net.Http
             return request.GetProperty<SynchronizationContext>(HttpPropertyKeys.SynchronizationContextKey);
         }
 
+        internal static void SetSynchronizationContext(this HttpRequestMessage request, SynchronizationContext syncronizationContext)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            request.Properties[HttpPropertyKeys.SynchronizationContextKey] = syncronizationContext;
+        }
+
         /// <summary>
         /// Gets the current <see cref="T:System.Security.Cryptography.X509Certificates.X509Certificate2"/> or null if not available.
         /// </summary>
@@ -172,6 +182,16 @@ namespace System.Net.Http
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
         }
 
+        internal static bool TryGetRouteData(this HttpRequestMessage request, out IHttpRouteData routeData)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.Properties.TryGetValue<IHttpRouteData>(HttpPropertyKeys.HttpRouteDataKey, out routeData);
+        }
+
         /// <summary>
         /// Gets the <see cref="System.Web.Http.Controllers.HttpActionDescriptor"/> selected for the given request or null if not available.
         /// </summary>
@@ -185,6 +205,16 @@ namespace System.Net.Http
             }
 
             return request.GetProperty<HttpActionDescriptor>(HttpPropertyKeys.HttpActionDescriptorKey);
+        }
+
+        internal static void SetActionDescriptor(this HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor;
         }
 
         private static T GetProperty<T>(this HttpRequestMessage request, string key)

@@ -147,7 +147,7 @@ namespace System.Web.Http.Cors
 
         private static HttpActionDescriptor SelectAction(HttpRequestMessage request, IHttpRouteData routeData, HttpConfiguration config)
         {
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+            request.SetRouteData(routeData);
 
             RemoveOptionalRoutingParameters(routeData.Values);
 

@@ -33,7 +33,7 @@ namespace System.Web.Http.Dispatcher
             HttpRequestMessage request = new HttpRequestMessage();
             IHttpRouteData routeData = GetRouteData();
             routeData.Values[controllerKeyName] = controllerName;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+            request.SetRouteData(routeData);
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(new HttpConfiguration());
 
             // Act 
@@ -62,7 +62,7 @@ namespace System.Web.Http.Dispatcher
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = GetRouteData();
+            request.SetRouteData(GetRouteData());
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(new HttpConfiguration());
 
             // Act 
@@ -88,7 +88,7 @@ namespace System.Web.Http.Dispatcher
             HttpRequestMessage request = new HttpRequestMessage();
             IHttpRouteData routeData = GetRouteData();
             routeData.Values["controller"] = "Sample";
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+            request.SetRouteData(routeData);
 
             // Act
             selector.SelectController(request);
@@ -115,7 +115,7 @@ namespace System.Web.Http.Dispatcher
             HttpRequestMessage request = new HttpRequestMessage();
             IHttpRouteData routeData = GetRouteData();
             routeData.Values["controller"] = controllerTypeName;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+            request.SetRouteData(routeData);
 
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
 
@@ -142,7 +142,7 @@ namespace System.Web.Http.Dispatcher
             HttpRequestMessage request = new HttpRequestMessage();
             IHttpRouteData routeData = GetRouteData();
             routeData.Values["controller"] = "Sample";
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+            request.SetRouteData(routeData);
 
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
 
@@ -169,12 +169,12 @@ namespace System.Web.Http.Dispatcher
             HttpRequestMessage request1 = new HttpRequestMessage();
             IHttpRouteData routeData1 = GetRouteData();
             routeData1.Values["controller"] = "Sample";
-            request1.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData1;
+            request1.SetRouteData(routeData1);
 
             HttpRequestMessage request2 = new HttpRequestMessage();
             IHttpRouteData routeData2 = GetRouteData();
             routeData2.Values["controller"] = "SaMPle";
-            request2.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData2;
+            request2.SetRouteData(routeData2);
 
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
 
@@ -201,7 +201,7 @@ namespace System.Web.Http.Dispatcher
         {
             HttpConfiguration configuration = new HttpConfiguration();
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = GetRouteData();
+            request.SetRouteData(GetRouteData());
 
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
 
@@ -223,7 +223,7 @@ namespace System.Web.Http.Dispatcher
             var action2Descriptor = new ReflectedHttpActionDescriptor() { ControllerDescriptor = controllerDescriptor };
             IHttpRouteData routeData = GetRouteData();
             routeData.Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { action1Descriptor, action2Descriptor });
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;            
+            request.SetRouteData(routeData);
 
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
 
@@ -243,7 +243,7 @@ namespace System.Web.Http.Dispatcher
             var action2Descriptor = new ReflectedHttpActionDescriptor() { ControllerDescriptor = new HttpControllerDescriptor() };
             IHttpRouteData routeData = GetRouteData();
             routeData.Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { action1Descriptor, action2Descriptor });
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+            request.SetRouteData(routeData);
 
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
 
@@ -287,8 +287,8 @@ namespace System.Web.Http.Dispatcher
             HttpRequestMessage request = new HttpRequestMessage();
             IHttpRouteData routeData1 = GetRouteData();
             routeData1.Values["controller"] = "Sample";
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData1;
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+            request.SetRouteData(routeData1);
+            request.SetConfiguration(configuration);
 
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
 
@@ -317,8 +317,8 @@ namespace System.Web.Http.Dispatcher
             HttpRequestMessage request = new HttpRequestMessage();
             IHttpRouteData routeData1 = GetRouteData();
             routeData1.Values["controller"] = "Sample";
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData1;
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+            request.SetRouteData(routeData1);
+            request.SetConfiguration(configuration);
 
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
 

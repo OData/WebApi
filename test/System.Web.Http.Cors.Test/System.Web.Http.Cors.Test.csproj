@@ -70,6 +70,7 @@
     <Compile Include="CorsHttpConfigurationExtensionsTest.cs" />
     <Compile Include="CorsHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="CorsHttpResponseMessageExtensionsTest.cs" />
+    <Compile Include="HttpRequestMethodExtensions.cs" />
     <Compile Include="Tracing\CorsEngineTracerTest.cs" />
     <Compile Include="Tracing\CorsPolicyProviderFactoryTracerTest.cs" />
     <Compile Include="Tracing\CorsPolicyProviderTracerTest.cs" />

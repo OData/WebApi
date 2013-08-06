@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GlobalConfigurationTest.cs" />
+    <Compile Include="HttpRequestMessageExtensions.cs" />
     <Compile Include="Routing\HttpContextBaseExtensionsTest.cs" />
     <Compile Include="Routing\HttpRequestMessageWrapperTest.cs" />
     <Compile Include="Routing\HostedHttpRouteCollectionTest.cs" />

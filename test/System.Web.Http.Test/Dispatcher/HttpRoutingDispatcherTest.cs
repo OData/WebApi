@@ -71,7 +71,7 @@ namespace System.Web.Http.Dispatcher
             responseTask.WaitUntilCompleted();
 
             Assert.Equal(HttpStatusCode.NotFound, responseTask.Result.StatusCode);
-            Assert.True((bool)request.Properties["MS_NoRouteMatched"]);
+            Assert.True((bool)request.Properties[HttpPropertyKeys.NoRouteMatched]);
         }
 
         [Fact]
@@ -117,7 +117,7 @@ namespace System.Web.Http.Dispatcher
             config.Routes.Add("default", route);
 
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             return request;
         }
 

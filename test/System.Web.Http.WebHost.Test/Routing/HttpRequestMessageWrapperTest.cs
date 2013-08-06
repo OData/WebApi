@@ -258,7 +258,7 @@ namespace System.Web.Http.WebHost.Routing
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
+            request.SetIsLocal(new Lazy<bool>(() => true));
             HttpRequestMessageWrapper wrapper = new HttpRequestMessageWrapper("/", request);
 
             // Act

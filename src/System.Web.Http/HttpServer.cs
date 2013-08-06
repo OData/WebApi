@@ -145,11 +145,11 @@ namespace System.Web.Http
             SynchronizationContext context = SynchronizationContext.Current;
             if (context != null)
             {
-                request.Properties.Add(HttpPropertyKeys.SynchronizationContextKey, context);
+                request.SetSynchronizationContext(context);
             }
 
             // Add HttpConfiguration object as a parameter to the request 
-            request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, _configuration);
+            request.SetConfiguration(_configuration);
 
             // Ensure we have a principal, even if the host didn't give us one
             IPrincipal originalPrincipal = Thread.CurrentPrincipal;

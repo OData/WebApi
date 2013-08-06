@@ -341,7 +341,7 @@ namespace System.Web.Http.WebHost
             Mock<HttpContextBase> contextMock = CreateMockHttpContextBaseForResponse(memoryStream);
             HttpResponseBase responseBase = contextMock.Object.Response;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
+            request.SetIsLocal(new Lazy<bool>(() => true));
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
@@ -388,7 +388,7 @@ namespace System.Web.Http.WebHost
             Mock<HttpContextBase> contextMock = CreateMockHttpContextBaseForResponse(memoryStream);
             HttpResponseBase responseBase = contextMock.Object.Response;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
+            request.SetIsLocal(new Lazy<bool>(() => true));
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
@@ -438,7 +438,7 @@ namespace System.Web.Http.WebHost
             Mock<HttpContextBase> contextMock = CreateMockHttpContextBaseForResponse(memoryStream);
             HttpResponseBase responseBase = contextMock.Object.Response;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
+            request.SetIsLocal(new Lazy<bool>(() => true));
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
@@ -473,7 +473,7 @@ namespace System.Web.Http.WebHost
             Mock<HttpContextBase> contextMock = CreateMockHttpContextBaseForResponse(memoryStream);
             HttpResponseBase responseBase = contextMock.Object.Response;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
+            request.SetIsLocal(new Lazy<bool>(() => true));
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
@@ -522,8 +522,8 @@ namespace System.Web.Http.WebHost
             Mock<HttpContextBase> contextMock = CreateMockHttpContextBaseForResponse(memoryStream);
             HttpResponseBase responseBase = contextMock.Object.Response;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
-            request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, config);
+            request.SetIsLocal(new Lazy<bool>(() => true));
+            request.SetConfiguration(config);
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
@@ -560,8 +560,8 @@ namespace System.Web.Http.WebHost
             Mock<HttpContextBase> contextMock = CreateMockHttpContextBaseForResponse(memoryStream);
             HttpResponseBase responseBase = contextMock.Object.Response;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
-            request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, config);
+            request.SetIsLocal(new Lazy<bool>(() => true));
+            request.SetConfiguration(config);
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
@@ -610,8 +610,8 @@ namespace System.Web.Http.WebHost
             Mock<HttpContextBase> contextMock = CreateMockHttpContextBaseForResponse(memoryStream);
             HttpResponseBase responseBase = contextMock.Object.Response;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
-            request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, config);
+            request.SetIsLocal(new Lazy<bool>(() => true));
+            request.SetConfiguration(config);
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
@@ -649,8 +649,8 @@ namespace System.Web.Http.WebHost
             Mock<HttpContextBase> contextMock = CreateMockHttpContextBaseForResponse(memoryStream);
             HttpResponseBase responseBase = contextMock.Object.Response;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
-            request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, config);
+            request.SetIsLocal(new Lazy<bool>(() => true));
+            request.SetConfiguration(config);
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
@@ -705,7 +705,7 @@ namespace System.Web.Http.WebHost
             HttpContextBase contextBase = CreateStubContext(requestBase, responseBase);
 
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
+            request.SetIsLocal(new Lazy<bool>(() => true));
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
@@ -740,7 +740,7 @@ namespace System.Web.Http.WebHost
             HttpContextBase contextBase = CreateStubContext(requestBase, responseBase);
 
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
+            request.SetIsLocal(new Lazy<bool>(() => true));
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 

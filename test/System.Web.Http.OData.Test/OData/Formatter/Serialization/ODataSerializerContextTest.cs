@@ -83,5 +83,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Same(selectExpand, nestedContext.SelectExpandClause);
             Assert.Same(model.Orders, nestedContext.EntitySet);
         }
+
+        [Fact]
+        public void Property_Items_IsInitialized()
+        {
+            ODataSerializerContext context = new ODataSerializerContext();
+            Assert.NotNull(context.Items);
+        }
     }
 }

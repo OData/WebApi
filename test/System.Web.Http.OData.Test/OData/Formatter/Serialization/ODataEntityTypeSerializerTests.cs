@@ -1163,6 +1163,59 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 s => s.WriteObjectInline(It.IsAny<object>(), mockWriter, It.Is<ODataSerializerContext>(c => c.ExpandedEntity.SerializerContext == _writeContext)));
         }
 
+        [Fact]
+        public void CreateSelectExpandNode_Caches_SelectExpandNode()
+        {
+            // Arrange
+            IEdmEntityTypeReference customerType = _customerSet.ElementType.AsReference();
+            EntityInstanceContext entity1 = new EntityInstanceContext(_writeContext, customerType, new Customer());
+            EntityInstanceContext entity2 = new EntityInstanceContext(_writeContext, customerType, new Customer());
+
+            // Act
+            var selectExpandNode1 = _serializer.CreateSelectExpandNode(entity1);
+            var selectExpandNode2 = _serializer.CreateSelectExpandNode(entity2);
+
+            // Assert
+            Assert.Same(selectExpandNode1, selectExpandNode2);
+        }
+
+        [Fact]
+        public void CreateSelectExpandNode_ReturnsDifferentSelectExpandNode_IfEntityTypeIsDifferent()
+        {
+            // Arrange
+            IEdmEntityType customerType = _customerSet.ElementType;
+            IEdmEntityType derivedCustomerType = new EdmEntityType("NS", "DerivedCustomer", customerType);
+
+            EntityInstanceContext entity1 = new EntityInstanceContext(_writeContext, customerType.AsReference(), new Customer());
+            EntityInstanceContext entity2 = new EntityInstanceContext(_writeContext, derivedCustomerType.AsReference(), new Customer());
+
+            // Act
+            var selectExpandNode1 = _serializer.CreateSelectExpandNode(entity1);
+            var selectExpandNode2 = _serializer.CreateSelectExpandNode(entity2);
+
+            // Assert
+            Assert.NotSame(selectExpandNode1, selectExpandNode2);
+        }
+
+        [Fact]
+        public void CreateSelectExpandNode_ReturnsDifferentSelectExpandNode_IfSelectExpandClauseIsDifferent()
+        {
+            // Arrange
+            IEdmEntityType customerType = _customerSet.ElementType;
+
+            EntityInstanceContext entity1 = new EntityInstanceContext(_writeContext, customerType.AsReference(), new Customer());
+            EntityInstanceContext entity2 = new EntityInstanceContext(_writeContext, customerType.AsReference(), new Customer());
+
+            // Act
+            _writeContext.SelectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
+            var selectExpandNode1 = _serializer.CreateSelectExpandNode(entity1);
+            _writeContext.SelectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: false);
+            var selectExpandNode2 = _serializer.CreateSelectExpandNode(entity2);
+
+            // Assert
+            Assert.NotSame(selectExpandNode1, selectExpandNode2);
+        }
+
         private static IEdmNavigationProperty CreateFakeNavigationProperty(string name, IEdmTypeReference type)
         {
             Mock<IEdmNavigationProperty> property = new Mock<IEdmNavigationProperty>();

@@ -115,7 +115,17 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             ODataSerializerContext writeContext = entityInstanceContext.SerializerContext;
-            return new SelectExpandNode(writeContext.SelectExpandClause, EntityType, writeContext.Model);
+            IEdmEntityType entityType = entityInstanceContext.EntityType;
+
+            object selectExpandNode;
+            Tuple<SelectExpandClause, IEdmEntityType> key = Tuple.Create(writeContext.SelectExpandClause, entityType);
+            if (!writeContext.Items.TryGetValue(key, out selectExpandNode))
+            {
+                // cache the selectExpandNode so that if we are writing a feed we don't have to construct it again.
+                selectExpandNode = new SelectExpandNode(writeContext.SelectExpandClause, entityType, writeContext.Model);
+                writeContext.Items[key] = selectExpandNode;
+            }
+            return selectExpandNode as SelectExpandNode;
         }
 
         /// <summary>

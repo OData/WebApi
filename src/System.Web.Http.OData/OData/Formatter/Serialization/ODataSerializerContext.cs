@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
@@ -18,6 +19,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// </summary>
         public ODataSerializerContext()
         {
+            Items = new Dictionary<object, object>();
         }
 
         /// <summary>
@@ -48,6 +50,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             RootElementName = context.RootElementName;
             SkipExpensiveAvailabilityChecks = context.SkipExpensiveAvailabilityChecks;
             MetadataLevel = context.MetadataLevel;
+            Items = context.Items;
 
             ExpandedEntity = entity;
             SelectExpandClause = selectExpandClause;
@@ -110,5 +113,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Gets or sets the navigation property being expanded.
         /// </summary>
         public IEdmNavigationProperty NavigationProperty { get; set; }
+
+        /// <summary>
+        /// Gets or sets a property bag associated with this context to store any generic data.
+        /// </summary>
+        public Dictionary<object, object> Items { get; private set; }
     }
 }

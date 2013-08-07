@@ -30,7 +30,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.ThrowsArgumentNull(
                 () => new SelectExpandNode(
                     selectExpandClause: null,
-                    entityType: new Mock<IEdmEntityTypeReference>().Object,
+                    entityType: new Mock<IEdmEntityType>().Object,
                     model: null),
                 "model");
         }
@@ -62,7 +62,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             SelectExpandClause selectExpandClause =
                 new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand,  _model.Customer, _model.Customers);
-            IEdmEntityTypeReference entityType = new EdmEntityTypeReference((specialCustomer ? _model.SpecialCustomer : _model.Customer), false);
+            IEdmEntityType entityType = specialCustomer ? _model.SpecialCustomer : _model.Customer;
 
             // Act
             SelectExpandNode selectExpandNode = new SelectExpandNode(selectExpandClause, entityType, _model.Model);
@@ -87,7 +87,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
             SelectExpandClause nestedSelectExpandClause = selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand;
 
-            IEdmEntityTypeReference entityType = new EdmEntityTypeReference((specialOrder ? _model.SpecialOrder : _model.Order), false);
+            IEdmEntityType entityType = specialOrder ? _model.SpecialOrder : _model.Order;
 
             // Act
             SelectExpandNode selectExpandNode = new SelectExpandNode(nestedSelectExpandClause, entityType, _model.Model);
@@ -119,7 +119,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             SelectExpandClause selectExpandClause =
                 new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
 
-            IEdmEntityTypeReference entityType = new EdmEntityTypeReference((specialCustomer ? _model.SpecialCustomer : _model.Customer), false);
+            IEdmEntityType entityType = specialCustomer ? _model.SpecialCustomer : _model.Customer;
 
             // Act
             SelectExpandNode selectExpandNode = new SelectExpandNode(selectExpandClause, entityType, _model.Model);
@@ -152,7 +152,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             SelectExpandClause selectExpandClause =
                 new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
 
-            IEdmEntityTypeReference entityType = new EdmEntityTypeReference((specialCustomer ? _model.SpecialCustomer : _model.Customer), false);
+            IEdmEntityType entityType = specialCustomer ? _model.SpecialCustomer : _model.Customer;
 
             // Act
             SelectExpandNode selectExpandNode = new SelectExpandNode(selectExpandClause, entityType, _model.Model);
@@ -180,7 +180,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             SelectExpandClause selectExpandClause =
                 new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
-            IEdmEntityTypeReference entityType = new EdmEntityTypeReference(specialCustomer ? _model.SpecialCustomer : _model.Customer, false);
+            IEdmEntityType entityType = specialCustomer ? _model.SpecialCustomer : _model.Customer;
 
             // Act
             SelectExpandNode selectExpandNode = new SelectExpandNode(selectExpandClause, entityType, _model.Model);
@@ -194,7 +194,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void BuildSelectExpandNode_ThrowsODataException_IfUnknownSelectItemPresent()
         {
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[] { new Mock<SelectItem>().Object }, allSelected: false);
-            IEdmEntityTypeReference entityType = new EdmEntityTypeReference(_model.Customer, false);
+            IEdmEntityType entityType = _model.Customer;
 
             Assert.Throws<ODataException>(
                 () => new SelectExpandNode(selectExpandClause, entityType, _model.Model),

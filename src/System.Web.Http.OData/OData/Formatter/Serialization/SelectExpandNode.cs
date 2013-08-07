@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
@@ -37,7 +35,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <param name="selectExpandClause">The parsed $select and $expand query options.</param>
         /// <param name="entityType">The entity type of the entry that would be written.</param>
         /// <param name="model">The <see cref="IEdmModel"/> that contains the given entity type.</param>
-        public SelectExpandNode(SelectExpandClause selectExpandClause, IEdmEntityTypeReference entityType, IEdmModel model)
+        public SelectExpandNode(SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmModel model)
             : this()
         {
             if (entityType == null)
@@ -51,7 +49,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             HashSet<IEdmStructuralProperty> allStructuralProperties = new HashSet<IEdmStructuralProperty>(entityType.StructuralProperties());
             HashSet<IEdmNavigationProperty> allNavigationProperties = new HashSet<IEdmNavigationProperty>(entityType.NavigationProperties());
-            HashSet<IEdmFunctionImport> allActions = new HashSet<IEdmFunctionImport>(model.GetAvailableProcedures(entityType.EntityDefinition()));
+            HashSet<IEdmFunctionImport> allActions = new HashSet<IEdmFunctionImport>(model.GetAvailableProcedures(entityType));
 
             if (selectExpandClause == null)
             {

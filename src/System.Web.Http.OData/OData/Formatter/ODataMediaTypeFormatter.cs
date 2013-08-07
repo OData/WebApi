@@ -12,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 using System.Web.Http.OData.Batch;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
@@ -327,6 +328,7 @@ namespace System.Web.Http.OData.Formatter
                         Path = path,
                         Model = model,
                         Request = Request,
+                        RequestContext = Request.GetRequestContext(),
                         ResourceType = type
                     };
 
@@ -441,6 +443,7 @@ namespace System.Web.Http.OData.Formatter
                 ODataSerializerContext writeContext = new ODataSerializerContext()
                 {
                     Request = Request,
+                    RequestContext = Request.GetRequestContext(),
                     Url = urlHelper,
                     EntitySet = targetEntitySet,
                     Model = model,

@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 
@@ -77,7 +78,7 @@ namespace System.Web.Http
 
             for (int i = 0; i < _collection.Count; i++)
             {
-                string virtualPathRoot = GetVirtualPathRoot(request);
+                string virtualPathRoot = GetVirtualPathRoot(request.GetRequestContext());
                 IHttpRouteData routeData = _collection[i].GetRouteData(virtualPathRoot, request);
                 if (routeData != null)
                 {
@@ -112,7 +113,7 @@ namespace System.Web.Http
             }
 
             // Construct a new VirtualPathData with the resolved app path
-            string virtualPathRoot = GetVirtualPathRoot(request);
+            string virtualPathRoot = GetVirtualPathRoot(request.GetRequestContext());
             if (!virtualPathRoot.EndsWith("/", StringComparison.Ordinal))
             {
                 virtualPathRoot += "/";
@@ -123,11 +124,16 @@ namespace System.Web.Http
             return new HttpVirtualPathData(virtualPath.Route, virtualPathRoot + virtualPath.VirtualPath);
         }
 
-        // Returns the virtual path root on the request if one is specified
+        // Returns the virtual path root on the request context if present
         // Otherwise, fall back on the virtual path root for the route collection
-        private string GetVirtualPathRoot(HttpRequestMessage request)
+        private string GetVirtualPathRoot(HttpRequestContext requestContext)
         {
-            return request.GetVirtualPathRoot() ?? _virtualPathRoot;
+            if (requestContext != null)
+            {
+                return requestContext.VirtualPathRoot ?? String.Empty;
+            }
+
+            return _virtualPathRoot;
         }
 
         public IHttpRoute CreateRoute(string routeTemplate, object defaults, object constraints)

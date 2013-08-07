@@ -226,6 +226,10 @@ namespace System.Web.Http.Results
             {
                 if (_resolvedDependencies == null)
                 {
+                    HttpRequestContext requestContext = _controller.RequestContext;
+                    Contract.Assert(requestContext != null);
+                    bool includeErrorDetail = requestContext.IncludeErrorDetail;
+
                     HttpConfiguration configuration = _controller.Configuration;
 
                     if (configuration == null)
@@ -233,15 +237,6 @@ namespace System.Web.Http.Results
                         throw new InvalidOperationException(
                             SRResources.HttpControllerContext_ConfigurationMustNotBeNull);
                     }
-
-                    HttpRequestMessage request = _controller.Request;
-
-                    if (request == null)
-                    {
-                        throw new InvalidOperationException(SRResources.ApiController_RequestMustNotBeNull);
-                    }
-
-                    bool includeErrorDetail = request.ShouldIncludeErrorDetail();
 
                     ServicesContainer services = configuration.Services;
                     Contract.Assert(services != null);
@@ -251,6 +246,13 @@ namespace System.Web.Http.Results
                     {
                         throw new InvalidOperationException(Error.Format(
                             SRResources.HttpRequestMessageExtensions_NoContentNegotiator, typeof(IContentNegotiator)));
+                    }
+
+                    HttpRequestMessage request = _controller.Request;
+
+                    if (request == null)
+                    {
+                        throw new InvalidOperationException(SRResources.ApiController_RequestMustNotBeNull);
                     }
 
                     IEnumerable<MediaTypeFormatter> formatters = configuration.Formatters;

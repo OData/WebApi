@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
 using Microsoft.TestCommon;
 
@@ -164,7 +165,10 @@ namespace System.Web.Http.Routing
         {
             // Arrange
             var request = new HttpRequestMessage();
-            request.SetVirtualPathRoot("/AppPath");
+            request.SetRequestContext(new HttpRequestContext
+            {
+                VirtualPathRoot = "/AppPath"
+            });
             request.RequestUri = new Uri("http://contoso.com/AppPath/api/Products");
             var urlHelper = new UrlHelper(request);
 

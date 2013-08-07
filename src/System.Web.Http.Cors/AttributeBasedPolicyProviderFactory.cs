@@ -156,8 +156,23 @@ namespace System.Web.Http.Cors
             // Get the per-controller configuration
             config = controllerDescriptor.Configuration;
             request.SetConfiguration(config);
-            HttpControllerContext controllerContext = new HttpControllerContext(config, routeData, request)
+            HttpRequestContext requestContext = request.GetRequestContext();
+
+            if (requestContext == null)
             {
+                requestContext = new HttpRequestContext
+                {
+                    Configuration = config,
+                    RouteData = routeData,
+                    Url = new UrlHelper(request),
+                    VirtualPathRoot = config.VirtualPathRoot
+                };
+            }
+
+            HttpControllerContext controllerContext = new HttpControllerContext
+            {
+                RequestContext = requestContext,
+                Request = request,
                 ControllerDescriptor = controllerDescriptor
             };
 

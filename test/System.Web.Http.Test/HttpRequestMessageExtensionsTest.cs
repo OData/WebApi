@@ -529,31 +529,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void GetUrlHelper_Caches_UrlHelperInstance()
-        {
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.SetConfiguration(new HttpConfiguration());
-
-            UrlHelper urlHelper1 = request.GetUrlHelper();
-            UrlHelper urlHelper2 = request.GetUrlHelper();
-
-            Assert.NotNull(urlHelper1);
-            Assert.Same(urlHelper1, urlHelper2);
-        }
-
-        [Fact]
-        public void SetUrlHelper_AndThen_GetUrlHelper_Returns_SameInstance()
-        {
-            HttpRequestMessage request = new HttpRequestMessage();
-            UrlHelper urlHelper = new UrlHelper();
-
-            request.SetUrlHelper(urlHelper);
-            var retrievedUrlHelper = request.GetUrlHelper();
-
-            Assert.Same(urlHelper, retrievedUrlHelper);
-        }
-
-        [Fact]
         public void CreateErrorResponseRangeNotSatisfiable_ThrowsOnNullException()
         {
             HttpRequestMessage request = new HttpRequestMessage();

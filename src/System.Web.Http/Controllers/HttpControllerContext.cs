@@ -10,14 +10,47 @@ namespace System.Web.Http.Controllers
     /// </summary>
     public class HttpControllerContext
     {
-        private HttpConfiguration _configuration;
-        private IHttpRouteData _routeData;
+        private HttpRequestContext _requestContext;
         private HttpRequestMessage _request;
-
         private HttpControllerDescriptor _controllerDescriptor;
         private IHttpController _controller;
 
-        public HttpControllerContext(HttpConfiguration configuration, IHttpRouteData routeData, HttpRequestMessage request)
+        /// <summary>Initializes a new instance of the <see cref="HttpControllerContext"/> class.</summary>
+        /// <param name="requestContext">The request context.</param>
+        /// <param name="request">The HTTP request.</param>
+        /// <param name="controllerDescriptor">The controller descriptor.</param>
+        /// <param name="controller">The controller.</param>
+        public HttpControllerContext(HttpRequestContext requestContext, HttpRequestMessage request,
+            HttpControllerDescriptor controllerDescriptor, IHttpController controller)
+        {
+            if (requestContext == null)
+            {
+                throw Error.ArgumentNull("requestContext");
+            }
+
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (controllerDescriptor == null)
+            {
+                throw Error.ArgumentNull("controllerDescriptor");
+            }
+
+            if (controller == null)
+            {
+                throw Error.ArgumentNull("controller");
+            }
+
+            _requestContext = requestContext;
+            _request = request;
+            _controllerDescriptor = controllerDescriptor;
+            _controller = controller;
+        }
+
+        public HttpControllerContext(HttpConfiguration configuration, IHttpRouteData routeData,
+            HttpRequestMessage request)
         {
             if (configuration == null)
             {
@@ -34,8 +67,11 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("request");
             }
 
-            _configuration = configuration;
-            _routeData = routeData;
+            _requestContext = new HttpRequestContext
+            {
+                Configuration = configuration,
+                RouteData = routeData
+            };
             _request = request;
         }
 
@@ -45,13 +81,14 @@ namespace System.Web.Http.Controllers
         /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
         public HttpControllerContext()
         {
+            _requestContext = new HttpRequestContext();
         }
 
         public HttpConfiguration Configuration
         {
             get
             {
-                return _configuration ?? (_request == null ? null : _request.GetConfiguration());
+                return _requestContext.Configuration;
             }
             set
             {
@@ -60,41 +97,7 @@ namespace System.Web.Http.Controllers
                     throw Error.PropertyNull();
                 }
 
-                _configuration = value;
-                SyncWithRequest();
-            }
-        }
-
-        public HttpRequestMessage Request
-        {
-            get { return _request; }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-
-                _request = value;
-                SyncWithRequest();
-            }
-        }
-
-        public IHttpRouteData RouteData
-        {
-            get
-            {
-                return _routeData ?? (_request == null ? null : _request.GetRouteData());
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-
-                _routeData = value;
-                SyncWithRequest();
+                _requestContext.Configuration = value;
             }
         }
 
@@ -138,24 +141,46 @@ namespace System.Web.Http.Controllers
             }
         }
 
-        // unit test only. syncs data on the controller context with the request.
-        private void SyncWithRequest()
+        public HttpRequestMessage Request
         {
-            if (_request != null)
+            get { return _request; }
+            set
             {
-                if (_configuration != null)
+                if (value == null)
                 {
-                    _request.SetConfiguration(_configuration);
+                    throw Error.PropertyNull();
                 }
 
-                if (_routeData != null)
+                _request = value;
+            }
+        }
+
+        /// <summary>Gets or sets the request context.</summary>
+        public HttpRequestContext RequestContext
+        {
+            get { return _requestContext; }
+            set
+            {
+                if (value == null)
                 {
-                    _request.SetRouteData(_routeData);
+                    throw Error.PropertyNull();
                 }
 
-                // fall back to data from request.
-                _routeData = null;
-                _configuration = null;
+                _requestContext = value;
+            }
+        }
+
+        public IHttpRouteData RouteData
+        {
+            get { return _requestContext.RouteData; }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                _requestContext.RouteData = value;
             }
         }
     }

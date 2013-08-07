@@ -88,6 +88,7 @@ namespace System.Web.Http.Dispatcher
 
             IHttpRouteData routeData = request.GetRouteData();
             Contract.Assert(routeData != null);
+
             HttpControllerDescriptor httpControllerDescriptor = ControllerSelector.SelectController(request);
             if (httpControllerDescriptor == null)
             {
@@ -106,24 +107,38 @@ namespace System.Web.Http.Dispatcher
                     SRResources.NoControllerCreated));
             }
 
+            HttpConfiguration controllerConfiguration = httpControllerDescriptor.Configuration;
+
             // Set the controller configuration on the request properties
             HttpConfiguration requestConfig = request.GetConfiguration();
             if (requestConfig == null)
             {
-                request.SetConfiguration(httpControllerDescriptor.Configuration);
+                request.SetConfiguration(controllerConfiguration);
             }
             else
             {
-                if (requestConfig != httpControllerDescriptor.Configuration)
+                if (requestConfig != controllerConfiguration)
                 {
-                    request.SetConfiguration(httpControllerDescriptor.Configuration);
+                    request.SetConfiguration(controllerConfiguration);
                 }
             }
 
+            HttpRequestContext requestContext = request.GetRequestContext();
+
+            if (requestContext == null)
+            {
+                requestContext = new HttpRequestContext
+                {
+                    Configuration = controllerConfiguration,
+                    RouteData = routeData,
+                    Url = new UrlHelper(request),
+                    VirtualPathRoot = controllerConfiguration != null ? controllerConfiguration.VirtualPathRoot : null
+                };
+            }
+
             // Create context
-            HttpControllerContext controllerContext = new HttpControllerContext(httpControllerDescriptor.Configuration, routeData, request);
-            controllerContext.Controller = httpController;
-            controllerContext.ControllerDescriptor = httpControllerDescriptor;
+            HttpControllerContext controllerContext = new HttpControllerContext(requestContext, request,
+                httpControllerDescriptor, httpController);
 
             return httpController.ExecuteAsync(controllerContext, cancellationToken);
         }

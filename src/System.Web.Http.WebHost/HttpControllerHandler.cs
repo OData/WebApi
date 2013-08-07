@@ -10,9 +10,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Configuration;
+using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using System.Web.Http.WebHost.Properties;
@@ -207,6 +209,9 @@ namespace System.Web.Http.WebHost
             // Add context to enable route lookup later on
             request.SetHttpContext(httpContextBase);
 
+            HttpRequestContext requestContext = new WebHostHttpRequestContext(httpContextBase, requestBase, request);
+            request.SetRequestContext(requestContext);
+
             IDictionary httpContextItems = httpContextBase.Items;
 
             // Add the OWIN environment, when available (such as when using the OWIN integrated pipeline HTTP module).
@@ -214,6 +219,9 @@ namespace System.Web.Http.WebHost
             {
                 request.Properties.Add(OwinEnvironmentKey, httpContextItems[OwinEnvironmentHttpContextKey]);
             }
+
+            // The following three properties are set for backwards compatibility only. The request context controls
+            // the behavior for all cases except when accessing the property directly by key.
 
             // Add the retrieve client certificate delegate to the property bag to enable lookup later on
             request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, _retrieveClientCertificate);
@@ -498,6 +506,199 @@ namespace System.Web.Http.WebHost
             }
 
             return result;
+        }
+
+        private class WebHostHttpRequestContext : HttpRequestContext
+        {
+            private readonly HttpContextBase _contextBase;
+            private readonly HttpRequestBase _requestBase;
+            private readonly HttpRequestMessage _request;
+
+            private X509Certificate2 _clientCertificate;
+            private bool _clientCertificateSet;
+            private HttpConfiguration _configuration;
+            private bool _configurationSet;
+            private bool _includeErrorDetail;
+            private bool _includeErrorDetailSet;
+            private bool _isLocal;
+            private bool _isLocalSet;
+            private IPrincipal _principal;
+            private bool _principalSet;
+            private UrlHelper _url;
+            private bool _urlSet;
+            private string _virtualPathRoot;
+            private bool _virtualPathRootSet;
+
+            public WebHostHttpRequestContext(HttpContextBase contextBase, HttpRequestBase requestBase,
+                HttpRequestMessage request)
+            {
+                Contract.Assert(contextBase != null);
+                Contract.Assert(requestBase != null);
+                Contract.Assert(request != null);
+                _contextBase = contextBase;
+                _requestBase = requestBase;
+                _request = request;
+            }
+
+            // RouteData is not overridden; it is provided by a later point in the pipeline
+            //  (HttpControllerHandler.ProcessRequestAsyncCore).
+
+            public override X509Certificate2 ClientCertificate
+            {
+                get
+                {
+                    if (!_clientCertificateSet)
+                    {
+                        if (_requestBase.ClientCertificate.Certificate != null
+                            && _requestBase.ClientCertificate.Certificate.Length > 0)
+                        {
+                            _clientCertificate = new X509Certificate2(_requestBase.ClientCertificate.Certificate);
+                        }
+
+                        _clientCertificateSet = true;
+                    }
+
+                    return _clientCertificate;
+                }
+                set
+                {
+                    _clientCertificate = value;
+                    _clientCertificateSet = true;
+                }
+            }
+
+            public override HttpConfiguration Configuration
+            {
+                get
+                {
+                    if (!_configurationSet)
+                    {
+                        _configuration = GlobalConfiguration.Configuration;
+                        _configurationSet = true;
+                    }
+
+                    return _configuration;
+                }
+                set
+                {
+                    _configuration = value;
+                    _configurationSet = true;
+                }
+            }
+
+            public override bool IncludeErrorDetail
+            {
+                get
+                {
+                    if (!_includeErrorDetailSet)
+                    {
+                        switch (GlobalConfiguration.Configuration.IncludeErrorDetailPolicy)
+                        {
+                            case IncludeErrorDetailPolicy.Default:
+                                _includeErrorDetail = !_contextBase.IsCustomErrorEnabled;
+                                break;
+
+                            case IncludeErrorDetailPolicy.LocalOnly:
+                                _includeErrorDetail = IsLocal;
+                                break;
+
+                            case IncludeErrorDetailPolicy.Always:
+                                _includeErrorDetail = true;
+                                break;
+
+                            case IncludeErrorDetailPolicy.Never:
+                            default:
+                                _includeErrorDetail = false;
+                                break;
+                        }
+
+                        _includeErrorDetailSet = true;
+                    }
+
+                    return _includeErrorDetail;
+                }
+                set
+                {
+                    _includeErrorDetail = value;
+                    _includeErrorDetailSet = true;
+                }
+            }
+
+            public override bool IsLocal
+            {
+                get
+                {
+                    if (!_isLocalSet)
+                    {
+                        _isLocal = _requestBase.IsLocal;
+                        _isLocalSet = true;
+                    }
+
+                    return _isLocal;
+                }
+                set
+                {
+                    _isLocal = value;
+                    _isLocalSet = true;
+                }
+            }
+
+            public override IPrincipal Principal
+            {
+                get
+                {
+                    if (!_principalSet)
+                    {
+                        _principal = _contextBase.User;
+                        _principalSet = true;
+                    }
+
+                    return _principal;
+                }
+                set
+                {
+                    _principal = value;
+                    _principalSet = true;
+                }
+            }
+
+            public override UrlHelper Url
+            {
+                get
+                {
+                    if (!_urlSet)
+                    {
+                        _url = new UrlHelper(_request);
+                        _urlSet = true;
+                    }
+
+                    return _url;
+                }
+                set
+                {
+                    _url = value;
+                    _urlSet = true;
+                }
+            }
+
+            public override string VirtualPathRoot
+            {
+                get
+                {
+                    if (!_virtualPathRootSet)
+                    {
+                        _virtualPathRoot = GlobalConfiguration.Configuration.VirtualPathRoot;
+                        _virtualPathRootSet = true;
+                    }
+
+                    return _virtualPathRoot;
+                }
+                set
+                {
+                    _virtualPathRoot = value;
+                    _virtualPathRootSet = true;
+                }
+            }
         }
     }
 }

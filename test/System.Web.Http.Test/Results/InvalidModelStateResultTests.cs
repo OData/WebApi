@@ -406,8 +406,11 @@ namespace System.Web.Http.Results
                 using (HttpConfiguration configuration = CreateConfiguration(expectedInputFormatter,
                     contentNegotiator))
                 {
-                    configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-                    controller.Configuration = configuration;
+                    controller.RequestContext = new HttpRequestContext
+                    {
+                        Configuration = configuration,
+                        IncludeErrorDetail = true
+                    };
                     controller.Request = expectedRequest;
 
                     IHttpActionResult result = CreateProductUnderTest(modelState, controller);
@@ -577,15 +580,19 @@ namespace System.Web.Http.Results
                 CreateDummyContentNegotiator()))
             using (HttpRequestMessage request = CreateRequest())
             {
-                configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-                controller.Configuration = configuration;
+                HttpRequestContext requestContext = new HttpRequestContext
+                {
+                    Configuration = configuration,
+                    IncludeErrorDetail = true
+                };
+                controller.RequestContext = requestContext;
                 controller.Request = request;
 
                 InvalidModelStateResult result = CreateProductUnderTest(modelState, controller);
 
                 bool ignore = result.IncludeErrorDetail;
 
-                configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Never;
+                requestContext.IncludeErrorDetail = false;
 
                 // Act
                 bool includeErrorDetail = result.IncludeErrorDetail;

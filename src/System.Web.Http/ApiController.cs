@@ -31,52 +31,19 @@ namespace System.Web.Http
         private IHostPrincipalService _principalService;
         private bool _initialized;
 
-        /// <summary>
-        /// Gets the <see name="HttpRequestMessage"/> of the current ApiController.
-        ///
-        /// The setter is not intended to be used other than for unit testing purpose.
-        /// </summary>
-        public HttpRequestMessage Request
-        {
-            get { return ControllerContext.Request; }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-
-                ControllerContext.Request = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the <see name="HttpConfiguration"/> of the current ApiController.
-        ///
-        /// The setter is not intended to be used other than for unit testing purpose.
-        /// </summary>
+        /// <summary>Gets the configuration.</summary>
+        /// <remarks>The setter is intended for unit testing purposes only.</remarks>
         public HttpConfiguration Configuration
         {
-            get
-            {
-                return ControllerContext.Configuration;
-            }
+            get { return ControllerContext.Configuration; }
             set
             {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-
                 ControllerContext.Configuration = value;
             }
         }
 
-        /// <summary>
-        /// Gets the <see name="HttpControllerContext"/> of the current ApiController.
-        ///
-        /// The setter is not intended to be used other than for unit testing purpose.
-        /// </summary>
+        /// <summary>Gets the controller context.</summary>
+        /// <remarks>The setter is intended for unit testing purposes only.</remarks>
         public HttpControllerContext ControllerContext
         {
             get
@@ -102,15 +69,15 @@ namespace System.Web.Http
 
         /// <summary>
         /// Gets model state after the model binding process. This ModelState will be empty before model binding happens.
-        /// Please do not populate this property other than for unit testing purpose.
         /// </summary>
+        /// <remarks>The setter is intended for unit testing purposes only.</remarks>
         public ModelStateDictionary ModelState
         {
             get
             {
                 if (_modelState == null)
                 {
-                    // The getter is not intended to be used by multiple threads, so it is fine to initialize here
+                    // The getter is not intended to be used by multiple threads, so it is fine to initialize here.
                     _modelState = new ModelStateDictionary();
                 }
 
@@ -123,49 +90,37 @@ namespace System.Web.Http
             }
         }
 
-        /// <summary>
-        /// Gets an instance of a <see name="UrlHelper" />, which is used to generate URLs to other APIs.
-        ///
-        /// The setter is not intended to be used other than for unit testing purpose.
-        /// </summary>
-        public UrlHelper Url
+        /// <summary>Gets the HTTP request message.</summary>
+        /// <remarks>The setter is intended for unit testing purposes only.</remarks>
+        public HttpRequestMessage Request
         {
-            get
-            {
-                if (Request == null)
-                {
-                    return null;
-                }
-                return Request.GetUrlHelper();
-            }
-
+            get { return ControllerContext.Request; }
             set
             {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
+                ControllerContext.Request = value;
 
-                ThrowIfRequestIsNull();
-                Request.SetUrlHelper(value);
+                // Unit testing only
+                if (Request.GetRequestContext() == null)
+                {
+                    Request.SetRequestContext(RequestContext);
+                }
             }
         }
 
-        public IHttpRouteData RouteData
+        /// <summary>Gets the request context.</summary>
+        /// <remarks>The setter is intended for unit testing purposes only.</remarks>
+        public HttpRequestContext RequestContext
         {
-            get
-            {
-                return ControllerContext.RouteData;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
+            get { return ControllerContext.RequestContext; }
+            set { ControllerContext.RequestContext = value; }
+        }
 
-                ControllerContext.RouteData = value;
-            }
+        /// <summary>Gets a factory used to generate URLs to other APIs.</summary>
+        /// <remarks>The setter is intended for unit testing purposes only.</remarks>
+        public UrlHelper Url
+        {
+            get { return RequestContext.Url ?? (Request != null ? new UrlHelper(Request) : null); }
+            set { RequestContext.Url = value; }
         }
 
         /// <summary>
@@ -558,13 +513,5 @@ namespace System.Web.Http
         }
 
         #endregion IDisposable
-
-        private void ThrowIfRequestIsNull()
-        {
-            if (ControllerContext.Request == null)
-            {
-                throw Error.InvalidOperation(SRResources.RequestIsNull, GetType().Name);
-            }
-        }
     }
 }

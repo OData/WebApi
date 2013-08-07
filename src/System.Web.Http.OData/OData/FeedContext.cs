@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
@@ -16,6 +17,11 @@ namespace System.Web.Http.OData
         /// Gets or sets the HTTP request that caused this instance to be generated.
         /// </summary>
         public HttpRequestMessage Request { get; set; }
+
+        /// <summary>
+        /// Gets or sets the request context.
+        /// </summary>
+        public HttpRequestContext RequestContext { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IEdmEntitySet"/> this instance belongs to.

@@ -11,15 +11,6 @@ namespace System.Web.Http.Controllers
     public class ApiControllerTestabilityTest
     {
         [Fact]
-        public void SettingUrlHelperWithoutRequest_Throws()
-        {
-            CustomersController controller = new CustomersController();
-            Assert.Throws<InvalidOperationException>(
-                () => controller.Url = new UrlHelper(),
-                "The property 'Request' on 'CustomersController' is null. The property must be initialized with a non-null value.");
-        }
-
-        [Fact]
         public void Post_With_EmptyRequest_And_MockUrlHelper()
         {
             // Arrange
@@ -63,7 +54,7 @@ namespace System.Web.Http.Controllers
             CustomersController controller = new CustomersController();
             controller.Configuration = new HttpConfiguration();
             controller.Configuration.Routes.MapHttpRoute("default", "{controller}/{id}", new { id = RouteParameter.Optional });
-            controller.RouteData = new HttpRouteData(new HttpRoute(), new HttpRouteValueDictionary { { "controller", "Customers" } });
+            controller.RequestContext.RouteData = new HttpRouteData(new HttpRoute(), new HttpRouteValueDictionary { { "controller", "Customers" } });
             controller.Request = new HttpRequestMessage { RequestUri = new Uri("http://locahost/Customers") };
 
             // Act

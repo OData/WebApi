@@ -420,9 +420,6 @@
   <data name="ServicesContainerIHostPrincipalServiceRequired" xml:space="preserve">
     <value>ServicesContainer must have an IHostPrincipalService.</value>
   </data>
-  <data name="RequestIsNull" xml:space="preserve">
-    <value>The property 'Request' on '{0}' is null. The property must be initialized with a non-null value.</value>
-  </data>
   <data name="DefaultInlineConstraintResolver_CouldNotFindCtor" xml:space="preserve">
     <value>Could not find a constructor for constraint type '{0}' with the following number of parameters: {1}.</value>
   </data>
@@ -464,5 +461,8 @@
   </data>
   <data name="UrlHelper_LinkMustNotReturnNull" xml:space="preserve">
     <value>UrlHelper.Link must not return null.</value>
+  </data>
+  <data name="RequestIsNull" xml:space="preserve">
+    <value>The property 'Request' on '{0}' is null. The property must be initialized with a non-null value.</value>
   </data>
 </root>

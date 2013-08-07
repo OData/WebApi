@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
 using System.Web.Http.Properties;
@@ -156,6 +157,14 @@ namespace System.Web.Http
             if (originalPrincipal == null)
             {
                 Thread.CurrentPrincipal = _anonymousPrincipal;
+            }
+
+            // Ensure we have a principal on the request context (if there is a request context).
+            HttpRequestContext requestContext = request.GetRequestContext();
+
+            if (requestContext != null && requestContext.Principal == null)
+            {
+                requestContext.Principal = Thread.CurrentPrincipal;
             }
 
             try

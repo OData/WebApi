@@ -171,6 +171,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 FeedContext feedContext = new FeedContext
                 {
                     Request = writeContext.Request,
+                    RequestContext = writeContext.RequestContext,
                     EntitySet = writeContext.EntitySet,
                     Url = writeContext.Url,
                     FeedInstance = feedInstance

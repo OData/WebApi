@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
@@ -43,6 +44,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataSerializerContext context = entity.SerializerContext;
 
             Request = context.Request;
+            RequestContext = context.RequestContext;
             Url = context.Url;
             EntitySet = context.EntitySet;
             Model = context.Model;
@@ -62,6 +64,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Gets or sets the HTTP Request whose response is being serialized.
         /// </summary>
         public HttpRequestMessage Request { get; set; }
+
+        /// <summary>
+        /// Gets or sets the request context.
+        /// </summary>
+        public HttpRequestContext RequestContext { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="UrlHelper"/> to use for generating OData links.

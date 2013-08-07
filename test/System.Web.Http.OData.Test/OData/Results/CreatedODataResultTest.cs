@@ -314,10 +314,10 @@ namespace System.Web.Http.OData.Results
             model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetConfiguration(new HttpConfiguration());
             request.SetEdmModel(model.Model);
             request.SetODataPath(path);
             TestController controller = new TestController();
+            controller.Configuration = new HttpConfiguration();
             CreatedODataResult<TestEntity> createdODataResult = new CreatedODataResult<TestEntity>(_entity, controller);
 
             // Act

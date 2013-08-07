@@ -10,7 +10,6 @@ namespace System.Web.Http.Batch
         [Theory]
         [InlineData("MS_HttpRouteData")]
         [InlineData("MS_DisposableRequestResources")]
-        [InlineData("MS_UrlHelper")]
         [InlineData("MS_SynchronizationContext")]
         [InlineData("MS_HttpConfiguration")]
         [InlineData("MS_HttpBatchContext")]

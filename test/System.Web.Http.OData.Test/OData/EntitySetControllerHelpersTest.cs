@@ -20,7 +20,7 @@ namespace System.Web.Http.OData
         {
             ApiController controller = new Mock<ApiController>().Object;
             var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers");
-            request.SetConfiguration(new HttpConfiguration());
+            controller.Configuration = new HttpConfiguration();
             controller.Request = request;
 
             Assert.Throws<InvalidOperationException>(
@@ -33,7 +33,7 @@ namespace System.Web.Http.OData
         {
             ApiController controller = new Mock<ApiController>().Object;
             var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers");
-            request.SetConfiguration(new HttpConfiguration());
+            controller.Configuration = new HttpConfiguration();
             request.SetODataPath(new ODataPath(new MetadataPathSegment()));
             controller.Request = request;
 

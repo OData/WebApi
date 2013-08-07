@@ -38,6 +38,13 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
+            HttpRequestContext requestContext = GetRequestContext(request);
+
+            if (requestContext != null)
+            {
+                return requestContext.Configuration;
+            }
+
             return request.GetProperty<HttpConfiguration>(HttpPropertyKeys.HttpConfigurationKey);
         }
 
@@ -55,6 +62,13 @@ namespace System.Net.Http
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
+            }
+
+            HttpRequestContext requestContext = GetRequestContext(request);
+
+            if (requestContext != null)
+            {
+                requestContext.Configuration = configuration;
             }
 
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -88,6 +102,37 @@ namespace System.Net.Http
             }
 
             return result;
+        }
+
+        /// <summary>Gets the <see cref="HttpRequestContext"/> associated with this request.</summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <returns>The <see cref="HttpRequestContext"/> associated with this request.</returns>
+        public static HttpRequestContext GetRequestContext(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetProperty<HttpRequestContext>(HttpPropertyKeys.RequestContextKey);
+        }
+
+        /// <summary>Gets an <see cref="HttpRequestContext"/> associated with this request.</summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <param name="context">The <see cref="HttpRequestContext"/> to associate with this request.</param>
+        public static void SetRequestContext(this HttpRequestMessage request, HttpRequestContext context)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            request.Properties[HttpPropertyKeys.RequestContextKey] = context;
         }
 
         /// <summary>
@@ -127,6 +172,13 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
+            HttpRequestContext requestContext = GetRequestContext(request);
+
+            if (requestContext != null)
+            {
+                return requestContext.ClientCertificate;
+            }
+
             X509Certificate2 result = null;
 
             if (!request.Properties.TryGetValue(HttpPropertyKeys.ClientCertificateKey, out result))
@@ -160,6 +212,13 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
+            HttpRequestContext requestContext = GetRequestContext(request);
+
+            if (requestContext != null)
+            {
+                return requestContext.RouteData;
+            }
+
             return request.GetProperty<IHttpRouteData>(HttpPropertyKeys.HttpRouteDataKey);
         }
 
@@ -177,6 +236,13 @@ namespace System.Net.Http
             if (routeData == null)
             {
                 throw Error.ArgumentNull("routeData");
+            }
+
+            HttpRequestContext requestContext = GetRequestContext(request);
+
+            if (requestContext != null)
+            {
+                requestContext.RouteData = routeData;
             }
 
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
@@ -751,69 +817,16 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
-            UrlHelper urlHelper;
-            if (!request.Properties.TryGetValue<UrlHelper>(HttpPropertyKeys.UrlHelperKey, out urlHelper))
+            HttpRequestContext requestContext = GetRequestContext(request);
+
+            UrlHelper url = null;
+
+            if (requestContext != null)
             {
-                urlHelper = new UrlHelper(request);
-                request.Properties.Add(HttpPropertyKeys.UrlHelperKey, urlHelper);
+                url = requestContext.Url;
             }
 
-            return urlHelper;
-        }
-
-        /// <summary>
-        /// Sets the <see cref="UrlHelper"/> instance associated with this request.
-        /// </summary>
-        /// <param name="request">The <see cref="HttpRequestMessage"/>.</param>
-        /// <param name="urlHelper">The <see cref="UrlHelper"/></param>
-        /// <returns>The <see cref="UrlHelper"/> instance associated with this request.</returns>
-        public static void SetUrlHelper(this HttpRequestMessage request, UrlHelper urlHelper)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-            if (urlHelper == null)
-            {
-                throw Error.ArgumentNull("urlHelper");
-            }
-
-            request.Properties[HttpPropertyKeys.UrlHelperKey] = urlHelper;
-        }
-
-        /// <summary>
-        /// Retrieves the root virtual path associated with this request.
-        /// </summary>
-        /// <param name="request">The <see cref="HttpRequestMessage"/>.</param>
-        /// <returns>The root virtual path associated with this request.</returns>
-        public static string GetVirtualPathRoot(this HttpRequestMessage request)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            return request.GetProperty<string>(HttpPropertyKeys.VirtualPathRoot);
-        }
-
-        /// <summary>
-        /// Sets the root virtual path associated with this request.
-        /// </summary>
-        /// <param name="request">The <see cref="HttpRequestMessage"/>.</param>
-        /// <param name="virtualPathRoot">The virtual path root to associate with this request.</param>
-        public static void SetVirtualPathRoot(this HttpRequestMessage request, string virtualPathRoot)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            if (virtualPathRoot == null)
-            {
-                throw Error.ArgumentNull("virtualPathRoot");
-            }
-
-            request.Properties[HttpPropertyKeys.VirtualPathRoot] = virtualPathRoot;
+            return url ?? new UrlHelper(request);
         }
 
         /// <summary>
@@ -826,6 +839,13 @@ namespace System.Net.Http
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
+            }
+
+            HttpRequestContext requestContext = GetRequestContext(request);
+
+            if (requestContext != null)
+            {
+                return requestContext.IsLocal;
             }
 
             Lazy<bool> isLocal = request.GetProperty<Lazy<bool>>(HttpPropertyKeys.IsLocalKey);
@@ -858,6 +878,13 @@ namespace System.Net.Http
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
+            }
+
+            HttpRequestContext requestContext = GetRequestContext(request);
+
+            if (requestContext != null)
+            {
+                return requestContext.IncludeErrorDetail;
             }
 
             HttpConfiguration configuration = request.GetConfiguration();

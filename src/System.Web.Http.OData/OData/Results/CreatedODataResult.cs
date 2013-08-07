@@ -186,6 +186,7 @@ namespace System.Web.Http.OData.Results
                 Url = request.GetUrlHelper(),
                 MetadataLevel = ODataMetadataLevel.Default,
                 Request = request,
+                RequestContext = request.GetRequestContext(),
                 Path = path
             };
 

@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Routing
@@ -75,8 +76,14 @@ namespace System.Web.Http.Routing
             if (path.StartsWith("~/", StringComparison.Ordinal))
             {
                 // This is a virtual path, we need to combine it with the virtual path root
-                string virtualPathRoot = Request.GetVirtualPathRoot();
-                if (virtualPathRoot == null)
+                string virtualPathRoot;
+                HttpRequestContext requestContext = Request.GetRequestContext();
+
+                if (requestContext != null)
+                {
+                    virtualPathRoot = requestContext.VirtualPathRoot;
+                }
+                else
                 {
                     HttpConfiguration configuration = Request.GetConfiguration();
                     if (configuration == null)
@@ -84,7 +91,12 @@ namespace System.Web.Http.Routing
                         throw Error.InvalidOperation(SRResources.HttpRequestMessageExtensions_NoConfiguration);
                     }
 
-                    virtualPathRoot = configuration.VirtualPathRoot ?? "/";
+                    virtualPathRoot = configuration.VirtualPathRoot;
+                }
+
+                if (virtualPathRoot == null)
+                {
+                    virtualPathRoot = "/";
                 }
 
                 if (!virtualPathRoot.StartsWith("/", StringComparison.Ordinal))

@@ -294,7 +294,6 @@ namespace System.Web.Http
             };
             request.Properties.Add("foo", "bar");
             request.SetRouteData(new HttpRouteData(new HttpRoute()));
-            request.SetUrlHelper(new UrlHelper());
             request.RegisterForDispose(new StringContent(String.Empty));
 
             IList<HttpRequestMessage> requests = batchHandler.ParseBatchRequestsAsync(request, CancellationToken.None).Result;

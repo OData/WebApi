@@ -199,6 +199,9 @@
                 .filter("form");
 
             $(selector).find(":input[data-val=true]").each(function () {
+            // :input is a psuedoselector provided by jQuery which selects input and input-like elements
+            // combining :input with other selectors significantly decreases performance.
+            $(selector).find(":input").filter("[data-val=true]").each(function () {
                 $jQval.unobtrusive.parseElement(this, true);
             });
 
@@ -333,6 +336,7 @@
             other = options.params.other,
             fullOtherName = appendModelPrefix(other, prefix),
             element = $(options.form).find(":input[name='" + escapeAttributeValue(fullOtherName) + "']")[0];
+            element = $(options.form).find(":input").filter("[name='" + escapeAttributeValue(fullOtherName) + "']")[0];
 
         setValidationValues(options, "equalTo", element);
     });
@@ -354,6 +358,7 @@
             var paramName = appendModelPrefix(fieldName, prefix);
             value.data[paramName] = function () {
                 return $(options.form).find(":input[name='" + escapeAttributeValue(paramName) + "']").val();
+                return $(options.form).find(":input").filter("[name='" + escapeAttributeValue(paramName) + "']").val();
             };
         });
 
@@ -374,4 +379,4 @@
     $(function () {
         $jQval.unobtrusive.parse(document);
     });
-} (jQuery));
+}(jQuery));

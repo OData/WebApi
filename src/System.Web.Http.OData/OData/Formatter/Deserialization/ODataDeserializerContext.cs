@@ -22,6 +22,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public Type ResourceType { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="IEdmTypeReference"/> of the top-level object the request needs to be deserialized into.
+        /// </summary>
+        public IEdmTypeReference ResourceEdmType { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="ODataPath"/> of the request.
         /// </summary>
         public ODataPath Path { get; set; }
@@ -63,6 +68,16 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
                 return _isUntyped.Value;
             }
+        }
+
+        internal IEdmTypeReference GetEdmType(Type type)
+        {
+            if (ResourceEdmType != null)
+            {
+                return ResourceEdmType;
+            }
+
+            return ODataMediaTypeFormatter.GetExpectedPayloadType(type, Path, Model);
         }
     }
 }

@@ -18,37 +18,35 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataCollectionDeserializer"/> class.
         /// </summary>
-        /// <param name="edmType">The collection type that this deserializer can read.</param>
         /// <param name="deserializerProvider">The deserializer provider to use to read inner objects.</param>
-        public ODataCollectionDeserializer(IEdmCollectionTypeReference edmType, ODataDeserializerProvider deserializerProvider)
-            : base(edmType, ODataPayloadKind.Collection, deserializerProvider)
+        public ODataCollectionDeserializer(ODataDeserializerProvider deserializerProvider)
+            : base(ODataPayloadKind.Collection, deserializerProvider)
         {
-            CollectionType = edmType;
-            ElementType = edmType.ElementType();
         }
 
-        /// <summary>
-        /// Gets the collection type that this deserializer can read.
-        /// </summary>
-        public IEdmCollectionTypeReference CollectionType { get; private set; }
-
-        /// <summary>
-        /// Gets the element type of the collection type that this deserializer can read.
-        /// </summary>
-        public IEdmTypeReference ElementType { get; private set; }
-
         /// <inheritdoc />
-        public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
+        public override object Read(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
         {
             if (messageReader == null)
             {
                 throw Error.ArgumentNull("messageReader");
             }
 
-            IEnumerable result = ReadInline(ReadCollection(messageReader), readContext) as IEnumerable;
-            if (result != null && readContext.IsUntyped && ElementType.IsComplex())
+            IEdmTypeReference edmType = readContext.GetEdmType(type);
+            Contract.Assert(edmType != null);
+
+            if (!edmType.IsCollection())
             {
-                EdmComplexObjectCollection complexCollection = new EdmComplexObjectCollection(CollectionType);
+                throw Error.Argument("type", SRResources.ArgumentMustBeOfType, EdmTypeKind.Collection);
+            }
+
+            IEdmCollectionTypeReference collectionType = edmType.AsCollection();
+            IEdmTypeReference elementType = collectionType.ElementType();
+
+            IEnumerable result = ReadInline(ReadCollection(messageReader, elementType), edmType, readContext) as IEnumerable;
+            if (result != null && readContext.IsUntyped && elementType.IsComplex())
+            {
+                EdmComplexObjectCollection complexCollection = new EdmComplexObjectCollection(collectionType);
                 foreach (EdmComplexObject complexObject in result)
                 {
                     complexCollection.Add(complexObject);
@@ -60,12 +58,25 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         /// <inheritdoc />
-        public sealed override object ReadInline(object item, ODataDeserializerContext readContext)
+        public sealed override object ReadInline(object item, IEdmTypeReference edmType, ODataDeserializerContext readContext)
         {
             if (item == null)
             {
                 return null;
             }
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+
+            if (!edmType.IsCollection())
+            {
+                throw new SerializationException(
+                    Error.Format(SRResources.TypeCannotBeDeserialized, edmType.ToTraceString(), typeof(ODataMediaTypeFormatter)));
+            }
+
+            IEdmCollectionTypeReference collectionType = edmType.AsCollection();
+            IEdmTypeReference elementType = collectionType.ElementType();
 
             ODataCollectionValue collection = item as ODataCollectionValue;
 
@@ -77,47 +88,53 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             // Recursion guard to avoid stack overflows
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
-            return ReadCollectionValue(collection, readContext);
+            return ReadCollectionValue(collection, elementType, readContext);
         }
 
         /// <summary>
         /// Deserializes the given <paramref name="collectionValue"/> under the given <paramref name="readContext"/>.
         /// </summary>
         /// <param name="collectionValue">The <see cref="ODataCollectionValue"/> to deserialize.</param>
+        /// <param name="elementType">The element type of the collection to read.</param>
         /// <param name="readContext">The deserializer context.</param>
         /// <returns>The deserialized collection.</returns>
-        public virtual IEnumerable ReadCollectionValue(ODataCollectionValue collectionValue, ODataDeserializerContext readContext)
+        public virtual IEnumerable ReadCollectionValue(ODataCollectionValue collectionValue, IEdmTypeReference elementType,
+            ODataDeserializerContext readContext)
         {
             if (collectionValue == null)
             {
                 throw Error.ArgumentNull("collectionValue");
             }
+            if (elementType == null)
+            {
+                throw Error.ArgumentNull("elementType");
+            }
 
-            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(ElementType);
+            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(elementType);
             if (deserializer == null)
             {
                 throw new SerializationException(
-                    Error.Format(SRResources.TypeCannotBeDeserialized, ElementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                    Error.Format(SRResources.TypeCannotBeDeserialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
             }
 
             foreach (object entry in collectionValue.Items)
             {
-                if (ElementType.IsPrimitive())
+                if (elementType.IsPrimitive())
                 {
                     yield return entry;
                 }
                 else
                 {
-                    yield return deserializer.ReadInline(entry, readContext);
+                    yield return deserializer.ReadInline(entry, elementType, readContext);
                 }
             }
         }
 
-        private ODataCollectionValue ReadCollection(ODataMessageReader messageReader)
+        private static ODataCollectionValue ReadCollection(ODataMessageReader messageReader, IEdmTypeReference elementType)
         {
             Contract.Assert(messageReader != null);
 
-            ODataCollectionReader reader = messageReader.CreateODataCollectionReader(CollectionType.ElementType());
+            ODataCollectionReader reader = messageReader.CreateODataCollectionReader(elementType);
             ArrayList items = new ArrayList();
             string typeName = null;
 

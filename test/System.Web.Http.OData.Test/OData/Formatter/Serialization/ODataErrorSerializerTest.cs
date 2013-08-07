@@ -20,7 +20,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Mock<IODataResponseMessage> mockResponseMessage = new Mock<IODataResponseMessage>();
             mockResponseMessage.Setup(response => response.GetStream()).Returns(new MemoryStream());
 
-            Assert.DoesNotThrow(() => serializer.WriteObject(error, new ODataMessageWriter(mockResponseMessage.Object), new ODataSerializerContext()));
+            Assert.DoesNotThrow(() => serializer.WriteObject(error, typeof(ODataError), new ODataMessageWriter(mockResponseMessage.Object), 
+                new ODataSerializerContext()));
         }
 
         [Fact]
@@ -29,7 +30,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataErrorSerializer serializer = new ODataErrorSerializer();
 
             Assert.ThrowsArgumentNull(
-                () => serializer.WriteObject(graph: null, messageWriter: null, writeContext: null),
+                () => serializer.WriteObject(graph: null, type: typeof(ODataError),messageWriter: null, writeContext: null),
                 "graph");
         }
 
@@ -39,7 +40,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataErrorSerializer serializer = new ODataErrorSerializer();
 
             Assert.ThrowsArgumentNull(
-                () => serializer.WriteObject(graph: 42, messageWriter: null, writeContext: null),
+                () => serializer.WriteObject(graph: 42, type: typeof(ODataError), messageWriter: null, writeContext: null),
                 "messageWriter");
         }
 
@@ -48,7 +49,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ODataErrorSerializer serializer = new ODataErrorSerializer();
             Assert.Throws<SerializationException>(
-                () => serializer.WriteObject(42, ODataTestUtil.GetMockODataMessageWriter(), new ODataSerializerContext()),
+                () => serializer.WriteObject(42, typeof(ODataError), ODataTestUtil.GetMockODataMessageWriter(), new ODataSerializerContext()),
                 "The type 'System.Int32' is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError.");
         }
 
@@ -62,7 +63,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataError error = new ODataError { Message = "Error!!!" };
 
             // Act
-            serializer.WriteObject(error, new ODataMessageWriter(message), new ODataSerializerContext());
+            serializer.WriteObject(error, typeof(ODataError), new ODataMessageWriter(message), new ODataSerializerContext());
 
             // Assert
             stream.Seek(0, SeekOrigin.Begin);

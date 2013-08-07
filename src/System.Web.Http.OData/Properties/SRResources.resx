@@ -514,9 +514,6 @@
   <data name="NavigationPropertyMissingDuringSerialization" xml:space="preserve">
     <value>The related navigation property could not be found from the OData path. The related navigation property is required to serialize the payload.</value>
   </data>
-  <data name="UnsupportedPrimitiveType" xml:space="preserve">
-    <value>The type '{0}' is not a supported primitive type.</value>
-  </data>
   <data name="UnableToDetermineMetadataUrl" xml:space="preserve">
     <value>The ODataMediaTypeFormatter must be able to determine the metadata URL for a request in order to serialize the response.</value>
   </data>
@@ -561,9 +558,6 @@
   </data>
   <data name="UnableToDetermineBaseUrl" xml:space="preserve">
     <value>The ODataMediaTypeFormatter was unable to determine the base URI for the request. The request must be processed by an OData route for the OData formatter to serialize the response.</value>
-  </data>
-  <data name="ItemTypeOfCollectionNull" xml:space="preserve">
-    <value>The element type of an EDM collection type cannot be null.</value>
   </data>
   <data name="CannotWriteType" xml:space="preserve">
     <value>{0} cannot write an object of type '{1}'.</value>

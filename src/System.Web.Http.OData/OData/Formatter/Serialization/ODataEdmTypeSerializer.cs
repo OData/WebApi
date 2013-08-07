@@ -15,27 +15,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataEdmTypeSerializer"/> class.
         /// </summary>
-        /// <param name="edmType">The EDM type.</param>
         /// <param name="payloadKind">The kind of OData payload that this serializer generates.</param>
-        protected ODataEdmTypeSerializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind)
+        protected ODataEdmTypeSerializer(ODataPayloadKind payloadKind)
             : base(payloadKind)
         {
-            if (edmType == null)
-            {
-                throw Error.ArgumentNull("edmType");
-            }
-
-            EdmType = edmType;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataEdmTypeSerializer"/> class.
         /// </summary>
-        /// <param name="edmType">The EDM type.</param>
         /// <param name="payloadKind">The kind of OData payload that this serializer generates.</param>
         /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use to write inner objects.</param>
-        protected ODataEdmTypeSerializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
-            : this(edmType, payloadKind)
+        protected ODataEdmTypeSerializer(ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
+            : this(payloadKind)
         {
             if (serializerProvider == null)
             {
@@ -44,11 +36,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             SerializerProvider = serializerProvider;
         }
-
-        /// <summary>
-        /// Gets the EDM type this serializer can write.
-        /// </summary>
-        public IEdmTypeReference EdmType { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="ODataSerializerProvider"/> that can be used to write inner objects.
@@ -60,9 +47,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// messageWriter and the writeContext.
         /// </summary>
         /// <param name="graph">The object to be written.</param>
+        /// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
         /// <param name="writer">The <see cref="ODataWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteObjectInline(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        public virtual void WriteObjectInline(object graph, IEdmTypeReference expectedType, ODataWriter writer,
+            ODataSerializerContext writeContext)
         {
             throw Error.NotSupported(SRResources.WriteObjectInlineNotSupported, GetType().Name);
         }
@@ -71,20 +60,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Creates an <see cref="ODataValue"/> for the object represented by <paramref name="graph"/>.
         /// </summary>
         /// <param name="graph">The value of the <see cref="ODataValue"/> to be created.</param>
+        /// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
         /// <returns>The <see cref="ODataValue"/> created.</returns>
-        public virtual ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
+        public virtual ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
         {
             throw Error.NotSupported(SRResources.CreateODataValueNotSupported, GetType().Name);
         }
 
-        internal ODataProperty CreateProperty(object graph, string elementName, ODataSerializerContext writeContext)
+        internal ODataProperty CreateProperty(object graph, IEdmTypeReference expectedType, string elementName,
+            ODataSerializerContext writeContext)
         {
             Contract.Assert(elementName != null);
             return new ODataProperty
             {
                 Name = elementName,
-                Value = CreateODataValue(graph, writeContext)
+                Value = CreateODataValue(graph, expectedType, writeContext)
             };
         }
     }

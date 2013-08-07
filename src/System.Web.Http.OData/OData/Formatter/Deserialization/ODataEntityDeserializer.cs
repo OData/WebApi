@@ -21,21 +21,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataEntityDeserializer"/> class.
         /// </summary>
-        /// <param name="edmType">The entity type that this serializer handles.</param>
         /// <param name="deserializerProvider">The deserializer provider to use to read inner objects.</param>
-        public ODataEntityDeserializer(IEdmEntityTypeReference edmType, ODataDeserializerProvider deserializerProvider)
-            : base(edmType, ODataPayloadKind.Entry, deserializerProvider)
+        public ODataEntityDeserializer(ODataDeserializerProvider deserializerProvider)
+            : base(ODataPayloadKind.Entry, deserializerProvider)
         {
-            EntityType = edmType;
         }
 
-        /// <summary>
-        /// Gets the entity type that this serializer handles.
-        /// </summary>
-        public IEdmEntityTypeReference EntityType { get; private set; }
-
         /// <inheritdoc />
-        public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
+        public override object Read(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
         {
             if (messageReader == null)
             {
@@ -53,25 +46,42 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
 
             IEdmEntitySet entitySet = GetEntitySet(readContext.Path);
-
             if (entitySet == null)
             {
                 throw new SerializationException(SRResources.EntitySetMissingDuringDeserialization);
             }
 
-            ODataReader odataReader = messageReader.CreateODataEntryReader(entitySet, EntityType.EntityDefinition());
+            IEdmTypeReference edmType = readContext.GetEdmType(type);
+            Contract.Assert(edmType != null);
+
+            if (!edmType.IsEntity())
+            {
+                throw Error.Argument("type", SRResources.ArgumentMustBeOfType, EdmTypeKind.Entity);
+            }
+
+            IEdmEntityTypeReference entityType = edmType.AsEntity();
+
+            ODataReader odataReader = messageReader.CreateODataEntryReader(entitySet, entityType.EntityDefinition());
             ODataEntryWithNavigationLinks topLevelEntry = ReadEntryOrFeed(odataReader) as ODataEntryWithNavigationLinks;
             Contract.Assert(topLevelEntry != null);
 
-            return ReadInline(topLevelEntry, readContext);
+            return ReadInline(topLevelEntry, entityType, readContext);
         }
 
         /// <inheritdoc />
-        public sealed override object ReadInline(object item, ODataDeserializerContext readContext)
+        public sealed override object ReadInline(object item, IEdmTypeReference edmType, ODataDeserializerContext readContext)
         {
             if (item == null)
             {
                 throw Error.ArgumentNull("item");
+            }
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+            if (!edmType.IsEntity())
+            {
+                throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, EdmTypeKind.Entity);
             }
 
             ODataEntryWithNavigationLinks entryWrapper = item as ODataEntryWithNavigationLinks;
@@ -83,16 +93,18 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             // Recursion guard to avoid stack overflows
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
-            return ReadEntry(entryWrapper, readContext);
+            return ReadEntry(entryWrapper, edmType.AsEntity(), readContext);
         }
 
         /// <summary>
         /// Deserializes the given <paramref name="entryWrapper"/> under the given <paramref name="readContext"/>.
         /// </summary>
         /// <param name="entryWrapper">The OData entry to deserialize.</param>
+        /// <param name="entityType">The entity type of the entry to deserialize.</param>
         /// <param name="readContext">The deserializer context.</param>
         /// <returns>The deserialized entity.</returns>
-        public virtual object ReadEntry(ODataEntryWithNavigationLinks entryWrapper, ODataDeserializerContext readContext)
+        public virtual object ReadEntry(ODataEntryWithNavigationLinks entryWrapper, IEdmEntityTypeReference entityType,
+            ODataDeserializerContext readContext)
         {
             if (entryWrapper == null)
             {
@@ -104,7 +116,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("readContext");
             }
 
-            if (!String.IsNullOrEmpty(entryWrapper.Entry.TypeName) && EntityType.FullName() != entryWrapper.Entry.TypeName)
+            if (!String.IsNullOrEmpty(entryWrapper.Entry.TypeName) && entityType.FullName() != entryWrapper.Entry.TypeName)
             {
                 // received a derived type in a base type deserializer. delegate it to the appropriate derived type deserializer.
                 IEdmModel model = readContext.Model;
@@ -114,52 +126,59 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
                 }
 
-                IEdmEntityType entityType = model.FindType(entryWrapper.Entry.TypeName) as IEdmEntityType;
-                if (entityType == null)
+                IEdmEntityType actualType = model.FindType(entryWrapper.Entry.TypeName) as IEdmEntityType;
+                if (actualType == null)
                 {
                     throw new ODataException(Error.Format(SRResources.EntityTypeNotInModel, entryWrapper.Entry.TypeName));
                 }
 
-                if (entityType.IsAbstract)
+                if (actualType.IsAbstract)
                 {
                     string message = Error.Format(SRResources.CannotInstantiateAbstractEntityType, entryWrapper.Entry.TypeName);
                     throw new ODataException(message);
                 }
 
-                ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(new EdmEntityTypeReference(entityType, isNullable: false));
+                IEdmTypeReference actualEntityType = new EdmEntityTypeReference(actualType, isNullable: false);
+                ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(actualEntityType);
                 if (deserializer == null)
                 {
-                    throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, entityType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                    throw new SerializationException(
+                        Error.Format(SRResources.TypeCannotBeDeserialized, actualEntityType.FullName(), typeof(ODataMediaTypeFormatter).Name));
                 }
 
-                object resource = deserializer.ReadInline(entryWrapper, readContext);
+                object resource = deserializer.ReadInline(entryWrapper, actualEntityType, readContext);
 
                 EdmStructuredObject structuredObject = resource as EdmStructuredObject;
                 if (structuredObject != null)
                 {
-                    structuredObject.ExpectedEdmType = EntityType.EntityDefinition();
+                    structuredObject.ExpectedEdmType = entityType.EntityDefinition();
                 }
 
                 return resource;
             }
             else
             {
-                object resource = CreateEntityResource(readContext);
-                ApplyEntityProperties(resource, entryWrapper, readContext);
+                object resource = CreateEntityResource(entityType, readContext);
+                ApplyEntityProperties(resource, entryWrapper, entityType, readContext);
                 return resource;
             }
         }
 
         /// <summary>
-        /// Creates a new instance of the backing CLR object for <see cref="ODataEntityDeserializer.EntityType"/>.
+        /// Creates a new instance of the backing CLR object for the given entity type.
         /// </summary>
+        /// <param name="entityType">The EDM type of the entity to create.</param>
         /// <param name="readContext">The deserializer context.</param>
         /// <returns>The created CLR object.</returns>
-        public virtual object CreateEntityResource(ODataDeserializerContext readContext)
+        public virtual object CreateEntityResource(IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
         {
             if (readContext == null)
             {
                 throw Error.ArgumentNull("readContext");
+            }
+            if (entityType == null)
+            {
+                throw Error.ArgumentNull("entityType");
             }
 
             IEdmModel model = readContext.Model;
@@ -170,15 +189,15 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             if (readContext.IsUntyped)
             {
-                return new EdmEntityObject(EntityType);
+                return new EdmEntityObject(entityType);
             }
             else
             {
-                Type clrType = EdmLibHelpers.GetClrType(EntityType, model);
+                Type clrType = EdmLibHelpers.GetClrType(entityType, model);
                 if (clrType == null)
                 {
                     throw new ODataException(
-                        Error.Format(SRResources.MappingDoesNotContainEntityType, EntityType.FullName()));
+                        Error.Format(SRResources.MappingDoesNotContainEntityType, entityType.FullName()));
                 }
 
                 if (readContext.IsDeltaOfT)
@@ -197,8 +216,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// </summary>
         /// <param name="entityResource">The object into which the navigation properties should be read.</param>
         /// <param name="entryWrapper">The entry object containing the navigation properties.</param>
+        /// <param name="entityType">The entity type of the entity resource.</param>
         /// <param name="readContext">The deserializer context.</param>
-        public virtual void ApplyNavigationProperties(object entityResource, ODataEntryWithNavigationLinks entryWrapper, ODataDeserializerContext readContext)
+        public virtual void ApplyNavigationProperties(object entityResource, ODataEntryWithNavigationLinks entryWrapper,
+            IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
         {
             if (entryWrapper == null)
             {
@@ -207,7 +228,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             foreach (ODataNavigationLinkWithItems navigationLink in entryWrapper.NavigationLinks)
             {
-                ApplyNavigationProperty(entityResource, navigationLink, readContext);
+                ApplyNavigationProperty(entityResource, navigationLink, entityType, readContext);
             }
         }
 
@@ -216,8 +237,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// </summary>
         /// <param name="entityResource">The object into which the navigation property should be read.</param>
         /// <param name="navigationLinkWrapper">The navigation link.</param>
+        /// <param name="entityType">The entity type of the entity resource.</param>
         /// <param name="readContext">The deserializer context.</param>
-        public virtual void ApplyNavigationProperty(object entityResource, ODataNavigationLinkWithItems navigationLinkWrapper, ODataDeserializerContext readContext)
+        public virtual void ApplyNavigationProperty(object entityResource, ODataNavigationLinkWithItems navigationLinkWrapper,
+             IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
         {
             if (navigationLinkWrapper == null)
             {
@@ -229,11 +252,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("entityResource");
             }
 
-            IEdmNavigationProperty navigationProperty = EntityType.FindProperty(navigationLinkWrapper.NavigationLink.Name) as IEdmNavigationProperty;
+            IEdmNavigationProperty navigationProperty = entityType.FindProperty(navigationLinkWrapper.NavigationLink.Name) as IEdmNavigationProperty;
             if (navigationProperty == null)
             {
                 throw new ODataException(
-                    Error.Format(SRResources.NavigationPropertyNotfound, navigationLinkWrapper.NavigationLink.Name, EntityType.FullName()));
+                    Error.Format(SRResources.NavigationPropertyNotfound, navigationLinkWrapper.NavigationLink.Name, entityType.FullName()));
             }
 
             foreach (ODataItemBase childItem in navigationLinkWrapper.NestedItems)
@@ -266,8 +289,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// </summary>
         /// <param name="entityResource">The object into which the structural properties should be read.</param>
         /// <param name="entryWrapper">The entry object containing the structural properties.</param>
+        /// <param name="entityType">The entity type of the entity resource.</param>
         /// <param name="readContext">The deserializer context.</param>
-        public virtual void ApplyStructuralProperties(object entityResource, ODataEntryWithNavigationLinks entryWrapper, ODataDeserializerContext readContext)
+        public virtual void ApplyStructuralProperties(object entityResource, ODataEntryWithNavigationLinks entryWrapper,
+            IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
         {
             if (entryWrapper == null)
             {
@@ -276,7 +301,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             foreach (ODataProperty property in entryWrapper.Entry.Properties)
             {
-                ApplyStructuralProperty(entityResource, property, readContext);
+                ApplyStructuralProperty(entityResource, property, entityType, readContext);
             }
         }
 
@@ -285,8 +310,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// </summary>
         /// <param name="entityResource">The object into which the structural property should be read.</param>
         /// <param name="structuralProperty">The entry object containing the structural properties.</param>
+        /// <param name="entityType">The entity type of the entity resource.</param>
         /// <param name="readContext">The deserializer context.</param>
-        public virtual void ApplyStructuralProperty(object entityResource, ODataProperty structuralProperty, ODataDeserializerContext readContext)
+        public virtual void ApplyStructuralProperty(object entityResource, ODataProperty structuralProperty,
+            IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
         {
             if (entityResource == null)
             {
@@ -298,7 +325,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("structuralProperty");
             }
 
-            DeserializationHelpers.ApplyProperty(structuralProperty, EntityType, entityResource, DeserializerProvider, readContext);
+            DeserializationHelpers.ApplyProperty(structuralProperty, entityType, entityResource, DeserializerProvider, readContext);
         }
 
         /// <summary>
@@ -425,13 +452,15 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return topLevelItem;
         }
 
-        private void ApplyEntityProperties(object entityResource, ODataEntryWithNavigationLinks entryWrapper, ODataDeserializerContext readContext)
+        private void ApplyEntityProperties(object entityResource, ODataEntryWithNavigationLinks entryWrapper,
+            IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
         {
-            ApplyStructuralProperties(entityResource, entryWrapper, readContext);
-            ApplyNavigationProperties(entityResource, entryWrapper, readContext);
+            ApplyStructuralProperties(entityResource, entryWrapper, entityType, readContext);
+            ApplyNavigationProperties(entityResource, entryWrapper, entityType, readContext);
         }
 
-        private void ApplyEntryInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataEntryWithNavigationLinks entry, ODataDeserializerContext readContext)
+        private void ApplyEntryInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource,
+            ODataEntryWithNavigationLinks entry, ODataDeserializerContext readContext)
         {
             Contract.Assert(navigationProperty != null && navigationProperty.PropertyKind == EdmPropertyKind.Navigation, "navigationProperty != null && navigationProperty.TypeKind == ResourceTypeKind.EntityType");
             Contract.Assert(entityResource != null, "entityResource != null");
@@ -447,7 +476,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, navigationProperty.Type.FullName(), typeof(ODataMediaTypeFormatter)));
             }
-            object value = deserializer.ReadInline(entry, readContext);
+            object value = deserializer.ReadInline(entry, navigationProperty.Type, readContext);
 
             DeserializationHelpers.SetProperty(entityResource, navigationProperty.Name, value);
         }
@@ -468,7 +497,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, navigationProperty.Type.FullName(), typeof(ODataMediaTypeFormatter)));
             }
-            object value = deserializer.ReadInline(feed, readContext);
+            object value = deserializer.ReadInline(feed, navigationProperty.Type, readContext);
 
             DeserializationHelpers.SetCollectionProperty(entityResource, navigationProperty, value);
         }

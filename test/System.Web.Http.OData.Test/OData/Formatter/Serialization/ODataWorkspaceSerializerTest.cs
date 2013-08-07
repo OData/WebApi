@@ -10,12 +10,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
 {
     public class ODataWorkspaceSerializerTest
     {
+        private Type _workspaceType = typeof(ODataWorkspace);
+
         [Fact]
         public void WriteObject_ThrowsArgumentNull_MessageWriter()
         {
             ODataWorkspaceSerializer serializer = new ODataWorkspaceSerializer();
             Assert.ThrowsArgumentNull(
-                () => serializer.WriteObject(42, messageWriter: null, writeContext: null),
+                () => serializer.WriteObject(42, _workspaceType, messageWriter: null, writeContext: null),
                 "messageWriter");
         }
 
@@ -24,7 +26,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ODataWorkspaceSerializer serializer = new ODataWorkspaceSerializer();
             Assert.ThrowsArgumentNull(
-                () => serializer.WriteObject(null, messageWriter: null, writeContext: null),
+                () => serializer.WriteObject(null, type: _workspaceType, messageWriter: null, writeContext: null),
                 "messageWriter");
         }
 
@@ -33,8 +35,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ODataWorkspaceSerializer serializer = new ODataWorkspaceSerializer();
             Assert.Throws<SerializationException>(
-                () => serializer.WriteObject(42, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
-                "ODataWorkspaceSerializer cannot write an object of type 'Int32'.");
+                () => serializer.WriteObject(42, _workspaceType, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
+                "ODataWorkspaceSerializer cannot write an object of type 'ODataWorkspace'.");
         }
 
         [Fact]
@@ -46,7 +48,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IODataResponseMessage message = new ODataMessageWrapper(stream);
 
             // Act
-            serializer.WriteObject(new ODataWorkspace(), new ODataMessageWriter(message), new ODataSerializerContext());
+            serializer.WriteObject(new ODataWorkspace(), _workspaceType, new ODataMessageWriter(message), new ODataSerializerContext());
 
             // Assert
             stream.Seek(0, SeekOrigin.Begin);

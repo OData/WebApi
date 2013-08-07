@@ -22,7 +22,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataSerializer serializer = new Mock<ODataSerializer>(ODataPayloadKind.Unsupported) { CallBase = true }.Object;
 
             Assert.Throws<NotSupportedException>(
-                () => serializer.WriteObject(graph: null, messageWriter: null, writeContext: null),
+                () => serializer.WriteObject(graph: null, type: typeof(int),messageWriter: null, writeContext: null),
                 "ODataSerializerProxy does not support WriteObject.");
         }
     }

@@ -763,15 +763,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The element type of an EDM collection type cannot be null..
-        /// </summary>
-        internal static string ItemTypeOfCollectionNull {
-            get {
-                return ResourceManager.GetString("ItemTypeOfCollectionNull", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Key property &apos;{0}&apos; of type &apos;{1}&apos; is null. Key properties cannot have null values..
         /// </summary>
         internal static string KeyValueCannotBeNull {
@@ -1605,15 +1596,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string UnsupportedExpressionNodeType {
             get {
                 return ResourceManager.GetString("UnsupportedExpressionNodeType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The type &apos;{0}&apos; is not a supported primitive type..
-        /// </summary>
-        internal static string UnsupportedPrimitiveType {
-            get {
-                return ResourceManager.GetString("UnsupportedPrimitiveType", resourceCulture);
             }
         }
         

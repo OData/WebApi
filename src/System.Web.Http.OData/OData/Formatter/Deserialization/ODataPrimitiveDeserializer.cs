@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -14,32 +15,28 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataPrimitiveDeserializer"/> class.
         /// </summary>
-        /// <param name="edmType">The primitive type that this deserializer can read.</param>
-        public ODataPrimitiveDeserializer(IEdmPrimitiveTypeReference edmType)
-            : base(edmType, ODataPayloadKind.Property)
+        public ODataPrimitiveDeserializer()
+            : base(ODataPayloadKind.Property)
         {
-            PrimitiveType = edmType;
         }
 
-        /// <summary>
-        /// Gets the EDM primitive type that this deserializer can read.
-        /// </summary>
-        public IEdmPrimitiveTypeReference PrimitiveType { get; private set; }
-
         /// <inheritdoc />
-        public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
+        public override object Read(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
         {
             if (messageReader == null)
             {
                 throw Error.ArgumentNull("messageReader");
             }
 
+            IEdmTypeReference edmType = readContext.GetEdmType(type);
+            Contract.Assert(edmType != null);
+
             ODataProperty property = messageReader.ReadProperty();
-            return ReadInline(property, readContext);
+            return ReadInline(property, edmType, readContext);
         }
 
         /// <inheritdoc />
-        public sealed override object ReadInline(object item, ODataDeserializerContext readContext)
+        public sealed override object ReadInline(object item, IEdmTypeReference edmType, ODataDeserializerContext readContext)
         {
             if (item == null)
             {

@@ -24,7 +24,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <inheridoc />
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {

@@ -14,10 +14,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
 {
     public class ODataComplexTypeSerializerTests
     {
-        IEdmModel _model;
-        Address _address;
-        ODataComplexTypeSerializer _serializer;
-        IEdmComplexType _addressType;
+        private IEdmModel _model;
+        private Address _address;
+        private ODataComplexTypeSerializer _serializer;
+        private IEdmComplexType _addressType;
+        private IEdmComplexTypeReference _addressTypeRef;
 
         public ODataComplexTypeSerializerTests()
         {
@@ -32,42 +33,24 @@ namespace System.Web.Http.OData.Formatter.Serialization
             };
 
             _addressType = _model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            _model.SetAnnotationValue(_addressType, new ClrTypeAnnotation(typeof(Address)));
+            _addressTypeRef = _addressType.ToEdmTypeReference(isNullable: false).AsComplex();
 
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
-            _serializer = new ODataComplexTypeSerializer(new EdmComplexTypeReference(_addressType, isNullable: false), serializerProvider);
-        }
-
-        [Fact]
-        public void Ctor_ThrowsArgumentNull_EdmComplexType()
-        {
-            Assert.ThrowsArgumentNull(
-                () => new ODataComplexTypeSerializer(edmType: null, serializerProvider: null),
-                "edmType");
+            _serializer = new ODataComplexTypeSerializer(serializerProvider);
         }
 
         [Fact]
         public void Ctor_ThrowsArgumentNull_SerializerProvider()
         {
-            Assert.ThrowsArgumentNull(
-                () => new ODataComplexTypeSerializer(edmType: new Mock<IEdmComplexTypeReference>().Object, serializerProvider: null),
-                "serializerProvider");
-        }
-
-        [Fact]
-        public void Ctor_SetsProperty_ComplexType()
-        {
-            IEdmComplexTypeReference complexType = new Mock<IEdmComplexTypeReference>().Object;
-
-            var serializer = new ODataComplexTypeSerializer(complexType, new DefaultODataSerializerProvider());
-
-            Assert.Equal(complexType, serializer.ComplexType);
+            Assert.ThrowsArgumentNull(() => new ODataComplexTypeSerializer(serializerProvider: null), "serializerProvider");
         }
 
         [Fact]
         public void WriteObject_ThrowsArgumentNull_MessageWriter()
         {
             Assert.ThrowsArgumentNull(
-                () => _serializer.WriteObject(42, messageWriter: null, writeContext: new ODataSerializerContext()),
+                () => _serializer.WriteObject(42, typeof(int), messageWriter: null, writeContext: new ODataSerializerContext()),
                 "messageWriter");
         }
 
@@ -75,7 +58,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObject_ThrowsArgumentNull_WriteContext()
         {
             Assert.ThrowsArgumentNull(
-                () => _serializer.WriteObject(42, ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
+                () => _serializer.WriteObject(42, typeof(int), ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
                 "writeContext");
         }
 
@@ -83,7 +66,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObject_ThrowsArgument_WriteContext_RootElementNameMissing()
         {
             Assert.ThrowsArgument(
-                () => _serializer.WriteObject(42, ODataTestUtil.GetMockODataMessageWriter(), new ODataSerializerContext()),
+                () => _serializer.WriteObject(42, typeof(int), ODataTestUtil.GetMockODataMessageWriter(), new ODataSerializerContext()),
                 "writeContext",
                 "The 'RootElementName' property is required on 'ODataSerializerContext'.");
         }
@@ -95,8 +78,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
             ODataMessageWriter messageWriter = new ODataMessageWriter(message);
-            Mock<ODataComplexTypeSerializer> serializer = new Mock<ODataComplexTypeSerializer>(_serializer.ComplexType, new DefaultODataSerializerProvider());
-            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "ComplexPropertyName" };
+            Mock<ODataComplexTypeSerializer> serializer = new Mock<ODataComplexTypeSerializer>(new DefaultODataSerializerProvider());
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "ComplexPropertyName", Model = _model };
             object graph = new object();
             ODataComplexValue complexValue = new ODataComplexValue
             {
@@ -105,10 +88,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             };
 
             serializer.CallBase = true;
-            serializer.Setup(s => s.CreateODataComplexValue(graph, writeContext)).Returns(complexValue).Verifiable();
+            serializer.Setup(s => s.CreateODataComplexValue(graph, It.Is<IEdmComplexTypeReference>(e => e.Definition == _addressType), writeContext))
+                .Returns(complexValue).Verifiable();
 
             // Act
-            serializer.Object.WriteObject(graph, messageWriter, writeContext);
+            serializer.Object.WriteObject(graph, typeof(Address), messageWriter, writeContext);
 
             // Assert
             serializer.Verify();
@@ -127,16 +111,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             var oDataComplexValue = new ODataComplexValue();
             var complexObject = new object();
-            Mock<ODataComplexTypeSerializer> serializer =
-                new Mock<ODataComplexTypeSerializer>(_serializer.ComplexType, new DefaultODataSerializerProvider());
+            Mock<ODataComplexTypeSerializer> serializer = new Mock<ODataComplexTypeSerializer>(new DefaultODataSerializerProvider());
             serializer.CallBase = true;
             serializer
-                .Setup(s => s.CreateODataComplexValue(complexObject, It.IsAny<ODataSerializerContext>()))
+                .Setup(s => s.CreateODataComplexValue(complexObject, _addressTypeRef, It.IsAny<ODataSerializerContext>()))
                 .Returns(oDataComplexValue)
                 .Verifiable();
 
             // Act
-            ODataValue value = serializer.Object.CreateODataValue(complexObject, new ODataSerializerContext());
+            ODataValue value = serializer.Object.CreateODataValue(complexObject, _addressTypeRef, new ODataSerializerContext());
 
             // Assert
             serializer.Verify();
@@ -147,14 +130,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateODataComplexValue_ThrowsArgumentNull_WriteContext()
         {
             Assert.ThrowsArgumentNull(
-                () => _serializer.CreateODataComplexValue(graph: 42, writeContext: null),
+                () => _serializer.CreateODataComplexValue(graph: 42, complexType: _addressTypeRef, writeContext: null),
+                "writeContext");
+        }
+
+        [Fact]
+        public void CreateODataComplexValue_ThrowsArgumentNull_Complextype()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateODataComplexValue(graph: 42, complexType: null, writeContext: null),
                 "writeContext");
         }
 
         [Fact]
         public void CreateODataComplexValue_WritesAllDeclaredProperties()
         {
-            var odataValue = _serializer.CreateODataComplexValue(_address, new ODataSerializerContext());
+            var odataValue = _serializer.CreateODataComplexValue(_address, _addressTypeRef, new ODataSerializerContext());
 
             ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
 
@@ -172,7 +163,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void CreateODataComplexValue_ReturnsNull_ForNullValue()
         {
-            var odataValue = _serializer.CreateODataComplexValue(null, new ODataSerializerContext());
+            var odataValue = _serializer.CreateODataComplexValue(null, _addressTypeRef, new ODataSerializerContext());
 
             Assert.Null(odataValue);
         }
@@ -181,9 +172,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateODataComplexValue_ReturnsNull_ForNullEdmComplexObject()
         {
             IEdmComplexTypeReference edmType = new EdmComplexTypeReference(_addressType, isNullable: true);
-            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(edmType, new DefaultODataSerializerProvider());
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(new DefaultODataSerializerProvider());
 
-            var result = serializer.CreateODataComplexValue(new NullEdmComplexObject(edmType), new ODataSerializerContext());
+            var result = serializer.CreateODataComplexValue(new NullEdmComplexObject(edmType), edmType, new ODataSerializerContext());
 
             Assert.Null(result);
         }
@@ -194,10 +185,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmPrimitiveTypeReference stringType = EdmCoreModel.Instance.GetString(isNullable: true);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(stringType)).Returns<ODataEdmTypeSerializer>(null);
-            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(_serializer.ComplexType, serializerProvider.Object);
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider.Object);
 
             Assert.Throws<NotSupportedException>(
-                () => serializer.CreateODataComplexValue(_address, new ODataSerializerContext()),
+                () => serializer.CreateODataComplexValue(_address, _addressTypeRef, new ODataSerializerContext()),
                 "'Edm.String' cannot be serialized using the ODataMediaTypeFormatter.");
         }
 
@@ -210,10 +201,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmComplexTypeReference edmTypeReference = new EdmComplexTypeReference(complexEdmType, isNullable: false);
 
             TypedEdmComplexObject edmObject = new TypedEdmComplexObject(new { Property = 42 }, edmTypeReference);
-            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(edmTypeReference, new DefaultODataSerializerProvider());
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(new DefaultODataSerializerProvider());
 
             // Act
-            ODataComplexValue result = serializer.CreateODataComplexValue(edmObject, new ODataSerializerContext());
+            ODataComplexValue result = serializer.CreateODataComplexValue(edmObject, edmTypeReference, new ODataSerializerContext());
 
             // Assert
             Assert.Equal("Property", result.Properties.Single().Name);

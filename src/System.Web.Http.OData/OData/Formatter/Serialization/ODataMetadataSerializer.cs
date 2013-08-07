@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <inheritdoc/>
         /// <remarks>The metadata written is from the model set on the <paramref name="messageWriter"/>. The <paramref name="graph" />
         /// is not used.</remarks>
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {

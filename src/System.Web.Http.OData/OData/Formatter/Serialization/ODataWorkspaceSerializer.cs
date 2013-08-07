@@ -20,13 +20,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
                 throw Error.ArgumentNull("messageWriter");
             }
-
             if (graph == null)
             {
                 throw Error.ArgumentNull("graph");
@@ -35,7 +34,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataWorkspace workspace = graph as ODataWorkspace;
             if (workspace == null)
             {
-                throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().Name));
+                throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, type.Name));
             }
 
             messageWriter.WriteServiceDocument(workspace);

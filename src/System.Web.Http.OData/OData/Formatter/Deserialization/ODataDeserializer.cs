@@ -33,9 +33,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// Reads an <see cref="IODataRequestMessage"/> using messageReader.
         /// </summary>
         /// <param name="messageReader">The messageReader to use.</param>
+        /// <param name="type">The type of the object to read into.</param>
         /// <param name="readContext">The read context.</param>
         /// <returns>The deserialized object.</returns>
-        public virtual object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
+        public virtual object Read(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
         {
             throw Error.NotSupported(SRResources.DeserializerDoesNotSupportRead, GetType().Name);
         }

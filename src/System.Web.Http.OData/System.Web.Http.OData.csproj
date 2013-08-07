@@ -83,6 +83,7 @@
     <Compile Include="OData\EdmEntityCollectionObject.cs" />
     <Compile Include="OData\EdmEntityObject.cs" />
     <Compile Include="OData\EdmStructuredObject.cs" />
+    <Compile Include="OData\Formatter\ClrTypeCache.cs" />
     <Compile Include="OData\Formatter\Serialization\TypedEdmComplexObject.cs" />
     <Compile Include="OData\Formatter\Serialization\TypedEdmEntityObject.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpers.cs" />

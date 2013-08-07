@@ -328,7 +328,8 @@ namespace System.Web.Http.OData.Formatter
 
             serializerProvider.Setup(p => p.GetODataPayloadSerializer(model, typeof(int), request)).Returns(serializer.Object);
             serializer
-                .Setup(s => s.WriteObject(42, It.IsAny<ODataMessageWriter>(), It.Is<ODataSerializerContext>(c => c.MetadataLevel == ODataMetadataLevel.FullMetadata)))
+                .Setup(s => s.WriteObject(42, typeof(int), It.IsAny<ODataMessageWriter>(),
+                    It.Is<ODataSerializerContext>(c => c.MetadataLevel == ODataMetadataLevel.FullMetadata)))
                 .Verifiable();
 
 
@@ -361,7 +362,8 @@ namespace System.Web.Http.OData.Formatter
 
             serializerProvider.Setup(p => p.GetODataPayloadSerializer(model, typeof(int), request)).Returns(serializer.Object);
             serializer
-                .Setup(s => s.WriteObject(42, It.IsAny<ODataMessageWriter>(), It.Is<ODataSerializerContext>(c => c.SelectExpandClause == selectExpandClause)))
+                .Setup(s => s.WriteObject(42, typeof(int), It.IsAny<ODataMessageWriter>(),
+                    It.Is<ODataSerializerContext>(c => c.SelectExpandClause == selectExpandClause)))
                 .Verifiable();
 
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
@@ -423,10 +425,12 @@ namespace System.Web.Http.OData.Formatter
             // Arrange
             var model = CreateModel();
             var request = CreateFakeODataRequest(model);
-            Mock<ODataDeserializer> deserializer = new Mock<ODataDeserializer>(ODataPayloadKind.Property);
+            Mock<ODataEdmTypeDeserializer> deserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Property);
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            deserializerProvider.Setup(p => p.GetODataDeserializer(model, typeof(int), request)).Returns(deserializer.Object);
-            deserializer.Setup(d => d.Read(It.IsAny<ODataMessageReader>(), It.Is<ODataDeserializerContext>(c => c.Request == request))).Verifiable();
+            deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns(deserializer.Object);
+            deserializer
+                .Setup(d => d.Read(It.IsAny<ODataMessageReader>(), typeof(int), It.Is<ODataDeserializerContext>(c => c.Request == request)))
+                .Verifiable();
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
 
             var formatter = new ODataMediaTypeFormatter(deserializerProvider.Object, serializerProvider, Enumerable.Empty<ODataPayloadKind>());
@@ -575,8 +579,10 @@ namespace System.Web.Http.OData.Formatter
             Mock<IEdmObject> instance = new Mock<IEdmObject>();
             instance.Setup(e => e.GetEdmType()).Returns(edmType);
 
-            Mock<ODataEdmTypeSerializer> serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Entry);
-            serializer.Setup(s => s.WriteObject(instance.Object, It.IsAny<ODataMessageWriter>(), It.IsAny<ODataSerializerContext>())).Verifiable();
+            Mock<ODataEdmTypeSerializer> serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Entry);
+            serializer
+                .Setup(s => s.WriteObject(instance.Object, instance.GetType(), It.IsAny<ODataMessageWriter>(), It.IsAny<ODataSerializerContext>()))
+                .Verifiable();
 
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(edmType)).Returns(serializer.Object);

@@ -26,7 +26,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             mockRequest.Setup(r => r.GetStream()).Returns(stream);
             ODataMessageWriter messageWriter = new ODataMessageWriter(mockRequest.Object);
 
-            serializer.WriteObject(value, messageWriter, null);
+            serializer.WriteObject(value, value.GetType(), messageWriter, null);
             stream.Seek(0, SeekOrigin.Begin);
             TextReader reader = new StreamReader(stream);
             string result = reader.ReadToEnd();
@@ -44,7 +44,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             mockRequest.Setup(r => r.GetStream()).Returns(stream);
             ODataMessageWriter messageWriter = new ODataMessageWriter(mockRequest.Object);
 
-            serializer.WriteObject(value, messageWriter, null);
+            serializer.WriteObject(value, value.GetType(), messageWriter, null);
             stream.Seek(0, SeekOrigin.Begin);
             TextReader reader = new StreamReader(stream);
 

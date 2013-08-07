@@ -22,7 +22,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Mock<ODataDeserializer> deserializer = new Mock<ODataDeserializer>(ODataPayloadKind.Entry) { CallBase = true };
 
             Assert.Throws<NotSupportedException>(
-                () => deserializer.Object.Read(messageReader: null, readContext: null),
+                () => deserializer.Object.Read(messageReader: null, type: null, readContext: null),
                 "'ODataDeserializerProxy' does not support Read.");
         }
     }

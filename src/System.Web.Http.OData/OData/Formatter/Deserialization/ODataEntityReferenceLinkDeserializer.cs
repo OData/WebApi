@@ -25,7 +25,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         /// <inheritdoc />
-        public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
+        public override object Read(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
         {
             if (messageReader == null)
             {

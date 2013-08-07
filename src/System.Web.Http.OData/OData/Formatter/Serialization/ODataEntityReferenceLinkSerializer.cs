@@ -23,13 +23,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
                 throw Error.ArgumentNull("messageWriter");
             }
-
             if (writeContext == null)
             {
                 throw Error.ArgumentNull("writeContext");

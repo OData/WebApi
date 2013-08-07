@@ -10,7 +10,6 @@ using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
@@ -207,14 +206,12 @@ namespace System.Web.Http.OData.Formatter
             ODataMessageReader reader = new ODataMessageReader(oDataRequest, new ODataMessageReaderSettings(), _model);
 
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
-            IEdmEntityTypeReference _motorcycle =
-                new EdmEntityTypeReference(_model.SchemaElements.OfType<IEdmEntityType>().Single(t => t.Name == "Car"), isNullable: false);
 
-            ODataDeserializerContext context = new ODataDeserializerContext();
+            ODataDeserializerContext context = new ODataDeserializerContext { Model = _model };
             context.Path = new ODataPath(new ActionPathSegment(_model.EntityContainers().Single().FunctionImports().Single(f => f.Name == "PostMotorcycle_When_Expecting_Car")));
 
             Assert.Throws<ODataException>(
-                () => new ODataEntityDeserializer(_motorcycle, deserializerProvider).Read(reader, context),
+                () => new ODataEntityDeserializer(deserializerProvider).Read(reader, typeof(Car), context),
                 "An entry with type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' was found, " +
                 "but it is not assignable to the expected type 'System.Web.Http.OData.Builder.TestModels.Car'. " +
                 "The type specified in the entry must be equal to either the expected type or a derived type.");

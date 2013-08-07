@@ -14,46 +14,19 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         private IEdmComplexTypeReference _addressEdmType = EdmTestHelpers.GetModel().GetEdmTypeReference(typeof(ODataEntityDeserializerTests.Address)).AsComplex();
 
         [Fact]
-        public void Ctor_ThrowsArgumentNull_EdmType()
-        {
-            Assert.ThrowsArgumentNull(
-                () => new ODataComplexTypeDeserializer(edmType: null, deserializerProvider: new DefaultODataDeserializerProvider()),
-                "edmType");
-        }
-
-        [Fact]
         public void Ctor_ThrowsArgumentNull_DeserializerProvider()
         {
             Assert.ThrowsArgumentNull(
-                () => new ODataComplexTypeDeserializer(_addressEdmType, deserializerProvider: null),
+                () => new ODataComplexTypeDeserializer(deserializerProvider: null),
                 "deserializerProvider");
-        }
-
-        [Fact]
-        public void Ctor_SetsProperty_ComplexType()
-        {
-            IEdmComplexTypeReference complexType = new Mock<IEdmComplexTypeReference>().Object;
-            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(complexType, new DefaultODataDeserializerProvider());
-            Assert.Equal(deserializer.ComplexType, complexType);
-        }
-
-        [Fact]
-        public void Constructor_Succeeds_ForValidComplexType()
-        {
-            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
-            var deserializer = new ODataComplexTypeDeserializer(_addressEdmType, deserializerProvider);
-
-            Assert.Equal(deserializer.DeserializerProvider, deserializerProvider);
-            Assert.Equal(deserializer.ComplexType.Definition, EdmTestHelpers.GetEdmType("ODataDemo.Address"));
-            Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Property);
         }
 
         [Fact]
         public void ReadInline_ThrowsArgumentNull_ReadContext()
         {
-            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(_addressEdmType, new DefaultODataDeserializerProvider());
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
             Assert.ThrowsArgumentNull(
-                () => deserializer.ReadInline(42, readContext: null),
+                () => deserializer.ReadInline(42, _addressEdmType, readContext: null),
                 "readContext");
         }
 
@@ -61,18 +34,29 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void ReadInline_Throws_ForNonODataComplexValues()
         {
             var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
-            var deserializer = new ODataComplexTypeDeserializer(_addressEdmType, deserializerProvider);
+            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
 
             Assert.ThrowsArgument(
-                () => deserializer.ReadInline(10, new ODataDeserializerContext()),
+                () => deserializer.ReadInline(10, _addressEdmType, new ODataDeserializerContext()),
                 "item");
+        }
+
+        [Fact]
+        public void ReadInline_Throws_ArgumentMustBeOfType()
+        {
+            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
+            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
+
+            Assert.ThrowsArgument(
+                () => deserializer.ReadInline(new ODataComplexValue(), new EdmEntityType("NS", "Name").AsReference(), new ODataDeserializerContext()),
+                "edmType", "The argument must be of type 'Complex'.");
         }
 
         [Fact]
         public void ReadInline_ReturnsNull_IfItemIsNull()
         {
-            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(_addressEdmType, new DefaultODataDeserializerProvider());
-            Assert.Null(deserializer.ReadInline(item: null, readContext: new ODataDeserializerContext()));
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
+            Assert.Null(deserializer.ReadInline(item: null, edmType: _addressEdmType, readContext: new ODataDeserializerContext()));
         }
 
         [Fact]
@@ -80,15 +64,15 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             // Arrange
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
-            Mock<ODataComplexTypeDeserializer> deserializer = new Mock<ODataComplexTypeDeserializer>(_addressEdmType, deserializerProvider);
+            Mock<ODataComplexTypeDeserializer> deserializer = new Mock<ODataComplexTypeDeserializer>(deserializerProvider);
             ODataComplexValue item = new ODataComplexValue();
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             deserializer.CallBase = true;
-            deserializer.Setup(d => d.ReadComplexValue(item, readContext)).Returns(42).Verifiable();
+            deserializer.Setup(d => d.ReadComplexValue(item, _addressEdmType, readContext)).Returns(42).Verifiable();
 
             // Act
-            object result = deserializer.Object.ReadInline(item, readContext);
+            object result = deserializer.Object.ReadInline(item, _addressEdmType, readContext);
 
             // Assert
             deserializer.Verify();
@@ -98,30 +82,30 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void ReadComplexValue_ThrowsArgumentNull_ComplexValue()
         {
-            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(_addressEdmType, new DefaultODataDeserializerProvider());
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
 
             Assert.ThrowsArgumentNull(
-                () => deserializer.ReadComplexValue(complexValue: null, readContext: new ODataDeserializerContext()),
+                () => deserializer.ReadComplexValue(complexValue: null, complexType: _addressEdmType, readContext: new ODataDeserializerContext()),
                 "complexValue");
         }
 
         [Fact]
         public void ReadComplexValue_ThrowsArgumentNull_ReadContext()
         {
-            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(_addressEdmType, new DefaultODataDeserializerProvider());
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
 
             Assert.ThrowsArgumentNull(
-                () => deserializer.ReadComplexValue(new ODataComplexValue(), readContext: null),
+                () => deserializer.ReadComplexValue(new ODataComplexValue(), _addressEdmType, readContext: null),
                 "readContext");
         }
 
         [Fact]
         public void ReadComplexValue_ThrowsArgument_ModelMissingFromReadContext()
         {
-            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(_addressEdmType, new DefaultODataDeserializerProvider());
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
 
             Assert.ThrowsArgument(
-                () => deserializer.ReadComplexValue(new ODataComplexValue(), readContext: new ODataDeserializerContext()),
+                () => deserializer.ReadComplexValue(new ODataComplexValue(), _addressEdmType, readContext: new ODataDeserializerContext()),
                 "readContext",
                 "The EDM model is missing on the read context. The model is required on the read context to deserialize the payload.");
         }
@@ -131,7 +115,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             // Arrange
             var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
-            var deserializer = new ODataComplexTypeDeserializer(_addressEdmType, deserializerProvider);
+            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
 
             ODataComplexValue complexValue = new ODataComplexValue
             {
@@ -145,7 +129,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = _edmModel };
 
             // Act
-            var address = deserializer.ReadComplexValue(complexValue, readContext) as ODataEntityDeserializerTests.Address;
+            var address = deserializer.ReadComplexValue(complexValue, _addressEdmType, readContext) as ODataEntityDeserializerTests.Address;
 
             // Assert
             Assert.NotNull(address);

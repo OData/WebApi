@@ -10,31 +10,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
     public class ODataEdmTypeSerializerTest
     {
         [Fact]
-        public void Ctor_ThrowsArgumentNull_EdmType()
-        {
-            Assert.ThrowsArgumentNull(
-                () =>
-                {
-                    var serializer = new Mock<ODataEdmTypeSerializer>(null, ODataPayloadKind.Unsupported).Object;
-                },
-                "edmType");
-        }
-
-        [Fact]
-        public void Ctor_SetsProperty_EdmType()
-        {
-            IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported).Object;
-
-            Assert.Same(edmType, serializer.EdmType);
-        }
-
-        [Fact]
         public void Ctor_SetsProperty_ODataPayloadKind()
         {
-            IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported).Object;
-
+            var serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Unsupported).Object;
             Assert.Equal(ODataPayloadKind.Unsupported, serializer.ODataPayloadKind);
         }
 
@@ -43,7 +21,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
-            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported, serializerProvider).Object;
+            var serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Unsupported, serializerProvider).Object;
 
             Assert.Same(serializerProvider, serializer.SerializerProvider);
         }
@@ -51,11 +29,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void WriteObjectInline_Throws_NotSupported()
         {
-            IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported) { CallBase = true };
+            var serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Unsupported) { CallBase = true };
 
             Assert.Throws<NotSupportedException>(
-                () => serializer.Object.WriteObjectInline(graph: null, writer: null, writeContext: null),
+                () => serializer.Object.WriteObjectInline(graph: null, expectedType: null, writer: null, writeContext: null),
                 "ODataEdmTypeSerializerProxy does not support WriteObjectInline.");
         }
 
@@ -63,10 +40,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateODataValue_Throws_NotSupported()
         {
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported) { CallBase = true };
+            var serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Unsupported) { CallBase = true };
 
             Assert.Throws<NotSupportedException>(
-                () => serializer.Object.CreateODataValue(graph: null, writeContext: null),
+                () => serializer.Object.CreateODataValue(graph: null, expectedType: edmType, writeContext: null),
                 "ODataEdmTypeSerializerProxy does not support CreateODataValue.");
         }
 
@@ -75,13 +52,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported);
+            var serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Unsupported);
             serializer
-                .Setup(s => s.CreateODataValue(42, null))
+                .Setup(s => s.CreateODataValue(42, edmType, null))
                 .Returns(new ODataPrimitiveValue(42));
 
             // Act
-            ODataProperty property = serializer.Object.CreateProperty(graph: 42, elementName: "SomePropertyName", writeContext: null);
+            ODataProperty property = serializer.Object.CreateProperty(graph: 42, expectedType: edmType,
+                elementName: "SomePropertyName", writeContext: null);
 
             // Assert
             Assert.NotNull(property);

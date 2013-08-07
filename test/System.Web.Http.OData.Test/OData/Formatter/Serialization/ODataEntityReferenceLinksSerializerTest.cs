@@ -27,7 +27,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             Assert.ThrowsArgumentNull(
-                () => serializer.WriteObject(graph: null, messageWriter: null, writeContext: new ODataSerializerContext()),
+                () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLinks), messageWriter: null,
+                    writeContext: new ODataSerializerContext()),
                 "messageWriter");
         }
 
@@ -36,7 +37,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             Assert.ThrowsArgumentNull(
-                () => serializer.WriteObject(graph: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
+                () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLinks),
+                    messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
                 "writeContext");
         }
 
@@ -47,7 +49,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataSerializerContext writeContext = new ODataSerializerContext();
 
             Assert.Throws<SerializationException>(
-                () => serializer.WriteObject(graph: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
+                () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLinks),
+                    messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
                 "The related entity set could not be found from the OData path. The related entity set is required to serialize the payload.");
         }
 
@@ -58,7 +61,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet };
 
             Assert.Throws<SerializationException>(
-                () => serializer.WriteObject(graph: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
+                () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLinks),
+                    messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
                 "The operation cannot be completed because no ODataPath is available for the request.");
         }
 
@@ -69,7 +73,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = new ODataPath() };
 
             Assert.Throws<SerializationException>(
-                () => serializer.WriteObject(graph: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
+                () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLinks),
+                    messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
                 "The related navigation property could not be found from the OData path. The related navigation property is required to serialize the payload.");
         }
 
@@ -82,7 +87,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = path };
 
             Assert.Throws<SerializationException>(
-                () => serializer.WriteObject(graph: "not uri", messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
+                () => serializer.WriteObject(graph: "not uri", type: typeof(ODataEntityReferenceLinks),
+                    messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
                 "ODataEntityReferenceLinksSerializer cannot write an object of type 'System.String'.");
         }
 
@@ -121,7 +127,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IODataResponseMessage message = new ODataMessageWrapper(stream);
 
             // Act
-            serializer.WriteObject(uris, new ODataMessageWriter(message), writeContext);
+            serializer.WriteObject(uris, typeof(ODataEntityReferenceLinks), new ODataMessageWriter(message), writeContext);
 
             // Assert
             stream.Seek(0, SeekOrigin.Begin);

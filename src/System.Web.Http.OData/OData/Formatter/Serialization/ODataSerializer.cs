@@ -35,9 +35,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Writes the given object specified by the parameter graph as a whole using the given messageWriter and writeContext.
         /// </summary>
         /// <param name="graph">The object to be written</param>
+        /// <param name="type">The type of the object to be written.</param>
         /// <param name="messageWriter">The <see cref="ODataMessageWriter"/> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public virtual void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             throw Error.NotSupported(SRResources.WriteObjectNotSupported, GetType().Name);
         }

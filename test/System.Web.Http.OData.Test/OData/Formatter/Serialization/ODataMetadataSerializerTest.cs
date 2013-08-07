@@ -16,7 +16,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ODataMetadataSerializer serializer = new ODataMetadataSerializer();
             Assert.ThrowsArgumentNull(
-                () => serializer.WriteObject(42, messageWriter: null, writeContext: null),
+                () => serializer.WriteObject(42, typeof(IEdmModel), messageWriter: null, writeContext: null),
                 "messageWriter");
         }
 
@@ -31,7 +31,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmModel model = new EdmModel();
 
             // Act
-            serializer.WriteObject("42", new ODataMessageWriter(message, settings, model), new ODataSerializerContext());
+            serializer.WriteObject("42", typeof(IEdmModel), new ODataMessageWriter(message, settings, model), new ODataSerializerContext());
 
             // Assert
             stream.Seek(0, SeekOrigin.Begin);

@@ -10,9 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web.Http.Controllers;
 using System.Web.Http.OData.Batch;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
@@ -31,7 +29,6 @@ namespace System.Web.Http.OData.Formatter
     {
         internal const ODataVersion DefaultODataVersion = ODataVersion.V3;
         internal const string ODataServiceVersion = "DataServiceVersion";
-        private readonly ODataDeserializerProvider _deserializerProvider;
         private readonly ODataVersion _version;
 
         /// <summary>
@@ -39,6 +36,7 @@ namespace System.Web.Http.OData.Formatter
         /// </summary>
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
 
+        private readonly ODataDeserializerProvider _deserializerProvider;
         private readonly ODataSerializerProvider _serializerProvider;
 
         /// <summary>
@@ -56,7 +54,8 @@ namespace System.Web.Http.OData.Formatter
         /// <param name="deserializerProvider">The <see cref="ODataDeserializerProvider"/> to use.</param>
         /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use.</param>
         /// <param name="payloadKinds">The kind of payloads this formatter supports.</param>
-        public ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider, ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
+        public ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider, ODataSerializerProvider serializerProvider,
+            IEnumerable<ODataPayloadKind> payloadKinds)
         {
             if (deserializerProvider == null)
             {
@@ -197,7 +196,9 @@ namespace System.Web.Http.OData.Formatter
                 IEdmModel model = Request.GetEdmModel();
                 if (model != null)
                 {
-                    ODataDeserializer deserializer = GetDeserializer(type, Request.GetODataPath(), model, _deserializerProvider);
+                    IEdmTypeReference expectedPayloadType;
+                    ODataDeserializer deserializer = GetDeserializer(type, Request.GetODataPath(), model,
+                        _deserializerProvider, out expectedPayloadType);
                     if (deserializer != null)
                     {
                         return _payloadKinds.Contains(deserializer.ODataPayloadKind);
@@ -302,7 +303,8 @@ namespace System.Web.Http.OData.Formatter
                     throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
                 }
 
-                ODataDeserializer deserializer = GetDeserializer(type, Request.GetODataPath(), model, _deserializerProvider);
+                IEdmTypeReference expectedPayloadType;
+                ODataDeserializer deserializer = GetDeserializer(type, Request.GetODataPath(), model, _deserializerProvider, out expectedPayloadType);
                 if (deserializer == null)
                 {
                     throw Error.Argument("type", SRResources.FormatterReadIsNotSupportedForType, type.FullName, GetType().FullName);
@@ -328,11 +330,12 @@ namespace System.Web.Http.OData.Formatter
                         Path = path,
                         Model = model,
                         Request = Request,
+                        ResourceType = type,
+                        ResourceEdmType = expectedPayloadType,
                         RequestContext = Request.GetRequestContext(),
-                        ResourceType = type
                     };
 
-                    result = deserializer.Read(oDataMessageReader, readContext);
+                    result = deserializer.Read(oDataMessageReader, type, readContext);
                 }
                 catch (Exception e)
                 {
@@ -454,7 +457,7 @@ namespace System.Web.Http.OData.Formatter
                     SelectExpandClause = Request.GetSelectExpandClause()
                 };
 
-                serializer.WriteObject(value, messageWriter, writeContext);
+                serializer.WriteObject(value, type, messageWriter, writeContext);
             }
         }
 
@@ -501,38 +504,19 @@ namespace System.Web.Http.OData.Formatter
             return null;
         }
 
-        private ODataDeserializer GetDeserializer(Type type, ODataPath path, IEdmModel model, ODataDeserializerProvider deserializerProvider)
+        private ODataDeserializer GetDeserializer(Type type, ODataPath path, IEdmModel model,
+            ODataDeserializerProvider deserializerProvider, out IEdmTypeReference expectedPayloadType)
         {
-            if (typeof(IEdmObject).IsAssignableFrom(type))
-            {
-                // typeless mode. figure out the expected payload type from the OData Path.
-                IEdmType edmType = path.EdmType;
-                if (edmType != null)
-                {
-                    IEdmTypeReference expectedPayloadType = EdmLibHelpers.ToEdmTypeReference(edmType, isNullable: false);
-                    if (expectedPayloadType.TypeKind() == EdmTypeKind.Collection)
-                    {
-                        IEdmTypeReference elementType = expectedPayloadType.AsCollection().ElementType();
-                        if (elementType.IsEntity())
-                        {
-                            // collection of entities cannot be CREATE/UPDATEd. Instead, the request would contain a single entry.
-                            expectedPayloadType = elementType;
-                        }
-                    }
+            expectedPayloadType = GetExpectedPayloadType(type, path, model);
 
-                    if (expectedPayloadType != null)
-                    {
-                        return deserializerProvider.GetEdmTypeDeserializer(expectedPayloadType);
-                    }
-                }
+            if (expectedPayloadType != null)
+            {
+                return deserializerProvider.GetEdmTypeDeserializer(expectedPayloadType);
             }
             else
             {
-                TryGetInnerTypeForDelta(ref type);
                 return deserializerProvider.GetODataDeserializer(model, type, Request);
             }
-
-            return null;
         }
 
         private ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider)
@@ -603,6 +587,37 @@ namespace System.Web.Http.OData.Formatter
             }
 
             return false;
+        }
+
+        internal static IEdmTypeReference GetExpectedPayloadType(Type type, ODataPath path, IEdmModel model)
+        {
+            IEdmTypeReference expectedPayloadType = null;
+
+            if (typeof(IEdmObject).IsAssignableFrom(type))
+            {
+                // typeless mode. figure out the expected payload type from the OData Path.
+                IEdmType edmType = path.EdmType;
+                if (edmType != null)
+                {
+                    expectedPayloadType = EdmLibHelpers.ToEdmTypeReference(edmType, isNullable: false);
+                    if (expectedPayloadType.TypeKind() == EdmTypeKind.Collection)
+                    {
+                        IEdmTypeReference elementType = expectedPayloadType.AsCollection().ElementType();
+                        if (elementType.IsEntity())
+                        {
+                            // collection of entities cannot be CREATE/UPDATEd. Instead, the request would contain a single entry.
+                            expectedPayloadType = elementType;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                TryGetInnerTypeForDelta(ref type);
+                expectedPayloadType = model.GetEdmTypeReference(type);
+            }
+
+            return expectedPayloadType;
         }
 
         private static bool IsEntityOrFeed(IEdmTypeReference type)

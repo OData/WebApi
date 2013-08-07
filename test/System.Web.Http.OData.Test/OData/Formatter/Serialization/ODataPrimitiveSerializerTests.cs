@@ -77,27 +77,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void Constructor_ThrowsArgumentNull_edmPrimitiveType()
+        public void Property_ODataPayloadKind()
         {
-            Assert.ThrowsArgumentNull(() =>
-            {
-                var serializer = new ODataPrimitiveSerializer(edmPrimitiveType: null);
-            }, "edmType");
-        }
-
-        [Theory]
-        [PropertyData("EdmPrimitiveKinds")]
-        public void Constructor_SucceedsForValidPrimitiveType(EdmPrimitiveTypeKind primitiveTypeKind)
-        {
-            IEdmPrimitiveType edmPrimitiveType = EdmCoreModel.Instance.SchemaElements
-                                                                .OfType<IEdmPrimitiveType>()
-                                                                .Where(primitiveType => primitiveType.PrimitiveKind == primitiveTypeKind)
-                                                                .FirstOrDefault();
-            IEdmPrimitiveTypeReference edmPrimitiveTypeReference = new EdmPrimitiveTypeReference(edmPrimitiveType, false);
-
-            var serializer = new ODataPrimitiveSerializer(edmPrimitiveTypeReference);
-
-            Assert.Equal(serializer.EdmType, edmPrimitiveTypeReference);
+            var serializer = new ODataPrimitiveSerializer();
             Assert.Equal(serializer.ODataPayloadKind, ODataPayloadKind.Property);
         }
 
@@ -105,23 +87,24 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObject_Throws_RootElementNameMissing()
         {
             ODataSerializerContext writeContext = new ODataSerializerContext();
-            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer(EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: true));
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
 
             Assert.Throws<ArgumentException>(
-                () => serializer.WriteObject(42, ODataTestUtil.GetMockODataMessageWriter(), writeContext),
+                () => serializer.WriteObject(42, typeof(int), ODataTestUtil.GetMockODataMessageWriter(), writeContext),
                 "The 'RootElementName' property is required on 'ODataSerializerContext'.\r\nParameter name: writeContext");
         }
 
         [Fact]
         public void WriteObject_Calls_CreateODataPrimitiveValue()
         {
-            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property" };
-            Mock<ODataPrimitiveSerializer> serializer = new Mock<ODataPrimitiveSerializer>(
-                EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: true));
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = EdmCoreModel.Instance };
+            Mock<ODataPrimitiveSerializer> serializer = new Mock<ODataPrimitiveSerializer>();
             serializer.CallBase = true;
-            serializer.Setup(s => s.CreateODataPrimitiveValue(42, writeContext)).Returns(new ODataPrimitiveValue(42)).Verifiable();
+            serializer.Setup(s => s.CreateODataPrimitiveValue(
+                    42, It.Is<IEdmPrimitiveTypeReference>(t => t.PrimitiveKind() == EdmPrimitiveTypeKind.Int32), writeContext))
+                .Returns(new ODataPrimitiveValue(42)).Verifiable();
 
-            serializer.Object.WriteObject(42, ODataTestUtil.GetMockODataMessageWriter(), writeContext);
+            serializer.Object.WriteObject(42, typeof(int), ODataTestUtil.GetMockODataMessageWriter(), writeContext);
 
             serializer.Verify();
         }
@@ -130,9 +113,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateODataValue_PrimitiveValue()
         {
             IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
-            var serializer = new ODataPrimitiveSerializer(edmPrimitiveType);
+            var serializer = new ODataPrimitiveSerializer();
 
-            var odataValue = serializer.CreateODataValue(20, writeContext: null);
+            var odataValue = serializer.CreateODataValue(20, edmPrimitiveType, writeContext: null);
             Assert.NotNull(odataValue);
             ODataPrimitiveValue primitiveValue = Assert.IsType<ODataPrimitiveValue>(odataValue);
             Assert.Equal(primitiveValue.Value, 20);
@@ -142,8 +125,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateODataValue_ReturnsODataNullValue_ForNullValue()
         {
             IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string));
-            var serializer = new ODataPrimitiveSerializer(edmPrimitiveType);
-            var odataValue = serializer.CreateODataValue(null, new ODataSerializerContext());
+            var serializer = new ODataPrimitiveSerializer();
+            var odataValue = serializer.CreateODataValue(null, edmPrimitiveType, new ODataSerializerContext());
 
             Assert.IsType<ODataNullValue>(odataValue);
         }
@@ -154,21 +137,23 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObject_EdmPrimitives(object graph)
         {
             IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
-            var serializer = new ODataPrimitiveSerializer(edmPrimitiveType);
+            var serializer = new ODataPrimitiveSerializer();
+            ODataSerializerContext writecontext = new ODataSerializerContext() { RootElementName = "PropertyName", Model = EdmCoreModel.Instance };
 
             ODataMessageWriter writer = new ODataMessageWriter(new ODataMessageWrapper(new MemoryStream()) as IODataResponseMessage);
 
-            Assert.DoesNotThrow(() => serializer.WriteObject(graph, writer, new ODataSerializerContext() { RootElementName = "PropertyName" }));
+            Assert.DoesNotThrow(() => serializer.WriteObject(graph, typeof(int), writer, writecontext));
         }
 
         [Fact]
         public void AddTypeNameAnnotationAsNeeded_DoesNotAddAnnotation_InDefaultMetadataMode()
         {
             // Arrange
+            IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
             ODataPrimitiveValue primitive = new ODataPrimitiveValue(0);
 
             // Act
-            ODataPrimitiveSerializer.AddTypeNameAnnotationAsNeeded(primitive, ODataMetadataLevel.Default);
+            ODataPrimitiveSerializer.AddTypeNameAnnotationAsNeeded(primitive, edmPrimitiveType, ODataMetadataLevel.Default);
 
             // Assert
             Assert.Null(primitive.GetAnnotation<SerializationTypeNameAnnotation>());
@@ -178,10 +163,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void AddTypeNameAnnotationAsNeeded_AddsAnnotation_InJsonLightMetadataMode()
         {
             // Arrange
+            IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(short));
             ODataPrimitiveValue primitive = new ODataPrimitiveValue((short)1);
 
             // Act
-            ODataPrimitiveSerializer.AddTypeNameAnnotationAsNeeded(primitive, ODataMetadataLevel.FullMetadata);
+            ODataPrimitiveSerializer.AddTypeNameAnnotationAsNeeded(primitive, edmPrimitiveType, ODataMetadataLevel.FullMetadata);
 
             // Assert
             SerializationTypeNameAnnotation annotation = primitive.GetAnnotation<SerializationTypeNameAnnotation>();
@@ -211,7 +197,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreatePrimitive_ReturnsNull_ForNullValue()
         {
             // Act
-            ODataValue value = ODataPrimitiveSerializer.CreatePrimitive(null, ODataMetadataLevel.Default);
+            IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
+            ODataValue value = ODataPrimitiveSerializer.CreatePrimitive(null, edmPrimitiveType, ODataMetadataLevel.Default);
 
             // Assert
             Assert.Null(value);

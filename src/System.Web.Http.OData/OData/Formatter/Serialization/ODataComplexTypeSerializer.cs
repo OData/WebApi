@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -13,66 +14,66 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// </summary>
     public class ODataComplexTypeSerializer : ODataEdmTypeSerializer
     {
-        private readonly IEdmComplexTypeReference _edmComplexType;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataComplexTypeSerializer"/> class.
         /// </summary>
-        /// <param name="edmType">The edm complex type this serializer instance can serialize.</param>
         /// <param name="serializerProvider">The serializer provider to use to serialize nested objects.</param>
-        public ODataComplexTypeSerializer(IEdmComplexTypeReference edmType, ODataSerializerProvider serializerProvider)
-            : base(edmType, ODataPayloadKind.Property, serializerProvider)
+        public ODataComplexTypeSerializer(ODataSerializerProvider serializerProvider)
+            : base(ODataPayloadKind.Property, serializerProvider)
         {
-            _edmComplexType = edmType;
-        }
-
-        /// <summary>
-        /// Gets the <see cref="IEdmComplexTypeReference"/> this serializer handles.
-        /// </summary>
-        public IEdmComplexTypeReference ComplexType
-        {
-            get
-            {
-                return _edmComplexType;
-            }
         }
 
         /// <inheritdoc/>
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter,
+            ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
                 throw Error.ArgumentNull("messageWriter");
             }
-
             if (writeContext == null)
             {
                 throw Error.ArgumentNull("writeContext");
             }
-
             if (writeContext.RootElementName == null)
             {
                 throw Error.Argument("writeContext", SRResources.RootElementNameMissing, typeof(ODataSerializerContext).Name);
             }
 
-            ODataProperty property = CreateProperty(graph, writeContext.RootElementName, writeContext);
+            IEdmTypeReference edmType = writeContext.GetEdmType(graph, type);
+            Contract.Assert(edmType != null);
 
+            ODataProperty property = CreateProperty(graph, edmType, writeContext.RootElementName, writeContext);
             messageWriter.WriteProperty(property);
         }
 
         /// <inheitdoc />
-        public sealed override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
+        public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType,
+            ODataSerializerContext writeContext)
         {
-            return CreateODataComplexValue(graph, writeContext);
+            if (expectedType == null)
+            {
+                throw Error.ArgumentNull("expectedType");
+            }
+
+            if (!expectedType.IsComplex())
+            {
+                throw new SerializationException(
+                    Error.Format(SRResources.CannotWriteType, GetType().Name, expectedType.FullName()));
+            }
+
+            return CreateODataComplexValue(graph, expectedType.AsComplex(), writeContext);
         }
 
         /// <summary>
         /// Creates an <see cref="ODataComplexValue"/> for the object represented by <paramref name="graph"/>.
         /// </summary>
         /// <param name="graph">The value of the <see cref="ODataComplexValue"/> to be created.</param>
+        /// <param name="complexType">The EDM complex type of the object.</param>
         /// <param name="writeContext">The serializer context.</param>
         /// <returns>The created <see cref="ODataComplexValue"/>.</returns>
-        public virtual ODataComplexValue CreateODataComplexValue(object graph, ODataSerializerContext writeContext)
+        public virtual ODataComplexValue CreateODataComplexValue(object graph, IEdmComplexTypeReference complexType,
+            ODataSerializerContext writeContext)
         {
             if (writeContext == null)
             {
@@ -84,10 +85,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 return null;
             }
 
-            IEdmComplexObject complexObject = graph as IEdmComplexObject ?? new TypedEdmComplexObject(graph, ComplexType);
+            IEdmComplexObject complexObject = graph as IEdmComplexObject ?? new TypedEdmComplexObject(graph, complexType);
 
             List<ODataProperty> propertyCollection = new List<ODataProperty>();
-            foreach (IEdmProperty property in _edmComplexType.ComplexDefinition().Properties())
+            foreach (IEdmProperty property in complexType.ComplexDefinition().Properties())
             {
                 IEdmTypeReference propertyType = property.Type;
                 ODataEdmTypeSerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(propertyType);
@@ -99,11 +100,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 object propertyValue;
                 if (complexObject.TryGetPropertyValue(property.Name, out propertyValue))
                 {
-                    propertyCollection.Add(propertySerializer.CreateProperty(propertyValue, property.Name, writeContext));
+                    propertyCollection.Add(
+                        propertySerializer.CreateProperty(propertyValue, property.Type, property.Name, writeContext));
                 }
             }
 
-            string typeName = _edmComplexType.FullName();
+            string typeName = complexType.FullName();
 
             ODataComplexValue value = new ODataComplexValue()
             {

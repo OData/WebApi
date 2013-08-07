@@ -17,33 +17,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataCollectionSerializer"/> class.
         /// </summary>
-        /// <param name="edmType">The edm collection type this serializer instance can serialize.</param>
         /// <param name="serializerProvider">The serializer provider to use to serialize nested objects.</param>
-        public ODataCollectionSerializer(IEdmCollectionTypeReference edmType, ODataSerializerProvider serializerProvider)
-            : base(edmType, ODataPayloadKind.Collection, serializerProvider)
+        public ODataCollectionSerializer(ODataSerializerProvider serializerProvider)
+            : base(ODataPayloadKind.Collection, serializerProvider)
         {
-            IEdmTypeReference itemType = edmType.ElementType();
-            if (itemType == null)
-            {
-                throw Error.Argument("edmType", SRResources.ItemTypeOfCollectionNull, edmType.FullName());
-            }
-
-            CollectionType = edmType;
-            ElementType = itemType;
         }
 
-        /// <summary>
-        /// Gets the EDM type of the elements of the collection this serializer handles.
-        /// </summary>
-        public IEdmTypeReference ElementType { get; private set; }
-
-        /// <summary>
-        /// Gets the EDM collection type this serializer handles.
-        /// </summary>
-        public IEdmCollectionTypeReference CollectionType { get; private set; }
-
         /// <inheritdoc/>
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter,
+            ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -55,20 +37,31 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            ODataCollectionWriter writer = messageWriter.CreateODataCollectionWriter(ElementType);
-            WriteCollection(writer, graph, writeContext);
+            IEdmTypeReference collectionType = writeContext.GetEdmType(graph, type);
+            Contract.Assert(collectionType != null);
+
+            IEdmTypeReference elementType = GetElementType(collectionType);
+            ODataCollectionWriter writer = messageWriter.CreateODataCollectionWriter(elementType);
+            WriteCollection(writer, graph, collectionType.AsCollection(), writeContext);
         }
 
         /// <inheritdoc/>
-        public sealed override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
+        public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType,
+            ODataSerializerContext writeContext)
         {
             IEnumerable enumerable = graph as IEnumerable;
             if (enumerable == null)
             {
                 throw Error.Argument("graph", SRResources.ArgumentMustBeOfType, typeof(IEnumerable).Name);
             }
+            if (expectedType == null)
+            {
+                throw Error.ArgumentNull("expectedType");
+            }
 
-            return CreateODataCollectionValue(enumerable, writeContext);
+            IEdmTypeReference elementType = GetElementType(expectedType);
+
+            return CreateODataCollectionValue(enumerable, elementType, writeContext);
         }
 
         /// <summary>
@@ -76,15 +69,17 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// </summary>
         /// <param name="writer">The <see cref="ODataCollectionWriter"/> to use.</param>
         /// <param name="graph">The collection to write.</param>
+        /// <param name="collectionType">The EDM type of the collection.</param>
         /// <param name="writeContext">The serializer context.</param>
-        public void WriteCollection(ODataCollectionWriter writer, object graph, ODataSerializerContext writeContext)
+        public void WriteCollection(ODataCollectionWriter writer, object graph, IEdmTypeReference collectionType,
+            ODataSerializerContext writeContext)
         {
             if (writer == null)
             {
                 throw Error.ArgumentNull("writer");
             }
 
-            ODataCollectionValue collectionValue = CreateODataValue(graph, writeContext) as ODataCollectionValue;
+            ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
 
             writer.WriteStart(new ODataCollectionStart { Name = writeContext.RootElementName });
 
@@ -103,13 +98,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Creates an <see cref="ODataCollectionValue"/> for the enumerable represented by <paramref name="enumerable"/>.
         /// </summary>
         /// <param name="enumerable">The value of the collection to be created.</param>
+        /// <param name="elementType">The element EDM type of the collection.</param>
         /// <param name="writeContext">The serializer context to be used while creating the collection.</param>
         /// <returns>The created <see cref="ODataCollectionValue"/>.</returns>
-        public virtual ODataCollectionValue CreateODataCollectionValue(IEnumerable enumerable, ODataSerializerContext writeContext)
+        public virtual ODataCollectionValue CreateODataCollectionValue(IEnumerable enumerable, IEdmTypeReference elementType,
+            ODataSerializerContext writeContext)
         {
             if (writeContext == null)
             {
                 throw Error.ArgumentNull("writeContext");
+            }
+            if (elementType == null)
+            {
+                throw Error.ArgumentNull("elementType");
             }
 
             ArrayList valueCollection = new ArrayList();
@@ -119,15 +120,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 ODataEdmTypeSerializer itemSerializer = null;
                 foreach (object item in enumerable)
                 {
-                    itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(ElementType);
+                    itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(elementType);
                     if (itemSerializer == null)
                     {
                         throw new SerializationException(
-                            Error.Format(SRResources.TypeCannotBeSerialized, ElementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                            Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
                     }
 
                     // ODataCollectionWriter expects the individual elements in the collection to be the underlying values and not ODataValues.
-                    valueCollection.Add(itemSerializer.CreateODataValue(item, writeContext).GetInnerValue());
+                    valueCollection.Add(itemSerializer.CreateODataValue(item, elementType, writeContext).GetInnerValue());
                 }
             }
 
@@ -135,7 +136,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // string typeName = _edmCollectionType.FullName();
             // But ODataLib currently doesn't support .FullName() for collections. As a workaround, we construct the
             // collection type name the hard way.
-            string typeName = "Collection(" + ElementType.FullName() + ")";
+            string typeName = "Collection(" + elementType.FullName() + ")";
 
             // ODataCollectionValue is only a V3 property, arrays inside Complex Types or Entity types are only supported in V3
             // if a V1 or V2 Client requests a type that has a collection within it ODataLib will throw.
@@ -219,6 +220,17 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 default: // All values already specified; just keeping the compiler happy.
                     return false;
             }
+        }
+
+        private static IEdmTypeReference GetElementType(IEdmTypeReference feedType)
+        {
+            if (feedType.IsCollection())
+            {
+                return feedType.AsCollection().ElementType();
+            }
+
+            string message = Error.Format(SRResources.CannotWriteType, typeof(ODataFeedSerializer).Name, feedType.FullName());
+            throw new SerializationException(message);
         }
     }
 }

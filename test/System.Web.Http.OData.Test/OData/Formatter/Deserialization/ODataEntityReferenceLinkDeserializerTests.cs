@@ -27,7 +27,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             var deserializer = new ODataEntityReferenceLinkDeserializer();
 
             Assert.ThrowsArgumentNull(
-                () => deserializer.Read(messageReader: null, readContext: new ODataDeserializerContext()),
+                () => deserializer.Read(messageReader: null, type: null, readContext: new ODataDeserializerContext()),
                 "messageReader");
         }
 
@@ -38,7 +38,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader messageReader = ODataTestUtil.GetMockODataMessageReader();
 
             Assert.ThrowsArgumentNull(
-                () => deserializer.Read(messageReader, readContext: null),
+                () => deserializer.Read(messageReader, type: null, readContext: null),
                 "readContext");
         }
 
@@ -58,7 +58,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             };
 
             // Act
-            Uri uri = deserializer.Read(messageReader, context) as Uri;
+            Uri uri = deserializer.Read(messageReader, typeof(Uri), context) as Uri;
 
             // Assert
             Assert.NotNull(uri);
@@ -88,7 +88,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             };
 
             // Act
-            Uri uri = deserializer.Read(messageReader, context) as Uri;
+            Uri uri = deserializer.Read(messageReader, typeof(Uri), context) as Uri;
 
             // Assert
             Assert.NotNull(uri);
@@ -104,7 +104,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataDeserializerContext context = new ODataDeserializerContext();
 
             // Act & Assert
-            Assert.Throws<SerializationException>(() => deserializer.Read(reader, context),
+            Assert.Throws<SerializationException>(() => deserializer.Read(reader, typeof(Uri), context),
                 "The operation cannot be completed because no ODataPath is available for the request.");
         }
 
@@ -120,7 +120,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             };
 
             // Act & Assert
-            Assert.Throws<SerializationException>(() => deserializer.Read(reader, context),
+            Assert.Throws<SerializationException>(() => deserializer.Read(reader, typeof(Uri), context),
                 "The related navigation property could not be found from the OData path. The related navigation property is required to deserialize the payload.");
         }
 

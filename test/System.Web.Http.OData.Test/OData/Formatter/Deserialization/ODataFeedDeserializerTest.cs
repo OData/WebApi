@@ -27,62 +27,26 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void Ctor_ThrowsArgumentNull_EdmType()
-        {
-            Assert.ThrowsArgumentNull(
-                () => new ODataFeedDeserializer(edmType: null, deserializerProvider: new DefaultODataDeserializerProvider()),
-                "edmType");
-        }
-
-        [Fact]
         public void Ctor_ThrowsArgumentNull_DeserializerProvider()
         {
             Assert.ThrowsArgumentNull(
-                () => new ODataFeedDeserializer(edmType: _customersType, deserializerProvider: null),
+                () => new ODataFeedDeserializer(deserializerProvider: null),
                 "deserializerProvider");
-        }
-
-        [Fact]
-        public void Ctor_ThrowsArgument_IfEdmTypeIsNotEntityCollection()
-        {
-            IEdmCollectionTypeReference edmType =
-                new EdmCollectionTypeReference(
-                    new EdmCollectionType(EdmCoreModel.Instance.GetInt32(isNullable: false)),
-                    isNullable: false);
-
-            Assert.ThrowsArgument(
-                () => new ODataFeedDeserializer(edmType, new DefaultODataDeserializerProvider()),
-                "edmType",
-                "Edm.Int32 is not a collection of type IEdmEntityType. Only entity collections are supported.");
-        }
-
-        [Fact]
-        public void Ctor_SetsProperty_CollectionType()
-        {
-            var deserializer = new ODataFeedDeserializer(_customersType, new DefaultODataDeserializerProvider());
-            Assert.Equal(_customersType, deserializer.CollectionType);
-        }
-
-        [Fact]
-        public void Ctor_SetsProperty_EntityType()
-        {
-            var deserializer = new ODataFeedDeserializer(_customersType, new DefaultODataDeserializerProvider());
-            Assert.Equal(_customerType, deserializer.EntityType);
         }
 
         [Fact]
         public void ReadInline_ReturnsNull_IfItemIsNull()
         {
-            var deserializer = new ODataFeedDeserializer(_customersType, new DefaultODataDeserializerProvider());
-            Assert.Null(deserializer.ReadInline(item: null, readContext: new ODataDeserializerContext()));
+            var deserializer = new ODataFeedDeserializer(new DefaultODataDeserializerProvider());
+            Assert.Null(deserializer.ReadInline(item: null, edmType: _customersType, readContext: new ODataDeserializerContext()));
         }
 
         [Fact]
         public void ReadInline_Throws_ArgumentMustBeOfType()
         {
-            var deserializer = new ODataFeedDeserializer(_customersType, new DefaultODataDeserializerProvider());
+            var deserializer = new ODataFeedDeserializer(new DefaultODataDeserializerProvider());
             Assert.ThrowsArgument(
-                () => deserializer.ReadInline(item: 42, readContext: new ODataDeserializerContext()),
+                () => deserializer.ReadInline(item: 42, edmType: _customersType, readContext: new ODataDeserializerContext()),
                 "item",
                 "The argument must be of type 'ODataFeedWithEntries'.");
         }
@@ -92,16 +56,16 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             // Arrange
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
-            Mock<ODataFeedDeserializer> deserializer = new Mock<ODataFeedDeserializer>(_customersType, deserializerProvider);
+            Mock<ODataFeedDeserializer> deserializer = new Mock<ODataFeedDeserializer>(deserializerProvider);
             ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataFeed());
             ODataDeserializerContext readContext = new ODataDeserializerContext();
             IEnumerable expectedResult = new object[0];
 
             deserializer.CallBase = true;
-            deserializer.Setup(f => f.ReadFeed(feedWrapper, readContext)).Returns(expectedResult).Verifiable();
+            deserializer.Setup(f => f.ReadFeed(feedWrapper, _customerType, readContext)).Returns(expectedResult).Verifiable();
 
             // Act
-            var result = deserializer.Object.ReadInline(feedWrapper, readContext);
+            var result = deserializer.Object.ReadInline(feedWrapper, _customersType, readContext);
 
             // Assert
             deserializer.Verify();
@@ -112,14 +76,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void ReadFeed_Throws_TypeCannotBeDeserialized()
         {
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            ODataFeedDeserializer deserializer = new ODataFeedDeserializer(_customersType, deserializerProvider.Object);
+            ODataFeedDeserializer deserializer = new ODataFeedDeserializer(deserializerProvider.Object);
             ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataFeed());
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns<ODataEdmTypeDeserializer>(null);
 
             Assert.Throws<SerializationException>(
-                () => deserializer.ReadFeed(feedWrapper, readContext).GetEnumerator().MoveNext(),
+                () => deserializer.ReadFeed(feedWrapper, _customerType, readContext).GetEnumerator().MoveNext(),
                 "'System.Web.Http.OData.TestCommon.Models.Customer' cannot be deserialized using the ODataMediaTypeFormatter.");
         }
 
@@ -128,19 +92,19 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             // Arrange
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            Mock<ODataEdmTypeDeserializer> entityDeserializer = new Mock<ODataEdmTypeDeserializer>(_customerType, ODataPayloadKind.Entry);
-            ODataFeedDeserializer deserializer = new ODataFeedDeserializer(_customersType, deserializerProvider.Object);
+            Mock<ODataEdmTypeDeserializer> entityDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Entry);
+            ODataFeedDeserializer deserializer = new ODataFeedDeserializer(deserializerProvider.Object);
             ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataFeed());
             feedWrapper.Entries.Add(new ODataEntryWithNavigationLinks(new ODataEntry { Id = "1" }));
             feedWrapper.Entries.Add(new ODataEntryWithNavigationLinks(new ODataEntry { Id = "2" }));
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns(entityDeserializer.Object);
-            entityDeserializer.Setup(d => d.ReadInline(feedWrapper.Entries[0], readContext)).Returns("entry1").Verifiable();
-            entityDeserializer.Setup(d => d.ReadInline(feedWrapper.Entries[1], readContext)).Returns("entry2").Verifiable();
+            entityDeserializer.Setup(d => d.ReadInline(feedWrapper.Entries[0], _customerType, readContext)).Returns("entry1").Verifiable();
+            entityDeserializer.Setup(d => d.ReadInline(feedWrapper.Entries[1], _customerType, readContext)).Returns("entry2").Verifiable();
 
             // Act
-            var result = deserializer.ReadFeed(feedWrapper, readContext);
+            var result = deserializer.ReadFeed(feedWrapper, _customerType, readContext);
 
             // Assert
             Assert.Equal(new[] { "entry1", "entry2" }, result.OfType<String>());

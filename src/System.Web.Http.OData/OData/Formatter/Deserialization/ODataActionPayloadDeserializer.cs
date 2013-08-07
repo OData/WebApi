@@ -39,7 +39,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public ODataDeserializerProvider DeserializerProvider { get; private set; }
 
         /// <inheritdoc />
-        public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
+        public override object Read(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
         {
             if (messageReader == null)
             {
@@ -95,7 +95,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             else
             {
                 ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(parameterType);
-                return deserializer.ReadInline(value, readContext);
+                return deserializer.ReadInline(value, parameterType, readContext);
             }
         }
 

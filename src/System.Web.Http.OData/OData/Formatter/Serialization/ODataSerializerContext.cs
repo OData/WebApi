@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
@@ -15,6 +16,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// </summary>
     public class ODataSerializerContext
     {
+        private ClrTypeCache _typeMappingCache;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
         /// </summary>
@@ -125,5 +128,36 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Gets or sets a property bag associated with this context to store any generic data.
         /// </summary>
         public Dictionary<object, object> Items { get; private set; }
+
+        internal IEdmTypeReference GetEdmType(object instance, Type type)
+        {
+            IEdmTypeReference edmType;
+
+            IEdmObject edmObject = instance as IEdmObject;
+            if (edmObject != null)
+            {
+                edmType = edmObject.GetEdmType();
+                if (edmType == null)
+                {
+                    throw Error.InvalidOperation(SRResources.EdmTypeCannotBeNull);
+                }
+            }
+            else
+            {
+                if (Model == null)
+                {
+                    throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
+                }
+
+                _typeMappingCache = _typeMappingCache ?? Model.GetTypeMappingCache();
+                edmType = _typeMappingCache.GetEdmType(type, Model);
+                if (edmType == null)
+                {
+                    throw Error.InvalidOperation(SRResources.ClrTypeNotInModel, type);
+                }
+            }
+
+            return edmType;
+        }
     }
 }

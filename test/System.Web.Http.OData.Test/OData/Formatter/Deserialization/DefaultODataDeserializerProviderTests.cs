@@ -45,7 +45,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Assert.NotNull(deserializer);
             ODataPrimitiveDeserializer rawValueDeserializer = Assert.IsType<ODataPrimitiveDeserializer>(deserializer);
             Assert.Equal(ODataPayloadKind.Property, rawValueDeserializer.ODataPayloadKind);
-            Assert.Equal(primitiveKind, rawValueDeserializer.EdmType.AsPrimitive().PrimitiveDefinition().PrimitiveKind);
         }
 
         [Fact]
@@ -61,8 +60,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataEntityDeserializer entityDeserializer = Assert.IsType<ODataEntityDeserializer>(deserializer);
             Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Entry);
             Assert.Equal(entityDeserializer.DeserializerProvider, deserializerProvider);
-            Assert.True(entityDeserializer.EntityType.IsEquivalentTo(_edmModel.GetEdmTypeReference(typeof(ODataEntityDeserializerTests.Product))));
-            Assert.Equal(entityDeserializer.EdmType, entityDeserializer.EntityType);
         }
 
         [Fact]
@@ -78,8 +75,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataComplexTypeDeserializer complexDeserializer = Assert.IsType<ODataComplexTypeDeserializer>(deserializer);
             Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Property);
             Assert.Equal(complexDeserializer.DeserializerProvider, deserializerProvider);
-            Assert.True(complexDeserializer.ComplexType.IsEquivalentTo(_edmModel.GetEdmTypeReference(typeof(ODataEntityDeserializerTests.Address))));
-            Assert.Equal(complexDeserializer.EdmType, complexDeserializer.ComplexType);
         }
 
         [Fact]
@@ -106,30 +101,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 typeof(ODataActionParameters), request) as ODataActionPayloadDeserializer;
 
             Assert.NotNull(basicActionPayload);
-        }
-
-        [Fact]
-        public void CreateEdmTypeDeserializer_Throws_ArgumentNullForEdmType()
-        {
-            DefaultODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
-
-            Assert.ThrowsArgumentNull(
-                () => deserializerProvider.CreateEdmTypeDeserializer(edmType: null),
-                "edmType");
-        }
-
-        [Fact]
-        public void CreateEdmTypeDeserializer_Returns_Null_ForUnsupportedType()
-        {
-            // Arrange
-            Mock<IEdmType> unsupportedEdmType = new Mock<IEdmType>();
-            unsupportedEdmType.Setup(e => e.TypeKind).Returns(EdmTypeKind.None);
-            Mock<IEdmTypeReference> unsupportedEdmTypeReference = new Mock<IEdmTypeReference>();
-            unsupportedEdmTypeReference.Setup(e => e.Definition).Returns(unsupportedEdmType.Object);
-            DefaultODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
-
-            // Act & Assert
-            Assert.Null(deserializerProvider.CreateEdmTypeDeserializer(unsupportedEdmTypeReference.Object));
         }
 
         [Fact]
@@ -165,21 +136,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void GetEdmTypeDeserializer_Calls_CreateDeserializer_ForAnEdmType()
-        {
-            // Arrange
-            Mock<DefaultODataDeserializerProvider> deserializerProvider = new Mock<DefaultODataDeserializerProvider> { CallBase = true };
-            IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            deserializerProvider.Setup(d => d.CreateEdmTypeDeserializer(edmType)).Verifiable();
-
-            // Act
-            deserializerProvider.Object.GetEdmTypeDeserializer(edmType);
-
-            // Assert
-            deserializerProvider.Verify();
-        }
-
-        [Fact]
         public void GetEdmTypeDeserializer_Caches_CreateDeserializerOutput()
         {
             // Arrange
@@ -192,31 +148,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             // Assert
             Assert.Same(deserializer1, deserializer2);
-        }
-
-        [Fact]
-        public void SetEdmTypeDeserializer_ThrowsArgumentNull_EdmType()
-        {
-            // Arrange
-            DefaultODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
-
-            // Act & Assert
-            Assert.ThrowsArgumentNull(
-                () => deserializerProvider.SetEdmTypeDeserializer(edmType: null, deserializer: null),
-                "edmType");
-        }
-
-        [Fact]
-        public void GetEdmTypeDeserializer_Returns_SetEdmTypeDeserializerInput()
-        {
-            // Arrange
-            DefaultODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
-            IEdmTypeReference edmType = EdmCoreModel.Instance.GetInt32(isNullable: true);
-            ODataEdmTypeDeserializer deserializer = new Mock<ODataEdmTypeDeserializer>(edmType, ODataPayloadKind.Property).Object;
-            deserializerProvider.SetEdmTypeDeserializer(edmType, deserializer);
-
-            // Act & Assert
-            Assert.Same(deserializer, deserializerProvider.GetEdmTypeDeserializer(edmType));
         }
 
         [Fact]

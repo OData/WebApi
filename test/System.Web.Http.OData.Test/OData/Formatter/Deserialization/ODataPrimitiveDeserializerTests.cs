@@ -15,6 +15,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 {
     public class ODataPrimitiveDeserializerTests
     {
+        private IEdmPrimitiveTypeReference _edmIntType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false);
+
         public static TheoryDataSet<object, object> NonEdmPrimitiveData
         {
             get
@@ -40,39 +42,22 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void Ctor_ThrowsArgumentNull_EdmType()
-        {
-            Assert.ThrowsArgumentNull(
-                () => new ODataPrimitiveDeserializer(edmType: null),
-                "edmType");
-        }
-
-        [Fact]
-        public void Ctor_SetsProperty_PrimitiveType()
-        {
-            Mock<IEdmPrimitiveTypeReference> primitiveType = new Mock<IEdmPrimitiveTypeReference>();
-            var deserializer = new ODataPrimitiveDeserializer(primitiveType.Object);
-
-            Assert.Equal(primitiveType.Object, deserializer.PrimitiveType);
-        }
-
-        [Fact]
         public void ReadInline_ReturnsNull_IfItemIsNull()
         {
             IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
-            var deserializer = new ODataPrimitiveDeserializer(primitiveType);
+            var deserializer = new ODataPrimitiveDeserializer();
 
-            Assert.Null(deserializer.ReadInline(item: null, readContext: new ODataDeserializerContext()));
+            Assert.Null(deserializer.ReadInline(item: null, edmType: _edmIntType, readContext: new ODataDeserializerContext()));
         }
 
         [Fact]
         public void ReadInline_Throws_ArgumentMustBeOfType()
         {
             IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
-            var deserializer = new ODataPrimitiveDeserializer(primitiveType);
+            var deserializer = new ODataPrimitiveDeserializer();
 
             Assert.ThrowsArgument(
-                () => deserializer.ReadInline(42, new ODataDeserializerContext()),
+                () => deserializer.ReadInline(42, _edmIntType, new ODataDeserializerContext()),
                 "item",
                 "The argument must be of type 'ODataProperty'");
         }
@@ -82,14 +67,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             // Arrange
             IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
-            Mock<ODataPrimitiveDeserializer> deserializer = new Mock<ODataPrimitiveDeserializer>(primitiveType);
+            Mock<ODataPrimitiveDeserializer> deserializer = new Mock<ODataPrimitiveDeserializer>();
             ODataProperty property = new ODataProperty();
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             deserializer.Setup(d => d.ReadPrimitive(property, readContext)).Returns(42).Verifiable();
 
             // Act
-            var result = deserializer.Object.ReadInline(property, readContext);
+            var result = deserializer.Object.ReadInline(property, primitiveType, readContext);
 
             // Assert
             deserializer.Verify();
@@ -99,19 +84,17 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void Read_ThrowsArgumentNull_MessageReader()
         {
-            IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
-            var deserializer = new ODataPrimitiveDeserializer(primitiveType);
+            var deserializer = new ODataPrimitiveDeserializer();
 
             Assert.ThrowsArgumentNull(
-                () => deserializer.Read(messageReader: null, readContext: new ODataDeserializerContext()),
+                () => deserializer.Read(messageReader: null, type: typeof(int), readContext: new ODataDeserializerContext()),
                 "messageReader");
         }
 
         [Fact]
         public void ReadPrimitive_ThrowsArgumentNull_PrimitiveProperty()
         {
-            IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
-            var deserializer = new ODataPrimitiveDeserializer(primitiveType);
+            var deserializer = new ODataPrimitiveDeserializer();
 
             Assert.ThrowsArgumentNull(
                 () => deserializer.ReadPrimitive(primitiveProperty: null, readContext: new ODataDeserializerContext()),
@@ -123,24 +106,22 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void Read_Primitive(object obj)
         {
             // Arrange
-            IEdmPrimitiveTypeReference primitive = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
-
-            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer(primitive);
-            ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer(primitive);
+            IEdmModel model = EdmCoreModel.Instance;
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+            ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer();
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), model);
+            ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
+            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
 
-            serializer.WriteObject(
-                obj,
-                new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), EdmCoreModel.Instance),
-                new ODataSerializerContext { RootElementName = "Property" });
+            serializer.WriteObject(obj, typeof(int), messageWriter, writeContext);
             stream.Seek(0, SeekOrigin.Begin);
-            Assert.Equal(
-                obj,
-                deserializer.Read(
-                new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), EdmCoreModel.Instance),
-                new ODataDeserializerContext()));
+
+            // Act & Assert
+            Assert.Equal(obj, deserializer.Read(messageReader, typeof(int), readContext));
         }
 
         [Theory]
@@ -149,25 +130,22 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             // Arrange
             IEdmPrimitiveTypeReference primitive = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
-
-            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer(primitive);
-            ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer(primitive);
+            IEdmModel model = EdmCoreModel.Instance;
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+            ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer();
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), model);
+            ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
+            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
 
-            serializer.WriteObject(
-                obj,
-                new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), EdmCoreModel.Instance),
-                new ODataSerializerContext { RootElementName = "Property" });
+            serializer.WriteObject(obj, typeof(int), messageWriter, writeContext);
             stream.Seek(0, SeekOrigin.Begin);
 
             // Act && Assert
-            Assert.Equal(
-                expected,
-                deserializer.Read(
-                new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), EdmCoreModel.Instance),
-                new ODataDeserializerContext()));
+            Assert.Equal(expected, deserializer.Read(messageReader, typeof(int), readContext));
         }
     }
 }

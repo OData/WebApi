@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Concurrent;
 using System.Net.Http;
 using Microsoft.Data.Edm;
 
@@ -11,15 +10,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// </summary>
     public class DefaultODataDeserializerProvider : ODataDeserializerProvider
     {
-        private readonly ConcurrentDictionary<IEdmTypeReference, ODataEdmTypeDeserializer> _deserializerCache =
-            new ConcurrentDictionary<IEdmTypeReference, ODataEdmTypeDeserializer>(new EdmTypeReferenceEqualityComparer());
-
-        // cache the clrtype to edmtype mappings as we might have to crawl the inheritance hierarchy to find the mapping.
-        private readonly ConcurrentDictionary<Tuple<IEdmModel, Type>, IEdmTypeReference> _clrTypeMappingCache =
-            new ConcurrentDictionary<Tuple<IEdmModel, Type>, IEdmTypeReference>();
-
         private static readonly ODataEntityReferenceLinkDeserializer _entityReferenceLinkDeserializer = new ODataEntityReferenceLinkDeserializer();
+        private static readonly ODataPrimitiveDeserializer _primitiveDeserializer = new ODataPrimitiveDeserializer();
+
         private readonly ODataActionPayloadDeserializer _actionPayloadDeserializer;
+        private readonly ODataEntityDeserializer _entityDeserializer;
+        private readonly ODataFeedDeserializer _feedDeserializer;
+        private readonly ODataCollectionDeserializer _collectionDeserializer;
+        private readonly ODataComplexTypeDeserializer _complexDeserializer;
 
         private static readonly DefaultODataDeserializerProvider _instance = new DefaultODataDeserializerProvider();
 
@@ -29,6 +27,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public DefaultODataDeserializerProvider()
         {
             _actionPayloadDeserializer = new ODataActionPayloadDeserializer(this);
+            _entityDeserializer = new ODataEntityDeserializer(this);
+            _feedDeserializer = new ODataFeedDeserializer(this);
+            _collectionDeserializer = new ODataCollectionDeserializer(this);
+            _complexDeserializer = new ODataComplexTypeDeserializer(this);
         }
 
         /// <summary>
@@ -50,57 +52,26 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("edmType");
             }
 
-            return _deserializerCache.GetOrAdd(edmType, CreateEdmTypeDeserializer);
-        }
-
-        /// <summary>
-        /// Sets the <see cref="ODataEdmTypeDeserializer"/> for the given edmType in the deserializer cache.
-        /// </summary>
-        /// <param name="edmType">The EDM type.</param>
-        /// <param name="deserializer">The deserializer to use for the given EDM type.</param>
-        public void SetEdmTypeDeserializer(IEdmTypeReference edmType, ODataEdmTypeDeserializer deserializer)
-        {
-            if (edmType == null)
-            {
-                throw Error.ArgumentNull("edmType");
-            }
-
-            _deserializerCache.AddOrUpdate(edmType, deserializer, (t, s) => deserializer);
-        }
-
-        /// <summary>
-        /// Creates an <see cref="ODataEdmTypeDeserializer"/> that can deserialize payloads of the given <paramref name="edmType"/>.
-        /// </summary>
-        /// <param name="edmType">The EDM type that the created deserializer can handle.</param>
-        /// <returns>The created deserializer.</returns>
-        /// <remarks> Override this method if you want to use a custom deserializer. <see cref="GetEdmTypeDeserializer"/> calls into this method and caches the result.</remarks>
-        public virtual ODataEdmTypeDeserializer CreateEdmTypeDeserializer(IEdmTypeReference edmType)
-        {
-            if (edmType == null)
-            {
-                throw Error.ArgumentNull("edmType");
-            }
-
             switch (edmType.TypeKind())
             {
                 case EdmTypeKind.Entity:
-                    return new ODataEntityDeserializer(edmType.AsEntity(), this);
+                    return _entityDeserializer;
 
                 case EdmTypeKind.Primitive:
-                    return new ODataPrimitiveDeserializer(edmType.AsPrimitive());
+                    return _primitiveDeserializer;
 
                 case EdmTypeKind.Complex:
-                    return new ODataComplexTypeDeserializer(edmType.AsComplex(), this);
+                    return _complexDeserializer;
 
                 case EdmTypeKind.Collection:
                     IEdmCollectionTypeReference collectionType = edmType.AsCollection();
                     if (collectionType.ElementType().IsEntity())
                     {
-                        return new ODataFeedDeserializer(collectionType, this);
+                        return _feedDeserializer;
                     }
                     else
                     {
-                        return new ODataCollectionDeserializer(collectionType, this);
+                        return _collectionDeserializer;
                     }
 
                 default:
@@ -131,13 +102,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return _actionPayloadDeserializer;
             }
 
-            Tuple<IEdmModel, Type> cacheKey = Tuple.Create(model, type);
-            IEdmTypeReference edmType = _clrTypeMappingCache.GetOrAdd(cacheKey, (key) =>
-            {
-                IEdmModel m = key.Item1;
-                Type t = key.Item2;
-                return m.GetEdmTypeReference(t);
-            });
+            ClrTypeCache typeMappingCache = model.GetTypeMappingCache();
+            IEdmTypeReference edmType = typeMappingCache.GetEdmType(type, model);
 
             if (edmType == null)
             {

@@ -39,7 +39,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(new DefaultODataDeserializerProvider());
             Assert.ThrowsArgumentNull(
-                () => deserializer.Read(messageReader: null, readContext: new ODataDeserializerContext()),
+                () => deserializer.Read(messageReader: null, type: typeof(ODataActionParameters), readContext: new ODataDeserializerContext()),
                 "messageReader");
         }
 
@@ -49,7 +49,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(new DefaultODataDeserializerProvider());
             ODataMessageReader messageReader = ODataTestUtil.GetMockODataMessageReader();
             Assert.ThrowsArgumentNull(
-                () => deserializer.Read(messageReader, readContext: null),
+                () => deserializer.Read(messageReader, typeof(ODataActionParameters), readContext: null),
                 "readContext");
         }
 
@@ -59,7 +59,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(new DefaultODataDeserializerProvider());
             ODataMessageReader messageReader = ODataTestUtil.GetMockODataMessageReader();
             Assert.Throws<SerializationException>(
-                () => deserializer.Read(messageReader, readContext: new ODataDeserializerContext()),
+                () => deserializer.Read(messageReader, typeof(ODataActionParameters), readContext: new ODataDeserializerContext()),
                 "The operation cannot be completed because no ODataPath is available for the request.");
         }
 
@@ -79,7 +79,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(new DefaultODataDeserializerProvider());
             ODataPath path = CreatePath(model, actionName);
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
-            ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
+            ODataActionParameters payload = deserializer.Read(reader, typeof(ODataActionParameters), context) as ODataActionParameters;
 
             Assert.NotNull(payload);
             Assert.Same(
@@ -105,7 +105,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(new DefaultODataDeserializerProvider());
             ODataPath path = CreatePath(model, actionName);
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
-            ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
+            ODataActionParameters payload = deserializer.Read(reader, typeof(ODataActionParameters), context) as ODataActionParameters;
 
             Assert.NotNull(payload);
             Assert.Same(
@@ -136,7 +136,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(new DefaultODataDeserializerProvider());
             ODataPath path = CreatePath(model, actionName);
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
-            ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
+            ODataActionParameters payload = deserializer.Read(reader, typeof(ODataActionParameters), context) as ODataActionParameters;
 
             Assert.NotNull(payload);
             Assert.Same(
@@ -163,7 +163,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(new DefaultODataDeserializerProvider());
             ODataPath path = CreatePath(model, actionName);
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
-            ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
+            ODataActionParameters payload = deserializer.Read(reader, typeof(ODataActionParameters), context) as ODataActionParameters;
 
             Assert.NotNull(payload);
             Assert.True(payload.ContainsKey("Name"));
@@ -195,7 +195,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             Assert.Throws<ODataException>(() =>
             {
-                ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
+                ODataActionParameters payload = deserializer.Read(reader, typeof(ODataActionParameters), context) as ODataActionParameters;
             }, "The parameter 'MissingParameter' in the request payload is not a valid parameter for the function import 'Primitive'.");
         }
 

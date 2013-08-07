@@ -23,36 +23,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <summary>
         /// Initializes a new instance of <see cref="ODataFeedSerializer"/>.
         /// </summary>
-        /// <param name="edmType">The <see cref="IEdmCollectionTypeReference"/> that this serializer handles.</param>
         /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use to write nested entries.</param>
-        public ODataFeedSerializer(IEdmCollectionTypeReference edmType, ODataSerializerProvider serializerProvider)
-            : base(edmType, ODataPayloadKind.Feed, serializerProvider)
+        public ODataFeedSerializer(ODataSerializerProvider serializerProvider)
+            : base(ODataPayloadKind.Feed, serializerProvider)
         {
-            Contract.Assert(edmType != null);
-            if (!edmType.ElementType().IsEntity())
-            {
-                throw Error.NotSupported(SRResources.TypeMustBeEntityCollection, edmType.ElementType().FullName(), typeof(IEdmEntityType).Name);
-            }
-
-            Contract.Assert(edmType.ElementType() != null);
-            Contract.Assert(edmType.ElementType().AsEntity() != null);
-
-            EntityCollectionType = edmType;
-            EntityType = EntityCollectionType.ElementType().AsEntity();
         }
 
-        /// <summary>
-        /// Gets the <see cref="IEdmCollectionTypeReference"/> of the feed.
-        /// </summary>
-        public IEdmCollectionTypeReference EntityCollectionType { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="IEdmEntityType"/> of the entries of this feed.
-        /// </summary>
-        public IEdmEntityTypeReference EntityType { get; private set; }
-
         /// <inheritdoc />
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -65,31 +43,35 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             IEdmEntitySet entitySet = writeContext.EntitySet;
-
             if (entitySet == null)
             {
                 throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
             }
 
-            IEdmEntityType entityType = EntityType.EntityDefinition();
+            IEdmTypeReference feedType = writeContext.GetEdmType(graph, type);
+            Contract.Assert(feedType != null);
 
-            ODataWriter writer = messageWriter.CreateODataFeedWriter(entitySet, entityType);
-            WriteObjectInline(graph, writer, writeContext);
+            IEdmEntityTypeReference entityType = GetEntityType(feedType);
+            ODataWriter writer = messageWriter.CreateODataFeedWriter(entitySet, entityType.EntityDefinition());
+            WriteObjectInline(graph, feedType, writer, writeContext);
         }
 
         /// <inheritdoc />
-        public override void WriteObjectInline(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        public override void WriteObjectInline(object graph, IEdmTypeReference expectedType, ODataWriter writer,
+            ODataSerializerContext writeContext)
         {
             if (writer == null)
             {
                 throw Error.ArgumentNull("writer");
             }
-
             if (writeContext == null)
             {
                 throw Error.ArgumentNull("writeContext");
             }
-
+            if (expectedType == null)
+            {
+                throw Error.ArgumentNull("expectedType");
+            }
             if (graph == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
@@ -102,19 +84,29 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
             }
 
-            WriteFeed(enumerable, writer, writeContext);
+            WriteFeed(enumerable, expectedType, writer, writeContext);
         }
 
-        private void WriteFeed(IEnumerable enumerable, ODataWriter writer, ODataSerializerContext writeContext)
+        private void WriteFeed(IEnumerable enumerable, IEdmTypeReference feedType, ODataWriter writer,
+            ODataSerializerContext writeContext)
         {
             Contract.Assert(writer != null);
             Contract.Assert(writeContext != null);
             Contract.Assert(enumerable != null);
+            Contract.Assert(feedType != null);
 
-            ODataFeed feed = CreateODataFeed(enumerable, writeContext);
+            IEdmEntityTypeReference elementType = GetEntityType(feedType);
+            ODataFeed feed = CreateODataFeed(enumerable, feedType.AsCollection(), writeContext);
             if (feed == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
+            }
+
+            ODataEdmTypeSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType);
+            if (entrySerializer == null)
+            {
+                throw new SerializationException(
+                    Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
             }
 
             // save this for later to support JSON lite streaming.
@@ -130,14 +122,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     throw new SerializationException(SRResources.NullElementInCollection);
                 }
 
-                ODataEdmTypeSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(writeContext.Model, entry, writeContext.Request);
-                if (entrySerializer == null)
-                {
-                    throw new SerializationException(
-                        Error.Format(SRResources.TypeCannotBeSerialized, entry.GetType(), typeof(ODataMediaTypeFormatter).Name));
-                }
-
-                entrySerializer.WriteObjectInline(entry, writer, writeContext);
+                entrySerializer.WriteObjectInline(entry, elementType, writer, writeContext);
             }
 
             // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(feed),
@@ -158,9 +143,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Create the <see cref="ODataFeed"/> to be written for the given feed instance.
         /// </summary>
         /// <param name="feedInstance">The instance representing the feed being written.</param>
+        /// <param name="feedType">The EDM type of the feed being written.</param>
         /// <param name="writeContext">The serializer context.</param>
         /// <returns>The created <see cref="ODataFeed"/> object.</returns>
-        public virtual ODataFeed CreateODataFeed(IEnumerable feedInstance, ODataSerializerContext writeContext)
+        public virtual ODataFeed CreateODataFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
+            ODataSerializerContext writeContext)
         {
             ODataFeed feed = new ODataFeed();
 
@@ -185,7 +172,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             // TODO: Bug 467590: remove the hardcoded feed id. Get support for it from the model builder ?
-            feed.Id = "http://schemas.datacontract.org/2004/07/" + EntityCollectionType.FullName();
+            feed.Id = "http://schemas.datacontract.org/2004/07/" + feedType.FullName();
 
             if (writeContext.ExpandedEntity == null)
             {
@@ -236,6 +223,21 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             return null;
+        }
+
+        private static IEdmEntityTypeReference GetEntityType(IEdmTypeReference feedType)
+        {
+            if (feedType.IsCollection())
+            {
+                IEdmTypeReference elementType = feedType.AsCollection().ElementType();
+                if (elementType.IsEntity())
+                {
+                    return elementType.AsEntity();
+                }
+            }
+
+            string message = Error.Format(SRResources.CannotWriteType, typeof(ODataFeedSerializer).Name, feedType.FullName());
+            throw new SerializationException(message);
         }
     }
 }

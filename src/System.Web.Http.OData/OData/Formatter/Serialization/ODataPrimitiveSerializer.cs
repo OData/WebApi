@@ -2,7 +2,6 @@
 
 using System.Data.Linq;
 using System.Diagnostics.Contracts;
-using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
@@ -18,37 +17,42 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <summary>
         /// Initializes a new instance of <see cref="ODataPrimitiveSerializer"/>.
         /// </summary>
-        /// <param name="edmPrimitiveType">The EDM primitive type this serializer handles.</param>
-        public ODataPrimitiveSerializer(IEdmPrimitiveTypeReference edmPrimitiveType)
-            : base(edmPrimitiveType, ODataPayloadKind.Property)
+        public ODataPrimitiveSerializer()
+            : base(ODataPayloadKind.Property)
         {
         }
 
         /// <inheritdoc/>
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
                 throw Error.ArgumentNull("messageWriter");
             }
-
             if (writeContext == null)
             {
                 throw Error.ArgumentNull("writeContext");
             }
-
             if (writeContext.RootElementName == null)
             {
                 throw Error.Argument("writeContext", SRResources.RootElementNameMissing, typeof(ODataSerializerContext).Name);
             }
 
-            messageWriter.WriteProperty(CreateProperty(graph, writeContext.RootElementName, writeContext));
+            IEdmTypeReference edmType = writeContext.GetEdmType(graph, type);
+            Contract.Assert(edmType != null);
+
+            messageWriter.WriteProperty(CreateProperty(graph, edmType, writeContext.RootElementName, writeContext));
         }
 
         /// <inheritdoc/>
-        public sealed override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
+        public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
         {
-            ODataPrimitiveValue value = CreateODataPrimitiveValue(graph, writeContext);
+            if (!expectedType.IsPrimitive())
+            {
+                throw Error.InvalidOperation(SRResources.CannotWriteType, typeof(ODataPrimitiveSerializer), expectedType.FullName());
+            }
+
+            ODataPrimitiveValue value = CreateODataPrimitiveValue(graph, expectedType.AsPrimitive(), writeContext);
             if (value == null)
             {
                 return new ODataNullValue();
@@ -58,21 +62,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// 
+        /// Creates an <see cref="ODataPrimitiveValue"/> for the object represented by <paramref name="graph"/>.
         /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="writeContext"></param>
-        /// <returns></returns>
-        public virtual ODataPrimitiveValue CreateODataPrimitiveValue(object graph, ODataSerializerContext writeContext)
+        /// <param name="graph">The primitive value.</param>
+        /// <param name="primitiveType">The EDM primitive type of the value.</param>
+        /// <param name="writeContext">The serializer write context.</param>
+        /// <returns>The created <see cref="ODataPrimitiveValue"/>.</returns>
+        public virtual ODataPrimitiveValue CreateODataPrimitiveValue(object graph, IEdmPrimitiveTypeReference primitiveType,
+            ODataSerializerContext writeContext)
         {
-            ODataMetadataLevel metadataLevel = writeContext != null ?
-                writeContext.MetadataLevel : ODataMetadataLevel.Default;
+            ODataMetadataLevel metadataLevel = writeContext != null ? writeContext.MetadataLevel : ODataMetadataLevel.Default;
 
             // TODO: Bug 467598: validate the type of the object being passed in here with the underlying primitive type. 
-            return CreatePrimitive(graph, metadataLevel);
+            return CreatePrimitive(graph, primitiveType, metadataLevel);
         }
 
-        internal static void AddTypeNameAnnotationAsNeeded(ODataPrimitiveValue primitive,
+        internal static void AddTypeNameAnnotationAsNeeded(ODataPrimitiveValue primitive, IEdmPrimitiveTypeReference primitiveType,
             ODataMetadataLevel metadataLevel)
         {
             // ODataLib normally has the caller decide whether or not to serialize properties by leaving properties
@@ -99,7 +104,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 }
                 else
                 {
-                    typeName = GetTypeName(value);
+                    typeName = primitiveType.FullName();
                 }
 
                 primitive.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
@@ -118,7 +123,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             return metadataLevel != ODataMetadataLevel.Default;
         }
 
-        internal static ODataPrimitiveValue CreatePrimitive(object value, ODataMetadataLevel metadataLevel)
+        internal static ODataPrimitiveValue CreatePrimitive(object value, IEdmPrimitiveTypeReference primitveType,
+            ODataMetadataLevel metadataLevel)
         {
             if (value == null)
             {
@@ -127,7 +133,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             object supportedValue = ConvertUnsupportedPrimitives(value);
             ODataPrimitiveValue primitive = new ODataPrimitiveValue(supportedValue);
-            AddTypeNameAnnotationAsNeeded(primitive, metadataLevel);
+            AddTypeNameAnnotationAsNeeded(primitive, primitveType, metadataLevel);
             return primitive;
         }
 
@@ -205,26 +211,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 default:
                     return false;
             }
-        }
-
-        private static string GetTypeName(object value)
-        {
-            // Null values can be inferred, so we'd never call GetTypeName for them.
-            Contract.Assert(value != null);
-
-            Type valueType = value.GetType();
-            Contract.Assert(valueType != null);
-            IEdmPrimitiveType primitiveType = EdmLibHelpers.GetEdmPrimitiveTypeOrNull(valueType);
-
-            if (primitiveType == null)
-            {
-                throw new SerializationException(Error.Format(SRResources.UnsupportedPrimitiveType,
-                    valueType.FullName));
-            }
-
-            string typeName = primitiveType.FullName();
-            Contract.Assert(typeName != null);
-            return typeName;
         }
 
         internal static bool ShouldSuppressTypeNameSerialization(object value, ODataMetadataLevel metadataLevel)

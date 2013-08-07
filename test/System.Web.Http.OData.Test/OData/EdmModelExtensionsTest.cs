@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
@@ -83,6 +84,23 @@ namespace System.Web.Http.OData
             IEdmFunctionImport action = new EdmFunctionImport(container, "Action", returnType: null);
 
             Assert.NotNull(model.GetActionLinkBuilder(action));
+        }
+
+        [Fact]
+        public void GetTypeMappingCache_ReturnsNewInstance_IfNotSet()
+        {
+            IEdmModel model = new EdmModel();
+            Assert.NotNull(model.GetTypeMappingCache());
+        }
+
+        [Fact]
+        public void GetTypeMappingCache_ReturnsCachedInstance_IfCalledMultipleTimes()
+        {
+            IEdmModel model = new EdmModel();
+            ClrTypeCache cache1 = model.GetTypeMappingCache();
+            ClrTypeCache cache2 = model.GetTypeMappingCache();
+
+            Assert.Same(cache1, cache2);
         }
     }
 }

@@ -2,7 +2,9 @@
 
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData
@@ -100,6 +102,20 @@ namespace System.Web.Http.OData
             }
 
             model.SetAnnotationValue(action, actionLinkBuilder);
+        }
+
+        internal static ClrTypeCache GetTypeMappingCache(this IEdmModel model)
+        {
+            Contract.Assert(model != null);
+
+            ClrTypeCache typeMappingCache = model.GetAnnotationValue<ClrTypeCache>(model);
+            if (typeMappingCache == null)
+            {
+                typeMappingCache = new ClrTypeCache();
+                model.SetAnnotationValue(model, typeMappingCache);
+            }
+
+            return typeMappingCache;
         }
     }
 }

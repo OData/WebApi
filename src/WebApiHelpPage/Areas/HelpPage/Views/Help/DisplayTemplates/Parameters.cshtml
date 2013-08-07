@@ -15,7 +15,9 @@
             "No documentation available.";
 
         // Don't show CancellationToken because it's a special parameter
-        if (!typeof(CancellationToken).IsAssignableFrom(parameter.ParameterDescriptor.ParameterType))
+        if (parameter.ParameterDescriptor == null || 
+            (parameter.ParameterDescriptor != null &&
+            !typeof(CancellationToken).IsAssignableFrom(parameter.ParameterDescriptor.ParameterType)))
         {
             <tr>
                 <td class="parameter-name"><b>@parameter.Name</b></td>

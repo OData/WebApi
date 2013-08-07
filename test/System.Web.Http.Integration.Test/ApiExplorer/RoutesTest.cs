@@ -275,14 +275,14 @@ namespace System.Web.Http.ApiExplorer
 
             List<object> expectedResults = new List<object>
             {
-                new { HttpMethod = HttpMethod.Get, RelativePath = "{majorVersion}/{minorVersion}/custom?name={name}&series={series}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 2},
-                new { HttpMethod = HttpMethod.Post, RelativePath = "{majorVersion}/{minorVersion}/custom", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 1},
-                new { HttpMethod = HttpMethod.Put, RelativePath = "{majorVersion}/{minorVersion}/custom", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 1},
-                new { HttpMethod = HttpMethod.Delete, RelativePath = "{majorVersion}/{minorVersion}/custom?id={id}", HasRequestFormatters = false, HasResponseFormatters = false, NumberOfParameters = 1},
-                new { HttpMethod = HttpMethod.Get, RelativePath = "{version}/Item?name={name}&series={series}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 2},
-                new { HttpMethod = HttpMethod.Post, RelativePath = "{version}/Item", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 1},
-                new { HttpMethod = HttpMethod.Put, RelativePath = "{version}/Item", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 1},
-                new { HttpMethod = HttpMethod.Delete, RelativePath = "{version}/Item/{id}", HasRequestFormatters = false, HasResponseFormatters = false, NumberOfParameters = 1}
+                new { HttpMethod = HttpMethod.Get, RelativePath = "{majorVersion}/{minorVersion}/custom?name={name}&series={series}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 4},
+                new { HttpMethod = HttpMethod.Post, RelativePath = "{majorVersion}/{minorVersion}/custom", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 3},
+                new { HttpMethod = HttpMethod.Put, RelativePath = "{majorVersion}/{minorVersion}/custom", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 3},
+                new { HttpMethod = HttpMethod.Delete, RelativePath = "{majorVersion}/{minorVersion}/custom?id={id}", HasRequestFormatters = false, HasResponseFormatters = false, NumberOfParameters = 3},
+                new { HttpMethod = HttpMethod.Get, RelativePath = "{version}/Item?name={name}&series={series}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 3},
+                new { HttpMethod = HttpMethod.Post, RelativePath = "{version}/Item", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 2},
+                new { HttpMethod = HttpMethod.Put, RelativePath = "{version}/Item", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 2},
+                new { HttpMethod = HttpMethod.Delete, RelativePath = "{version}/Item/{id}", HasRequestFormatters = false, HasResponseFormatters = false, NumberOfParameters = 2}
             };
             ApiExplorerHelper.VerifyApiDescriptions(descriptions, expectedResults);
         }

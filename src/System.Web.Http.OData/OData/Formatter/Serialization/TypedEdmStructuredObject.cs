@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
+using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.Data.Edm;
 
@@ -11,7 +13,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// </summary>
     internal abstract class TypedEdmStructuredObject : IEdmStructuredObject
     {
+        private static readonly ConcurrentDictionary<Tuple<string, Type>, Func<object, object>> PropertyGetterCache =
+            new ConcurrentDictionary<Tuple<string, Type>, Func<object, object>>();
+
         private IEdmStructuredTypeReference _edmType;
+        private Type _type;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypedEdmStructuredObject"/> class.
@@ -24,6 +30,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             Instance = instance;
             _edmType = edmType;
+            _type = instance == null ? null : instance.GetType();
         }
 
         /// <summary>
@@ -46,18 +53,49 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 return false;
             }
 
-            Type type = Instance.GetType();
-            PropertyInfo property = type.GetProperty(propertyName);
-            if (property == null)
+            Contract.Assert(_type != null);
+
+            Func<object, object> getter = GetOrCreatePropertyGetter(_type, propertyName);
+            if (getter == null)
             {
                 value = null;
                 return false;
             }
             else
             {
-                value = property.GetValue(Instance);
+                value = getter(Instance);
                 return true;
             }
+        }
+
+        internal static Func<object, object> GetOrCreatePropertyGetter(Type type, string propertyName)
+        {
+            Tuple<string, Type> key = Tuple.Create(propertyName, type);
+            Func<object, object> getter;
+
+            if (!PropertyGetterCache.TryGetValue(key, out getter))
+            {
+                getter = CreatePropertyGetter(type, propertyName);
+                PropertyGetterCache[key] = getter;
+            }
+
+            return getter;
+        }
+
+        private static Func<object, object> CreatePropertyGetter(Type type, string propertyName)
+        {
+            PropertyInfo property = type.GetProperty(propertyName);
+            if (property == null)
+            {
+                return null;
+            }
+
+            // (object paramater) => (object)((type)parameter).Property;
+            ParameterExpression parameter = Expression.Parameter(typeof(object));
+            Expression<Func<object, object>> lambda = Expression.Lambda<Func<object, object>>(
+                Expression.Convert(Expression.Property(Expression.Convert(parameter, type), property), typeof(object)),
+                parameter);
+            return lambda.Compile();
         }
     }
 }

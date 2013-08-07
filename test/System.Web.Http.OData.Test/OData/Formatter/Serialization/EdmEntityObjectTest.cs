@@ -65,6 +65,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Null(value);
         }
 
+        [Fact]
+        public void GetPropertyGetter_Caches_PropertyGetter()
+        {
+            Func<object, object> getter1 = TypedEdmStructuredObject.GetOrCreatePropertyGetter(typeof(TestEntity), "Property");
+            Func<object, object> getter2 = TypedEdmStructuredObject.GetOrCreatePropertyGetter(typeof(TestEntity), "Property");
+
+            Assert.Same(getter1, getter2);
+        }
+
         public class TestEntity
         {
             public object Property { get; set; }

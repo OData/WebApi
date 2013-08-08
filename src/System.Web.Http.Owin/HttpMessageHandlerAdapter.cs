@@ -312,7 +312,7 @@ namespace System.Web.Http.Owin
             public OwinHttpRequestContext(IOwinContext context, HttpRequestMessage request)
             {
                 Contract.Assert(context != null);
-                Contract.Assert(_context.Request != null);
+                Contract.Assert(context.Request != null);
                 Contract.Assert(request != null);
                 _context = context;
                 _request = request;

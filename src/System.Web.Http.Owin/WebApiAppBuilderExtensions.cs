@@ -34,6 +34,19 @@ namespace Owin
         /// Adds a component to the OWIN pipeline for running a Web API endpoint.
         /// </summary>
         /// <param name="builder">The application builder.</param>
+        /// <param name="httpServer">The http server.</param>
+        /// <returns>The application builder.</returns>
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Not out of scope")]
+        public static IAppBuilder UseWebApi(this IAppBuilder builder, HttpServer httpServer)
+        {
+            IHostBufferPolicySelector bufferPolicySelector = httpServer.Configuration.Services.GetHostBufferPolicySelector() ?? _defaultBufferPolicySelector;
+            return builder.Use(typeof(HttpMessageHandlerAdapter), httpServer, bufferPolicySelector);
+        }
+
+        /// <summary>
+        /// Adds a component to the OWIN pipeline for running a Web API endpoint.
+        /// </summary>
+        /// <param name="builder">The application builder.</param>
         /// <param name="configuration">The <see cref="HttpConfiguration"/> used to configure the endpoint.</param>
         /// <param name="dispatcher">The dispatcher responsible for handling incoming requests.</param>
         /// <returns>The application builder.</returns>

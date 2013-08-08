@@ -51,6 +51,53 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
+        public void UseWebApiWithHttpServer_UsesAdapter()
+        {
+            // Arrange
+            HttpServer httpServer = new Mock<HttpServer>().Object;
+            Mock<IAppBuilder> appBuilderMock = new Mock<IAppBuilder>();
+            appBuilderMock
+                .Setup(ab => ab.Use(
+                    typeof(HttpMessageHandlerAdapter),
+                    httpServer,
+                    It.IsAny<OwinBufferPolicySelector>()))
+                .Returns(appBuilderMock.Object)
+                .Verifiable();
+
+            // Act
+            IAppBuilder returnedAppBuilder = appBuilderMock.Object.UseWebApi(httpServer);
+
+            // Assert
+            Assert.Equal(appBuilderMock.Object, returnedAppBuilder);
+            appBuilderMock.Verify();
+        }
+
+        [Fact]
+        public void UseWebApiWithHttpServer_UsesAdapterAndConfigBufferPolicySelector()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            IHostBufferPolicySelector bufferPolicySelector = new Mock<IHostBufferPolicySelector>().Object;
+            config.Services.Replace(typeof(IHostBufferPolicySelector), bufferPolicySelector);
+            HttpServer httpServer = new Mock<HttpServer>(config).Object;
+            Mock<IAppBuilder> appBuilderMock = new Mock<IAppBuilder>();
+            appBuilderMock
+                .Setup(ab => ab.Use(
+                    typeof(HttpMessageHandlerAdapter),
+                    httpServer,
+                    bufferPolicySelector))
+                .Returns(appBuilderMock.Object)
+                .Verifiable();
+
+            // Act
+            IAppBuilder returnedAppBuilder = appBuilderMock.Object.UseWebApi(httpServer);
+
+            // Assert
+            Assert.Equal(appBuilderMock.Object, returnedAppBuilder);
+            appBuilderMock.Verify();
+        }
+
+        [Fact]
         public void UseWebApiWithMessageHandler_UsesAdapter()
         {
             var config = new HttpConfiguration();

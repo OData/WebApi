@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting.Parsers;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -77,6 +78,17 @@ namespace System.Net.Http
         }
 
         /// <summary>
+        /// Reads all body parts within a MIME multipart message into memory using a <see cref="MultipartMemoryStreamProvider"/>.
+        /// </summary>
+        /// <param name="content">An existing <see cref="HttpContent"/> instance to use for the object's content.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>A <see cref="Task{T}"/> representing the tasks of getting the result of reading the MIME content.</returns>
+        public static Task<MultipartMemoryStreamProvider> ReadAsMultipartAsync(this HttpContent content, CancellationToken cancellationToken)
+        {
+            return ReadAsMultipartAsync<MultipartMemoryStreamProvider>(content, new MultipartMemoryStreamProvider(), DefaultBufferSize, cancellationToken);
+        }
+
+        /// <summary>
         /// Reads all body parts within a MIME multipart message using the provided <see cref="MultipartStreamProvider"/> instance
         /// to determine where the contents of each body part is written. 
         /// </summary>
@@ -91,6 +103,21 @@ namespace System.Net.Http
 
         /// <summary>
         /// Reads all body parts within a MIME multipart message using the provided <see cref="MultipartStreamProvider"/> instance
+        /// to determine where the contents of each body part is written. 
+        /// </summary>
+        /// <typeparam name="T">The <see cref="MultipartStreamProvider"/> with which to process the data.</typeparam>
+        /// <param name="content">An existing <see cref="HttpContent"/> instance to use for the object's content.</param>
+        /// <param name="streamProvider">A stream provider providing output streams for where to write body parts as they are parsed.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>A <see cref="Task{T}"/> representing the tasks of getting the result of reading the MIME content.</returns>
+        public static Task<T> ReadAsMultipartAsync<T>(this HttpContent content, T streamProvider, CancellationToken cancellationToken)
+            where T : MultipartStreamProvider
+        {
+            return ReadAsMultipartAsync(content, streamProvider, DefaultBufferSize, cancellationToken);
+        }
+
+        /// <summary>
+        /// Reads all body parts within a MIME multipart message using the provided <see cref="MultipartStreamProvider"/> instance
         /// to determine where the contents of each body part is written and <paramref name="bufferSize"/> as read buffer size.
         /// </summary>
         /// <typeparam name="T">The <see cref="MultipartStreamProvider"/> with which to process the data.</typeparam>
@@ -98,7 +125,24 @@ namespace System.Net.Http
         /// <param name="streamProvider">A stream provider providing output streams for where to write body parts as they are parsed.</param>
         /// <param name="bufferSize">Size of the buffer used to read the contents.</param>
         /// <returns>A <see cref="Task{T}"/> representing the tasks of getting the result of reading the MIME content.</returns>
-        public static async Task<T> ReadAsMultipartAsync<T>(this HttpContent content, T streamProvider, int bufferSize) where T : MultipartStreamProvider
+        public static Task<T> ReadAsMultipartAsync<T>(this HttpContent content, T streamProvider, int bufferSize)
+            where T : MultipartStreamProvider
+        {
+            return ReadAsMultipartAsync(content, streamProvider, bufferSize, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Reads all body parts within a MIME multipart message using the provided <see cref="MultipartStreamProvider"/> instance
+        /// to determine where the contents of each body part is written and <paramref name="bufferSize"/> as read buffer size.
+        /// </summary>
+        /// <typeparam name="T">The <see cref="MultipartStreamProvider"/> with which to process the data.</typeparam>
+        /// <param name="content">An existing <see cref="HttpContent"/> instance to use for the object's content.</param>
+        /// <param name="streamProvider">A stream provider providing output streams for where to write body parts as they are parsed.</param>
+        /// <param name="bufferSize">Size of the buffer used to read the contents.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>A <see cref="Task{T}"/> representing the tasks of getting the result of reading the MIME content.</returns>
+        public static async Task<T> ReadAsMultipartAsync<T>(this HttpContent content, T streamProvider, int bufferSize,
+            CancellationToken cancellationToken) where T : MultipartStreamProvider
         {
             if (content == null)
             {
@@ -133,17 +177,17 @@ namespace System.Net.Http
                     MultipartAsyncContext context = new MultipartAsyncContext(stream, parser, data, streamProvider.Contents);
 
                     // Start async read/write loop
-                    await MultipartReadAsync(context);
+                    await MultipartReadAsync(context, cancellationToken);
 
                     // Let the stream provider post-process when everything is complete
-                    await streamProvider.ExecutePostProcessingAsync();
+                    await streamProvider.ExecutePostProcessingAsync(cancellationToken);
                     return streamProvider;
                 }
             }
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
-        private static async Task MultipartReadAsync(MultipartAsyncContext context)
+        private static async Task MultipartReadAsync(MultipartAsyncContext context, CancellationToken cancellationToken)
         {
             Contract.Assert(context != null, "context cannot be null");
             while (true)
@@ -151,7 +195,7 @@ namespace System.Net.Http
                 int bytesRead;
                 try
                 {
-                    bytesRead = await context.ContentStream.ReadAsync(context.Data, 0, context.Data.Length);
+                    bytesRead = await context.ContentStream.ReadAsync(context.Data, 0, context.Data.Length, cancellationToken);
                 }
                 catch (Exception e)
                 {
@@ -166,7 +210,7 @@ namespace System.Net.Http
                     {
                         try
                         {
-                            await part.WriteSegment(segment);
+                            await part.WriteSegment(segment, cancellationToken);
                         }
                         catch (Exception e)
                         {
@@ -208,7 +252,7 @@ namespace System.Net.Http
         /// </summary>
         private class MultipartAsyncContext
         {
-            public MultipartAsyncContext(Stream contentStream,  MimeMultipartBodyPartParser mimeParser, byte[] data, ICollection<HttpContent> result)
+            public MultipartAsyncContext(Stream contentStream, MimeMultipartBodyPartParser mimeParser, byte[] data, ICollection<HttpContent> result)
             {
                 Contract.Assert(contentStream != null);
                 Contract.Assert(mimeParser != null);

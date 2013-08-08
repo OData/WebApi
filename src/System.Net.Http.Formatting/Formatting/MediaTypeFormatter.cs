@@ -5,11 +5,6 @@ using System.Collections.Concurrent;
 #endif
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-#if !NETFX_CORE
-using System.Configuration;
-#endif
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -18,6 +13,7 @@ using System.Net.Http.Internal;
 #endif
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -112,8 +108,8 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public Collection<MediaTypeHeaderValue> SupportedMediaTypes { get; private set; }
 
-        internal List<MediaTypeHeaderValue> SupportedMediaTypesInternal 
-        { 
+        internal List<MediaTypeHeaderValue> SupportedMediaTypesInternal
+        {
             get { return _supportedMediaTypes; }
         }
 
@@ -147,7 +143,7 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Gets or sets the <see cref="IRequiredMemberSelector"/> used to determine required members.
         /// </summary>
-        public virtual IRequiredMemberSelector RequiredMemberSelector 
+        public virtual IRequiredMemberSelector RequiredMemberSelector
         {
             get
             {
@@ -181,10 +177,34 @@ namespace System.Net.Http.Formatting
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
         /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
         /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
-        /// <seealso cref="CanWriteType(Type)"/>
+        /// <seealso cref="CanReadType(Type)"/>
         public virtual Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             throw Error.NotSupported(Properties.Resources.MediaTypeFormatterCannotRead, GetType().Name);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Task"/> to deserialize an object of the given <paramref name="type"/> from the given <paramref name="readStream"/>
+        /// </summary>
+        /// <remarks>
+        /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+        /// supports reading.</para>
+        /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion. The stream will be closed independently when
+        /// the <see cref="HttpContent"/> instance is disposed.
+        /// </para>
+        /// </remarks>
+        /// <param name="type">The type of the object to deserialize.</param>
+        /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+        /// <param name="content">The <see cref="HttpContent"/> if available. It may be <c>null</c>.</param>
+        /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
+        /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
+        /// <seealso cref="CanReadType(Type)"/>
+        public virtual Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content,
+            IFormatterLogger formatterLogger, CancellationToken cancellationToken)
+        {
+            return ReadFromStreamAsync(type, readStream, content, formatterLogger);
         }
 
         /// <summary>
@@ -205,10 +225,36 @@ namespace System.Net.Http.Formatting
         /// <param name="transportContext">The <see cref="TransportContext"/> if available. It may be <c>null</c>.</param>
         /// <returns>A <see cref="Task"/> that will perform the write.</returns>
         /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
-        /// <seealso cref="CanReadType(Type)"/>
+        /// <seealso cref="CanWriteType(Type)"/>
         public virtual Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             throw Error.NotSupported(Properties.Resources.MediaTypeFormatterCannotWrite, GetType().Name);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given <paramref name="type"/>
+        /// to the given <paramref name="writeStream"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+        /// supports reading.</para>
+        /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion. The stream will be closed independently when
+        /// the <see cref="HttpContent"/> instance is disposed.
+        /// </para>
+        /// </remarks>
+        /// <param name="type">The type of the object to write.</param>
+        /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+        /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+        /// <param name="content">The <see cref="HttpContent"/> if available. It may be <c>null</c>.</param>
+        /// <param name="transportContext">The <see cref="TransportContext"/> if available. It may be <c>null</c>.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>A <see cref="Task"/> that will perform the write.</returns>
+        /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
+        /// <seealso cref="CanWriteType(Type)"/>
+        public virtual Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content,
+            TransportContext transportContext, CancellationToken cancellationToken)
+        {
+            return WriteToStreamAsync(type, value, writeStream, content, transportContext);
         }
 
         private static bool TryGetDelegatingType(Type interfaceType, ref Type type)

@@ -3,6 +3,7 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Web.Http.OData.Batch;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
@@ -24,9 +25,10 @@ namespace System.Web.Http
         {
             var httpContent = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
             httpContent.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
-            var reader = httpContent.GetODataMessageReaderAsync(new ODataMessageReaderSettings()).Result;
+            var reader = httpContent.GetODataMessageReaderAsync(new ODataMessageReaderSettings(), CancellationToken.None).Result;
             Assert.Throws<InvalidOperationException>(
-                () => ODataBatchReaderExtensions.ReadChangeSetRequestAsync(reader.CreateODataBatchReader(), Guid.NewGuid()).Wait(),
+                () => ODataBatchReaderExtensions.ReadChangeSetRequestAsync(reader.CreateODataBatchReader(), Guid.NewGuid(),
+                    CancellationToken.None).Wait(),
                 "The current batch reader state 'Initial' is invalid. The expected state is 'ChangesetStart'.");
         }
 
@@ -43,9 +45,10 @@ namespace System.Web.Http
         {
             var httpContent = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
             httpContent.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
-            var reader = httpContent.GetODataMessageReaderAsync(new ODataMessageReaderSettings()).Result;
+            var reader = httpContent.GetODataMessageReaderAsync(new ODataMessageReaderSettings(), CancellationToken.None).Result;
             Assert.Throws<InvalidOperationException>(
-                () => ODataBatchReaderExtensions.ReadOperationRequestAsync(reader.CreateODataBatchReader(), Guid.NewGuid(), false),
+                () => ODataBatchReaderExtensions.ReadOperationRequestAsync(reader.CreateODataBatchReader(), Guid.NewGuid(),
+                    false, CancellationToken.None),
                 "The current batch reader state 'Initial' is invalid. The expected state is 'Operation'.");
         }
 
@@ -62,9 +65,10 @@ namespace System.Web.Http
         {
             var httpContent = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
             httpContent.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
-            var reader = httpContent.GetODataMessageReaderAsync(new ODataMessageReaderSettings()).Result;
+            var reader = httpContent.GetODataMessageReaderAsync(new ODataMessageReaderSettings(), CancellationToken.None).Result;
             Assert.Throws<InvalidOperationException>(
-                () => ODataBatchReaderExtensions.ReadChangeSetOperationRequestAsync(reader.CreateODataBatchReader(), Guid.NewGuid(), Guid.NewGuid(), false),
+                () => ODataBatchReaderExtensions.ReadChangeSetOperationRequestAsync(reader.CreateODataBatchReader(),
+                    Guid.NewGuid(), Guid.NewGuid(), false, CancellationToken.None),
                 "The current batch reader state 'Initial' is invalid. The expected state is 'Operation'.");
         }
     }

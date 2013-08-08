@@ -3,6 +3,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Web.Http.OData.Batch;
 using System.Web.Http.OData.Formatter;
 using Microsoft.Data.OData;
@@ -35,7 +36,7 @@ namespace System.Web.Http
             OperationResponseItem responseItem = new OperationResponseItem(new HttpResponseMessage());
 
             Assert.ThrowsArgumentNull(
-                () => responseItem.WriteResponseAsync(null).Wait(),
+                () => responseItem.WriteResponseAsync(null, CancellationToken.None).Wait(),
                 "writer");
         }
 
@@ -49,7 +50,7 @@ namespace System.Web.Http
             ODataBatchWriter batchWriter = writer.CreateODataBatchWriter();
             batchWriter.WriteStartBatch();
 
-            responseItem.WriteResponseAsync(batchWriter).Wait();
+            responseItem.WriteResponseAsync(batchWriter, CancellationToken.None).Wait();
 
             batchWriter.WriteEndBatch();
             memoryStream.Position = 0;

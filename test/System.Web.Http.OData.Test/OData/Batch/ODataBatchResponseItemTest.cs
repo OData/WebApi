@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Web.Http.OData.Batch;
 using System.Web.Http.OData.Formatter;
 using Microsoft.Data.OData;
@@ -17,7 +18,8 @@ namespace System.Web.Http
         public void WriteMessageAsync_NullWriter_Throws()
         {
             Assert.ThrowsArgumentNull(
-                () => ODataBatchResponseItem.WriteMessageAsync(null, new HttpResponseMessage()).Wait(),
+                () => ODataBatchResponseItem.WriteMessageAsync(null, new HttpResponseMessage(), CancellationToken.None)
+                    .Wait(),
                 "writer");
         }
 
@@ -30,7 +32,8 @@ namespace System.Web.Http
             ODataMessageWriter messageWriter = new ODataMessageWriter(odataResponse);
 
             Assert.ThrowsArgumentNull(
-                () => ODataBatchResponseItem.WriteMessageAsync(messageWriter.CreateODataBatchWriter(), null).Wait(),
+                () => ODataBatchResponseItem.WriteMessageAsync(messageWriter.CreateODataBatchWriter(), null, CancellationToken.None)
+                    .Wait(),
                 "response");
         }
 
@@ -49,7 +52,7 @@ namespace System.Web.Http
             response.Headers.Add("customHeader", "bar");
 
             batchWriter.WriteStartBatch();
-            ODataBatchResponseItem.WriteMessageAsync(batchWriter, response).Wait();
+            ODataBatchResponseItem.WriteMessageAsync(batchWriter, response, CancellationToken.None).Wait();
             batchWriter.WriteEndBatch();
 
             ms.Position = 0;

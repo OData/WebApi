@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Moq;
@@ -218,6 +220,122 @@ namespace System.Net.Http
             formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("multipart/mixed"));
 
             Assert.Equal("multipartContent", mimeContent.ReadAsAsync<string>(new[] { formatter }).Result);
+        }
+
+        [Fact]
+        public void ReadAsAsync_type_cancellationToken_PassesCancellationTokenFurther()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.Cancel();
+            HttpContent content = new StringContent("42", Encoding.Default, "application/json");
+
+            Assert.Throws<TaskCanceledException>(() => content.ReadAsAsync(typeof(int), cts.Token).Wait());
+        }
+
+        [Fact]
+        public void ReadAsAsync_type_formatters_cancellationToken_PassesCancellationTokenFurther()
+        {
+            // Arrange
+            Stream stream = new MemoryStream();
+            HttpContent content = new StreamContent(stream);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/test");
+            CancellationToken token = new CancellationToken();
+            Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>(MockBehavior.Strict);
+            formatter.Object.SupportedMediaTypes.Add(content.Headers.ContentType);
+            formatter.Setup(f => f.CanReadType(typeof(int))).Returns(true);
+            formatter
+                .Setup(f => f.ReadFromStreamAsync(typeof(int), It.IsAny<Stream>(), content, null, token))
+                .Returns(Task.FromResult<object>(42))
+                .Verifiable();
+
+            // Act
+            content.ReadAsAsync(typeof(int), new[] { formatter.Object }, token).Wait();
+
+            // Assert
+            formatter.Verify();
+        }
+
+        [Fact]
+        public void ReadAsAsync_type_formatters_formatterLogger_cancellationToken_PassesCancellationTokenFurther()
+        {
+            // Arrange
+            Stream stream = new MemoryStream();
+            HttpContent content = new StreamContent(stream);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/test");
+            CancellationToken token = new CancellationToken();
+            IFormatterLogger formatterLogger = new Mock<IFormatterLogger>().Object;
+
+            Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>(MockBehavior.Strict);
+            formatter.Object.SupportedMediaTypes.Add(content.Headers.ContentType);
+            formatter.Setup(f => f.CanReadType(typeof(int))).Returns(true);
+            formatter
+                .Setup(f => f.ReadFromStreamAsync(typeof(int), It.IsAny<Stream>(), content, formatterLogger, token))
+                .Returns(Task.FromResult<object>(42))
+                .Verifiable();
+
+            // Act
+            content.ReadAsAsync(typeof(int), new[] { formatter.Object }, formatterLogger, token).Wait();
+
+            // Assert
+            formatter.Verify();
+        }
+
+        [Fact]
+        public void ReadAsAsyncOfT_cancellationToken_PassesCancellationTokenFurther()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.Cancel();
+            HttpContent content = new StringContent("42", Encoding.Default, "application/json");
+
+            Assert.Throws<TaskCanceledException>(() => content.ReadAsAsync<int>(cts.Token).Wait());
+        }
+
+        [Fact]
+        public void ReadAsAsyncOfT_formatters_cancellationToken_PassesCancellationTokenFurther()
+        {
+            // Arrange
+            Stream stream = new MemoryStream();
+            HttpContent content = new StreamContent(stream);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/test");
+            CancellationToken token = new CancellationToken();
+            Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>(MockBehavior.Strict);
+            formatter.Object.SupportedMediaTypes.Add(content.Headers.ContentType);
+            formatter.Setup(f => f.CanReadType(typeof(int))).Returns(true);
+            formatter
+                .Setup(f => f.ReadFromStreamAsync(typeof(int), It.IsAny<Stream>(), content, null, token))
+                .Returns(Task.FromResult<object>(42))
+                .Verifiable();
+
+            // Act
+            content.ReadAsAsync<int>(new[] { formatter.Object }, token).Wait();
+
+            // Assert
+            formatter.Verify();
+        }
+
+        [Fact]
+        public void ReadAsAsyncOfT_formatters_formatterLogger_cancellationToken_PassesCancellationTokenFurther()
+        {
+            // Arrange
+            Stream stream = new MemoryStream();
+            HttpContent content = new StreamContent(stream);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/test");
+            CancellationToken token = new CancellationToken();
+            IFormatterLogger formatterLogger = new Mock<IFormatterLogger>().Object;
+
+            Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>(MockBehavior.Strict);
+            formatter.Object.SupportedMediaTypes.Add(content.Headers.ContentType);
+            formatter.Setup(f => f.CanReadType(typeof(int))).Returns(true);
+            formatter
+                .Setup(f => f.ReadFromStreamAsync(typeof(int), It.IsAny<Stream>(), content, formatterLogger, token))
+                .Returns(Task.FromResult<object>(42))
+                .Verifiable();
+
+            // Act
+            content.ReadAsAsync<int>(new[] { formatter.Object }, formatterLogger, token).Wait();
+
+            // Assert
+            formatter.Verify();
         }
 
         private void SetupUpRoundTripSerialization(Func<Type, object> factory = null)

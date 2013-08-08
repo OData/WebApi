@@ -188,7 +188,7 @@ namespace System.Web.Http
         {
             var httpContent = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
             httpContent.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
-            var reader = httpContent.GetODataMessageReaderAsync(new ODataMessageReaderSettings()).Result;
+            var reader = httpContent.GetODataMessageReaderAsync(new ODataMessageReaderSettings(), CancellationToken.None).Result;
             UnbufferedODataBatchHandler batchHandler = new UnbufferedODataBatchHandler(new HttpServer());
 
             Assert.ThrowsArgumentNull(
@@ -223,7 +223,9 @@ namespace System.Web.Http
             batchRequest.Properties.Add("foo", "bar");
             batchRequest.SetRouteData(new HttpRouteData(new HttpRoute()));
             batchRequest.RegisterForDispose(new StringContent(String.Empty));
-            ODataMessageReader reader = batchRequest.Content.GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }).Result;
+            ODataMessageReader reader = batchRequest.Content
+                .GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }, CancellationToken.None)
+                .Result;
             ODataBatchReader batchReader = reader.CreateODataBatchReader();
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
@@ -266,7 +268,9 @@ namespace System.Web.Http
                     }
                 }
             };
-            ODataMessageReader reader = batchRequest.Content.GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }).Result;
+            ODataMessageReader reader = batchRequest.Content
+                .GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }, CancellationToken.None)
+                .Result;
             ODataBatchReader batchReader = reader.CreateODataBatchReader();
 
             var response = batchHandler.ExecuteChangeSetAsync(batchReader, Guid.NewGuid(), batchRequest, CancellationToken.None).Result;
@@ -297,7 +301,9 @@ namespace System.Web.Http
             batchRequest.Properties.Add("foo", "bar");
             batchRequest.SetRouteData(new HttpRouteData(new HttpRoute()));
             batchRequest.RegisterForDispose(new StringContent(String.Empty));
-            ODataMessageReader reader = batchRequest.Content.GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }).Result;
+            ODataMessageReader reader = batchRequest.Content
+                .GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }, CancellationToken.None)
+                .Result;
             ODataBatchReader batchReader = reader.CreateODataBatchReader();
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
@@ -327,7 +333,7 @@ namespace System.Web.Http
         {
             var httpContent = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
             httpContent.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
-            var reader = httpContent.GetODataMessageReaderAsync(new ODataMessageReaderSettings()).Result;
+            var reader = httpContent.GetODataMessageReaderAsync(new ODataMessageReaderSettings(), CancellationToken.None).Result;
             UnbufferedODataBatchHandler batchHandler = new UnbufferedODataBatchHandler(new HttpServer());
 
             Assert.ThrowsArgumentNull(

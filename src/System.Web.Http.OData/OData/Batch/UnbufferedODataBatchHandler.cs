@@ -41,8 +41,7 @@ namespace System.Web.Http.OData.Batch
                 BaseUri = GetBaseUri(request)
             };
 
-            cancellationToken.ThrowIfCancellationRequested();
-            ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(oDataReaderSettings);
+            ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(oDataReaderSettings, cancellationToken);
             request.RegisterForDispose(reader);
 
             ODataBatchReader batchReader = reader.CreateODataBatchReader();

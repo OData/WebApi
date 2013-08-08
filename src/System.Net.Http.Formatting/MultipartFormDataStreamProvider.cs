@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Net.Http.Formatting.Internal;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -102,8 +101,18 @@ namespace System.Net.Http
         /// <summary>
         /// Read the non-file contents as form data.
         /// </summary>
-        /// <returns></returns>
-        public override async Task ExecutePostProcessingAsync()
+        /// <returns>A <see cref="Task"/> representing the post processing.</returns>
+        public override Task ExecutePostProcessingAsync()
+        {
+            return ExecutePostProcessingAsync(CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Read the non-file contents as form data.
+        /// </summary>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>A <see cref="Task"/> representing the post processing.</returns>
+        public override async Task ExecutePostProcessingAsync(CancellationToken cancellationToken)
         {
             // Find instances of HttpContent for which we created a memory stream and read them asynchronously
             // to get the string content and then add that as form data
@@ -117,6 +126,7 @@ namespace System.Net.Http
                     string formFieldName = FormattingUtilities.UnquoteToken(contentDisposition.Name) ?? String.Empty;
 
                     // Read the contents as string data and add to form data
+                    cancellationToken.ThrowIfCancellationRequested();
                     string formFieldValue = await formContent.ReadAsStringAsync();
                     FormData.Add(formFieldName, formFieldValue);
                 }

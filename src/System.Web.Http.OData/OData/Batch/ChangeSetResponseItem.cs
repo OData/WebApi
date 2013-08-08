@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.OData;
 
@@ -35,7 +36,8 @@ namespace System.Web.Http.OData.Batch
         /// Writes the responses as a ChangeSet.
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
-        public override async Task WriteResponseAsync(ODataBatchWriter writer)
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        public override async Task WriteResponseAsync(ODataBatchWriter writer, CancellationToken cancellationToken)
         {
             if (writer == null)
             {
@@ -46,7 +48,7 @@ namespace System.Web.Http.OData.Batch
 
             foreach (HttpResponseMessage responseMessage in Responses)
             {
-                await WriteMessageAsync(writer, responseMessage);
+                await WriteMessageAsync(writer, responseMessage, cancellationToken);
             }
 
             writer.WriteEndChangeset();

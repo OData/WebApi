@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.OData.Formatter;
 using Microsoft.Data.OData;
@@ -83,7 +84,7 @@ namespace System.Web.Http.OData.Batch
 
             foreach (ODataBatchResponseItem response in Responses)
             {
-                await response.WriteResponseAsync(writer);
+                await response.WriteResponseAsync(writer, CancellationToken.None);
             }
 
             writer.WriteEndBatch();

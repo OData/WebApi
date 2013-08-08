@@ -1,10 +1,16 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Text;
+using System.Net.Http.Headers;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.Metadata;
+using System.Web.Http.Validation;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -53,6 +59,63 @@ namespace System.Web.Http.ModelBinding
             Assert.Equal(
                 "The request entity's media type 'text/plain' is not supported for this resource.",
                 error.Message);
-        }    
+        }
+
+        [Fact]
+        public void ExecuteBindingAsync_PassesCancellationTokenTo_ReadContentAsync()
+        {
+            // Arrange
+            var parameter = new Mock<HttpParameterDescriptor>();
+            parameter.Setup(p => p.IsOptional).Returns(false);
+            parameter.Setup(p => p.ParameterName).Returns("ParameterName");
+            var formatters = Enumerable.Empty<MediaTypeFormatter>();
+            IBodyModelValidator validator = null;
+            ModelMetadataProvider metadataProvider = new Mock<ModelMetadataProvider>().Object;
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpActionContext actionContext = new HttpActionContext { ControllerContext = new HttpControllerContext { Request = request } };
+            CancellationTokenSource cts = new CancellationTokenSource();
+
+            Mock<FormatterParameterBinding> binding = new Mock<FormatterParameterBinding>(parameter.Object, formatters, validator);
+            binding.CallBase = true;
+            binding.Setup(b => b.ReadContentAsync(request, null, formatters, It.IsAny<IFormatterLogger>()))
+                .Returns(Task.FromResult<object>(42))
+                .Verifiable();
+
+            // Act
+            binding.Object.ExecuteBindingAsync(metadataProvider, actionContext, cts.Token).Wait();
+
+            // Assert
+            binding.Verify();
+        }
+
+        [Fact]
+        public void ReadContentAsync_PassesCancellationToken_Further()
+        {
+            // Arrange
+            var parameter = new Mock<HttpParameterDescriptor>();
+            parameter.Setup(p => p.IsOptional).Returns(false);
+            IBodyModelValidator validator = null;
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Content = new StringContent("");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("app/test");
+            IFormatterLogger logger = null;
+            CancellationTokenSource cts = new CancellationTokenSource();
+
+            Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>();
+            formatter.Setup(f => f.CanReadType(typeof(int))).Returns(true);
+            formatter.Object.SupportedMediaTypes.Add(request.Content.Headers.ContentType);
+            formatter.Setup(f => f.ReadFromStreamAsync(typeof(int), It.IsAny<Stream>(), request.Content, logger, cts.Token))
+                .Returns(Task.FromResult<object>(42))
+                .Verifiable();
+
+            var formatters = new[] { formatter.Object };
+            FormatterParameterBinding binding = new FormatterParameterBinding(parameter.Object, formatters, validator);
+
+            // Act
+            binding.ReadContentAsync(request, typeof(int), formatters, logger, cts.Token).Wait();
+
+            // Assert
+            formatter.Verify();
+        }
     }
 }

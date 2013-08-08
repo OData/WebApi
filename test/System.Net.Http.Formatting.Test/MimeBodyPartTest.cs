@@ -3,6 +3,7 @@
 using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Http.Mocks;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Moq;
@@ -34,7 +35,7 @@ namespace System.Net.Http
             bodypart.Segments.Add(new ArraySegment<byte>(new byte[] { 1 }));
 
             // Act and Assert
-            Assert.Throws<InvalidOperationException>(() => bodypart.WriteSegment(bodypart.Segments[0]).Wait());
+            Assert.Throws<InvalidOperationException>(() => bodypart.WriteSegment(bodypart.Segments[0], CancellationToken.None).Wait());
         }
 
         [Fact]
@@ -48,7 +49,7 @@ namespace System.Net.Http
             mockStreamProvider.Setup(sp => sp.GetStream(It.IsAny<HttpContent>(), It.IsAny<HttpContentHeaders>())).Returns(mockStream.Object);
             MimeBodyPart bodypart = new MimeBodyPart(mockStreamProvider.Object, 1024, parent);
             bodypart.Segments.Add(new ArraySegment<byte>(new byte[] { 1 }));
-            bodypart.WriteSegment(bodypart.Segments[0]).Wait();
+            bodypart.WriteSegment(bodypart.Segments[0], CancellationToken.None).Wait();
             bodypart.IsComplete = true;
 
             // Act
@@ -69,7 +70,7 @@ namespace System.Net.Http
             mockStreamProvider.Setup(sp => sp.GetStream(It.IsAny<HttpContent>(), It.IsAny<HttpContentHeaders>())).Returns(mockStream.Object);
             MimeBodyPart bodypart = new MimeBodyPart(mockStreamProvider.Object, 1024, parent);
             bodypart.Segments.Add(new ArraySegment<byte>(new byte[] { 1 }));
-            bodypart.WriteSegment(bodypart.Segments[0]).Wait();
+            bodypart.WriteSegment(bodypart.Segments[0], CancellationToken.None).Wait();
             bodypart.IsComplete = true;
 
             // Act

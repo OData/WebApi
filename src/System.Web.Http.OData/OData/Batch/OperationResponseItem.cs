@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.OData;
 
@@ -34,14 +35,15 @@ namespace System.Web.Http.OData.Batch
         /// Writes the response as an Operation.
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
-        public override Task WriteResponseAsync(ODataBatchWriter writer)
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        public override Task WriteResponseAsync(ODataBatchWriter writer, CancellationToken cancellationToken)
         {
             if (writer == null)
             {
                 throw Error.ArgumentNull("writer");
             }
 
-            return WriteMessageAsync(writer, Response);
+            return WriteMessageAsync(writer, Response, cancellationToken);
         }
 
         /// <inheritdoc/>

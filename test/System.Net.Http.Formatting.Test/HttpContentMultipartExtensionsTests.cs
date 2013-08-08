@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Net.Http
 {
@@ -356,6 +357,21 @@ namespace System.Net.Http
 
             string text = content.ReadAsStringAsync().Result;
             Assert.Equal(innerText, text);
+        }
+
+        [Fact]
+        public void ReadAsMultipartAsyncOfT_PassesCancellationToken()
+        {
+            CancellationToken token = new CancellationToken();
+            HttpContent content = CreateContent("boundary");
+            Mock<MultipartStreamProvider> provider = new Mock<MultipartStreamProvider>();
+            provider.Setup(p => p.ExecutePostProcessingAsync(token))
+                .Returns(Task.FromResult(42))
+                .Verifiable();
+
+            content.ReadAsMultipartAsync<MultipartStreamProvider>(provider.Object, token).Wait();
+
+            provider.Verify();
         }
 
         public class ReadOnlyStream : MemoryStream

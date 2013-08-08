@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -92,10 +93,11 @@ namespace System.Net.Http
         /// Writes the <paramref name="segment"/> into the part's output stream.
         /// </summary>
         /// <param name="segment">The current segment to be written to the part's output stream.</param>
-        public async Task WriteSegment(ArraySegment<byte> segment)
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        public async Task WriteSegment(ArraySegment<byte> segment, CancellationToken cancellationToken)
         {
             var stream = GetOutputStream();
-            await stream.WriteAsync(segment.Array, segment.Offset, segment.Count);
+            await stream.WriteAsync(segment.Array, segment.Offset, segment.Count, cancellationToken);
         }
 
         /// <summary>

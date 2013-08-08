@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.TestCommon;
 
 namespace System.Net.Http
@@ -553,6 +555,49 @@ namespace System.Net.Http
             string destinationMessage = new StreamReader(destination).ReadToEnd();
             string sourceMessage = content.ReadAsStringAsync().Result;
             Assert.Equal(sourceMessage, destinationMessage);
+        }
+
+        [Fact]
+        public void ReadAsHttpRequestMessageAsync_cancellationToken_PassesCancellationToken()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.Cancel();
+            HttpContent content = CreateContent(isRequest: true, hasEntity: false);
+
+            Assert.Throws<TaskCanceledException>(() => content.ReadAsHttpRequestMessageAsync(cts.Token).Wait());
+        }
+
+        [Fact]
+        public void ReadAsHttpRequestMessageAsync_uriScheme_cancellationToken_PassesCancellationToken()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.Cancel();
+            HttpContent content = CreateContent(isRequest: true, hasEntity: false);
+
+            Assert.Throws<TaskCanceledException>(
+                () => content.ReadAsHttpRequestMessageAsync("http", cts.Token).Wait());
+        }
+
+        [Fact]
+        public void ReadAsHttpRequestMessageAsync_uriScheme_bufferSize_cancellationToken_PassesCancellationToken()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.Cancel();
+            HttpContent content = CreateContent(isRequest: true, hasEntity: false);
+
+            Assert.Throws<TaskCanceledException>(
+                () => content.ReadAsHttpRequestMessageAsync("http", 1024, cts.Token).Wait());
+        }
+
+        [Fact]
+        public void ReadAsHttpRequestMessageAsync_uriScheme_bufferSize_maxHeaderSize_cancellationToken_PassesCancellationToken()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.Cancel();
+            HttpContent content = CreateContent(isRequest: true, hasEntity: false);
+
+            Assert.Throws<TaskCanceledException>(
+                () => content.ReadAsHttpRequestMessageAsync("http", 1024, 1024, cts.Token).Wait());
         }
     }
 }

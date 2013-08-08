@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
@@ -20,6 +19,9 @@ namespace System.Web.Http.ModelBinding
     /// </summary>
     public class FormatterParameterBinding : HttpParameterBinding
     {
+        // Magic key to pass cancellation token through the request property bag to maintain backward compat.
+        private const string CancellationTokenKey = "MS_FormatterParameterBinding_CancellationToken";
+
         private IEnumerable<MediaTypeFormatter> _formatters;
         private string _errorMessage;
 
@@ -66,8 +68,23 @@ namespace System.Web.Http.ModelBinding
             set;
         }
 
+        public virtual Task<object> ReadContentAsync(HttpRequestMessage request, Type type,
+            IEnumerable<MediaTypeFormatter> formatters, IFormatterLogger formatterLogger)
+        {
+            // Try to get the cancellation token if it is set earlier during the magic handshake
+            // to maintain backward compatibility.
+            object cancellationToken;
+            if (!request.Properties.TryGetValue(CancellationTokenKey, out cancellationToken))
+            {
+                cancellationToken = CancellationToken.None;
+            }
+
+            return ReadContentAsync(request, type, formatters, formatterLogger, (CancellationToken)cancellationToken);
+        }
+
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Disposed later")]
-        public virtual Task<object> ReadContentAsync(HttpRequestMessage request, Type type, IEnumerable<MediaTypeFormatter> formatters, IFormatterLogger formatterLogger)
+        public virtual Task<object> ReadContentAsync(HttpRequestMessage request, Type type,
+            IEnumerable<MediaTypeFormatter> formatters, IFormatterLogger formatterLogger, CancellationToken cancellationToken)
         {
             HttpContent content = request.Content;
             if (content == null)
@@ -85,7 +102,7 @@ namespace System.Web.Http.ModelBinding
 
             try
             {
-                return content.ReadAsAsync(type, formatters, formatterLogger);
+                return content.ReadAsAsync(type, formatters, formatterLogger, cancellationToken);
             }
             catch (UnsupportedMediaTypeException exception)
             {
@@ -102,7 +119,8 @@ namespace System.Web.Http.ModelBinding
             }
         }
 
-        public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
+        public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext,
+            CancellationToken cancellationToken)
         {
             HttpParameterDescriptor paramFromBody = this.Descriptor;
             Type type = paramFromBody.ParameterType;
@@ -113,10 +131,13 @@ namespace System.Web.Http.ModelBinding
         }
 
         // Perf-sensitive - keeping the async method as small as possible
-        private async Task ExecuteBindingAsyncCore(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, HttpParameterDescriptor paramFromBody,
-            Type type, HttpRequestMessage request, IFormatterLogger formatterLogger, CancellationToken cancellationToken)
+        private async Task ExecuteBindingAsyncCore(ModelMetadataProvider metadataProvider, HttpActionContext actionContext,
+            HttpParameterDescriptor paramFromBody, Type type, HttpRequestMessage request, IFormatterLogger formatterLogger,
+            CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            // pass the cancellation token through the request as we cannot call the ReadContentAsync overload that takes
+            // CancellationToken for backword compatibility reasons.
+            request.Properties[CancellationTokenKey] = cancellationToken;
             object model = await ReadContentAsync(request, type, _formatters, formatterLogger);
 
             // Put the parameter result into the action context.

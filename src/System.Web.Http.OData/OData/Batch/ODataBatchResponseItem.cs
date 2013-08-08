@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.OData;
 
@@ -18,7 +19,21 @@ namespace System.Web.Http.OData.Batch
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
         /// <param name="response">The response message.</param>
-        public static async Task WriteMessageAsync(ODataBatchWriter writer, HttpResponseMessage response)
+        /// <returns>A task object representing writing the given batch response using the given writer.</returns>
+        public static Task WriteMessageAsync(ODataBatchWriter writer, HttpResponseMessage response)
+        {
+            return WriteMessageAsync(writer, response, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Writes a single OData batch response.
+        /// </summary>
+        /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
+        /// <param name="response">The response message.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>A task object representing writing the given batch response using the given writer.</returns>
+        public static async Task WriteMessageAsync(ODataBatchWriter writer, HttpResponseMessage response,
+            CancellationToken cancellationToken)
         {
             if (writer == null)
             {
@@ -47,6 +62,7 @@ namespace System.Web.Http.OData.Batch
 
                 using (Stream stream = batchResponse.GetStream())
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     await response.Content.CopyToAsync(stream);
                 }
             }
@@ -63,7 +79,8 @@ namespace System.Web.Http.OData.Batch
         /// Writes the response.
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
-        public abstract Task WriteResponseAsync(ODataBatchWriter writer);
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        public abstract Task WriteResponseAsync(ODataBatchWriter writer, CancellationToken cancellationToken);
 
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.

@@ -3,6 +3,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net.Http
@@ -53,6 +54,20 @@ namespace System.Net.Http
         public virtual Task ExecutePostProcessingAsync()
         {
             return TaskHelpers.Completed();
+        }
+
+        /// <summary>
+        /// Immediately upon reading the last MIME body part but before completing the read task, this method is 
+        /// called to enable the <see cref="MultipartStreamProvider"/> to do any post processing on the <see cref="HttpContent"/>
+        /// instances that have been read. For example, it can be used to copy the data to another location, or perform
+        /// some other kind of post processing on the data before completing the read operation.
+        /// </summary>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>A <see cref="Task"/> representing the post processing.</returns>
+        public virtual Task ExecutePostProcessingAsync(CancellationToken cancellationToken)
+        {
+            // Call the other overload to maintain backward compatibility.
+            return ExecutePostProcessingAsync();
         }
     }
 }

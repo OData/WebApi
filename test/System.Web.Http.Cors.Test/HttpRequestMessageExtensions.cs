@@ -6,7 +6,7 @@ using System.Web.Http.Hosting;
 
 namespace System.Web.Http.Cors
 {
-    internal static class HttpRequestMethodExtensions
+    internal static class HttpRequestMessageExtensions
     {
         public static void SetActionDescriptor(this HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
         {

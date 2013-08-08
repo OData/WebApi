@@ -150,14 +150,14 @@ namespace System.Net.Http
             return request.GetProperty<SynchronizationContext>(HttpPropertyKeys.SynchronizationContextKey);
         }
 
-        internal static void SetSynchronizationContext(this HttpRequestMessage request, SynchronizationContext syncronizationContext)
+        internal static void SetSynchronizationContext(this HttpRequestMessage request, SynchronizationContext synchronizationContext)
         {
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
             }
 
-            request.Properties[HttpPropertyKeys.SynchronizationContextKey] = syncronizationContext;
+            request.Properties[HttpPropertyKeys.SynchronizationContextKey] = synchronizationContext;
         }
 
         /// <summary>

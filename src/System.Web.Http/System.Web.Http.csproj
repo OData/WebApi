@@ -83,7 +83,7 @@
     <Compile Include="Hosting\IHostPrincipalService.cs" />
     <Compile Include="Results\BadRequestResult.cs" />
     <Compile Include="Results\CreatedAtRouteNegotiatedContentResult.cs" />
-    <Compile Include="Results\ErrorMessageResult.cs" />
+    <Compile Include="Results\BadRequestErrorMessageResult.cs" />
     <Compile Include="Results\JsonResult.cs" />
     <Compile Include="Results\ConflictResult.cs" />
     <Compile Include="Results\UnauthorizedResult.cs" />

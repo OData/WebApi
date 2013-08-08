@@ -15,7 +15,7 @@ using Moq;
 
 namespace System.Web.Http.Results
 {
-    public class ErrorMessageResultTests
+    public class BadRequestErrorMessageResultTests
     {
         [Fact]
         public void Constructor_Throws_WhenMessageIsNull()
@@ -101,8 +101,8 @@ namespace System.Web.Http.Results
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                ErrorMessageResult result = CreateProductUnderTest(expectedMessage, contentNegotiator, request,
-                    formatters);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(expectedMessage, contentNegotiator,
+                    request, formatters);
 
                 // Act
                 string message = result.Message;
@@ -123,8 +123,8 @@ namespace System.Web.Http.Results
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                ErrorMessageResult result = CreateProductUnderTest(message, expectedContentNegotiator, request,
-                    formatters);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, expectedContentNegotiator,
+                    request, formatters);
 
                 // Act
                 IContentNegotiator contentNegotiator = result.ContentNegotiator;
@@ -145,8 +145,8 @@ namespace System.Web.Http.Results
             {
                 IEnumerable<MediaTypeFormatter> formatters = CreateFormatters();
 
-                ErrorMessageResult result = CreateProductUnderTest(message, contentNegotiator, expectedRequest,
-                    formatters);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, contentNegotiator,
+                    expectedRequest, formatters);
 
                 // Act
                 HttpRequestMessage request = result.Request;
@@ -167,7 +167,7 @@ namespace System.Web.Http.Results
             {
                 IEnumerable<MediaTypeFormatter> expectedFormatters = CreateFormatters();
 
-                ErrorMessageResult result = CreateProductUnderTest(message, contentNegotiator, request,
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, contentNegotiator, request,
                     expectedFormatters);
 
                 // Act
@@ -343,7 +343,7 @@ namespace System.Web.Http.Results
                 {
                     controller.Request = request;
 
-                    ErrorMessageResult result = CreateProductUnderTest(message, controller);
+                    BadRequestErrorMessageResult result = CreateProductUnderTest(message, controller);
 
                     IContentNegotiator expectedContentNegotiator = CreateDummyContentNegotiator();
                     configuration.Services.Replace(typeof(IContentNegotiator), expectedContentNegotiator);
@@ -370,7 +370,7 @@ namespace System.Web.Http.Results
                 CreateDummyContentNegotiator()))
             {
                 controller.Configuration = configuration;
-                ErrorMessageResult result = CreateProductUnderTest(message, controller);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, controller);
 
                 using (HttpRequestMessage expectedRequest = CreateRequest())
                 {
@@ -399,7 +399,7 @@ namespace System.Web.Http.Results
                 controller.Configuration = earlyConfiguration;
                 controller.Request = request;
 
-                ErrorMessageResult result = CreateProductUnderTest(message, controller);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, controller);
 
                 MediaTypeFormatter expectedFormatter = CreateFormatter();
 
@@ -432,7 +432,7 @@ namespace System.Web.Http.Results
                 controller.Configuration = configuration;
                 controller.Request = request;
 
-                ErrorMessageResult result = CreateProductUnderTest(message, controller);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, controller);
 
                 IContentNegotiator ignore = result.ContentNegotiator;
 
@@ -458,7 +458,7 @@ namespace System.Web.Http.Results
             {
                 controller.Configuration = configuration;
 
-                ErrorMessageResult result = CreateProductUnderTest(message, controller);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, controller);
 
                 using (HttpRequestMessage expectedRequest = CreateRequest())
                 {
@@ -494,7 +494,7 @@ namespace System.Web.Http.Results
                 controller.Configuration = earlyConfiguration;
                 controller.Request = request;
 
-                ErrorMessageResult result = CreateProductUnderTest(message, controller);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, controller);
 
                 IEnumerable<MediaTypeFormatter> ignore = result.Formatters;
 
@@ -525,7 +525,7 @@ namespace System.Web.Http.Results
             {
                 controller.ControllerContext = context;
 
-                ErrorMessageResult result = CreateProductUnderTest(message, controller);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, controller);
 
                 // Act & Assert
                 Assert.Throws<InvalidOperationException>(
@@ -547,7 +547,7 @@ namespace System.Web.Http.Results
                 controller.Request = request;
                 controller.Configuration = configuration;
 
-                ErrorMessageResult result = CreateProductUnderTest(message, controller);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, controller);
 
                 // Act & Assert
                 Assert.Throws<InvalidOperationException>(
@@ -569,7 +569,7 @@ namespace System.Web.Http.Results
                 CreateDummyContentNegotiator()))
             {
                 controller.Configuration = configuration;
-                ErrorMessageResult result = CreateProductUnderTest(message, controller);
+                BadRequestErrorMessageResult result = CreateProductUnderTest(message, controller);
 
                 // Act & Assert
                 InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
@@ -585,7 +585,7 @@ namespace System.Web.Http.Results
             ApiController controller = CreateController();
 
             // Act
-            ErrorMessageResult result = controller.BadRequest(expectedMessage);
+            BadRequestErrorMessageResult result = controller.BadRequest(expectedMessage);
 
             // Assert
             Assert.NotNull(result);
@@ -641,15 +641,16 @@ namespace System.Web.Http.Results
             return "IgnoreMessage";
         }
 
-        private static ErrorMessageResult CreateProductUnderTest(string message, IContentNegotiator contentNegotiator,
-            HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
+        private static BadRequestErrorMessageResult CreateProductUnderTest(string message,
+            IContentNegotiator contentNegotiator, HttpRequestMessage request,
+            IEnumerable<MediaTypeFormatter> formatters)
         {
-            return new ErrorMessageResult(message, contentNegotiator, request, formatters);
+            return new BadRequestErrorMessageResult(message, contentNegotiator, request, formatters);
         }
 
-        private static ErrorMessageResult CreateProductUnderTest(string message, ApiController controller)
+        private static BadRequestErrorMessageResult CreateProductUnderTest(string message, ApiController controller)
         {
-            return new ErrorMessageResult(message, controller);
+            return new BadRequestErrorMessageResult(message, controller);
         }
 
         private static HttpRequestMessage CreateRequest()

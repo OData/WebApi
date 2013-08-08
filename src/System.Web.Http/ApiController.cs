@@ -192,13 +192,13 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Creates an <see cref="ErrorMessageResult"/> (400 Bad Request) with the specified error message.
+        /// Creates a <see cref="BadRequestErrorMessageResult"/> (400 Bad Request) with the specified error message.
         /// </summary>
         /// <param name="message">The user-visible error message.</param>
-        /// <returns>An <see cref="InvalidModelStateResult"/> with the specified model state.</returns>
-        protected internal virtual ErrorMessageResult BadRequest(string message)
+        /// <returns>A <see cref="BadRequestErrorMessageResult"/> with the specified model state.</returns>
+        protected internal virtual BadRequestErrorMessageResult BadRequest(string message)
         {
-            return new ErrorMessageResult(message, this);
+            return new BadRequestErrorMessageResult(message, this);
         }
 
         /// <summary>

@@ -14,32 +14,33 @@ namespace System.Web.Http.Results
     /// Represents an action result that returns a <see cref="HttpStatusCode.BadRequest"/> response and performs
     /// content negotiation on an <see cref="HttpError"/> with a <see cref="HttpError.Message"/>.
     /// </summary>
-    public class ErrorMessageResult : IHttpActionResult
+    public class BadRequestErrorMessageResult : IHttpActionResult
     {
         private readonly string _message;
         private readonly NegotiatedContentResult<HttpError>.IDependencyProvider _dependencies;
 
-        /// <summary>Initializes a new instance of the <see cref="ErrorMessageResult"/> class.</summary>
+        /// <summary>Initializes a new instance of the <see cref="BadRequestErrorMessageResult"/> class.</summary>
         /// <param name="message">The user-visible error message.</param>
         /// <param name="contentNegotiator">The content negotiator to handle content negotiation.</param>
         /// <param name="request">The request message which led to this result.</param>
         /// <param name="formatters">The formatters to use to negotiate and format the content.</param>
-        public ErrorMessageResult(string message, IContentNegotiator contentNegotiator,
+        public BadRequestErrorMessageResult(string message, IContentNegotiator contentNegotiator,
             HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
             : this(message, new NegotiatedContentResult<HttpError>.DirectDependencyProvider(contentNegotiator, request,
                 formatters))
         {
         }
 
-        /// <summary>Initializes a new instance of the <see cref="ErrorMessageResult"/> class.</summary>
+        /// <summary>Initializes a new instance of the <see cref="BadRequestErrorMessageResult"/> class.</summary>
         /// <param name="message">The user-visible error message.</param>
         /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
-        public ErrorMessageResult(string message, ApiController controller)
+        public BadRequestErrorMessageResult(string message, ApiController controller)
             : this(message, new NegotiatedContentResult<HttpError>.ApiControllerDependencyProvider(controller))
         {
         }
 
-        private ErrorMessageResult(string message, NegotiatedContentResult<HttpError>.IDependencyProvider dependencies)
+        private BadRequestErrorMessageResult(string message,
+            NegotiatedContentResult<HttpError>.IDependencyProvider dependencies)
         {
             if (message == null)
             {

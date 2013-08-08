@@ -55,6 +55,56 @@ namespace System.Web.Http.Routing
         }
 
         /// <summary>
+        /// Creates an absolute URL using the specified path.
+        /// </summary>
+        /// <param name="path">The URL path, which may be a relative URL, a rooted URL, or a virtual path.</param>
+        /// <returns>The generated URL.</returns>
+        [SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings", Justification = "It is safe to pass string here")]
+        public virtual string Content(string path)
+        {
+            if (String.IsNullOrEmpty(path))
+            {
+                throw Error.ArgumentNullOrEmpty("path");
+            }
+
+            if (Request == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestIsNull, "UrlHelper");
+            }
+
+            if (path.StartsWith("~/", StringComparison.Ordinal))
+            {
+                // This is a virtual path, we need to combine it with the virtual path root
+                string virtualPathRoot = Request.GetVirtualPathRoot();
+                if (virtualPathRoot == null)
+                {
+                    HttpConfiguration configuration = Request.GetConfiguration();
+                    if (configuration == null)
+                    {
+                        throw Error.InvalidOperation(SRResources.HttpRequestMessageExtensions_NoConfiguration);
+                    }
+
+                    virtualPathRoot = configuration.VirtualPathRoot ?? "/";
+                }
+
+                if (!virtualPathRoot.StartsWith("/", StringComparison.Ordinal))
+                {
+                    virtualPathRoot = "/" + virtualPathRoot;
+                }
+                if (!virtualPathRoot.EndsWith("/", StringComparison.Ordinal))
+                {
+                    virtualPathRoot += "/";
+                }
+
+                return new Uri(Request.RequestUri, virtualPathRoot + path.Substring("~/".Length)).AbsoluteUri;
+            }
+            else
+            {
+                return new Uri(Request.RequestUri, path).AbsoluteUri;
+            }
+        }
+
+        /// <summary>
         /// Creates a relative URL using the specified route and route data.
         /// </summary>
         /// <param name="routeName">The name of the route to use for generating the URL.</param>

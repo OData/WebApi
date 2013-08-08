@@ -129,6 +129,68 @@ namespace System.Web.Http.Routing
             Assert.Equal(expectedUrl != null ? baseUrl + expectedUrl : null, generatedlink);
         }
 
+        [Fact]
+        public void UrlHelper_Content_NoOpsAbsoluteUrl()
+        {
+            // Arrange
+            var request = new HttpRequestMessage();
+            request.RequestUri = new Uri("http://contoso.com/api/Products");
+            var urlHelper = new UrlHelper(request);
+
+            // Act
+            string link = urlHelper.Content("http://microsoft.com/webapi");
+
+            // Assert
+            Assert.Equal("http://microsoft.com/webapi", link);
+        }
+
+        [Fact]
+        public void UrlHelper_Content_CombinesAbsolutePath()
+        {
+            // Arrange
+            var request = new HttpRequestMessage();
+            request.RequestUri = new Uri("http://contoso.com/api/Products");
+            var urlHelper = new UrlHelper(request);
+
+            // Act
+            string link = urlHelper.Content("/store");
+
+            // Assert
+            Assert.Equal("http://contoso.com/store", link);
+        }
+
+        [Fact]
+        public void UrlHelper_Content_CombinesVirtualPath()
+        {
+            // Arrange
+            var request = new HttpRequestMessage();
+            request.SetVirtualPathRoot("/AppPath");
+            request.RequestUri = new Uri("http://contoso.com/AppPath/api/Products");
+            var urlHelper = new UrlHelper(request);
+
+            // Act
+            string link = urlHelper.Content("~/store");
+
+            // Assert
+            Assert.Equal("http://contoso.com/AppPath/store", link);
+        }
+
+        [Fact]
+        public void UrlHelper_Content_UsesVirtualPathFromConfiguration()
+        {
+            // Arrange
+            var request = new HttpRequestMessage();
+            request.SetConfiguration(new HttpConfiguration(new HttpRouteCollection("/AppPath")));
+            request.RequestUri = new Uri("http://contoso.com/AppPath/api/Products");
+            var urlHelper = new UrlHelper(request);
+
+            // Act
+            string link = urlHelper.Content("~/store");
+
+            // Assert
+            Assert.Equal("http://contoso.com/AppPath/store", link);
+        }
+
         private static UrlHelper GetUrlHelperForApi()
         {
             HttpRequestMessage request = new HttpRequestMessage();
@@ -136,8 +198,8 @@ namespace System.Web.Http.Routing
             // Set up routes
             var routes = new HttpRouteCollection("/somerootpath");
             IHttpRoute route = routes.MapHttpRoute("route1", "{controller}/{id}");
-            request.SetConfiguration(new HttpConfiguration(routes));
-            request.SetRouteData(new HttpRouteData(route, new HttpRouteValueDictionary(new { controller = "people", id = "123" })));
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration(routes);
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(route, new HttpRouteValueDictionary(new { controller = "people", id = "123" }));
 
             return new UrlHelper(request);
         }

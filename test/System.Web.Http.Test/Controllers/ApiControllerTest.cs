@@ -726,21 +726,6 @@ namespace System.Web.Http
             Assert.Same(expectedException, actualException);
         }
 
-        [Fact, RestoreThreadPrincipal]
-        public void User_ReturnsThreadPrincipal()
-        {
-            // Arrange
-            ApiController controller = new Mock<ApiController>().Object;
-            IPrincipal principal = new GenericPrincipal(new GenericIdentity("joe"), new string[0]);
-            Thread.CurrentPrincipal = principal;
-
-            // Act
-            IPrincipal result = controller.User;
-
-            // Assert
-            Assert.Same(result, principal);
-        }
-
         [Fact]
         public void ApiControllerCannotBeReused()
         {

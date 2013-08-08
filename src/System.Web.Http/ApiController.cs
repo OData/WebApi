@@ -129,7 +129,8 @@ namespace System.Web.Http
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "That would make for poor usability.")]
         public IPrincipal User
         {
-            get { return Thread.CurrentPrincipal; }
+            get { return RequestContext.Principal; }
+            set { RequestContext.Principal = value; }
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "This method is a coordinator, so this coupling is expected.")]
@@ -176,7 +177,7 @@ namespace System.Web.Http
             }
             if (authenticationFilters.Length > 0)
             {
-                result = new AuthenticationFilterResult(actionContext, authenticationFilters, _principalService,
+                result = new AuthenticationFilterResult(actionContext, this, authenticationFilters, _principalService,
                     controllerContext.Request, result);
             }
 

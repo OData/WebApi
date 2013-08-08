@@ -21,6 +21,7 @@ namespace System.Web.Http.Controllers
             using (HttpResponseMessage expectedResponse = CreateResponse())
             {
                 HttpActionContext context = CreateContext();
+                ApiController controller = CreateController();
                 IAuthenticationFilter[] filters = new IAuthenticationFilter[0];
                 IHostPrincipalService principalService = CreateStubPrincipalService();
                 int calls = 0;
@@ -31,8 +32,8 @@ namespace System.Web.Http.Controllers
                     cancellationToken = t;
                     return Task.FromResult(expectedResponse);
                 });
-                IHttpActionResult product = CreateProductUnderTest(context, filters, principalService, request,
-                    innerResult);
+                IHttpActionResult product = CreateProductUnderTest(context, controller, filters, principalService,
+                    request, innerResult);
                 CancellationToken expectedCancellationToken = CreateCancellationToken();
 
                 // Act
@@ -52,6 +53,7 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             HttpActionContext context = CreateContext();
+            ApiController controller = CreateController();
             IAuthenticationFilter filter = CreateStubFilter();
             IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter };
             int calls = 0;
@@ -66,8 +68,8 @@ namespace System.Web.Http.Controllers
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
-                IHttpActionResult product = CreateProductUnderTest(context, filters, principalService, expectedRequest,
-                    innerResult);
+                IHttpActionResult product = CreateProductUnderTest(context, controller, filters, principalService,
+                    expectedRequest, innerResult);
 
                 // Act
                 Task<HttpResponseMessage> task = product.ExecuteAsync(CancellationToken.None);
@@ -85,6 +87,7 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             HttpActionContext expectedActionContext = CreateContext();
+            ApiController controller = CreateController();
             int calls = 0;
             HttpAuthenticationContext authenticationContext = null;
             CancellationToken cancellationToken = default(CancellationToken);
@@ -102,8 +105,8 @@ namespace System.Web.Http.Controllers
 
             using (HttpRequestMessage request = CreateRequest())
             {
-                IHttpActionResult product = CreateProductUnderTest(expectedActionContext, filters, principalService,
-                    request, innerResult);
+                IHttpActionResult product = CreateProductUnderTest(expectedActionContext, controller, filters,
+                    principalService, request, innerResult);
 
                 // Act
                 Task<HttpResponseMessage> task = product.ExecuteAsync(expectedCancellationToken);
@@ -129,6 +132,7 @@ namespace System.Web.Http.Controllers
             using (HttpResponseMessage expectedResponse = CreateResponse())
             {
                 HttpActionContext context = CreateContext();
+                ApiController controller = CreateController();
                 int calls = 0;
                 CancellationToken cancellationToken;
                 IHttpActionResult errorResult = CreateActionResult((t) =>
@@ -144,8 +148,8 @@ namespace System.Web.Http.Controllers
                 IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter };
                 IHostPrincipalService principalService = CreateStubPrincipalService();
                 IHttpActionResult innerResult = CreateDummyActionResult();
-                IHttpActionResult product = CreateProductUnderTest(context, filters, principalService, request,
-                    innerResult);
+                IHttpActionResult product = CreateProductUnderTest(context, controller, filters, principalService,
+                    request, innerResult);
                 CancellationToken expectedCancellationToken = CreateCancellationToken();
 
                 // Act
@@ -168,6 +172,7 @@ namespace System.Web.Http.Controllers
             using (HttpResponseMessage expectedResponse = CreateResponse())
             {
                 HttpActionContext context = CreateContext();
+                ApiController controller = CreateController();
                 IHttpActionResult errorResult = CreateActionResult((t) => Task.FromResult(expectedResponse));
                 IAuthenticationFilter firstFilter = CreateAuthenticationFilter((c, t) =>
                 {
@@ -181,8 +186,8 @@ namespace System.Web.Http.Controllers
                 IAuthenticationFilter[] filters = new IAuthenticationFilter[] { firstFilter, secondFilter };
                 IHostPrincipalService principalService = CreateStubPrincipalService();
                 IHttpActionResult innerResult = CreateDummyActionResult();
-                IHttpActionResult product = CreateProductUnderTest(context, filters, principalService, request,
-                    innerResult);
+                IHttpActionResult product = CreateProductUnderTest(context, controller, filters, principalService,
+                    request, innerResult);
                 CancellationToken expectedCancellationToken = CreateCancellationToken();
 
                 // Act
@@ -200,6 +205,7 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             HttpActionContext context = CreateContext();
+            ApiController controller = CreateController();
             IPrincipal expectedPrincipal = CreateDummyPrincipal();
             IAuthenticationFilter filter = CreateAuthenticationFilter((c, t) =>
             {
@@ -219,8 +225,8 @@ namespace System.Web.Http.Controllers
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
-                IHttpActionResult product = CreateProductUnderTest(context, filters, principalService, expectedRequest,
-                    innerResult);
+                IHttpActionResult product = CreateProductUnderTest(context, controller, filters, principalService,
+                    expectedRequest, innerResult);
 
                 // Act
                 Task<HttpResponseMessage> task = product.ExecuteAsync(CancellationToken.None);
@@ -239,6 +245,7 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             HttpActionContext context = CreateContext();
+            ApiController controller = CreateController();
             IPrincipal expectedPrincipal = CreateDummyPrincipal();
             IAuthenticationFilter firstFilter = CreateAuthenticationFilter((c, t) =>
             {
@@ -258,8 +265,8 @@ namespace System.Web.Http.Controllers
 
             using (HttpRequestMessage request = CreateRequest())
             {
-                IHttpActionResult product = CreateProductUnderTest(context, filters, principalService, request,
-                    innerResult);
+                IHttpActionResult product = CreateProductUnderTest(context, controller, filters, principalService,
+                    request, innerResult);
 
                 // Act
                 Task<HttpResponseMessage> task = product.ExecuteAsync(CancellationToken.None);
@@ -276,6 +283,7 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             HttpActionContext context = CreateContext();
+            ApiController controller = CreateController();
             IPrincipal principal = CreateDummyPrincipal();
             IAuthenticationFilter filter = CreateAuthenticationFilter((c, t) =>
             {
@@ -291,8 +299,8 @@ namespace System.Web.Http.Controllers
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
-                IHttpActionResult product = CreateProductUnderTest(context, filters, principalService, expectedRequest,
-                    innerResult);
+                IHttpActionResult product = CreateProductUnderTest(context, controller, filters, principalService,
+                    expectedRequest, innerResult);
 
                 // Act
                 Task<HttpResponseMessage> task = product.ExecuteAsync(CancellationToken.None);
@@ -309,6 +317,7 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             HttpActionContext context = CreateContext();
+            ApiController controller = CreateController();
             IPrincipal principal = CreateDummyPrincipal();
             IAuthenticationFilter filter = CreateAuthenticationFilter((c, t) => Task.FromResult<object>(null));
             IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter, filter };
@@ -321,8 +330,8 @@ namespace System.Web.Http.Controllers
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
-                IHttpActionResult product = CreateProductUnderTest(context, filters, principalService, expectedRequest,
-                    innerResult);
+                IHttpActionResult product = CreateProductUnderTest(context, controller, filters, principalService,
+                    expectedRequest, innerResult);
 
                 // Act
                 Task<HttpResponseMessage> task = product.ExecuteAsync(CancellationToken.None);
@@ -339,6 +348,7 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             HttpActionContext expectedContext = CreateContext();
+            ApiController controller = CreateController();
             int calls = 0;
             HttpActionContext context = null;
             IHttpActionResult innerResult = null;
@@ -357,8 +367,8 @@ namespace System.Web.Http.Controllers
 
             using (HttpRequestMessage request = CreateRequest())
             {
-                IHttpActionResult product = CreateProductUnderTest(expectedContext, filters, principalService, request,
-                    expectedInnerResult);
+                IHttpActionResult product = CreateProductUnderTest(expectedContext, controller, filters,
+                    principalService, request, expectedInnerResult);
 
                 // Act
                 Task<HttpResponseMessage> task = product.ExecuteAsync(expectedCancellationToken);
@@ -378,6 +388,7 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             HttpActionContext expectedContext = CreateContext();
+            ApiController controller = CreateController();
             IHttpActionResult expectedErrorResult = CreateDummyActionResult();
             int calls = 0;
             HttpActionContext context = null;
@@ -404,8 +415,8 @@ namespace System.Web.Http.Controllers
 
             using (HttpRequestMessage request = CreateRequest())
             {
-                IHttpActionResult product = CreateProductUnderTest(expectedContext, filters, principalService, request,
-                    originalInnerResult);
+                IHttpActionResult product = CreateProductUnderTest(expectedContext, controller, filters,
+                    principalService, request, originalInnerResult);
 
                 // Act
                 Task<HttpResponseMessage> task = product.ExecuteAsync(expectedCancellationToken);
@@ -425,6 +436,7 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             HttpActionContext expectedContext = CreateContext();
+            ApiController controller = CreateController();
             IHttpActionResult expectedInnerResult = CreateDummyActionResult();
             int calls = 0;
             HttpActionContext context = null;
@@ -450,8 +462,8 @@ namespace System.Web.Http.Controllers
 
             using (HttpRequestMessage request = CreateRequest())
             {
-                IHttpActionResult product = CreateProductUnderTest(expectedContext, filters, principalService, request,
-                    originalInnerResult);
+                IHttpActionResult product = CreateProductUnderTest(expectedContext, controller, filters,
+                    principalService, request, originalInnerResult);
 
                 // Act
                 Task<HttpResponseMessage> task = product.ExecuteAsync(expectedCancellationToken);
@@ -540,6 +552,11 @@ namespace System.Web.Http.Controllers
             return new HttpActionContext();
         }
 
+        private static ApiController CreateController()
+        {
+            return new Mock<ApiController>().Object;
+        }
+
         private static IHttpActionResult CreateDummyActionResult()
         {
             return new Mock<IHttpActionResult>(MockBehavior.Strict).Object;
@@ -572,10 +589,11 @@ namespace System.Web.Http.Controllers
         }
 
         private static AuthenticationFilterResult CreateProductUnderTest(HttpActionContext context,
-            IAuthenticationFilter[] filters, IHostPrincipalService principalService, HttpRequestMessage request,
-            IHttpActionResult innerResult)
+            ApiController controller, IAuthenticationFilter[] filters, IHostPrincipalService principalService,
+            HttpRequestMessage request, IHttpActionResult innerResult)
         {
-            return new AuthenticationFilterResult(context, filters, principalService, request, innerResult);
+            return new AuthenticationFilterResult(context, controller, filters, principalService, request,
+                innerResult);
         }
 
         private static HttpRequestMessage CreateRequest()

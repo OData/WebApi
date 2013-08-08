@@ -17,13 +17,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
     public class ODataSerializerContext
     {
         private ClrTypeCache _typeMappingCache;
+        private IDictionary<object, object> _items;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
         /// </summary>
         public ODataSerializerContext()
         {
-            Items = new Dictionary<object, object>();
         }
 
         /// <summary>
@@ -125,9 +125,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public IEdmNavigationProperty NavigationProperty { get; set; }
 
         /// <summary>
-        /// Gets or sets a property bag associated with this context to store any generic data.
+        /// Gets a property bag associated with this context to store any generic data.
         /// </summary>
-        public Dictionary<object, object> Items { get; private set; }
+        public IDictionary<object, object> Items
+        {
+            get
+            {
+                _items = _items ?? new Dictionary<object, object>();
+                return _items;
+            }
+            private set
+            {
+                _items = value;
+            }
+        }
 
         internal IEdmTypeReference GetEdmType(object instance, Type type)
         {

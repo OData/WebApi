@@ -38,6 +38,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RemoteHttpControllerHandlerTest.cs" />
     <Compile Include="GlobalConfigurationTest.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />
     <Compile Include="Routing\HttpContextBaseExtensionsTest.cs" />

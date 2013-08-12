@@ -10,11 +10,11 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Runtime.Remoting;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
-using System.Web.Routing;
 using Microsoft.TestCommon;
 using Moq;
 using Newtonsoft.Json.Linq;
@@ -28,7 +28,7 @@ namespace System.Web.Http.WebHost
             get
             {
                 return new TheoryDataSet<HttpMethod>
-                {       
+                {
                     HttpMethod.Get,
                     HttpMethod.Post,
                     HttpMethod.Put,
@@ -45,7 +45,7 @@ namespace System.Web.Http.WebHost
             get
             {
                 return new TheoryDataSet<HttpMethod>
-                {       
+                {
                     HttpMethod.Post,
                     HttpMethod.Put,
                     HttpMethod.Delete,
@@ -181,6 +181,54 @@ namespace System.Web.Http.WebHost
                     Assert.False(found);
                 }
             }
+        }
+
+        [Fact]
+        public void ConvertRequest_DoesLazyGetInputStream()
+        {
+            bool inputStreamCalled = false;
+            HttpRequestBase stubRequest = CreateStubRequest(() =>
+            {
+                inputStreamCalled = true;
+                return new MemoryStream();
+            },
+            buffered: true);
+            HttpContextBase context = CreateStubContext(request: stubRequest, items: null);
+
+            HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context);
+
+            Assert.False(inputStreamCalled);
+            var contentStream = actualRequest.Content.ReadAsStreamAsync().Result;
+            Assert.True(inputStreamCalled);
+        }
+
+        [Fact]
+        public void ConvertRequest_DoesLazyGetBufferlessInputStream()
+        {
+            // Need to run this test on different AppDomain because the buffer policy selector in 
+            // HttpControllerHandler is static and cached so it's not possible to change in the context of this test.
+            AppDomain newAppDomain = AppDomain.CreateDomain("NewTestAppDomain");
+            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            UriBuilder uri = new UriBuilder(codeBase);
+            string location = Uri.UnescapeDataString(uri.Path);
+            ObjectHandle proxy = newAppDomain.CreateInstanceFrom(location, typeof(RemoteHttpControllerHandlerTest).FullName);
+            RemoteHttpControllerHandlerTest remoteTest = proxy.Unwrap() as RemoteHttpControllerHandlerTest;
+
+            ConvertRequest_DoesLazyGetBufferlessInputStream_TestResults results;
+            try
+            {
+                results = remoteTest.ConvertRequest_DoesLazyGetBufferlessInputStream();
+            }
+            finally
+            {
+                if (newAppDomain != null)
+                {
+                    AppDomain.Unload(newAppDomain);
+                }
+            }
+
+            Assert.False(results.inputStreamCalledBeforeContentIsRead);
+            Assert.True(results.inputStreamCalledAfterContentIsRead);
         }
 
         [Fact]
@@ -762,6 +810,23 @@ namespace System.Web.Http.WebHost
             return requestBaseMock.Object;
         }
 
+        internal static HttpRequestBase CreateStubRequest(Func<Stream> getStream, bool buffered)
+        {
+            Mock<HttpRequestBase> requestBaseMock = new Mock<HttpRequestBase>() { CallBase = true };
+            requestBaseMock.SetupGet(m => m.HttpMethod).Returns("GET");
+            requestBaseMock.SetupGet(m => m.Url).Returns(new Uri("Http://localhost"));
+            requestBaseMock.SetupGet(m => m.Headers).Returns(new NameValueCollection());
+            if (buffered)
+            {
+                requestBaseMock.Setup(m => m.InputStream).Returns(() => getStream());
+            }
+            else
+            {
+                requestBaseMock.Setup(m => m.GetBufferlessInputStream()).Returns(() => getStream());
+            }
+            return requestBaseMock.Object;
+        }
+
         private static HttpContextBase CreateStubContext(string httpMethod, Stream bufferedStream)
         {
             HttpRequestBase request = CreateStubRequest(httpMethod, bufferedStream);
@@ -770,7 +835,7 @@ namespace System.Web.Http.WebHost
             return contextMock.Object;
         }
 
-        private static HttpContextBase CreateStubContext(HttpRequestBase request, IDictionary items)
+        internal static HttpContextBase CreateStubContext(HttpRequestBase request, IDictionary items)
         {
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
             contextMock.SetupGet(m => m.Request).Returns(request);
@@ -819,6 +884,5 @@ namespace System.Web.Http.WebHost
 
             return contextMock;
         }
-
     }
 }

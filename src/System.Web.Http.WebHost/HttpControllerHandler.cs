@@ -129,7 +129,7 @@ namespace System.Web.Http.WebHost
         }
 
         /// <summary>
-        /// Converts a <see cref="HttpResponseMessage"/> to an <see cref="HttpResponseBase"/> and disposes the 
+        /// Converts a <see cref="HttpResponseMessage"/> to an <see cref="HttpResponseBase"/> and disposes the
         /// <see cref="HttpResponseMessage"/> and <see cref="HttpRequestMessage"/> upon completion.
         /// </summary>
         /// <param name="httpContextBase">The HTTP context base.</param>
@@ -195,11 +195,16 @@ namespace System.Web.Http.WebHost
             // Choose a buffered or bufferless input stream based on user's policy
             IHostBufferPolicySelector policySelector = _bufferPolicySelector.Value;
             bool isInputBuffered = policySelector == null ? true : policySelector.UseBufferedInputStream(httpContextBase);
-            Stream inputStream = isInputBuffered
-                                    ? requestBase.InputStream
-                                    : requestBase.GetBufferlessInputStream();
 
-            request.Content = new StreamContent(inputStream);
+            if (isInputBuffered)
+            {
+                request.Content = new LazyStreamContent(() => requestBase.InputStream);
+            }
+            else
+            {
+                request.Content = new LazyStreamContent(() => requestBase.GetBufferlessInputStream());
+            }
+
             foreach (string headerName in requestBase.Headers)
             {
                 string[] values = requestBase.Headers.GetValues(headerName);
@@ -236,7 +241,7 @@ namespace System.Web.Http.WebHost
         }
 
         /// <summary>
-        /// Prevents the <see cref="T:System.Web.Security.FormsAuthenticationModule"/> from altering a 401 response to 302 by 
+        /// Prevents the <see cref="T:System.Web.Security.FormsAuthenticationModule"/> from altering a 401 response to 302 by
         /// setting <see cref="P:System.Web.HttpResponseBase.SuppressFormsAuthenticationRedirect" /> to <c>true</c> if available.
         /// </summary>
         /// <param name="httpContextBase">The HTTP context base.</param>
@@ -698,6 +703,67 @@ namespace System.Web.Http.WebHost
                     _virtualPathRoot = value;
                     _virtualPathRootSet = true;
                 }
+            }
+        }
+
+        private class DelegatingStreamContent : StreamContent
+        {
+            public DelegatingStreamContent(Stream stream)
+                : base(stream) 
+            { 
+            }
+
+            public Task WriteToStreamAsync(Stream stream, TransportContext context)
+            {
+                return SerializeToStreamAsync(stream, context);
+            }
+
+            public bool TryCalculateLength(out long length)
+            {
+                return TryComputeLength(out length);
+            }
+
+            public Task<Stream> GetContentReadStreamAsync()
+            {
+                return CreateContentReadStreamAsync();
+            }
+        }
+
+        private class LazyStreamContent : HttpContent
+        {
+            private readonly Func<Stream> _getStream;
+            private DelegatingStreamContent _streamContent;
+
+            public LazyStreamContent(Func<Stream> getStream)
+            {
+                _getStream = getStream;
+            }
+
+            private DelegatingStreamContent StreamContent
+            {
+                get
+                {
+                    if (_streamContent == null)
+                    {
+                        _streamContent = new DelegatingStreamContent(_getStream());
+                    }
+                    return _streamContent;
+                }
+            }
+
+            protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+            {
+                return StreamContent.WriteToStreamAsync(stream, context);
+            }
+
+            protected override Task<Stream> CreateContentReadStreamAsync()
+            {
+                return StreamContent.GetContentReadStreamAsync();
+            }
+
+            protected override bool TryComputeLength(out long length)
+            {
+                return StreamContent.TryCalculateLength(out length);
             }
         }
     }

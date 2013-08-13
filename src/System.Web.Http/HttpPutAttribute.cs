@@ -10,23 +10,14 @@ namespace System.Web.Http
     /// <summary>
     /// Specifies that an action supports the PUT HTTP method.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class HttpPutAttribute : HttpVerbAttribute
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public sealed class HttpPutAttribute : AcceptVerbsAttribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpPutAttribute" /> class.
         /// </summary>
         public HttpPutAttribute()
             : base(HttpMethod.Put)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpPutAttribute" /> class.
-        /// </summary>
-        /// <param name="routeTemplate">The route template describing the URI pattern to match against.</param>
-        public HttpPutAttribute(string routeTemplate)
-            : base(HttpMethod.Put, routeTemplate)
         {
         }
     }

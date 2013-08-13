@@ -102,7 +102,6 @@
     <Compile Include="IHttpActionResult.cs" />
     <Compile Include="Results\ContinuationResult.cs" />
     <Compile Include="HttpErrorKeys.cs" />
-    <Compile Include="HttpVerbAttribute.cs" />
     <Compile Include="Controllers\FilterGrouping.cs" />
     <Compile Include="RoutePrefixAttribute.cs" />
     <Compile Include="Filters\HttpAuthenticationContext.cs" />
@@ -114,6 +113,7 @@
     <Compile Include="OverrideAuthenticationAttribute.cs" />
     <Compile Include="OverrideAuthorizationAttribute.cs" />
     <Compile Include="OverrideExceptionFiltersAttribute.cs" />
+    <Compile Include="RouteAttribute.cs" />
     <Compile Include="Routing\RouteCollectionRoute.cs" />
     <Compile Include="Routing\GenerationRoute.cs" />
     <Compile Include="Routing\HttpDirectRoute.cs" />

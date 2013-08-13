@@ -10,23 +10,14 @@ namespace System.Web.Http
     /// <summary>
     /// Specifies that an action supports the POST HTTP method.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class HttpPostAttribute : HttpVerbAttribute
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public sealed class HttpPostAttribute : AcceptVerbsAttribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpPostAttribute" /> class.
         /// </summary>
         public HttpPostAttribute()
             : base(HttpMethod.Post)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpPostAttribute" /> class.
-        /// </summary>
-        /// <param name="routeTemplate">The route template describing the URI pattern to match against.</param>
-        public HttpPostAttribute(string routeTemplate)
-            : base(HttpMethod.Post, routeTemplate)
         {
         }
     }

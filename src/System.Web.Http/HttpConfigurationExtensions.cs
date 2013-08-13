@@ -233,12 +233,14 @@ namespace System.Web.Http
 
                         string routeTemplate = BuildRouteTemplate(routePrefix, providerTemplate);
 
+                        IEnumerable<HttpMethod> verbs = actionDescriptor.SupportedHttpMethods;
+
                         // Try to find an entry with the same route template and the same HTTP verbs
                         HttpRouteEntry existingEntry = null;
                         foreach (HttpRouteEntry entry in routes)
                         {
                             if (String.Equals(routeTemplate, entry.RouteTemplate, StringComparison.OrdinalIgnoreCase) &&
-                                    AreEqual(routeProvider.HttpMethods, entry.HttpMethods))
+                                    AreEqual(verbs, entry.HttpMethods))
                             {
                                 existingEntry = entry;
                                 break;
@@ -253,7 +255,7 @@ namespace System.Web.Http
                                 Actions = new HashSet<ReflectedHttpActionDescriptor>() { actionDescriptor }
                             };
 
-                            entry.HttpMethods = routeProvider.HttpMethods;
+                            entry.HttpMethods = verbs;
                             entry.Name = routeProvider.RouteName;
                             entry.Order = routeProvider.RouteOrder;
                             routes.Add(entry);

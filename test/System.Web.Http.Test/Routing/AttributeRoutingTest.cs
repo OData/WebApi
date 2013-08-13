@@ -29,6 +29,13 @@ namespace System.Web.Http.Routing
         // Test prefixes
         [InlineData("GET", "prefix", "PrefixedGet")]
         [InlineData("GET", "prefix/123", "PrefixedGetById123")]
+        [InlineData("PUT", "prefix", "PrefixedPut")]
+        // Test multiple routes to same action
+        [InlineData("DELETE", "multi1", "multi")]
+        [InlineData("DELETE", "multi2", "multi")]        
+        // Test multiple verbs on the same route
+        [InlineData("GET", "multiverb", "GET")]
+        [InlineData("PUT", "multiverb", "PUT")]                    
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -88,59 +95,87 @@ namespace System.Web.Http.Routing
 
     public class AttributedController : ApiController
     {
-        [HttpGet("controller/{id:int}")]
+        [Route("controller/{id:int}")]
         public string Get(int id)
         {
             return "Get" + id;
         }
 
-        [HttpGet("controller/{name}")]
+        [Route("controller/{name}")]
         public string GetByName(string name)
         {
             return "GetByName" + name;
         }
 
-        [HttpPut("controller/{id}")]
+        [Route("controller/{id}")]
         public string Put(string id)
         {
             return "Put" + id;
         }
 
-        [HttpGet("optional/{opt1?}/{opt2?}")]
+        [HttpGet]
+        [Route("optional/{opt1?}/{opt2?}")]
         public string Optional(int opt1, string opt2)
         {
             return "Optional" + opt1 + opt2;
         }
 
-        [HttpGet("optionalwconstraint/{opt:int?}")]
+        [HttpGet]
+        [Route("optionalwconstraint/{opt:int?}")]
         public string OptionalWithConstraint(string opt)
         {
             return "OptionalWithConstraint" + opt;
         }
 
-        [HttpGet("default/{default1=D1}/{default2=D2}")]
+        [HttpGet]
+        [Route("default/{default1=D1}/{default2=D2}")]
         public string Default(string default1, string default2)
         {
             return "Default" + default1 + default2;
         }
 
-        [HttpGet("wildcard/{*wildcard}")]
+        [HttpGet]
+        [Route("wildcard/{*wildcard}")]
         public string Wildcard(string wildcard)
         {
             return "Wildcard" + wildcard;
         }
+
+        [HttpGet]
+        [HttpPut]
+        [Route("multiverb")]
+        public string MultiVerbs()
+        {
+            return Request.Method.ToString();
+        }
+
+        [HttpDelete] // Pick a unique verb 
+        [Route("multi1")]
+        [Route("multi2")]
+        public string MultiRoute()
+        {
+            return "multi";
+        }
+
     }
 
     [RoutePrefix("prefix")]
     public class PrefixedController : ApiController
     {
-        [HttpGet("")]
+        [Route("")]
         public string Get()
         {
             return "PrefixedGet";
         }
 
-        [HttpGet("{id}")]
+        [Route] // same behavior as Route("")
+        public string Put()
+        {
+            return "PrefixedPut";
+        }
+
+        [HttpGet]
+        [Route("{id}")]
         public string GetById(int id)
         {
             return "PrefixedGetById" + id;

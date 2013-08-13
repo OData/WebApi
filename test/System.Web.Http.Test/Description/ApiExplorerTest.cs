@@ -108,7 +108,8 @@ namespace System.Web.Http.Description
 
         public class AttributeApiExplorerValuesController : ApiController
         {
-            [HttpGet("")]
+            [Route("")]
+            [HttpGet]
             public void Action() { }
         }
     }

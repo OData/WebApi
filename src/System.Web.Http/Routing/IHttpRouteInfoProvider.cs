@@ -22,11 +22,6 @@ namespace System.Web.Http.Routing
         string RouteTemplate { get; }
 
         /// <summary>
-        /// Gets the HTTP methods that are supported by the route, or <c>null</c> if the route is not constrained by HTTP methods.
-        /// </summary>
-        IEnumerable<HttpMethod> HttpMethods { get; }
-
-        /// <summary>
         /// Gets the order of the route relative to other routes.
         /// </summary>
         int RouteOrder { get; }

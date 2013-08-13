@@ -154,6 +154,6 @@
     </ItemGroup>
     <MakeDir Directories="$(OutputPath)\NuGet" />
     <ConvertToNuGetTransformationFiles SourceFiles="@(SourceFiles)" OutputPath="$(OutputPath)VB\" OriginalNamespaceToken="ROOT_PROJECT_NAMESPACE" ReplacementNamespaceToken="$rootnamespace$" />
-    <Exec Command="&quot;$(SolutionDir)\.nuget\nuget.exe&quot; pack &quot;$(ProjectDir)WebApiHelpPage.VB.nuspec&quot; -BasePath &quot;$(OutputPath)VB&quot; -OutputDirectory &quot;$(OutputPath)\NuGet&quot;" />
+    <Exec Command="&quot;$(SolutionDir)\.nuget\nuget.exe&quot; pack &quot;$(ProjectDir)WebApiHelpPage.VB.nuspec&quot; -BasePath &quot;$(OutputPath)VB&quot; -OutputDirectory &quot;$(OutputPath)NuGet&quot;" />
   </Target>
 </Project>

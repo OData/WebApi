@@ -124,6 +124,6 @@
     </ItemGroup>
     <MakeDir Directories="$(OutputPath)\NuGet" />
     <ConvertToNuGetTransformationFiles SourceFiles="@(SourceFiles)" OutputPath="$(OutputPath)" OriginalNamespaceToken="ROOT_PROJECT_NAMESPACE" ReplacementNamespaceToken="$rootnamespace$" />
-    <Exec Command="$(SolutionDir)\.nuget\nuget.exe pack $(ProjectDir)WebApiHelpPage.nuspec -BasePath $(OutputPath) -OutputDirectory $(OutputPath)\NuGet" />
+    <Exec Command="&quot;$(SolutionDir)\.nuget\nuget.exe&quot; pack &quot;$(ProjectDir)WebApiHelpPage.nuspec&quot; -BasePath &quot;$(OutputPath)&quot; -OutputDirectory &quot;$(OutputPath)\NuGet&quot;" />
   </Target>
 </Project>

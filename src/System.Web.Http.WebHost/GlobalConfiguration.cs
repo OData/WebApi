@@ -54,5 +54,21 @@ namespace System.Web.Http
         {
             get { return _defaultServer.Value; }
         }
+
+        /// <summary>
+        /// Performs configuration for <see cref="GlobalConfiguration.Configuration"/> and ensures that it is
+        /// initialized.
+        /// </summary>
+        /// <param name="configurationCallback">The callback that will perform the configuration.</param>
+        public static void Configure(Action<HttpConfiguration> configurationCallback)
+        {
+            if (configurationCallback == null)
+            {
+                throw new ArgumentNullException("configurationCallback");
+            }
+
+            configurationCallback.Invoke(Configuration);
+            Configuration.EnsureInitialized();
+        }
     }
 }

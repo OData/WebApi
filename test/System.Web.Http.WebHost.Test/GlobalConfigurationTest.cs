@@ -77,5 +77,59 @@ namespace System.Web.Http
             Assert.NotNull(server);
             Assert.Same(GlobalConfiguration.DefaultHandler, server.Dispatcher);
         }
+
+        [Fact]
+        public void Configure_Throws_WhenConfigurationCallbackIsNull()
+        {
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => { GlobalConfiguration.Configure(null); }, "configurationCallback");
+        }
+
+        [Fact]
+        public void Configure_CallsCallbackOnceWithGlobalConfiguration()
+        {
+            // Arrange
+            int calls = 0;
+            HttpConfiguration configuration = null;
+            Action<HttpConfiguration> callback = (c) =>
+            {
+                calls++;
+                configuration = c;
+            };
+
+            // Act
+            GlobalConfiguration.Configure(callback);
+
+            // Assert
+            Assert.Equal(1, calls);
+            Assert.Same(GlobalConfiguration.Configuration, configuration);
+        }
+
+        [Fact]
+        public void Configure_CallsConfigurationEnsureInitialized()
+        {
+            // Arrange
+            Action<HttpConfiguration> oldInitializer = GlobalConfiguration.Configuration.Initializer;
+
+            try
+            {
+                bool initialized = false;
+                GlobalConfiguration.Configuration.Initializer = (c) =>
+                {
+                    initialized = true;
+                };
+                Action<HttpConfiguration> callback = (ignore) => { };
+
+                // Act
+                GlobalConfiguration.Configure(callback);
+
+                // Assert
+                Assert.True(initialized);
+            }
+            finally
+            {
+                GlobalConfiguration.Configuration.Initializer = oldInitializer;
+            }
+        }
     }
 }

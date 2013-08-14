@@ -35,7 +35,11 @@ namespace System.Web.Http.Routing
         [InlineData("DELETE", "multi2", "multi")]        
         // Test multiple verbs on the same route
         [InlineData("GET", "multiverb", "GET")]
-        [InlineData("PUT", "multiverb", "PUT")]                    
+        [InlineData("PUT", "multiverb", "PUT")]     
+        // Test with default route
+        [InlineData("GET", "prefix2/defaultroute/12", "get12")]
+        [InlineData("PUT", "prefix2/defaultrouteoverride/12", "put12")]     
+        [InlineData("POST", "prefix2", "post")]             
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -47,18 +51,22 @@ namespace System.Web.Http.Routing
         }
 
         [Theory]
-        [InlineData("controller/42")]
-        [InlineData("default/1/2")]
-        [InlineData("controller/Ethan")]
-        public void AttributeRouting_405(string uri)
+        // default routes 
+        [InlineData("GET", "prefix2/defaultroute/name", HttpStatusCode.NotFound)] // miss route constraint
+        [InlineData("PUT", "prefix2/defaultroute/12", HttpStatusCode.MethodNotAllowed)] // override, different url
+        [InlineData("POST", "prefix", HttpStatusCode.MethodNotAllowed)]
+        // wrong verb, 405
+        [InlineData("MISSING", "controller/42", HttpStatusCode.MethodNotAllowed)] 
+        [InlineData("MISSING", "default/1/2", HttpStatusCode.MethodNotAllowed)] 
+        [InlineData("MISSING", "controller/Ethan", HttpStatusCode.MethodNotAllowed)]
+        public void AttributeRouting_Failures(string httpMethod, string uri, HttpStatusCode failureCode)
         {
-            // pick valid URLS, but a invalid verb, should get 405 instead of 400.
-            string httpMethod = "MISSING"; 
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
 
             var response = SubmitRequest(request);
 
-            Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);            
+            Assert.False(response.IsSuccessStatusCode);
+            Assert.Equal(failureCode, response.StatusCode);      
         }
 
         [Fact]
@@ -162,6 +170,11 @@ namespace System.Web.Http.Routing
     [RoutePrefix("prefix")]
     public class PrefixedController : ApiController
     {
+        // Should not be reachable be our routes since there's no route attribute. 
+        public void Post()
+        {
+        }
+
         [Route("")]
         public string Get()
         {
@@ -179,6 +192,29 @@ namespace System.Web.Http.Routing
         public string GetById(int id)
         {
             return "PrefixedGetById" + id;
+        }
+    }
+
+    [RoutePrefix("prefix2")]
+    [DefaultRoute("defaultroute/{id:int}")]
+    public class DefaultRouteController : ApiController
+    {
+        // This gets default route
+        public string Get(int id)
+        {
+            return "get" + id;
+        }
+
+        [Route] 
+        public string Post()
+        {
+            return "post";
+        }
+
+        [Route("defaultrouteoverride/{id}")]
+        public string Put(int id)
+        {
+            return "put" + id;
         }
     }
 }

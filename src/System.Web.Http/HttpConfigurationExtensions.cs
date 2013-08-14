@@ -211,14 +211,25 @@ namespace System.Web.Http
 
             List<HttpRouteEntry> routes = new List<HttpRouteEntry>();
             string routePrefix = GetRoutePrefix(controllerDescriptor);
-
+            Collection<IHttpRouteInfoProvider> defaultRouteProviders = GetDefaultRouteTemplate(controllerDescriptor);
+                        
             foreach (IGrouping<string, HttpActionDescriptor> actionGrouping in actionMap)
             {
                 string actionName = actionGrouping.Key;
 
                 foreach (ReflectedHttpActionDescriptor actionDescriptor in actionGrouping.OfType<ReflectedHttpActionDescriptor>())
                 {
-                    foreach (IHttpRouteInfoProvider routeProvider in actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false))
+                    Collection<IHttpRouteInfoProvider> routeProviders = actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
+                    if (routeProviders.Count == 0)
+                    {
+                        // IF there are no routes on the specific action, then use the one provided via the DefaultRouteAttribute.
+                        if (defaultRouteProviders != null)
+                        {
+                            routeProviders = defaultRouteProviders;
+                        }
+                    }
+
+                    foreach (IHttpRouteInfoProvider routeProvider in routeProviders)
                     {
                         string providerTemplate = routeProvider.RouteTemplate;
                         if (providerTemplate == null)
@@ -282,6 +293,25 @@ namespace System.Web.Http
             }
 
             return routes;
+        }
+
+        // Return null if no DefaultRouteAttribute on the controller.        
+        private static Collection<IHttpRouteInfoProvider> GetDefaultRouteTemplate(HttpControllerDescriptor controllerDescriptor)
+        {
+            Collection<DefaultRouteAttribute> defaultRouteAttributes = controllerDescriptor.GetCustomAttributes<DefaultRouteAttribute>(inherit: false);
+            if ((defaultRouteAttributes == null) || (defaultRouteAttributes.Count == 0))
+            {
+                return null;
+            }
+
+            // Morph a DefaultRouteAttribute into a IHttpRouteInfoProvider
+            // Let the other properties have their default values. If the user cared about them, 
+            // they'd set the [Route] attribute on the action directly and specify them.
+            string routeTemplate = defaultRouteAttributes[0].RouteTemplate;
+            return new Collection<IHttpRouteInfoProvider> 
+            {
+                new RouteAttribute(routeTemplate) 
+            };
         }
 
         private static string GetRoutePrefix(HttpControllerDescriptor controllerDescriptor)

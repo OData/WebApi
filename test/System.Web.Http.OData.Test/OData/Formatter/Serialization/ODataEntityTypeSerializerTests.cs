@@ -85,19 +85,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteObject_Calls_WriteObjectInline()
+        public void WriteObject_Calls_WriteObjectInline_WithRightEntityType()
         {
             // Arrange
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(new DefaultODataSerializerProvider());
             serializer
-                .Setup(s => s.WriteObjectInline(_customer, It.Is<IEdmTypeReference>(e => _customerType.IsEquivalentTo(e)),
+                .Setup(s => s.WriteObjectInline(_customer, It.Is<IEdmTypeReference>(e => _customerType.Definition == e.Definition),
                     It.IsAny<ODataWriter>(), _writeContext))
                 .Verifiable();
             serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(new SelectExpandNode());
             serializer.CallBase = true;
 
             // Act
-            serializer.Object.WriteObject(_customer, typeof(Customer), ODataTestUtil.GetMockODataMessageWriter(), _writeContext);
+            serializer.Object.WriteObject(_customer, typeof(int), ODataTestUtil.GetMockODataMessageWriter(), _writeContext);
 
             // Assert
             serializer.Verify();

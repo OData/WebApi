@@ -46,11 +46,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
             }
 
-            IEdmEntityTypeReference entityType = GetEntityType(graph, type, writeContext);
-            Contract.Assert(entityType != null);
-
-            ODataWriter writer = messageWriter.CreateODataEntryWriter(entitySet, entityType.EntityDefinition());
-            WriteObjectInline(graph, entityType, writer, writeContext);
+            ODataWriter writer = messageWriter.CreateODataEntryWriter(entitySet, entitySet.ElementType);
+            WriteObjectInline(graph, entitySet.ElementType.ToEdmTypeReference(isNullable: false), writer, writeContext);
         }
 
         /// <inheritdoc />
@@ -81,7 +78,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             Contract.Assert(writeContext != null);
 
-            IEdmEntityTypeReference entityType = GetEntityType(graph, graph.GetType(), writeContext);
+            IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
             EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph);
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityInstanceContext);
             if (selectExpandNode != null)
@@ -558,9 +555,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             return elementType.FullName();
         }
 
-        private IEdmEntityTypeReference GetEntityType(object graph, Type type, ODataSerializerContext writeContext)
+        private IEdmEntityTypeReference GetEntityType(object graph, ODataSerializerContext writeContext)
         {
-            IEdmTypeReference edmType = writeContext.GetEdmType(graph, type);
+            Contract.Assert(graph != null);
+
+            IEdmTypeReference edmType = writeContext.GetEdmType(graph, graph.GetType());
             Contract.Assert(edmType != null);
 
             if (!edmType.IsEntity())

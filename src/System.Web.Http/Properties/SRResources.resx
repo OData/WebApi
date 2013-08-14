@@ -466,6 +466,6 @@
     <value>The property 'Request' on '{0}' is null. The property must be initialized with a non-null value.</value>
   </data>
   <data name="Object_NotYetInitialized" xml:space="preserve">
-    <value>The object has not yet been initialized.</value>
+    <value>The object has not yet been initialized. Ensure that HttpConfiguration.EnsureInitialized() is called in the application's startup code after all other initialization code.</value>
   </data>
 </root>

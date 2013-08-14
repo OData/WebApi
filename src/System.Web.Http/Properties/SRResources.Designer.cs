@@ -565,7 +565,7 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The object has not yet been initialized..
+        ///   Looks up a localized string similar to The object has not yet been initialized. Ensure that HttpConfiguration.EnsureInitialized() is called in the application&apos;s startup code after all other initialization code..
         /// </summary>
         internal static string Object_NotYetInitialized {
             get {

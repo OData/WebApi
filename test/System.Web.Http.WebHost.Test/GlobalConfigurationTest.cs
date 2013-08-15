@@ -81,37 +81,42 @@ namespace System.Web.Http
         [Fact]
         public void Configure_Throws_WhenConfigurationCallbackIsNull()
         {
-            // Act & Assert
-            Assert.ThrowsArgumentNull(() => { GlobalConfiguration.Configure(null); }, "configurationCallback");
+            // Arrange
+            using (new GlobalConfigurationContext())
+            {
+                // Act & Assert
+                Assert.ThrowsArgumentNull(() => { GlobalConfiguration.Configure(null); }, "configurationCallback");
+            }
         }
 
         [Fact]
         public void Configure_CallsCallbackOnceWithGlobalConfiguration()
         {
             // Arrange
-            int calls = 0;
-            HttpConfiguration configuration = null;
-            Action<HttpConfiguration> callback = (c) =>
+            using (new GlobalConfigurationContext())
             {
-                calls++;
-                configuration = c;
-            };
+                int calls = 0;
+                HttpConfiguration configuration = null;
+                Action<HttpConfiguration> callback = (c) =>
+                {
+                    calls++;
+                    configuration = c;
+                };
 
-            // Act
-            GlobalConfiguration.Configure(callback);
+                // Act
+                GlobalConfiguration.Configure(callback);
 
-            // Assert
-            Assert.Equal(1, calls);
-            Assert.Same(GlobalConfiguration.Configuration, configuration);
+                // Assert
+                Assert.Equal(1, calls);
+                Assert.Same(GlobalConfiguration.Configuration, configuration);
+            }
         }
 
         [Fact]
         public void Configure_CallsConfigurationEnsureInitialized()
         {
             // Arrange
-            Action<HttpConfiguration> oldInitializer = GlobalConfiguration.Configuration.Initializer;
-
-            try
+            using (new GlobalConfigurationContext())
             {
                 bool initialized = false;
                 GlobalConfiguration.Configuration.Initializer = (c) =>
@@ -126,9 +131,19 @@ namespace System.Web.Http
                 // Assert
                 Assert.True(initialized);
             }
-            finally
+        }
+
+        private sealed class GlobalConfigurationContext : IDisposable
+        {
+            bool disposed;
+
+            public void Dispose()
             {
-                GlobalConfiguration.Configuration.Initializer = oldInitializer;
+                if (!disposed)
+                {
+                    GlobalConfiguration.Reset();
+                    disposed = true;
+                }
             }
         }
     }

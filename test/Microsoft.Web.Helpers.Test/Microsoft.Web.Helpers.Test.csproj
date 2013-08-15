@@ -40,7 +40,6 @@
     <Compile Include="MapsTest.cs" />
     <Compile Include="PreAppStartCodeTest.cs" />
     <Compile Include="ThemesTest.cs" />
-    <Compile Include="TwitterTest.cs" />
     <Compile Include="VideoTest.cs" />
     <Compile Include="ReCaptchaTest.cs" />
     <Compile Include="UrlBuilderTest.cs" />

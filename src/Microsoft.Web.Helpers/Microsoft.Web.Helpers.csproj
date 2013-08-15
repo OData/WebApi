@@ -90,11 +90,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ThemesImplementation.cs" />
-    <Compile Include="Twitter.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Twitter.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Video.cs" />
     <Compile Include="VirtualPathUtilityBase.cs" />
     <Compile Include="VirtualPathUtilityWrapper.cs" />
@@ -171,11 +166,6 @@
       <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ReCaptcha.generated.cs</LastGenOutput>
-    </None>
-    <None Include="Twitter.cshtml">
-      <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Twitter.generated.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

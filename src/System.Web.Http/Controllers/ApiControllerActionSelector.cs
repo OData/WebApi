@@ -89,11 +89,19 @@ namespace System.Web.Http.Controllers
         {
             private readonly HttpControllerDescriptor _controllerDescriptor;
 
-            private readonly ReflectedHttpActionDescriptor[] _actionDescriptors;
+            // Includes action descriptors for actions with and without route attributes.
+            private readonly ReflectedHttpActionDescriptor[] _combinedActionDescriptors;
+
+            // Includes action descriptors only for actions accessible via standard routing (without route attributes).
+            private readonly ReflectedHttpActionDescriptor[] _standardActionDescriptors;
 
             private readonly IDictionary<ReflectedHttpActionDescriptor, string[]> _actionParameterNames = new Dictionary<ReflectedHttpActionDescriptor, string[]>();
 
-            private readonly ILookup<string, ReflectedHttpActionDescriptor> _actionNameMapping;
+            // Includes action descriptors for actions with and without route attributes.
+            private readonly ILookup<string, ReflectedHttpActionDescriptor> _combinedActionNameMapping;
+
+            // Includes action descriptors only for actions accessible via standard routing (without route attributes).
+            private readonly ILookup<string, ReflectedHttpActionDescriptor> _standardActionNameMapping;
 
             // Selection commonly looks up an action by verb.
             // Cache this mapping. These caches are completely optional and we still behave correctly if we cache miss.
@@ -116,12 +124,12 @@ namespace System.Web.Http.Controllers
                 MethodInfo[] allMethods = _controllerDescriptor.ControllerType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
                 MethodInfo[] validMethods = Array.FindAll(allMethods, IsValidActionMethod);
 
-                _actionDescriptors = new ReflectedHttpActionDescriptor[validMethods.Length];
+                _combinedActionDescriptors = new ReflectedHttpActionDescriptor[validMethods.Length];
                 for (int i = 0; i < validMethods.Length; i++)
                 {
                     MethodInfo method = validMethods[i];
                     ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(_controllerDescriptor, method);
-                    _actionDescriptors[i] = actionDescriptor;
+                    _combinedActionDescriptors[i] = actionDescriptor;
                     HttpActionBinding actionBinding = actionDescriptor.ActionBinding;
 
                     // Building an action parameter name mapping to compare against the URI parameters coming from the request. Here we only take into account required parameters that are simple types and come from URI.
@@ -132,7 +140,32 @@ namespace System.Web.Http.Controllers
                             .Select(binding => binding.Descriptor.Prefix ?? binding.Descriptor.ParameterName).ToArray());
                 }
 
-                _actionNameMapping = _actionDescriptors.ToLookup(actionDesc => actionDesc.ActionName, StringComparer.OrdinalIgnoreCase);
+                if (controllerDescriptor.GetCustomAttributes<DefaultRouteAttribute>(inherit: false).Any())
+                {
+                    // The controller has an attribute route; no actions are accessible via standard routing.
+                    _standardActionDescriptors = new ReflectedHttpActionDescriptor[0];
+                }
+                else
+                {
+                    // The controller does not have an attribute route; some actions may be accessible via standard
+                    // routing.
+                    List<ReflectedHttpActionDescriptor> standardActionDescriptors =
+                        new List<ReflectedHttpActionDescriptor>();
+
+                    for (int i = 0; i < _combinedActionDescriptors.Length; i++)
+                    {
+                        ReflectedHttpActionDescriptor actionDescriptor = _combinedActionDescriptors[i];
+                        if (!actionDescriptor.GetCustomAttributes<RouteAttribute>(inherit: true).Any())
+                        {
+                            standardActionDescriptors.Add(actionDescriptor);
+                        }
+                    }
+
+                    _standardActionDescriptors = standardActionDescriptors.ToArray();
+                }
+
+                _combinedActionNameMapping = _combinedActionDescriptors.ToLookup(actionDesc => actionDesc.ActionName, StringComparer.OrdinalIgnoreCase);
+                _standardActionNameMapping = _standardActionDescriptors.ToLookup(actionDesc => actionDesc.ActionName, StringComparer.OrdinalIgnoreCase);
 
                 // Bucket the action descriptors by common verbs.
                 int len = _cacheListVerbKinds.Length;
@@ -147,7 +180,7 @@ namespace System.Web.Http.Controllers
             {
                 get { return _controllerDescriptor; }
             }
-                        
+
             public HttpActionDescriptor SelectAction(HttpControllerContext controllerContext)
             {
                 // Performance-sensitive
@@ -174,12 +207,12 @@ namespace System.Web.Http.Controllers
                 }
             }
 
-            // Selection error. Caller has already determined the request is an error, and now we need to provide the best error message. 
-            // If there's another verb that could satisfy this URL, then return 405. 
-            // Else return 404.  
+            // Selection error. Caller has already determined the request is an error, and now we need to provide the best error message.
+            // If there's another verb that could satisfy this URL, then return 405.
+            // Else return 404.
             [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
             private HttpResponseMessage CreateSelectionError(HttpControllerContext controllerContext)
-            {                
+            {
                 // Check for 405.  
                 ReflectedHttpActionDescriptor[] candidateActions = GetInitialCandidateList(controllerContext, ignoreVerbs: true);
                 List<ReflectedHttpActionDescriptor> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidateActions);
@@ -204,19 +237,19 @@ namespace System.Web.Http.Controllers
                 HttpResponseMessage response = controllerContext.Request.CreateErrorResponse(
                     HttpStatusCode.MethodNotAllowed,
                     Error.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, incomingMethod));
-                
+
                 // 405 must include an Allow content-header with the allowable methods.
                 // See: https://tools.ietf.org/html/rfc2616#section-14.7
                 HashSet<HttpMethod> methods = new HashSet<HttpMethod>();
                 foreach (var action in allowedActions)
                 {
                     methods.UnionWith(action.SupportedHttpMethods);
-                }                
+                }
                 foreach (var method in methods)
                 {
                     response.Content.Headers.Allow.Add(method.ToString());
                 }
-                
+
                 return response;
             }
 
@@ -230,11 +263,12 @@ namespace System.Web.Http.Controllers
                 ReflectedHttpActionDescriptor[] actions;
                 if (route != null)
                 {
+                    // Attribute routing gives the action selector an explicit initial candidate list.
                     actions = routeData.GetDirectRouteActions();
                     if (actions != null)
                     {
                         if (!ignoreVerbs)
-                        {                            
+                        {
                             actions = FindActionsForVerbWorker(incomingMethod, actions);
                         }
 
@@ -246,7 +280,7 @@ namespace System.Web.Http.Controllers
                 if (routeData.Values.TryGetValue(RouteKeys.ActionKey, out actionName))
                 {
                     // We have an explicit {action} value, do traditional binding. Just lookup by actionName
-                    ReflectedHttpActionDescriptor[] actionsFoundByName = _actionNameMapping[actionName].ToArray();
+                    ReflectedHttpActionDescriptor[] actionsFoundByName = _standardActionNameMapping[actionName].ToArray();
 
                     // Throws HttpResponseException with NotFound status because no action matches the Name
                     if (actionsFoundByName.Length == 0)
@@ -261,7 +295,7 @@ namespace System.Web.Http.Controllers
                     {
                         actions = actionsFoundByName;
                     }
-                    else 
+                    else
                     {
                         actions = FilterIncompatibleVerbs(incomingMethod, actionsFoundByName);
                     }
@@ -270,7 +304,7 @@ namespace System.Web.Http.Controllers
                 {
                     if (ignoreVerbs)
                     {
-                        actions = _actionDescriptors;
+                        actions = _standardActionDescriptors;
                     }
                     else
                     {
@@ -289,7 +323,7 @@ namespace System.Web.Http.Controllers
 
             public ILookup<string, HttpActionDescriptor> GetActionMapping()
             {
-                return new LookupAdapter() { Source = _actionNameMapping };
+                return new LookupAdapter() { Source = _combinedActionNameMapping };
             }
 
             private List<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, ReflectedHttpActionDescriptor[] actionsFound)
@@ -434,10 +468,10 @@ namespace System.Web.Http.Controllers
             }
 
             // This is called when we don't specify an Action name
-            // Given all the actions on the controller, filter it to ones that match a given verb.
+            // Given all the standard actions on the controller, filter it to ones that match a given verb.
             private ReflectedHttpActionDescriptor[] FindActionsForVerbWorker(HttpMethod verb)
             {
-                return FindActionsForVerbWorker(verb, _actionDescriptors);
+                return FindActionsForVerbWorker(verb, _standardActionDescriptors);
             }
 
             // Given a list of actions, filter it to ones that match a given verb. This can match by name or IActionHttpMethodSelector.
@@ -456,7 +490,7 @@ namespace System.Web.Http.Controllers
                 }
 
                 return listMethods.ToArray();
-            }            
+            }
 
             private static string CreateAmbiguousMatchList(IEnumerable<HttpActionDescriptor> ambiguousDescriptors)
             {

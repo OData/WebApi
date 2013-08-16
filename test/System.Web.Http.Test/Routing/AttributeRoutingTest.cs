@@ -59,6 +59,9 @@ namespace System.Web.Http.Routing
         [InlineData("MISSING", "controller/42", HttpStatusCode.MethodNotAllowed)] 
         [InlineData("MISSING", "default/1/2", HttpStatusCode.MethodNotAllowed)] 
         [InlineData("MISSING", "controller/Ethan", HttpStatusCode.MethodNotAllowed)]
+        // accessing attribute routed method via standard route
+        [InlineData("GET", "api/Attributed?id=42", HttpStatusCode.NotFound)]
+        [InlineData("GET", "api/DefaultRoute?id=42", HttpStatusCode.NotFound)]
         public void AttributeRouting_Failures(string httpMethod, string uri, HttpStatusCode failureCode)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -84,6 +87,7 @@ namespace System.Web.Http.Routing
         private static HttpResponseMessage SubmitRequest(HttpRequestMessage request)
         {
             HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("DefaultApi", "api/{controller}");
             config.MapHttpAttributeRoutes();
 
             HttpServer server = new HttpServer(config);

@@ -267,7 +267,7 @@ namespace System.Net.Http.Formatting
 
             // Arrange
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
-            
+
             string formattedContent = "<string xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/\">" + content + "</string>";
 #if NETFX_CORE
             // We need to supply the xml declaration when compiled in portable library for non utf-8 content
@@ -386,6 +386,57 @@ namespace System.Net.Http.Formatting
             Assert.Throws<InvalidOperationException>(
                 () => formatter.Object.WriteToStreamAsync(type, value, new MemoryStream(), content: null, transportContext: null).Wait(),
                 "The object of type 'JsonSerializer' returned by GetSerializer must be an instance of either XmlObjectSerializer or XmlSerializer.");
+        }
+
+        [Fact]
+        public void CreateXmlWriter_Uses_WriterSettings()
+        {
+            // Arrange
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            formatter.WriterSettings.ConformanceLevel = ConformanceLevel.Fragment;
+            Stream stream = new MemoryStream();
+            HttpContent content = new StreamContent(stream);
+
+            // Act
+            XmlWriter writer = formatter.CreateXmlWriter(stream, content);
+
+            // Assert
+            Assert.Equal(writer.Settings.ConformanceLevel, formatter.WriterSettings.ConformanceLevel);
+        }
+
+        [Fact]
+        public void Property_WriterSettings_DefaultValues()
+        {
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+
+            Assert.NotNull(formatter.WriterSettings);
+            Assert.False(formatter.WriterSettings.Indent);
+            Assert.False(formatter.WriterSettings.CloseOutput);
+            Assert.True(formatter.WriterSettings.OmitXmlDeclaration);
+            Assert.False(formatter.WriterSettings.CheckCharacters);
+        }
+
+        [Fact]
+        public void InvalidXmlCharacters_CanBeSerialized_Default()
+        {
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            Stream stream = new MemoryStream();
+            HttpContent content = new StreamContent(stream);
+
+            formatter.WriteToStreamAsync(typeof(string), "\x16", stream, content, null).Wait();
+        }
+
+        [Fact]
+        public void InvalidXmlCharacters_CannotBeSerialized_IfCheckCharactersIsTrue()
+        {
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            formatter.WriterSettings.CheckCharacters = true;
+            Stream stream = new MemoryStream();
+            HttpContent content = new StreamContent(stream);
+
+            Assert.Throws<ArgumentException>(
+                () => formatter.WriteToStreamAsync(typeof(string), "\x16", stream, content, null).Wait(),
+                "'\x16', hexadecimal value 0x16, is an invalid character.");
         }
 
 #if !NETFX_CORE // Different behavior in portable libraries due to no DataContract validation

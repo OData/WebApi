@@ -169,6 +169,7 @@ namespace System.Web.Http.Tracing
                             "get_RequiredMemberSelector", "set_RequiredMemberSelector",
                             "get_UseXmlSerializer", "set_UseXmlSerializer",
                             "get_Indent", "set_Indent",
+                            "get_WriterSettings",
                             "get_MaxDepth", "set_MaxDepth",
                             // Cannot override, base handles correctly
                             "SelectCharacterEncoding",

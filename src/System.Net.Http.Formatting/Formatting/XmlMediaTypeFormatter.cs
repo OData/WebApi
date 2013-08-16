@@ -38,6 +38,12 @@ namespace System.Net.Http.Formatting
             // Set default supported character encodings
             SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
             SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true));
+            WriterSettings = new XmlWriterSettings
+            {
+                OmitXmlDeclaration = true,
+                CloseOutput = false,
+                CheckCharacters = false
+            };
         }
 
         /// <summary>
@@ -48,7 +54,7 @@ namespace System.Net.Http.Formatting
             : base(formatter)
         {
             UseXmlSerializer = formatter.UseXmlSerializer;
-            Indent = formatter.Indent;
+            WriterSettings = formatter.WriterSettings;
 #if !NETFX_CORE // MaxDepth is not supported in portable libraries
             MaxDepth = formatter.MaxDepth;
 #endif
@@ -83,7 +89,22 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Gets or sets a value indicating whether to indent elements when writing data. 
         /// </summary>
-        public bool Indent { get; set; }
+        public bool Indent
+        {
+            get
+            {
+                return WriterSettings.Indent;
+            }
+            set
+            {
+                WriterSettings.Indent = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="XmlWriterSettings"/> to be used while writing.
+        /// </summary>
+        public XmlWriterSettings WriterSettings { get; private set; }
 
 #if !NETFX_CORE // MaxDepth is not supported in portable libraries
         /// <summary>
@@ -420,14 +441,8 @@ namespace System.Net.Http.Formatting
         protected internal virtual XmlWriter CreateXmlWriter(Stream writeStream, HttpContent content)
         {
             Encoding effectiveEncoding = SelectCharacterEncoding(content != null ? content.Headers : null);
-            XmlWriterSettings writerSettings = new XmlWriterSettings
-            {
-                OmitXmlDeclaration = true,
-                Indent = Indent,
-                Encoding = effectiveEncoding,
-                CloseOutput = false
-            };
-
+            XmlWriterSettings writerSettings = WriterSettings.Clone();
+            writerSettings.Encoding = effectiveEncoding;
             return XmlWriter.Create(writeStream, writerSettings);
         }
 

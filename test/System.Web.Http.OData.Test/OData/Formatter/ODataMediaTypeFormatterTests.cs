@@ -11,7 +11,6 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
@@ -381,6 +380,24 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
+        public void MessageReaderSettings_Property()
+        {
+            var formatter = CreateFormatter();
+
+            Assert.NotNull(formatter.MessageReaderSettings);
+            Assert.True(formatter.MessageReaderSettings.DisableMessageStreamDisposal);
+        }
+
+        [Fact]
+        public void MessageWriterSettings_Property()
+        {
+            var formatter = CreateFormatter();
+
+            Assert.NotNull(formatter.MessageWriterSettings);
+            Assert.True(formatter.MessageWriterSettings.DisableMessageStreamDisposal);
+        }
+
+        [Fact]
         public void MessageReaderQuotas_Property_RoundTrip()
         {
             var formatter = CreateFormatter();
@@ -409,7 +426,7 @@ namespace System.Web.Http.OData.Formatter
         public void MessageReaderQuotas_Is_Passed_To_ODataLib()
         {
             ODataMediaTypeFormatter formatter = CreateFormatter();
-            formatter.MessageReaderQuotas.MaxReceivedMessageSize = 1;
+            formatter.MessageReaderSettings.MessageQuotas.MaxReceivedMessageSize = 1;
 
             HttpContent content = new StringContent("{ 'Number' : '42' }");
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
@@ -417,6 +434,33 @@ namespace System.Web.Http.OData.Formatter
             Assert.Throws<ODataException>(
                 () => formatter.ReadFromStreamAsync(typeof(int), content.ReadAsStreamAsync().Result, content, formatterLogger: null).Result,
                 "The maximum number of bytes allowed to be read from the stream has been exceeded. After the last read operation, a total of 19 bytes has been read from the stream; however a maximum of 1 bytes is allowed.");
+        }
+
+        [Fact]
+        public void InvalidXmlCharacters_CanBeWrittenByDefault_InAtom()
+        {
+            ODataMediaTypeFormatter formatter = CreateFormatter();
+            Stream stream = new MemoryStream();
+            HttpContent content = new StreamContent(stream);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/xml");
+
+            Assert.DoesNotThrow(
+                () => formatter.WriteToStreamAsync(typeof(string), "Hello\x16", stream, content, null));
+        }
+
+        [Fact]
+        public void InvalidXmlCharacters_RaiseExceptionsIfCheckCharactersIsTrue_InAtom()
+        {
+            ODataMediaTypeFormatter formatter = CreateFormatter();
+            formatter.MessageWriterSettings.CheckCharacters = true;
+            Stream stream = new MemoryStream();
+            HttpContent content = new StreamContent(stream);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/xml");
+
+            //formatter.WriteToStreamAsync(typeof(string), "Hello\x16", stream, content, null).Wait();
+            Assert.Throws<ArgumentException>(
+                () => formatter.WriteToStreamAsync(typeof(string), "Hello\x16", stream, content, null).Wait(),
+                 "'\x16', hexadecimal value 0x16, is an invalid character.");
         }
 
         [Fact]

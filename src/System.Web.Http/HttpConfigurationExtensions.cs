@@ -231,7 +231,7 @@ namespace System.Web.Http
 
                     foreach (IHttpRouteInfoProvider routeProvider in routeProviders)
                     {
-                        string providerTemplate = routeProvider.RouteTemplate;
+                        string providerTemplate = routeProvider.Template;
                         if (providerTemplate == null)
                         {
                             continue;
@@ -267,8 +267,8 @@ namespace System.Web.Http
                             };
 
                             entry.HttpMethods = verbs;
-                            entry.Name = routeProvider.RouteName;
-                            entry.Order = routeProvider.RouteOrder;
+                            entry.Name = routeProvider.Name;
+                            entry.Order = routeProvider.Order;
                             routes.Add(entry);
                         }
                         else
@@ -276,7 +276,7 @@ namespace System.Web.Http
                             existingEntry.Actions.Add(actionDescriptor);
 
                             // Take the minimum of the two orders as the order
-                            int order = routeProvider.RouteOrder;
+                            int order = routeProvider.Order;
                             if (order < existingEntry.Order)
                             {
                                 existingEntry.Order = order;
@@ -285,7 +285,7 @@ namespace System.Web.Http
                             // Use the provider route name if the route hasn't already been named
                             if (existingEntry.Name == null)
                             {
-                                existingEntry.Name = routeProvider.RouteName;
+                                existingEntry.Name = routeProvider.Name;
                             }
                         }
                     }

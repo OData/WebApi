@@ -14,13 +14,13 @@ namespace System.Web.Http
         {
             RouteAttribute attribute = new RouteAttribute();
 
-            Assert.Equal(String.Empty, attribute.RouteTemplate);
+            Assert.Equal(String.Empty, attribute.Template);
         }
         
         [Fact]
         public void Ctor_NotNull()
         {
-            Assert.ThrowsArgumentNull(() => new RouteAttribute(null), "routeTemplate");
+            Assert.ThrowsArgumentNull(() => new RouteAttribute(null), "template");
         }
     }
 }

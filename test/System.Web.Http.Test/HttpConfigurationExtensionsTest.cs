@@ -219,9 +219,9 @@ namespace System.Net.Http
             var routePrefixes = new Collection<RoutePrefixAttribute>() { };
             var routeProviders = new Collection<IHttpRouteInfoProvider>()
                 {
-                    new RouteAttribute("get1") { RouteOrder = 1 },
+                    new RouteAttribute("get1") { Order = 1 },
                     new RouteAttribute("get2"),
-                    new RouteAttribute("get3") { RouteOrder = -1 }
+                    new RouteAttribute("get3") { Order = -1 }
                 };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
@@ -244,9 +244,9 @@ namespace System.Net.Http
             var routePrefixes = new Collection<RoutePrefixAttribute>() { };
             var routeProviders = new Collection<IHttpRouteInfoProvider>()
                 {
-                    new RouteAttribute("get1") { RouteName = "one" },
-                    new RouteAttribute("get2") { RouteName = "two" },
-                    new RouteAttribute("get3") { RouteName = "three" }
+                    new RouteAttribute("get1") { Name = "one" },
+                    new RouteAttribute("get2") { Name = "two" },
+                    new RouteAttribute("get3") { Name = "three" }
                 };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
@@ -276,11 +276,11 @@ namespace System.Net.Http
             HttpControllerDescriptor controllerDescriptor1 = CreateControllerDescriptor(config, "Controller1", new Collection<RoutePrefixAttribute>());
             HttpActionDescriptor actionDescriptor1 = CreateActionDescriptor(
                 "Action1",
-                new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("action1/route1") { RouteOrder = 3 }, new RouteAttribute("action1/route2") { RouteOrder = 1 } });
+                new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("action1/route1") { Order = 3 }, new RouteAttribute("action1/route2") { Order = 1 } });
             HttpControllerDescriptor controllerDescriptor2 = CreateControllerDescriptor(config, "Controller2", new Collection<RoutePrefixAttribute>());
             HttpActionDescriptor actionDescriptor2 = CreateActionDescriptor(
                 "Action2",
-                new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("action2/route1") { RouteOrder = 2 } });
+                new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("action2/route1") { Order = 2 } });
             
             var controllerSelector = CreateControllerSelector(new[] { controllerDescriptor1, controllerDescriptor2 });
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);

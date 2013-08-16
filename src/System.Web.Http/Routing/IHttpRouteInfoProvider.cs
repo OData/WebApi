@@ -14,16 +14,16 @@ namespace System.Web.Http.Routing
         /// <summary>
         /// Gets the name of the route to generate.
         /// </summary>
-        string RouteName { get; }
+        string Name { get; }
 
         /// <summary>
         /// Gets the route template describing the URI pattern to match against.
         /// </summary>
-        string RouteTemplate { get; }
+        string Template { get; }
 
         /// <summary>
         /// Gets the order of the route relative to other routes.
         /// </summary>
-        int RouteOrder { get; }
+        int Order { get; }
     }
 }

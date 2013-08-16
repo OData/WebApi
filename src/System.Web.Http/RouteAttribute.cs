@@ -20,29 +20,29 @@ namespace System.Web.Http
         /// </summary>
         public RouteAttribute()
         {
-            RouteTemplate = String.Empty;
+            Template = String.Empty;
         }
         
         /// <summary>
         /// Initializes a new instance of the <see cref="RouteAttribute" /> class.
         /// </summary>
-        /// <param name="routeTemplate">The route template describing the URI pattern to match against.</param>
-        public RouteAttribute(string routeTemplate)
+        /// <param name="template">The route template describing the URI pattern to match against.</param>
+        public RouteAttribute(string template)
         {
-            if (routeTemplate == null)
+            if (template == null)
             {
-                throw Error.ArgumentNull("routeTemplate");
+                throw Error.ArgumentNull("template");
             }
-            RouteTemplate = routeTemplate;
+            Template = template;
         }
 
         /// <inheritdoc />
-        public string RouteName { get; set; }
+        public string Name { get; set; }
 
         /// <inheritdoc />
-        public int RouteOrder { get; set; }
+        public int Order { get; set; }
 
         /// <inheritdoc />
-        public string RouteTemplate { get; private set; }
+        public string Template { get; private set; }
     }
 }

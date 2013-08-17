@@ -15,6 +15,8 @@ namespace System.Web.Http.Routing
         [InlineData("GET", "controller/Ethan", "GetByNameEthan")]
         // Tests the HTTP method constraint
         [InlineData("PUT", "controller/42", "Put42")]
+        // Tests route consolidation (or lack thereof)
+        [InlineData("PUT", "controller/42?name=foo", "Put42foo")]
         // Tests optional parameters
         [InlineData("GET", "optional/1/2", "Optional12")]
         [InlineData("GET", "optional/1", "Optional1")]
@@ -125,6 +127,12 @@ namespace System.Web.Http.Routing
             return "Put" + id;
         }
 
+        [Route("controller/{id}")]
+        public string Put(string id, string name)
+        {
+            return "Put" + id + name;
+        }
+
         [HttpGet]
         [Route("optional/{opt1?}/{opt2?}")]
         public string Optional(int opt1, string opt2)
@@ -200,7 +208,7 @@ namespace System.Web.Http.Routing
     }
 
     [RoutePrefix("prefix2")]
-    [DefaultRoute("defaultroute/{id:int}")]
+    [Route("defaultroute/{id:int}")]
     public class DefaultRouteController : ApiController
     {
         // This gets default route

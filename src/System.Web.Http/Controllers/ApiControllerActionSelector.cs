@@ -140,7 +140,7 @@ namespace System.Web.Http.Controllers
                             .Select(binding => binding.Descriptor.Prefix ?? binding.Descriptor.ParameterName).ToArray());
                 }
 
-                if (controllerDescriptor.GetCustomAttributes<DefaultRouteAttribute>(inherit: false).Any())
+                if (controllerDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: true).Any())
                 {
                     // The controller has an attribute route; no actions are accessible via standard routing.
                     _standardActionDescriptors = new ReflectedHttpActionDescriptor[0];
@@ -155,7 +155,7 @@ namespace System.Web.Http.Controllers
                     for (int i = 0; i < _combinedActionDescriptors.Length; i++)
                     {
                         ReflectedHttpActionDescriptor actionDescriptor = _combinedActionDescriptors[i];
-                        if (!actionDescriptor.GetCustomAttributes<RouteAttribute>(inherit: true).Any())
+                        if (!actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: true).Any())
                         {
                             standardActionDescriptors.Add(actionDescriptor);
                         }

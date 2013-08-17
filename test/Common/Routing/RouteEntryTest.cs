@@ -79,7 +79,7 @@ namespace System.Web.Mvc.Routing
         private static HttpRouteEntry CreateRouteEntry(string routeTemplate)
         {
             IHttpRoute route = new HttpRouteBuilder().BuildHttpRoute(routeTemplate, actions: null);
-            return new HttpRouteEntry() { Route = route, RouteTemplate = routeTemplate };
+            return new HttpRouteEntry() { Route = route, Template = routeTemplate };
         }
 #else
        private static RouteEntry CreateRouteEntry(string routeTemplate)
@@ -88,7 +88,7 @@ namespace System.Web.Mvc.Routing
            return new RouteEntry()
            {
                Route = route,
-               RouteTemplate = routeTemplate,
+               Template = routeTemplate,
                ParsedRoute = RouteParser.Parse(route.Url)
            };
        }

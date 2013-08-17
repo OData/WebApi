@@ -42,14 +42,13 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-        public IEnumerable<HttpMethod> HttpMethods { get; set; }
         public HashSet<ReflectedHttpActionDescriptor> Actions { get; set; }
 #else
         public Route Route { get; set; }
         public ParsedRoute ParsedRoute { get; set; }
 #endif
         public string Name { get; set; }
-        public string RouteTemplate { get; set; }
+        public string Template { get; set; }
         public int Order { get; set; }
 
 #if ASPNETWEBAPI
@@ -86,7 +85,7 @@ namespace System.Web.Mvc.Routing
             }
 
             // Compare the route templates alphabetically to ensure the sort is stable and deterministic in almost all cases
-            return String.Compare(RouteTemplate, other.RouteTemplate, StringComparison.OrdinalIgnoreCase);
+            return String.Compare(Template, other.Template, StringComparison.OrdinalIgnoreCase);
         }
 
         // Default ordering goes through segments one by one and tries to apply an ordering

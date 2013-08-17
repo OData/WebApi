@@ -85,7 +85,7 @@ namespace System.Web.Mvc.Routing
                     {
                         Name = routeAttribute.RouteName,
                         Route = route,
-                        RouteTemplate = template,
+                        Template = template,
                         ParsedRoute = RouteParser.Parse(route.Url),
                         Order = routeAttribute.RouteOrder                        
                     };

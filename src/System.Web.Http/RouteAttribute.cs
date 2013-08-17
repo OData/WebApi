@@ -12,7 +12,7 @@ namespace System.Web.Http
     /// <summary>
     /// Place on an action to expose it directly via a route. 
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public sealed class RouteAttribute : Attribute, IHttpRouteInfoProvider
     {
         /// <summary>

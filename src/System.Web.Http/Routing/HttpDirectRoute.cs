@@ -11,9 +11,9 @@ using System.Web.Http.Properties;
 namespace System.Web.Http.Routing
 {
     /// <summary>
-    /// Represents a route that is able to directly select the actions that can be reached.
+    /// Represents a subroute that is able to directly select the actions that can be reached.
     /// </summary>
-    public class HttpDirectRoute : HttpRoute
+    internal class HttpDirectRoute : HttpRoute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpDirectRoute" /> class.

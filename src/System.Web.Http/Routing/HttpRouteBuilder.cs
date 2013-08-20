@@ -10,7 +10,7 @@ namespace System.Web.Http.Routing
     /// <summary>
     /// Builds <see cref="IHttpRoute"/> instances based on route information.
     /// </summary>
-    public class HttpRouteBuilder
+    internal class HttpRouteBuilder
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpRouteBuilder" /> class using the default inline constraint resolver.
@@ -42,7 +42,7 @@ namespace System.Web.Http.Routing
         /// <param name="routeTemplate">The tokenized route template for the route.</param>
         /// <param name="actions">The actions to invoke for the route.</param>
         /// <returns>The generated <see cref="IHttpRoute"/>.</returns>
-        public virtual IHttpRoute BuildHttpRoute(
+        public virtual IHttpRoute BuildParsingRoute(
             string routeTemplate,
             IEnumerable<ReflectedHttpActionDescriptor> actions)
         {
@@ -56,7 +56,7 @@ namespace System.Web.Http.Routing
 
             string detokenizedRouteTemplate = InlineRouteTemplateParser.ParseRouteTemplate(routeTemplate, defaults, constraints, ConstraintResolver);
 
-            return BuildHttpRoute(detokenizedRouteTemplate, defaults, constraints, actions);
+            return BuildParsingRoute(detokenizedRouteTemplate, defaults, constraints, actions);
         }
 
         /// <summary>
@@ -67,13 +67,18 @@ namespace System.Web.Http.Routing
         /// <param name="constraints">The route constraints.</param>
         /// <param name="actions">The actions to invoke for the route.</param>
         /// <returns>The generated <see cref="IHttpRoute"/>.</returns>
-        public virtual IHttpRoute BuildHttpRoute(
+        public virtual IHttpRoute BuildParsingRoute(
             string routeTemplate,
             HttpRouteValueDictionary defaults,
             HttpRouteValueDictionary constraints,
             IEnumerable<ReflectedHttpActionDescriptor> actions)
         {
             return new HttpDirectRoute(routeTemplate, defaults, constraints, actions);
+        }
+
+        public virtual IHttpRoute BuildGenerationRoute(IHttpRoute parsingRoute)
+        {
+            return new GenerateRoute(parsingRoute);
         }
     }
 }

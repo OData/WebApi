@@ -168,30 +168,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void MapHttpAttributeRoutes_DoesNotAddRoute_WhenRouteBuilderReturnsNull()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>();
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("values") };
-            SetUpConfiguration(config, routePrefixes, routeProviders);
-
-            var mockRouteBuilder = new Mock<HttpRouteBuilder>();
-            mockRouteBuilder.Setup(
-                routeBuilder => routeBuilder.BuildHttpRoute(
-                    "values",
-                    It.IsAny<IEnumerable<ReflectedHttpActionDescriptor>>()))
-                .Returns<IHttpRoute>(null);
-
-            // Act
-            config.MapHttpAttributeRoutes(mockRouteBuilder.Object);
-
-            // Assert
-            var routes = config.GetAttributeRoutes();
-            Assert.Empty(routes);
-        }
-
-        [Fact]
         public void MapHttpAttributeRoutes_IsDeferred()
         {
             bool called = false;

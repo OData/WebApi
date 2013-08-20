@@ -78,7 +78,7 @@ namespace System.Web.Mvc.Routing
 #if ASPNETWEBAPI
         private static HttpRouteEntry CreateRouteEntry(string routeTemplate)
         {
-            IHttpRoute route = new HttpRouteBuilder().BuildHttpRoute(routeTemplate, actions: null);
+            IHttpRoute route = new HttpRouteBuilder().BuildParsingRoute(routeTemplate, actions: null);
             return new HttpRouteEntry() { Route = route, Template = routeTemplate };
         }
 #else

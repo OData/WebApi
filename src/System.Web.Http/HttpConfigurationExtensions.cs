@@ -64,16 +64,17 @@ namespace System.Web.Http
         /// <param name="configuration">The server configuration.</param>
         public static void MapHttpAttributeRoutes(this HttpConfiguration configuration)
         {
-            MapHttpAttributeRoutes(configuration, new HttpRouteBuilder());
+            MapHttpAttributeRoutes(configuration, new DefaultInlineConstraintResolver());
         }
 
         /// <summary>
         /// Maps the attribute-defined routes for the application.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        /// <param name="routeBuilder">The <see cref="HttpRouteBuilder"/> to use for generating attribute routes.</param>
-        public static void MapHttpAttributeRoutes(this HttpConfiguration configuration, HttpRouteBuilder routeBuilder)
+        /// <param name="constraintResolver">The <see cref="IInlineConstraintResolver"/> to use for resolving inline constraints.</param>
+        public static void MapHttpAttributeRoutes(this HttpConfiguration configuration, IInlineConstraintResolver constraintResolver)
         {
+            HttpRouteBuilder routeBuilder = new HttpRouteBuilder(constraintResolver);
             var attrRoute = new RouteCollectionRoute();
             configuration.Routes.Add(AttributeRouteName, attrRoute);
 
@@ -92,20 +93,20 @@ namespace System.Web.Http
                     HttpSubRouteCollection subRoutes = attrRoute.EnsureInitialized(initializer);
                     if (subRoutes != null)
                     {
-                        AddGenerationHooksForSubRoutes(config.Routes, subRoutes);
+                        AddGenerationHooksForSubRoutes(config.Routes, subRoutes, routeBuilder);
                     }
                 };
         }
 
         // Add generation hooks for the Attribute-routing subroutes. 
         // This lets us generate urls for routes supplied by attr-based routing.
-        private static void AddGenerationHooksForSubRoutes(HttpRouteCollection destRoutes, HttpSubRouteCollection sourceRoutes)
+        private static void AddGenerationHooksForSubRoutes(HttpRouteCollection destRoutes, HttpSubRouteCollection sourceRoutes, HttpRouteBuilder routeBuilder)
         {
             foreach (KeyValuePair<string, IHttpRoute> kv in sourceRoutes.NamedRoutes)
             {
                 string name = kv.Key;
                 IHttpRoute route = kv.Value;
-                var stubRoute = new GenerateRoute(route);
+                var stubRoute = routeBuilder.BuildGenerationRoute(route);
                 destRoutes.Add(name, stubRoute);
             }
         }
@@ -158,7 +159,7 @@ namespace System.Web.Http
 
                     foreach (HttpRouteEntry route in controllerRoutes)
                     {
-                        route.Route = routeBuilder.BuildHttpRoute(route.Template, route.Actions);
+                        route.Route = routeBuilder.BuildParsingRoute(route.Template, route.Actions);
                     }
 
                     attributeRoutes.AddRange(controllerRoutes);

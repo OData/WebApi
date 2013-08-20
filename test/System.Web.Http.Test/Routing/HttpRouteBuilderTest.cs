@@ -39,7 +39,7 @@ namespace System.Web.Http.Routing
 
             // Act
             HttpRouteBuilder routeBuilder = new HttpRouteBuilder(constraintResolver ?? new DefaultInlineConstraintResolver());
-            IHttpRoute route = routeBuilder.BuildHttpRoute(routeTemplate, actions: actions);
+            IHttpRoute route = routeBuilder.BuildParsingRoute(routeTemplate, actions: actions);
 
             // Assertions for default, unspecified behavior:
             Assert.NotNull(route);

@@ -129,6 +129,18 @@
   <data name="NoConfiguration" xml:space="preserve">
     <value>The request does not have an associated configuration object.</value>
   </data>
+  <data name="OriginCannotBeNullOrEmpty" xml:space="preserve">
+    <value>The specified policy origin cannot be null or empty.</value>
+  </data>
+  <data name="OriginCannotEndWithSlash" xml:space="preserve">
+    <value>The specified policy origin '{0}' is invalid. It cannot end with a forward slash.</value>
+  </data>
+  <data name="OriginMustNotContainPathQueryOrFragment" xml:space="preserve">
+    <value>The specified policy origin '{0}' is invalid. It must not contain a path, query, or fragment.</value>
+  </data>
+  <data name="OriginNotWellFormed" xml:space="preserve">
+    <value>The specified policy origin '{0}' is invalid. It must be correctly formed with the scheme, the host, and optionally, the port.</value>
+  </data>
   <data name="TraceCorsRequestContext" xml:space="preserve">
     <value>CorsRequestContext: '{0}'</value>
   </data>

@@ -80,44 +80,101 @@ namespace System.Web.Http.Cors.Test
             Assert.Equal(20, corsPolicy.PreflightMaxAge);
         }
 
-        [Fact]
-        public void GetCorsPolicyAsync_RetunsExpectedExposeHeaders()
+        [Theory]
+        [InlineData("foo", new[] { "foo" })]
+        [InlineData("foo ", new[] { "foo" })]
+        [InlineData("foo,", new[] { "foo" })]
+        [InlineData("foo,bar", new[] { "foo", "bar" })]
+        [InlineData("foo, bar", new[] { "foo", "bar" })]
+        [InlineData("foo,bar,", new[] { "foo", "bar" })]
+        public void GetCorsPolicyAsync_RetunsExpectedExposeHeaders(string exposedHeaders, string[] expectedResults)
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "*", exposedHeaders: "foo, bar");
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "*", exposedHeaders: exposedHeaders);
 
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage(), CancellationToken.None).Result;
 
-            Assert.Equal(new List<string> { "foo", "bar" }, corsPolicy.ExposedHeaders);
+            Assert.Equal(new List<string>(expectedResults), corsPolicy.ExposedHeaders);
         }
 
-        [Fact]
-        public void GetCorsPolicyAsync_RetunsExpectedHeaders()
+        [Theory]
+        [InlineData("Accept", new[] { "Accept" })]
+        [InlineData("Accept ", new[] { "Accept" })]
+        [InlineData("Accept,", new[] { "Accept" })]
+        [InlineData("Accept,Content-Type", new[] { "Accept", "Content-Type" })]
+        [InlineData("Accept, Content-Type", new[] { "Accept", "Content-Type" })]
+        [InlineData("Accept,Content-Type,", new[] { "Accept", "Content-Type" })]
+        public void GetCorsPolicyAsync_RetunsExpectedHeaders(string headers, string[] expectedResults)
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "Accept, Content-Type", methods: "*");
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: headers, methods: "*");
 
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage(), CancellationToken.None).Result;
 
-            Assert.Equal(new List<string> { "Accept", "Content-Type" }, corsPolicy.Headers);
+            Assert.Equal(new List<string>(expectedResults), corsPolicy.Headers);
         }
 
-        [Fact]
-        public void GetCorsPolicyAsync_RetunsExpectedMethods()
+        [Theory]
+        [InlineData("Get", new[] { "Get" })]
+        [InlineData("Get ", new[] { "Get" })]
+        [InlineData("Get,", new[] { "Get" })]
+        [InlineData("Get,Delete", new[] { "Get", "Delete" })]
+        [InlineData("Get, Delete", new[] { "Get", "Delete" })]
+        [InlineData("Get,Delete,", new[] { "Get", "Delete" })]
+        public void GetCorsPolicyAsync_RetunsExpectedMethods(string methods, string[] expectedResults)
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: "GET, Delete");
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "*", headers: "*", methods: methods);
 
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage(), CancellationToken.None).Result;
 
-            Assert.Equal(new List<string> { "GET", "Delete" }, corsPolicy.Methods);
+            Assert.Equal(new List<string>(expectedResults), corsPolicy.Methods);
         }
 
-        [Fact]
-        public void GetCorsPolicyAsync_RetunsExpectedOrigins()
+        [Theory]
+        [InlineData("http://example.com", new[] { "http://example.com" })]
+        [InlineData("http://example.com ", new[] { "http://example.com" })]
+        [InlineData("http://example.com,", new[] { "http://example.com" })]
+        [InlineData("http://example.com,http://localhost:8080", new[] { "http://example.com", "http://localhost:8080" })]
+        [InlineData("http://example.com, http://localhost:8080", new[] { "http://example.com", "http://localhost:8080" })]
+        [InlineData("http://example.com,http://localhost:8080,", new[] { "http://example.com", "http://localhost:8080" })]
+        public void GetCorsPolicyAsync_RetunsExpectedOrigins(string origins, string[] expectedResults)
         {
-            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "http://example.com", headers: "*", methods: "*");
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: origins, headers: "*", methods: "*");
 
             CorsPolicy corsPolicy = enableCors.GetCorsPolicyAsync(new HttpRequestMessage(), CancellationToken.None).Result;
 
-            Assert.Equal(new List<string> { "http://example.com" }, corsPolicy.Origins);
+            Assert.Equal(new List<string>(expectedResults), corsPolicy.Origins);
+        }
+
+        [Theory]
+        [InlineData("foo", "The specified policy origin 'foo' is invalid. It must be correctly formed with the scheme, the host, and optionally, the port.")]
+        [InlineData("://example.com", "The specified policy origin '://example.com' is invalid. It must be correctly formed with the scheme, the host, and optionally, the port.")]
+        [InlineData("http://example.com/", "The specified policy origin 'http://example.com/' is invalid. It cannot end with a forward slash.")]
+        [InlineData("http://example.com#fragment", "The specified policy origin 'http://example.com#fragment' is invalid. It must not contain a path, query, or fragment.")]
+        [InlineData("http://example.com/path", "The specified policy origin 'http://example.com/path' is invalid. It must not contain a path, query, or fragment.")]
+        [InlineData("http://example.com?query=foo", "The specified policy origin 'http://example.com?query=foo' is invalid. It must not contain a path, query, or fragment.")]
+        public void GetCorsPolicyAsync_InvalidOrigin_Throws(string origin, string expectedErrorMessage)
+        {
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: origin, headers: "*", methods: "*");
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                enableCors.GetCorsPolicyAsync(new HttpRequestMessage(), CancellationToken.None).Wait();
+            },
+            expectedErrorMessage);
+        }
+
+        [Theory]
+        [InlineData("", "The specified policy origin cannot be null or empty.")]
+        [InlineData(null, "The specified policy origin cannot be null or empty.")]
+        public void GetCorsPolicyAsync_NullEmptyOrigin_Throws(string origin, string expectedErrorMessage)
+        {
+            EnableCorsAttribute enableCors = new EnableCorsAttribute(origins: "http://localhost", headers: "*", methods: "*");
+            enableCors.Origins.Add(origin);
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                enableCors.GetCorsPolicyAsync(new HttpRequestMessage(), CancellationToken.None).Wait();
+            },
+            expectedErrorMessage);
         }
 
         [Fact]

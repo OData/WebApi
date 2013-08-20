@@ -97,6 +97,42 @@ namespace System.Web.Http.Cors.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The specified policy origin cannot be null or empty..
+        /// </summary>
+        internal static string OriginCannotBeNullOrEmpty {
+            get {
+                return ResourceManager.GetString("OriginCannotBeNullOrEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified policy origin &apos;{0}&apos; is invalid. It cannot end with a forward slash..
+        /// </summary>
+        internal static string OriginCannotEndWithSlash {
+            get {
+                return ResourceManager.GetString("OriginCannotEndWithSlash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified policy origin &apos;{0}&apos; is invalid. It must not contain a path, query, or fragment..
+        /// </summary>
+        internal static string OriginMustNotContainPathQueryOrFragment {
+            get {
+                return ResourceManager.GetString("OriginMustNotContainPathQueryOrFragment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified policy origin &apos;{0}&apos; is invalid. It must be correctly formed with the scheme, the host, and optionally, the port..
+        /// </summary>
+        internal static string OriginNotWellFormed {
+            get {
+                return ResourceManager.GetString("OriginNotWellFormed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CorsRequestContext: &apos;{0}&apos;.
         /// </summary>
         internal static string TraceCorsRequestContext {

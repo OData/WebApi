@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace System.Web.Http.Cors
     public sealed class EnableCorsAttribute : Attribute, ICorsPolicyProvider
     {
         private CorsPolicy _corsPolicy;
+        private bool _originsValidated;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EnableCorsAttribute" /> class.
@@ -164,7 +166,54 @@ namespace System.Web.Http.Cors
         /// <inheritdoc />
         public Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            if (!_originsValidated)
+            {
+                ValidateOrigins(_corsPolicy.Origins);
+                _originsValidated = true;
+            }
+
             return Task.FromResult(_corsPolicy);
+        }
+
+        private static void ValidateOrigins(IList<string> origins)
+        {
+            foreach (string origin in origins)
+            {
+                if (String.IsNullOrEmpty(origin))
+                {
+                    throw new InvalidOperationException(SRResources.OriginCannotBeNullOrEmpty);
+                }
+
+                if (origin.EndsWith("/", StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException(
+                        String.Format(
+                            CultureInfo.CurrentCulture,
+                            SRResources.OriginCannotEndWithSlash,
+                            origin));
+                }
+
+                if (!Uri.IsWellFormedUriString(origin, UriKind.Absolute))
+                {
+                    throw new InvalidOperationException(
+                        String.Format(
+                            CultureInfo.CurrentCulture,
+                            SRResources.OriginNotWellFormed,
+                            origin));
+                }
+
+                Uri originUri = new Uri(origin);
+                if ((!String.IsNullOrEmpty(originUri.AbsolutePath) && !String.Equals(originUri.AbsolutePath, "/", StringComparison.Ordinal)) ||
+                    !String.IsNullOrEmpty(originUri.Query) ||
+                    !String.IsNullOrEmpty(originUri.Fragment))
+                {
+                    throw new InvalidOperationException(
+                        String.Format(
+                            CultureInfo.CurrentCulture,
+                            SRResources.OriginMustNotContainPathQueryOrFragment,
+                            origin));
+                }
+            }
         }
 
         private static void AddCommaSeparatedValuesToCollection(string commaSeparatedValues, IList<string> collection)

@@ -19,9 +19,10 @@ namespace System.Web.Http.Routing
         /// Initializes a new instance of the <see cref="HttpDirectRoute" /> class.
         /// </summary>
         /// <param name="routeTemplate">The route template.</param>
+        /// <param name="order">The subroute order.</param>
         /// <param name="actions">The actions that are reachable via this route.</param>
-        public HttpDirectRoute(string routeTemplate, IEnumerable<ReflectedHttpActionDescriptor> actions)
-            : this(routeTemplate, defaults: null, constraints: null, actions: actions)
+        public HttpDirectRoute(string routeTemplate, int order, IEnumerable<ReflectedHttpActionDescriptor> actions)
+            : this(routeTemplate, order, defaults: null, constraints: null, actions: actions)
         {
         }
 
@@ -29,11 +30,13 @@ namespace System.Web.Http.Routing
         /// Initializes a new instance of the <see cref="HttpDirectRoute" /> class.
         /// </summary>
         /// <param name="routeTemplate">The route template.</param>
+        /// <param name="order">The subroute order.</param>
         /// <param name="defaults">The default values.</param>
         /// <param name="constraints">The route constraints.</param>
         /// <param name="actions">The actions that are reachable via this route.</param>
         public HttpDirectRoute(
             string routeTemplate,
+            int order,
             HttpRouteValueDictionary defaults,
             HttpRouteValueDictionary constraints,
             IEnumerable<ReflectedHttpActionDescriptor> actions)
@@ -42,6 +45,8 @@ namespace System.Web.Http.Routing
             if (actions != null)
             {
                 Actions = actions.AsArray();
+                DataTokens[RouteKeys.OrderDataTokenKey] = order;
+                DataTokens[RouteKeys.PrecedenceDataTokenKey] = ParsedRoute.GetPrecedence(constraints);
                 DataTokens[RouteKeys.ActionsDataTokenKey] = Actions;
             }
         }

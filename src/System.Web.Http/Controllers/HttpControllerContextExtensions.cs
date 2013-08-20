@@ -25,12 +25,13 @@ namespace System.Web.Http.Controllers
 
             foreach (IHttpRouteData subData in multipleRouteData)
             {
-                ReflectedHttpActionDescriptor[] actionDescriptors = subData.Route.GetDirectRouteActions();
-                if (actionDescriptors != null)
+                CandidateAction[] candidates = subData.Route.GetDirectRouteCandidates();
+
+                if (candidates != null)
                 {
-                    foreach (ReflectedHttpActionDescriptor ad in actionDescriptors)
+                    foreach (CandidateAction candidate in candidates)
                     {
-                        if (ad.Equals(actionDescriptorSelected))
+                        if (candidate.ActionDescriptor.Equals(actionDescriptorSelected))
                         {
                             controllerContext.RouteData = subData;
                             return;

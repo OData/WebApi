@@ -112,26 +112,13 @@ namespace System.Web.Http.Routing
         // Else, returns a composite route data that encapsulates the possible routes this may match against. 
         public IHttpRouteData GetRouteData(string virtualPathRoot, HttpRequestMessage request)
         {
-            // Only take 1st match per verb. This is to honor URL constraints.
-            // EG, consider this scenario:
-            // (1)  GET /controller/{id:int}
-            // (2)  GET /controller/{id}
-            // (3)  PUT /controller/{value}
-            // Matching "/controller/15" should only return routes 1 and 3, not 2. 
-            HashSet<HttpMethod> methods = new HashSet<HttpMethod>();
-
             List<IHttpRouteData> list = new List<IHttpRouteData>();
             foreach (IHttpRoute route in SubRoutes)
             {
                 IHttpRouteData match = route.GetRouteData(virtualPathRoot, request);
                 if (match != null)
                 {
-                    // Is this the first verb?
-                    HttpMethod verb = match.Route.GetDirectRouteVerb();
-                    if (methods.Add(verb))
-                    {
-                        list.Add(match);
-                    }
+                    list.Add(match);
                 }
             }
             if (list.Count == 0)

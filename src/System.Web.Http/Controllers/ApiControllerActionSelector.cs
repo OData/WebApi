@@ -90,10 +90,10 @@ namespace System.Web.Http.Controllers
             private readonly HttpControllerDescriptor _controllerDescriptor;
 
             // Includes action descriptors for actions with and without route attributes.
-            private readonly ReflectedHttpActionDescriptor[] _combinedActionDescriptors;
+            private readonly CandidateAction[] _combinedCandidateActions;
 
             // Includes action descriptors only for actions accessible via standard routing (without route attributes).
-            private readonly ReflectedHttpActionDescriptor[] _standardActionDescriptors;
+            private readonly CandidateAction[] _standardCandidateActions;
 
             private readonly IDictionary<ReflectedHttpActionDescriptor, string[]> _actionParameterNames = new Dictionary<ReflectedHttpActionDescriptor, string[]>();
 
@@ -112,7 +112,7 @@ namespace System.Web.Http.Controllers
             // - we can build the cache at startup and don't need to continually add to it.
             private readonly HttpMethod[] _cacheListVerbKinds = new HttpMethod[] { HttpMethod.Get, HttpMethod.Put, HttpMethod.Post };
 
-            private readonly ReflectedHttpActionDescriptor[][] _cacheListVerbs;
+            private readonly CandidateAction[][] _cacheListVerbs;
 
             public ActionSelectorCacheItem(HttpControllerDescriptor controllerDescriptor)
             {
@@ -124,12 +124,15 @@ namespace System.Web.Http.Controllers
                 MethodInfo[] allMethods = _controllerDescriptor.ControllerType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
                 MethodInfo[] validMethods = Array.FindAll(allMethods, IsValidActionMethod);
 
-                _combinedActionDescriptors = new ReflectedHttpActionDescriptor[validMethods.Length];
+                _combinedCandidateActions = new CandidateAction[validMethods.Length];
                 for (int i = 0; i < validMethods.Length; i++)
                 {
                     MethodInfo method = validMethods[i];
                     ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(_controllerDescriptor, method);
-                    _combinedActionDescriptors[i] = actionDescriptor;
+                    _combinedCandidateActions[i] = new CandidateAction
+                    {
+                        ActionDescriptor = actionDescriptor
+                    };
                     HttpActionBinding actionBinding = actionDescriptor.ActionBinding;
 
                     // Building an action parameter name mapping to compare against the URI parameters coming from the request. Here we only take into account required parameters that are simple types and come from URI.
@@ -143,33 +146,32 @@ namespace System.Web.Http.Controllers
                 if (controllerDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: true).Any())
                 {
                     // The controller has an attribute route; no actions are accessible via standard routing.
-                    _standardActionDescriptors = new ReflectedHttpActionDescriptor[0];
+                    _standardCandidateActions = new CandidateAction[0];
                 }
                 else
                 {
                     // The controller does not have an attribute route; some actions may be accessible via standard
                     // routing.
-                    List<ReflectedHttpActionDescriptor> standardActionDescriptors =
-                        new List<ReflectedHttpActionDescriptor>();
+                    List<CandidateAction> standardCandidateActions = new List<CandidateAction>();
 
-                    for (int i = 0; i < _combinedActionDescriptors.Length; i++)
+                    for (int i = 0; i < _combinedCandidateActions.Length; i++)
                     {
-                        ReflectedHttpActionDescriptor actionDescriptor = _combinedActionDescriptors[i];
-                        if (!actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: true).Any())
+                        CandidateAction candidate = _combinedCandidateActions[i];
+                        if (!candidate.ActionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: true).Any())
                         {
-                            standardActionDescriptors.Add(actionDescriptor);
+                            standardCandidateActions.Add(candidate);
                         }
                     }
 
-                    _standardActionDescriptors = standardActionDescriptors.ToArray();
+                    _standardCandidateActions = standardCandidateActions.ToArray();
                 }
 
-                _combinedActionNameMapping = _combinedActionDescriptors.ToLookup(actionDesc => actionDesc.ActionName, StringComparer.OrdinalIgnoreCase);
-                _standardActionNameMapping = _standardActionDescriptors.ToLookup(actionDesc => actionDesc.ActionName, StringComparer.OrdinalIgnoreCase);
+                _combinedActionNameMapping = _combinedCandidateActions.Select(c => c.ActionDescriptor).ToLookup(actionDesc => actionDesc.ActionName, StringComparer.OrdinalIgnoreCase);
+                _standardActionNameMapping = _standardCandidateActions.Select(c => c.ActionDescriptor).ToLookup(actionDesc => actionDesc.ActionName, StringComparer.OrdinalIgnoreCase);
 
                 // Bucket the action descriptors by common verbs.
                 int len = _cacheListVerbKinds.Length;
-                _cacheListVerbs = new ReflectedHttpActionDescriptor[len][];
+                _cacheListVerbs = new CandidateAction[len][];
                 for (int i = 0; i < len; i++)
                 {
                     _cacheListVerbs[i] = FindActionsForVerbWorker(_cacheListVerbKinds[i]);
@@ -184,25 +186,27 @@ namespace System.Web.Http.Controllers
             public HttpActionDescriptor SelectAction(HttpControllerContext controllerContext)
             {
                 // Performance-sensitive
-                ReflectedHttpActionDescriptor[] candidateActions = GetInitialCandidateList(controllerContext);
+                CandidateAction[] candidates = GetInitialCandidateList(controllerContext);
 
                 // Make sure the action parameter matches the route and query parameters. Overload resolution logic is applied when needed.
-                List<ReflectedHttpActionDescriptor> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidateActions);
-                List<ReflectedHttpActionDescriptor> selectedActions = RunSelectionFilters(controllerContext, actionsFoundByParams);
-                candidateActions = null;
+                List<CandidateAction> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidates);
+                List<CandidateAction> filteredCandidates = RunSelectionFilters(controllerContext, actionsFoundByParams);
+                List<CandidateAction> maximumOrderCandidates = RunOrderFilter(filteredCandidates);
+                List<CandidateAction> selectedCandidates = RunPrecedenceFilter(maximumOrderCandidates);
+                candidates = null;
                 actionsFoundByParams = null;
 
-                switch (selectedActions.Count)
+                switch (selectedCandidates.Count)
                 {
                     case 0:
                         throw new HttpResponseException(CreateSelectionError(controllerContext));
                     case 1:
-                        controllerContext.ElevateRouteData(selectedActions[0]);
-                        return selectedActions[0];
+                        controllerContext.ElevateRouteData(selectedCandidates[0].ActionDescriptor);
+                        return selectedCandidates[0].ActionDescriptor;
                     default:
 
                         // Throws exception because multiple actions match the request
-                        string ambiguityList = CreateAmbiguousMatchList(selectedActions);
+                        string ambiguityList = CreateAmbiguousMatchList(selectedCandidates);
                         throw Error.InvalidOperation(SRResources.ApiControllerActionSelector_AmbiguousMatch, ambiguityList);
                 }
             }
@@ -214,12 +218,12 @@ namespace System.Web.Http.Controllers
             private HttpResponseMessage CreateSelectionError(HttpControllerContext controllerContext)
             {
                 // Check for 405.  
-                ReflectedHttpActionDescriptor[] candidateActions = GetInitialCandidateList(controllerContext, ignoreVerbs: true);
-                List<ReflectedHttpActionDescriptor> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidateActions);
-                List<ReflectedHttpActionDescriptor> selectedActions = RunSelectionFilters(controllerContext, actionsFoundByParams);
-                if (selectedActions.Count > 0)
+                CandidateAction[] candidateActions = GetInitialCandidateList(controllerContext, ignoreVerbs: true);
+                List<CandidateAction> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidateActions);
+                List<CandidateAction> selectedCandidates = RunSelectionFilters(controllerContext, actionsFoundByParams);
+                if (selectedCandidates.Count > 0)
                 {
-                    return Create405Response(controllerContext, selectedActions);
+                    return Create405Response(controllerContext, selectedCandidates);
                 }
 
                 // Throws HttpResponseException with NotFound status because no action matches the request
@@ -231,7 +235,7 @@ namespace System.Web.Http.Controllers
 
             // Create a 405 error response with proper headers and message string. 
             [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
-            private static HttpResponseMessage Create405Response(HttpControllerContext controllerContext, IEnumerable<ReflectedHttpActionDescriptor> allowedActions)
+            private static HttpResponseMessage Create405Response(HttpControllerContext controllerContext, IEnumerable<CandidateAction> allowedCandidates)
             {
                 HttpMethod incomingMethod = controllerContext.Request.Method;
                 HttpResponseMessage response = controllerContext.Request.CreateErrorResponse(
@@ -241,9 +245,9 @@ namespace System.Web.Http.Controllers
                 // 405 must include an Allow content-header with the allowable methods.
                 // See: https://tools.ietf.org/html/rfc2616#section-14.7
                 HashSet<HttpMethod> methods = new HashSet<HttpMethod>();
-                foreach (var action in allowedActions)
+                foreach (var candidate in allowedCandidates)
                 {
-                    methods.UnionWith(action.SupportedHttpMethods);
+                    methods.UnionWith(candidate.ActionDescriptor.SupportedHttpMethods);
                 }
                 foreach (var method in methods)
                 {
@@ -254,25 +258,25 @@ namespace System.Web.Http.Controllers
             }
 
             [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
-            private ReflectedHttpActionDescriptor[] GetInitialCandidateList(HttpControllerContext controllerContext, bool ignoreVerbs = false)
+            private CandidateAction[] GetInitialCandidateList(HttpControllerContext controllerContext, bool ignoreVerbs = false)
             {
                 HttpMethod incomingMethod = controllerContext.Request.Method;
                 IHttpRouteData routeData = controllerContext.RouteData;
 
                 IHttpRoute route = routeData.Route;
-                ReflectedHttpActionDescriptor[] actions;
+                CandidateAction[] candidates;
                 if (route != null)
                 {
                     // Attribute routing gives the action selector an explicit initial candidate list.
-                    actions = routeData.GetDirectRouteActions();
-                    if (actions != null)
+                    candidates = routeData.GetDirectRouteCandidates();
+                    if (candidates != null)
                     {
                         if (!ignoreVerbs)
                         {
-                            actions = FindActionsForVerbWorker(incomingMethod, actions);
+                            candidates = FindActionsForVerbWorker(incomingMethod, candidates);
                         }
 
-                        return actions;
+                        return candidates;
                     }
                 }
 
@@ -291,34 +295,44 @@ namespace System.Web.Http.Controllers
                             Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
                     }
 
+                    CandidateAction[] candidatesFoundByName = new CandidateAction[actionsFoundByName.Length];
+
+                    for (int i = 0; i < actionsFoundByName.Length; i++)
+                    {
+                        candidatesFoundByName[i] = new CandidateAction
+                        {
+                            ActionDescriptor = actionsFoundByName[i]
+                        };
+                    }
+
                     if (ignoreVerbs)
                     {
-                        actions = actionsFoundByName;
+                        candidates = candidatesFoundByName;
                     }
                     else
                     {
-                        actions = FilterIncompatibleVerbs(incomingMethod, actionsFoundByName);
+                        candidates = FilterIncompatibleVerbs(incomingMethod, candidatesFoundByName);
                     }
                 }
                 else
                 {
                     if (ignoreVerbs)
                     {
-                        actions = _standardActionDescriptors;
+                        candidates = _standardCandidateActions;
                     }
                     else
                     {
                         // No direct routing or {action} parameter, infer it from the verb.
-                        actions = FindActionsForVerb(incomingMethod);
+                        candidates = FindActionsForVerb(incomingMethod);
                     }
                 }
 
-                return actions;
+                return candidates;
             }
 
-            private static ReflectedHttpActionDescriptor[] FilterIncompatibleVerbs(HttpMethod incomingMethod, ReflectedHttpActionDescriptor[] actionsFoundByName)
+            private static CandidateAction[] FilterIncompatibleVerbs(HttpMethod incomingMethod, CandidateAction[] candidatesFoundByName)
             {
-                return actionsFoundByName.Where(actionDescriptor => actionDescriptor.SupportedHttpMethods.Contains(incomingMethod)).ToArray();
+                return candidatesFoundByName.Where(candidate => candidate.ActionDescriptor.SupportedHttpMethods.Contains(incomingMethod)).ToArray();
             }
 
             public ILookup<string, HttpActionDescriptor> GetActionMapping()
@@ -326,7 +340,7 @@ namespace System.Web.Http.Controllers
                 return new LookupAdapter() { Source = _combinedActionNameMapping };
             }
 
-            private List<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, ReflectedHttpActionDescriptor[] actionsFound)
+            private List<CandidateAction> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, CandidateAction[] candidatesFound)
             {
                 IDictionary<string, object> routeValues = controllerContext.RouteData.Values;
                 HashSet<string> routeParameterNames = new HashSet<string>(routeValues.Keys, StringComparer.OrdinalIgnoreCase);
@@ -338,7 +352,7 @@ namespace System.Web.Http.Controllers
                 bool hasQueryParameters = requestUri != null && !String.IsNullOrEmpty(requestUri.Query);
                 bool hasRouteParameters = routeParameterNames.Count != 0;
 
-                List<ReflectedHttpActionDescriptor> matches = new List<ReflectedHttpActionDescriptor>(actionsFound.Length);
+                List<CandidateAction> matches = new List<CandidateAction>(candidatesFound.Length);
                 if (hasRouteParameters || hasQueryParameters)
                 {
                     var combinedParameterNames = new HashSet<string>(routeParameterNames, StringComparer.OrdinalIgnoreCase);
@@ -351,19 +365,20 @@ namespace System.Web.Http.Controllers
                     }
 
                     // action parameters is a subset of route parameters and query parameters
-                    for (int i = 0; i < actionsFound.Length; i++)
+                    for (int i = 0; i < candidatesFound.Length; i++)
                     {
-                        ReflectedHttpActionDescriptor descriptor = actionsFound[i];
+                        CandidateAction candidate = candidatesFound[i];
+                        ReflectedHttpActionDescriptor descriptor = candidate.ActionDescriptor;
                         if (IsSubset(_actionParameterNames[descriptor], combinedParameterNames))
                         {
-                            matches.Add(descriptor);
+                            matches.Add(candidate);
                         }
                     }
                     if (matches.Count > 1)
                     {
                         // select the results that match the most number of required parameters
                         matches = matches
-                            .GroupBy(descriptor => _actionParameterNames[descriptor].Length)
+                            .GroupBy(candidate => _actionParameterNames[candidate.ActionDescriptor].Length)
                             .OrderByDescending(g => g.Key)
                             .First()
                             .ToList();
@@ -372,12 +387,13 @@ namespace System.Web.Http.Controllers
                 else
                 {
                     // return actions with no parameters
-                    for (int i = 0; i < actionsFound.Length; i++)
+                    for (int i = 0; i < candidatesFound.Length; i++)
                     {
-                        ReflectedHttpActionDescriptor descriptor = actionsFound[i];
+                        CandidateAction candidate = candidatesFound[i];
+                        ReflectedHttpActionDescriptor descriptor = candidate.ActionDescriptor;
                         if (_actionParameterNames[descriptor].Length == 0)
                         {
-                            matches.Add(descriptor);
+                            matches.Add(candidate);
                         }
                     }
                 }
@@ -397,21 +413,22 @@ namespace System.Web.Http.Controllers
                 return true;
             }
 
-            private static List<ReflectedHttpActionDescriptor> RunSelectionFilters(HttpControllerContext controllerContext, List<ReflectedHttpActionDescriptor> descriptorsFound)
+            private static List<CandidateAction> RunSelectionFilters(HttpControllerContext controllerContext, List<CandidateAction> candidatesFound)
             {
                 // remove all methods which are opting out of this request
                 // to opt out, at least one attribute defined on the method must return false
 
-                List<ReflectedHttpActionDescriptor> matchesWithSelectionAttributes = null;
-                List<ReflectedHttpActionDescriptor> matchesWithoutSelectionAttributes = new List<ReflectedHttpActionDescriptor>();
+                List<CandidateAction> matchesWithSelectionAttributes = null;
+                List<CandidateAction> matchesWithoutSelectionAttributes = new List<CandidateAction>();
 
-                for (int i = 0; i < descriptorsFound.Count; i++)
+                for (int i = 0; i < candidatesFound.Count; i++)
                 {
-                    ReflectedHttpActionDescriptor actionDescriptor = descriptorsFound[i];
+                    CandidateAction candidate = candidatesFound[i];
+                    ReflectedHttpActionDescriptor actionDescriptor = candidate.ActionDescriptor;
                     IActionMethodSelector[] attrs = actionDescriptor.CacheAttrsIActionMethodSelector;
                     if (attrs.Length == 0)
                     {
-                        matchesWithoutSelectionAttributes.Add(actionDescriptor);
+                        matchesWithoutSelectionAttributes.Add(candidate);
                     }
                     else
                     {
@@ -429,9 +446,9 @@ namespace System.Web.Http.Controllers
                         {
                             if (matchesWithSelectionAttributes == null)
                             {
-                                matchesWithSelectionAttributes = new List<ReflectedHttpActionDescriptor>();
+                                matchesWithSelectionAttributes = new List<CandidateAction>();
                             }
-                            matchesWithSelectionAttributes.Add(actionDescriptor);
+                            matchesWithSelectionAttributes.Add(candidate);
                         }
                     }
                 }
@@ -448,9 +465,29 @@ namespace System.Web.Http.Controllers
                 }
             }
 
+            private static List<CandidateAction> RunOrderFilter(List<CandidateAction> candidatesFound)
+            {
+                if (candidatesFound.Count == 0)
+                {
+                    return candidatesFound;
+                }
+                int maxOrder = candidatesFound.Max(c => c.Order);
+                return candidatesFound.Where(c => c.Order == maxOrder).AsList();
+            }
+
+            private static List<CandidateAction> RunPrecedenceFilter(List<CandidateAction> candidatesFound)
+            {
+                if (candidatesFound.Count == 0)
+                {
+                    return candidatesFound;
+                }
+                decimal highestPrecedence = candidatesFound.Min(c => c.Precedence);
+                return candidatesFound.Where(c => c.Precedence == highestPrecedence).AsList();
+            }
+
             // This is called when we don't specify an Action name
             // Get list of actions that match a given verb. This can match by name or IActionHttpMethodSelecto
-            private ReflectedHttpActionDescriptor[] FindActionsForVerb(HttpMethod verb)
+            private CandidateAction[] FindActionsForVerb(HttpMethod verb)
             {
                 // Check cache for common verbs.
                 for (int i = 0; i < _cacheListVerbKinds.Length; i++)
@@ -469,34 +506,35 @@ namespace System.Web.Http.Controllers
 
             // This is called when we don't specify an Action name
             // Given all the standard actions on the controller, filter it to ones that match a given verb.
-            private ReflectedHttpActionDescriptor[] FindActionsForVerbWorker(HttpMethod verb)
+            private CandidateAction[] FindActionsForVerbWorker(HttpMethod verb)
             {
-                return FindActionsForVerbWorker(verb, _standardActionDescriptors);
+                return FindActionsForVerbWorker(verb, _standardCandidateActions);
             }
 
             // Given a list of actions, filter it to ones that match a given verb. This can match by name or IActionHttpMethodSelector.
             // Since this list is fixed for a given verb type, it can be pre-computed and cached.
             // This function should not do caching. It's the helper that builds the caches.
-            private static ReflectedHttpActionDescriptor[] FindActionsForVerbWorker(HttpMethod verb, ReflectedHttpActionDescriptor[] actions)
+            private static CandidateAction[] FindActionsForVerbWorker(HttpMethod verb, CandidateAction[] candidates)
             {
-                List<ReflectedHttpActionDescriptor> listMethods = new List<ReflectedHttpActionDescriptor>();
+                List<CandidateAction> listCandidates = new List<CandidateAction>();
 
-                foreach (ReflectedHttpActionDescriptor descriptor in actions)
+                foreach (CandidateAction candidate in candidates)
                 {
-                    if (descriptor.SupportedHttpMethods.Contains(verb))
+                    if (candidate.ActionDescriptor != null && candidate.ActionDescriptor.SupportedHttpMethods.Contains(verb))
                     {
-                        listMethods.Add(descriptor);
+                        listCandidates.Add(candidate);
                     }
                 }
 
-                return listMethods.ToArray();
+                return listCandidates.ToArray();
             }
 
-            private static string CreateAmbiguousMatchList(IEnumerable<HttpActionDescriptor> ambiguousDescriptors)
+            private static string CreateAmbiguousMatchList(IEnumerable<CandidateAction> ambiguousCandidates)
             {
                 StringBuilder exceptionMessageBuilder = new StringBuilder();
-                foreach (ReflectedHttpActionDescriptor descriptor in ambiguousDescriptors)
+                foreach (CandidateAction candidate in ambiguousCandidates)
                 {
+                    ReflectedHttpActionDescriptor descriptor = candidate.ActionDescriptor;
                     MethodInfo methodInfo = descriptor.MethodInfo;
 
                     exceptionMessageBuilder.AppendLine();

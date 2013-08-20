@@ -9,21 +9,8 @@ namespace System.Web.Http.Routing
 {
     internal static class HttpRouteExtensions
     {
-        // If route is a direct route, get the http method for its actions.
-        // Else return null.
-        public static HttpMethod GetDirectRouteVerb(this IHttpRoute route)
-        {
-            ReflectedHttpActionDescriptor[] ads = route.GetDirectRouteActions();
-            if (ads != null)
-            {
-                // All action descriptors on this route have the same method, so just pull the first. 
-                return ads[0].SupportedHttpMethods[0];
-            }
-            return null;
-        }
-
-        // If route is a direct route, get the action descriptors it may map to.
-        public static ReflectedHttpActionDescriptor[] GetDirectRouteActions(this IHttpRoute route)
+        // If route is a direct route, get the action descriptors, order and precedence it may map to.
+        public static CandidateAction[] GetDirectRouteCandidates(this IHttpRoute route)
         {
             Contract.Assert(route != null);
 
@@ -33,16 +20,49 @@ namespace System.Web.Http.Routing
                 return null;
             }
 
-            ReflectedHttpActionDescriptor[] directRouteActions;
-            if (dataTokens.TryGetValue<ReflectedHttpActionDescriptor[]>(RouteKeys.ActionsDataTokenKey, out directRouteActions))
+            List<CandidateAction> candidates = new List<CandidateAction>();
+
+            ReflectedHttpActionDescriptor[] directRouteActions = null;
+            ReflectedHttpActionDescriptor[] possibleDirectRouteActions;
+            if (dataTokens.TryGetValue<ReflectedHttpActionDescriptor[]>(RouteKeys.ActionsDataTokenKey, out possibleDirectRouteActions))
             {
-                if (directRouteActions != null && directRouteActions.Length > 0)
+                if (possibleDirectRouteActions != null && possibleDirectRouteActions.Length > 0)
                 {
-                    return directRouteActions;
+                    directRouteActions = possibleDirectRouteActions;
                 }
             }
 
-            return null;
+            if (directRouteActions == null)
+            {
+                return null;
+            }
+
+            int order = 0;
+            int possibleOrder;
+            if (dataTokens.TryGetValue<int>(RouteKeys.OrderDataTokenKey, out possibleOrder))
+            {
+                order = possibleOrder;
+            }
+
+            decimal precedence = 0M;
+            decimal possiblePrecedence;
+
+            if (dataTokens.TryGetValue<decimal>(RouteKeys.PrecedenceDataTokenKey, out possiblePrecedence))
+            {
+                precedence = possiblePrecedence;
+            }
+
+            foreach (ReflectedHttpActionDescriptor actionDescriptor in directRouteActions)
+            {
+                candidates.Add(new CandidateAction
+                {
+                    ActionDescriptor = actionDescriptor,
+                    Order = order,
+                    Precedence = precedence
+                });
+            }
+
+            return candidates.ToArray();
         }
     }
 }

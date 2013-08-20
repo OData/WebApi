@@ -13,5 +13,11 @@ namespace System.Web.Http.Routing
 
         // Used to provide the action descriptors to consider in the route data tokens
         public const string ActionsDataTokenKey = "actions";
+
+        // Used to allow customer-provided disambiguation between multiple matching routes
+        public const string OrderDataTokenKey = "order";
+
+        // Used to allow URI constraint-based disambiguation between multiple matching routes
+        public const string PrecedenceDataTokenKey = "precedence";
     }
 }

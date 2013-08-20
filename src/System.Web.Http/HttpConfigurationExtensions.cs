@@ -159,13 +159,11 @@ namespace System.Web.Http
 
                     foreach (HttpRouteEntry route in controllerRoutes)
                     {
-                        route.Route = routeBuilder.BuildParsingRoute(route.Template, route.Actions);
+                        route.Route = routeBuilder.BuildParsingRoute(route.Template, route.Order, route.Actions);
                     }
 
                     attributeRoutes.AddRange(controllerRoutes);
                 }
-
-                attributeRoutes.Sort();
 
                 foreach (HttpRouteEntry attributeRoute in attributeRoutes)
                 {

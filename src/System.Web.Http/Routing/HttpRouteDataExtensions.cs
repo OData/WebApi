@@ -13,19 +13,23 @@ namespace System.Web.Http.Routing
         // Else return null.
         public static HttpControllerDescriptor GetDirectRouteController(this IHttpRouteData routeData)
         {
-            ReflectedHttpActionDescriptor[] directRouteActions = routeData.GetDirectRouteActions();
-            if (directRouteActions != null)
+            CandidateAction[] candidates = routeData.GetDirectRouteCandidates();
+            if (candidates != null)
             {
                 // Set the controller descriptor for the first action descriptor
-                Contract.Assert(directRouteActions.Length > 0);
-                HttpControllerDescriptor controllerDescriptor = directRouteActions[0].ControllerDescriptor;
+                Contract.Assert(candidates.Length > 0);
+                Contract.Assert(candidates[0].ActionDescriptor != null);
+                HttpControllerDescriptor controllerDescriptor = candidates[0].ActionDescriptor.ControllerDescriptor;
 
-                // Check that all other action descriptors share the same controller descriptor
-                for (int i = 1; i < directRouteActions.Length; i++)
+                foreach (CandidateAction candidate in candidates)
                 {
-                    if (directRouteActions[i].ControllerDescriptor != controllerDescriptor)
+                    // Check that all other candidate action descriptors share the same controller descriptor
+                    for (int i = 1; i < candidates.Length; i++)
                     {
-                        return null;
+                        if (candidates[i].ActionDescriptor.ControllerDescriptor != controllerDescriptor)
+                        {
+                            return null;
+                        }
                     }
                 }
 
@@ -45,26 +49,27 @@ namespace System.Web.Http.Routing
             return null;
         }
 
-        // If routeData is from an attribute route, get the action descriptors that it may match to.
-        // Caller still needs to run action selection to pick the specific action.
+        // If routeData is from an attribute route, get the action descriptors, order and precedence that it may match
+        // to. Caller still needs to run action selection to pick the specific action.
         // Else return null.
-        public static ReflectedHttpActionDescriptor[] GetDirectRouteActions(this IHttpRouteData routeData)
+        public static CandidateAction[] GetDirectRouteCandidates(this IHttpRouteData routeData)
         {
+            Contract.Assert(routeData != null);
             IEnumerable<IHttpRouteData> subRoutes = routeData.GetSubRoutes();
             if (subRoutes == null)
             {
                 // Possible this is being called on a subroute. This can happen after ElevateRouteData. Just chain. 
-                return routeData.Route.GetDirectRouteActions();
+                return routeData.Route.GetDirectRouteCandidates();
             }
 
-            var list = new List<ReflectedHttpActionDescriptor>();
+            var list = new List<CandidateAction>();
 
             foreach (IHttpRouteData subData in subRoutes)
             {
-                ReflectedHttpActionDescriptor[] actionDescriptors = subData.Route.GetDirectRouteActions();
-                if (actionDescriptors != null)
+                CandidateAction[] candidates = subData.Route.GetDirectRouteCandidates();
+                if (candidates != null)
                 {
-                    list.AddRange(actionDescriptors);
+                    list.AddRange(candidates);
                 }
             }
             return list.ToArray();

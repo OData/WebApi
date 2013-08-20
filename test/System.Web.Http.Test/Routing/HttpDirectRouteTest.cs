@@ -13,7 +13,7 @@ namespace System.Web.Http.Routing
         {
             var actions = new ReflectedHttpActionDescriptor[0];
 
-            var route = new HttpDirectRoute("route", actions);
+            var route = new HttpDirectRoute("route", 0, actions);
 
             Assert.Equal(actions, route.Actions);
         }
@@ -22,7 +22,7 @@ namespace System.Web.Http.Routing
         public void GetRouteData_AddsDefaultValuesAsNull()
         {
             var actions = new ReflectedHttpActionDescriptor[] { new ReflectedHttpActionDescriptor() };
-            var route = new HttpDirectRoute("movies/{id}", actions);
+            var route = new HttpDirectRoute("movies/{id}", 0, actions);
             route.Defaults.Add("id", RouteParameter.Optional);
 
             var routeData = route.GetRouteData("", new HttpRequestMessage(HttpMethod.Get, "http://localhost/movies"));

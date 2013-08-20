@@ -158,17 +158,17 @@ namespace System.Web.Http.Description
             }
         }
 
-        private static HttpControllerDescriptor GetDirectRouteController(ReflectedHttpActionDescriptor[] directRouteActions)
+        private static HttpControllerDescriptor GetDirectRouteController(CandidateAction[] directRouteCandidates)
         {
-            if (directRouteActions != null)
+            if (directRouteCandidates != null)
             {
                 // Set the controller descriptor for the first action descriptor
-                HttpControllerDescriptor controllerDescriptor = directRouteActions[0].ControllerDescriptor;
+                HttpControllerDescriptor controllerDescriptor = directRouteCandidates[0].ActionDescriptor.ControllerDescriptor;
 
                 // Check that all other action descriptors share the same controller descriptor
-                for (int i = 1; i < directRouteActions.Length; i++)
+                for (int i = 1; i < directRouteCandidates.Length; i++)
                 {
-                    if (directRouteActions[i].ControllerDescriptor != controllerDescriptor)
+                    if (directRouteCandidates[i].ActionDescriptor.ControllerDescriptor != controllerDescriptor)
                     {
                         // This can happen if a developer puts the same route template on different actions 
                         // in different controllers. 
@@ -192,11 +192,12 @@ namespace System.Web.Http.Description
                 ApiDescriptionComparer descriptionComparer = new ApiDescriptionComparer();
                 foreach (IHttpRoute route in FlattenRoutes(_config.Routes))
                 {
-                    ReflectedHttpActionDescriptor[] directRouteActions = route.GetDirectRouteActions();
-                    HttpControllerDescriptor directRouteController = GetDirectRouteController(directRouteActions);
+                    CandidateAction[] directRouteCandidates = route.GetDirectRouteCandidates();
+
+                    HttpControllerDescriptor directRouteController = GetDirectRouteController(directRouteCandidates);
                     Collection<ApiDescription> descriptionsFromRoute =
-                        (directRouteController != null && directRouteActions != null) ?
-                            ExploreDirectRoute(directRouteController, directRouteActions, route) :
+                        (directRouteController != null && directRouteCandidates != null) ?
+                            ExploreDirectRoute(directRouteController, directRouteCandidates, route) :
                             ExploreRouteControllers(controllerMappings, route);
 
                     // Remove ApiDescription that will lead to ambiguous action matching.
@@ -219,13 +220,13 @@ namespace System.Web.Http.Description
             return apiDescriptions;
         }
 
-        private Collection<ApiDescription> ExploreDirectRoute(HttpControllerDescriptor controllerDescriptor, ReflectedHttpActionDescriptor[] actions, IHttpRoute route)
+        private Collection<ApiDescription> ExploreDirectRoute(HttpControllerDescriptor controllerDescriptor, CandidateAction[] candidates, IHttpRoute route)
         {
             Collection<ApiDescription> descriptions = new Collection<ApiDescription>();
 
             if (ShouldExploreController(controllerDescriptor.ControllerName, controllerDescriptor, route))
             {
-                PopulateActionDescriptions(actions, null, route, route.RouteTemplate, descriptions);
+                PopulateActionDescriptions(candidates.Select(c => c.ActionDescriptor), null, route, route.RouteTemplate, descriptions);
             }
 
             return descriptions;

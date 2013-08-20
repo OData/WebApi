@@ -34,13 +34,13 @@ namespace System.Web.Http.Routing
         [InlineData("PUT", "prefix", "PrefixedPut")]
         // Test multiple routes to same action
         [InlineData("DELETE", "multi1", "multi")]
-        [InlineData("DELETE", "multi2", "multi")]        
+        [InlineData("DELETE", "multi2", "multi")]
         // Test multiple verbs on the same route
         [InlineData("GET", "multiverb", "GET")]
-        [InlineData("PUT", "multiverb", "PUT")]     
+        [InlineData("PUT", "multiverb", "PUT")]
         // Test with default route
         [InlineData("GET", "prefix2/defaultroute/12", "get12")]
-        [InlineData("PUT", "prefix2/defaultrouteoverride/12", "put12")]     
+        [InlineData("PUT", "prefix2/defaultrouteoverride/12", "put12")]
         [InlineData("POST", "prefix2", "post")]             
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {

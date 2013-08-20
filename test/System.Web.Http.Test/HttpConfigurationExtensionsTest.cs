@@ -187,31 +187,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void MapHttpAttributeRoutes_RespectsRouteOrder()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>() { };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>()
-                {
-                    new RouteAttribute("get1") { Order = 1 },
-                    new RouteAttribute("get2"),
-                    new RouteAttribute("get3") { Order = -1 }
-                };
-            SetUpConfiguration(config, routePrefixes, routeProviders);
-
-            // Act
-            config.MapHttpAttributeRoutes();
-
-            // Assert
-            HttpSubRouteCollection routes = config.GetAttributeRoutes();
-            Assert.Equal(3, routes.Count);
-            Assert.Equal("get3", routes.ElementAt(0).RouteTemplate);
-            Assert.Equal("get2", routes.ElementAt(1).RouteTemplate);
-            Assert.Equal("get1", routes.ElementAt(2).RouteTemplate);
-        }
-
-        [Fact]
         public void MapHttpAttributeRoutes_AddsGenerationRoutes()
         {
             // Arrange
@@ -241,41 +216,6 @@ namespace System.Net.Http
             Assert.IsType<GenerateRoute>(routes["one"]);
             Assert.IsType<GenerateRoute>(routes["two"]);
             Assert.IsType<GenerateRoute>(routes["three"]);
-        }
-
-        [Fact]
-        public void MapHttpAttributeRoutes_RespectsRouteOrderAcrossControllers()
-        {
-            // Arrange
-            var config = new HttpConfiguration();
-            HttpControllerDescriptor controllerDescriptor1 = CreateControllerDescriptor(config, "Controller1", new Collection<RoutePrefixAttribute>());
-            HttpActionDescriptor actionDescriptor1 = CreateActionDescriptor(
-                "Action1",
-                new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("action1/route1") { Order = 3 }, new RouteAttribute("action1/route2") { Order = 1 } });
-            HttpControllerDescriptor controllerDescriptor2 = CreateControllerDescriptor(config, "Controller2", new Collection<RoutePrefixAttribute>());
-            HttpActionDescriptor actionDescriptor2 = CreateActionDescriptor(
-                "Action2",
-                new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("action2/route1") { Order = 2 } });
-            
-            var controllerSelector = CreateControllerSelector(new[] { controllerDescriptor1, controllerDescriptor2 });
-            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
-            var actionSelector = CreateActionSelector(
-                new Dictionary<HttpControllerDescriptor, IEnumerable<HttpActionDescriptor>>()
-                {
-                    { controllerDescriptor1, new HttpActionDescriptor[] { actionDescriptor1 } },
-                    { controllerDescriptor2, new HttpActionDescriptor[] { actionDescriptor2 } }
-                });
-            config.Services.Replace(typeof(IHttpActionSelector), actionSelector);
-
-            // Act
-            config.MapHttpAttributeRoutes();
-
-            // Assert
-            HttpSubRouteCollection routes = config.GetAttributeRoutes();
-            Assert.Equal(3, routes.Count);
-            Assert.Equal("action1/route2", routes.ElementAt(0).RouteTemplate);
-            Assert.Equal("action2/route1", routes.ElementAt(1).RouteTemplate);
-            Assert.Equal("action1/route1", routes.ElementAt(2).RouteTemplate);
         }
 
         [Fact]

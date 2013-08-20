@@ -24,7 +24,7 @@ namespace System.Web.Mvc.Routing
     /// and the attribute order first, then applies a default order that registers more specific routes earlier.
     /// </summary>
 #if ASPNETWEBAPI
-    internal class HttpRouteEntry : IComparable<HttpRouteEntry>
+    internal class HttpRouteEntry
 #else
     internal class RouteEntry : IComparable<RouteEntry>
 #endif
@@ -51,11 +51,8 @@ namespace System.Web.Mvc.Routing
         public string Template { get; set; }
         public int Order { get; set; }
 
-#if ASPNETWEBAPI
-        public int CompareTo(HttpRouteEntry other)
-#else
+#if !ASPNETWEBAPI
         public int CompareTo(RouteEntry other)
-#endif
         {
             Contract.Assert(other != null);            
                         
@@ -68,13 +65,9 @@ namespace System.Web.Mvc.Routing
                 return -1;
             }
 
-#if ASPNETWEBAPI
-            HttpRoute httpRoute1 = Route as HttpRoute;
-            HttpRoute httpRoute2 = other.Route as HttpRoute;
-#else
             Route httpRoute1 = Route;
             Route httpRoute2 = other.Route;
-#endif
+
             if (httpRoute1 != null && httpRoute2 != null)
             {
                 int comparison = Compare(this, other);
@@ -87,21 +80,14 @@ namespace System.Web.Mvc.Routing
             // Compare the route templates alphabetically to ensure the sort is stable and deterministic in almost all cases
             return String.Compare(Template, other.Template, StringComparison.OrdinalIgnoreCase);
         }
-
-        // Default ordering goes through segments one by one and tries to apply an ordering
-#if ASPNETWEBAPI
-        private static int Compare(HttpRouteEntry entry1, HttpRouteEntry entry2)
-#else
-        private static int Compare(RouteEntry entry1, RouteEntry entry2)
 #endif
+
+#if !ASPNETWEBAPI
+        // Default ordering goes through segments one by one and tries to apply an ordering
+        private static int Compare(RouteEntry entry1, RouteEntry entry2)
         {
-#if ASPNETWEBAPI
-            HttpParsedRoute parsedRoute1 = entry1.ParsedRoute;
-            HttpParsedRoute parsedRoute2 = entry2.ParsedRoute;
-#else
             ParsedRoute parsedRoute1 = entry1.ParsedRoute;
             ParsedRoute parsedRoute2 = entry2.ParsedRoute;
-#endif
 
             IList<PathContentSegment> segments1 = parsedRoute1.PathSegments.OfType<PathContentSegment>().ToArray();
             IList<PathContentSegment> segments2 = parsedRoute2.PathSegments.OfType<PathContentSegment>().ToArray();
@@ -111,8 +97,8 @@ namespace System.Web.Mvc.Routing
                 PathContentSegment segment1 = segments1[i];
                 PathContentSegment segment2 = segments2[i];
 
-                int order1 = GetOrder(segment1, entry1.Route.Constraints);
-                int order2 = GetOrder(segment2, entry2.Route.Constraints);
+                int order1 = GetPrecedenceDigit(segment1, entry1.Route.Constraints);
+                int order2 = GetPrecedenceDigit(segment2, entry2.Route.Constraints);
 
                 if (order1 > order2)
                 {
@@ -126,6 +112,7 @@ namespace System.Web.Mvc.Routing
 
             return 0;
         }
+#endif
 
         // Segments have the following order:
         // 1 - Literal segments
@@ -133,7 +120,7 @@ namespace System.Web.Mvc.Routing
         // 3 - Unconstrained parameter segments
         // 4 - Constrained wildcard parameter segments
         // 5 - Unconstrained wildcard parameter segments
-        private static int GetOrder(PathContentSegment segment, IDictionary<string, object> constraints)
+        internal static int GetPrecedenceDigit(PathContentSegment segment, IDictionary<string, object> constraints)
         {
             if (segment.Subsegments.Count > 1)
             {
@@ -155,7 +142,7 @@ namespace System.Web.Mvc.Routing
                 
                 // If there is a route constraint for the parameter, reduce order by 1
                 // Constrained parameters end up with order 2, Constrained catch alls end up with order 4
-                if (constraints.ContainsKey(parameterSegment.ParameterName))
+                if (constraints != null && constraints.ContainsKey(parameterSegment.ParameterName))
                 {
                     order--;
                 }

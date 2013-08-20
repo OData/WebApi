@@ -13,6 +13,7 @@ namespace System.Web.Mvc.Routing
 {
     public class RouteEntryTest
     {
+#if !ASPNETWEBAPI
         [Theory]
         [InlineData(1, 2, -1)]
         [InlineData(2, 1, 1)]
@@ -21,13 +22,8 @@ namespace System.Web.Mvc.Routing
         [InlineData(0, 0, 0)]
         public void CompareTo_RespectsOrder(int order1, int order2, int expectedValue)
         {
-#if ASPNETWEBAPI
-            var x = new HttpRouteEntry();
-            var y = new HttpRouteEntry();
-#else
             var x = new RouteEntry();
             var y = new RouteEntry();
-#endif
 
             x.Order = order1;
             y.Order = order2;
@@ -75,15 +71,8 @@ namespace System.Web.Mvc.Routing
             Assert.True(y.CompareTo(x) > 0);
         }
 
-#if ASPNETWEBAPI
-        private static HttpRouteEntry CreateRouteEntry(string routeTemplate)
+        private static RouteEntry CreateRouteEntry(string routeTemplate)
         {
-            IHttpRoute route = new HttpRouteBuilder().BuildParsingRoute(routeTemplate, actions: null);
-            return new HttpRouteEntry() { Route = route, Template = routeTemplate };
-        }
-#else
-       private static RouteEntry CreateRouteEntry(string routeTemplate)
-       {
            var route = new RouteBuilder().BuildDirectRoute(routeTemplate, new[] { "GET" }, "Controller", "Action", null, null);
            return new RouteEntry()
            {
@@ -91,7 +80,7 @@ namespace System.Web.Mvc.Routing
                Template = routeTemplate,
                ParsedRoute = RouteParser.Parse(route.Url)
            };
-       }
+        }
 #endif
     }
 }

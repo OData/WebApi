@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http
@@ -53,6 +55,60 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void SelectAction_WithDirectRoutes_RespectsRouteOrder()
+        {
+            // Arrange
+            var actionSelector = new ApiControllerActionSelector();
+            HttpControllerContext context = ContextUtil.CreateControllerContext();
+            context.Request = new HttpRequestMessage { Method = HttpMethod.Get };
+            var controllerDescriptor = new HttpControllerDescriptor(context.Configuration, "MultipleGet", typeof(MultipleGetController));
+            context.ControllerDescriptor = controllerDescriptor;
+            ReflectedHttpActionDescriptor firstDirectRouteAction = (ReflectedHttpActionDescriptor)actionSelector.GetActionMapping(controllerDescriptor)["GetA"].Single();
+            HttpRouteData[] subRouteData = new HttpRouteData[2];
+            subRouteData[0] = new HttpRouteData(new HttpRoute());
+            subRouteData[1] = new HttpRouteData(new HttpRoute());
+            context.RouteData.Values.Add(RouteCollectionRoute.SubRouteDataKey, subRouteData);
+            subRouteData[0].Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { firstDirectRouteAction });
+            subRouteData[0].Route.DataTokens.Add("order", 1);
+            ReflectedHttpActionDescriptor secondDirectRouteAction = (ReflectedHttpActionDescriptor)actionSelector.GetActionMapping(controllerDescriptor)["GetB"].Single();
+            subRouteData[1].Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { secondDirectRouteAction });
+            subRouteData[1].Route.DataTokens.Add("order", 2);
+
+            // Act
+            HttpActionDescriptor actionDescriptor = actionSelector.SelectAction(context);
+
+            // Assert
+            Assert.Same(secondDirectRouteAction, actionDescriptor);
+        }
+
+        [Fact]
+        public void SelectAction_WithDirectRoutes_RespectsPrecedence()
+        {
+            // Arrange
+            var actionSelector = new ApiControllerActionSelector();
+            HttpControllerContext context = ContextUtil.CreateControllerContext();
+            context.Request = new HttpRequestMessage { Method = HttpMethod.Get };
+            var controllerDescriptor = new HttpControllerDescriptor(context.Configuration, "MultipleGet", typeof(MultipleGetController));
+            context.ControllerDescriptor = controllerDescriptor;
+            ReflectedHttpActionDescriptor firstDirectRouteAction = (ReflectedHttpActionDescriptor)actionSelector.GetActionMapping(controllerDescriptor)["GetA"].Single();
+            HttpRouteData[] subRouteData = new HttpRouteData[2];
+            subRouteData[0] = new HttpRouteData(new HttpRoute());
+            subRouteData[1] = new HttpRouteData(new HttpRoute());
+            context.RouteData.Values.Add(RouteCollectionRoute.SubRouteDataKey, subRouteData);
+            subRouteData[0].Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { firstDirectRouteAction });
+            subRouteData[0].Route.DataTokens.Add("precedence", 2M);
+            ReflectedHttpActionDescriptor secondDirectRouteAction = (ReflectedHttpActionDescriptor)actionSelector.GetActionMapping(controllerDescriptor)["GetB"].Single();
+            subRouteData[1].Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { secondDirectRouteAction });
+            subRouteData[1].Route.DataTokens.Add("precedence", 1M);
+
+            // Act
+            HttpActionDescriptor actionDescriptor = actionSelector.SelectAction(context);
+
+            // Assert
+            Assert.Same(secondDirectRouteAction, actionDescriptor);
+        }
+
+        [Fact]
         public void SelectAction_Throws_IfContextIsNull()
         {
             ApiControllerActionSelector actionSelector = new ApiControllerActionSelector();
@@ -60,6 +116,13 @@ namespace System.Web.Http
             Assert.ThrowsArgumentNull(
                 () => actionSelector.SelectAction(null),
                 "controllerContext");
+        }
+
+        public class MultipleGetController : ApiController
+        {
+            public HttpResponseMessage GetA() { return null; }
+
+            public HttpResponseMessage GetB() { return null; }
         }
     }
 }

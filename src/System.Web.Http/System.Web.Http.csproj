@@ -114,6 +114,7 @@
     <Compile Include="OverrideAuthorizationAttribute.cs" />
     <Compile Include="OverrideExceptionFiltersAttribute.cs" />
     <Compile Include="RouteAttribute.cs" />
+    <Compile Include="Routing\HttpSubRouteCollection.cs" />
     <Compile Include="Routing\RouteCollectionRoute.cs" />
     <Compile Include="Routing\GenerationRoute.cs" />
     <Compile Include="Routing\HttpDirectRoute.cs" />

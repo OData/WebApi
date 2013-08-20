@@ -90,7 +90,7 @@ namespace System.Web.Http.Description
             var action = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(AttributeApiExplorerValuesController).GetMethod("Action"));
             var actions = new ReflectedHttpActionDescriptor[] { action };
 
-            var routeCollection = new HttpRouteCollection();
+            var routeCollection = new HttpSubRouteCollection();
             routeCollection.Add("testroute", new HttpDirectRoute(routeTemplate, actions));
 
             RouteCollectionRoute route = new RouteCollectionRoute();

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -85,10 +86,10 @@ namespace System.Web.Http
 
                     // Add a single placeholder route that handles all of attribute routing.
                     // Add an initialize hook that initializes these routes after the config has been initialized.
-                    Func<HttpRouteCollection> initializer = () => MapHttpAttributeRoutesInternal(configuration, routeBuilder);
+                    Func<HttpSubRouteCollection> initializer = () => MapHttpAttributeRoutesInternal(configuration, routeBuilder);
 
                     // This won't change config. It wants to pick up the finalized config.
-                    HttpRouteCollection subRoutes = attrRoute.EnsureInitialized(initializer);
+                    HttpSubRouteCollection subRoutes = attrRoute.EnsureInitialized(initializer);
                     if (subRoutes != null)
                     {
                         AddGenerationHooksForSubRoutes(config.Routes, subRoutes);
@@ -98,9 +99,9 @@ namespace System.Web.Http
 
         // Add generation hooks for the Attribute-routing subroutes. 
         // This lets us generate urls for routes supplied by attr-based routing.
-        private static void AddGenerationHooksForSubRoutes(HttpRouteCollection destRoutes, HttpRouteCollection sourceRoutes)
+        private static void AddGenerationHooksForSubRoutes(HttpRouteCollection destRoutes, HttpSubRouteCollection sourceRoutes)
         {
-            foreach (KeyValuePair<string, IHttpRoute> kv in sourceRoutes.GetRoutesWithNames())
+            foreach (KeyValuePair<string, IHttpRoute> kv in sourceRoutes.NamedRoutes)
             {
                 string name = kv.Key;
                 IHttpRoute route = kv.Value;
@@ -113,7 +114,7 @@ namespace System.Web.Http
         // MapHttpAttributeRoutes doesn't return the route collection because it's an implementation detail
         // that attr routes even generate a meaningful route collection. 
         // Public APIs can get similar functionality by querying the IHttpRoute for IEnumerable<IHttpRoute>.
-        internal static HttpRouteCollection GetAttributeRoutes(this HttpConfiguration configuration)
+        internal static HttpSubRouteCollection GetAttributeRoutes(this HttpConfiguration configuration)
         {
             configuration.EnsureInitialized();
 
@@ -131,9 +132,9 @@ namespace System.Web.Http
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
             Justification = "HttpRouteCollection doesn't need to be disposed")]
-        private static HttpRouteCollection MapHttpAttributeRoutesInternal(this HttpConfiguration configuration, HttpRouteBuilder routeBuilder)
+        private static HttpSubRouteCollection MapHttpAttributeRoutesInternal(this HttpConfiguration configuration, HttpRouteBuilder routeBuilder)
         {
-            HttpRouteCollection subRoutes = new HttpRouteCollection();
+            HttpSubRouteCollection subRoutes = new HttpSubRouteCollection();
 
             if (configuration == null)
             {
@@ -160,7 +161,6 @@ namespace System.Web.Http
                         route.Route = routeBuilder.BuildHttpRoute(route.Template, route.Actions);
                     }
 
-                    SetDefaultRouteNames(controllerRoutes, controllerDescriptor.ControllerName);
                     attributeRoutes.AddRange(controllerRoutes);
                 }
 
@@ -262,7 +262,7 @@ namespace System.Web.Http
                 {
                     // Merge unnamed entries with the exact same template and order.
                     HttpRouteEntry existingMatch = routes.SingleOrDefault(
-                        e => String.IsNullOrEmpty(entry.Name)
+                        e => String.IsNullOrEmpty(e.Name)
                             && String.Equals(e.Template, entry.Template, StringComparison.Ordinal)
                             && e.Order == entry.Order);
 
@@ -351,17 +351,6 @@ namespace System.Web.Http
             {
                 // template and prefix both not null - combine them
                 return routePrefix + '/' + routeTemplate;
-            }
-        }
-
-        private static void SetDefaultRouteNames(IEnumerable<HttpRouteEntry> routes, string controllerName)
-        {
-            // Only use a route suffix to disambiguate between routes without a specified route name
-            int routeSuffix = 1;
-            foreach (HttpRouteEntry namelessRoute in routes.Where(entry => entry.Name == null))
-            {
-                namelessRoute.Name = controllerName + routeSuffix;
-                routeSuffix++;
             }
         }
     }

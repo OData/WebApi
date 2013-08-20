@@ -113,10 +113,9 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = config.GetAttributeRoutes();
+            HttpSubRouteCollection routes = config.GetAttributeRoutes();
             IHttpRoute route = Assert.Single(routes);
             Assert.Equal(expectedTemplate, route.RouteTemplate);
-            Assert.Equal(route, routes["Controller1"]);
         }
 
         [Fact]
@@ -162,7 +161,7 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = config.GetAttributeRoutes();
+            HttpSubRouteCollection routes = config.GetAttributeRoutes();
             Assert.Equal(2, routes.Count);
             Assert.Single(routes.Where(route => route.RouteTemplate == "controller/get1"));
             Assert.Single(routes.Where(route => route.RouteTemplate == "controller/get2"));
@@ -229,7 +228,7 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = config.GetAttributeRoutes();
+            HttpSubRouteCollection routes = config.GetAttributeRoutes();
             Assert.Equal(3, routes.Count);
             Assert.Equal("get3", routes.ElementAt(0).RouteTemplate);
             Assert.Equal("get2", routes.ElementAt(1).RouteTemplate);
@@ -296,7 +295,7 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = config.GetAttributeRoutes();
+            HttpSubRouteCollection routes = config.GetAttributeRoutes();
             Assert.Equal(3, routes.Count);
             Assert.Equal("action1/route2", routes.ElementAt(0).RouteTemplate);
             Assert.Equal("action2/route1", routes.ElementAt(1).RouteTemplate);
@@ -334,7 +333,7 @@ namespace System.Net.Http
             globalConfiguration.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = globalConfiguration.GetAttributeRoutes();
+            HttpSubRouteCollection routes = globalConfiguration.GetAttributeRoutes();
             Assert.Equal("PerController", Assert.Single(routes).RouteTemplate);
         }
 
@@ -362,7 +361,7 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpRouteCollection routes = config.GetAttributeRoutes();
+            HttpSubRouteCollection routes = config.GetAttributeRoutes();
             IHttpRoute route = Assert.Single(routes);
             Assert.Equal(routeTemplate, route.RouteTemplate);
             Assert.Equal(actionDescriptor, Assert.Single(route.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));

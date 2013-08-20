@@ -90,13 +90,5 @@ namespace System.Web.Http
         {
             return routes.MapHttpRoute(routeName, routeTemplate, defaults: null, constraints: null, handler: batchHandler);
         }
-
-        // Normal route table enumeration doesn't include the route name.
-        internal static IEnumerable<KeyValuePair<string, IHttpRoute>> GetRoutesWithNames(this HttpRouteCollection routes)
-        {
-            KeyValuePair<string, IHttpRoute>[] names = new KeyValuePair<string, IHttpRoute>[routes.Count];
-            routes.CopyTo(names, 0);
-            return names;
-        }
     }
 }

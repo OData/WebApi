@@ -18,7 +18,7 @@ namespace System.Web.Http.Routing
         // Prefix with a \0 to protect against conflicts with user keys. 
         public const string SubRouteDataKey = "MS_SubRoutes";
 
-        private HttpRouteCollection _subRoutes;
+        private HttpSubRouteCollection _subRoutes;
 
         private static readonly IDictionary<string, object> _empty = EmptyReadOnlyDictionary<string, object>.Value;
         
@@ -33,7 +33,7 @@ namespace System.Web.Http.Routing
 
         // deferred hook for initializing the sub routes. The composite route can be added during the middle of 
         // intializing, but then the actual sub routes can get populated after initialization has finished. 
-        public HttpRouteCollection EnsureInitialized(Func<HttpRouteCollection> initializer)
+        public HttpSubRouteCollection EnsureInitialized(Func<HttpSubRouteCollection> initializer)
         {
             if (_beingInitialized && _subRoutes == null)
             {
@@ -55,7 +55,7 @@ namespace System.Web.Http.Routing
             }
         }
 
-        public HttpRouteCollection SubRoutes
+        public HttpSubRouteCollection SubRoutes
         {
             get
             {

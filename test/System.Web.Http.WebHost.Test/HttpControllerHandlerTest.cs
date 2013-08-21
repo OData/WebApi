@@ -240,7 +240,7 @@ namespace System.Web.Http.WebHost
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            HttpControllerHandler.ConvertResponse(contextMock.Object, response, request);
+            HttpControllerHandler.ConvertResponse(contextMock.Object, response, request).Wait();
 
             // Assert
             contextMock.Verify(c => c.Response.Cache.SetCacheability(HttpCacheability.NoCache));
@@ -256,7 +256,7 @@ namespace System.Web.Http.WebHost
             response.Headers.CacheControl = new CacheControlHeaderValue { Public = true };
 
             // Act
-            HttpControllerHandler.ConvertResponse(contextMock.Object, response, request);
+            HttpControllerHandler.ConvertResponse(contextMock.Object, response, request).Wait();
 
             // Assert
             contextMock.Verify(c => c.Response.Cache.SetCacheability(HttpCacheability.NoCache), Times.Never());
@@ -806,7 +806,7 @@ namespace System.Web.Http.WebHost
             requestBaseMock.SetupGet(m => m.HttpMethod).Returns(httpMethod);
             requestBaseMock.SetupGet(m => m.Url).Returns(new Uri("Http://localhost"));
             requestBaseMock.SetupGet(m => m.Headers).Returns(new NameValueCollection());
-            requestBaseMock.Setup(m => m.InputStream).Returns(bufferedStream);
+            requestBaseMock.Setup(m => m.GetBufferedInputStream()).Returns(bufferedStream);
             return requestBaseMock.Object;
         }
 
@@ -818,7 +818,7 @@ namespace System.Web.Http.WebHost
             requestBaseMock.SetupGet(m => m.Headers).Returns(new NameValueCollection());
             if (buffered)
             {
-                requestBaseMock.Setup(m => m.InputStream).Returns(() => getStream());
+                requestBaseMock.Setup(m => m.GetBufferedInputStream()).Returns(() => getStream());
             }
             else
             {

@@ -257,9 +257,14 @@ namespace System.Web.Http.Controllers
                 return response;
             }
 
-            [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
             private CandidateAction[] GetInitialCandidateList(HttpControllerContext controllerContext, bool ignoreVerbs = false)
             {
+                // Initial candidate list is determined by:
+                // - Direct route?
+                // - {action} value?
+                // - ignore verbs?
+                string actionName;
+
                 HttpMethod incomingMethod = controllerContext.Request.Method;
                 IHttpRouteData routeData = controllerContext.RouteData;
 
@@ -271,7 +276,14 @@ namespace System.Web.Http.Controllers
                     candidates = routeData.GetDirectRouteCandidates();
                     if (candidates != null)
                     {
-                        if (!ignoreVerbs)
+                        actionName = GetActionNameFromDirectRoute(routeData);
+
+                        if (actionName != null)
+                        {
+                            CandidateAction[] candidatesFoundByName = Array.FindAll(candidates, candidate => candidate.MatchName(actionName));
+                            candidates = GetInitialCandidateListByActionName(controllerContext, candidatesFoundByName, actionName, ignoreVerbs);                            
+                        } 
+                        else if (!ignoreVerbs)
                         {
                             candidates = FindActionsForVerbWorker(incomingMethod, candidates);
                         }
@@ -280,20 +292,10 @@ namespace System.Web.Http.Controllers
                     }
                 }
 
-                string actionName;
                 if (routeData.Values.TryGetValue(RouteKeys.ActionKey, out actionName))
                 {
                     // We have an explicit {action} value, do traditional binding. Just lookup by actionName
                     ReflectedHttpActionDescriptor[] actionsFoundByName = _standardActionNameMapping[actionName].ToArray();
-
-                    // Throws HttpResponseException with NotFound status because no action matches the Name
-                    if (actionsFoundByName.Length == 0)
-                    {
-                        throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
-                            HttpStatusCode.NotFound,
-                            Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
-                            Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
-                    }
 
                     CandidateAction[] candidatesFoundByName = new CandidateAction[actionsFoundByName.Length];
 
@@ -305,14 +307,7 @@ namespace System.Web.Http.Controllers
                         };
                     }
 
-                    if (ignoreVerbs)
-                    {
-                        candidates = candidatesFoundByName;
-                    }
-                    else
-                    {
-                        candidates = FilterIncompatibleVerbs(incomingMethod, candidatesFoundByName);
-                    }
+                    candidates = GetInitialCandidateListByActionName(controllerContext, candidatesFoundByName, actionName, ignoreVerbs);
                 }
                 else
                 {
@@ -327,6 +322,61 @@ namespace System.Web.Http.Controllers
                     }
                 }
 
+                return candidates;
+            }
+
+            // Get the action name from a direct route.
+            // {action} makes sense in a direct route on a controller, so there should be only 1 
+            private static string GetActionNameFromDirectRoute(IHttpRouteData routeData)
+            {
+                string actionName;
+                IEnumerable<IHttpRouteData> subRoutes = routeData.GetSubRoutes();
+                if (subRoutes == null)
+                {
+                    return null;
+                }
+
+                if (subRoutes.Count() != 1)
+                {
+                    return null;
+                }
+
+                IHttpRouteData subRoute = subRoutes.First();
+
+                if (subRoute == null)
+                {
+                    return null;
+                }
+                if (!subRoute.Values.TryGetValue(RouteKeys.ActionKey, out actionName))
+                {
+                    return null;
+                }
+                return actionName;
+            }
+                        
+            [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
+            private CandidateAction[] GetInitialCandidateListByActionName(HttpControllerContext controllerContext, CandidateAction[] candidatesFoundByName, string actionName, bool ignoreVerbs)
+            {
+                HttpMethod incomingMethod = controllerContext.Request.Method;
+
+                CandidateAction[] candidates;
+                // Throws HttpResponseException with NotFound status because no action matches the Name
+                if (candidatesFoundByName.Length == 0)
+                {
+                    throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
+                        HttpStatusCode.NotFound,
+                        Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
+                        Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
+                }
+
+                if (ignoreVerbs)
+                {
+                    candidates = candidatesFoundByName;
+                }
+                else
+                {
+                    candidates = FilterIncompatibleVerbs(incomingMethod, candidatesFoundByName);
+                }
                 return candidates;
             }
 

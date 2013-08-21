@@ -41,7 +41,13 @@ namespace System.Web.Http.Routing
         // Test with default route
         [InlineData("GET", "prefix2/defaultroute/12", "get12")]
         [InlineData("PUT", "prefix2/defaultrouteoverride/12", "put12")]
-        [InlineData("POST", "prefix2", "post")]             
+        [InlineData("POST", "prefix2", "post")]
+        // {action} values
+        [InlineData("GET", "api/default2/GetAllCustomers1", "GetAllCustomers1")]
+        [InlineData("GET", "api/resource/12", "12")]
+        // Mixing {action} with REST
+        [InlineData("GET", "partial/DoOp1", "op1")]
+        [InlineData("GET", "partial/154", "154")]
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -64,6 +70,7 @@ namespace System.Web.Http.Routing
         // accessing attribute routed method via standard route
         [InlineData("GET", "api/Attributed?id=42", HttpStatusCode.NotFound)]
         [InlineData("GET", "api/DefaultRoute?id=42", HttpStatusCode.NotFound)]
+        [InlineData("GET", "api/Default2/GetById", HttpStatusCode.NotFound)]        
         public void AttributeRouting_Failures(string httpMethod, string uri, HttpStatusCode failureCode)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -227,6 +234,44 @@ namespace System.Web.Http.Routing
         public string Put(int id)
         {
             return "put" + id;
+        }
+    }
+
+    [Route("api/default2/{action}")]
+    public class RpcController : ApiController
+    {
+        public string GetAllCustomers1()
+        {
+            return "GetAllCustomers1";
+        }
+
+        public string GetAllCustomers2()
+        {
+            return "GetAllCustomers2";
+        }
+
+        // Have a REST api on a RPC controller. Has unique URL
+        [Route("api/resource/{id}")]
+        public string GetById(string id)
+        {
+            return id;
+        }
+    }
+
+    [Route("partial/{action}")]
+    public class PartlyResourcePartlyRpcController : ApiController
+    {
+        // Normal RPC methods        
+        [HttpGet]
+        public string DoOp1() {
+            return "op1";
+        }
+
+        // Some non-RPC methods.  Has overlapping URL
+        [Route("partial/{id:int}")]
+        public string GetById(int id) 
+        {
+            return id.ToString();
         }
     }
 }

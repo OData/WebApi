@@ -168,8 +168,8 @@ namespace System.Web.Http.Description
                 {
                     if (directRouteCandidates[i].ActionDescriptor.ControllerDescriptor != controllerDescriptor)
                     {
-                        // This can happen if a developer puts the same route template on different actions 
-                        // in different controllers. 
+                        // This can happen if a developer puts the same route template on different actions
+                        // in different controllers.
                         return null;
                     }
                 }
@@ -224,7 +224,23 @@ namespace System.Web.Http.Description
 
             if (ShouldExploreController(controllerDescriptor.ControllerName, controllerDescriptor, route))
             {
-                PopulateActionDescriptions(candidates.Select(c => c.ActionDescriptor), null, route, route.RouteTemplate, descriptions);
+                foreach (CandidateAction action in candidates)
+                {
+                    ReflectedHttpActionDescriptor actionDescriptor = action.ActionDescriptor;
+                    string actionName = actionDescriptor.ActionName;
+
+                    if (ShouldExploreAction(actionName, actionDescriptor, route))
+                    {
+                        string routeTemplate = route.RouteTemplate;
+                        if (_actionVariableRegex.IsMatch(routeTemplate))
+                        {
+                            // expand {action} variable
+                            routeTemplate = _actionVariableRegex.Replace(routeTemplate, actionName);
+                        }
+
+                        PopulateActionDescriptions(actionDescriptor, route, routeTemplate, descriptions);
+                    }
+                }
             }
 
             return descriptions;
@@ -265,33 +281,37 @@ namespace System.Web.Http.Description
 
         private void ExploreRouteActions(IHttpRoute route, string localPath, HttpControllerDescriptor controllerDescriptor, Collection<ApiDescription> apiDescriptions)
         {
-            ServicesContainer controllerServices = controllerDescriptor.Configuration.Services;
-            ILookup<string, HttpActionDescriptor> actionMappings = controllerServices.GetActionSelector().GetActionMapping(controllerDescriptor);
-            string actionVariableValue;
-            if (actionMappings != null)
+            // exclude controllers that are marked with route attributes.
+            if (!controllerDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: true).Any())
             {
-                if (_actionVariableRegex.IsMatch(localPath))
+                ServicesContainer controllerServices = controllerDescriptor.Configuration.Services;
+                ILookup<string, HttpActionDescriptor> actionMappings = controllerServices.GetActionSelector().GetActionMapping(controllerDescriptor);
+                string actionVariableValue;
+                if (actionMappings != null)
                 {
-                    // unbound action variable, {action}
-                    foreach (IGrouping<string, HttpActionDescriptor> actionMapping in actionMappings)
+                    if (_actionVariableRegex.IsMatch(localPath))
                     {
-                        // expand {action} variable
-                        actionVariableValue = actionMapping.Key;
-                        string expandedLocalPath = _actionVariableRegex.Replace(localPath, actionVariableValue);
-                        PopulateActionDescriptions(actionMapping, actionVariableValue, route, expandedLocalPath, apiDescriptions);
+                        // unbound action variable, {action}
+                        foreach (IGrouping<string, HttpActionDescriptor> actionMapping in actionMappings)
+                        {
+                            // expand {action} variable
+                            actionVariableValue = actionMapping.Key;
+                            string expandedLocalPath = _actionVariableRegex.Replace(localPath, actionVariableValue);
+                            PopulateActionDescriptions(actionMapping, actionVariableValue, route, expandedLocalPath, apiDescriptions);
+                        }
                     }
-                }
-                else if (route.Defaults.TryGetValue(RouteKeys.ActionKey, out actionVariableValue))
-                {
-                    // bound action variable, { action = "actionName" }
-                    PopulateActionDescriptions(actionMappings[actionVariableValue], actionVariableValue, route, localPath, apiDescriptions);
-                }
-                else
-                {
-                    // no {action} specified, e.g. {controller}/{id}
-                    foreach (IGrouping<string, HttpActionDescriptor> actionMapping in actionMappings)
+                    else if (route.Defaults.TryGetValue(RouteKeys.ActionKey, out actionVariableValue))
                     {
-                        PopulateActionDescriptions(actionMapping, null, route, localPath, apiDescriptions);
+                        // bound action variable, { action = "actionName" }
+                        PopulateActionDescriptions(actionMappings[actionVariableValue], actionVariableValue, route, localPath, apiDescriptions);
+                    }
+                    else
+                    {
+                        // no {action} specified, e.g. {controller}/{id}
+                        foreach (IGrouping<string, HttpActionDescriptor> actionMapping in actionMappings)
+                        {
+                            PopulateActionDescriptions(actionMapping, null, route, localPath, apiDescriptions);
+                        }
                     }
                 }
             }
@@ -303,7 +323,11 @@ namespace System.Web.Http.Description
             {
                 if (ShouldExploreAction(actionVariableValue, actionDescriptor, route))
                 {
-                    PopulateActionDescriptions(actionDescriptor, route, localPath, apiDescriptions);
+                    // exclude actions that are marked with route attributes.
+                    if (!actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: true).Any())
+                    {
+                        PopulateActionDescriptions(actionDescriptor, route, localPath, apiDescriptions);
+                    }
                 }
             }
         }

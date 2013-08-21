@@ -31,7 +31,7 @@ namespace System.Web.Http.ApiExplorer
                 dynamic expectedResult = sortedExpectedResults[i];
                 ApiDescription matchingDescription = sortedDescriptions[i];
                 Assert.Equal(expectedResult.HttpMethod, matchingDescription.HttpMethod);
-                Assert.Equal(expectedResult.RelativePath, matchingDescription.RelativePath);
+                Assert.Equal(expectedResult.RelativePath, matchingDescription.RelativePath, ignoreCase: true);
                 Assert.Equal(expectedResult.HasRequestFormatters, matchingDescription.SupportedRequestBodyFormatters.Count > 0);
                 Assert.Equal(expectedResult.HasResponseFormatters, matchingDescription.SupportedResponseFormatters.Count > 0);
                 Assert.Equal(expectedResult.NumberOfParameters, matchingDescription.ParameterDescriptions.Count);

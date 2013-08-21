@@ -82,7 +82,10 @@ namespace System.Web.Http
 
             Assert.Equal(HttpStatusCode.NotFound, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
-            Assert.Equal("No action was found on the controller 'ActionAttributeTestController' that matches the request.", ((HttpError)content.Value)["MessageDetail"]);
+
+            // Error message might be ApiControllerActionSelector_ActionNameNotFound or ApiControllerActionSelector_ActionNotFound
+            string actualMessage = (string)((HttpError)content.Value)["MessageDetail"];
+            Assert.True(actualMessage.StartsWith("No action was found on the controller 'ActionAttributeTestController' that matches"));
         }
 
         [Theory]

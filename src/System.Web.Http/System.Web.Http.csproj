@@ -243,7 +243,6 @@
     <Compile Include="HttpPutAttribute.cs" />
     <Compile Include="HttpDeleteAttribute.cs" />
     <Compile Include="Controllers\IActionHttpMethodProvider.cs" />
-    <Compile Include="Controllers\IActionMethodSelector.cs" />
     <Compile Include="Controllers\ApiControllerActionInvoker.cs">
       <SubType>Code</SubType>
     </Compile>

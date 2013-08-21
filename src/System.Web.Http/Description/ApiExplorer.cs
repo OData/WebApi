@@ -99,9 +99,7 @@ namespace System.Web.Http.Description
             }
 
             ApiExplorerSettingsAttribute setting = actionDescriptor.GetCustomAttributes<ApiExplorerSettingsAttribute>().FirstOrDefault();
-            NonActionAttribute nonAction = actionDescriptor.GetCustomAttributes<NonActionAttribute>().FirstOrDefault();
             return (setting == null || !setting.IgnoreApi) &&
-                (nonAction == null) &&
                 MatchRegexConstraint(route, RouteKeys.ActionKey, actionVariableValue);
         }
 

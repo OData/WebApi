@@ -118,6 +118,29 @@ namespace System.Web.Http
                 "controllerContext");
         }
 
+        [Fact]
+        public void GetActionMapping_IgnoresNonAction()
+        {
+            var actionSelector = new ApiControllerActionSelector();
+            HttpControllerContext context = ContextUtil.CreateControllerContext();
+            context.Request = new HttpRequestMessage { Method = HttpMethod.Get };
+            var controllerDescriptor = new HttpControllerDescriptor(context.Configuration, "NonAction", typeof(NonActionController));
+            context.ControllerDescriptor = controllerDescriptor;
+
+            var mapping = actionSelector.GetActionMapping(controllerDescriptor);
+
+            Assert.False(mapping.Contains("GetA"));
+            Assert.True(mapping.Contains("GetB"));            
+        }
+
+        public class NonActionController : ApiController
+        {
+            [NonAction]
+            public HttpResponseMessage GetA() { return null; }
+
+            public HttpResponseMessage GetB() { return null; }
+        }
+
         public class MultipleGetController : ApiController
         {
             public HttpResponseMessage GetA() { return null; }

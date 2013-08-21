@@ -190,8 +190,7 @@ namespace System.Web.Http.Controllers
 
                 // Make sure the action parameter matches the route and query parameters. Overload resolution logic is applied when needed.
                 List<CandidateAction> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidates);
-                List<CandidateAction> filteredCandidates = RunSelectionFilters(controllerContext, actionsFoundByParams);
-                List<CandidateAction> maximumOrderCandidates = RunOrderFilter(filteredCandidates);
+                List<CandidateAction> maximumOrderCandidates = RunOrderFilter(actionsFoundByParams);
                 List<CandidateAction> selectedCandidates = RunPrecedenceFilter(maximumOrderCandidates);
                 candidates = null;
                 actionsFoundByParams = null;
@@ -220,10 +219,10 @@ namespace System.Web.Http.Controllers
                 // Check for 405.  
                 CandidateAction[] candidateActions = GetInitialCandidateList(controllerContext, ignoreVerbs: true);
                 List<CandidateAction> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidateActions);
-                List<CandidateAction> selectedCandidates = RunSelectionFilters(controllerContext, actionsFoundByParams);
-                if (selectedCandidates.Count > 0)
+
+                if (actionsFoundByParams.Count > 0)
                 {
-                    return Create405Response(controllerContext, selectedCandidates);
+                    return Create405Response(controllerContext, actionsFoundByParams);
                 }
 
                 // Throws HttpResponseException with NotFound status because no action matches the request
@@ -463,58 +462,6 @@ namespace System.Web.Http.Controllers
                 return true;
             }
 
-            private static List<CandidateAction> RunSelectionFilters(HttpControllerContext controllerContext, List<CandidateAction> candidatesFound)
-            {
-                // remove all methods which are opting out of this request
-                // to opt out, at least one attribute defined on the method must return false
-
-                List<CandidateAction> matchesWithSelectionAttributes = null;
-                List<CandidateAction> matchesWithoutSelectionAttributes = new List<CandidateAction>();
-
-                for (int i = 0; i < candidatesFound.Count; i++)
-                {
-                    CandidateAction candidate = candidatesFound[i];
-                    ReflectedHttpActionDescriptor actionDescriptor = candidate.ActionDescriptor;
-                    IActionMethodSelector[] attrs = actionDescriptor.CacheAttrsIActionMethodSelector;
-                    if (attrs.Length == 0)
-                    {
-                        matchesWithoutSelectionAttributes.Add(candidate);
-                    }
-                    else
-                    {
-                        bool match = true;
-                        for (int j = 0; j < attrs.Length; j++)
-                        {
-                            IActionMethodSelector selector = attrs[j];
-                            if (!selector.IsValidForRequest(controllerContext, actionDescriptor.MethodInfo))
-                            {
-                                match = false;
-                                break;
-                            }
-                        }
-                        if (match)
-                        {
-                            if (matchesWithSelectionAttributes == null)
-                            {
-                                matchesWithSelectionAttributes = new List<CandidateAction>();
-                            }
-                            matchesWithSelectionAttributes.Add(candidate);
-                        }
-                    }
-                }
-
-                // if a matching action method had a selection attribute, consider it more specific than a matching action method
-                // without a selection attribute
-                if ((matchesWithSelectionAttributes != null) && (matchesWithSelectionAttributes.Count > 0))
-                {
-                    return matchesWithSelectionAttributes;
-                }
-                else
-                {
-                    return matchesWithoutSelectionAttributes;
-                }
-            }
-
             private static List<CandidateAction> RunOrderFilter(List<CandidateAction> candidatesFound)
             {
                 if (candidatesFound.Count == 0)
@@ -607,6 +554,11 @@ namespace System.Web.Http.Controllers
                 if (methodInfo.GetBaseDefinition().DeclaringType.IsAssignableFrom(TypeHelper.ApiControllerType))
                 {
                     // is a method on Object, IHttpController, ApiController
+                    return false;
+                }
+
+                if (methodInfo.GetCustomAttribute<NonActionAttribute>() != null)
+                {
                     return false;
                 }
 

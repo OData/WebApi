@@ -74,11 +74,6 @@ namespace System.Web.Http.Controllers
             _parameters = new Lazy<Collection<HttpParameterDescriptor>>(() => InitializeParameterDescriptors());
         }
 
-        /// <summary>
-        /// Caches that the ActionSelector use.
-        /// </summary>
-        internal IActionMethodSelector[] CacheAttrsIActionMethodSelector { get; private set; }
-
         public override string ActionName
         {
             get { return _actionName; }
@@ -163,7 +158,6 @@ namespace System.Web.Http.Controllers
             _actionExecutor = new Lazy<ActionExecutor>(() => InitializeActionExecutor(_methodInfo));
             _declaredOnlyAttributeCache = _methodInfo.GetCustomAttributes(inherit: false);
             _attributeCache = _methodInfo.GetCustomAttributes(inherit: true);
-            CacheAttrsIActionMethodSelector = _attributeCache.OfType<IActionMethodSelector>().ToArray();
             _actionName = GetActionName(_methodInfo, _attributeCache);
             _supportedHttpMethods = GetSupportedHttpMethods(_methodInfo, _attributeCache);
         }

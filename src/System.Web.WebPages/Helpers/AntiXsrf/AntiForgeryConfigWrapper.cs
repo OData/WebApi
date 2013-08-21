@@ -36,5 +36,10 @@ namespace System.Web.Helpers.AntiXsrf
         {
             get { return AntiForgeryConfig.UniqueClaimTypeIdentifier; }
         }
+
+        public bool SuppressXFrameOptionsHeader
+        {
+            get { return AntiForgeryConfig.SuppressXFrameOptionsHeader; }
+        }
     }
 }

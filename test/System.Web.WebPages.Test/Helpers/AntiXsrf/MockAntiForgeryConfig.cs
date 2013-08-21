@@ -39,5 +39,11 @@ namespace System.Web.Helpers.AntiXsrf.Test
             get;
             set;
         }
+
+        public bool SuppressXFrameOptionsHeader
+        {
+            get;
+            set;
+        }
     }
 }

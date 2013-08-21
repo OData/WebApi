@@ -98,6 +98,14 @@ namespace System.Web.Helpers.AntiXsrf
                 _tokenStore.SaveCookieToken(httpContext, newCookieToken);
             }
 
+            if (!_config.SuppressXFrameOptionsHeader)
+            {
+                // Adding X-Frame-Options header to prevent ClickJacking. See
+                // http://tools.ietf.org/html/draft-ietf-websec-x-frame-options-10
+                // for more information.
+                httpContext.Response.AddHeader("X-Frame-Options", "SAMEORIGIN");
+            }
+
             // <input type="hidden" name="__AntiForgeryToken" value="..." />
             TagBuilder retVal = new TagBuilder("input");
             retVal.Attributes["type"] = "hidden";

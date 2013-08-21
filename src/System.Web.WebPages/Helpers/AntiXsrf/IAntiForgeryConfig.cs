@@ -22,5 +22,8 @@ namespace System.Web.Helpers.AntiXsrf
 
         // ClaimType to use for ClaimsIdentity.
         string UniqueClaimTypeIdentifier { get; }
+
+        // Skip X-FRAME-OPTIONS header.
+        bool SuppressXFrameOptionsHeader { get; }
     }
 }

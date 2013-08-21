@@ -18,7 +18,7 @@ namespace System.Net.Http
     /// </summary>
     public class PushStreamContent : HttpContent
     {
-        private readonly Action<Stream, HttpContent, TransportContext> _onStreamAvailable;
+        private readonly Func<Stream, HttpContent, TransportContext, Task> _onStreamAvailable;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PushStreamContent"/> class. The
@@ -26,28 +26,50 @@ namespace System.Net.Http
         /// has become available allowing the action to write to it directly. When the 
         /// stream is closed, it will signal to the content that is has completed and the 
         /// HTTP request or response will be completed.
-        /// </summary>
-        /// <param name="onStreamAvailable">The action to call when an output stream
-        /// is available. Close the stream to complete the HTTP request or response.</param>
+        /// <param name="onStreamAvailable">The action to call when an output stream is available.</param>
         public PushStreamContent(Action<Stream, HttpContent, TransportContext> onStreamAvailable)
+            : this(Taskify(onStreamAvailable), (MediaTypeHeaderValue)null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PushStreamContent"/> class. 
+        /// </summary>
+        /// <param name="onStreamAvailable">The action to call when an output stream is available. The stream is automatically
+        /// closed when the return task is completed.</param>
+        public PushStreamContent(Func<Stream, HttpContent, TransportContext, Task> onStreamAvailable)
             : this(onStreamAvailable, (MediaTypeHeaderValue)null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PushStreamContent"/> class
-        /// with the given media type.
+        /// Initializes a new instance of the <see cref="PushStreamContent"/> class with the given media type.
         /// </summary>
         public PushStreamContent(Action<Stream, HttpContent, TransportContext> onStreamAvailable, string mediaType)
+            : this(Taskify(onStreamAvailable), new MediaTypeHeaderValue(mediaType))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PushStreamContent"/> class with the given media type.
+        /// </summary>
+        public PushStreamContent(Func<Stream, HttpContent, TransportContext, Task> onStreamAvailable, string mediaType)
             : this(onStreamAvailable, new MediaTypeHeaderValue(mediaType))
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PushStreamContent"/> class
-        /// with the given <see cref="MediaTypeHeaderValue"/>.
+        /// Initializes a new instance of the <see cref="PushStreamContent"/> class with the given <see cref="MediaTypeHeaderValue"/>.
         /// </summary>
         public PushStreamContent(Action<Stream, HttpContent, TransportContext> onStreamAvailable, MediaTypeHeaderValue mediaType)
+            : this(Taskify(onStreamAvailable), mediaType)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PushStreamContent"/> class with the given <see cref="MediaTypeHeaderValue"/>.
+        /// </summary>
+        public PushStreamContent(Func<Stream, HttpContent, TransportContext, Task> onStreamAvailable, MediaTypeHeaderValue mediaType)
         {
             if (onStreamAvailable == null)
             {
@@ -56,6 +78,21 @@ namespace System.Net.Http
 
             _onStreamAvailable = onStreamAvailable;
             Headers.ContentType = mediaType ?? MediaTypeConstants.ApplicationOctetStreamMediaType;
+        }
+
+        private static Func<Stream, HttpContent, TransportContext, Task> Taskify(
+            Action<Stream, HttpContent, TransportContext> onStreamAvailable)
+        {
+            if (onStreamAvailable == null)
+            {
+                throw Error.ArgumentNull("onStreamAvailable");
+            }
+
+            return (Stream stream, HttpContent content, TransportContext transportContext) =>
+            {
+                onStreamAvailable(stream, content, transportContext);
+                return TaskHelpers.Completed();
+            };
         }
 
         /// <summary>
@@ -67,20 +104,15 @@ namespace System.Net.Http
         /// <param name="context">The associated <see cref="TransportContext"/>.</param>
         /// <returns>A <see cref="Task"/> instance that is asynchronously serializing the object's content.</returns>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is passed as task result.")]
-        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
         {
             TaskCompletionSource<bool> serializeToStreamTask = new TaskCompletionSource<bool>();
-            try
-            {
-                Stream wrappedStream = new CompleteTaskOnCloseStream(stream, serializeToStreamTask);
-                _onStreamAvailable(wrappedStream, this, context);
-            }
-            catch (Exception e)
-            {
-                serializeToStreamTask.TrySetException(e);
-            }
 
-            return serializeToStreamTask.Task;
+            Stream wrappedStream = new CompleteTaskOnCloseStream(stream, serializeToStreamTask);
+            await _onStreamAvailable(wrappedStream, this, context);
+
+            // wait for wrappedStream.Close/Dispose to get called.
+            await serializeToStreamTask.Task;
         }
 
         /// <summary>

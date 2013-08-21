@@ -14,30 +14,31 @@ namespace System.Net.Http
         [Fact]
         public void Constructor_ThrowsOnNullAction()
         {
-            Assert.ThrowsArgumentNull(() => new PushStreamContent(null), "onStreamAvailable");
+            Action<Stream, HttpContent, TransportContext> action = null;
+            Assert.ThrowsArgumentNull(() => new PushStreamContent(action), "onStreamAvailable");
         }
 
         [Fact]
         public void Constructor_SetsDefaultMediaType()
         {
-            MockStreamAction streamAction = new MockStreamAction();
-            PushStreamContent content = new PushStreamContent(streamAction.Action);
+            Action<Stream, HttpContent, TransportContext> streamAction = new MockStreamAction().Action;
+            PushStreamContent content = new PushStreamContent(streamAction);
             Assert.Equal(MediaTypeConstants.ApplicationOctetStreamMediaType, content.Headers.ContentType);
         }
 
         [Fact]
         public void Constructor_SetsMediaTypeFromString()
         {
-            MockStreamAction streamAction = new MockStreamAction();
-            PushStreamContent content = new PushStreamContent(streamAction.Action, "text/xml");
+            Action<Stream, HttpContent, TransportContext> streamAction = new MockStreamAction().Action;
+            PushStreamContent content = new PushStreamContent(streamAction, "text/xml");
             Assert.Equal(MediaTypeConstants.TextXmlMediaType, content.Headers.ContentType);
         }
 
         [Fact]
         public void Constructor_SetsMediaType()
         {
-            MockStreamAction streamAction = new MockStreamAction();
-            PushStreamContent content = new PushStreamContent(streamAction.Action, MediaTypeConstants.TextXmlMediaType);
+            Action<Stream, HttpContent, TransportContext> streamAction = new MockStreamAction().Action;
+            PushStreamContent content = new PushStreamContent(streamAction, MediaTypeConstants.TextXmlMediaType);
             Assert.Equal(MediaTypeConstants.TextXmlMediaType, content.Headers.ContentType);
         }
 
@@ -47,7 +48,7 @@ namespace System.Net.Http
             // Arrange
             MemoryStream outputStream = new MemoryStream();
             MockStreamAction streamAction = new MockStreamAction(close: true);
-            PushStreamContent content = new PushStreamContent(streamAction.Action);
+            PushStreamContent content = new PushStreamContent((Action<Stream, HttpContent, TransportContext>)streamAction.Action);
 
             // Act
             return content.CopyToAsync(outputStream).ContinueWith(
@@ -67,7 +68,7 @@ namespace System.Net.Http
                     Assert.True(outputStream.CanRead);
 #endif
 
-                    });
+                });
         }
 
         [Fact]
@@ -76,7 +77,7 @@ namespace System.Net.Http
             // Arrange
             MemoryStream outputStream = new MemoryStream();
             MockStreamAction streamAction = new MockStreamAction(throwException: true);
-            PushStreamContent content = new PushStreamContent(streamAction.Action);
+            PushStreamContent content = new PushStreamContent((Action<Stream, HttpContent, TransportContext>)streamAction.Action);
 
             // Act
             return content.CopyToAsync(outputStream).ContinueWith(
@@ -150,6 +151,33 @@ namespace System.Net.Http
             Assert.True(serializeToStreamTask.Task.Result);
         }
 #endif
+        [Fact]
+        public async Task PushStreamContentWithAsyncOnStreamAvailableHandler_ExceptionsInOnStreamAvailable_AreCaught()
+        {
+            // Arrange
+            bool faulted = false;
+            Exception exception = new ApplicationException();
+            PushStreamContent content = new PushStreamContent(async (s, c, tc) =>
+            {
+                await Task.FromResult(42);
+                throw exception;
+            });
+            MemoryStream stream = new MemoryStream();
+
+            try
+            {
+                // Act
+                await content.CopyToAsync(stream);
+            }
+            catch (ApplicationException e)
+            {
+                Assert.Same(exception, e);
+                faulted = true;
+            }
+
+            // Assert
+            Assert.True(faulted);
+        }
 
         private class MockStreamAction
         {

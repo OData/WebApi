@@ -26,6 +26,7 @@ namespace System.Net.Http
         /// has become available allowing the action to write to it directly. When the 
         /// stream is closed, it will signal to the content that is has completed and the 
         /// HTTP request or response will be completed.
+        /// </summary>
         /// <param name="onStreamAvailable">The action to call when an output stream is available.</param>
         public PushStreamContent(Action<Stream, HttpContent, TransportContext> onStreamAvailable)
             : this(Taskify(onStreamAvailable), (MediaTypeHeaderValue)null)

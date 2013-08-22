@@ -682,6 +682,34 @@ namespace System.Web.Http.OData.Formatter
             Assert.Contains("$select=something", result);
         }
 
+        [Fact]
+        public void ReadFromStreamAsync_UsesRightDeserializerFrom_ODataDeserializerProvider()
+        {
+            // Arrange
+            MemoryStream stream = new MemoryStream();
+            StringContent content = new StringContent("42");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+            IEdmModel model = CreateModel();
+            HttpRequestMessage request = CreateFakeODataRequest(model);
+            Mock<ODataDeserializer> deserializer = new Mock<ODataDeserializer>(ODataPayloadKind.Property);
+            deserializer.Setup(d => d.Read(It.IsAny<ODataMessageReader>(), typeof(int), It.IsAny<ODataDeserializerContext>()))
+                .Verifiable();
+
+            Mock<ODataDeserializerProvider> provider = new Mock<ODataDeserializerProvider>();
+            provider.Setup(p => p.GetODataDeserializer(model, typeof(int), request)).Returns(deserializer.Object);
+
+            // Act
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(provider.Object,
+                new DefaultODataSerializerProvider(), Enumerable.Empty<ODataPayloadKind>());
+            formatter.Request = request;
+
+            formatter.ReadFromStreamAsync(typeof(int), stream, content, null);
+
+            // Assert
+            deserializer.Verify();
+        }
+
         private static Encoding CreateEncoding(string name)
         {
             if (name == "utf-8")

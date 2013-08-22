@@ -532,14 +532,15 @@ namespace System.Web.Http.OData.Formatter
         {
             expectedPayloadType = GetExpectedPayloadType(type, path, model);
 
-            if (expectedPayloadType != null)
+            // Get the deserializer using the CLR type first from the deserializer provider.
+            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(model, type, Request);
+            if (deserializer == null && expectedPayloadType != null)
             {
-                return deserializerProvider.GetEdmTypeDeserializer(expectedPayloadType);
+                // we are in typeless mode, get the deserializer using the edm type from the path.
+                deserializer = deserializerProvider.GetEdmTypeDeserializer(expectedPayloadType);
             }
-            else
-            {
-                return deserializerProvider.GetODataDeserializer(model, type, Request);
-            }
+
+            return deserializer;
         }
 
         private ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider)

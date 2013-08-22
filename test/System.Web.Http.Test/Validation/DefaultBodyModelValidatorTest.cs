@@ -170,25 +170,6 @@ namespace System.Web.Http.Validation
         }
 
         [Fact]
-        public void ValidationErrorsNotAddedOnInvalidFields()
-        {
-            // Arrange
-            ModelMetadataProvider metadataProvider = new DataAnnotationsModelMetadataProvider();
-            HttpActionContext actionContext = ContextUtil.CreateActionContext();
-            object model = new Address() { Street = "Microsoft Way" };
-
-            actionContext.ModelState.AddModelError("Street", "error");
-
-            // Act
-            new DefaultBodyModelValidator().Validate(model, typeof(Address), metadataProvider, actionContext, string.Empty);
-
-            // Assert
-            Assert.Contains("Street", actionContext.ModelState.Keys);
-            ModelState streetState = actionContext.ModelState["Street"];
-            Assert.Equal(1, streetState.Errors.Count);
-        }
-
-        [Fact]
         public void ExcludedTypes_AreNotValidated()
         {
             // Arrange

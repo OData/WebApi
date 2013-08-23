@@ -48,6 +48,9 @@ namespace System.Web.Http.Routing
         // Mixing {action} with REST
         [InlineData("GET", "partial/DoOp1", "op1")]
         [InlineData("GET", "partial/154", "154")]
+        // Overload resolution 
+        [InlineData("GET", "apioverload/Fred?age=12", "GetAge:Fred12")]
+        [InlineData("GET", "apioverload/Fred?score=12", "GetScore:Fred12")]        
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -70,7 +73,8 @@ namespace System.Web.Http.Routing
         // accessing attribute routed method via standard route
         [InlineData("GET", "api/Attributed?id=42", HttpStatusCode.NotFound)]
         [InlineData("GET", "api/DefaultRoute?id=42", HttpStatusCode.NotFound)]
-        [InlineData("GET", "api/Default2/GetById", HttpStatusCode.NotFound)]        
+        [InlineData("GET", "api/Default2/GetById", HttpStatusCode.NotFound)]
+        [InlineData("GET", "apioverload/Fred?score=12&age=23", HttpStatusCode.InternalServerError)] // Ambiguous match
         public void AttributeRouting_Failures(string httpMethod, string uri, HttpStatusCode failureCode)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -272,6 +276,22 @@ namespace System.Web.Http.Routing
         public string GetById(int id) 
         {
             return id.ToString();
+        }
+    }
+
+    [RoutePrefix("apioverload")]
+    public class OverloadController : ApiController
+    {
+        [Route("{name}")]
+        public string GetAge(string name, int age)
+        {
+            return "GetAge:" + name + age;
+        }
+
+        [Route("{id}")]
+        public string GetScore(string id, int score)
+        {
+            return "GetScore:" + id + score;
         }
     }
 }

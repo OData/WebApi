@@ -173,7 +173,6 @@
     <Compile Include="Controls\RepeaterItem.cs" />
     <Compile Include="Controls\RouteValues.cs" />
     <Compile Include="Controls\TextBox.cs" />
-    <Compile Include="CookieTempDataProvider.cs" />
     <Compile Include="SkipBindingAttribute.cs" />
     <Compile Include="FormExtensions.cs" />
     <Compile Include="HtmlButtonType.cs" />

@@ -77,7 +77,6 @@
     <Compile Include="Test\ButtonTest.cs" />
     <Compile Include="Test\ContentTypeAttributeTest.cs" />
     <Compile Include="Test\ControllerExtensionsTest.cs" />
-    <Compile Include="Test\CookieTempDataProviderTest.cs" />
     <Compile Include="Test\AjaxOnlyAttributeTest.cs" />
     <Compile Include="Test\AsyncManagerExtensionsTest.cs" />
     <Compile Include="Test\CookieValueProviderFactoryTest.cs" />

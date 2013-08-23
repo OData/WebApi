@@ -174,8 +174,23 @@ namespace System.Web.Http.Routing
                         {
                             foreach (var kv in data.Values)
                             {
+                                // Preserve optional parameters. 
+                                // When merging, non-optional values bind tighter than optional values. 
                                 // Actual value doesn't matter. We just look for the presence of the key. 
-                                dict[kv.Key] = String.Empty;
+                                object val = String.Empty; // required parameter
+                                if (kv.Value == RouteParameter.Optional)
+                                {
+                                    object prevVal;
+                                    if (dict.TryGetValue(kv.Key, out prevVal))
+                                    {
+                                        if (prevVal == RouteParameter.Optional)
+                                        {
+                                            continue;
+                                        }
+                                    }
+                                    val = RouteParameter.Optional;
+                                }
+                                dict[kv.Key] = val;
                             }
                         }
                         dict[SubRouteDataKey] = SubRouteDatas;

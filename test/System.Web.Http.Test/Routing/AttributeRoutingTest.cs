@@ -48,9 +48,12 @@ namespace System.Web.Http.Routing
         // Mixing {action} with REST
         [InlineData("GET", "partial/DoOp1", "op1")]
         [InlineData("GET", "partial/154", "154")]
-        // Overload resolution 
+        // Optional on controller [Route]
+        [InlineData("GET", "apioptional", "GetAllCustomers")] // fails
+        [InlineData("GET", "apioptional/57", "GetCustomer:57")] // works
+        // Overload resolution
         [InlineData("GET", "apioverload/Fred?age=12", "GetAge:Fred12")]
-        [InlineData("GET", "apioverload/Fred?score=12", "GetScore:Fred12")]        
+        [InlineData("GET", "apioverload/Fred?score=12", "GetScore:Fred12")]
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -259,6 +262,21 @@ namespace System.Web.Http.Routing
         public string GetById(string id)
         {
             return id;
+        }
+    }
+
+    [RoutePrefix("apioptional")]
+    [Route("{id?}")]
+    public class OptionalController : ApiController
+    {        
+        public string GetAllCustomers()
+        {
+            return "GetAllCustomers";
+        }
+
+        public string GetCustomer(int id)
+        {
+            return "GetCustomer:" + id;
         }
     }
 

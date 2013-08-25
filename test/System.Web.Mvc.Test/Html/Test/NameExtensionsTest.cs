@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 
@@ -69,6 +70,23 @@ namespace System.Web.Mvc.Html.Test
 
             Assert.Equal("prefix.IntValue", html.NameFor(m => m.IntValue).ToHtmlString());
             Assert.Equal("prefix.Inner.StringValue", html.NameFor(m => m.Inner.StringValue).ToHtmlString());
+        }
+        
+        // Regression test for codeplex #554 - editor templates for collections would add an extra dot to the
+        // generated name.
+        [Fact]
+        public void StronglyTypedCollectionWithPrefix()
+        {
+            // Arrange
+            HtmlHelper<List<OuterClass>> html = MvcHelper.GetHtmlHelper(new ViewDataDictionary<List<OuterClass>>());
+            html.ViewData.TemplateInfo.HtmlFieldPrefix = "prefix";
+
+            // Act & Assert
+            Assert.Equal("prefix_0__IntValue", html.IdFor(m => m[0].IntValue).ToHtmlString());
+            Assert.Equal("prefix_0__Inner_StringValue", html.IdFor(m => m[0].Inner.StringValue).ToHtmlString());
+
+            Assert.Equal("prefix[0].IntValue", html.NameFor(m => m[0].IntValue).ToHtmlString());
+            Assert.Equal("prefix[0].Inner.StringValue", html.NameFor(m => m[0].Inner.StringValue).ToHtmlString());
         }
 
         private sealed class OuterClass

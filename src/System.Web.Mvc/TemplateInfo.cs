@@ -48,8 +48,17 @@ namespace System.Web.Mvc
 
         public string GetFullHtmlFieldName(string partialFieldName)
         {
-            // This uses "combine and trim" because either or both of these values might be empty
-            return (HtmlFieldPrefix + "." + (partialFieldName ?? String.Empty)).Trim('.');
+            if (partialFieldName != null && partialFieldName.StartsWith("[", StringComparison.Ordinal))
+            {
+                // See Codeplex #544 - the partialFieldName might represent an indexer access, in which case combining
+                // with a 'dot' would be invalid.
+                return HtmlFieldPrefix + (partialFieldName ?? String.Empty);
+            }
+            else
+            {
+                // This uses "combine and trim" because either or both of these values might be empty
+                return (HtmlFieldPrefix + "." + (partialFieldName ?? String.Empty)).Trim('.');
+            }
         }
 
         public bool Visited(ModelMetadata metadata)

@@ -1,12 +1,16 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics;
+using System.Globalization;
+using System.Net.Http;
 using System.Web.Http.Controllers;
 
 namespace System.Web.Http.Routing
 {
-    [DebuggerDisplay("{ActionDescriptor.ActionName}, Order={Order}, Prec={Precedence}")]
-    internal struct CandidateAction
+    // This is static description of an action and can be shared across requests. 
+    // Direct routes may cache a list of these. 
+    [DebuggerDisplay("{DebuggerToString()}")]
+    internal class CandidateAction
     {
         public ReflectedHttpActionDescriptor ActionDescriptor { get; set; }
         public int Order { get; set; }
@@ -15,6 +19,16 @@ namespace System.Web.Http.Routing
         public bool MatchName(string actionName)
         {
             return String.Equals(ActionDescriptor.ActionName, actionName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public bool MatchVerb(HttpMethod method)
+        {
+            return ActionDescriptor.SupportedHttpMethods.Contains(method);
+        }
+
+        internal string DebuggerToString()
+        {
+            return String.Format(CultureInfo.CurrentCulture, "{0}, Order={1}, Prec={2}", ActionDescriptor.ActionName, Order, Precedence);
         }
     }
 }

@@ -70,7 +70,6 @@
     <Compile Include="Controllers\ActionFilterResult.cs" />
     <Compile Include="Controllers\AuthenticationFilterResult.cs" />
     <Compile Include="Controllers\AuthorizationFilterResult.cs" />
-    <Compile Include="Controllers\HttpControllerContextExtensions.cs" />
     <Compile Include="Controllers\HttpControllerSettings.cs" />
     <Compile Include="Controllers\HttpParameterDescriptorExtensions.cs" />
     <Compile Include="Controllers\HttpRequestContext.cs" />

@@ -99,31 +99,6 @@ namespace System.Web.Http.Cors
             return GetCorsPolicyProvider(actionDescriptor);
         }
 
-        private static void RemoveOptionalRoutingParameters(IDictionary<string, object> routeValueDictionary)
-        {
-            Contract.Assert(routeValueDictionary != null);
-
-            // Get all keys for which the corresponding value is 'Optional'.
-            // Having a separate array is necessary so that we don't manipulate the dictionary while enumerating.
-            // This is on a hot-path and linq expressions are showing up on the profile, so do array manipulation.
-            int max = routeValueDictionary.Count;
-            int i = 0;
-            string[] matching = new string[max];
-            foreach (KeyValuePair<string, object> kv in routeValueDictionary)
-            {
-                if (kv.Value == RouteParameter.Optional)
-                {
-                    matching[i] = kv.Key;
-                    i++;
-                }
-            }
-            for (int j = 0; j < i; j++)
-            {
-                string key = matching[j];
-                routeValueDictionary.Remove(key);
-            }
-        }
-
         private ICorsPolicyProvider GetCorsPolicyProvider(HttpActionDescriptor actionDescriptor)
         {
             ICorsPolicyProvider policyProvider = null;
@@ -149,7 +124,7 @@ namespace System.Web.Http.Cors
         {
             request.SetRouteData(routeData);
 
-            RemoveOptionalRoutingParameters(routeData.Values);
+            routeData.RemoveOptionalRoutingParameters();
 
             HttpControllerDescriptor controllerDescriptor = config.Services.GetHttpControllerSelector().SelectController(request);
 

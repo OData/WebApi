@@ -150,57 +150,18 @@ namespace System.Web.Http.Routing
         {
             public RouteCollectionRouteData(IHttpRoute parent, IHttpRouteData[] subRouteDatas)
             {
-                this.Route = parent;
-                this.SubRouteDatas = subRouteDatas;
+                Route = parent;
+
+                // Each sub route may have different values. Callers need to enumerate the subroutes 
+                // and individually query each. 
+                // Find sub-routes via the SubRouteDataKey; don't expose as a property since the RouteData 
+                // can be wrapped in an outer type that doesn't propagate properties. 
+                Values = new HttpRouteValueDictionary() { { SubRouteDataKey, subRouteDatas } };
             }
 
             public IHttpRoute Route { get; private set; }
 
-            public IHttpRouteData[] SubRouteDatas { get; private set; }
-
-            private IDictionary<string, object> _values;
-
-            public IDictionary<string, object> Values
-            {
-                get
-                {
-                    // Keys is just a union of the Keys from the sub routes. 
-                    // We don't actually use the values, because different subroutes may have conflicting values.
-                    // Action selection just needs to know which keys are present. 
-                    if (_values == null)
-                    {
-                        var dict = new HttpRouteValueDictionary();
-                        foreach (var data in SubRouteDatas)
-                        {
-                            foreach (var kv in data.Values)
-                            {
-                                // Preserve optional parameters. 
-                                // When merging, non-optional values bind tighter than optional values. 
-                                // Actual value doesn't matter. We just look for the presence of the key. 
-                                object val = String.Empty; // required parameter
-                                if (kv.Value == RouteParameter.Optional)
-                                {
-                                    object prevVal;
-                                    if (dict.TryGetValue(kv.Key, out prevVal))
-                                    {
-                                        if (prevVal == RouteParameter.Optional)
-                                        {
-                                            continue;
-                                        }
-                                    }
-                                    val = RouteParameter.Optional;
-                                }
-                                dict[kv.Key] = val;
-                            }
-                        }
-                        dict[SubRouteDataKey] = SubRouteDatas;
-
-                        _values = dict;
-                    }
-
-                    return _values;
-                }
-            }
+            public IDictionary<string, object> Values { get; private set; }
         }        
     }
 }

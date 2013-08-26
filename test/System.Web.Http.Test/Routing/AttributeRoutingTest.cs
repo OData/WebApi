@@ -45,12 +45,14 @@ namespace System.Web.Http.Routing
         // {action} values
         [InlineData("GET", "api/default2/GetAllCustomers1", "GetAllCustomers1")]
         [InlineData("GET", "api/resource/12", "12")]
+        [InlineData("GET", "apiactionstress/ActionY/ActionX?useX=5", "XActionY5")]
+        [InlineData("GET", "apiactionstress/ActionY/ActionX?useY=7", "YActionX7")]
         // Mixing {action} with REST
         [InlineData("GET", "partial/DoOp1", "op1")]
         [InlineData("GET", "partial/154", "154")]
         // Optional on controller [Route]
-        [InlineData("GET", "apioptional", "GetAllCustomers")] // fails
-        [InlineData("GET", "apioptional/57", "GetCustomer:57")] // works
+        [InlineData("GET", "apioptional", "GetAllCustomers")]
+        [InlineData("GET", "apioptional/57", "GetCustomer:57")]
         // Overload resolution
         [InlineData("GET", "apioverload/Fred?age=12", "GetAge:Fred12")]
         [InlineData("GET", "apioverload/Fred?score=12", "GetScore:Fred12")]
@@ -70,14 +72,17 @@ namespace System.Web.Http.Routing
         [InlineData("PUT", "prefix2/defaultroute/12", HttpStatusCode.MethodNotAllowed)] // override, different url
         [InlineData("POST", "prefix", HttpStatusCode.MethodNotAllowed)]
         // wrong verb, 405
-        [InlineData("MISSING", "controller/42", HttpStatusCode.MethodNotAllowed)] 
-        [InlineData("MISSING", "default/1/2", HttpStatusCode.MethodNotAllowed)] 
+        [InlineData("MISSING", "controller/42", HttpStatusCode.MethodNotAllowed)]
+        [InlineData("MISSING", "default/1/2", HttpStatusCode.MethodNotAllowed)]
         [InlineData("MISSING", "controller/Ethan", HttpStatusCode.MethodNotAllowed)]
         // accessing attribute routed method via standard route
         [InlineData("GET", "api/Attributed?id=42", HttpStatusCode.NotFound)]
         [InlineData("GET", "api/DefaultRoute?id=42", HttpStatusCode.NotFound)]
         [InlineData("GET", "api/Default2/GetById", HttpStatusCode.NotFound)]
-        [InlineData("GET", "apioverload/Fred?score=12&age=23", HttpStatusCode.InternalServerError)] // Ambiguous match
+        [InlineData("GET", "api/Default2/MethodNotFound", HttpStatusCode.NotFound)]
+        // Ambiguous match
+        [InlineData("GET", "apioverload/Fred?score=12&age=23", HttpStatusCode.InternalServerError)] 
+        [InlineData("GET", "apiactionstress/ActionY/ActionX?useY=7&useX=8", HttpStatusCode.InternalServerError)]
         public void AttributeRouting_Failures(string httpMethod, string uri, HttpStatusCode failureCode)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -310,6 +315,49 @@ namespace System.Web.Http.Routing
         public string GetScore(string id, int score)
         {
             return "GetScore:" + id + score;
+        }
+    }
+
+    [RoutePrefix("apitokens")]
+    public class TokensController : ApiController
+    {
+        [Route("{id:int}")]
+        public string GetById(int id)
+        {
+            return "id" + id;
+        }
+
+        [Route("{name}")]
+        public string GetByName(string name)
+        {
+            return "name" + name;
+        }
+
+        [Route("{id:int}")]
+        public string GetDetails(int id, string name)
+        {
+            return "id" + id + "name" + name;
+        }
+    }
+
+    // Stress test for action selection. This stresses that the union route really keeps the various 
+    // sub routes separate and properly elevates the correct one. 
+    // Uses query string parameters to disambiguate. 
+    [RoutePrefix("apiactionstress")]
+    [Route("{x}/{action}")]
+    [Route("{action}/{y}")]
+    public class ActionStressController : ApiController
+    {
+        [HttpGet]
+        public string ActionX(string x, int useX)
+        {
+            return "X" + x + useX;
+        }
+
+        [HttpGet]
+        public string ActionY(string y, int useY)
+        {
+            return "Y" + y + useY;
         }
     }
 }

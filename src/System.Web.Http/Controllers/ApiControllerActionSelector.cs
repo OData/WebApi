@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -185,22 +186,14 @@ namespace System.Web.Http.Controllers
 
             public HttpActionDescriptor SelectAction(HttpControllerContext controllerContext)
             {
-                // Performance-sensitive
-                CandidateAction[] candidates = GetInitialCandidateList(controllerContext);
-
-                // Make sure the action parameter matches the route and query parameters. Overload resolution logic is applied when needed.
-                List<CandidateAction> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidates);
-                List<CandidateAction> maximumOrderCandidates = RunOrderFilter(actionsFoundByParams);
-                List<CandidateAction> selectedCandidates = RunPrecedenceFilter(maximumOrderCandidates);
-                candidates = null;
-                actionsFoundByParams = null;
+                List<CandidateActionWithParams> selectedCandidates = FindMatchingActions(controllerContext); 
 
                 switch (selectedCandidates.Count)
                 {
                     case 0:
                         throw new HttpResponseException(CreateSelectionError(controllerContext));
                     case 1:
-                        controllerContext.ElevateRouteData(selectedCandidates[0].ActionDescriptor);
+                        ElevateRouteData(controllerContext, selectedCandidates[0]);
                         return selectedCandidates[0].ActionDescriptor;
                     default:
 
@@ -210,6 +203,32 @@ namespace System.Web.Http.Controllers
                 }
             }
 
+            private static void ElevateRouteData(HttpControllerContext controllerContext, CandidateActionWithParams selectedCandidate)
+            {
+                controllerContext.RouteData = selectedCandidate.RouteDataSource;
+            }
+                        
+            // Find all actions on this controller that match the request. 
+            // if ignoreVerbs = true, then don't filter actions based on mismatching Http verb. This is useful for detecting 404/405. 
+            private List<CandidateActionWithParams> FindMatchingActions(HttpControllerContext controllerContext, bool ignoreVerbs = false)
+            {
+                // If matched with direct route?
+                IHttpRouteData routeData = controllerContext.RouteData;
+                IEnumerable<IHttpRouteData> subRoutes = routeData.GetSubRoutes();
+                                
+                IEnumerable<CandidateActionWithParams> actionsWithParameters = (subRoutes == null) ? 
+                    GetInitialCandidateWithParameterListForRegularRoutes(controllerContext, ignoreVerbs) :
+                    GetInitialCandidateWithParameterListForDirectRoutes(controllerContext, subRoutes, ignoreVerbs);
+
+                // Make sure the action parameter matches the route and query parameters. Overload resolution logic is applied when needed.
+                List<CandidateActionWithParams> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(actionsWithParameters);
+
+                List<CandidateActionWithParams> maximumOrderCandidates = RunOrderFilter(actionsFoundByParams);
+                List<CandidateActionWithParams> selectedCandidates = RunPrecedenceFilter(maximumOrderCandidates);
+
+                return selectedCandidates;
+            }
+
             // Selection error. Caller has already determined the request is an error, and now we need to provide the best error message.
             // If there's another verb that could satisfy this URL, then return 405.
             // Else return 404.
@@ -217,8 +236,7 @@ namespace System.Web.Http.Controllers
             private HttpResponseMessage CreateSelectionError(HttpControllerContext controllerContext)
             {
                 // Check for 405.  
-                CandidateAction[] candidateActions = GetInitialCandidateList(controllerContext, ignoreVerbs: true);
-                List<CandidateAction> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, candidateActions);
+                List<CandidateActionWithParams> actionsFoundByParams = FindMatchingActions(controllerContext, ignoreVerbs: true);
 
                 if (actionsFoundByParams.Count > 0)
                 {
@@ -226,15 +244,12 @@ namespace System.Web.Http.Controllers
                 }
 
                 // Throws HttpResponseException with NotFound status because no action matches the request
-                return controllerContext.Request.CreateErrorResponse(
-                    HttpStatusCode.NotFound,
-                    Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
-                    Error.Format(SRResources.ApiControllerActionSelector_ActionNotFound, _controllerDescriptor.ControllerName));
+                return CreateActionNotFoundResponse(controllerContext);
             }
 
             // Create a 405 error response with proper headers and message string. 
             [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
-            private static HttpResponseMessage Create405Response(HttpControllerContext controllerContext, IEnumerable<CandidateAction> allowedCandidates)
+            private static HttpResponseMessage Create405Response(HttpControllerContext controllerContext, IEnumerable<CandidateActionWithParams> allowedCandidates)
             {
                 HttpMethod incomingMethod = controllerContext.Request.Method;
                 HttpResponseMessage response = controllerContext.Request.CreateErrorResponse(
@@ -256,6 +271,66 @@ namespace System.Web.Http.Controllers
                 return response;
             }
 
+            // Create a 404
+            private HttpResponseMessage CreateActionNotFoundResponse(HttpControllerContext controllerContext)
+            {
+                return controllerContext.Request.CreateErrorResponse(
+                    HttpStatusCode.NotFound,
+                    Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
+                    Error.Format(SRResources.ApiControllerActionSelector_ActionNotFound, _controllerDescriptor.ControllerName));
+            }
+
+            // Create a 404, including the name of the action we were looking for. 
+            // This overload includes the action name. 
+            private HttpResponseMessage CreateActionNotFoundResponse(HttpControllerContext controllerContext, string actionName)
+            {
+                return controllerContext.Request.CreateErrorResponse(
+                    HttpStatusCode.NotFound,
+                    Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
+                    Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName));
+            }
+
+            // Call for direct routes. 
+            private static List<CandidateActionWithParams> GetInitialCandidateWithParameterListForDirectRoutes(HttpControllerContext controllerContext, IEnumerable<IHttpRouteData> subRoutes, bool ignoreVerbs)
+            {
+                HttpRequestMessage request = controllerContext.Request;
+                HttpMethod incomingMethod = controllerContext.Request.Method;
+
+                var queryNameValuePairs = request.GetQueryNameValuePairs();
+
+                List<CandidateActionWithParams> candidateActionWithParams = new List<CandidateActionWithParams>();
+
+                foreach (IHttpRouteData subRouteData in subRoutes)
+                {
+                    // Each route may have different route parameters.
+                    ISet<string> combinedParameterNames = GetCombinedParameterNames(queryNameValuePairs, subRouteData.Values);
+
+                    CandidateAction[] candidates = subRouteData.Route.GetDirectRouteCandidates();
+
+                    string actionName;
+                    subRouteData.Values.TryGetValue(RouteKeys.ActionKey, out actionName);
+
+                    foreach (var candidate in candidates)
+                    {
+                        if ((actionName == null) || candidate.MatchName(actionName))
+                        {
+                            if (ignoreVerbs || candidate.MatchVerb(incomingMethod))
+                            {
+                                candidateActionWithParams.Add(new CandidateActionWithParams(candidate, combinedParameterNames, subRouteData));
+                            }
+                        }
+                    }
+                }
+                return candidateActionWithParams;
+            }
+
+            // Call for non-direct routes
+            private IEnumerable<CandidateActionWithParams> GetInitialCandidateWithParameterListForRegularRoutes(HttpControllerContext controllerContext, bool ignoreVerbs = false)
+            {
+                CandidateAction[] candidates = GetInitialCandidateList(controllerContext, ignoreVerbs);
+                return GetCandidateActionsWithBindings(controllerContext, candidates);
+            }
+
             private CandidateAction[] GetInitialCandidateList(HttpControllerContext controllerContext, bool ignoreVerbs = false)
             {
                 // Initial candidate list is determined by:
@@ -267,34 +342,19 @@ namespace System.Web.Http.Controllers
                 HttpMethod incomingMethod = controllerContext.Request.Method;
                 IHttpRouteData routeData = controllerContext.RouteData;
 
-                IHttpRoute route = routeData.Route;
+                Contract.Assert(routeData.GetSubRoutes() == null, "Should not be called on a direct route");
                 CandidateAction[] candidates;
-                if (route != null)
-                {
-                    // Attribute routing gives the action selector an explicit initial candidate list.
-                    candidates = routeData.GetDirectRouteCandidates();
-                    if (candidates != null)
-                    {
-                        actionName = GetActionNameFromDirectRoute(routeData);
-
-                        if (actionName != null)
-                        {
-                            CandidateAction[] candidatesFoundByName = Array.FindAll(candidates, candidate => candidate.MatchName(actionName));
-                            candidates = GetInitialCandidateListByActionName(controllerContext, candidatesFoundByName, actionName, ignoreVerbs);                            
-                        } 
-                        else if (!ignoreVerbs)
-                        {
-                            candidates = FindActionsForVerbWorker(incomingMethod, candidates);
-                        }
-
-                        return candidates;
-                    }
-                }
 
                 if (routeData.Values.TryGetValue(RouteKeys.ActionKey, out actionName))
                 {
                     // We have an explicit {action} value, do traditional binding. Just lookup by actionName
                     ReflectedHttpActionDescriptor[] actionsFoundByName = _standardActionNameMapping[actionName].ToArray();
+
+                    // Throws HttpResponseException with NotFound status because no action matches the Name
+                    if (actionsFoundByName.Length == 0)
+                    {
+                        throw new HttpResponseException(CreateActionNotFoundResponse(controllerContext, actionName));
+                    }
 
                     CandidateAction[] candidatesFoundByName = new CandidateAction[actionsFoundByName.Length];
 
@@ -306,7 +366,14 @@ namespace System.Web.Http.Controllers
                         };
                     }
 
-                    candidates = GetInitialCandidateListByActionName(controllerContext, candidatesFoundByName, actionName, ignoreVerbs);
+                    if (ignoreVerbs)
+                    {
+                        candidates = candidatesFoundByName;
+                    }
+                    else
+                    {
+                        candidates = FilterIncompatibleVerbs(incomingMethod, candidatesFoundByName);
+                    }
                 }
                 else
                 {
@@ -324,61 +391,6 @@ namespace System.Web.Http.Controllers
                 return candidates;
             }
 
-            // Get the action name from a direct route.
-            // {action} makes sense in a direct route on a controller, so there should be only 1 
-            private static string GetActionNameFromDirectRoute(IHttpRouteData routeData)
-            {
-                string actionName;
-                IEnumerable<IHttpRouteData> subRoutes = routeData.GetSubRoutes();
-                if (subRoutes == null)
-                {
-                    return null;
-                }
-
-                if (subRoutes.Count() != 1)
-                {
-                    return null;
-                }
-
-                IHttpRouteData subRoute = subRoutes.First();
-
-                if (subRoute == null)
-                {
-                    return null;
-                }
-                if (!subRoute.Values.TryGetValue(RouteKeys.ActionKey, out actionName))
-                {
-                    return null;
-                }
-                return actionName;
-            }
-                        
-            [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
-            private CandidateAction[] GetInitialCandidateListByActionName(HttpControllerContext controllerContext, CandidateAction[] candidatesFoundByName, string actionName, bool ignoreVerbs)
-            {
-                HttpMethod incomingMethod = controllerContext.Request.Method;
-
-                CandidateAction[] candidates;
-                // Throws HttpResponseException with NotFound status because no action matches the Name
-                if (candidatesFoundByName.Length == 0)
-                {
-                    throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
-                        HttpStatusCode.NotFound,
-                        Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
-                        Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
-                }
-
-                if (ignoreVerbs)
-                {
-                    candidates = candidatesFoundByName;
-                }
-                else
-                {
-                    candidates = FilterIncompatibleVerbs(incomingMethod, candidatesFoundByName);
-                }
-                return candidates;
-            }
-
             private static CandidateAction[] FilterIncompatibleVerbs(HttpMethod incomingMethod, CandidateAction[] candidatesFoundByName)
             {
                 return candidatesFoundByName.Where(candidate => candidate.ActionDescriptor.SupportedHttpMethods.Contains(incomingMethod)).ToArray();
@@ -389,67 +401,64 @@ namespace System.Web.Http.Controllers
                 return new LookupAdapter() { Source = _combinedActionNameMapping };
             }
 
-            private List<CandidateAction> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, CandidateAction[] candidatesFound)
+            // Get a non-null set that combines both the route and query parameters. 
+            private static ISet<string> GetCombinedParameterNames(IEnumerable<KeyValuePair<string, string>> queryNameValuePairs, IDictionary<string, object> routeValues)
             {
-                IDictionary<string, object> routeValues = controllerContext.RouteData.Values;
                 HashSet<string> routeParameterNames = new HashSet<string>(routeValues.Keys, StringComparer.OrdinalIgnoreCase);
                 routeParameterNames.Remove(RouteKeys.ControllerKey);
                 routeParameterNames.Remove(RouteKeys.ActionKey);
 
-                HttpRequestMessage request = controllerContext.Request;
-                Uri requestUri = request.RequestUri;
-                bool hasQueryParameters = requestUri != null && !String.IsNullOrEmpty(requestUri.Query);
-                bool hasRouteParameters = routeParameterNames.Count != 0;
-
-                List<CandidateAction> matches = new List<CandidateAction>(candidatesFound.Length);
-                if (hasRouteParameters || hasQueryParameters)
+                var combinedParameterNames = new HashSet<string>(routeParameterNames, StringComparer.OrdinalIgnoreCase);
+                if (queryNameValuePairs != null)
                 {
-                    var combinedParameterNames = new HashSet<string>(routeParameterNames, StringComparer.OrdinalIgnoreCase);
-                    if (hasQueryParameters)
+                    foreach (var queryNameValuePair in queryNameValuePairs)
                     {
-                        foreach (var queryNameValuePair in request.GetQueryNameValuePairs())
-                        {
-                            combinedParameterNames.Add(queryNameValuePair.Key);
-                        }
-                    }
-
-                    // action parameters is a subset of route parameters and query parameters
-                    for (int i = 0; i < candidatesFound.Length; i++)
-                    {
-                        CandidateAction candidate = candidatesFound[i];
-                        ReflectedHttpActionDescriptor descriptor = candidate.ActionDescriptor;
-                        if (IsSubset(_actionParameterNames[descriptor], combinedParameterNames))
-                        {
-                            matches.Add(candidate);
-                        }
-                    }
-                    if (matches.Count > 1)
-                    {
-                        // select the results that match the most number of required parameters
-                        matches = matches
-                            .GroupBy(candidate => _actionParameterNames[candidate.ActionDescriptor].Length)
-                            .OrderByDescending(g => g.Key)
-                            .First()
-                            .ToList();
+                        combinedParameterNames.Add(queryNameValuePair.Key);
                     }
                 }
-                else
+                return combinedParameterNames;
+            }
+
+            private List<CandidateActionWithParams> FindActionUsingRouteAndQueryParameters(IEnumerable<CandidateActionWithParams> candidatesFound)
+            {
+                List<CandidateActionWithParams> matches = new List<CandidateActionWithParams>();
+
+                foreach (var candidate in candidatesFound)
                 {
-                    // return actions with no parameters
-                    for (int i = 0; i < candidatesFound.Length; i++)
+                    ReflectedHttpActionDescriptor descriptor = candidate.ActionDescriptor;
+                    if (IsSubset(_actionParameterNames[descriptor], candidate.CombinedParameterNames))
                     {
-                        CandidateAction candidate = candidatesFound[i];
-                        ReflectedHttpActionDescriptor descriptor = candidate.ActionDescriptor;
-                        if (_actionParameterNames[descriptor].Length == 0)
-                        {
-                            matches.Add(candidate);
-                        }
+                        matches.Add(candidate);
                     }
                 }
+                if (matches.Count > 1)
+                {
+                    // select the results that match the most number of required parameters
+                    matches = matches
+                        .GroupBy(candidate => _actionParameterNames[candidate.ActionDescriptor].Length)
+                        .OrderByDescending(g => g.Key)
+                        .First()
+                        .ToList();
+                }
+
                 return matches;
             }
 
-            private static bool IsSubset(string[] actionParameters, HashSet<string> routeAndQueryParameters)
+            // Given a list of candidate actions, return a parallel list that includes the parameter information. 
+            // This is used for regular routing where all candidates come from a single route, so they all share the same route parameter names. 
+            private static CandidateActionWithParams[] GetCandidateActionsWithBindings(HttpControllerContext controllerContext, CandidateAction[] candidatesFound)
+            {
+                HttpRequestMessage request = controllerContext.Request;
+                var queryNameValuePairs = request.GetQueryNameValuePairs();
+                IHttpRouteData routeData = controllerContext.RouteData;
+                IDictionary<string, object> routeValues = routeData.Values;
+                ISet<string> combinedParameterNames = GetCombinedParameterNames(queryNameValuePairs, routeValues);
+
+                CandidateActionWithParams[] candidatesWithParams = Array.ConvertAll(candidatesFound, candidate => new CandidateActionWithParams(candidate, combinedParameterNames, routeData));
+                return candidatesWithParams;
+            }
+
+            private static bool IsSubset(string[] actionParameters, ISet<string> routeAndQueryParameters)
             {
                 foreach (string actionParameter in actionParameters)
                 {
@@ -462,24 +471,24 @@ namespace System.Web.Http.Controllers
                 return true;
             }
 
-            private static List<CandidateAction> RunOrderFilter(List<CandidateAction> candidatesFound)
+            private static List<CandidateActionWithParams> RunOrderFilter(List<CandidateActionWithParams> candidatesFound)
             {
                 if (candidatesFound.Count == 0)
                 {
                     return candidatesFound;
                 }
-                int maxOrder = candidatesFound.Max(c => c.Order);
-                return candidatesFound.Where(c => c.Order == maxOrder).AsList();
+                int maxOrder = candidatesFound.Max(c => c.CandidateAction.Order);
+                return candidatesFound.Where(c => c.CandidateAction.Order == maxOrder).AsList();
             }
 
-            private static List<CandidateAction> RunPrecedenceFilter(List<CandidateAction> candidatesFound)
+            private static List<CandidateActionWithParams> RunPrecedenceFilter(List<CandidateActionWithParams> candidatesFound)
             {
                 if (candidatesFound.Count == 0)
                 {
                     return candidatesFound;
                 }
-                decimal highestPrecedence = candidatesFound.Min(c => c.Precedence);
-                return candidatesFound.Where(c => c.Precedence == highestPrecedence).AsList();
+                decimal highestPrecedence = candidatesFound.Min(c => c.CandidateAction.Precedence);
+                return candidatesFound.Where(c => c.CandidateAction.Precedence == highestPrecedence).AsList();
             }
 
             // This is called when we don't specify an Action name
@@ -515,6 +524,14 @@ namespace System.Web.Http.Controllers
             {
                 List<CandidateAction> listCandidates = new List<CandidateAction>();
 
+                FindActionsForVerbWorker(verb, candidates, listCandidates);
+
+                return listCandidates.ToArray();
+            }
+
+            // Adds to existing list rather than send back as a return value.
+            private static void FindActionsForVerbWorker(HttpMethod verb, CandidateAction[] candidates, List<CandidateAction> listCandidates)
+            {
                 foreach (CandidateAction candidate in candidates)
                 {
                     if (candidate.ActionDescriptor != null && candidate.ActionDescriptor.SupportedHttpMethods.Contains(verb))
@@ -522,14 +539,12 @@ namespace System.Web.Http.Controllers
                         listCandidates.Add(candidate);
                     }
                 }
-
-                return listCandidates.ToArray();
             }
 
-            private static string CreateAmbiguousMatchList(IEnumerable<CandidateAction> ambiguousCandidates)
+            private static string CreateAmbiguousMatchList(IEnumerable<CandidateActionWithParams> ambiguousCandidates)
             {
                 StringBuilder exceptionMessageBuilder = new StringBuilder();
-                foreach (CandidateAction candidate in ambiguousCandidates)
+                foreach (CandidateActionWithParams candidate in ambiguousCandidates)
                 {
                     ReflectedHttpActionDescriptor descriptor = candidate.ActionDescriptor;
                     MethodInfo methodInfo = descriptor.MethodInfo;
@@ -563,6 +578,52 @@ namespace System.Web.Http.Controllers
                 }
 
                 return true;
+            }
+        }
+
+        // Associate parameter (route and query) with each action. 
+        // For regular routing, there was just a single route, and so single set of route parameters and so all of these
+        // may share the same set of combined parameter names.
+        // For attribute routing, there may be multiple routes, each with different route parameter names, and 
+        // so each instance of a CandidateActionWithParams may have a different parameter set.
+        [DebuggerDisplay("{DebuggerToString()}")]
+        private class CandidateActionWithParams
+        {
+            public CandidateActionWithParams(CandidateAction candidateAction, ISet<string> parameters, IHttpRouteData routeDataSource)
+            {
+                CandidateAction = candidateAction;
+                CombinedParameterNames = parameters;
+                RouteDataSource = routeDataSource;
+            }
+
+            public CandidateAction CandidateAction { get; private set; }
+            public ISet<string> CombinedParameterNames { get; private set; }
+
+            // Remember this so that we can apply it for model binding. 
+            public IHttpRouteData RouteDataSource { get; private set; }
+
+            public ReflectedHttpActionDescriptor ActionDescriptor
+            {
+                get
+                {
+                    return CandidateAction.ActionDescriptor;
+                }
+            }
+
+            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called from DebuggerDisplay")]
+            private string DebuggerToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(CandidateAction.DebuggerToString());
+                if (CombinedParameterNames.Count > 0)
+                {
+                    sb.Append(", Params =");
+                    foreach (string param in CombinedParameterNames)
+                    {
+                        sb.AppendFormat(" {0}", param);
+                    }
+                }
+                return sb.ToString();
             }
         }
 

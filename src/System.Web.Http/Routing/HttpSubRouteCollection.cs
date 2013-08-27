@@ -60,6 +60,12 @@ namespace System.Web.Http.Routing
         public bool Remove(IHttpRoute item)
         {
             Contract.Assert(item != null);
+
+            if (_dictionary.Values.Contains(item))
+            {
+                _dictionary.Values.Remove(item);
+            }
+
             return _collection.Remove(item);
         }
 

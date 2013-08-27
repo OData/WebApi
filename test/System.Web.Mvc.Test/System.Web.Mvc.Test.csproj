@@ -92,6 +92,7 @@
     <Compile Include="Test\BuildManagerCompiledViewTest.cs" />
     <Compile Include="Test\BuildManagerViewEngineTest.cs" />
     <Compile Include="Test\CompareAttributeTest.cs" />
+    <Compile Include="Test\CompareAttributeAdapterTest.cs" />
     <Compile Include="Test\DataAnnotationsModelMetadataProviderTestBase.cs" />
     <Compile Include="Test\DataTypeUtilTest.cs" />
     <Compile Include="Test\FilterInfoTest.cs" />

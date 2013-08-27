@@ -356,6 +356,9 @@ namespace System.Net.Http.Formatting
             }
         }
 
+#if NETFX_CORE
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", Justification = "The type parameter is only used by the non-portable version of the library.")]
+#endif
         private void WriteToStream(Type type, object value, Stream writeStream, HttpContent content)
         {
             Encoding effectiveEncoding = SelectCharacterEncoding(content == null ? null : content.Headers);

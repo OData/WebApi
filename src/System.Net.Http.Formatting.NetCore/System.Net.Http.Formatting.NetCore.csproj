@@ -100,9 +100,7 @@
     <Compile Include="..\System.Net.Http.Formatting\Formatting\XmlMediaTypeFormatter.cs">
       <Link>Formatting\XmlMediaTypeFormatter.cs</Link>
     </Compile>
-    <Compile Include="..\System.Net.Http.Formatting\GlobalSuppressions.cs">
-      <Link>GlobalSuppressions.cs</Link>
-    </Compile>
+    <Compile Include="GlobalSuppressions.cs"/>
     <Compile Include="..\System.Net.Http.Formatting\Handlers\HttpProgressEventArgs.cs">
       <Link>Handlers\HttpProgressEventArgs.cs</Link>
     </Compile>

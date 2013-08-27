@@ -253,16 +253,35 @@ namespace System.Collections.Concurrent
         }
 
         [Fact]
-        public void TryRemove_ThrowsNotImplementedException()
+        public void TryRemove_ReturnsTrueAndRemovesWhenPresent()
         {
             // Arrange
             ConcurrentDictionary<int, int> dictionary = new ConcurrentDictionary<int, int>();
-            // Act/Assert
-            Assert.Throws<NotImplementedException>(() =>
-            {
-                int value;
-                dictionary.TryRemove(0, out value);
-            });
+            dictionary.TryAdd(1, -1);
+            
+            // Act
+            int returnedValue;
+            bool tryResult = dictionary.TryGetValue(1, out returnedValue);
+
+            // Assert
+            Assert.Equal(-1, returnedValue);
+            Assert.True(tryResult);
+        }
+
+        [Fact]
+        public void TryRemove_ReturnsFalseAndDefaultWhenMissing()
+        {
+            // Arrange
+            ConcurrentDictionary<int, int> dictionary = new ConcurrentDictionary<int, int>();
+            dictionary.TryAdd(1, -1);
+
+            // Act
+            int returnedValue;
+            bool tryResult = dictionary.TryGetValue(2, out returnedValue);
+
+            // Assert
+            Assert.Equal(0, returnedValue);
+            Assert.False(tryResult);
         }
 
         [Fact]

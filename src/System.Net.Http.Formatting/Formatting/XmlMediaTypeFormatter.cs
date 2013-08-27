@@ -325,6 +325,7 @@ namespace System.Net.Http.Formatting
         /// <param name="type">The type of object to deserialize.</param>
         /// <param name="content">The <see cref="HttpContent"/> for the content being read.</param>
         /// <returns>An instance of <see cref="XmlObjectSerializer"/> or <see cref="XmlSerializer"/> to use for deserializing the object.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The term deserializer is spelled correctly.")]
         protected internal virtual object GetDeserializer(Type type, HttpContent content)
         {
             return GetSerializerForType(type);

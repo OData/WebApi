@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -125,7 +126,15 @@ namespace System.Net.Http.Internal
         // ConcurrentDictionary members
         public bool TryRemove(TKey key, out TValue removedValue)
         {
-            throw new NotImplementedException();
+            lock (_lock)
+            {
+                if (_dictionary.TryGetValue(key, out removedValue))
+                {
+                    return _dictionary.Remove(key);
+                }
+
+                return false;
+            }
         }
 
         public TValue GetOrAdd(TKey key, Func<TKey, TValue> addValueFactory)

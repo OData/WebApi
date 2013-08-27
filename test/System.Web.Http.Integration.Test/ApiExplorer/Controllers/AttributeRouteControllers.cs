@@ -212,4 +212,73 @@ namespace System.Web.Http.ApiExplorer
             return "GetScore:" + id + score;
         }
     }
+
+    [Route("baseclass", Name = "Base")]
+    public class BaseClassController : ApiController
+    {
+        public string Get(int id)
+        {
+            return "Get:" + id;
+        }
+    }
+
+    [Route("subclass", Name = "Sub")]
+    public class SubClassController : BaseClassController
+    {
+        public string Post(string name)
+        {
+            return "Post:" + name;
+        }
+    }
+
+    public class SubClassNoRouteController : BaseClassController
+    {
+        public string Post(string name)
+        {
+            return "Post:" + name;
+        }
+    }
+
+    [RoutePrefix("baseclassprefix")]
+    public class BaseClassPrefixController : ApiController
+    {
+        [Route]
+        public string GetAll()
+        {
+            return "Get";
+        }
+
+        [Route("base/{id}", Name = "GetById")]
+        public string GetById(int id)
+        {
+            return "Get:" + id;
+        }
+    }
+
+    public class SubClassNoPrefixController : BaseClassPrefixController
+    {
+        public string Post(string name)
+        {
+            return "Post:" + name;
+        }
+    }
+
+    [RoutePrefix("subclassprefix")]
+    public class SubClassPrefixController : BaseClassPrefixController
+    {
+        [Route]
+        public string Post(string name)
+        {
+            return "Post:" + name;
+        }
+    }
+
+    [Route("subclassroute")]
+    public class SubClassRouteController : BaseClassPrefixController
+    {
+        public string Post(string name)
+        {
+            return "Post:" + name;
+        }
+    }
 }

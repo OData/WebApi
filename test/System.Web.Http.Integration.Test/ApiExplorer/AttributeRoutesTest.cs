@@ -94,6 +94,30 @@ namespace System.Web.Http.ApiExplorer
                     new { HttpMethod = HttpMethod.Get, RelativePath = "apioverload/{id}?score={score}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 2},
                 };
                 yield return new[] { controllerType, expectedApiDescriptions };
+
+                controllerType = typeof(BaseClassController);
+                expectedApiDescriptions = new List<object>
+                {
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "baseclass?id={id}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                };
+                yield return new[] { controllerType, expectedApiDescriptions };
+
+                controllerType = typeof(BaseClassPrefixController);
+                expectedApiDescriptions = new List<object>
+                {
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "baseclassprefix", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 0},
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "baseclassprefix/base/{id}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                };
+                yield return new[] { controllerType, expectedApiDescriptions };
+
+                controllerType = typeof(SubClassRouteController);
+                expectedApiDescriptions = new List<object>
+                {
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "subclassroute", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 0},
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "subclassroute?id={id}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                    new { HttpMethod = HttpMethod.Post, RelativePath = "subclassroute?name={name}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                };
+                yield return new[] { controllerType, expectedApiDescriptions };
             }
         }
 
@@ -116,8 +140,11 @@ namespace System.Web.Http.ApiExplorer
         {
             get
             {
-                object controllerType = typeof(MixedController);
-                object expectedApiDescriptions = new List<object>
+                object controllerType;
+                object expectedApiDescriptions;
+
+                controllerType = typeof(MixedController);
+                expectedApiDescriptions = new List<object>
                 {
                     new { HttpMethod = HttpMethod.Get, RelativePath = "api/Mixed?name={name}&series={series}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 2},
                     new { HttpMethod = HttpMethod.Post, RelativePath = "attribute/mixed", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 1},
@@ -132,6 +159,40 @@ namespace System.Web.Http.ApiExplorer
                     new { HttpMethod = HttpMethod.Put, RelativePath = "prefix", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 0},
                     new { HttpMethod = HttpMethod.Get, RelativePath = "prefix/{id}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
                     new { HttpMethod = HttpMethod.Post, RelativePath = "api/prefixed", HasRequestFormatters = false, HasResponseFormatters = false, NumberOfParameters = 0},
+                };
+                yield return new[] { controllerType, expectedApiDescriptions };
+
+                controllerType = typeof(SubClassController);
+                expectedApiDescriptions = new List<object>
+                {
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "subclass?id={id}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                    new { HttpMethod = HttpMethod.Post, RelativePath = "subclass?name={name}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                };
+                yield return new[] { controllerType, expectedApiDescriptions };
+
+                controllerType = typeof(SubClassNoRouteController);
+                expectedApiDescriptions = new List<object>
+                {
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "api/subclassnoroute/{id}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                    new { HttpMethod = HttpMethod.Post, RelativePath = "api/subclassnoroute?name={name}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                };
+                yield return new[] { controllerType, expectedApiDescriptions };
+
+                controllerType = typeof(SubClassNoPrefixController);
+                expectedApiDescriptions = new List<object>
+                {
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "api/subclassnoprefix", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 0},
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "api/subclassnoprefix/{id}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                    new { HttpMethod = HttpMethod.Post, RelativePath = "api/subclassnoprefix?name={name}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                };
+                yield return new[] { controllerType, expectedApiDescriptions };
+
+                controllerType = typeof(SubClassPrefixController);
+                expectedApiDescriptions = new List<object>
+                {
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "api/subclassprefix", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 0},
+                    new { HttpMethod = HttpMethod.Get, RelativePath = "api/subclassprefix/{id}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
+                    new { HttpMethod = HttpMethod.Post, RelativePath = "subclassprefix?name={name}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 1},
                 };
                 yield return new[] { controllerType, expectedApiDescriptions };
             }

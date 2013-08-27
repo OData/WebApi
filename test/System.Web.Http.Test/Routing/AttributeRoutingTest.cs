@@ -56,6 +56,23 @@ namespace System.Web.Http.Routing
         // Overload resolution
         [InlineData("GET", "apioverload/Fred?age=12", "GetAge:Fred12")]
         [InlineData("GET", "apioverload/Fred?score=12", "GetScore:Fred12")]
+        // Controller route attribute inheritance
+        [InlineData("GET", "subclass?id=8", "Get:8")]
+        [InlineData("POST", "subclass?name=foo", "Post:foo")]
+        [InlineData("GET", "api/subclassnoroute?id=8", "Get:8")]
+        [InlineData("POST", "api/subclassnoroute?name=foo", "Post:foo")]
+        [InlineData("GET", "baseclass?id=9", "Get:9")]
+        [InlineData("GET", "baseclassprefix", "Get")]
+        [InlineData("GET", "baseclassprefix/base/8", "Get:8")]
+        [InlineData("GET", "api/subclassnoprefix", "Get")]
+        [InlineData("GET", "api/subclassnoprefix?id=9", "Get:9")]
+        [InlineData("POST", "api/subclassnoprefix?name=foo", "Post:foo")]
+        [InlineData("POST", "subclassprefix?name=foo", "Post:foo")]
+        [InlineData("GET", "api/subclassprefix", "Get")]
+        [InlineData("GET", "api/subclassprefix?id=3", "Get:3")]
+        [InlineData("GET", "subclassroute", "Get")]
+        [InlineData("GET", "subclassroute?id=9", "Get:9")]
+        [InlineData("POST", "subclassroute?name=foo", "Post:foo")]
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -83,6 +100,13 @@ namespace System.Web.Http.Routing
         // Ambiguous match
         [InlineData("GET", "apioverload/Fred?score=12&age=23", HttpStatusCode.InternalServerError)] 
         [InlineData("GET", "apiactionstress/ActionY/ActionX?useY=7&useX=8", HttpStatusCode.InternalServerError)]
+        // Unreachable inherited routes
+        [InlineData("GET", "api/subclassroute", HttpStatusCode.NotFound)]
+        [InlineData("GET", "api/subclassroute?id=9", HttpStatusCode.NotFound)]
+        [InlineData("POST", "api/subclassroute?name=foo", HttpStatusCode.NotFound)]
+        [InlineData("GET", "api/baseclass?id=2", HttpStatusCode.NotFound)]
+        [InlineData("GET", "api/baseclassprefix", HttpStatusCode.NotFound)]
+        [InlineData("GET", "api/baseclassprefix?id=2", HttpStatusCode.NotFound)]
         public void AttributeRouting_Failures(string httpMethod, string uri, HttpStatusCode failureCode)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -358,6 +382,75 @@ namespace System.Web.Http.Routing
         public string ActionY(string y, int useY)
         {
             return "Y" + y + useY;
+        }
+    }
+
+    [Route("baseclass", Name="Base")]
+    public class BaseClassController : ApiController
+    {
+        public string Get(int id)
+        {
+            return "Get:" + id;
+        }
+    }
+
+    [Route("subclass", Name="Sub")]
+    public class SubClassController : BaseClassController
+    {
+        public string Post(string name)
+        {
+            return "Post:" + name;
+        }
+    }
+
+    public class SubClassNoRouteController : BaseClassController
+    {
+        public string Post(string name)
+        {
+            return "Post:" + name;
+        }
+    }
+
+    [RoutePrefix("baseclassprefix")]
+    public class BaseClassPrefixController : ApiController
+    {
+        [Route]
+        public string GetAll()
+        {
+            return "Get";
+        }
+
+        [Route("base/{id}", Name = "GetById")]
+        public string GetById(int id)
+        {
+            return "Get:" + id;
+        }
+    }
+
+    public class SubClassNoPrefixController : BaseClassPrefixController
+    {
+        public string Post(string name)
+        {
+            return "Post:" + name;
+        }
+    }
+
+    [RoutePrefix("subclassprefix")]
+    public class SubClassPrefixController : BaseClassPrefixController
+    {
+        [Route]
+        public string Post(string name)
+        {
+            return "Post:" + name;
+        }
+    }
+
+    [Route("subclassroute")]
+    public class SubClassRouteController : BaseClassPrefixController
+    {
+        public string Post(string name)
+        {
+            return "Post:" + name;
         }
     }
 }

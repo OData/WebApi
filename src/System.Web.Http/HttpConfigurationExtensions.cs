@@ -218,8 +218,14 @@ namespace System.Web.Http
 
                 foreach (ReflectedHttpActionDescriptor actionDescriptor in actionGrouping.OfType<ReflectedHttpActionDescriptor>())
                 {
-                    Collection<IHttpRouteInfoProvider> routeProviders =
-                        actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
+                    Collection<IHttpRouteInfoProvider> routeProviders = actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
+
+                    // Ignore the Route attributes from inherited actions.
+                    if (actionDescriptor.MethodInfo != null && 
+                        actionDescriptor.MethodInfo.DeclaringType != controllerDescriptor.ControllerType)
+                    {
+                        routeProviders = null;
+                    }
 
                     if (routeProviders != null && routeProviders.Count > 0)
                     {
@@ -235,7 +241,7 @@ namespace System.Web.Http
             }
 
             Collection<IHttpRouteInfoProvider> controllerRouteProviders =
-                controllerDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: true);
+                controllerDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
 
             // If they exist and have not been overridden, create routes for controller-level route providers.
             if (controllerRouteProviders != null && controllerRouteProviders.Count > 0

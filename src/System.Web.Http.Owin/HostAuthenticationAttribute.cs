@@ -11,14 +11,14 @@ namespace System.Web.Http
     public sealed class HostAuthenticationAttribute : Attribute, IAuthenticationFilter
     {
         private readonly IAuthenticationFilter _innerFilter;
-        private readonly string _authenticaitonType;
+        private readonly string _authenticationType;
 
         /// <summary>Initializes a new instance of the <see cref="HostAuthenticationAttribute"/> class.</summary>
         /// <param name="authenticationType">The authentication type of the OWIN middleware to use.</param>
         public HostAuthenticationAttribute(string authenticationType)
             : this(new HostAuthenticationFilter(authenticationType))
         {
-            _authenticaitonType = authenticationType;
+            _authenticationType = authenticationType;
         }
 
         internal HostAuthenticationAttribute(IAuthenticationFilter innerFilter)
@@ -40,7 +40,7 @@ namespace System.Web.Http
         /// <summary>Gets the authentication type of the OWIN middleware to use.</summary>
         public string AuthenticationType
         {
-            get { return _authenticaitonType; }
+            get { return _authenticationType; }
         }
 
         internal IAuthenticationFilter InnerFilter

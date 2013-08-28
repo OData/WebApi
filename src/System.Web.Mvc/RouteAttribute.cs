@@ -9,16 +9,28 @@ namespace System.Web.Mvc
     /// Represents a route for an action method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class HttpRouteAttribute : Attribute, IDirectRouteInfoProvider
+    public sealed class RouteAttribute : Attribute, IDirectRouteInfoProvider
     {
         private readonly string _routeTemplate;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HttpRouteAttribute" /> class.
+        /// Initializes a new instance of the <see cref="RouteAttribute" /> class.
+        /// </summary>
+        public RouteAttribute() : this(String.Empty)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RouteAttribute" /> class.
         /// </summary>
         /// <param name="routeTemplate">The route template describing the URI pattern to match against.</param>
-        public HttpRouteAttribute(string routeTemplate)
+        public RouteAttribute(string routeTemplate)
         {
+            if (routeTemplate == null)
+            {
+                throw Error.ArgumentNull("routeTemplate");
+            }
+
             _routeTemplate = routeTemplate;
         }
 

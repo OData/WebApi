@@ -410,13 +410,13 @@ namespace System.Web.Mvc.Async.Test
 
         private class WithRoutingAttributeController : Controller
         {
-            [HttpRoute("route")]
+            [Route("route")]
             [ActionName("Action")] // to make things confusing
             public void ActionWithoutRoute()
             {
             }
 
-            [HttpRoute("route")]
+            [Route("route")]
             public void Action()
             {
             }

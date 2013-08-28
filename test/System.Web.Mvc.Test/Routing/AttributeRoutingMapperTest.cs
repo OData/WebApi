@@ -34,7 +34,7 @@ namespace System.Web.Mvc.Routing
         public class MyController : Controller
         {
             [HttpGet]
-            [HttpRoute("")]
+            [Route("")]
             [ActionName("ActionName")]
             public void MethodName()
             {

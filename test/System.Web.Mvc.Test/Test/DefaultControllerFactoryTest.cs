@@ -793,7 +793,7 @@ namespace System.Web.Mvc.Test
 
     public class WithRoutingAttributeController : Controller
     {
-        [HttpRoute("route")]
+        [Route("route")]
         public void Action()
         {
         }

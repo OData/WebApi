@@ -228,7 +228,7 @@ namespace System.Web.Routing
 
         private class SimpleRoutingController : Controller
         {
-            [HttpRoute("getme")]
+            [Route("getme")]
             [HttpGet]
             public ActionResult GetMe()
             {
@@ -236,13 +236,13 @@ namespace System.Web.Routing
             }
 
             [HttpPost]
-            [HttpRoute("postme")]
+            [Route("postme")]
             public ActionResult PostMe()
             {
                 throw new NotImplementedException();
             }
 
-            [HttpRoute("routeme")]
+            [Route("routeme")]
             public ActionResult RouteMe()
             {
                 throw new NotImplementedException();
@@ -255,15 +255,15 @@ namespace System.Web.Routing
             }
             
             [HttpGet]
-            [HttpRoute("once")]
-            [HttpRoute("twice")]
+            [Route("once")]
+            [Route("twice")]
             public ActionResult FoolMe()
             {
                 throw new NotImplementedException("Shame on you!");
             }
 
             [HttpGet]
-            [HttpRoute("i/{have}/{id:int}/{defaultsto=VAL}/{name?}")]
+            [Route("i/{have}/{id:int}/{defaultsto=VAL}/{name?}")]
             public ActionResult Parameterized(string have, int id, string optional)
             {
                 throw new NotImplementedException();
@@ -274,7 +274,7 @@ namespace System.Web.Routing
         private class PrefixedController : Controller
         {
             [HttpGet]
-            [HttpRoute("getme")]
+            [Route("getme")]
             public ActionResult GetMe()
             {
                 throw new NotImplementedException();
@@ -290,7 +290,7 @@ namespace System.Web.Routing
         private class PugetSoundController : Controller
         {
             [HttpGet]
-            [HttpRoute("getme")]
+            [Route("getme")]
             public ActionResult GetMe()
             {
                 throw new NotImplementedException();
@@ -307,7 +307,7 @@ namespace System.Web.Routing
         private class PrefixedPugetSoundController : Controller
         {
             [HttpGet]
-            [HttpRoute("getme")]
+            [Route("getme")]
             public ActionResult GetMe()
             {
                 throw new NotImplementedException();
@@ -323,7 +323,7 @@ namespace System.Web.Routing
         private class Bad1Controller : Controller
         {
             [HttpGet]
-            [HttpRoute("getme")]
+            [Route("getme")]
             public ActionResult GetMe()
             {
                 throw new NotImplementedException();
@@ -334,7 +334,7 @@ namespace System.Web.Routing
         private class Bad2Controller : Controller
         {
             [HttpGet]
-            [HttpRoute("getme")]
+            [Route("getme")]
             public ActionResult GetMe()
             {
                 throw new NotImplementedException();
@@ -344,7 +344,7 @@ namespace System.Web.Routing
         private class Bad3Controller : Controller
         {
             [HttpGet]
-            [HttpRoute("/getme")]
+            [Route("/getme")]
             public ActionResult GetMe()
             {
                 throw new NotImplementedException();
@@ -354,7 +354,7 @@ namespace System.Web.Routing
         private class Bad4Controller : Controller
         {
             [HttpGet]
-            [HttpRoute("getme/")]
+            [Route("getme/")]
             public ActionResult GetMe()
             {
                 throw new NotImplementedException();
@@ -374,7 +374,7 @@ namespace System.Web.Routing
         private class FruitConstraintController : Controller
         {
             [HttpGet]
-            [HttpRoute("fruits/{apple:fruit}")]
+            [Route("fruits/{apple:fruit}")]
             public ActionResult Eat(string apple)
             {
                 throw new NotImplementedException();

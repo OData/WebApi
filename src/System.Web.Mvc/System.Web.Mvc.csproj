@@ -166,7 +166,7 @@
     <Compile Include="Filters\IAuthenticationFilter.cs" />
     <Compile Include="Filters\IOverrideFilter.cs" />
     <Compile Include="Html5DateRenderingMode.cs" />
-    <Compile Include="HttpRouteAttribute.cs" />
+    <Compile Include="RouteAttribute.cs" />
     <Compile Include="MembershipPasswordAttributeAdapter.cs" />
     <Compile Include="CompareAttribute.cs" />
     <Compile Include="ChildActionValueProvider.cs" />

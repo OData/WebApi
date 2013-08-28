@@ -7,9 +7,10 @@ using System.Web.Mvc.Routing;
 
 namespace System.Web.Mvc
 {
+    [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "base class for HttpGet and other attributes.")]
     [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "The accessor is exposed as an ICollection<string>.")]
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public sealed class AcceptVerbsAttribute : ActionMethodSelectorAttribute, IDirectRouteInfoProvider
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    public class AcceptVerbsAttribute : ActionMethodSelectorAttribute, IDirectRouteInfoProvider
     {
         private readonly HttpVerbsValidator _httpVerbsValidator;
 
@@ -46,7 +47,9 @@ namespace System.Web.Mvc
         /// </summary>
         public int RouteOrder { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the set of allowed HTTP methods for that route. If the route allow any method to be used, the value is null.
+        /// </summary>
         public ICollection<string> Verbs
         {
             get { return _httpVerbsValidator.Verbs; }

@@ -74,12 +74,14 @@ namespace System.Web.Mvc.Routing
                 string actionName = GetActionName(method, actionSelector.AllowLegacyAsyncActions);
                 IEnumerable<IDirectRouteInfoProvider> routeAttributes = GetRouteAttributes(method);
 
+                IEnumerable<string> verbs = GetActionVerbs(method);
+
                 foreach (var routeAttribute in routeAttributes)
                 {
                     ValidateTemplate(routeAttribute.RouteTemplate, actionName, controllerDescriptor);
 
                     string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.RouteTemplate);
-                    Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute.Verbs, controllerName,
+                    Route route = _routeBuilder.BuildDirectRoute(template, verbs, controllerName,
                                                                     actionName, method, areaName);
                     RouteEntry entry = new RouteEntry
                     {
@@ -223,6 +225,22 @@ namespace System.Web.Mvc.Routing
             }
 
             return templateBuilder.ToString();
+        }
+
+        // return list of verbs on the method.
+        private static IEnumerable<string> GetActionVerbs(MethodInfo method)
+        {
+            var list = new List<string>();
+
+            IEnumerable<AcceptVerbsAttribute> verbAttributes = method.GetCustomAttributes<AcceptVerbsAttribute>();
+            foreach (AcceptVerbsAttribute verbAttribute in verbAttributes)
+            {
+                foreach (var verb in verbAttribute.Verbs)
+                {                    
+                    list.Add(verb);
+                }
+            }
+            return list;
         }
 
         private static string GetActionName(MethodInfo method, bool allowLegacyAsyncActions)

@@ -72,9 +72,13 @@ namespace System.Web.Mvc.Routing
             RouteValueDictionary constraints = new RouteValueDictionary();
             if (allowedMethods != null)
             {
-                // Current method constraint implementation is inefficient since it matches before running the constraint.
-                // Consider checking the HTTP method first in a custom route as a performance optimization.
-                constraints.Add("httpMethod", new HttpMethodConstraint(allowedMethods.ToArray()));
+                string[] array = allowedMethods.ToArray();
+                if (array.Length > 0)
+                {
+                    // Current method constraint implementation is inefficient since it matches before running the constraint.
+                    // Consider checking the HTTP method first in a custom route as a performance optimization.
+                    constraints.Add("httpMethod", new HttpMethodConstraint(array));
+                }
             }
 
             RouteValueDictionary dataTokens = new RouteValueDictionary();

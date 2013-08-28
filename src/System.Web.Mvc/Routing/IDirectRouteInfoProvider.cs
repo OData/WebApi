@@ -23,11 +23,6 @@ namespace System.Web.Mvc.Routing
         /// <summary>
         /// Gets the order of the route relative to other routes.
         /// </summary>
-        int RouteOrder { get; }
-
-        /// <summary>
-        /// Gets the set of allowed HTTP methods for that route. If the route allow any method to be used, the value is null.
-        /// </summary>
-        ICollection<string> Verbs { get; }
+        int RouteOrder { get; }      
     }
 }

@@ -5,23 +5,14 @@ namespace System.Web.Mvc
     /// <summary>
     /// Specifies that an action supports the PATCH HTTP method.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class HttpPatchAttribute : HttpVerbAttribute
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public sealed class HttpPatchAttribute : AcceptVerbsAttribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpPatchAttribute" /> class.
         /// </summary>
         public HttpPatchAttribute()
             : base(HttpVerbs.Patch)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpPatchAttribute" /> class.
-        /// </summary>
-        /// <param name="routeTemplate">The route template describing the URI pattern to match against.</param>
-        public HttpPatchAttribute(string routeTemplate)
-            : base(HttpVerbs.Patch, routeTemplate)
         {
         }
     }

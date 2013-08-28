@@ -37,11 +37,5 @@ namespace System.Web.Mvc
         /// Gets or sets the order of the route relative to other routes. The default order is 0.
         /// </summary>
         public int RouteOrder { get; set; }
-
-        /// <inheritdoc />
-        public ICollection<string> Verbs
-        {
-            get { return null; }
-        }
     }
 }

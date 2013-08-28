@@ -12,11 +12,5 @@ namespace System.Web.Routing
         {
             new HttpRouteAttribute("");
         }
-
-        [Fact]
-        public void AllowedMethodsShouldBeNull()
-        {
-            Assert.Null(new HttpRouteAttribute("").Verbs);
-        }
     }
 }

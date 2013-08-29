@@ -98,6 +98,7 @@
     <Compile Include="Hosting\ThreadCurrentPrincipalContext.cs" />
     <Compile Include="Hosting\ThreadPrincipalServiceTest.cs" />
     <Compile Include="Results\BadRequestResultTests.cs" />
+    <Compile Include="Results\RedirectToRouteResultTests.cs" />
     <Compile Include="Results\CreatedAtRouteNegotiatedContentResultTests.cs" />
     <Compile Include="Results\BadRequestErrorMessageResultTests.cs" />
     <Compile Include="Results\JsonResultTests.cs" />

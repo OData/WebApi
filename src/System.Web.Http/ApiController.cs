@@ -447,6 +447,25 @@ namespace System.Web.Http
             return new RedirectResult(location, this);
         }
 
+        /// <summary>Creates a <see cref="RedirectToRouteResult"/> (302 Found) with the specified values.</summary>
+        /// <param name="routeName">The name of the route to use for generating the URL.</param>
+        /// <param name="routeValues">The route data to use for generating the URL.</param>
+        /// <returns>A <see cref="RedirectToRouteResult"/> with the specified values.</returns>
+        protected internal RedirectToRouteResult RedirectToRoute(string routeName, object routeValues)
+        {
+            return RedirectToRoute(routeName, new HttpRouteValueDictionary(routeValues));
+        }
+
+        /// <summary>Creates a <see cref="RedirectToRouteResult"/> (302 Found) with the specified values.</summary>
+        /// <param name="routeName">The name of the route to use for generating the URL.</param>
+        /// <param name="routeValues">The route data to use for generating the URL.</param>
+        /// <returns>A <see cref="RedirectToRouteResult"/> with the specified values.</returns>
+        protected internal virtual RedirectToRouteResult RedirectToRoute(string routeName,
+            IDictionary<string, object> routeValues)
+        {
+            return new RedirectToRouteResult(routeName, routeValues, this);
+        }
+
         /// <summary>Creates a <see cref="ResponseMessageResult"/> with the specified response.</summary>
         /// <param name="response">The HTTP response message.</param>
         /// <returns>A <see cref="ResponseMessageResult"/> for the specified response.</returns>

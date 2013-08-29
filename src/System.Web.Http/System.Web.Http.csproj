@@ -82,6 +82,7 @@
     <Compile Include="Filters\HttpAuthenticationChallengeContext.cs" />
     <Compile Include="Hosting\IHostPrincipalService.cs" />
     <Compile Include="Results\BadRequestResult.cs" />
+    <Compile Include="Results\RedirectToRouteResult.cs" />
     <Compile Include="Results\RedirectResult.cs" />
     <Compile Include="Results\CreatedAtRouteNegotiatedContentResult.cs" />
     <Compile Include="Results\BadRequestErrorMessageResult.cs" />

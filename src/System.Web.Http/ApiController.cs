@@ -90,19 +90,29 @@ namespace System.Web.Http
             }
         }
 
-        /// <summary>Gets the HTTP request message.</summary>
+        /// <summary>Gets or sets the HTTP request message.</summary>
         /// <remarks>The setter is intended for unit testing purposes only.</remarks>
         public HttpRequestMessage Request
         {
             get { return ControllerContext.Request; }
             set
             {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
                 ControllerContext.Request = value;
 
-                // Unit testing only
-                if (Request.GetRequestContext() == null)
+                HttpRequestContext context = value.GetRequestContext();
+
+                if (context == null)
                 {
-                    Request.SetRequestContext(RequestContext);
+                    value.SetRequestContext(RequestContext);
+                }
+                else
+                {
+                    RequestContext = context;
                 }
             }
         }
@@ -111,8 +121,24 @@ namespace System.Web.Http
         /// <remarks>The setter is intended for unit testing purposes only.</remarks>
         public HttpRequestContext RequestContext
         {
-            get { return ControllerContext.RequestContext; }
-            set { ControllerContext.RequestContext = value; }
+            get
+            {
+                return ControllerContext.RequestContext;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                ControllerContext.RequestContext = value;
+
+                if (Request != null)
+                {
+                    Request.SetRequestContext(value);
+                }
+            }
         }
 
         /// <summary>Gets a factory used to generate URLs to other APIs.</summary>

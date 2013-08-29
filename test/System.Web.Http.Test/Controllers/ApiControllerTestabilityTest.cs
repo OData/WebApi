@@ -67,6 +67,73 @@ namespace System.Web.Http.Controllers
             Assert.Equal(42, customer.ID);
         }
 
+        [Fact]
+        public void SettingRequestWithoutContextAppliesADefaultContextToTheRequest()
+        {
+            // Arrange
+            CustomersController controller = new CustomersController();
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            // Act
+            controller.Request = request;
+
+            // Arrange
+            HttpRequestContext context = request.GetRequestContext(); // cache the result before accessing the controller
+
+            // Assert
+            Assert.Equal(controller.RequestContext, context);
+        }
+
+        [Fact]
+        public void ControllerHasDefaultControllerContext()
+        {
+            // Arrange
+            CustomersController controller = new CustomersController();
+
+            // Assert
+            Assert.NotNull(controller.ControllerContext);
+            Assert.NotNull(controller.RequestContext);
+        }
+
+        [Fact]
+        public void SettingRequestWithContextSetsTheControllerRequestContext()
+        {
+            // Arrange
+            CustomersController controller = new CustomersController();
+
+            var request = new HttpRequestMessage();
+            var context = new HttpRequestContext();
+
+            request.SetRequestContext(context);
+
+            // Act
+            controller.Request = request;
+
+            // Assert
+            Assert.Equal(controller.RequestContext, context);
+        }
+
+        [Fact]
+        public void SettingRequestContextAppliesToRequest()
+        {
+            // This test is to make sure the ordering of the calls request and requestcontext setters does't matter
+
+            // Arrange
+            CustomersController controller = new CustomersController();
+
+            var request = new HttpRequestMessage();
+            var context = new HttpRequestContext();
+
+            Assert.Null(request.GetRequestContext());
+
+            // Act
+            controller.Request = request;
+            controller.RequestContext = context;
+
+            // Assert
+            Assert.Equal(request.GetRequestContext(), context);
+        }
+
         private class CustomersController : ApiController
         {
             public HttpResponseMessage Post(Customer c)

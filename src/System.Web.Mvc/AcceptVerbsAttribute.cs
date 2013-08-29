@@ -48,7 +48,7 @@ namespace System.Web.Mvc
         public int RouteOrder { get; set; }
 
         /// <summary>
-        /// Gets the set of allowed HTTP methods for that route. If the route allow any method to be used, the value is null.
+        /// Gets the set of allowed HTTP methods specified by this attribute. 
         /// </summary>
         public ICollection<string> Verbs
         {

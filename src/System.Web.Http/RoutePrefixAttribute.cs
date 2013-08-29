@@ -3,7 +3,7 @@
 namespace System.Web.Http
 {
     /// <summary>
-    /// Annotates a controller with a route prefix that applies to all actions within the controller.
+    /// Annotates a controller with a route prefix that applies to actions that have any <see cref="RouteAttribute"/>s on them.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class RoutePrefixAttribute : Attribute

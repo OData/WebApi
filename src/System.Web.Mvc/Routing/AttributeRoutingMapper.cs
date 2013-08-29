@@ -55,17 +55,7 @@ namespace System.Web.Mvc.Routing
             string controllerName = controllerDescriptor.ControllerName;
 
             AsyncActionMethodSelector actionSelector = controllerDescriptor.Selector;
-            IEnumerable<MethodInfo> actionMethodsInfo = actionSelector.AliasedMethods
-                                                                      .Concat(actionSelector.NonAliasedMethods.SelectMany(x => x))
-                                                                      .Where(m => m.DeclaringType == controllerDescriptor.ControllerType);
-
-            if (actionSelector.AllowLegacyAsyncActions)
-            {
-                // if the ActionAsync / ActionCompleted pattern is used, we need to remove the "Completed" methods
-                // and not look up routing attributes on them
-                actionMethodsInfo =
-                    actionMethodsInfo.Where(m => !m.Name.EndsWith("Completed", StringComparison.OrdinalIgnoreCase));
-            }
+            IEnumerable<MethodInfo> actionMethodsInfo = actionSelector.DirectRouteMethods;
 
             List<RouteEntry> routeEntries = new List<RouteEntry>();
 

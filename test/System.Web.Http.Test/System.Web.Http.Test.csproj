@@ -112,6 +112,7 @@
     <Compile Include="Results\InvalidModelStateResultTests.cs" />
     <Compile Include="Results\NegotiatedContentResultTests.cs" />
     <Compile Include="Results\FormattedContentResultTests.cs" />
+    <Compile Include="Results\RedirectResultTests.cs" />
     <Compile Include="Results\StatusCodeResultTests.cs" />
     <Compile Include="HttpConfigurationExtensionsTest.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerTypeResolverTest.cs" />

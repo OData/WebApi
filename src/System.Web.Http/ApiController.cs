@@ -426,6 +426,27 @@ namespace System.Web.Http
             return new OkNegotiatedContentResult<T>(content, this);
         }
 
+        /// <summary>Creates a <see cref="RedirectResult"/> (302 Found) with the specified value.</summary>
+        /// <param name="location">The location to which to redirect.</param>
+        /// <returns>A <see cref="RedirectResult"/> with the specified value.</returns>
+        protected internal virtual RedirectResult Redirect(string location)
+        {
+            if (location == null)
+            {
+                throw new ArgumentNullException("location");
+            }
+
+            return Redirect(new Uri(location));
+        }
+
+        /// <summary>Creates a <see cref="RedirectResult"/> (302 Found) with the specified value.</summary>
+        /// <param name="location">The location to which to redirect.</param>
+        /// <returns>A <see cref="RedirectResult"/> with the specified value.</returns>
+        protected internal virtual RedirectResult Redirect(Uri location)
+        {
+            return new RedirectResult(location, this);
+        }
+
         /// <summary>Creates a <see cref="ResponseMessageResult"/> with the specified response.</summary>
         /// <param name="response">The HTTP response message.</param>
         /// <returns>A <see cref="ResponseMessageResult"/> for the specified response.</returns>

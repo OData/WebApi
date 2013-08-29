@@ -52,7 +52,7 @@ namespace System.Web.Mvc
             {
                 // See Codeplex #544 - the partialFieldName might represent an indexer access, in which case combining
                 // with a 'dot' would be invalid.
-                return HtmlFieldPrefix + (partialFieldName ?? String.Empty);
+                return HtmlFieldPrefix + partialFieldName;
             }
             else
             {

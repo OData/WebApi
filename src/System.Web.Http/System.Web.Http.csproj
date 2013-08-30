@@ -71,6 +71,7 @@
     <Compile Include="Controllers\AuthenticationFilterResult.cs" />
     <Compile Include="Controllers\AuthorizationFilterResult.cs" />
     <Compile Include="Controllers\HttpControllerSettings.cs" />
+    <Compile Include="Controllers\HttpLegacyRequestContext.cs" />
     <Compile Include="Controllers\HttpParameterDescriptorExtensions.cs" />
     <Compile Include="Controllers\HttpRequestContext.cs" />
     <Compile Include="Controllers\IActionResultConverter.cs" />

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net;
@@ -125,15 +126,17 @@ namespace System.Web.Http.Dispatcher
 
             HttpRequestContext requestContext = request.GetRequestContext();
 
+            // if the host doesn't create the context we will fallback to creating it.
             if (requestContext == null)
             {
-                requestContext = new HttpRequestContext
+                requestContext = new HttpLegacyRequestContext(request)
                 {
+                    // we are caching controller configuration to support per controller configuration.
                     Configuration = controllerConfiguration,
-                    RouteData = routeData,
-                    Url = new UrlHelper(request),
-                    VirtualPathRoot = controllerConfiguration != null ? controllerConfiguration.VirtualPathRoot : null
                 };
+
+                // if the host did not set a request context we will also set it back to the request.
+                request.SetRequestContext(requestContext);
             }
 
             // Create context

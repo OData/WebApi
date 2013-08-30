@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.Hosting;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http
@@ -162,7 +161,17 @@ namespace System.Web.Http
             // Ensure we have a principal on the request context (if there is a request context).
             HttpRequestContext requestContext = request.GetRequestContext();
 
-            if (requestContext != null && requestContext.Principal == null)
+            if (requestContext == null)
+            {
+                requestContext = new HttpLegacyRequestContext(request);
+
+                // if the host did not set a request context we will also set it back to the request.
+                request.SetRequestContext(requestContext);
+            }
+
+            // we need this for the case where the context was set outside of HttpServer, but principal was not assigned.
+            // HttpLegacyRequestContext already captures the Thread.CurrentPrincipal.
+            if (requestContext.Principal == null)
             {
                 requestContext.Principal = Thread.CurrentPrincipal;
             }

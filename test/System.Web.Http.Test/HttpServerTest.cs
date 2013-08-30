@@ -24,7 +24,7 @@ namespace System.Web.Http
         [Fact]
         public void DefaultConstructor()
         {
-            Assert.NotNull(new HttpServer());
+            Assert.DoesNotThrow(() => new HttpServer());
         }
 
         [Fact]
@@ -288,6 +288,63 @@ namespace System.Web.Http
             // Assert
             Assert.Equal(exception.Response.StatusCode, response.StatusCode);
             Assert.Equal(exception.Response.ReasonPhrase, response.ReasonPhrase);
+        }
+
+        [Fact]
+        public void TestRequestContext_HttpServer()
+        {
+            // Arrange
+            HttpServer server = new HttpServer();
+            var handler = new ThrowIfNoContext();
+
+            server.Configuration.MessageHandlers.Add(handler);
+            server.Configuration.MapHttpAttributeRoutes();
+            server.Configuration.EnsureInitialized();
+
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/Customers").Result;
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            Assert.True(handler.ContextFound);
+        }
+
+        private class ThrowIfNoContext : DelegatingHandler
+        {
+            public bool ContextFound { get; set; }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                if (request.GetRequestContext() == null)
+                {
+                    throw new InvalidOperationException("context missing");
+                }
+
+                ContextFound = true;
+
+                return base.SendAsync(request, cancellationToken);
+            }
+        }
+
+        public class RequestHasContextController : ApiController
+        {
+            [Route("Customers")]
+            public IHttpActionResult Get()
+            {
+                if (RequestContext == null)
+                {
+                    return InternalServerError();
+                }
+
+                if (Request.GetRequestContext() == null)
+                {
+                    return BadRequest();
+                }
+
+                return Ok();
+            }
         }
 
         private class ThrowingMessageHandler : DelegatingHandler

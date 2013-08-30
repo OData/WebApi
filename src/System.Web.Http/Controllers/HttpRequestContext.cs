@@ -9,6 +9,14 @@ namespace System.Web.Http.Controllers
     /// <summary>Represents the context associated with a request.</summary>
     public class HttpRequestContext
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpRequestContext"/> class.
+        /// </summary>
+        public HttpRequestContext()
+        {
+            // This is constructor is available to allow placing break points on construction.</remarks>
+        }
+
         /// <summary>Gets or sets the client certificate.</summary>
         public virtual X509Certificate2 ClientCertificate { get; set; }
 

@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 [assembly: CLSCompliant(true)]
 #endif
 [assembly: NeutralResourcesLanguage("en-US")]
+[assembly: AssemblyMetadata("Serviceable", "True")]
 
 // ===========================================================================
 //  DO NOT EDIT OR REMOVE ANYTHING BELOW THIS COMMENT.

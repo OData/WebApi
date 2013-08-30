@@ -124,6 +124,7 @@
       <Link>Routing\RouteParsing\HttpRouteParser.cs</Link>
     </Compile>
     <Compile Include="ActionMethodSelectorBase.cs" />
+    <Compile Include="ControllerDescriptorExtensions.cs" />
     <Compile Include="Routing\RouteParsing\ParsedRoute.cs" />
     <Compile Include="..\Common\Routing\PathContentSegment.cs">
       <Link>Routing\RouteParsing\PathContentSegment.cs</Link>

@@ -8,7 +8,7 @@ namespace System.Web.Mvc
     /// <summary>
     /// Represents a route for an action method.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public sealed class RouteAttribute : Attribute, IRouteInfoProvider
     {
         /// <summary>

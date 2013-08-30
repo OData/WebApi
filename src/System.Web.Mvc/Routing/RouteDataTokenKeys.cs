@@ -7,5 +7,6 @@ namespace System.Web.Mvc.Routing
         public const string UseNamespaceFallback = "UseNamespaceFallback";
         public const string Namespaces = "Namespaces";
         public const string Area = "area";
+        public const string DirectRouteToController = "MS_DirectControllerRoute";
     }
 }

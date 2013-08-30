@@ -44,12 +44,13 @@ namespace System.Web.Mvc.Routing
 
         internal List<RouteEntry> MapMvcAttributeRoutes(ReflectedAsyncControllerDescriptor controllerDescriptor)
         {
-            string prefix = GetPrefixFrom(controllerDescriptor);
-            ValidatePrefixTemplate(prefix, controllerDescriptor);            
+            string prefix = controllerDescriptor.GetPrefixFrom();
+            ValidatePrefixTemplate(prefix, controllerDescriptor);
 
-            RouteAreaAttribute area = GetAreaFrom(controllerDescriptor);
-            string areaName = GetAreaName(controllerDescriptor, area);
+            RouteAreaAttribute area = controllerDescriptor.GetAreaFrom();
+            string areaName = controllerDescriptor.GetAreaName(area);
             string areaPrefix = area != null ? area.AreaPrefix ?? area.AreaName : null;
+
             ValidateAreaPrefixTemplate(areaPrefix, areaName, controllerDescriptor);
 
             string controllerName = controllerDescriptor.ControllerName;
@@ -61,7 +62,7 @@ namespace System.Web.Mvc.Routing
 
             foreach (var method in actionMethodsInfo)
             {
-                string actionName = GetActionName(method, actionSelector.AllowLegacyAsyncActions);
+                string actionName = actionSelector.GetActionName(method);
                 IEnumerable<IRouteInfoProvider> routeAttributes = GetRouteAttributes(method);
 
                 IEnumerable<string> verbs = GetActionVerbs(method);
@@ -83,6 +84,24 @@ namespace System.Web.Mvc.Routing
                     };
                     routeEntries.Add(entry);                    
                 }
+            }
+
+            // Check for controller-level routes. 
+            IEnumerable<IRouteInfoProvider> controllerRouteAttributes = controllerDescriptor.GetDirectRoutes();
+            foreach (var routeAttribute in controllerRouteAttributes)
+            {               
+                string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.Template);
+
+                Route route = _routeBuilder.BuildDirectRoute(template, controllerDescriptor);
+                RouteEntry entry = new RouteEntry
+                {
+                    Name = routeAttribute.Name,
+                    Route = route,
+                    Template = template,
+                    ParsedRoute = RouteParser.Parse(route.Url),
+                    Order = routeAttribute.Order
+                };
+                routeEntries.Add(entry);     
             }
 
             return routeEntries;
@@ -127,51 +146,6 @@ namespace System.Web.Mvc.Routing
               .OfType<IRouteInfoProvider>()
               .Where(attr => attr.Template != null)
               .ToArray();
-        }
-
-        private static string GetAreaName(ReflectedAsyncControllerDescriptor controllerDescriptor, RouteAreaAttribute area)
-        {
-            if (area == null)
-            {
-                return null;
-            }
-
-            if (area.AreaName != null)
-            {
-                return area.AreaName;
-            }
-            if (controllerDescriptor.ControllerType.Namespace != null)
-            {
-                return controllerDescriptor.ControllerType.Namespace.Split('.').Last();
-            }
-
-            throw Error.InvalidOperation(MvcResources.AttributeRouting_CouldNotInferAreaNameFromMissingNamespace, controllerDescriptor.ControllerName);
-        }
-
-        private static RouteAreaAttribute GetAreaFrom(ReflectedAsyncControllerDescriptor controllerDescriptor)
-        {
-            RouteAreaAttribute areaAttribute =
-                controllerDescriptor.GetCustomAttributes(typeof(RouteAreaAttribute), true)
-                                    .Cast<RouteAreaAttribute>()
-                                    .FirstOrDefault();
-            return areaAttribute;
-        }
-
-        private static string GetPrefixFrom(ReflectedAsyncControllerDescriptor controllerDescriptor)
-        {
-            // this only happens once per controller type, for the lifetime of the application,
-            // so we do not need to cache the results
-            object[] routePrefixAttributes = controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute), inherit: false);
-            if (routePrefixAttributes.Length > 0)
-            {
-                RoutePrefixAttribute routePrefixAttribute = routePrefixAttributes[0] as RoutePrefixAttribute;
-                if (routePrefixAttribute != null)
-                {
-                    return routePrefixAttribute.Prefix;
-                }
-            }
-
-            return null;
         }
 
         internal static string CombinePrefixAndAreaWithTemplate(string areaPrefix, string prefix, string template)
@@ -231,28 +205,6 @@ namespace System.Web.Mvc.Routing
                 }
             }
             return list;
-        }
-
-        private static string GetActionName(MethodInfo method, bool allowLegacyAsyncActions)
-        {
-            // Check for ActionName attribute
-            object[] nameAttributes = method.GetCustomAttributes(typeof(ActionNameAttribute), inherit: true);
-            if (nameAttributes.Length > 0)
-            {
-                ActionNameAttribute nameAttribute = nameAttributes[0] as ActionNameAttribute;
-                if (nameAttribute != null)
-                {
-                    return nameAttribute.Name;
-                }
-            }
-
-            const string AsyncMethodSuffix = "Async";
-            if (allowLegacyAsyncActions && method.Name.EndsWith(AsyncMethodSuffix, StringComparison.OrdinalIgnoreCase))
-            {
-                return method.Name.Substring(0, method.Name.Length - AsyncMethodSuffix.Length);
-            }
-
-            return method.Name;
         }
     }
 }

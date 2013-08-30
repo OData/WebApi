@@ -37,6 +37,62 @@ namespace System.Web.Mvc.Routing
         public IInlineConstraintResolver ConstraintResolver { get; private set; }
 
         /// <summary>
+        /// Builds an <see cref="Route"/> for a particular controller.
+        /// </summary>
+        /// <param name="routeTemplate">The tokenized route template for the route.</param>
+        /// <param name="controllerDescriptor">The controller the route attribute has been applied on.</param>
+        /// <returns>The generated <see cref="Route"/>.</returns>
+        public Route BuildDirectRoute(string routeTemplate, ControllerDescriptor controllerDescriptor)
+        {
+            if (routeTemplate == null)
+            {
+                throw Error.ArgumentNull("routeTemplate");
+            }
+
+            if (controllerDescriptor == null)
+            {
+                throw Error.ArgumentNull("controllerDescriptor");
+            }
+                        
+            string controllerName = controllerDescriptor.ControllerName;
+                        
+            RouteAreaAttribute area = controllerDescriptor.GetAreaFrom();
+            string areaName = controllerDescriptor.GetAreaName(area);
+            string areaPrefix = area != null ? area.AreaPrefix ?? area.AreaName : null;
+
+            RouteValueDictionary defaults = new RouteValueDictionary
+            {
+                { "controller", controllerName }
+            };
+
+            Type controllerType = controllerDescriptor.ControllerType;
+
+            RouteValueDictionary dataTokens = new RouteValueDictionary();
+            dataTokens[RouteDataTokenKeys.DirectRouteToController] = controllerDescriptor;
+            if (areaName != null)
+            {
+                dataTokens.Add(RouteDataTokenKeys.Area, areaName);
+                dataTokens.Add(RouteDataTokenKeys.UseNamespaceFallback, value: false);
+                if (controllerType != null)
+                {
+                    dataTokens.Add(RouteDataTokenKeys.Namespaces, new[] { controllerType.Namespace });
+                }
+            }
+
+            RouteValueDictionary constraints = new RouteValueDictionary();
+            string detokenizedRouteTemplate = InlineRouteTemplateParser.ParseRouteTemplate(routeTemplate, defaults, constraints, ConstraintResolver);
+
+            Route route = new Route(detokenizedRouteTemplate, new MvcRouteHandler())
+            {
+                Defaults = defaults,
+                Constraints = constraints,
+                DataTokens = dataTokens
+            };
+
+            return route;
+        }
+
+        /// <summary>
         /// Builds an <see cref="Route"/> for a particular action.
         /// </summary>
         /// <param name="routeTemplate">The tokenized route template for the route.</param>

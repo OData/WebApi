@@ -21,7 +21,12 @@ namespace System.Web.Mvc
         {
             ControllerType = controllerType;
             PopulateLookupTables();
+
+            // If controller type has a RoutePrefix, then standard routes can't reach it.             
+            _hasRouteAttributeOnController = controllerType.GetCustomAttributes(inherit: false).OfType<IRouteInfoProvider>().Any();
         }
+
+        private bool _hasRouteAttributeOnController;
 
         public Type ControllerType { get; private set; }
 
@@ -201,6 +206,23 @@ namespace System.Web.Mvc
                 }
             }
         }
+
+        // Get the action name for the method.         
+        public string GetActionName(MethodInfo methodInfo)
+        {
+            // Check for ActionName attribute
+            object[] nameAttributes = methodInfo.GetCustomAttributes(typeof(ActionNameAttribute), inherit: true);
+            if (nameAttributes.Length > 0)
+            {
+                ActionNameAttribute nameAttribute = nameAttributes[0] as ActionNameAttribute;
+                if (nameAttribute != null)
+                {
+                    return nameAttribute.Name;
+                }
+            }
+
+            return GetCanonicalMethodName(methodInfo);
+        }
         
         public MethodInfo FindActionMethod(ControllerContext controllerContext, string actionName)
         {
@@ -209,13 +231,31 @@ namespace System.Web.Mvc
                 throw Error.ArgumentNull("controllerContext");
             }
 
-            if (controllerContext.RouteData != null)
+            RouteData routeData = controllerContext.RouteData;
+
+            if (routeData != null)
             {
-                MethodInfo target = controllerContext.RouteData.GetTargetActionMethod();
+                MethodInfo target = routeData.GetTargetActionMethod();
                 if (target != null)
                 {
-                    // short circuit the selection process if a direct route was matched.
+                    // short circuit the selection process if we matched a direct route that already supplies the method. 
                     return target;
+                }
+            }
+
+            // If this controller has a Route attribute, then its actions can't be reached by standard routes. 
+            if (_hasRouteAttributeOnController)
+            {
+                if (routeData == null)
+                {
+                    return null;
+                }
+                ControllerDescriptor descriptor = routeData.DataTokens[RouteDataTokenKeys.DirectRouteToController] as ControllerDescriptor;
+
+                if (descriptor == null)
+                {
+                    // Missing descriptor. It's a standard route. Can't reach actions. 
+                    return null;
                 }
             }
 

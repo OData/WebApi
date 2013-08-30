@@ -52,6 +52,7 @@
     <Compile Include="Html\Test\ValueExtensionsTest.cs" />
     <Compile Include="Razor\Test\MvcCSharpRazorCodeGeneratorTest.cs" />
     <Compile Include="Routing\AttributeRoutingMapperTest.cs" />
+    <Compile Include="Routing\AttributeRoutingTest.cs" />
     <Compile Include="Routing\DirectRouteTestHelpers.cs" />
     <Compile Include="Routing\RouteAttributeTests.cs" />
     <Compile Include="..\Common\Routing\RouteConstraintsTests.cs">

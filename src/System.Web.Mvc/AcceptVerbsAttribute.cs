@@ -10,7 +10,7 @@ namespace System.Web.Mvc
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "base class for HttpGet and other attributes.")]
     [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "The accessor is exposed as an ICollection<string>.")]
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class AcceptVerbsAttribute : ActionMethodSelectorAttribute, IDirectRouteInfoProvider
+    public class AcceptVerbsAttribute : ActionMethodSelectorAttribute
     {
         private readonly HttpVerbsValidator _httpVerbsValidator;
 
@@ -30,22 +30,7 @@ namespace System.Web.Mvc
         public AcceptVerbsAttribute(params string[] verbs)
         {
             _httpVerbsValidator = new HttpVerbsValidator(verbs);
-        }
-
-        /// <summary>
-        /// Gets or sets the route template describing the URI pattern to match against.
-        /// </summary>
-        public string RouteTemplate { get; set; }
-
-        /// <summary>
-        /// Gets or sets the name of the route to generate for this action.
-        /// </summary>
-        public string RouteName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the order of the route relative to other routes. The default order is 0.
-        /// </summary>
-        public int RouteOrder { get; set; }
+        }      
 
         /// <summary>
         /// Gets the set of allowed HTTP methods specified by this attribute. 

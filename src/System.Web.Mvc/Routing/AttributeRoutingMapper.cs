@@ -62,24 +62,24 @@ namespace System.Web.Mvc.Routing
             foreach (var method in actionMethodsInfo)
             {
                 string actionName = GetActionName(method, actionSelector.AllowLegacyAsyncActions);
-                IEnumerable<IDirectRouteInfoProvider> routeAttributes = GetRouteAttributes(method);
+                IEnumerable<IRouteInfoProvider> routeAttributes = GetRouteAttributes(method);
 
                 IEnumerable<string> verbs = GetActionVerbs(method);
 
                 foreach (var routeAttribute in routeAttributes)
                 {
-                    ValidateTemplate(routeAttribute.RouteTemplate, actionName, controllerDescriptor);
+                    ValidateTemplate(routeAttribute.Template, actionName, controllerDescriptor);
 
-                    string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.RouteTemplate);
+                    string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.Template);
                     Route route = _routeBuilder.BuildDirectRoute(template, verbs, controllerName,
                                                                     actionName, method, areaName);
                     RouteEntry entry = new RouteEntry
                     {
-                        Name = routeAttribute.RouteName,
+                        Name = routeAttribute.Name,
                         Route = route,
                         Template = template,
                         ParsedRoute = RouteParser.Parse(route.Url),
-                        Order = routeAttribute.RouteOrder                        
+                        Order = routeAttribute.Order                        
                     };
                     routeEntries.Add(entry);                    
                 }
@@ -118,14 +118,14 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-        private static IEnumerable<IDirectRouteInfoProvider> GetRouteAttributes(MethodInfo methodInfo)
+        private static IEnumerable<IRouteInfoProvider> GetRouteAttributes(MethodInfo methodInfo)
         {
             // We do not want to cache this as these attributes are only being looked up during
             // application's init time, so there will be no perf gain, and we will end up
             // storing that cache for no reason
             return methodInfo.GetCustomAttributes(inherit: false)
-              .OfType<IDirectRouteInfoProvider>()
-              .Where(attr => attr.RouteTemplate != null)
+              .OfType<IRouteInfoProvider>()
+              .Where(attr => attr.Template != null)
               .ToArray();
         }
 

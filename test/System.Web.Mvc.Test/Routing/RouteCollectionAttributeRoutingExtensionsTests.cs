@@ -248,7 +248,8 @@ namespace System.Web.Routing
                 throw new NotImplementedException();
             }
 
-            [AcceptVerbs(HttpVerbs.Get | HttpVerbs.Post, RouteTemplate = "getorpostme")]
+            [AcceptVerbs(HttpVerbs.Get | HttpVerbs.Post)]
+            [Route("getorpostme")]
             public ActionResult GetOrPostMe()
             {
                 throw new NotImplementedException();

@@ -22,7 +22,7 @@ namespace System.Web.Http.Routing
         string Template { get; }
 
         /// <summary>
-        /// Gets the order of the route relative to other routes.
+        /// Gets the order of the route relative to other routes. Default value is 0.
         /// </summary>
         int Order { get; }
     }

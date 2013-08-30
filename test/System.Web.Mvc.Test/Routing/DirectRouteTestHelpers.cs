@@ -12,11 +12,11 @@ namespace System.Web.Routing
         public static Route[] BuildDirectRouteStubsFrom<T>(Expression<Action<T>> methodCall)
         {
             var method = ((MethodCallExpression)methodCall.Body).Method;
-            var attributes = method.GetCustomAttributes(false).OfType<IDirectRouteInfoProvider>();
+            var attributes = method.GetCustomAttributes(false).OfType<IRouteInfoProvider>();
 
             return attributes.Select(attr =>
                 {
-                    var route = new Route(attr.RouteTemplate, routeHandler: null);
+                    var route = new Route(attr.Template, routeHandler: null);
                     route.SetTargetActionMethod(method);
                     return route;
                 }).ToArray();

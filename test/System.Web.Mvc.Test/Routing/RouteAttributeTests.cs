@@ -24,7 +24,7 @@ namespace System.Web.Routing
         {
             RouteAttribute attr = new RouteAttribute();
 
-            Assert.Equal(String.Empty, attr.RouteTemplate);
+            Assert.Equal(String.Empty, attr.Template);
         }
     }
 }

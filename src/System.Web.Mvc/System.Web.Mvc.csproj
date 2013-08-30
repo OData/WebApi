@@ -192,7 +192,7 @@
     <Compile Include="Routing\AttributeRoutingMapper.cs" />
     <Compile Include="Routing\DirectRouteExtensions.cs" />
     <Compile Include="HttpVerbsValidator.cs" />
-    <Compile Include="Routing\IDirectRouteInfoProvider.cs" />
+    <Compile Include="Routing\IRouteInfoProvider.cs" />
     <Compile Include="Routing\RouteBuilder.cs" />
     <Compile Include="Routing\IInlineConstraintResolver.cs" />
     <Compile Include="Routing\RouteCollectionAttributeRoutingExtensions.cs" />

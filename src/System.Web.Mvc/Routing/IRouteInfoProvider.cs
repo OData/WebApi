@@ -8,21 +8,21 @@ namespace System.Web.Mvc.Routing
     /// <summary>
     /// Provides information for building a <see cref="Route"/>.
     /// </summary>
-    public interface IDirectRouteInfoProvider
+    public interface IRouteInfoProvider
     {
         /// <summary>
         /// Gets the name of the route to generate.
         /// </summary>
-        string RouteName { get; }
+        string Name { get; }
 
         /// <summary>
         /// Gets the route template describing the URI pattern to match against.
         /// </summary>
-        string RouteTemplate { get; }
+        string Template { get; }
 
         /// <summary>
-        /// Gets the order of the route relative to other routes.
+        /// Gets the order of the route relative to other routes. Default value is 0.
         /// </summary>
-        int RouteOrder { get; }      
+        int Order { get; }      
     }
 }

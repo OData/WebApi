@@ -9,10 +9,8 @@ namespace System.Web.Mvc
     /// Represents a route for an action method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class RouteAttribute : Attribute, IDirectRouteInfoProvider
+    public sealed class RouteAttribute : Attribute, IRouteInfoProvider
     {
-        private readonly string _routeTemplate;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RouteAttribute" /> class.
         /// </summary>
@@ -23,31 +21,23 @@ namespace System.Web.Mvc
         /// <summary>
         /// Initializes a new instance of the <see cref="RouteAttribute" /> class.
         /// </summary>
-        /// <param name="routeTemplate">The route template describing the URI pattern to match against.</param>
-        public RouteAttribute(string routeTemplate)
+        /// <param name="template">The route template describing the URI pattern to match against.</param>
+        public RouteAttribute(string template)
         {
-            if (routeTemplate == null)
+            if (template == null)
             {
-                throw Error.ArgumentNull("routeTemplate");
+                throw Error.ArgumentNull("template");
             }
-
-            _routeTemplate = routeTemplate;
+            Template = template;
         }
 
         /// <inheritdoc />
-        public string RouteTemplate
-        {
-            get { return _routeTemplate; }
-        }
+        public string Name { get; set; }
 
-        /// <summary>
-        /// Gets or sets the name of the route to generate for this action.
-        /// </summary>
-        public string RouteName { get; set; }
+        /// <inheritdoc />
+        public int Order { get; set; }
 
-        /// <summary>
-        /// Gets or sets the order of the route relative to other routes. The default order is 0.
-        /// </summary>
-        public int RouteOrder { get; set; }
+        /// <inheritdoc />
+        public string Template { get; private set; }
     }
 }

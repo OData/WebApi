@@ -90,7 +90,7 @@ namespace System.Web.Mvc
         // This does not include a route attribute on the controller itself.
         private static bool HasDirectRoutes(MethodInfo method)
         {
-            return method.GetCustomAttributes().OfType<IDirectRouteInfoProvider>().Any();
+            return method.GetCustomAttributes().OfType<IRouteInfoProvider>().Any();
         }
 
         private void PopulateLookupTables()

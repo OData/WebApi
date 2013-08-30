@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
@@ -291,7 +292,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void TestRequestContext_HttpServer()
+        public void HttpServerAddsDefaultRequestContext()
         {
             // Arrange
             HttpServer server = new HttpServer();
@@ -301,14 +302,44 @@ namespace System.Web.Http
             server.Configuration.MapHttpAttributeRoutes();
             server.Configuration.EnsureInitialized();
 
-            HttpClient client = new HttpClient(server);
+            var invoker = new HttpMessageInvoker(server);
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customers");
 
             // Act
-            var response = client.GetAsync("http://localhost/Customers").Result;
+            var response = invoker.SendAsync(request, CancellationToken.None).Result;
 
             // Assert
             response.EnsureSuccessStatusCode();
             Assert.True(handler.ContextFound);
+        }
+
+        [Fact]
+        public void HttpServerDoesNotReplaceOriginalRequestContext()
+        {
+            // Arrange
+            HttpServer server = new HttpServer();
+            var handler = new ThrowIfNoContext();
+
+            server.Configuration.MessageHandlers.Add(handler);
+            server.Configuration.MapHttpAttributeRoutes();
+            server.Configuration.EnsureInitialized();
+
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customers");
+
+            HttpRequestContext context = new HttpRequestContext();
+
+            request.SetRequestContext(context);
+
+            // Act
+            var response = invoker.SendAsync(request, CancellationToken.None).Result;
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            Assert.True(handler.ContextFound);
+            Assert.Equal(context, response.RequestMessage.GetRequestContext());
         }
 
         private class ThrowIfNoContext : DelegatingHandler
@@ -317,14 +348,25 @@ namespace System.Web.Http
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
-                if (request.GetRequestContext() == null)
+                HttpRequestContext incomingContext = request.GetRequestContext();
+
+                if (incomingContext == null)
                 {
                     throw new InvalidOperationException("context missing");
                 }
 
                 ContextFound = true;
 
-                return base.SendAsync(request, cancellationToken);
+                Task<HttpResponseMessage> result = base.SendAsync(request, cancellationToken);
+
+                HttpRequestContext outgoingContext = result.Result.RequestMessage.GetRequestContext();
+
+                if (outgoingContext != incomingContext)
+                {
+                    throw new InvalidOperationException("context mismatch");
+                }
+
+                return result;
             }
         }
 

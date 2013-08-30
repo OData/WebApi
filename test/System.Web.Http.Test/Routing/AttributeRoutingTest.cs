@@ -73,6 +73,13 @@ namespace System.Web.Http.Routing
         [InlineData("GET", "subclassroute", "Get")]
         [InlineData("GET", "subclassroute?id=9", "Get:9")]
         [InlineData("POST", "subclassroute?name=foo", "Post:foo")]
+        // Route order
+        [InlineData("GET", "routeorder/11", "GetById:11")]
+        [InlineData("GET", "routeorder/name", "GetByName:name")]
+        [InlineData("GET", "routeorder/literal", "GetLiteral")]
+        [InlineData("GET", "routeorderoverload", "Get")]
+        [InlineData("GET", "routeorderoverload?name=name&id=1", "GetByNameAndId:name1")]
+        [InlineData("GET", "routeorderoverload?name=name", "GetByName:name")]
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -451,6 +458,48 @@ namespace System.Web.Http.Routing
         public string Post(string name)
         {
             return "Post:" + name;
+        }
+    }
+
+    public class RouteOrderController : ApiController
+    {
+        [Route("routeorder/{id:int}", Order = 1)]
+        public string GetById(int id)
+        {
+            return "GetById:" + id;
+        }
+
+        [Route("routeorder/{name}", Order = 2)]
+        public string GetByName(string name)
+        {
+            return "GetByName:" + name;
+        }
+
+        [Route("routeorder/literal", Order = 0)]
+        public string GetByName()
+        {
+            return "GetLiteral";
+        }
+    }
+
+    public class RouteOrderOverloadController : ApiController
+    {
+        [Route("routeorderoverload", Order = 1)]
+        public string GetByNameAndId(string name, int id) 
+        {
+            return "GetByNameAndId:" + name + id;
+        }
+
+        [Route("routeorderoverload", Order = 2)]
+        public string GetByName(string name) 
+        {
+            return "GetByName:" + name;
+        }
+
+        [Route("routeorderoverload", Order = 3)]
+        public string Get() 
+        {
+            return "Get";
         }
     }
 }

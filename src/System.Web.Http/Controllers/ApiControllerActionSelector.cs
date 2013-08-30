@@ -222,11 +222,14 @@ namespace System.Web.Http.Controllers
                     GetInitialCandidateWithParameterListForRegularRoutes(controllerContext, ignoreVerbs) :
                     GetInitialCandidateWithParameterListForDirectRoutes(controllerContext, subRoutes, ignoreVerbs);
 
-                // Make sure the action parameter matches the route and query parameters. Overload resolution logic is applied when needed.
-                List<CandidateActionWithParams> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(actionsWithParameters);
+                // Make sure the action parameter matches the route and query parameters.
+                List<CandidateActionWithParams> actionsFoundByParams = FindActionMatchRequiredRouteAndQueryParameters(actionsWithParameters);
 
-                List<CandidateActionWithParams> maximumOrderCandidates = RunOrderFilter(actionsFoundByParams);
-                List<CandidateActionWithParams> selectedCandidates = RunPrecedenceFilter(maximumOrderCandidates);
+                List<CandidateActionWithParams> orderCandidates = RunOrderFilter(actionsFoundByParams);
+                List<CandidateActionWithParams> precedenceCandidates = RunPrecedenceFilter(orderCandidates);
+
+                // Overload resolution logic is applied when needed.
+                List<CandidateActionWithParams> selectedCandidates = FindActionMatchMostRouteAndQueryParameters(precedenceCandidates);
 
                 return selectedCandidates;
             }
@@ -421,7 +424,7 @@ namespace System.Web.Http.Controllers
                 return combinedParameterNames;
             }
 
-            private List<CandidateActionWithParams> FindActionUsingRouteAndQueryParameters(IEnumerable<CandidateActionWithParams> candidatesFound)
+            private List<CandidateActionWithParams> FindActionMatchRequiredRouteAndQueryParameters(IEnumerable<CandidateActionWithParams> candidatesFound)
             {
                 List<CandidateActionWithParams> matches = new List<CandidateActionWithParams>();
 
@@ -433,17 +436,23 @@ namespace System.Web.Http.Controllers
                         matches.Add(candidate);
                     }
                 }
-                if (matches.Count > 1)
+
+                return matches;
+            }
+
+            private List<CandidateActionWithParams> FindActionMatchMostRouteAndQueryParameters(List<CandidateActionWithParams> candidatesFound)
+            {
+                if (candidatesFound.Count > 1)
                 {
                     // select the results that match the most number of required parameters
-                    matches = matches
+                    return candidatesFound
                         .GroupBy(candidate => _actionParameterNames[candidate.ActionDescriptor].Length)
                         .OrderByDescending(g => g.Key)
                         .First()
                         .ToList();
                 }
 
-                return matches;
+                return candidatesFound;
             }
 
             // Given a list of candidate actions, return a parallel list that includes the parameter information. 
@@ -479,8 +488,8 @@ namespace System.Web.Http.Controllers
                 {
                     return candidatesFound;
                 }
-                int maxOrder = candidatesFound.Max(c => c.CandidateAction.Order);
-                return candidatesFound.Where(c => c.CandidateAction.Order == maxOrder).AsList();
+                int minOrder = candidatesFound.Min(c => c.CandidateAction.Order);
+                return candidatesFound.Where(c => c.CandidateAction.Order == minOrder).AsList();
             }
 
             private static List<CandidateActionWithParams> RunPrecedenceFilter(List<CandidateActionWithParams> candidatesFound)

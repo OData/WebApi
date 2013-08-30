@@ -78,7 +78,7 @@ namespace System.Web.Http
             HttpActionDescriptor actionDescriptor = actionSelector.SelectAction(context);
 
             // Assert
-            Assert.Same(secondDirectRouteAction, actionDescriptor);
+            Assert.Same(firstDirectRouteAction, actionDescriptor);
         }
 
         [Fact]

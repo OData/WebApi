@@ -80,6 +80,11 @@ namespace System.Web.Http.Routing
         [InlineData("GET", "routeorderoverload", "Get")]
         [InlineData("GET", "routeorderoverload?name=name&id=1", "GetByNameAndId:name1")]
         [InlineData("GET", "routeorderoverload?name=name", "GetByName:name")]
+        // Route precedence
+        [InlineData("GET", "routeprecedence/11", "GetById:11")]
+        [InlineData("GET", "routeprecedence/name", "GetByName:name")]
+        [InlineData("GET", "routeprecedence/literal", "GetLiteral")]
+        [InlineData("GET", "routeprecedence/name?id=20", "GetByNameAndId:name20")]
         public void AttributeRouting_RoutesToAction(string httpMethod, string uri, string responseBody)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -476,7 +481,7 @@ namespace System.Web.Http.Routing
         }
 
         [Route("routeorder/literal", Order = 0)]
-        public string GetByName()
+        public string GetLiteral()
         {
             return "GetLiteral";
         }
@@ -500,6 +505,33 @@ namespace System.Web.Http.Routing
         public string Get() 
         {
             return "Get";
+        }
+    }
+
+    public class RoutePrecedenceController : ApiController
+    {
+        [Route("routeprecedence/{id:int}")]
+        public string GetById(int id)
+        {
+            return "GetById:" + id;
+        }
+
+        [Route("routeprecedence/{name}")]
+        public string GetByName(string name)
+        {
+            return "GetByName:" + name;
+        }
+
+        [Route("routeprecedence/{name}")]
+        public string GetByNameAndId(string name, int id)
+        {
+            return "GetByNameAndId:" + name + id;
+        }
+
+        [Route("routeprecedence/literal")]
+        public string GetLiteral()
+        {
+            return "GetLiteral";
         }
     }
 }

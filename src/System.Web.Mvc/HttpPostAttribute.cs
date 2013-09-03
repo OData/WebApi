@@ -1,19 +1,17 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Reflection;
+
 namespace System.Web.Mvc
 {
-    /// <summary>
-    /// Specifies that an action supports the POST HTTP method.
-    /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public sealed class HttpPostAttribute : AcceptVerbsAttribute
+    public sealed class HttpPostAttribute : ActionMethodSelectorAttribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpPostAttribute" /> class.
-        /// </summary>
-        public HttpPostAttribute()
-            : base(HttpVerbs.Post)
+        private static readonly AcceptVerbsAttribute _innerAttribute = new AcceptVerbsAttribute(HttpVerbs.Post);
+
+        public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
         {
+            return _innerAttribute.IsValidForRequest(controllerContext, methodInfo);
         }
     }
 }

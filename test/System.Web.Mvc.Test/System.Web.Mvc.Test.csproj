@@ -101,7 +101,6 @@
     <Compile Include="Test\HttpHeadAttributeTest.cs" />
     <Compile Include="Test\HttpOptionsAttributeTest.cs" />
     <Compile Include="Test\HttpPatchAttributeTest.cs" />
-    <Compile Include="Test\HttpVerbsValidatorTests.cs" />
     <Compile Include="Test\MockableUnvalidatedRequestValues.cs" />
     <Compile Include="Test\DescriptorUtilTest.cs" />
     <Compile Include="Razor\Test\MvcVBRazorCodeParserTest.cs" />

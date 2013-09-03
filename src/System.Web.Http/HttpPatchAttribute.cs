@@ -3,7 +3,6 @@
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Routing;
 
 namespace System.Web.Http
 {
@@ -11,14 +10,16 @@ namespace System.Web.Http
     /// Specifies that an action supports the PATCH HTTP method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public sealed class HttpPatchAttribute : AcceptVerbsAttribute
+    public sealed class HttpPatchAttribute : Attribute, IActionHttpMethodProvider
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpPatchAttribute" /> class.
-        /// </summary>
-        public HttpPatchAttribute()
-            : base(new HttpMethod("PATCH"))
+        private static readonly Collection<HttpMethod> _supportedMethods = new Collection<HttpMethod>(new HttpMethod[] { new HttpMethod("PATCH") });
+
+        public Collection<HttpMethod> HttpMethods
         {
+            get
+            {
+                return _supportedMethods;
+            }
         }
     }
 }

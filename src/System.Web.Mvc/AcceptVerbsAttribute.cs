@@ -1,48 +1,68 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
-using System.Web.Mvc.Routing;
+using System.Web.Mvc.Properties;
 
 namespace System.Web.Mvc
 {
-    [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "base class for HttpGet and other attributes.")]
     [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "The accessor is exposed as an ICollection<string>.")]
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class AcceptVerbsAttribute : ActionMethodSelectorAttribute
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public sealed class AcceptVerbsAttribute : ActionMethodSelectorAttribute
     {
-        private readonly HttpVerbsValidator _httpVerbsValidator;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AcceptVerbsAttribute" /> class.
-        /// </summary>
-        /// <param name="verbs">The HTTP methods the action supports.</param>
         public AcceptVerbsAttribute(HttpVerbs verbs)
+            : this(EnumToArray(verbs))
         {
-            _httpVerbsValidator = new HttpVerbsValidator(verbs);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AcceptVerbsAttribute" /> class.
-        /// </summary>
-        /// <param name="verbs">The HTTP methods the action supports.</param>
         public AcceptVerbsAttribute(params string[] verbs)
         {
-            _httpVerbsValidator = new HttpVerbsValidator(verbs);
-        }      
+            if (verbs == null || verbs.Length == 0)
+            {
+                throw new ArgumentException(MvcResources.Common_NullOrEmpty, "verbs");
+            }
 
-        /// <summary>
-        /// Gets the set of allowed HTTP methods specified by this attribute. 
-        /// </summary>
-        public ICollection<string> Verbs
+            Verbs = new ReadOnlyCollection<string>(verbs);
+        }
+
+        public ICollection<string> Verbs { get; private set; }
+
+        private static void AddEntryToList(HttpVerbs verbs, HttpVerbs match, List<string> verbList, string entryText)
         {
-            get { return _httpVerbsValidator.Verbs; }
+            if ((verbs & match) != 0)
+            {
+                verbList.Add(entryText);
+            }
+        }
+
+        internal static string[] EnumToArray(HttpVerbs verbs)
+        {
+            List<string> verbList = new List<string>();
+
+            AddEntryToList(verbs, HttpVerbs.Get, verbList, "GET");
+            AddEntryToList(verbs, HttpVerbs.Post, verbList, "POST");
+            AddEntryToList(verbs, HttpVerbs.Put, verbList, "PUT");
+            AddEntryToList(verbs, HttpVerbs.Delete, verbList, "DELETE");
+            AddEntryToList(verbs, HttpVerbs.Head, verbList, "HEAD");
+            AddEntryToList(verbs, HttpVerbs.Patch, verbList, "PATCH");
+            AddEntryToList(verbs, HttpVerbs.Options, verbList, "OPTIONS");
+
+            return verbList.ToArray();
         }
 
         public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
         {
-            return _httpVerbsValidator.IsValidForRequest(controllerContext);
+            if (controllerContext == null)
+            {
+                throw new ArgumentNullException("controllerContext");
+            }
+
+            string incomingVerb = controllerContext.HttpContext.Request.GetHttpMethodOverride();
+
+            return Verbs.Contains(incomingVerb, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

@@ -204,7 +204,28 @@ namespace System.Web.Mvc.Routing
                     list.Add(verb);
                 }
             }
+            AddActionVerbForAttribute<HttpDeleteAttribute>(method, "DELETE", list);
+            AddActionVerbForAttribute<HttpGetAttribute>(method, "GET", list);
+            AddActionVerbForAttribute<HttpHeadAttribute>(method, "HEAD", list);
+            AddActionVerbForAttribute<HttpOptionsAttribute>(method, "OPTIONS", list);
+            AddActionVerbForAttribute<HttpPatchAttribute>(method, "PATCH", list);
+            AddActionVerbForAttribute<HttpPostAttribute>(method, "POST", list);
+            AddActionVerbForAttribute<HttpPutAttribute>(method, "PUT", list);
             return list;
+        }
+
+        private static void AddActionVerbForAttribute<T>(MethodInfo method, string verb, List<string> verbs)
+            where T : Attribute
+        {
+            if (!verbs.Any(v => String.Equals(v, verb, StringComparison.OrdinalIgnoreCase)))
+            {
+                T attribute = method.GetCustomAttribute<T>();
+
+                if (attribute != null)
+                {
+                    verbs.Add(verb);
+                }
+            }
         }
     }
 }

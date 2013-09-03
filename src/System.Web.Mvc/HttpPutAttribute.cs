@@ -1,19 +1,17 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Reflection;
+
 namespace System.Web.Mvc
 {
-    /// <summary>
-    /// Specifies that an action supports the PUT HTTP method.
-    /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public sealed class HttpPutAttribute : AcceptVerbsAttribute
+    public sealed class HttpPutAttribute : ActionMethodSelectorAttribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpPutAttribute" /> class.
-        /// </summary>
-        public HttpPutAttribute()
-            : base(HttpVerbs.Put)
+        private static readonly AcceptVerbsAttribute _innerAttribute = new AcceptVerbsAttribute(HttpVerbs.Put);
+
+        public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
         {
+            return _innerAttribute.IsValidForRequest(controllerContext, methodInfo);
         }
     }
 }

@@ -1,19 +1,17 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Reflection;
+
 namespace System.Web.Mvc
 {
-    /// <summary>
-    /// Specifies that an action supports the DELETE HTTP method.
-    /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public sealed class HttpDeleteAttribute : AcceptVerbsAttribute
+    public sealed class HttpDeleteAttribute : ActionMethodSelectorAttribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpDeleteAttribute" /> class.
-        /// </summary>
-        public HttpDeleteAttribute()
-            : base(HttpVerbs.Delete)
+        private static readonly AcceptVerbsAttribute _innerAttribute = new AcceptVerbsAttribute(HttpVerbs.Delete);
+
+        public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
         {
-        }       
+            return _innerAttribute.IsValidForRequest(controllerContext, methodInfo);
+        }
     }
 }

@@ -3,7 +3,6 @@
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Routing;
 
 namespace System.Web.Http
 {
@@ -11,14 +10,16 @@ namespace System.Web.Http
     /// Specifies that an action supports the HEAD HTTP method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public sealed class HttpHeadAttribute : AcceptVerbsAttribute
+    public sealed class HttpHeadAttribute : Attribute, IActionHttpMethodProvider
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpHeadAttribute" /> class.
-        /// </summary>
-        public HttpHeadAttribute()
-            : base(HttpMethod.Head)
+        private static readonly Collection<HttpMethod> _supportedMethods = new Collection<HttpMethod>(new HttpMethod[] { HttpMethod.Head });
+
+        public Collection<HttpMethod> HttpMethods
         {
+            get
+            {
+                return _supportedMethods;
+            }
         }
     }
 }

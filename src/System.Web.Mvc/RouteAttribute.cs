@@ -6,7 +6,8 @@ using System.Web.Mvc.Routing;
 namespace System.Web.Mvc
 {
     /// <summary>
-    /// Represents a route for an action method.
+    /// Place on a controller or action to expose it directly via a route. 
+    /// When placed on a controller, it applies to actions that do not have any <see cref="RouteAttribute"/>s on them.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public sealed class RouteAttribute : Attribute, IRouteInfoProvider
@@ -33,10 +34,7 @@ namespace System.Web.Mvc
 
         /// <inheritdoc />
         public string Name { get; set; }
-
-        /// <inheritdoc />
-        public int Order { get; set; }
-
+        
         /// <inheritdoc />
         public string Template { get; private set; }
     }

@@ -79,8 +79,7 @@ namespace System.Web.Mvc.Routing
                         Name = routeAttribute.Name,
                         Route = route,
                         Template = template,
-                        ParsedRoute = RouteParser.Parse(route.Url),
-                        Order = routeAttribute.Order                        
+                        ParsedRoute = RouteParser.Parse(route.Url)
                     };
                     routeEntries.Add(entry);                    
                 }
@@ -98,8 +97,7 @@ namespace System.Web.Mvc.Routing
                     Name = routeAttribute.Name,
                     Route = route,
                     Template = template,
-                    ParsedRoute = RouteParser.Parse(route.Url),
-                    Order = routeAttribute.Order
+                    ParsedRoute = RouteParser.Parse(route.Url)
                 };
                 routeEntries.Add(entry);     
             }

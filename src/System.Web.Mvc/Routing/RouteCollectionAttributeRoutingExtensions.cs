@@ -39,7 +39,7 @@ namespace System.Web.Mvc
         /// </summary>
         /// <param name="routes"></param>
         /// <param name="controllerTypes">The controller types to scan.</param>
-        public static void MapMvcAttributeRoutes(this RouteCollection routes, IEnumerable<Type> controllerTypes)
+        internal static void MapMvcAttributeRoutes(this RouteCollection routes, IEnumerable<Type> controllerTypes)
         {
             MapMvcAttributeRoutes(routes, controllerTypes, new DefaultInlineConstraintResolver());
         }
@@ -50,7 +50,7 @@ namespace System.Web.Mvc
         /// <param name="routes"></param>
         /// <param name="controllerTypes">The controller types to scan.</param>
         /// <param name="constraintResolver">The <see cref="IInlineConstraintResolver"/> to use for resolving inline constraints in route templates.</param>
-        public static void MapMvcAttributeRoutes(this RouteCollection routes, IEnumerable<Type> controllerTypes, IInlineConstraintResolver constraintResolver)
+        internal static void MapMvcAttributeRoutes(this RouteCollection routes, IEnumerable<Type> controllerTypes, IInlineConstraintResolver constraintResolver)
         {
             List<RouteEntry> routeEntries = new AttributeRoutingMapper(new RouteBuilder(constraintResolver)).MapMvcAttributeRoutes(controllerTypes);
 

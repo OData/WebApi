@@ -468,4 +468,7 @@
   <data name="Object_NotYetInitialized" xml:space="preserve">
     <value>The object has not yet been initialized. Ensure that HttpConfiguration.EnsureInitialized() is called in the application's startup code after all other initialization code.</value>
   </data>
+  <data name="RequestContextConflict" xml:space="preserve">
+    <value>The request context property on the request must be null or match ApiController.RequestContext.</value>
+  </data>
 </root>

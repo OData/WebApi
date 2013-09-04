@@ -646,6 +646,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The request context property on the request must be null or match ApiController.RequestContext..
+        /// </summary>
+        internal static string RequestContextConflict {
+            get {
+                return ResourceManager.GetString("RequestContextConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property &apos;Request&apos; on &apos;{0}&apos; is null. The property must be initialized with a non-null value..
         /// </summary>
         internal static string RequestIsNull {

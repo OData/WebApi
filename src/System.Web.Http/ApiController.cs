@@ -36,10 +36,7 @@ namespace System.Web.Http
         public HttpConfiguration Configuration
         {
             get { return ControllerContext.Configuration; }
-            set
-            {
-                ControllerContext.Configuration = value;
-            }
+            set { ControllerContext.Configuration = value; }
         }
 
         /// <summary>Gets the controller context.</summary>
@@ -51,7 +48,10 @@ namespace System.Web.Http
                 // unit test only.
                 if (_controllerContext == null)
                 {
-                    _controllerContext = new HttpControllerContext();
+                    _controllerContext = new HttpControllerContext
+                    {
+                        RequestContext = new RequestBackedHttpRequestContext()
+                    };
                 }
 
                 return _controllerContext;
@@ -94,7 +94,10 @@ namespace System.Web.Http
         /// <remarks>The setter is intended for unit testing purposes only.</remarks>
         public HttpRequestMessage Request
         {
-            get { return ControllerContext.Request; }
+            get
+            {
+                return ControllerContext.Request;
+            }
             set
             {
                 if (value == null)
@@ -102,17 +105,24 @@ namespace System.Web.Http
                     throw Error.PropertyNull();
                 }
 
-                ControllerContext.Request = value;
+                HttpRequestContext contextOnRequest = value.GetRequestContext();
+                HttpRequestContext contextOnController = RequestContext;
 
-                HttpRequestContext context = value.GetRequestContext();
-
-                if (context == null)
+                if (contextOnRequest != null && contextOnRequest != contextOnController)
                 {
-                    value.SetRequestContext(RequestContext);
+                    // Prevent unit testers from setting conflicting requests contexts.
+                    throw new InvalidOperationException(SRResources.RequestContextConflict);
                 }
-                else
+
+                ControllerContext.Request = value;
+                value.SetRequestContext(contextOnController);
+
+                RequestBackedHttpRequestContext requestBackedContext =
+                    contextOnController as RequestBackedHttpRequestContext;
+
+                if (requestBackedContext != null)
                 {
-                    RequestContext = context;
+                    requestBackedContext.Request = value;
                 }
             }
         }
@@ -132,12 +142,23 @@ namespace System.Web.Http
                     throw Error.PropertyNull();
                 }
 
-                ControllerContext.RequestContext = value;
+                HttpRequestContext oldContext = ControllerContext.RequestContext;
+                HttpRequestMessage request = Request;
 
-                if (Request != null)
+                if (request != null)
                 {
-                    Request.SetRequestContext(value);
+                    HttpRequestContext contextOnRequest = request.GetRequestContext();
+
+                    if (contextOnRequest != null && contextOnRequest != oldContext && contextOnRequest != value)
+                    {
+                        // Prevent unit testers from setting conflicting requests contexts.
+                        throw new InvalidOperationException(SRResources.RequestContextConflict);
+                    }
+
+                    request.SetRequestContext(value);
                 }
+
+                ControllerContext.RequestContext = value;
             }
         }
 
@@ -145,14 +166,12 @@ namespace System.Web.Http
         /// <remarks>The setter is intended for unit testing purposes only.</remarks>
         public UrlHelper Url
         {
-            get { return RequestContext.Url ?? (Request != null ? new UrlHelper(Request) : null); }
+            get { return RequestContext.Url; }
             set { RequestContext.Url = value; }
         }
 
-        /// <summary>
-        /// Returns the current principal associated with this request.
-        /// </summary>
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "That would make for poor usability.")]
+        /// <summary>Gets or sets the current principal associated with this request.</summary>
+        /// <remarks>The setter is intended for unit testing purposes only.</remarks>
         public IPrincipal User
         {
             get { return RequestContext.Principal; }

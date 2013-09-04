@@ -13,6 +13,7 @@ using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Results;
+using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Results
@@ -183,7 +184,7 @@ namespace System.Web.Http.OData.Results
             {
                 EntitySet = entitySet,
                 Model = model,
-                Url = request.GetUrlHelper(),
+                Url = request.GetUrlHelper() ?? new UrlHelper(request),
                 MetadataLevel = ODataMetadataLevel.Default,
                 Request = request,
                 RequestContext = request.GetRequestContext(),

@@ -206,8 +206,7 @@ namespace System.Web.Http.Results
                         throw new InvalidOperationException(SRResources.ApiController_RequestMustNotBeNull);
                     }
 
-                    UrlHelper urlFactory = _controller.Url;
-                    Contract.Assert(urlFactory != null);
+                    UrlHelper urlFactory = _controller.Url ?? new UrlHelper(request);
 
                     _resolvedDependencies = new DirectDependencyProvider(urlFactory, request);
                 }

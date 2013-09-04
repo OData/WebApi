@@ -2,22 +2,20 @@
 
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
 using System.Threading;
 using System.Web.Http.Routing;
 
 namespace System.Web.Http.Controllers
 {
     /// <summary>
-    /// Represents a request context that does not change the behavior of legacy properties.
-    /// Once a request context is set, things like route data and client certificate start
-    /// coming from it instead of from the legacy request properties. This class is a request
-    /// context that will do the same thing as the legacy request properties would have done
-    /// while still allowing GetRequestContext to return non-null.
+    /// Represents a request context that does not change the behavior of legacy properties. Once a request context is
+    /// set, things like route data and client certificate start coming from it instead of from the legacy request
+    /// properties. This class is a request context that will do the same thing as the legacy request properties would
+    /// have done while still allowing GetRequestContext to return non-null.
     /// </summary>
-    internal sealed class HttpLegacyRequestContext : HttpRequestContext
+    internal sealed class RequestBackedHttpRequestContext : HttpRequestContext
     {
-        private readonly HttpRequestMessage _request;
+        private HttpRequestMessage _request;
 
         private X509Certificate2 _certificate;
         private bool _certificateSet;
@@ -31,21 +29,39 @@ namespace System.Web.Http.Controllers
         private IHttpRouteData _routeData;
         private bool _routeDataSet;
 
+        private UrlHelper _url;
+        private bool _urlSet;
+
         private string _virtualPathRoot;
         private bool _virtualPathRootSet;
 
-        public HttpLegacyRequestContext(HttpRequestMessage request)
+        public RequestBackedHttpRequestContext()
+        {
+            // We don't have to override Principal since the base class provides the simple property.
+            Principal = Thread.CurrentPrincipal;
+        }
+
+        public RequestBackedHttpRequestContext(HttpRequestMessage request)
+            : this()
         {
             if (request == null)
             {
-                throw Error.ArgumentNull("request");
+                throw new ArgumentNullException("request");
             }
 
             _request = request;
+        }
 
-            // We didn't have to override Url and Principal the base class provides the simple property, and that's sufficient.
-            Url = new UrlHelper(request);
-            Principal = Thread.CurrentPrincipal;
+        public HttpRequestMessage Request
+        {
+            get
+            {
+                return _request;
+            }
+            set
+            {
+                _request = value;
+            }
         }
 
         public override X509Certificate2 ClientCertificate
@@ -56,9 +72,13 @@ namespace System.Web.Http.Controllers
                 {
                     return _certificate;
                 }
-                else
+                else if (_request != null)
                 {
                     return _request.LegacyGetClientCertificate();
+                }
+                else
+                {
+                    return null;
                 }
             }
             set
@@ -76,8 +96,14 @@ namespace System.Web.Http.Controllers
                 {
                     return _configuration;
                 }
-
-                return _request.LegacyGetConfiguration();
+                else if (_request != null)
+                {
+                    return _request.LegacyGetConfiguration();
+                }
+                else
+                {
+                    return null;
+                }
             }
             set
             {
@@ -94,8 +120,14 @@ namespace System.Web.Http.Controllers
                 {
                     return _includeErrorDetail.Value;
                 }
-
-                return _request.LegacyShouldIncludeErrorDetail();
+                else if (_request != null)
+                {
+                    return _request.LegacyShouldIncludeErrorDetail();
+                }
+                else
+                {
+                    return false;
+                }
             }
             set
             {
@@ -111,8 +143,14 @@ namespace System.Web.Http.Controllers
                 {
                     return _isLocal.Value;
                 }
-
-                return _request.LegacyIsLocal();
+                else if (_request != null)
+                {
+                    return _request.LegacyIsLocal();
+                }
+                else
+                {
+                    return false;
+                }
             }
             set
             {
@@ -128,13 +166,43 @@ namespace System.Web.Http.Controllers
                 {
                     return _routeData;
                 }
-
-                return _request.LegacyGetRouteData();
+                else if (_request != null)
+                {
+                    return _request.LegacyGetRouteData();
+                }
+                else
+                {
+                    return null;
+                }
             }
             set
             {
                 _routeData = value;
                 _routeDataSet = true;
+            }
+        }
+
+        public override UrlHelper Url
+        {
+            get
+            {
+                if (_urlSet)
+                {
+                    return _url;
+                }
+                else if (_request != null)
+                {
+                    return new UrlHelper(_request);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                _url = value;
+                _urlSet = true;
             }
         }
 
@@ -153,8 +221,10 @@ namespace System.Web.Http.Controllers
                 {
                     return configuration.VirtualPathRoot;
                 }
-
-                return null;
+                else
+                {
+                    return null;
+                }
             }
             set
             {

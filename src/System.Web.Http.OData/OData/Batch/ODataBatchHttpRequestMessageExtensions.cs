@@ -199,7 +199,7 @@ namespace System.Web.Http.OData.Batch
             }
             else
             {
-                UrlHelper helper = request.GetUrlHelper();
+                UrlHelper helper = request.GetUrlHelper() ?? new UrlHelper(request);
                 string baseAddress = helper.Link(oDataRouteName, new HttpRouteValueDictionary() { { ODataRouteConstants.ODataPath, String.Empty } });
                 if (baseAddress == null)
                 {

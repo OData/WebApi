@@ -129,7 +129,7 @@ namespace System.Web.Http.Dispatcher
             // if the host doesn't create the context we will fallback to creating it.
             if (requestContext == null)
             {
-                requestContext = new HttpLegacyRequestContext(request)
+                requestContext = new RequestBackedHttpRequestContext(request)
                 {
                     // we are caching controller configuration to support per controller configuration.
                     Configuration = controllerConfiguration,

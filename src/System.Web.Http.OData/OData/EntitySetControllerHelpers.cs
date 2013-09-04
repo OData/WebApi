@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
+using System.Web.Http.Routing;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 
@@ -88,7 +89,8 @@ namespace System.Web.Http.OData
                 throw Error.InvalidOperation(SRResources.LocationHeaderDoesNotStartWithEntitySet);
             }
 
-            response.Headers.Location = new Uri(controller.Url.ODataLink(
+            UrlHelper urlHelper = controller.Url ?? new UrlHelper(request);
+            response.Headers.Location = new Uri(urlHelper.ODataLink(
                                                     entitySetSegment,
                                                     new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(entityKey, ODataVersion.V3))));
             return response;

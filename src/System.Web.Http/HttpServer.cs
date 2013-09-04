@@ -163,7 +163,7 @@ namespace System.Web.Http
 
             if (requestContext == null)
             {
-                requestContext = new HttpLegacyRequestContext(request);
+                requestContext = new RequestBackedHttpRequestContext(request);
 
                 // if the host did not set a request context we will also set it back to the request.
                 request.SetRequestContext(requestContext);

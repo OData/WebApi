@@ -96,7 +96,7 @@ namespace System.Web.Http.Controllers
         }
 
         [Fact]
-        public void SettingRequestWithContextSetsTheControllerRequestContext()
+        public void SettingRequestWithConflictingContextThrows()
         {
             // Arrange
             CustomersController controller = new CustomersController();
@@ -106,11 +106,8 @@ namespace System.Web.Http.Controllers
 
             request.SetRequestContext(context);
 
-            // Act
-            controller.Request = request;
-
-            // Assert
-            Assert.Equal(controller.RequestContext, context);
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => { controller.Request = request; });
         }
 
         [Fact]
@@ -132,6 +129,26 @@ namespace System.Web.Http.Controllers
 
             // Assert
             Assert.Equal(request.GetRequestContext(), context);
+        }
+
+        [Fact]
+        public void SetRequestWithLegacyConfigurationProperty_ProvidesControllerConfiguration()
+        {
+            // Arrange
+            CustomersController controller = new CustomersController();
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            using (HttpConfiguration expectedConfiguration = new HttpConfiguration())
+            {
+                request.SetConfiguration(expectedConfiguration);
+                controller.Request = request;
+
+                // Act
+                HttpConfiguration configuration = controller.Configuration;
+
+                // Assert
+                Assert.Same(expectedConfiguration, configuration);
+            }
         }
 
         private class CustomersController : ApiController

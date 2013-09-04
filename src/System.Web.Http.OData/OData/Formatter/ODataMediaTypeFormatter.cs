@@ -420,8 +420,7 @@ namespace System.Web.Http.OData.Formatter
 
             ODataSerializer serializer = GetSerializer(type, value, model, _serializerProvider);
 
-            UrlHelper urlHelper = Request.GetUrlHelper();
-            Contract.Assert(urlHelper != null);
+            UrlHelper urlHelper = Request.GetUrlHelper() ?? new UrlHelper(Request);
 
             ODataPath path = Request.GetODataPath();
             IEdmEntitySet targetEntitySet = path == null ? null : path.EntitySet;
@@ -653,8 +652,7 @@ namespace System.Web.Http.OData.Formatter
 
         private static Uri GetBaseAddress(HttpRequestMessage request)
         {
-            UrlHelper urlHelper = request.GetUrlHelper();
-            Contract.Assert(urlHelper != null);
+            UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
 
             string baseAddress = urlHelper.ODataLink();
             if (baseAddress == null)

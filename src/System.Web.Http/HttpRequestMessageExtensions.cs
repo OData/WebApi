@@ -834,14 +834,12 @@ namespace System.Net.Http
 
             HttpRequestContext requestContext = GetRequestContext(request);
 
-            UrlHelper url = null;
-
             if (requestContext != null)
             {
-                url = requestContext.Url;
+                return requestContext.Url;
             }
 
-            return url ?? new UrlHelper(request);
+            return new UrlHelper(request);
         }
 
         /// <summary>

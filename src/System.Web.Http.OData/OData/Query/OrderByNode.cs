@@ -45,7 +45,8 @@ namespace System.Web.Http.OData.Query
                 {
                     SingleValuePropertyAccessNode property = clause.Expression as SingleValuePropertyAccessNode;
 
-                    if (property == null || !(property.Source is EntityRangeVariableReferenceNode))
+                    if (property == null ||
+                        !(property.Source is EntityRangeVariableReferenceNode || property.Source is NonentityRangeVariableReferenceNode))
                     {
                         throw new ODataException(SRResources.OrderByClauseNotSupported);
                     }

@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
@@ -59,6 +60,24 @@ namespace System.Web.Http.OData.Query
 
             Assert.ReferenceEquals("Property2", propertyNodes.Last().Property.Name);
             Assert.Equal(OrderByDirection.Ascending, nodes.Last().Direction);
+        }
+
+        [Fact]
+        public void CreateCollection_CopmplexType_Succeeds()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            OrderByClause orderByNode = ODataUriParser.ParseOrderBy("Street desc, City asc", model.Model, model.Address);
+
+            // Act
+            ICollection<OrderByNode> nodes = OrderByNode.CreateCollection(orderByNode);
+
+            // Assert
+            Assert.Equal(2, nodes.Count());
+            Assert.Equal("Street", (nodes.ToList()[0] as OrderByPropertyNode).Property.Name);
+            Assert.Equal(OrderByDirection.Descending, nodes.ToList()[0].Direction);
+            Assert.Equal("City", (nodes.ToList()[1] as OrderByPropertyNode).Property.Name);
+            Assert.Equal(OrderByDirection.Ascending, nodes.ToList()[1].Direction);
         }
 
         private class SampleClass

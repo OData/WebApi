@@ -89,7 +89,7 @@ namespace Microsoft.Web.Helpers.Test
         {
             string actualHTML = LinkShare.GetHtml("page-title", "www.foo.com", linkSites: LinkShareSite.Facebook).ToString();
             string expectedHTML =
-                "<a href=\"http://www.facebook.com/sharer.php?u=www.foo.com&amp;t=page-title\" target=\"_blank\" title=\"Share on Facebook\"><img alt=\"Share on Facebook\" src=\"http://www.facebook.com/favicon.ico\" style=\"border:0; height:16px; width:16px; margin:0 1px;\" title=\"Share on Facebook\" /></a>";
+                "<a href=\"http://www.facebook.com/sharer.php?u=www.foo.com&amp;t=page-title\" target=\"_blank\" title=\"Share on Facebook\"><img alt=\"Share on Facebook\" src=\"http://facebook.com/favicon.ico\" style=\"border:0; height:16px; width:16px; margin:0 1px;\" title=\"Share on Facebook\" /></a>";
             UnitTestHelper.AssertEqualsIgnoreWhitespace(actualHTML, expectedHTML);
         }
 
@@ -98,7 +98,7 @@ namespace Microsoft.Web.Helpers.Test
         {
             string actualHTML = LinkShare.GetHtml("page-title", "www.foo.com", linkSites: new[] { LinkShareSite.Facebook, LinkShareSite.Digg }).ToString();
             string expectedHTML =
-                "<a href=\"http://www.facebook.com/sharer.php?u=www.foo.com&amp;t=page-title\" target=\"_blank\" title=\"Share on Facebook\"><img alt=\"Share on Facebook\" src=\"http://www.facebook.com/favicon.ico\" style=\"border:0; height:16px; width:16px; margin:0 1px;\" title=\"Share on Facebook\" /></a><a href=\"http://digg.com/submit?url=www.foo.com&amp;title=page-title\" target=\"_blank\" title=\"Digg!\"><img alt=\"Digg!\" src=\"http://digg.com/img/badges/16x16-digg-guy.gif\" style=\"border:0; height:16px; width:16px; margin:0 1px;\" title=\"Digg!\" /></a>";
+                "<a href=\"http://www.facebook.com/sharer.php?u=www.foo.com&amp;t=page-title\" target=\"_blank\" title=\"Share on Facebook\"><img alt=\"Share on Facebook\" src=\"http://facebook.com/favicon.ico\" style=\"border:0; height:16px; width:16px; margin:0 1px;\" title=\"Share on Facebook\" /></a><a href=\"http://digg.com/submit?url=www.foo.com&amp;title=page-title\" target=\"_blank\" title=\"Digg!\"><img alt=\"Digg!\" src=\"http://digg.com/favicon.ico\" style=\"border:0; height:16px; width:16px; margin:0 1px;\" title=\"Digg!\" /></a>";
             UnitTestHelper.AssertEqualsIgnoreWhitespace(actualHTML, expectedHTML);
         }
 
@@ -107,7 +107,7 @@ namespace Microsoft.Web.Helpers.Test
         {
             string actualHTML = LinkShare.GetHtml("page-title", "www.foo.com", linkSites: LinkShareSite.Facebook).ToString();
             string expectedHtml = @"<a href=""http://www.facebook.com/sharer.php?u=www.foo.com&amp;t=page-title"" target=""_blank"" title=""Share on Facebook"">
-                <img alt=""Share on Facebook"" src=""http://www.facebook.com/favicon.ico"" style=""border:0; height:16px; width:16px; margin:0 1px;"" title=""Share on Facebook"" />
+                <img alt=""Share on Facebook"" src=""http://facebook.com/favicon.ico"" style=""border:0; height:16px; width:16px; margin:0 1px;"" title=""Share on Facebook"" />
                 </a>";
 
             UnitTestHelper.AssertEqualsIgnoreWhitespace(expectedHtml, actualHTML);

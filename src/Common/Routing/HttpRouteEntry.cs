@@ -46,6 +46,7 @@ namespace System.Web.Mvc.Routing
 #else
         public Route Route { get; set; }
         public ParsedRoute ParsedRoute { get; set; }
+        public bool HasVerbs { get; set; }
 #endif
         public string Name { get; set; }
         public string Template { get; set; }
@@ -110,7 +111,25 @@ namespace System.Web.Mvc.Routing
                 }
             }
 
-            return 0;
+            // Routes with constraints should come before the unconstrained routes, lest the unconstrained
+            // routes claim too much. Method constraints are implemented as route constraints, so 
+            // if 2 routes are identical, place the one with method constraints first. 
+            if (entry1.HasVerbs)
+            {
+                if (entry2.HasVerbs)
+                {
+                    return 0;
+                }
+                return -1;
+            } 
+            else 
+            {
+                if (entry2.HasVerbs)
+                {
+                    return 1;
+                }
+                return 0;
+            }
         }
 #endif
 

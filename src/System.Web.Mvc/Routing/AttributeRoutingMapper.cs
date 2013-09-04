@@ -79,7 +79,8 @@ namespace System.Web.Mvc.Routing
                         Name = routeAttribute.Name,
                         Route = route,
                         Template = template,
-                        ParsedRoute = RouteParser.Parse(route.Url)
+                        ParsedRoute = RouteParser.Parse(route.Url), 
+                        HasVerbs = verbs.Any()
                     };
                     routeEntries.Add(entry);                    
                 }

@@ -21,7 +21,7 @@ namespace System.Web.Routing
         [InlineData(typeof(DerivedController), "~/DerivedMethodWithRoute", "DerivedMethodWithRoute")]
         [InlineData(typeof(DerivedController), "~/BaseVirtualMethodToBeOverridenWithRoute_Derived", "BaseVirtualMethodToBeOverridenWithRoute_Derived")]
         [InlineData(typeof(DerivedController), "~/BaseVirtualMethodWithRouteToBeOverridenWithRoute_Derived", "BaseVirtualMethodWithRouteToBeOverridenWithRoute_Derived")]
-        // Issue 1273: [InlineData(typeof(DerivedController), "~/BaseMethodWithRouteWithName", "BaseMethodWithRouteWithName")]
+        [InlineData(typeof(DerivedController), "~/BaseMethodWithRouteWithName", "BaseMethodWithRouteWithName")]
         [InlineData(typeof(DerivedPrefixController), "~/BaseMethodWithRoute", "BaseMethodWithRoute")]
         [InlineData(typeof(DerivedPrefixController), "~/BaseVirtualMethodWithRoute", "BaseVirtualMethodWithRoute")]
         [InlineData(typeof(DerivedPrefixController), "~/BaseVirtualMethodWithRouteToBeOverridenWithRoute", "BaseVirtualMethodWithRouteToBeOverridenWithRoute")]
@@ -40,12 +40,16 @@ namespace System.Web.Routing
         [InlineData(typeof(DerivedWithPrefixFromBasePrefixController), "~/derived/DerivedMethodWithRoute", "DerivedMethodWithRoute")]
         [InlineData(typeof(DerivedWithPrefixFromBasePrefixController), "~/derived/BaseVirtualMethodToBeOverridenWithRoute_Derived", "BaseVirtualMethodToBeOverridenWithRoute_Derived")]
         [InlineData(typeof(DerivedWithPrefixFromBasePrefixController), "~/derived/BaseVirtualMethodWithRouteToBeOverridenWithRoute_Derived", "BaseVirtualMethodWithRouteToBeOverridenWithRoute_Derived")]
-        // Issue 1273: [InlineData(typeof(DerivedFromBaseRouteController), "~/BaseMethodWithRoute", "BaseMethodWithRoute")]
+        [InlineData(typeof(DerivedFromBaseRouteController), "~/BaseMethodWithRoute", "BaseMethodWithRoute")]
         [InlineData(typeof(DerivedFromBaseRouteController), "~/base/BaseVirtualMethodToBeOverridenWithRoute", "BaseVirtualMethodToBeOverridenWithRoute")]
         [InlineData(typeof(DerivedFromBaseRouteController), "~/BaseVirtualMethodWithRoute", "BaseVirtualMethodWithRoute")]
         [InlineData(typeof(DerivedFromBaseRouteController), "~/BaseVirtualMethodWithRouteToBeOverridenWithRoute", "BaseVirtualMethodWithRouteToBeOverridenWithRoute")]
         [InlineData(typeof(DerivedFromBaseRouteController), "~/DerivedMethodWithRoute", "DerivedMethodWithRoute")]
         [InlineData(typeof(DerivedFromBaseRouteController), "~/BaseVirtualMethodToBeOverridenWithRoute_Derived", "BaseVirtualMethodToBeOverridenWithRoute_Derived")]
+        [InlineData(typeof(DerivedFromBaseRouteWithRouteController), "~/derivedwithroute/BaseMethodWithRoute", "BaseMethodWithRoute")]
+        [InlineData(typeof(DerivedFromBaseRouteWithRouteController), "~/derivedwithroute/BaseVirtualMethodToBeOverridenWithRoute", "BaseVirtualMethodToBeOverridenWithRoute")]
+        [InlineData(typeof(DerivedFromBaseRouteWithRouteController), "~/derivedwithroute/BaseVirtualMethodWithRoute", "BaseVirtualMethodWithRoute")]
+        [InlineData(typeof(DerivedFromBaseRouteWithRouteController), "~/derivedwithroute/BaseVirtualMethodWithRouteToBeOverridenWithRoute", "BaseVirtualMethodWithRouteToBeOverridenWithRoute")]
         public void AttributeRouting_WithInheritance_MethodOverrides(Type derivedController, string path, string expectedAction)
         {
             // Arrange
@@ -289,7 +293,7 @@ namespace System.Web.Routing
             return "BaseMethodWithRoute";
         }
 
-        // Issue 1273: [Route("BaseMethodWithRouteWithName", Name = "BaseMethodWithRouteWithName")]
+        [Route("BaseMethodWithRouteWithName", Name = "BaseMethodWithRouteWithName")]
         public string BaseMethodWithRouteWithName()
         {
             return "BaseMethodWithRouteWithName";
@@ -497,6 +501,11 @@ namespace System.Web.Routing
         {
             return "BaseVirtualMethodWithRouteToBeOverridenWithRoute_Derived";
         }
+    }
+
+    [Route("derivedwithroute/{action}")]
+    public class DerivedFromBaseRouteWithRouteController : BaseRouteController
+    {
     }
 
     #endregion

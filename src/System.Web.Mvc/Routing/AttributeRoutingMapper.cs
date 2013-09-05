@@ -63,7 +63,7 @@ namespace System.Web.Mvc.Routing
             foreach (var method in actionMethodsInfo)
             {
                 string actionName = actionSelector.GetActionName(method);
-                IEnumerable<IRouteInfoProvider> routeAttributes = GetRouteAttributes(method);
+                IEnumerable<IRouteInfoProvider> routeAttributes = GetRouteAttributes(method, controllerDescriptor.ControllerType);
 
                 IEnumerable<string> verbs = GetActionVerbs(method);
 
@@ -136,15 +136,20 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-        private static IEnumerable<IRouteInfoProvider> GetRouteAttributes(MethodInfo methodInfo)
+        private static IEnumerable<IRouteInfoProvider> GetRouteAttributes(MethodInfo methodInfo, Type controllerType)
         {
+            // Skip Route attributes on inherited actions.
+            if (methodInfo.DeclaringType != controllerType)
+            {
+                return Enumerable.Empty<IRouteInfoProvider>();
+            }
+
             // We do not want to cache this as these attributes are only being looked up during
             // application's init time, so there will be no perf gain, and we will end up
             // storing that cache for no reason
             return methodInfo.GetCustomAttributes(inherit: false)
               .OfType<IRouteInfoProvider>()
-              .Where(attr => attr.Template != null)
-              .ToArray();
+              .Where(attr => attr.Template != null);
         }
 
         internal static string CombinePrefixAndAreaWithTemplate(string areaPrefix, string prefix, string template)

@@ -22,8 +22,8 @@ namespace System.Web.Mvc
             ControllerType = controllerType;
             PopulateLookupTables();
 
-            // If controller type has a RoutePrefix, then standard routes can't reach it.             
-            _hasRouteAttributeOnController = controllerType.GetCustomAttributes(inherit: false).OfType<IRouteInfoProvider>().Any();
+            // If controller type has a RouteAttribute, then standard routes can't reach it.             
+            _hasRouteAttributeOnController = controllerType.GetCustomAttributes(typeof(IRouteInfoProvider), inherit: false).Any();
         }
 
         private bool _hasRouteAttributeOnController;
@@ -93,9 +93,12 @@ namespace System.Web.Mvc
                 
         // Does this method have any direct routes on it?
         // This does not include a route attribute on the controller itself.
-        private static bool HasDirectRoutes(MethodInfo method)
+        private bool HasDirectRoutes(MethodInfo method)
         {
-            return method.GetCustomAttributes().OfType<IRouteInfoProvider>().Any();
+            // Inherited actions should not inherit the Route attributes.
+            // Only check the attribute on declared actions.
+            bool isDeclaredAction = method.DeclaringType == ControllerType;
+            return isDeclaredAction && method.GetCustomAttributes(typeof(IRouteInfoProvider), inherit: false).Any();
         }
 
         private void PopulateLookupTables()

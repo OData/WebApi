@@ -73,10 +73,10 @@ namespace System.Web.Mvc.Routing
             {
                 dataTokens.Add(RouteDataTokenKeys.Area, areaName);
                 dataTokens.Add(RouteDataTokenKeys.UseNamespaceFallback, value: false);
-                if (controllerType != null)
-                {
-                    dataTokens.Add(RouteDataTokenKeys.Namespaces, new[] { controllerType.Namespace });
-                }
+            }
+            if (controllerType != null)
+            {
+                dataTokens.Add(RouteDataTokenKeys.Namespaces, new[] { controllerType.Namespace });
             }
 
             RouteValueDictionary constraints = new RouteValueDictionary();

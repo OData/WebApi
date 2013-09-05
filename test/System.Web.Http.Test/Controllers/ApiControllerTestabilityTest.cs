@@ -107,7 +107,8 @@ namespace System.Web.Http.Controllers
             request.SetRequestContext(context);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => { controller.Request = request; });
+            Assert.Throws<InvalidOperationException>(() => { controller.Request = request; },
+                "The request context property on the request must be null or match ApiController.RequestContext.");
         }
 
         [Fact]

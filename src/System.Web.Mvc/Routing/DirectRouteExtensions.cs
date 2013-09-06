@@ -9,6 +9,15 @@ namespace System.Web.Mvc.Routing
     {
         private const string TargetActionMethodKey = "TargetActionMethod";
 
+        // For [Route] on a controller, get the controller descriptor. 
+        // Null if this is not a route specified directly on a controller.
+        public static ControllerDescriptor GetTargetControllerDescriptor(this RouteData routeData)
+        {
+            ControllerDescriptor descriptor = routeData.DataTokens[RouteDataTokenKeys.DirectRouteToController] as ControllerDescriptor;
+
+            return descriptor;
+        }
+
         /// <summary>
         /// Gets the target action method that will be invoked if this route is matched.
         /// </summary>

@@ -176,30 +176,37 @@ namespace System.Web.Mvc
                 throw new ArgumentException(MvcResources.Common_NullOrEmpty, "controllerName");
             }
 
-            if (requestContext != null && requestContext.RouteData != null)
+            RouteData routeData = requestContext.RouteData;
+            if (requestContext != null && routeData != null)
             {
-                MethodInfo target = requestContext.RouteData.GetTargetActionMethod();
+                // short circuit controller resolution if a direct route was matched.
+                MethodInfo target = routeData.GetTargetActionMethod();
 
                 if (target != null)
                 {
-                    // short circuit controller resolution if a direct route was matched.
                     return target.DeclaringType;
+                }
+
+                ControllerDescriptor controllerDescriptor = routeData.GetTargetControllerDescriptor();
+                if (controllerDescriptor != null)
+                {
+                    return controllerDescriptor.ControllerType;
                 }
             }
 
             // first search in the current route's namespace collection
             object routeNamespacesObj;
             Type match;
-            if (requestContext != null && requestContext.RouteData.DataTokens.TryGetValue(RouteDataTokenKeys.Namespaces, out routeNamespacesObj))
+            if (requestContext != null && routeData.DataTokens.TryGetValue(RouteDataTokenKeys.Namespaces, out routeNamespacesObj))
             {
                 IEnumerable<string> routeNamespaces = routeNamespacesObj as IEnumerable<string>;
                 if (routeNamespaces != null && routeNamespaces.Any())
                 {
                     HashSet<string> namespaceHash = new HashSet<string>(routeNamespaces, StringComparer.OrdinalIgnoreCase);
-                    match = GetControllerTypeWithinNamespaces(requestContext.RouteData.Route, controllerName, namespaceHash);
+                    match = GetControllerTypeWithinNamespaces(routeData.Route, controllerName, namespaceHash);
 
                     // the UseNamespaceFallback key might not exist, in which case its value is implicitly "true"
-                    if (match != null || false.Equals(requestContext.RouteData.DataTokens[RouteDataTokenKeys.UseNamespaceFallback]))
+                    if (match != null || false.Equals(routeData.DataTokens[RouteDataTokenKeys.UseNamespaceFallback]))
                     {
                         // got a match or the route requested we stop looking
                         return match;
@@ -211,7 +218,7 @@ namespace System.Web.Mvc
             if (ControllerBuilder.DefaultNamespaces.Count > 0)
             {
                 HashSet<string> namespaceDefaults = new HashSet<string>(ControllerBuilder.DefaultNamespaces, StringComparer.OrdinalIgnoreCase);
-                match = GetControllerTypeWithinNamespaces(requestContext.RouteData.Route, controllerName, namespaceDefaults);
+                match = GetControllerTypeWithinNamespaces(routeData.Route, controllerName, namespaceDefaults);
                 if (match != null)
                 {
                     return match;
@@ -219,7 +226,7 @@ namespace System.Web.Mvc
             }
 
             // if all else fails, search every namespace
-            return GetControllerTypeWithinNamespaces(requestContext.RouteData.Route, controllerName, null /* namespaces */);
+            return GetControllerTypeWithinNamespaces(routeData.Route, controllerName, null /* namespaces */);
         }
 
         private Type GetControllerTypeWithinNamespaces(RouteBase route, string controllerName, HashSet<string> namespaces)

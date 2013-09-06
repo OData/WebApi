@@ -253,7 +253,7 @@ namespace System.Web.Mvc
                 {
                     return null;
                 }
-                ControllerDescriptor descriptor = routeData.DataTokens[RouteDataTokenKeys.DirectRouteToController] as ControllerDescriptor;
+                ControllerDescriptor descriptor = routeData.GetTargetControllerDescriptor();
 
                 if (descriptor == null)
                 {

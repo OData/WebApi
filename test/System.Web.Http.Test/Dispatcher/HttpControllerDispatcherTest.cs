@@ -119,6 +119,123 @@ namespace System.Web.Http.Dispatcher
             Assert.Equal("Hello from the throwing controller", error["ExceptionMessage"]);
         }
 
+        [Fact]
+        public void SendAsync_CreatesControllerContext_WithRequestContextFromRequest()
+        {
+            // Arrange
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            using (HttpControllerDispatcher dispatcher = new HttpControllerDispatcher(configuration))
+            using (HttpMessageInvoker invoker = new HttpMessageInvoker(dispatcher))
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            {
+                Mock<IHttpController> controllerMock = new Mock<IHttpController>();
+                HttpRequestContext requestContext = null;
+                controllerMock
+                    .Setup(c => c.ExecuteAsync(It.IsAny<HttpControllerContext>(), CancellationToken.None))
+                    .Callback<HttpControllerContext, CancellationToken>((c, t) =>
+                    {
+                        requestContext = c.RequestContext;
+                    });
+                Mock<HttpControllerDescriptor> controllerDescriptorMock = new Mock<HttpControllerDescriptor>();
+                controllerDescriptorMock.Setup(d => d.CreateController(request)).Returns(controllerMock.Object);
+                HttpControllerDescriptor controllerDescriptor = controllerDescriptorMock.Object;
+                controllerDescriptor.Configuration = configuration;
+                Mock<IHttpControllerSelector> controllerSelectorMock = new Mock<IHttpControllerSelector>();
+                controllerSelectorMock.Setup(s => s.SelectController(request)).Returns(controllerDescriptor);
+                configuration.Services.Replace(typeof(IHttpControllerSelector), controllerSelectorMock.Object);
+
+                HttpRequestContext expectedRequestContext = new HttpRequestContext
+                {
+                    Configuration = configuration
+                };
+                request.SetRequestContext(expectedRequestContext);
+
+                request.SetRouteData(new Mock<IHttpRouteData>(MockBehavior.Strict).Object);
+
+                // Act
+                HttpResponseMessage ignore = invoker.SendAsync(request, CancellationToken.None).Result;
+
+                // Assert
+                Assert.Same(expectedRequestContext, requestContext);
+            }
+        }
+
+        [Fact]
+        public void SendAsync_CreatesControllerContextWithRequestBackedRequestContext_WhenRequestRequestContextIsNull()
+        {
+            // Arrange
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            using (HttpControllerDispatcher dispatcher = new HttpControllerDispatcher(configuration))
+            using (HttpMessageInvoker invoker = new HttpMessageInvoker(dispatcher))
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            {
+                Mock<IHttpController> controllerMock = new Mock<IHttpController>();
+                HttpRequestContext requestContext = null;
+                controllerMock
+                    .Setup(c => c.ExecuteAsync(It.IsAny<HttpControllerContext>(), CancellationToken.None))
+                    .Callback<HttpControllerContext, CancellationToken>((c, t) =>
+                    {
+                        requestContext = c.RequestContext;
+                    });
+                Mock<HttpControllerDescriptor> controllerDescriptorMock = new Mock<HttpControllerDescriptor>();
+                controllerDescriptorMock.Setup(d => d.CreateController(request)).Returns(controllerMock.Object);
+                HttpControllerDescriptor controllerDescriptor = controllerDescriptorMock.Object;
+                controllerDescriptor.Configuration = configuration;
+                Mock<IHttpControllerSelector> controllerSelectorMock = new Mock<IHttpControllerSelector>();
+                controllerSelectorMock.Setup(s => s.SelectController(request)).Returns(controllerDescriptor);
+                configuration.Services.Replace(typeof(IHttpControllerSelector), controllerSelectorMock.Object);
+
+                request.SetRouteData(new Mock<IHttpRouteData>(MockBehavior.Strict).Object);
+
+                // Act
+                HttpResponseMessage ignore = invoker.SendAsync(request, CancellationToken.None).Result;
+
+                // Assert
+                Assert.IsType<RequestBackedHttpRequestContext>(requestContext);
+                RequestBackedHttpRequestContext typedRequestContext = (RequestBackedHttpRequestContext)requestContext;
+                Assert.Same(request, typedRequestContext.Request);
+                Assert.Same(configuration, typedRequestContext.Configuration);
+            }
+        }
+
+        [Fact]
+        public void SendAsync_SetsRequestBackedRequestContextOnRequest_WhenRequestRequestContextIsNull()
+        {
+            // Arrange
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            using (HttpControllerDispatcher dispatcher = new HttpControllerDispatcher(configuration))
+            using (HttpMessageInvoker invoker = new HttpMessageInvoker(dispatcher))
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            {
+                Mock<IHttpController> controllerMock = new Mock<IHttpController>();
+                HttpRequestContext requestContext = null;
+                controllerMock
+                    .Setup(c => c.ExecuteAsync(It.IsAny<HttpControllerContext>(), CancellationToken.None))
+                    .Callback<HttpControllerContext, CancellationToken>((c, t) =>
+                    {
+                        requestContext = request.GetRequestContext();
+                    });
+                Mock<HttpControllerDescriptor> controllerDescriptorMock = new Mock<HttpControllerDescriptor>();
+                controllerDescriptorMock.Setup(d => d.CreateController(request)).Returns(controllerMock.Object);
+                HttpControllerDescriptor controllerDescriptor = controllerDescriptorMock.Object;
+                controllerDescriptor.Configuration = configuration;
+                Mock<IHttpControllerSelector> controllerSelectorMock = new Mock<IHttpControllerSelector>();
+                controllerSelectorMock.Setup(s => s.SelectController(request)).Returns(controllerDescriptor);
+                configuration.Services.Replace(typeof(IHttpControllerSelector), controllerSelectorMock.Object);
+
+                request.SetRouteData(new Mock<IHttpRouteData>(MockBehavior.Strict).Object);
+
+                // Act
+                HttpResponseMessage ignore = invoker.SendAsync(request, CancellationToken.None).Result;
+
+                // Assert
+                Assert.IsType<RequestBackedHttpRequestContext>(requestContext);
+                RequestBackedHttpRequestContext typedRequestContext = (RequestBackedHttpRequestContext)requestContext;
+                Assert.Same(request, typedRequestContext.Request);
+                Assert.Same(configuration, typedRequestContext.Configuration);
+            }
+        }
+
         private static HttpRequestMessage CreateRequest(HttpConfiguration config, string requestUri)
         {
             IHttpRoute route = config.Routes.MapHttpRoute("default", "api/{controller}/{id}", new { id = RouteParameter.Optional });

@@ -61,8 +61,8 @@ namespace System.Web.Http.Dispatcher
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             // Lookup route data, or if not found as a request property then we look it up in the route table
-            IHttpRouteData routeData;
-            if (!request.TryGetRouteData(out routeData))
+            IHttpRouteData routeData = request.GetRouteData();
+            if (routeData == null)
             {
                 routeData = _configuration.Routes.GetRouteData(request);
 

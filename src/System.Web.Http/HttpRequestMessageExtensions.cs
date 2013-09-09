@@ -264,16 +264,6 @@ namespace System.Net.Http
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
         }
 
-        internal static bool TryGetRouteData(this HttpRequestMessage request, out IHttpRouteData routeData)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            return request.Properties.TryGetValue<IHttpRouteData>(HttpPropertyKeys.HttpRouteDataKey, out routeData);
-        }
-
         /// <summary>
         /// Gets the <see cref="System.Web.Http.Controllers.HttpActionDescriptor"/> selected for the given request or null if not available.
         /// </summary>

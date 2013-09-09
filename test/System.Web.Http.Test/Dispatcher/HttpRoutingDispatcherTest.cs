@@ -6,7 +6,9 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
+using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 using Moq;
 using Moq.Protected;
@@ -102,6 +104,42 @@ namespace System.Web.Http.Dispatcher
             mockHandler.Protected().Verify("SendAsync", Times.Once(), request, CancellationToken.None);
         }
 
+        [Fact]
+        public void SendAsync_UsesRouteDataFromRequestContext()
+        {
+            // Arrange
+            Mock<HttpMessageHandler> doNotUseDefaultHandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            doNotUseDefaultHandlerMock.Protected().Setup("Dispose", true);
+
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            using (HttpMessageHandler doNoUseDefaultHandler = doNotUseDefaultHandlerMock.Object)
+            using (HttpRoutingDispatcher dispatcher = new HttpRoutingDispatcher(configuration, doNoUseDefaultHandler))
+            using (HttpMessageInvoker invoker = new HttpMessageInvoker(dispatcher))
+            using (HttpRequestMessage expectedRequest = new HttpRequestMessage())
+            using (HttpResponseMessage expectedResponse = new HttpResponseMessage())
+            {
+                SpyHttpMessageHandler routeHandler = new SpyHttpMessageHandler(expectedResponse);
+
+                Mock<IHttpRoute> routeMock = new Mock<IHttpRoute>(MockBehavior.Strict);
+                routeMock.Setup(r => r.Handler).Returns(routeHandler);
+
+                Mock<IHttpRouteData> routeDataMock = new Mock<IHttpRouteData>(MockBehavior.Strict);
+                routeDataMock.Setup(d => d.Route).Returns(routeMock.Object);
+                routeDataMock.Setup(d => d.Values).Returns(new Dictionary<string, object>());
+
+                HttpRequestContext context = new HttpRequestContext();
+                context.RouteData = routeDataMock.Object;
+                expectedRequest.SetRequestContext(context);
+
+                // Act
+                HttpResponseMessage response = invoker.SendAsync(expectedRequest, CancellationToken.None).Result;
+
+                // Assert
+                Assert.Same(expectedResponse, response);
+                Assert.Same(expectedRequest, routeHandler.Request);
+            }
+        }
+
         private static HttpRequestMessage CreateRequest(HttpConfiguration config, string requestUri)
         {
             return CreateRequest(config, requestUri, routeHandler: new EmptyResponseHandler());
@@ -126,6 +164,26 @@ namespace System.Web.Http.Dispatcher
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 return TaskHelpers.FromResult(request.CreateResponse(HttpStatusCode.OK));
+            }
+        }
+
+        private class SpyHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly HttpResponseMessage _response;
+
+            public HttpRequestMessage Request { get; private set; }
+            public CancellationToken CancellationToken { get; private set; }
+
+            public SpyHttpMessageHandler(HttpResponseMessage response)
+            {
+                _response = response;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                Request = request;
+                CancellationToken = cancellationToken;
+                return Task.FromResult(_response);
             }
         }
     }

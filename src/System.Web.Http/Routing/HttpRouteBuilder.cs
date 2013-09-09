@@ -77,12 +77,50 @@ namespace System.Web.Http.Routing
             HttpRouteValueDictionary constraints,
             IEnumerable<ReflectedHttpActionDescriptor> actions)
         {
-            return new HttpDirectRoute(routeTemplate, order, defaults, constraints, actions);
+            return BuildDirectRoute(routeTemplate, order, defaults, constraints, actions);
         }
 
         public virtual IHttpRoute BuildGenerationRoute(IHttpRoute parsingRoute)
         {
             return new GenerateRoute(parsingRoute);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpRoute" /> class.
+        /// </summary>
+        /// <param name="routeTemplate">The route template.</param>
+        /// <param name="order">The subroute order.</param>
+        /// <param name="actions">The actions that are reachable via this route.</param>
+        public static HttpRoute BuildDirectRoute(string routeTemplate, int order, IEnumerable<ReflectedHttpActionDescriptor> actions)            
+        {
+            return BuildDirectRoute(routeTemplate, order, defaults: null, constraints: null, actions: actions);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpRoute" /> class.
+        /// </summary>
+        /// <param name="routeTemplate">The route template.</param>
+        /// <param name="order">The subroute order.</param>
+        /// <param name="defaults">The default values.</param>
+        /// <param name="constraints">The route constraints.</param>
+        /// <param name="actions">The actions that are reachable via this route.</param>
+        public static HttpRoute BuildDirectRoute(
+            string routeTemplate,
+            int order,
+            HttpRouteValueDictionary defaults,
+            HttpRouteValueDictionary constraints,
+            IEnumerable<ReflectedHttpActionDescriptor> actions)
+        {
+            HttpRoute route = new HttpRoute(routeTemplate, defaults: defaults, constraints: constraints, dataTokens: null, handler: null);
+
+            if (actions != null)
+            {
+                route.DataTokens[RouteKeys.OrderDataTokenKey] = order;
+                route.DataTokens[RouteKeys.PrecedenceDataTokenKey] = route.ParsedRoute.GetPrecedence(constraints);
+                route.DataTokens[RouteKeys.ActionsDataTokenKey] = actions.AsArray();
+            }
+            
+            return route;
         }
     }
 }

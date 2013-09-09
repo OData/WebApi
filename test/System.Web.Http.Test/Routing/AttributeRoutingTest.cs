@@ -19,9 +19,14 @@ namespace System.Web.Http.Routing
         [InlineData("PUT", "controller/42?name=foo", "Put42foo")]
         // Tests optional parameters
         [InlineData("GET", "optional/1/2", "Optional12")]
-        [InlineData("GET", "optional/1", "Optional1")]
-        [InlineData("GET", "optional", "Optional0")]
-        [InlineData("GET", "optionalwconstraint", "OptionalWithConstraint")]
+        [InlineData("GET", "optional/1", "Optional1opt")]
+        [InlineData("GET", "optional", "Optional8opt")]
+        [InlineData("GET", "optionalwconstraint", "OptionalWithConstraintx")]
+        [InlineData("GET", "optionalwnullable/12", "Optional12")]
+        [InlineData("GET", "optionalwnullable", "Optional")]
+        [InlineData("GET", "apibadcontrollerx/int/12", "GetInt12")]
+        [InlineData("GET", "apibadcontrollerx/nullableint/12", "GetNullable12")]
+        [InlineData("GET", "apibadcontrollerx/string/12", "GetString12")]
         // Tests default values
         [InlineData("GET", "default/1/2", "Default12")]
         [InlineData("GET", "default/1", "Default1D2")]
@@ -110,7 +115,7 @@ namespace System.Web.Http.Routing
         [InlineData("GET", "api/Default2/GetById", HttpStatusCode.NotFound)]
         [InlineData("GET", "api/Default2/MethodNotFound", HttpStatusCode.NotFound)]
         // Ambiguous match
-        [InlineData("GET", "apioverload/Fred?score=12&age=23", HttpStatusCode.InternalServerError)] 
+        [InlineData("GET", "apioverload/Fred?score=12&age=23", HttpStatusCode.InternalServerError)]
         [InlineData("GET", "apiactionstress/ActionY/ActionX?useY=7&useX=8", HttpStatusCode.InternalServerError)]
         // Unreachable inherited routes
         [InlineData("GET", "api/subclassroute", HttpStatusCode.NotFound)]
@@ -119,6 +124,10 @@ namespace System.Web.Http.Routing
         [InlineData("GET", "api/baseclass?id=2", HttpStatusCode.NotFound)]
         [InlineData("GET", "api/baseclassprefix", HttpStatusCode.NotFound)]
         [InlineData("GET", "api/baseclassprefix?id=2", HttpStatusCode.NotFound)]
+        // Default value is required, 500 would be a better error, but important thing is we fail
+        [InlineData("GET", "apibadcontrollerx/int", HttpStatusCode.NotFound)]
+        [InlineData("GET", "apibadcontrollerx/nullableint", HttpStatusCode.NotFound)] 
+        [InlineData("GET", "apibadcontrollerx/string", HttpStatusCode.NotFound)] 
         public void AttributeRouting_Failures(string httpMethod, string uri, HttpStatusCode failureCode)
         {
             var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
@@ -188,16 +197,24 @@ namespace System.Web.Http.Routing
             return "Put" + id + name;
         }
 
+        // Optional route parameters still require a default value in the signature. 
         [HttpGet]
         [Route("optional/{opt1?}/{opt2?}")]
-        public string Optional(int opt1, string opt2)
+        public string Optional(int opt1 = 8, string opt2 = "opt")
         {
             return "Optional" + opt1 + opt2;
         }
 
         [HttpGet]
+        [Route("optionalwnullable/{opt1?}")]
+        public string Optional(int? opt1 = null)
+        {
+            return "Optional" + opt1;
+        }
+
+        [HttpGet]
         [Route("optionalwconstraint/{opt:int?}")]
-        public string OptionalWithConstraint(string opt)
+        public string OptionalWithConstraint(string opt = "x")
         {
             return "OptionalWithConstraint" + opt;
         }
@@ -232,6 +249,30 @@ namespace System.Web.Http.Routing
             return "multi";
         }
 
+    }
+
+    // Routes have optional parameters, but signature says it's required. 
+    // Try with value-type, reference type, and nullable. 
+    public class OptionalParameterController : ApiController
+    {
+        // Optional in route, required in signature. 
+        [Route("apibadcontrollerx/int/{id?}")]
+        public string Get(int id)
+        {
+            return "GetInt" + id;
+        }
+
+        [Route("apibadcontrollerx/nullableint/{id?}")]
+        public string GetNullable(int? id)
+        {
+            return "GetNullable" + id;
+        }
+                
+        [Route("apibadcontrollerx/string/{id?}")] 
+        public string GetString(string id)
+        {
+            return "GetString" + id;
+        }
     }
 
     [RoutePrefix("prefix")]

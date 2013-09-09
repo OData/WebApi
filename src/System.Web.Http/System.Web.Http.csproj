@@ -120,7 +120,6 @@
     <Compile Include="Routing\HttpSubRouteCollection.cs" />
     <Compile Include="Routing\RouteCollectionRoute.cs" />
     <Compile Include="Routing\GenerationRoute.cs" />
-    <Compile Include="Routing\HttpDirectRoute.cs" />
     <Compile Include="Routing\HttpRouteDataExtensions.cs" />
     <Compile Include="Routing\HttpRouteExtensions.cs" />
     <Compile Include="Routing\RouteKeys.cs" />

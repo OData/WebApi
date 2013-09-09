@@ -62,6 +62,7 @@
     <Compile Include="Channels\HttpBindingSecurityModeHelper.cs" />
     <Compile Include="HttpSelfHostConfiguration.cs" />
     <Compile Include="HttpSelfHostServer.cs" />
+    <Compile Include="SelfHostHttpRequestContext.cs" />
     <Compile Include="ServiceModel\Channels\AsyncResult.cs" />
     <Compile Include="ServiceModel\Channels\BufferedOutputStream.cs" />
     <Compile Include="ServiceModel\Channels\BufferManagerOutputStream.cs" />

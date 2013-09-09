@@ -4,14 +4,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ServiceModel.Security;
 using System.Web.Http;
+using System.Web.Http.SelfHost;
 
 namespace System.Net.Http
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpRequestMessageExtensions
     {
-        private const string SecurityKey = "Security";
-        
         /// <summary>
         /// Gets the current <see cref="T:System.ServiceModel.Security.SecurityMessageProperty"/> 
         /// stored in <see cref="M:HttpRequestMessage.Properties"/> for the given request.
@@ -25,7 +24,7 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
-            return request.GetProperty<SecurityMessageProperty>(SecurityKey);
+            return request.GetProperty<SecurityMessageProperty>(HttpSelfHostServer.SecurityKey);
         }
 
         private static T GetProperty<T>(this HttpRequestMessage request, string key)

@@ -28,6 +28,8 @@ namespace System.Web.Http.SelfHost
     /// </summary>
     public sealed class HttpSelfHostServer : HttpServer
     {
+        internal const string SecurityKey = "Security";
+
         private static readonly AsyncCallback _onCloseListenerComplete = new AsyncCallback(OnCloseListenerComplete);
         private static readonly AsyncCallback _onCloseChannelComplete = new AsyncCallback(OnCloseChannelComplete);
 
@@ -236,7 +238,7 @@ namespace System.Web.Http.SelfHost
             return request;
         }
 
-        private static bool IsLocal(Message message)
+        internal static bool IsLocal(Message message)
         {
             RemoteEndpointMessageProperty remoteEndpointProperty;
             if (message.Properties.TryGetValue(RemoteEndpointMessageProperty.Name, out remoteEndpointProperty))
@@ -268,7 +270,7 @@ namespace System.Web.Http.SelfHost
             }
         }
 
-        private static X509Certificate2 RetrieveClientCertificate(HttpRequestMessage request)
+        internal static X509Certificate2 RetrieveClientCertificate(HttpRequestMessage request)
         {
             if (request == null)
             {
@@ -1081,170 +1083,6 @@ namespace System.Web.Http.SelfHost
                     }
 
                     _disposed = true;
-                }
-            }
-        }
-
-        private class SelfHostHttpRequestContext : HttpRequestContext
-        {
-            private readonly RequestContext _requestContext;
-            private readonly HttpRequestMessage _request;
-
-            private HttpConfiguration _configuration;
-
-            private X509Certificate2 _clientCertificate;
-            private bool _clientCertificateSet;
-            private bool _includeErrorDetail;
-            private bool _includeErrorDetailSet;
-            private bool _isLocal;
-            private bool _isLocalSet;
-            private UrlHelper _url;
-            private bool _urlSet;
-            private string _virtualPathRoot;
-            private bool _virtualPathRootSet;
-
-            public SelfHostHttpRequestContext(RequestContext requestContext, HttpConfiguration configuration,
-                HttpRequestMessage request)
-            {
-                Contract.Assert(requestContext != null);
-                Contract.Assert(configuration != null);
-                Contract.Assert(request != null);
-                _requestContext = requestContext;
-                _configuration = configuration;
-                _request = request;
-            }
-
-            // Principal and RouteData are not overridden; they are provided by later points in the pipeline
-            //  (HttpServer and HttpRoutingDispatcher).
-
-            public override X509Certificate2 ClientCertificate
-            {
-                get
-                {
-                    if (!_clientCertificateSet)
-                    {
-                        _clientCertificate = RetrieveClientCertificate(_request);
-                        _clientCertificateSet = true;
-                    }
-
-                    return _clientCertificate;
-                }
-                set
-                {
-                    _clientCertificate = value;
-                    _clientCertificateSet = true;
-                }
-            }
-
-            public override HttpConfiguration Configuration
-            {
-                get
-                {
-                    return _configuration;
-                }
-                set
-                {
-                    _configuration = value;
-                }
-            }
-
-            public override bool IncludeErrorDetail
-            {
-                get
-                {
-                    if (!_includeErrorDetailSet)
-                    {
-                        HttpConfiguration configuration = Configuration;
-                        IncludeErrorDetailPolicy includeErrorDetailPolicy = IncludeErrorDetailPolicy.Default;
-
-                        if (configuration != null)
-                        {
-                            includeErrorDetailPolicy = configuration.IncludeErrorDetailPolicy;
-                        }
-
-                        switch (includeErrorDetailPolicy)
-                        {
-                            case IncludeErrorDetailPolicy.Default:
-                            case IncludeErrorDetailPolicy.LocalOnly:
-                                _includeErrorDetail = IsLocal;
-                                break;
-
-                            case IncludeErrorDetailPolicy.Always:
-                                _includeErrorDetail = true;
-                                break;
-
-                            case IncludeErrorDetailPolicy.Never:
-                            default:
-                                _includeErrorDetail = false;
-                                break;
-                        }
-
-                        _includeErrorDetailSet = true;
-                    }
-
-                    return _includeErrorDetail;
-                }
-                set
-                {
-                    _includeErrorDetail = value;
-                    _includeErrorDetailSet = true;
-                }
-            }
-
-            public override bool IsLocal
-            {
-                get
-                {
-                    if (!_isLocalSet)
-                    {
-                        _isLocal = IsLocal(_requestContext.RequestMessage);
-                        _isLocalSet = true;
-                    }
-
-                    return _isLocal;
-                }
-                set
-                {
-                    _isLocal = value;
-                    _isLocalSet = true;
-                }
-            }
-
-            public override UrlHelper Url
-            {
-                get
-                {
-                    if (!_urlSet)
-                    {
-                        _url = new UrlHelper(_request);
-                        _urlSet = true;
-                    }
-
-                    return _url;
-                }
-                set
-                {
-                    _url = value;
-                    _urlSet = true;
-                }
-            }
-
-            public override string VirtualPathRoot
-            {
-                get
-                {
-                    if (!_virtualPathRootSet)
-                    {
-                        _virtualPathRoot = _configuration.VirtualPathRoot;
-                        _virtualPathRootSet = true;
-                    }
-
-                    return _virtualPathRoot;
-                }
-                set
-                {
-                    _virtualPathRoot = value;
-                    _virtualPathRootSet = true;
                 }
             }
         }

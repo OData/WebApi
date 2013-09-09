@@ -53,6 +53,7 @@
     <Compile Include="OwinConstants.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HttpMessageHandlerAdapter.cs" />
+    <Compile Include="OwinHttpRequestContext.cs" />
     <Compile Include="OwinHttpRequestMessageExtensions.cs" />
     <Compile Include="PassiveAuthenticationMessageHandler.cs" />
     <Compile Include="WebApiAppBuilderExtensions.cs" />

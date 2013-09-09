@@ -5,14 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
 using System.Web.Http.Owin.Properties;
-using System.Web.Http.Routing;
 using Microsoft.Owin;
 
 namespace System.Web.Http.Owin
@@ -155,7 +153,7 @@ namespace System.Web.Http.Owin
             // Set the OWIN context on the request
             request.SetOwinContext(context);
 
-            // Set the a request context on the request that lazily populates each property.
+            // Set a request context on the request that lazily populates each property.
             HttpRequestContext requestContext = new OwinHttpRequestContext(context, request);
             request.SetRequestContext(requestContext);
         }
@@ -289,178 +287,6 @@ namespace System.Web.Http.Owin
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        private class OwinHttpRequestContext : HttpRequestContext
-        {
-            private readonly IOwinContext _context;
-            private readonly HttpRequestMessage _request;
-
-            private X509Certificate2 _clientCertificate;
-            private bool _clientCertificateSet;
-            private bool _includeErrorDetail;
-            private bool _includeErrorDetailSet;
-            private bool _isLocal;
-            private bool _isLocalSet;
-            private IPrincipal _principal;
-            private bool _principalSet;
-            private UrlHelper _url;
-            private bool _urlSet;
-            private string _virtualPathRoot;
-            private bool _virtualPathRootSet;
-
-            public OwinHttpRequestContext(IOwinContext context, HttpRequestMessage request)
-            {
-                Contract.Assert(context != null);
-                Contract.Assert(context.Request != null);
-                Contract.Assert(request != null);
-                _context = context;
-                _request = request;
-            }
-
-            // Configuration and RouteData are not overridden; these values are provided by later points in the
-            //  pipeline (HttpServer and HttpRoutingDispatcher)
-
-            public override X509Certificate2 ClientCertificate
-            {
-                get
-                {
-                    if (!_clientCertificateSet)
-                    {
-                        _clientCertificate = _context.Get<X509Certificate2>(OwinConstants.ClientCertifiateKey);
-                        _clientCertificateSet = true;
-                    }
-
-                    return _clientCertificate;
-                }
-                set
-                {
-                    _clientCertificate = value;
-                    _clientCertificateSet = true;
-                }
-            }
-
-            public override bool IncludeErrorDetail
-            {
-                get
-                {
-                    if (!_includeErrorDetailSet)
-                    {
-                        HttpConfiguration configuration = Configuration;
-                        IncludeErrorDetailPolicy includeErrorDetailPolicy = IncludeErrorDetailPolicy.Default;
-
-                        if (configuration != null)
-                        {
-                            includeErrorDetailPolicy = configuration.IncludeErrorDetailPolicy;
-                        }
-
-                        switch (includeErrorDetailPolicy)
-                        {
-                            case IncludeErrorDetailPolicy.Default:
-                            case IncludeErrorDetailPolicy.LocalOnly:
-                                _includeErrorDetail = IsLocal;
-                                break;
-
-                            case IncludeErrorDetailPolicy.Always:
-                                _includeErrorDetail = true;
-                                break;
-
-                            case IncludeErrorDetailPolicy.Never:
-                            default:
-                                _includeErrorDetail = false;
-                                break;
-                        }
-
-                        _includeErrorDetailSet = true;
-                    }
-
-                    return _includeErrorDetail;
-                }
-                set
-                {
-                    _includeErrorDetail = value;
-                    _includeErrorDetailSet = true;
-                }
-            }
-
-            public override bool IsLocal
-            {
-                get
-                {
-                    if (!_isLocalSet)
-                    {
-                        _isLocal = _context.Get<bool>(OwinConstants.IsLocalKey);
-                        _isLocalSet = true;
-                    }
-
-                    return _isLocal;
-                }
-                set
-                {
-                    _isLocal = value;
-                    _isLocalSet = true;
-                }
-            }
-
-            public override IPrincipal Principal
-            {
-                get
-                {
-                    if (!_principalSet)
-                    {
-                        _principal = _context.Request.User;
-                        _principalSet = true;
-                    }
-
-                    return _principal;
-                }
-                set
-                {
-                    _principal = value;
-                    _principalSet = true;
-                }
-            }
-
-            public override UrlHelper Url
-            {
-                get
-                {
-                    if (!_urlSet)
-                    {
-                        _url = new UrlHelper(_request);
-                        _urlSet = true;
-                    }
-
-                    return _url;
-                }
-                set
-                {
-                    _url = value;
-                    _urlSet = true;
-                }
-            }
-
-            public override string VirtualPathRoot
-            {
-                get
-                {
-                    if (!_virtualPathRootSet)
-                    {
-                        // Set the virtual path root for link resolution and link generation to work
-                        // OWIN spec requires request path base to be either the empty string or start with "/"
-                        string requestPathBase = _context.Request.PathBase.ToString();
-                        _virtualPathRoot = String.IsNullOrEmpty(requestPathBase) ? "/" : requestPathBase;
-                        _virtualPathRootSet = true;
-                    }
-
-                    return _virtualPathRoot;
-                }
-                set
-                {
-                    _virtualPathRoot = value;
-                    _virtualPathRootSet = true;
-                }
-            }
         }
     }
 }

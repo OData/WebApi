@@ -8,7 +8,9 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.ServiceModel;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.SelfHost
@@ -163,6 +165,59 @@ namespace System.Web.Http.SelfHost
             Assert.Throws<HttpRequestException>(() => task.Wait());
         }
 
+        [Fact]
+        public void SendAsync_ServiceModel_AddsSelfHostHttpRequestContext()
+        {
+            // Arrange
+            // Use a different port from 50231 to prevent conflicts with concurrent tests.
+            string baseUri = "http://localhost:50232/";
+
+            HttpRequestContext context = null;
+            Uri via = null;
+
+            Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync = (r, c) =>
+            {
+                if (r != null)
+                {
+                    context = r.GetRequestContext();
+                }
+
+                SelfHostHttpRequestContext typedContext = context as SelfHostHttpRequestContext;
+
+                if (typedContext != null)
+                {
+                    via = typedContext.RequestContext.RequestMessage.Properties.Via;
+                }
+
+                return Task.FromResult(new HttpResponseMessage());
+            };
+
+            using (HttpSelfHostConfiguration expectedConfiguration = new HttpSelfHostConfiguration(baseUri))
+            {
+                expectedConfiguration.HostNameComparisonMode = HostNameComparisonMode.Exact;
+
+                using (HttpMessageHandler dispatcher = new LambdaHttpMessageHandler(sendAsync))
+                using (HttpSelfHostServer server = new HttpSelfHostServer(expectedConfiguration, dispatcher))
+                using (HttpClient client = new HttpClient())
+                using (HttpRequestMessage expectedRequest = new HttpRequestMessage(HttpMethod.Get, baseUri))
+                {
+                    server.OpenAsync().Wait();
+
+                    // Act
+                    using (HttpResponseMessage ignore = client.SendAsync(expectedRequest).Result)
+                    {
+                        // Assert
+                        SelfHostHttpRequestContext typedContext = (SelfHostHttpRequestContext)context;
+                        Assert.Equal(expectedRequest.RequestUri, via);
+                        Assert.Same(expectedConfiguration, context.Configuration);
+                        Assert.Equal(expectedRequest.RequestUri, typedContext.Request.RequestUri);
+
+                        server.CloseAsync().Wait();
+                    }
+                }
+            }
+        }
+
         internal class ThrowsBeforeTaskObjectContent : ObjectContent
         {
             public ThrowsBeforeTaskObjectContent()
@@ -256,6 +311,23 @@ namespace System.Web.Http.SelfHost
             return transferMode == TransferMode.Streamed
                 ? String.Format("http://{0}:{1}/stream", machineName, TestPort)
                 : String.Format("http://{0}:{1}", machineName, TestPort);
+        }
+
+        private class LambdaHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _sendAsync;
+
+            public LambdaHttpMessageHandler(
+                Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync)
+            {
+                _sendAsync = sendAsync;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+                CancellationToken cancellationToken)
+            {
+                return _sendAsync.Invoke(request, cancellationToken);
+            }
         }
     }
 

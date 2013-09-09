@@ -14,7 +14,7 @@ using System.Runtime.Remoting;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Hosting;
+using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 using Moq;
 using Newtonsoft.Json.Linq;
@@ -232,6 +232,33 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
+        public void ConvertRequest_AddsWebHostHttpRequestContext()
+        {
+            // Arrange
+            Mock<HttpRequestBase> requestBaseMock = new Mock<HttpRequestBase>(MockBehavior.Strict);
+            requestBaseMock.Setup(r => r.HttpMethod).Returns("IGNORED");
+            requestBaseMock.Setup(r => r.Url).Returns(new Uri("http://ignore"));
+            requestBaseMock.Setup(r => r.Headers).Returns(new NameValueCollection());
+            HttpRequestBase requestBase = requestBaseMock.Object;
+            Mock<HttpContextBase> contextBaseMock = new Mock<HttpContextBase>(MockBehavior.Strict);
+            contextBaseMock.Setup(c => c.Request).Returns(requestBase);
+            contextBaseMock.Setup(c => c.Items).Returns((IDictionary)null);
+            HttpContextBase contextBase = contextBaseMock.Object;
+
+            // Act
+            using (HttpRequestMessage expectedRequest = HttpControllerHandler.ConvertRequest(contextBase))
+            {
+                // Assert
+                HttpRequestContext context = expectedRequest.GetRequestContext();
+                Assert.IsType<WebHostHttpRequestContext>(context);
+                WebHostHttpRequestContext typedContext = (WebHostHttpRequestContext)context;
+                Assert.Same(contextBase, typedContext.Context);
+                Assert.Same(requestBase, typedContext.WebRequest);
+                Assert.Same(expectedRequest, typedContext.Request);
+            }
+        }
+
+        [Fact]
         public void ConvertResponse_IfResponseHasNoCacheControlDefined_SetsNoCacheCacheabilityOnAspNetResponse()
         {
             // Arrange
@@ -240,7 +267,7 @@ namespace System.Web.Http.WebHost
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            HttpControllerHandler.ConvertResponse(contextMock.Object, response, request);
+            HttpControllerHandler.ConvertResponse(contextMock.Object, response, request).Wait();
 
             // Assert
             contextMock.Verify(c => c.Response.Cache.SetCacheability(HttpCacheability.NoCache));
@@ -256,7 +283,7 @@ namespace System.Web.Http.WebHost
             response.Headers.CacheControl = new CacheControlHeaderValue { Public = true };
 
             // Act
-            HttpControllerHandler.ConvertResponse(contextMock.Object, response, request);
+            HttpControllerHandler.ConvertResponse(contextMock.Object, response, request).Wait();
 
             // Assert
             contextMock.Verify(c => c.Response.Cache.SetCacheability(HttpCacheability.NoCache), Times.Never());

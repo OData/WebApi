@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.Batch
@@ -29,6 +30,26 @@ namespace System.Web.Http.Batch
             // Assert
             Assert.Contains(notSpecialPropertyName, childRequest.Properties.Keys);
             Assert.DoesNotContain(specialPropertyName, childRequest.Properties.Keys);
+        }
+
+        [Fact]
+        public void CopyBatchRequestProperties_AddsBatchHttpRequestContext()
+        {
+            using (HttpRequestMessage subRequest = new HttpRequestMessage())
+            using (HttpRequestMessage batchRequest = new HttpRequestMessage())
+            {
+                HttpRequestContext expectedOriginalContext = new HttpRequestContext();
+                subRequest.SetRequestContext(expectedOriginalContext);
+
+                // Act
+                BatchHttpRequestMessageExtensions.CopyBatchRequestProperties(subRequest, batchRequest);
+
+                // Assert
+                HttpRequestContext context = subRequest.GetRequestContext();
+                Assert.IsType<BatchHttpRequestContext>(context);
+                BatchHttpRequestContext typedContext = (BatchHttpRequestContext)context;
+                Assert.Same(expectedOriginalContext, typedContext.BatchContext);
+            }
         }
     }
 }

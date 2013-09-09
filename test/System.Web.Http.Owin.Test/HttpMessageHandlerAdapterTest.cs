@@ -11,6 +11,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using Microsoft.Owin;
@@ -206,6 +207,61 @@ namespace System.Web.Http.Owin
 
             var request = handler.Request;
             Assert.Same(environment, request.GetOwinEnvironment());
+        }
+
+        [Fact]
+        public void Invoke_SetsOwinRequestContext()
+        {
+            // Arrange
+            IHostBufferPolicySelector bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false,
+                bufferOutput: false);
+
+            using (HttpResponseMessage response = new HttpResponseMessage())
+            {
+                HttpRequestMessage request = null;
+                Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync = (r, c) =>
+                {
+                    request = r;
+                    return Task.FromResult(response);
+                };
+
+                using (HttpMessageHandler messageHandler = new LambdaHttpMessageHandler(sendAsync))
+                using (HttpMessageHandlerAdapter adapter = new HttpMessageHandlerAdapter(next: null,
+                    messageHandler: messageHandler, bufferPolicySelector: bufferPolicySelector))
+                {
+                    Mock<IHeaderDictionary> requestHeadersMock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
+                    requestHeadersMock.Setup(h => h.GetEnumerator()).Returns(
+                        new Mock<IEnumerator<KeyValuePair<string, string[]>>>().Object);
+
+                    Mock<IOwinRequest> requestMock = new Mock<IOwinRequest>(MockBehavior.Strict);
+                    requestMock.Setup(r => r.Method).Returns("GET");
+                    requestMock.Setup(r => r.Uri).Returns(new Uri("http://ignore"));
+                    requestMock.Setup(r => r.Body).Returns(Stream.Null);
+                    requestMock.Setup(r => r.Headers).Returns(requestHeadersMock.Object);
+                    requestMock.Setup(r => r.User).Returns((IPrincipal)null);
+                    requestMock.Setup(r => r.CallCancelled).Returns(CancellationToken.None);
+
+                    Mock<IHeaderDictionary> responseHeadersMock = new Mock<IHeaderDictionary>();
+
+                    Mock<IOwinResponse> responseMock = new Mock<IOwinResponse>();
+                    responseMock.Setup(r => r.Headers).Returns(responseHeadersMock.Object);
+
+                    Mock<IOwinContext> contextMock = new Mock<IOwinContext>(MockBehavior.Strict);
+                    contextMock.Setup(c => c.Request).Returns(requestMock.Object);
+                    contextMock.Setup(c => c.Response).Returns(responseMock.Object);
+                    IOwinContext expectedContext = contextMock.Object;
+
+                    // Act
+                    adapter.Invoke(expectedContext).Wait();
+
+                    // Assert
+                    HttpRequestContext requestContext = request.GetRequestContext();
+                    Assert.IsType<OwinHttpRequestContext>(requestContext);
+                    OwinHttpRequestContext typedContext = (OwinHttpRequestContext)requestContext;
+                    Assert.Same(expectedContext, typedContext.Context);
+                    Assert.Same(request, typedContext.Request);
+                }
+            }
         }
 
         [Theory]
@@ -518,6 +574,23 @@ namespace System.Web.Http.Owin
                 }
 
                 return TaskHelpers.FromResult<HttpResponseMessage>(Response);
+            }
+        }
+
+        private class LambdaHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _sendAsync;
+
+            public LambdaHttpMessageHandler(
+                Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync)
+            {
+                _sendAsync = sendAsync;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+                CancellationToken cancellationToken)
+            {
+                return _sendAsync.Invoke(request, cancellationToken);
             }
         }
     }

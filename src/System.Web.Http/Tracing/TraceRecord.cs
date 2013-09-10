@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 
@@ -9,6 +10,7 @@ namespace System.Web.Http.Tracing
     /// <summary>
     /// Data object used by <see cref="ITraceWriter"/> to record traces.
     /// </summary>
+    [DebuggerDisplay("Category: {Category}, Operation: {Operation}, Level: {Level}, Kind: {Kind}")]
     public class TraceRecord
     {
         private TraceKind _traceKind;

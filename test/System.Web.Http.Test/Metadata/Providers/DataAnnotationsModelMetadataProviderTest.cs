@@ -108,7 +108,7 @@ namespace System.Web.Http.Metadata.Providers
             [Display(Description = "Description text2", Name = "Name text2")]
             public int BothSet { get; set; }
 
-            [Display(Name="String1", ResourceType=typeof(Resources))]
+            [Display(Name = "String1", ResourceType = typeof(Resources))]
             public int Localized { get; set; }
         }
 

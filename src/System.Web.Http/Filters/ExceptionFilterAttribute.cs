@@ -12,6 +12,21 @@ namespace System.Web.Http.Filters
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The exception is flowed in the task")]
+        public virtual Task OnExceptionAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
+        {
+            try
+            {
+                OnException(actionExecutedContext);
+            }
+            catch (Exception ex)
+            {
+                return TaskHelpers.FromError(ex);
+            }
+
+            return TaskHelpers.Completed();
+        }
+
         Task IExceptionFilter.ExecuteExceptionFilterAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
         {
             if (actionExecutedContext == null)
@@ -19,8 +34,12 @@ namespace System.Web.Http.Filters
                 throw Error.ArgumentNull("actionExecutedContext");
             }
 
-            OnException(actionExecutedContext);
-            return TaskHelpers.Completed();
+            return ExecuteExceptionFilterAsyncCore(actionExecutedContext, cancellationToken);
+        }
+
+        private async Task ExecuteExceptionFilterAsyncCore(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
+        {
+            await OnExceptionAsync(actionExecutedContext, cancellationToken);
         }
     }
 }

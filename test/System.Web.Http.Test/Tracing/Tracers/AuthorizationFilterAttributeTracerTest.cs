@@ -127,8 +127,8 @@ namespace System.Web.Http.Tracing.Tracers
             AuthorizationFilterAttributeTracer tracer = new AuthorizationFilterAttributeTracer(mockAttr.Object, traceWriter);
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
-                new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "OnAuthorization" },
-                new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.End,  Operation = "OnAuthorization" },
+                new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "OnAuthorizationAsync" },
+                new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.End,  Operation = "OnAuthorizationAsync" },
             };
 
             // Act
@@ -155,8 +155,8 @@ namespace System.Web.Http.Tracing.Tracers
             AuthorizationFilterAttributeTracer tracer = new AuthorizationFilterAttributeTracer(mockAttr.Object, traceWriter);
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
-                new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "OnAuthorization" },
-                new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Error) { Kind = TraceKind.End,  Operation = "OnAuthorization" }
+                new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "OnAuthorizationAsync" },
+                new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Error) { Kind = TraceKind.End,  Operation = "OnAuthorizationAsync" }
             };
 
             // Act

@@ -96,7 +96,11 @@ namespace System.Web.Http.Filters
             // Arrange
             Exception e = new Exception();
             HttpActionContext context = ContextUtil.CreateActionContext();
-            Mock<AuthorizationFilterAttribute> filterMock = new Mock<AuthorizationFilterAttribute>();
+            Mock<AuthorizationFilterAttribute> filterMock = new Mock<AuthorizationFilterAttribute>()
+            {
+                CallBase = true,
+            };
+
             filterMock.Setup(f => f.OnAuthorization(It.IsAny<HttpActionContext>())).Throws(e);
             var filter = (IAuthorizationFilter)filterMock.Object;
             bool continuationCalled = false;
@@ -120,7 +124,7 @@ namespace System.Web.Http.Filters
         {
             // Arrange
             HttpActionContext context = ContextUtil.CreateActionContext();
-            Mock<AuthorizationFilterAttribute> filterMock = new Mock<AuthorizationFilterAttribute>() { CallBase = false };
+            Mock<AuthorizationFilterAttribute> filterMock = new Mock<AuthorizationFilterAttribute>() { CallBase = true };
             var filter = (IAuthorizationFilter)filterMock.Object;
 
             // Act
@@ -138,7 +142,11 @@ namespace System.Web.Http.Filters
         {
             // Arrange
             HttpActionContext context = ContextUtil.CreateActionContext();
-            Mock<AuthorizationFilterAttribute> filterMock = new Mock<AuthorizationFilterAttribute>();
+            Mock<AuthorizationFilterAttribute> filterMock = new Mock<AuthorizationFilterAttribute>()
+            {
+                CallBase = true,
+            };
+
             var filter = (IAuthorizationFilter)filterMock.Object;
 
             // Act
@@ -154,7 +162,11 @@ namespace System.Web.Http.Filters
         {
             // Arrange
             HttpActionContext context = ContextUtil.CreateActionContext();
-            Mock<AuthorizationFilterAttribute> filterMock = new Mock<AuthorizationFilterAttribute>();
+            Mock<AuthorizationFilterAttribute> filterMock = new Mock<AuthorizationFilterAttribute>()
+            {
+                CallBase = true,
+            };
+
             var filter = (IAuthorizationFilter)filterMock.Object;
             HttpResponseMessage response = new HttpResponseMessage();
 
@@ -171,7 +183,11 @@ namespace System.Web.Http.Filters
         {
             // Arrange
             HttpActionContext context = ContextUtil.CreateActionContext();
-            Mock<AuthorizationFilterAttribute> filterMock = new Mock<AuthorizationFilterAttribute>();
+            Mock<AuthorizationFilterAttribute> filterMock = new Mock<AuthorizationFilterAttribute>()
+            {
+                CallBase = true,
+            };
+
             var filter = (IAuthorizationFilter)filterMock.Object;
             Exception exception = new Exception();
 

@@ -22,7 +22,7 @@ namespace System.Web.Http.Filters
         [Fact]
         public void ExecuteExceptionFilterAsync_IfContextParameterIsNull_ThrowsException()
         {
-            IExceptionFilter filter = new Mock<ExceptionFilterAttribute>().Object;
+            IExceptionFilter filter = new Mock<ExceptionFilterAttribute>() { CallBase = true }.Object;
 
             Assert.ThrowsArgumentNull(() =>
             {
@@ -34,7 +34,8 @@ namespace System.Web.Http.Filters
         public void ExecuteExceptionFilterAsync_IfOnExceptionThrowsException_RethrowsTheSameException()
         {
             // Arrange
-            var mockFilter = new Mock<ExceptionFilterAttribute>();
+            var mockFilter = new Mock<ExceptionFilterAttribute>() { CallBase = true };
+
             Exception exception = new Exception();
             mockFilter.Setup(f => f.OnException(_context)).Throws(exception);
             IExceptionFilter filter = mockFilter.Object;
@@ -42,7 +43,7 @@ namespace System.Web.Http.Filters
             // Act & Assert
             var thrownException = Assert.Throws<Exception>(() =>
             {
-                filter.ExecuteExceptionFilterAsync(_context, CancellationToken.None);
+                filter.ExecuteExceptionFilterAsync(_context, CancellationToken.None).Wait();
             });
             Assert.Same(exception, thrownException);
         }
@@ -51,7 +52,11 @@ namespace System.Web.Http.Filters
         public void ExecuteExceptionFilterAsync_InvokesOnExceptionMethod()
         {
             // Arrange
-            var mockFilter = new Mock<ExceptionFilterAttribute>();
+            var mockFilter = new Mock<ExceptionFilterAttribute>()
+            {
+                CallBase = true,
+            };
+
             IExceptionFilter filter = mockFilter.Object;
 
             // Act
@@ -65,7 +70,7 @@ namespace System.Web.Http.Filters
         public void ExecuteExceptionFilterAsync_ReturnsCompletedTask()
         {
             // Arrange
-            var mockFilter = new Mock<ExceptionFilterAttribute>();
+            var mockFilter = new Mock<ExceptionFilterAttribute>() { CallBase = true };
             IExceptionFilter filter = mockFilter.Object;
 
             // Act

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,21 @@ namespace System.Web.Http.Filters
         {
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to intercept all exceptions")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "exception is flowed through the task")]
+        public virtual Task OnAuthorizationAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
+        {
+            try
+            {
+                OnAuthorization(actionContext);
+            }
+            catch (Exception ex)
+            {
+                return TaskHelpers.FromError(ex);
+            }
+
+            return TaskHelpers.Completed();
+        }
+
         Task<HttpResponseMessage> IAuthorizationFilter.ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
         {
             if (actionContext == null)
@@ -27,22 +40,20 @@ namespace System.Web.Http.Filters
                 throw Error.ArgumentNull("continuation");
             }
 
-            try
-            {
-                OnAuthorization(actionContext);
-            }
-            catch (Exception e)
-            {
-                return TaskHelpers.FromError<HttpResponseMessage>(e);
-            }
+            return ExecuteAuthorizationFilterAsyncCore(actionContext, cancellationToken, continuation);
+        }
+
+        private async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsyncCore(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
+        {
+            await OnAuthorizationAsync(actionContext, cancellationToken);
 
             if (actionContext.Response != null)
             {
-                return TaskHelpers.FromResult(actionContext.Response);
+                return actionContext.Response;
             }
             else
             {
-                return continuation();
+                return await continuation();
             }
         }
     }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +20,36 @@ namespace System.Web.Http.Filters
         {
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to intercept all exceptions")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "exception is flowed through the task")]
+        public virtual Task OnActionExecutingAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
+        {
+            try
+            {
+                OnActionExecuting(actionContext);
+            }
+            catch (Exception ex)
+            {
+                return TaskHelpers.FromError(ex);
+            }
+
+            return TaskHelpers.Completed();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "exception is flowed through the task")]
+        public virtual Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
+        {
+            try
+            {
+                OnActionExecuted(actionExecutedContext);
+            }
+            catch (Exception ex)
+            {
+                return TaskHelpers.FromError(ex);
+            }
+
+            return TaskHelpers.Completed();
+        }
+
         Task<HttpResponseMessage> IActionFilter.ExecuteActionFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
         {
             if (actionContext == null)
@@ -33,21 +61,20 @@ namespace System.Web.Http.Filters
                 throw Error.ArgumentNull("continuation");
             }
 
-            try
-            {
-                OnActionExecuting(actionContext);
-            }
-            catch (Exception e)
-            {
-                return TaskHelpers.FromError<HttpResponseMessage>(e);
-            }
+            return ExecuteActionFilterAsyncCore(actionContext, cancellationToken, continuation);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to intercept all exceptions")]
+        private async Task<HttpResponseMessage> ExecuteActionFilterAsyncCore(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
+        {
+            await OnActionExecutingAsync(actionContext, cancellationToken);
 
             if (actionContext.Response != null)
             {
-                return TaskHelpers.FromResult(actionContext.Response);
+                return actionContext.Response;
             }
 
-            return CallOnActionExecutedAsync(actionContext, cancellationToken, continuation);
+            return await CallOnActionExecutedAsync(actionContext, cancellationToken, continuation);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to intercept all exceptions")]
@@ -69,7 +96,7 @@ namespace System.Web.Http.Filters
             try
             {
                 HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, exception) { Response = response };
-                OnActionExecuted(executedContext);
+                await OnActionExecutedAsync(executedContext, cancellationToken);
 
                 if (executedContext.Response != null)
                 {

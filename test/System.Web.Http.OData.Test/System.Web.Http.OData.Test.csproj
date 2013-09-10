@@ -172,7 +172,6 @@
     <Compile Include="OData\Formatter\Deserialization\ODataActionPayloadDeserializerTest.cs" />
     <Compile Include="OData\Formatter\EdmPrimitiveHelpersTest.cs" />
     <Compile Include="OData\Formatter\ODataModelBinderProviderTest.cs" />
-    <Compile Include="OData\Formatter\PartialTrustTest.cs" />
     <Compile Include="OData\Builder\EdmTypeConfigurationExtensionsTest.cs" />
     <Compile Include="OData\Builder\TestModels\InheritanceModels.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializerTests.cs" />
@@ -206,7 +205,6 @@
     <Compile Include="OData\Query\ODataQueryOptionsOfTEntityTest.cs" />
     <Compile Include="OData\Query\ODataQuerySettingsTest.cs" />
     <Compile Include="OData\Query\OrderByPropertyNodeTest.cs" />
-    <Compile Include="OData\Query\PartialTrustTest.cs" />
     <Compile Include="OData\Query\Validators\ValidationTestHelper.cs" />
     <Compile Include="OData\Routing\ODataRoutingModel.cs" />
     <Compile Include="OData\Routing\ODataRoutingTest.cs" />

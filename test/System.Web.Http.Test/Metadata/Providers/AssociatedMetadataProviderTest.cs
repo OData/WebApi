@@ -8,7 +8,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Metadata.Providers
 {
-    public class AssociatedMetadataProviderTest : MarshalByRefObject
+    public class AssociatedMetadataProviderTest
     {
         // GetMetadataForProperties
 
@@ -276,7 +276,4 @@ namespace System.Web.Http.Metadata.Providers
             public object Model { get; set; }
         }
     }
-
-    [PartialTrustRunner]
-    public class PartialTrustAssociatedMetadataProviderTest : AssociatedMetadataProviderTest { }
 }

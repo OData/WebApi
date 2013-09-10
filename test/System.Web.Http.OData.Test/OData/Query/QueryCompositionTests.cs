@@ -14,7 +14,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query
 {
-    public class QueryCompositionTests : MarshalByRefObject
+    public class QueryCompositionTests
     {
         private static IEdmModel _queryCompositionCustomerModel;
 

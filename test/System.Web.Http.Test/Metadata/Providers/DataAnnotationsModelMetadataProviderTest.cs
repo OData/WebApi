@@ -8,7 +8,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Metadata.Providers
 {
-    public class DataAnnotationsModelMetadataProviderTest : MarshalByRefObject
+    public class DataAnnotationsModelMetadataProviderTest
     {
         [Fact]
         public void GetMetadataForPropertiesSetTypesAndPropertyNames()
@@ -112,7 +112,4 @@ namespace System.Web.Http.Metadata.Providers
             Assert.Equal("Description text", provider.GetMetadataForProperty(null, typeof(DisplayModel), "DescriptionSet").Description);
         }
     }
-
-    [PartialTrustRunner]
-    public class CachedDataAnnotationsModelMetadataProviderPartialTrustTest : DataAnnotationsModelMetadataProviderTest { }
 }

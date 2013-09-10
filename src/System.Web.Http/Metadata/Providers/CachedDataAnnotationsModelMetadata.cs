@@ -51,5 +51,21 @@ namespace System.Web.Http.Metadata.Providers
 
             return base.ComputeIsReadOnly();
         }
+
+        public override string GetDisplayName()
+        {
+            if (PrototypeCache.Display != null)
+            {
+                string name = PrototypeCache.Display.GetName();
+
+                // if the user specified a display property but not the name we still fallback to the property name.
+                if (name != null)
+                {
+                    return name;
+                }
+            }
+
+            return base.GetDisplayName();
+        }
     }
 }

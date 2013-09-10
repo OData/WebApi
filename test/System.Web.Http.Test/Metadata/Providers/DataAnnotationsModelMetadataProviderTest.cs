@@ -55,7 +55,7 @@ namespace System.Web.Http.Metadata.Providers
 
         // [ReadOnly] & [Editable] tests
 
-        class ReadOnlyModel
+        private class ReadOnlyModel
         {
             public int NoAttributes { get; set; }
 
@@ -87,29 +87,61 @@ namespace System.Web.Http.Metadata.Providers
 
         // [Display] & [DisplayName] tests
 
-        class DisplayModel
+        private class DisplayModel
         {
             public int NoAttribute { get; set; }
 
-            // Description
+            // Description + Name combination.
 
             [Display]
-            public int DescriptionNotSet { get; set; }
+            public int NothingSet { get; set; }
 
-            [Display(Description = "Description text")]
+            [Display(Name = "")]
+            public int EmptyDisplayName { get; set; }
+
+            [Display(Description = "Description text1")]
             public int DescriptionSet { get; set; }
+
+            [Display(Name = "Name text1")]
+            public int NameSet { get; set; }
+
+            [Display(Description = "Description text2", Name = "Name text2")]
+            public int BothSet { get; set; }
+
+            [Display(Name="String1", ResourceType=typeof(Resources))]
+            public int Localized { get; set; }
         }
 
         [Fact]
-        public void DescriptionTests()
+        public void DataAnnotationsNameTests()
+        {
+            // Arrange
+            var provider = new DataAnnotationsModelMetadataProvider();
+
+            // Act & Assert
+            Assert.Equal("NoAttribute", provider.GetMetadataForProperty(null, typeof(DisplayModel), "NoAttribute").GetDisplayName());
+            Assert.Equal("NothingSet", provider.GetMetadataForProperty(null, typeof(DisplayModel), "NothingSet").GetDisplayName());
+            Assert.Equal("", provider.GetMetadataForProperty(null, typeof(DisplayModel), "EmptyDisplayName").GetDisplayName());
+            Assert.Equal("DescriptionSet", provider.GetMetadataForProperty(null, typeof(DisplayModel), "DescriptionSet").GetDisplayName());
+            Assert.Equal("Name text1", provider.GetMetadataForProperty(null, typeof(DisplayModel), "NameSet").GetDisplayName());
+            Assert.Equal("Name text2", provider.GetMetadataForProperty(null, typeof(DisplayModel), "BothSet").GetDisplayName());
+
+            Assert.NotEqual("String1", Resources.String1);
+            Assert.Equal(Resources.String1, provider.GetMetadataForProperty(null, typeof(DisplayModel), "Localized").GetDisplayName());
+        }
+
+        [Fact]
+        public void DataAnnotationsDescriptionTests()
         {
             // Arrange
             var provider = new DataAnnotationsModelMetadataProvider();
 
             // Act & Assert
             Assert.Null(provider.GetMetadataForProperty(null, typeof(DisplayModel), "NoAttribute").Description);
-            Assert.Null(provider.GetMetadataForProperty(null, typeof(DisplayModel), "DescriptionNotSet").Description);
-            Assert.Equal("Description text", provider.GetMetadataForProperty(null, typeof(DisplayModel), "DescriptionSet").Description);
+            Assert.Null(provider.GetMetadataForProperty(null, typeof(DisplayModel), "NothingSet").Description);
+            Assert.Null(provider.GetMetadataForProperty(null, typeof(DisplayModel), "NameSet").Description);
+            Assert.Equal("Description text1", provider.GetMetadataForProperty(null, typeof(DisplayModel), "DescriptionSet").Description);
+            Assert.Equal("Description text2", provider.GetMetadataForProperty(null, typeof(DisplayModel), "BothSet").Description);
         }
     }
 }

@@ -141,7 +141,7 @@ namespace System.Web.Http.Metadata
         }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "The method is a delegating helper to choose among multiple property values")]
-        public string GetDisplayName()
+        public virtual string GetDisplayName()
         {
             return PropertyName ?? ModelType.Name;
         }

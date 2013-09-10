@@ -52,7 +52,7 @@ namespace System.Web.Http.ModelBinding
         // We verify only the stable parts of the trace record, not the optional messages etc.
         public static List<ExpectedTraceRecord> ExpectedTraceRecords = new List<ExpectedTraceRecord>() {
             new ExpectedTraceRecord("System.Web.Http.Request",      string.Empty,                     string.Empty),
-            new ExpectedTraceRecord("System.Web.Http.MessageHandlers",  "DelegatingHandlerProxy",  "SendAsync"),
+            new ExpectedTraceRecord("System.Web.Http.MessageHandlers",  "DelegatingHandlerProxy",     "SendAsync"),
             new ExpectedTraceRecord("System.Web.Http.Controllers",  "DefaultHttpControllerSelector",  "SelectController"),
             new ExpectedTraceRecord("System.Web.Http.Controllers",  "HttpControllerDescriptor",       "CreateController"),
             new ExpectedTraceRecord("System.Web.Http.Controllers",  "DefaultHttpControllerActivator", "Create"),

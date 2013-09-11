@@ -14,7 +14,7 @@ namespace System.Web.Http.Controllers
         /// </summary>
         public HttpRequestContext()
         {
-            // This is constructor is available to allow placing break points on construction.</remarks>
+            // This is constructor is available to allow placing breakpoints on construction.
         }
 
         /// <summary>Gets or sets the client certificate.</summary>
@@ -32,11 +32,11 @@ namespace System.Web.Http.Controllers
         /// <summary>Gets or sets a value indicating whether the request originates from a local address.</summary>
         public virtual bool IsLocal { get; set; }
 
-        /// <summary>Gets or sets the route data.</summary>
-        public virtual IHttpRouteData RouteData { get; set; }
-
         /// <summary>Gets or sets the principal.</summary>
         public virtual IPrincipal Principal { get; set; }
+
+        /// <summary>Gets or sets the route data.</summary>
+        public virtual IHttpRouteData RouteData { get; set; }
 
         /// <summary>Gets or sets the factory used to generate URLs to other APIs.</summary>
         public virtual UrlHelper Url { get; set; }

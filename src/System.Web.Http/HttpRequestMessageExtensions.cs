@@ -248,6 +248,7 @@ namespace System.Net.Http
             {
                 throw Error.ArgumentNull("request");
             }
+
             if (routeData == null)
             {
                 throw Error.ArgumentNull("routeData");

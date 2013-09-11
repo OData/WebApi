@@ -23,8 +23,11 @@ namespace System.Web.Http.Controllers
         private HttpConfiguration _configuration;
         private bool _configurationSet;
 
-        private bool? _includeErrorDetail;
-        private bool? _isLocal;
+        private bool _includeErrorDetail;
+        private bool _includeErrorDetailSet;
+
+        private bool _isLocal;
+        private bool _isLocalSet;
 
         private IHttpRouteData _routeData;
         private bool _routeDataSet;
@@ -116,9 +119,9 @@ namespace System.Web.Http.Controllers
         {
             get
             {
-                if (_includeErrorDetail.HasValue)
+                if (_includeErrorDetailSet)
                 {
-                    return _includeErrorDetail.Value;
+                    return _includeErrorDetail;
                 }
                 else if (_request != null)
                 {
@@ -132,6 +135,7 @@ namespace System.Web.Http.Controllers
             set
             {
                 _includeErrorDetail = value;
+                _includeErrorDetailSet = true;
             }
         }
 
@@ -139,9 +143,9 @@ namespace System.Web.Http.Controllers
         {
             get
             {
-                if (_isLocal.HasValue)
+                if (_isLocalSet)
                 {
-                    return _isLocal.Value;
+                    return _isLocal;
                 }
                 else if (_request != null)
                 {
@@ -155,6 +159,7 @@ namespace System.Web.Http.Controllers
             set
             {
                 _isLocal = value;
+                _isLocalSet = true;
             }
         }
 

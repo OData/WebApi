@@ -5,8 +5,10 @@ using System.Diagnostics;
 using System.Net.Http.Formatting;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
@@ -17,17 +19,71 @@ namespace System.Net.Http
 {
     public class HttpRequestMessageExtensionsTest
     {
-        private readonly HttpRequestMessage _request = new HttpRequestMessage();
-        private readonly HttpConfiguration _config = new HttpConfiguration();
-        private readonly object _value = new object();
-        private readonly Mock<IDisposable> _disposableMock = new Mock<IDisposable>();
-        private readonly Mock<IContentNegotiator> _negotiatorMock = new Mock<IContentNegotiator>();
-        private readonly IDisposable _disposable;
-
-        public HttpRequestMessageExtensionsTest()
+        [Fact]
+        public void GetRequestContext_Throws_WhenRequestIsNull()
         {
-            _disposable = _disposableMock.Object;
-            _request.SetConfiguration(_config);
+            // Arrange
+            HttpRequestMessage request = null;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => request.GetRequestContext(), "request");
+        }
+
+        [Fact]
+        public void GetRequestContext_ReturnsProperty()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpRequestContext expectedContext = CreateContext();
+                request.Properties[HttpPropertyKeys.RequestContextKey] = expectedContext;
+
+                // Act
+                HttpRequestContext context = request.GetRequestContext();
+
+                // Assert
+                Assert.Same(expectedContext, context);
+            }
+        }
+
+        [Fact]
+        public void SetRequestContext_Throws_WhenRequestIsNull()
+        {
+            // Arrange
+            HttpRequestMessage request = null;
+            HttpRequestContext context = CreateContext();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => { request.SetRequestContext(context); }, "request");
+        }
+
+        [Fact]
+        public void SetRequestContext_Throws_WhenContextIsNull()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpRequestContext context = null;
+
+                // Act & Assert
+                Assert.ThrowsArgumentNull(() => { request.SetRequestContext(context); }, "context");
+            }
+        }
+
+        [Fact]
+        public void SetRequestContext_AddsProperty()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpRequestContext expectedContext = CreateContext();
+
+                // Act
+                request.SetRequestContext(expectedContext);
+
+                // Assert
+                Assert.Same(expectedContext, request.Properties[HttpPropertyKeys.RequestContextKey]);
+            }
         }
 
         [Fact]
@@ -38,16 +94,62 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void GetConfiguration()
+        public void GetConfiguration_ReturnsConfigurationFromContext_WhenOnlyContextIsPresent()
         {
             // Arrange
-            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = _config;
+            using (HttpRequestMessage request = CreateRequest())
+            using (HttpConfiguration expectedConfiguration = CreateConfiguration())
+            {
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    Configuration = expectedConfiguration
+                });
 
-            // Act
-            HttpConfiguration afterConfig = _request.GetConfiguration();
+                // Act
+                HttpConfiguration configuration = request.GetConfiguration();
 
-            // Assert
-            Assert.Same(_config, afterConfig);
+                // Assert
+                Assert.Same(expectedConfiguration, configuration);
+            }
+        }
+
+        [Fact]
+        public void GetConfiguration_ReturnsConfigurationFromProperty_WhenOnlyPropertyIsPresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            using (HttpConfiguration expectedConfiguration = CreateConfiguration())
+            {
+                request.Properties[HttpPropertyKeys.HttpConfigurationKey] = expectedConfiguration;
+
+                // Act
+                HttpConfiguration configuration = request.GetConfiguration();
+
+                // Assert
+                Assert.Same(expectedConfiguration, configuration);
+            }
+        }
+
+        [Fact]
+        public void GetConfiguration_ReturnsConfigurationFromContext_WhenBothContextAndPropertyArePresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            using (HttpConfiguration expectedConfiguration = CreateConfiguration())
+            using (HttpConfiguration otherConfiguration = CreateConfiguration())
+            {
+                request.Properties[HttpPropertyKeys.HttpConfigurationKey] = otherConfiguration;
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    Configuration = expectedConfiguration
+                });
+
+                // Act
+                HttpConfiguration configuration = request.GetConfiguration();
+
+                // Assert
+                Assert.Same(expectedConfiguration, configuration);
+            }
         }
 
         [Fact]
@@ -56,16 +158,52 @@ namespace System.Net.Http
             HttpRequestMessage request = null;
 
             Assert.ThrowsArgumentNull(
-                () => request.SetConfiguration(_config),
+                () => request.SetConfiguration(CreateConfiguration()),
                 "request");
         }
 
         [Fact]
         public void SetConfiguration_ThrowsArgumentNull_Configuration()
         {
+            HttpRequestMessage request = CreateRequest();
+
             Assert.ThrowsArgumentNull(
-                () => _request.SetConfiguration(null),
+                () => request.SetConfiguration(null),
                 "configuration");
+        }
+
+        [Fact]
+        public void SetConfiguration_AddsProperty()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            using (HttpConfiguration expectedConfiguration = CreateConfiguration())
+            {
+                // Act
+                request.SetConfiguration(expectedConfiguration);
+
+                // Assert
+                Assert.Same(expectedConfiguration, request.Properties[HttpPropertyKeys.HttpConfigurationKey]);
+            }
+        }
+
+        [Fact]
+        public void SetConfiguration_UpdatesContextAndAddsProperty_WhenContextIsPresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            using (HttpConfiguration expectedConfiguration = CreateConfiguration())
+            {
+                HttpRequestContext context = CreateContext();
+                request.SetRequestContext(context);
+
+                // Act
+                request.SetConfiguration(expectedConfiguration);
+
+                // Assert
+                Assert.Same(expectedConfiguration, context.Configuration);
+                Assert.Same(expectedConfiguration, request.Properties[HttpPropertyKeys.HttpConfigurationKey]);
+            }
         }
 
         [Fact]
@@ -79,33 +217,20 @@ namespace System.Net.Http
         public void GetSynchronizationContext()
         {
             // Arrange
+            HttpRequestMessage request = CreateRequest();
             Mock<SynchronizationContext> syncContextMock = new Mock<SynchronizationContext>();
             SynchronizationContext beforeSyncContext = syncContextMock.Object;
-            _request.Properties.Add(HttpPropertyKeys.SynchronizationContextKey, beforeSyncContext);
+            request.Properties.Add(HttpPropertyKeys.SynchronizationContextKey, beforeSyncContext);
 
             // Act
-            SynchronizationContext afterSyncContext = _request.GetSynchronizationContext();
+            SynchronizationContext afterSyncContext = request.GetSynchronizationContext();
 
             // Assert
             Assert.Same(beforeSyncContext, afterSyncContext);
         }
 
         [Fact]
-        public void GetRouteData()
-        {
-            // Arrange
-            IHttpRouteData routeData = new Mock<IHttpRouteData>().Object;
-            _request.Properties.Add(HttpPropertyKeys.HttpRouteDataKey, routeData);
-
-            // Act
-            var httpRouteData = _request.GetRouteData();
-
-            // Assert
-            Assert.Same(routeData, httpRouteData);
-        }
-
-        [Fact]
-        public void GetRouteData_WhenRequestIsNull_Throws()
+        public void GetRouteData_Throws_WhenRequestIsNull()
         {
             // Arrange
             HttpRequestMessage request = null;
@@ -115,56 +240,271 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void SetRouteData_ThrowsArgumentNull_Request()
+        public void GetRouteData_ReturnsRouteDataFromContext_WhenOnlyContextIsPresent()
         {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                IHttpRouteData expectedRouteData = CreateDummyRouteData();
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    RouteData = expectedRouteData
+                });
+
+                // Act
+                IHttpRouteData routeData = request.GetRouteData();
+
+                // Assert
+                Assert.Same(expectedRouteData, routeData);
+            }
+        }
+
+        [Fact]
+        public void GetRouteData_ReturnsRouteDataFromProperty_WhenOnlyPropertyIsPresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                IHttpRouteData expectedRouteData = CreateDummyRouteData();
+                request.Properties[HttpPropertyKeys.HttpRouteDataKey] = expectedRouteData;
+
+                // Act
+                IHttpRouteData routeData = request.GetRouteData();
+
+                // Assert
+                Assert.Same(expectedRouteData, routeData);
+            }
+        }
+
+        [Fact]
+        public void GetRouteData_ReturnsRouteDataFromContext_WhenBothContextAndPropertyArePresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                IHttpRouteData expectedRouteData = CreateDummyRouteData();
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    RouteData = expectedRouteData
+                });
+                IHttpRouteData otherRouteData = CreateDummyRouteData();
+                request.Properties[HttpPropertyKeys.HttpRouteDataKey] = otherRouteData;
+
+                // Act
+                IHttpRouteData routeData = request.GetRouteData();
+
+                // Assert
+                Assert.Same(expectedRouteData, routeData);
+            }
+        }
+
+        [Fact]
+        public void SetRouteData_Throws_WhenRequestIsNull()
+        {
+            // Arrange
+            HttpRequestMessage request = null;
+            IHttpRouteData routeData = CreateDummyRouteData();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => request.SetRouteData(routeData), "request");
+        }
+
+        [Fact]
+        public void SetRouteData_Throws_WhenRouteDataIsNull()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                IHttpRouteData routeData = null;
+
+                // Act & Assert
+                Assert.ThrowsArgumentNull(() => request.SetRouteData(routeData), "routeData");
+            }
+        }
+
+        [Fact]
+        public void SetRouteData_AddsProperty()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                IHttpRouteData expectedRouteData = CreateDummyRouteData();
+
+                // Act
+                request.SetRouteData(expectedRouteData);
+
+                // Assert
+                Assert.Same(expectedRouteData, request.Properties[HttpPropertyKeys.HttpRouteDataKey]);
+            }
+        }
+
+        [Fact]
+        public void SetRouteData_UpdatesContextAndAddsProperty_WhenContextIsPresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpRequestContext context = CreateContext();
+                request.SetRequestContext(context);
+                IHttpRouteData expectedRouteData = CreateDummyRouteData();
+
+                // Act
+                request.SetRouteData(expectedRouteData);
+
+                // Assert
+                Assert.Same(expectedRouteData, context.RouteData);
+                Assert.Same(expectedRouteData, request.Properties[HttpPropertyKeys.HttpRouteDataKey]);
+            }
+        }
+
+        [Fact]
+        public void GetUrlHelper_Throws_WhenRequestIsNull()
+        {
+            // Arrange
             HttpRequestMessage request = null;
 
-            Assert.ThrowsArgumentNull(
-                () => request.SetRouteData(routeData: new HttpRouteData(new HttpRoute())),
-                "request");
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => request.GetUrlHelper(), "request");
         }
 
         [Fact]
-        public void SetRouteData_ThrowsArgumentNull_RouteData()
+        public void GetUrlHelper_ReturnsUrlFromContext_WhenContextIsPresent()
         {
-            Assert.ThrowsArgumentNull(
-                () => _request.SetRouteData(null),
-                "routeData");
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                UrlHelper expectedUrl = new Mock<UrlHelper>().Object;
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    Url = expectedUrl
+                });
+
+                // Act
+                UrlHelper url = request.GetUrlHelper();
+
+                // Assert
+                Assert.Same(expectedUrl, url);
+            }
         }
 
         [Fact]
-        public void CreateResponse_DoingConneg_OnNullRequest_ThrowsException()
+        public void GetUrlHelper_ReturnsNewUrlHelperForRequest_WhenContextIsAbsent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                // Act
+                UrlHelper urlHelper = request.GetUrlHelper();
+
+                // Assert
+                Assert.NotNull(urlHelper);
+                Assert.Same(request, urlHelper.Request);
+            }
+        }
+
+        [Fact]
+        public void GetClientCertificate_Throws_WhenRequestIsNull()
+        {
+            // Arrange
+            HttpRequestMessage request = null;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => request.GetClientCertificate(), "request");
+        }
+
+        [Fact]
+        public void GetClientCertificate_ReturnsClientCertificateFromContext_WhenOnlyContextIsPresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                X509Certificate2 expectedCertificate = CreateCertificate();
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    ClientCertificate = expectedCertificate
+                });
+
+                // Act
+                X509Certificate2 certificate = request.GetClientCertificate();
+
+                // Assert
+                Assert.Same(expectedCertificate, certificate);
+            }
+        }
+
+        [Fact]
+        public void GetClientCertificate_ReturnsClientCertificateFromProperty_WhenOnlyPropertyIsPresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                X509Certificate2 expectedCertificate = CreateCertificate();
+                request.Properties[HttpPropertyKeys.ClientCertificateKey] = expectedCertificate;
+
+                // Act
+                X509Certificate2 certificate = request.GetClientCertificate();
+
+                // Assert
+                Assert.Same(expectedCertificate, certificate);
+            }
+        }
+
+        [Fact]
+        public void GetClientCertificate_ReturnsClientCertificateFromContext_WhenBothContextAndPropertyArePresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                X509Certificate2 expectedCertificate = CreateCertificate();
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    ClientCertificate = expectedCertificate
+                });
+                X509Certificate2 otherCertificate = CreateCertificate();
+                request.Properties[HttpPropertyKeys.ClientCertificateKey] = otherCertificate;
+
+                // Act
+                X509Certificate2 certificate = request.GetClientCertificate();
+
+                // Assert
+                Assert.Same(expectedCertificate, certificate);
+            }
+        }
+
+        [Fact]
+        public void CreateResponse_OnNullRequest_ThrowsException()
         {
             HttpRequestMessage request = null;
             Assert.ThrowsArgumentNull(() =>
             {
-                request.CreateResponse(_value);
+                request.CreateResponse(CreateValue());
             }, "request");
 
             Assert.ThrowsArgumentNull(() =>
             {
-                request.CreateResponse(HttpStatusCode.OK, _value);
+                request.CreateResponse(HttpStatusCode.OK, CreateValue());
             }, "request");
 
             Assert.ThrowsArgumentNull(() =>
             {
-                request.CreateResponse(HttpStatusCode.OK, _value, configuration: null);
+                request.CreateResponse(HttpStatusCode.OK, CreateValue(), configuration: null);
             }, "request");
         }
 
         [Fact]
-        public void CreateResponse_DoingConneg_OnNullConfiguration_ThrowsException()
+        public void CreateResponse_OnNullConfiguration_ThrowsException()
         {
-            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = null;
+            HttpRequestMessage request = CreateRequest();
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = null;
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                _request.CreateResponse(_value);
+                request.CreateResponse(CreateValue());
             }, "The request does not have an associated configuration object or the provided configuration was null.");
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                _request.CreateResponse(HttpStatusCode.OK, _value, configuration: null);
+                request.CreateResponse(HttpStatusCode.OK, CreateValue(), configuration: null);
             }, "The request does not have an associated configuration object or the provided configuration was null.");
         }
 
@@ -172,14 +512,16 @@ namespace System.Net.Http
         public void CreateResponse_DoingConneg_OnlyContent_RetrievesContentNegotiatorFromServiceResolver()
         {
             // Arrange
+            HttpRequestMessage request = CreateRequest();
+            HttpConfiguration config = CreateAndAddConfiguration(request);
             Mock<DefaultServices> servicesMock = new Mock<DefaultServices> { CallBase = true };
             servicesMock.Setup(s => s.GetService(typeof(IContentNegotiator)))
                         .Returns(new Mock<IContentNegotiator>().Object)
                         .Verifiable();
-            _config.Services = servicesMock.Object;
+            config.Services = servicesMock.Object;
 
             // Act
-            _request.CreateResponse(_value);
+            request.CreateResponse(CreateValue());
 
             // Assert
             servicesMock.Verify();
@@ -189,14 +531,16 @@ namespace System.Net.Http
         public void CreateResponse_DoingConneg_RetrievesContentNegotiatorFromServiceResolver()
         {
             // Arrange
+            HttpRequestMessage request = CreateRequest();
+            HttpConfiguration config = CreateAndAddConfiguration(request);
             Mock<DefaultServices> servicesMock = new Mock<DefaultServices> { CallBase = true };
             servicesMock.Setup(s => s.GetService(typeof(IContentNegotiator)))
                         .Returns(new Mock<IContentNegotiator>().Object)
                         .Verifiable();
-            _config.Services = servicesMock.Object;
+            config.Services = servicesMock.Object;
 
             // Act
-            _request.CreateResponse(HttpStatusCode.OK, _value, _config);
+            request.CreateResponse(HttpStatusCode.OK, CreateValue(), config);
 
             // Assert
             servicesMock.Verify();
@@ -206,13 +550,15 @@ namespace System.Net.Http
         public void CreateResponse_DoingConneg_WhenNoContentNegotiatorInstanceRegistered_Throws()
         {
             // Arrange
-            _config.Services.Clear(typeof(IContentNegotiator));
+            HttpRequestMessage request = CreateRequest();
+            HttpConfiguration config = CreateAndAddConfiguration(request);
+            config.Services.Clear(typeof(IContentNegotiator));
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(_value),
+            Assert.Throws<InvalidOperationException>(() => request.CreateResponse(CreateValue()),
                 "The provided configuration does not have an instance of the 'System.Net.Http.Formatting.IContentNegotiator' service registered.");
 
-            Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, _config),
+            Assert.Throws<InvalidOperationException>(() => request.CreateResponse(HttpStatusCode.OK, CreateValue(), config),
                 "The provided configuration does not have an instance of the 'System.Net.Http.Formatting.IContentNegotiator' service registered.");
         }
 
@@ -220,66 +566,42 @@ namespace System.Net.Http
         public void CreateResponse_DoingConneg_WhenContentNegotiatorReturnsNullResult_Throws()
         {
             // Arrange
-            _negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, _config.Formatters)).Returns(value: null);
-            _config.Services.Replace(typeof(IContentNegotiator), _negotiatorMock.Object);
+            HttpRequestMessage request = CreateRequest();
+            HttpConfiguration config = CreateAndAddConfiguration(request);
+            Mock<IContentNegotiator> negotiatorMock = new Mock<IContentNegotiator>();
+            negotiatorMock.Setup(r => r.Negotiate(typeof(string), request, config.Formatters)).Returns(value: null);
+            config.Services.Replace(typeof(IContentNegotiator), negotiatorMock.Object);
 
             // Act
-            var response = _request.CreateResponse<string>(HttpStatusCode.OK, "", _config);
+            var response = request.CreateResponse<string>(HttpStatusCode.OK, "", config);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
-            Assert.Same(_request, response.RequestMessage);
+            Assert.Same(request, response.RequestMessage);
         }
 
         [Fact]
         public void CreateResponse_DoingConneg_PerformsContentNegotiationAndCreatesContentUsingResults()
         {
             // Arrange
+            HttpRequestMessage request = CreateRequest();
+            HttpConfiguration config = CreateAndAddConfiguration(request);
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
-            _negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, _config.Formatters))
+            Mock<IContentNegotiator> negotiatorMock = new Mock<IContentNegotiator>();
+            negotiatorMock.Setup(r => r.Negotiate(typeof(string), request, config.Formatters))
                         .Returns(new ContentNegotiationResult(formatter, null));
-            _config.Services.Replace(typeof(IContentNegotiator), _negotiatorMock.Object);
+            config.Services.Replace(typeof(IContentNegotiator), negotiatorMock.Object);
 
             // Act
-            var response = _request.CreateResponse<string>(HttpStatusCode.NoContent, "42", _config);
+            var response = request.CreateResponse<string>(HttpStatusCode.NoContent, "42", config);
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-            Assert.Same(_request, response.RequestMessage);
+            Assert.Same(request, response.RequestMessage);
             var objectContent = Assert.IsType<ObjectContent<string>>(response.Content);
             Assert.Equal("42", objectContent.Value);
             Assert.Same(formatter, objectContent.Formatter);
         }
-
-        //[Fact]
-        //public void CreateResponse_Uses_Per_Controller_Services()
-        //{
-        //    // Arrange
-        //    XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
-
-        //    HttpConfiguration config = new HttpConfiguration();
-        //    HttpControllerDescriptor cd = new HttpControllerDescriptor(config);
-
-        //    cd.Configuration.Formatters.Clear();
-        //    cd.Configuration.Formatters.Add(formatter);
-
-        //    var negotiatorMock = new Mock<IContentNegotiator>();
-        //    negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, cd.Configuration.Formatters))
-        //                .Returns(new ContentNegotiationResult(formatter, null));
-
-        //    cd.Configuration.Services.Replace(typeof(IContentNegotiator), negotiatorMock.Object);
-
-        //    // Act. Default call uses the controller services if it can find it in the property bag.
-        //    _request.Properties[HttpPropertyKeys.HttpControllerDescriptorKey] = cd;
-        //    var response = _request.CreateResponse<string>(HttpStatusCode.NoContent, "42");
-
-        //    // Assert
-        //    Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-        //    Assert.Same(_request, response.RequestMessage);
-        //    var objectContent = Assert.IsType<ObjectContent<string>>(response.Content);
-        //    Assert.Equal("42", objectContent.Value);
-        //    Assert.Same(formatter, objectContent.Formatter); // if this failed, then we didn't puck up the formatter from the controller.
-        //}
 
         [Fact]
         public void CreateResponse_MatchingMediaType_WhenRequestIsNull_Throws()
@@ -288,41 +610,51 @@ namespace System.Net.Http
             HttpRequestMessage request = null;
 
             // Act
-            Assert.ThrowsArgumentNull(() => request.CreateResponse(HttpStatusCode.OK, _value, "foo/bar"), "request");
+            Assert.ThrowsArgumentNull(() => request.CreateResponse(HttpStatusCode.OK, CreateValue(), "foo/bar"), "request");
         }
 
         [Fact]
         public void CreateResponse_MatchingMediaType_WhenMediaTypeHeaderIsNull_Throws()
         {
-            Assert.ThrowsArgumentNull(() => _request.CreateResponse(HttpStatusCode.OK, _value, (MediaTypeHeaderValue)null), "mediaType");
+            HttpRequestMessage request = CreateRequest();
+
+            Assert.ThrowsArgumentNull(() => request.CreateResponse(HttpStatusCode.OK, CreateValue(), (MediaTypeHeaderValue)null), "mediaType");
         }
 
         [Fact]
         public void CreateResponse_MatchingMediaType_WhenMediaTypeStringIsNull_Throws()
         {
-            Assert.ThrowsArgument(() => _request.CreateResponse(HttpStatusCode.OK, _value, (string)null), "mediaType");
+            HttpRequestMessage request = CreateRequest();
+
+            Assert.ThrowsArgument(() => request.CreateResponse(HttpStatusCode.OK, CreateValue(), (string)null), "mediaType");
         }
 
         [Fact]
         public void CreateResponse_MatchingMediaType_WhenMediaTypeStringIsEmpty_Throws()
         {
-            Assert.ThrowsArgumentNull(() => _request.CreateResponse(HttpStatusCode.OK, _value, (MediaTypeHeaderValue)null), "mediaType");
+            HttpRequestMessage request = CreateRequest();
+
+            Assert.ThrowsArgumentNull(() => request.CreateResponse(HttpStatusCode.OK, CreateValue(), (MediaTypeHeaderValue)null), "mediaType");
         }
 
         [Fact]
         public void CreateResponse_MatchingMediaType_WhenMediaTypeStringIsInvalidFormat_Throws()
         {
-            Assert.Throws<FormatException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, "foo/bar; param=value"), "The format of value 'foo/bar; param=value' is invalid.");
+            HttpRequestMessage request = CreateRequest();
+
+            Assert.Throws<FormatException>(() => request.CreateResponse(HttpStatusCode.OK, CreateValue(), "foo/bar; param=value"), "The format of value 'foo/bar; param=value' is invalid.");
         }
 
         [Fact]
         public void CreateResponse_MatchingMediaType_WhenRequestDoesNotHaveConfiguration_Throws()
         {
+            HttpRequestMessage request = CreateRequest();
+
             // Arrange
-            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = null;
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = null;
 
             // Act
-            Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, mediaType: "foo/bar"),
+            Assert.Throws<InvalidOperationException>(() => request.CreateResponse(HttpStatusCode.OK, CreateValue(), mediaType: "foo/bar"),
                 "The request does not have an associated configuration object or the provided configuration was null.");
         }
 
@@ -330,10 +662,11 @@ namespace System.Net.Http
         public void CreateResponse_MatchingMediaType_WhenMediaTypeDoesNotMatch_Throws()
         {
             // Arrange
-            _request.SetConfiguration(new HttpConfiguration());
+            HttpRequestMessage request = CreateRequest();
+            request.SetConfiguration(new HttpConfiguration());
 
             // Act
-            Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, mediaType: "foo/bar"),
+            Assert.Throws<InvalidOperationException>(() => request.CreateResponse(HttpStatusCode.OK, CreateValue(), mediaType: "foo/bar"),
                 "Could not find a formatter matching the media type 'foo/bar' that can write an instance of 'Object'.");
         }
 
@@ -341,22 +674,24 @@ namespace System.Net.Http
         public void CreateResponse_MatchingMediaType_FindsMatchingFormatterAndCreatesResponse()
         {
             // Arrange
+            HttpRequestMessage request = CreateRequest();
             var config = new HttpConfiguration();
-            _request.SetConfiguration(config);
+            request.SetConfiguration(config);
             config.Formatters.Clear();
             Mock<MediaTypeFormatter> formatterMock = new Mock<MediaTypeFormatter> { CallBase = true };
             var formatter = formatterMock.Object;
             formatterMock.Setup(f => f.CanWriteType(typeof(object))).Returns(true).Verifiable();
             formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("foo/bar"));
             config.Formatters.Add(formatter);
+            object expectedValue = CreateValue();
 
             // Act
-            var response = _request.CreateResponse(HttpStatusCode.Gone, _value, mediaType: "foo/bar");
+            var response = request.CreateResponse(HttpStatusCode.Gone, expectedValue, mediaType: "foo/bar");
 
             // Assert
             Assert.Equal(HttpStatusCode.Gone, response.StatusCode);
             var content = Assert.IsType<ObjectContent<object>>(response.Content);
-            Assert.Same(_value, content.Value);
+            Assert.Same(expectedValue, content.Value);
             Assert.Same(formatter, content.Formatter);
             Assert.Equal("foo/bar", content.Headers.ContentType.MediaType);
             formatterMock.Verify();
@@ -369,30 +704,35 @@ namespace System.Net.Http
             HttpRequestMessage request = null;
 
             // Act
-            Assert.ThrowsArgumentNull(() => request.CreateResponse(HttpStatusCode.OK, _value, new MockMediaTypeFormatter()), "request");
+            Assert.ThrowsArgumentNull(() => request.CreateResponse(HttpStatusCode.OK, CreateValue(), new MockMediaTypeFormatter()), "request");
         }
 
         [Fact]
         public void CreateResponse_AcceptingFormatter_WhenFormatterIsNull_Throws()
         {
+            // Arrange
+            HttpRequestMessage request = CreateRequest();
+
             // Act
-            Assert.ThrowsArgumentNull(() => _request.CreateResponse(HttpStatusCode.OK, _value, formatter: null), "formatter");
+            Assert.ThrowsArgumentNull(() => request.CreateResponse(HttpStatusCode.OK, CreateValue(), formatter: null), "formatter");
         }
 
         [Fact]
         public void CreateResponse_AcceptingFormatter_CreatesResponseWithDefaultMediaType()
         {
             // Arrange
+            HttpRequestMessage request = CreateRequest();
             var formatter = new MockMediaTypeFormatter { CallBase = true };
             formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("foo/bar"));
+            object expectedValue = CreateValue();
 
             // Act
-            var response = _request.CreateResponse(HttpStatusCode.MultipleChoices, _value, formatter, mediaType: (string)null);
+            var response = request.CreateResponse(HttpStatusCode.MultipleChoices, expectedValue, formatter, mediaType: (string)null);
 
             // Assert
             Assert.Equal(HttpStatusCode.MultipleChoices, response.StatusCode);
             var content = Assert.IsType<ObjectContent<object>>(response.Content);
-            Assert.Same(_value, content.Value);
+            Assert.Same(expectedValue, content.Value);
             Assert.Same(formatter, content.Formatter);
             Assert.Equal("foo/bar", content.Headers.ContentType.MediaType);
         }
@@ -401,11 +741,12 @@ namespace System.Net.Http
         public void CreateResponse_AcceptingFormatter_WithOverridenMediaTypeString_CreatesResponse()
         {
             // Arrange
+            HttpRequestMessage request = CreateRequest();
             var formatter = new MockMediaTypeFormatter { CallBase = true };
             formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("foo/bar"));
 
             // Act
-            var response = _request.CreateResponse(HttpStatusCode.MultipleChoices, _value, formatter, mediaType: "bin/baz");
+            var response = request.CreateResponse(HttpStatusCode.MultipleChoices, CreateValue(), formatter, mediaType: "bin/baz");
 
             // Assert
             Assert.Equal("bin/baz", response.Content.Headers.ContentType.MediaType);
@@ -415,11 +756,12 @@ namespace System.Net.Http
         public void CreateResponse_AcceptingFormatter_WithOverridenMediaTypeHeader_CreatesResponse()
         {
             // Arrange
+            HttpRequestMessage request = CreateRequest();
             var formatter = new MockMediaTypeFormatter { CallBase = true };
             formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("foo/bar"));
 
             // Act
-            var response = _request.CreateResponse(HttpStatusCode.MultipleChoices, _value, formatter, mediaType: new MediaTypeHeaderValue("bin/baz"));
+            var response = request.CreateResponse(HttpStatusCode.MultipleChoices, CreateValue(), formatter, mediaType: new MediaTypeHeaderValue("bin/baz"));
 
             // Assert
             Assert.Equal("bin/baz", response.Content.Headers.ContentType.MediaType);
@@ -435,34 +777,39 @@ namespace System.Net.Http
         [Fact]
         public void RegisterForDispose_WhenResourceParamterIsNull_DoesNothing()
         {
-            _request.RegisterForDispose(resource: null);
+            HttpRequestMessage request = CreateRequest();
+            request.RegisterForDispose(resource: null);
 
-            Assert.False(_request.Properties.ContainsKey(HttpPropertyKeys.DisposableRequestResourcesKey));
+            Assert.False(request.Properties.ContainsKey(HttpPropertyKeys.DisposableRequestResourcesKey));
         }
 
         [Fact]
         public void RegisterForDispose_WhenResourceListDoesNotExist_CreatesListAndAddsResource()
         {
-            _request.Properties.Remove(HttpPropertyKeys.DisposableRequestResourcesKey);
+            HttpRequestMessage request = CreateRequest();
+            request.Properties.Remove(HttpPropertyKeys.DisposableRequestResourcesKey);
+            IDisposable disposable = CreateStubDisposable();
 
-            _request.RegisterForDispose(_disposable);
+            request.RegisterForDispose(disposable);
 
-            var list = Assert.IsType<List<IDisposable>>(_request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey]);
+            var list = Assert.IsType<List<IDisposable>>(request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey]);
             Assert.Equal(1, list.Count);
-            Assert.Same(_disposable, list[0]);
+            Assert.Same(disposable, list[0]);
         }
 
         [Fact]
         public void RegisterForDispose_WhenResourceListExists_AddsResource()
         {
+            HttpRequestMessage request = CreateRequest();
             var list = new List<IDisposable>();
-            _request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey] = list;
+            request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey] = list;
+            IDisposable disposable = CreateStubDisposable();
 
-            _request.RegisterForDispose(_disposable);
+            request.RegisterForDispose(disposable);
 
-            Assert.Same(list, _request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey]);
+            Assert.Same(list, request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey]);
             Assert.Equal(1, list.Count);
-            Assert.Same(_disposable, list[0]);
+            Assert.Same(disposable, list[0]);
         }
 
         [Fact]
@@ -475,63 +822,51 @@ namespace System.Net.Http
         [Fact]
         public void DisposeRequestResources_WhenResourceListDoesNotExists_DoesNothing()
         {
-            _request.Properties.Remove(HttpPropertyKeys.DisposableRequestResourcesKey);
+            HttpRequestMessage request = CreateRequest();
+            request.Properties.Remove(HttpPropertyKeys.DisposableRequestResourcesKey);
 
-            _request.DisposeRequestResources();
+            request.DisposeRequestResources();
 
-            Assert.False(_request.Properties.ContainsKey(HttpPropertyKeys.DisposableRequestResourcesKey));
+            Assert.False(request.Properties.ContainsKey(HttpPropertyKeys.DisposableRequestResourcesKey));
         }
 
         [Fact]
         public void DisposeRequestResources_WhenResourceListExists_DisposesResourceAndClearsReferences()
         {
-            var list = new List<IDisposable> { _disposable };
-            _request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey] = list;
+            HttpRequestMessage request = CreateRequest();
+            Mock<IDisposable> disposableMock = new Mock<IDisposable>();
+            IDisposable disposable = disposableMock.Object;
+            var list = new List<IDisposable> { disposable };
+            request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey] = list;
 
-            _request.DisposeRequestResources();
+            request.DisposeRequestResources();
 
-            _disposableMock.Verify(d => d.Dispose());
+            disposableMock.Verify(d => d.Dispose());
             Assert.Empty(list);
         }
 
         [Fact]
         public void DisposeRequestResources_WhenResourcesDisposeMethodThrowsException_IgnoresExceptionsAndContinuesDisposingOtherResources()
         {
+            HttpRequestMessage request = CreateRequest();
             Mock<IDisposable> throwingDisposableMock = new Mock<IDisposable>();
             throwingDisposableMock.Setup(d => d.Dispose()).Throws(new Exception());
-            var list = new List<IDisposable> { throwingDisposableMock.Object, _disposable };
-            _request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey] = list;
+            Mock<IDisposable> disposableMock = new Mock<IDisposable>();
+            IDisposable disposable = disposableMock.Object;
+            var list = new List<IDisposable> { throwingDisposableMock.Object, disposable };
+            request.Properties[HttpPropertyKeys.DisposableRequestResourcesKey] = list;
 
-            _request.DisposeRequestResources();
+            request.DisposeRequestResources();
 
             throwingDisposableMock.Verify(d => d.Dispose());
-            _disposableMock.Verify(d => d.Dispose());
+            disposableMock.Verify(d => d.Dispose());
             Assert.Empty(list);
-        }
-
-        [Fact]
-        public void GetUrlHelper_WhenRequestParameterIsNull_Throws()
-        {
-            HttpRequestMessage request = null;
-            Assert.ThrowsArgumentNull(() => request.GetUrlHelper(), "request");
-        }
-
-        [Fact]
-        public void GetUrlHelper_ReturnsUrlHelper()
-        {
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.SetConfiguration(new HttpConfiguration());
-
-            UrlHelper urlHelper = request.GetUrlHelper();
-
-            Assert.NotNull(urlHelper);
-            Assert.Same(request, urlHelper.Request);
         }
 
         [Fact]
         public void CreateErrorResponseRangeNotSatisfiable_ThrowsOnNullException()
         {
-            HttpRequestMessage request = new HttpRequestMessage();
+            HttpRequestMessage request = CreateRequest();
             Assert.ThrowsArgumentNull(() => request.CreateErrorResponse(invalidByteRangeException: null), "invalidByteRangeException");
         }
 
@@ -539,7 +874,7 @@ namespace System.Net.Http
         public void CreateErrorResponseRangeNotSatisfiable_SetsCorrectStatusCodeAndContentRangeHeader()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
+            HttpRequestMessage request = CreateRequest();
             ContentRangeHeaderValue expectedContentRange = new ContentRangeHeaderValue(length: 128);
             InvalidByteRangeException invalidByteRangeException = new InvalidByteRangeException(expectedContentRange);
 
@@ -555,10 +890,11 @@ namespace System.Net.Http
         public void IsLocal_When_Request_From_Local_Address()
         {
             // Arrange
-            _request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
+            HttpRequestMessage request = CreateRequest();
+            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
 
             // Act
-            bool isLocal = _request.IsLocal();
+            bool isLocal = request.IsLocal();
 
             // Assert
             Assert.True(isLocal);
@@ -568,10 +904,11 @@ namespace System.Net.Http
         public void IsLocal_When_Request_Not_From_Local_Address()
         {
             // Arrange
-            _request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => false));
+            HttpRequestMessage request = CreateRequest();
+            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => false));
 
             // Act
-            bool isLocal = _request.IsLocal();
+            bool isLocal = request.IsLocal();
 
             // Assert
             Assert.False(isLocal);
@@ -581,10 +918,11 @@ namespace System.Net.Http
         public void IsLocal_With_Property_Value_Null_Returns_False()
         {
             // Arrange
-            _request.Properties.Add(HttpPropertyKeys.IsLocalKey, null);
+            HttpRequestMessage request = CreateRequest();
+            request.Properties.Add(HttpPropertyKeys.IsLocalKey, null);
 
             // Act
-            bool isLocal = _request.IsLocal();
+            bool isLocal = request.IsLocal();
 
             // Assert
             Assert.False(isLocal);
@@ -594,23 +932,170 @@ namespace System.Net.Http
         public void IsLocal_With_Property_Value_String_Returns_False()
         {
             // Arrange
-            _request.Properties.Add(HttpPropertyKeys.IsLocalKey, "Test String");
+            HttpRequestMessage request = CreateRequest();
+            request.Properties.Add(HttpPropertyKeys.IsLocalKey, "Test String");
 
             // Act
-            bool isLocal = _request.IsLocal();
+            bool isLocal = request.IsLocal();
 
             // Assert
             Assert.False(isLocal);
         }
 
         [Fact]
-        public void IsLocal_WhenRequestIsNull_Throws()
+        public void IsLocal_Throws_WhenRequestIsNull()
         {
             // Arrange
             HttpRequestMessage request = null;
 
-            // Act and Assert
+            // Act & Assert
             Assert.ThrowsArgumentNull(() => request.IsLocal(), "request");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void IsLocal_ReturnsValueFromContext_WhenOnlyContextIsPresent(bool expectedIsLocal)
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    IsLocal = expectedIsLocal
+                });
+
+                // Act
+                bool isLocal = request.IsLocal();
+
+                // Assert
+                Assert.Equal(expectedIsLocal, isLocal);
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void IsLocal_ReturnsValueFromProperty_WhenOnlyPropertyIsPresent(bool expectedIsLocal)
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                request.Properties[HttpPropertyKeys.IsLocalKey] = new Lazy<bool>(() => expectedIsLocal);
+
+                // Act
+                bool isLocal = request.IsLocal();
+
+                // Assert
+                Assert.Equal(expectedIsLocal, isLocal);
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void IsLocal_ReturnsValueFromContext_WhenBothContextAndPropertyArePresent(bool expectedIsLocal)
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    IsLocal = expectedIsLocal
+                });
+                request.Properties[HttpPropertyKeys.IsLocalKey] = new Lazy<bool>(() => !expectedIsLocal);
+
+                // Act
+                bool isLocal = request.IsLocal();
+
+                // Assert
+                Assert.Equal(expectedIsLocal, isLocal);
+            }
+        }
+
+        [Fact]
+        public void IsLocal_ReturnsFalse_WhenNeitherContextNorPropertyArePresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                // Act
+                bool isLocal = request.IsLocal();
+
+                // Assert
+                Assert.Equal(false, isLocal);
+            }
+        }
+
+        [Fact]
+        public void ShouldIncludeErrorDetail_Throws_WhenRequestIsNull()
+        {
+            // Arrange
+            HttpRequestMessage request = null;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => request.ShouldIncludeErrorDetail(), "request");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ShouldIncludeErrorDetail_ReturnsValueFromContext_WhenOnlyContextIsPresent(bool expected)
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    IncludeErrorDetail = expected
+                });
+
+                // Act
+                bool actual = request.ShouldIncludeErrorDetail();
+
+                // Assert
+                Assert.Equal(expected, actual);
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ShouldIncludeErrorDetail_ReturnsValueFromProperty_WhenOnlyPropertyIsPresent(bool expected)
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                request.Properties[HttpPropertyKeys.IncludeErrorDetailKey] = new Lazy<bool>(() => expected);
+
+                // Act
+                bool actual = request.ShouldIncludeErrorDetail();
+
+                // Assert
+                Assert.Equal(expected, actual);
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ShouldIncludeErrorDetail_ReturnsValueFromContext_WhenBothArePresent(bool expected)
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                request.SetRequestContext(new HttpRequestContext
+                {
+                    IncludeErrorDetail = expected
+                });
+                request.Properties[HttpPropertyKeys.IncludeErrorDetailKey] = new Lazy<bool>(() => !expected);
+
+                // Act
+                bool actual = request.ShouldIncludeErrorDetail();
+
+                // Assert
+                Assert.Equal(expected, actual);
+            }
         }
 
         [Theory]
@@ -651,15 +1136,17 @@ namespace System.Net.Http
         [InlineData(IncludeErrorDetailPolicy.Never, false, true, false)]
         [InlineData(IncludeErrorDetailPolicy.Never, false, false, false)]
         [InlineData(null, false, false, false)]
-        public void ShouldIncludeErrorDetail(IncludeErrorDetailPolicy errorDetail, bool isLocal, bool includeErrorDetail, bool expectedResult)
+        public void ShouldIncludeErrorDetail_WhenContextIsAbsent(IncludeErrorDetailPolicy errorDetail, bool isLocal, bool includeErrorDetail, bool expectedResult)
         {
             // Arrange
-            _config.IncludeErrorDetailPolicy = errorDetail;
-            _request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => isLocal));
-            _request.Properties.Add(HttpPropertyKeys.IncludeErrorDetailKey, new Lazy<bool>(() => includeErrorDetail));
+            HttpRequestMessage request = CreateRequest();
+            HttpConfiguration config = CreateAndAddConfiguration(request);
+            config.IncludeErrorDetailPolicy = errorDetail;
+            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => isLocal));
+            request.Properties.Add(HttpPropertyKeys.IncludeErrorDetailKey, new Lazy<bool>(() => includeErrorDetail));
 
             // Act
-            bool includeError = _request.ShouldIncludeErrorDetail();
+            bool includeError = request.ShouldIncludeErrorDetail();
 
             // Assert
             Assert.Equal(includeError, expectedResult);
@@ -669,7 +1156,7 @@ namespace System.Net.Http
         public void ShouldIncludeErrorDetail_Returns_False_WhenConfigIsNull_includeErrorDetail_Null()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
+            HttpRequestMessage request = CreateRequest();
 
             // Act
             bool includeError = request.ShouldIncludeErrorDetail();
@@ -682,7 +1169,7 @@ namespace System.Net.Http
         public void ShouldIncludeErrorDetail_Returns_Value_WhenConfigIsNull_includeErrorDetail_HasValue()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
+            HttpRequestMessage request = CreateRequest();
             request.Properties.Add(HttpPropertyKeys.IncludeErrorDetailKey, new Lazy<bool>(() => true));
 
             // Act
@@ -693,22 +1180,12 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void ShouldIncludeErrorDetail_WhenRequestIsNull_Throws()
-        {
-            // Arrange
-            HttpRequestMessage request = null;
-
-            // Act and Assert
-            Assert.ThrowsArgumentNull(() => request.ShouldIncludeErrorDetail(), "request");
-        }
-
-        [Fact]
         public void GetCorrelationId_ReturnsTraceCorrelationManagerId_IfSet()
         {
             Guid traceId = Guid.NewGuid();
             using (var scope = new TraceIdScope(traceId))
             {
-                Assert.Equal(traceId, new HttpRequestMessage().GetCorrelationId());
+                Assert.Equal(traceId, CreateRequest().GetCorrelationId());
             }
         }
 
@@ -718,7 +1195,7 @@ namespace System.Net.Http
             Guid traceId = Guid.Empty;
             using (var scope = new TraceIdScope(traceId))
             {
-                Assert.NotEqual(traceId, new HttpRequestMessage().GetCorrelationId());
+                Assert.NotEqual(traceId, CreateRequest().GetCorrelationId());
             }
         }
 
@@ -736,6 +1213,48 @@ namespace System.Net.Http
             {
                 Trace.CorrelationManager.ActivityId = _oldValue;
             }
+        }
+
+        private static HttpConfiguration CreateAndAddConfiguration(HttpRequestMessage request)
+        {
+            HttpConfiguration configuration = CreateConfiguration();
+            request.SetConfiguration(configuration);
+            return configuration;
+        }
+
+        private static X509Certificate2 CreateCertificate()
+        {
+            return new X509Certificate2();
+        }
+
+        private static HttpConfiguration CreateConfiguration()
+        {
+            return new HttpConfiguration();
+        }
+
+        private static HttpRequestContext CreateContext()
+        {
+            return new HttpRequestContext();
+        }
+
+        private static IHttpRouteData CreateDummyRouteData()
+        {
+            return new Mock<IHttpRouteData>(MockBehavior.Strict).Object;
+        }
+
+        private static IDisposable CreateStubDisposable()
+        {
+            return new Mock<IDisposable>().Object;
+        }
+
+        private static HttpRequestMessage CreateRequest()
+        {
+            return new HttpRequestMessage();
+        }
+
+        private static object CreateValue()
+        {
+            return new object();
         }
     }
 }

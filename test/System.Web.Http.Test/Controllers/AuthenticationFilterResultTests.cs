@@ -241,6 +241,41 @@ namespace System.Web.Http.Controllers
         }
 
         [Fact]
+        public void ExecuteAsync_UpdatesRequestContextPrincipal_WhenFilterReturnsSuccess()
+        {
+            // Arrange
+            HttpActionContext context = CreateContext();
+            ApiController controller = CreateController();
+            IPrincipal expectedPrincipal = CreateDummyPrincipal();
+            IAuthenticationFilter filter = CreateAuthenticationFilter((c, t) =>
+            {
+                c.Principal = expectedPrincipal;
+            });
+            IAuthenticationFilter[] filters = new IAuthenticationFilter[] { filter };
+            IHostPrincipalService principalService = CreateStubPrincipalService();
+            IPrincipal principal = null;
+            IHttpActionResult innerResult = CreateActionResult((c) =>
+            {
+                principal = controller.User;
+                return Task.FromResult<HttpResponseMessage>(null);
+            });
+
+            using (HttpRequestMessage expectedRequest = CreateRequest())
+            {
+                IHttpActionResult product = CreateProductUnderTest(context, controller, filters, principalService,
+                    expectedRequest, innerResult);
+
+                // Act
+                Task<HttpResponseMessage> task = product.ExecuteAsync(CancellationToken.None);
+
+                // Assert
+                Assert.NotNull(task);
+                HttpResponseMessage response = task.Result;
+                Assert.Same(expectedPrincipal, principal);
+            }
+        }
+
+        [Fact]
         public void ExecuteAsync_PassesPrincipalFromFirstFilterSuccessToSecondFilter()
         {
             // Arrange

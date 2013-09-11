@@ -195,6 +195,22 @@ namespace System.Web.Http.Routing
             Assert.Equal("http://contoso.com/AppPath/store", link);
         }
 
+        [Fact]
+        public void UrlHelper_Content_DefaultsVirtualPathToSlash()
+        {
+            // Arrange
+            var request = new HttpRequestMessage();
+            request.SetRequestContext(new HttpRequestContext());
+            request.RequestUri = new Uri("http://contoso.com/api/Products");
+            var urlHelper = new UrlHelper(request);
+
+            // Act
+            string link = urlHelper.Content("~/store");
+
+            // Assert
+            Assert.Equal("http://contoso.com/store", link);
+        }
+
         private static UrlHelper GetUrlHelperForApi()
         {
             HttpRequestMessage request = new HttpRequestMessage();

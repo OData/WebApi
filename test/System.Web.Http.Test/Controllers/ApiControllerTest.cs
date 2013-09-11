@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
+using System.Web.Http.Hosting;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
@@ -335,9 +336,11 @@ namespace System.Web.Http
             });
             authenticationFilterMock.Setup(f => f.ChallengeAsync(It.IsAny<HttpAuthenticationChallengeContext>(),
                 It.IsAny<CancellationToken>()))
-                .Callback<HttpAuthenticationChallengeContext, CancellationToken>((c, t) => {
+                .Callback<HttpAuthenticationChallengeContext, CancellationToken>((c, t) =>
+                {
                     innerResult = c.Result;
-                    c.Result = challengeResultMock.Object;})
+                    c.Result = challengeResultMock.Object;
+                })
                 .Returns(() => Task.FromResult<object>(null));
 
             var selectorMock = new Mock<IHttpActionSelector>();
@@ -769,6 +772,364 @@ namespace System.Web.Http
             Assert.True(SpyDisposeController.DisposeWasCalled);
         }
 
+        [Fact]
+        public void ControllerContextDefault_IsNonNull()
+        {
+            // Arrange
+            ApiController controller = CreateFakeController();
+
+            // Act
+            HttpControllerContext context = controller.ControllerContext;
+
+            // Assert
+            Assert.NotNull(context);
+        }
+
+        [Fact]
+        public void RequestGet_ReturnsControllerContextRequest()
+        {
+            // Arrange
+            using (HttpRequestMessage expectedRequest = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                controller.ControllerContext = new HttpControllerContext
+                {
+                    Request = expectedRequest
+                };
+
+                // Act
+                HttpRequestMessage request = controller.Request;
+
+                // Assert
+                Assert.Same(expectedRequest, request);
+            }
+        }
+
+        [Fact]
+        public void RequestSet_Throws_WhenNull()
+        {
+            // Arrange
+            ApiController controller = CreateFakeController();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => { controller.Request = null; }, "value");
+        }
+
+        [Fact]
+        public void RequestSet_UpdatesControllerContextRequest()
+        {
+            // Arrange
+            using (HttpRequestMessage expectedRequest = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                HttpControllerContext controllerContext = CreateControllerContext();
+                controller.ControllerContext = controllerContext;
+
+                // Act
+                controller.Request = expectedRequest;
+
+                // Assert
+                Assert.Same(expectedRequest, controllerContext.Request);
+            }
+        }
+
+        [Fact]
+        public void RequestSet_UpdatesRequestRequestContext()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                HttpRequestContext expectedRequestContext = CreateRequestContext();
+                controller.RequestContext = expectedRequestContext;
+
+                // Act
+                controller.Request = request;
+
+                // Assert
+                Assert.Same(expectedRequestContext, request.GetRequestContext());
+            }
+        }
+
+        [Fact]
+        public void RequestSet_Throws_WhenRequestHasConflictingRequestContext()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                HttpRequestContext otherRequestContext = CreateRequestContext();
+                request.SetRequestContext(otherRequestContext);
+                Assert.NotSame(controller.RequestContext, otherRequestContext); // Guard
+
+                // Act & Assert
+                Assert.Throws<InvalidOperationException>(() => { controller.Request = request; },
+                    "The request context property on the request must be null or match ApiController.RequestContext.");
+            }
+        }
+
+        [Fact]
+        public void RequestSet_UpdatesRequestRequestContext_WhenRequestHasNoContext()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                HttpRequestContext expectedRequestContext = CreateRequestContext();
+                controller.RequestContext = expectedRequestContext;
+                Assert.Null(request.GetRequestContext()); // Guard
+
+                // Act
+                controller.Request = request;
+
+                // Assert
+                Assert.Same(expectedRequestContext, request.GetRequestContext());
+            }
+        }
+
+        [Fact]
+        public void RequestSet_WithConfigurationPropertyAndDefaultRequestContext_UpdatesConfiguration()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            using (HttpConfiguration expectedConfiguration = new HttpConfiguration())
+            {
+                ApiController controller = CreateFakeController();
+                request.SetConfiguration(expectedConfiguration);
+                controller.Request = request;
+
+                // Act
+                HttpConfiguration configuration = controller.Configuration;
+
+                // Assert
+                Assert.Same(expectedConfiguration, configuration);
+            }
+        }
+
+        [Fact]
+        public void RequestContextSet_LeavesRequestRequestContextUnchanged_WhenRequestHasControllerRequestContext()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                HttpRequestContext expectedRequestContext = controller.RequestContext;
+                request.SetRequestContext(expectedRequestContext);
+
+                // Act
+                controller.Request = request;
+
+                // Assert
+                HttpRequestContext requestContext = request.GetRequestContext();
+                Assert.Same(expectedRequestContext, requestContext);
+            }
+        }
+
+        [Fact]
+        public void RequestSet_UpdatesRequestBackedContextRequest()
+        {
+            // Arrange
+            using (HttpRequestMessage expectedRequest = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                Assert.IsType<RequestBackedHttpRequestContext>(controller.RequestContext); // Guard
+                RequestBackedHttpRequestContext context = (RequestBackedHttpRequestContext)controller.RequestContext;
+
+                // Act
+                controller.Request = expectedRequest;
+
+                // Assert
+                Assert.Same(expectedRequest, context.Request);
+            }
+        }
+
+        [Fact]
+        public void RequestContextGet_ReturnsControllerContextRequestContext()
+        {
+            // Arrange
+            HttpControllerContext controllerContext = CreateControllerContext();
+            HttpRequestContext expectedRequestContext = CreateRequestContext();
+            controllerContext.RequestContext = expectedRequestContext;
+            ApiController controller = CreateFakeController();
+            controller.ControllerContext = controllerContext;
+
+            // Act
+            HttpRequestContext requestContext = controller.RequestContext;
+
+            // Assert
+            Assert.Same(expectedRequestContext, requestContext);
+        }
+
+        [Fact]
+        public void RequestContextSet_Throws_WhenNull()
+        {
+            // Arrange
+            ApiController controller = CreateFakeController();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => { controller.RequestContext = null; }, "value");
+        }
+
+        [Fact]
+        public void RequestContextSet_UpdatesControllerContextRequestContext()
+        {
+            // Arrange
+            ApiController controller = CreateFakeController();
+            HttpControllerContext controllerContext = CreateControllerContext();
+            controller.ControllerContext = controllerContext;
+            HttpRequestContext expectedRequestContext = CreateRequestContext();
+
+            // Act
+            controller.RequestContext = expectedRequestContext;
+
+            // Assert
+            Assert.Same(expectedRequestContext, controllerContext.RequestContext);
+        }
+
+        [Fact]
+        public void RequestContextSet_UpdatesRequestRequestContext_WhenRequestIsPresent()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                HttpRequestContext expectedRequestContext = CreateRequestContext();
+                controller.Request = request;
+
+                // Act
+                controller.RequestContext = expectedRequestContext;
+
+                // Assert
+                HttpRequestContext requestContext = request.GetRequestContext();
+                Assert.Same(expectedRequestContext, requestContext);
+            }
+        }
+
+        [Fact]
+        public void RequestContextSet_Throws_WhenRequestIsPresentWithConflictingRequestContext()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                HttpRequestContext otherRequestContext = CreateRequestContext();
+                controller.Request = request;
+                request.SetRequestContext(otherRequestContext);
+                HttpRequestContext requestContext = CreateRequestContext();
+
+                // Act & Assert
+                Assert.Throws<InvalidOperationException>(() => { controller.RequestContext = requestContext; },
+                    "The request context property on the request must be null or match ApiController.RequestContext.");
+            }
+        }
+
+        [Fact]
+        public void RequestContextSet_UpdatesRequestRequestContext_WhenRequestIsPresentWithNoContext()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                HttpRequestContext expectedRequestContext = CreateRequestContext();
+                controller.Request = request;
+                request.Properties.Remove(HttpPropertyKeys.RequestContextKey);
+
+                // Act
+                controller.RequestContext = expectedRequestContext;
+
+                // Assert
+                HttpRequestContext requestContext = request.GetRequestContext();
+                Assert.Same(expectedRequestContext, requestContext);
+            }
+        }
+
+        [Fact]
+        public void RequestContextSet_UpdatesRequestRequestContext_WhenRequestIsPresentWithExistingContext()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                HttpRequestContext expectedRequestContext = CreateRequestContext();
+                controller.Request = request;
+                request.SetRequestContext(controller.RequestContext);
+
+                // Act
+                controller.RequestContext = expectedRequestContext;
+
+                // Assert
+                HttpRequestContext requestContext = request.GetRequestContext();
+                Assert.Same(expectedRequestContext, requestContext);
+            }
+        }
+
+        [Fact]
+        public void RequestContextSet_LeavesRequestRequestContextUnchanged_WhenRequestIsPresentWithNewContext()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ApiController controller = CreateFakeController();
+                HttpRequestContext expectedRequestContext = CreateRequestContext();
+                controller.Request = request;
+                request.SetRequestContext(expectedRequestContext);
+
+                // Act
+                controller.RequestContext = expectedRequestContext;
+
+                // Assert
+                HttpRequestContext requestContext = request.GetRequestContext();
+                Assert.Same(expectedRequestContext, requestContext);
+            }
+        }
+
+        [Fact]
+        public void RequestContextDefault_IsRequestBacked()
+        {
+            // Arrange
+            ApiController controller = CreateFakeController();
+
+            // Act
+            HttpRequestContext context = controller.RequestContext;
+
+            // Assert
+            Assert.IsType<RequestBackedHttpRequestContext>(context);
+        }
+
+        [Fact]
+        public void UserGet_ReturnsContextPrincipal()
+        {
+            // Arrange
+            ApiController controller = CreateFakeController();
+            IPrincipal expectedPrincipal = CreateDummyPrincipal();
+            controller.RequestContext = new HttpRequestContext
+            {
+                Principal = expectedPrincipal
+            };
+
+            // Act
+            IPrincipal principal = controller.User;
+
+            // Assert
+            Assert.Same(expectedPrincipal, principal);
+        }
+
+        [Fact]
+        public void UserSet_UpdatesContextPrincipal()
+        {
+            // Arrange
+            ApiController controller = CreateFakeController();
+            IPrincipal expectedPrincipal = CreateDummyPrincipal();
+            HttpRequestContext context = new HttpRequestContext();
+            controller.RequestContext = context;
+
+            // Act
+            controller.User = expectedPrincipal;
+
+            // Assert
+            Assert.Same(expectedPrincipal, context.Principal);
+        }
+
         private Mock<IAuthorizationFilter> CreateAuthorizationFilterMock(Func<HttpActionContext, CancellationToken, Func<Task<HttpResponseMessage>>, Task<HttpResponseMessage>> implementation)
         {
             Mock<IAuthorizationFilter> filterMock = new Mock<IAuthorizationFilter>();
@@ -791,6 +1152,16 @@ namespace System.Web.Http
             return filterMock;
         }
 
+        private static HttpControllerContext CreateControllerContext()
+        {
+            return new HttpControllerContext();
+        }
+
+        private static IPrincipal CreateDummyPrincipal()
+        {
+            return new Mock<IPrincipal>(MockBehavior.Strict).Object;
+        }
+
         private Mock<IExceptionFilter> CreateExceptionFilterMock(Func<HttpActionExecutedContext, CancellationToken, Task> implementation)
         {
             Mock<IExceptionFilter> filterMock = new Mock<IExceptionFilter>();
@@ -799,6 +1170,21 @@ namespace System.Web.Http
                       .Returns(implementation)
                       .Verifiable();
             return filterMock;
+        }
+
+        private static ApiController CreateFakeController()
+        {
+            return new ExceptionlessController();
+        }
+
+        private static HttpRequestMessage CreateRequest()
+        {
+            return new HttpRequestMessage();
+        }
+
+        private static HttpRequestContext CreateRequestContext()
+        {
+            return new HttpRequestContext();
         }
 
         private IHttpActionResult CreateStubActionResult(Task<HttpResponseMessage> task)

@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 
@@ -26,9 +27,6 @@ namespace System.Web.Http.WebHost
 
         private bool _isLocal;
         private bool _isLocalSet;
-
-        private IPrincipal _principal;
-        private bool _principalSet;
 
         private UrlHelper _url;
         private bool _urlSet;
@@ -190,18 +188,12 @@ namespace System.Web.Http.WebHost
         {
             get
             {
-                if (!_principalSet)
-                {
-                    _principal = _contextBase.User;
-                    _principalSet = true;
-                }
-
-                return _principal;
+                return _contextBase.User;
             }
             set
             {
-                _principal = value;
-                _principalSet = true;
+                _contextBase.User = value;
+                Thread.CurrentPrincipal = value;
             }
         }
 

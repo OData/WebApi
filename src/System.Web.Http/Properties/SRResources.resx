@@ -417,9 +417,6 @@
   <data name="UnsupportedMediaTypeNoContentType" xml:space="preserve">
     <value>The request contains an entity body but no Content-Type header. The inferred media type '{0}' is not supported for this resource.</value>
   </data>
-  <data name="ServicesContainerIHostPrincipalServiceRequired" xml:space="preserve">
-    <value>ServicesContainer must have an IHostPrincipalService.</value>
-  </data>
   <data name="DefaultInlineConstraintResolver_CouldNotFindCtor" xml:space="preserve">
     <value>Could not find a constructor for constraint type '{0}' with the following number of parameters: {1}.</value>
   </data>
@@ -470,5 +467,8 @@
   </data>
   <data name="RequestContextConflict" xml:space="preserve">
     <value>The request context property on the request must be null or match ApiController.RequestContext.</value>
+  </data>
+  <data name="Request_RequestContextMustNotBeNull" xml:space="preserve">
+    <value>The request must have a request context.</value>
   </data>
 </root>

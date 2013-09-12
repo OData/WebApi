@@ -169,13 +169,6 @@ namespace System.Web.Http
                 request.SetRequestContext(requestContext);
             }
 
-            // we need this for the case where the context was set outside of HttpServer, but principal was not assigned.
-            // HttpLegacyRequestContext already captures the Thread.CurrentPrincipal.
-            if (requestContext.Principal == null)
-            {
-                requestContext.Principal = Thread.CurrentPrincipal;
-            }
-
             try
             {
                 return await base.SendAsync(request, cancellationToken);

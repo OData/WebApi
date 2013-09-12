@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -13,85 +13,9 @@ namespace System.Web.Http.Hosting
     public class SuppressHostPrincipalMessageHandlerTest
     {
         [Fact]
-        public void ConstructorWithConfiguration_SetsPrincipalService()
-        {
-            // Arrange
-            IHostPrincipalService expectedPrincipalService = CreateDummyPrincipalService();
-
-            IHostPrincipalService principalService;
-
-            using (HttpConfiguration configuration = new HttpConfiguration())
-            {
-                configuration.Services.Replace(typeof(IHostPrincipalService), expectedPrincipalService);
-                SuppressHostPrincipalMessageHandler handler = new SuppressHostPrincipalMessageHandler(configuration);
-
-                // Act
-                principalService = handler.HostPrincipalService;
-            }
-
-            // Assert
-            Assert.Same(expectedPrincipalService, principalService);
-        }
-
-        [Fact]
-        public void ConstructorWithConfiguration_Throws_WhenConfigurationIsNull()
-        {
-            // Arrange
-            HttpConfiguration configuration = null;
-
-            // Act & Assert
-            Assert.ThrowsArgumentNull(() => { new SuppressHostPrincipalMessageHandler(configuration); },
-                "configuration");
-        }
-
-        [Fact]
-        public void ConstructorWithConfiguration_Throws_WhenPrincipalServiceIsNull()
-        {
-            // Arrange
-            using (HttpConfiguration configuration = new HttpConfiguration())
-            {
-                configuration.Services.Replace(typeof(IHostPrincipalService), null);
-
-                // Act & Assert
-                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
-                {
-                    new SuppressHostPrincipalMessageHandler(configuration);
-                });
-                Assert.Equal("ServicesContainer must have an IHostPrincipalService.", exception.Message);
-            }
-        }
-
-        [Fact]
-        public void ConstructorWithPrincipalService_SetsPrincipalService()
-        {
-            // Arrange
-            IHostPrincipalService expectedPrincipalService = CreateDummyPrincipalService();
-            SuppressHostPrincipalMessageHandler handler = new SuppressHostPrincipalMessageHandler(
-                expectedPrincipalService);
-
-            // Act
-            IHostPrincipalService principalService = handler.HostPrincipalService;
-
-            // Assert
-            Assert.Same(expectedPrincipalService, principalService);
-        }
-
-        [Fact]
-        public void ConstructorWithPrincipalService_Throws_WhenPrincipalServiceIsNull()
-        {
-            // Arrange
-            IHostPrincipalService principalService = null;
-
-            // Act & Assert
-            Assert.ThrowsArgumentNull(() => { new SuppressHostPrincipalMessageHandler(principalService); },
-                "principalService");
-        }
-
-        [Fact]
         public void SendAsync_DelegatesToInnerHandler()
         {
             // Arrange
-            IHostPrincipalService principalService = CreateStubPrincipalService();
             HttpRequestMessage request = null;
             CancellationToken cancellationToken = default(CancellationToken);
             Task<HttpResponseMessage> expectedResult = new Task<HttpResponseMessage>(() => null);
@@ -101,10 +25,10 @@ namespace System.Web.Http.Hosting
                 cancellationToken = c;
                 return expectedResult;
             });
-            HttpMessageHandler handler = CreateProductUnderTest(principalService, innerHandler);
+            HttpMessageHandler handler = CreateProductUnderTest(innerHandler);
             CancellationToken expectedCancellationToken = new CancellationToken(true);
 
-            using (HttpRequestMessage expectedRequest = new HttpRequestMessage())
+            using (HttpRequestMessage expectedRequest = CreateRequestWithContext())
             {
                 // Act
                 Task<HttpResponseMessage> result = handler.SendAsync(expectedRequest, expectedCancellationToken);
@@ -117,24 +41,43 @@ namespace System.Web.Http.Hosting
         }
 
         [Fact]
-        public void SendAsync_SetsCurrentPrincipalToAnonymous_BeforeCallingInnerHandler()
+        public void SendAsync_Throws_WhenRequestContextIsNull()
         {
             // Arrange
-            IPrincipal principalServiceCurrentPrincipal = null;
-            IHostPrincipalService principalService = CreateSpyPrincipalService((p) =>
-            {
-                principalServiceCurrentPrincipal = p;
-            });
-            IPrincipal principalBeforeInnerHandler = null;
-            HttpMessageHandler inner = new LambdaHttpMessageHandler((ignore1, ignore2) =>
-            {
-                principalBeforeInnerHandler = principalServiceCurrentPrincipal;
-                return Task.FromResult<HttpResponseMessage>(null);
-            });
-            HttpMessageHandler handler = CreateProductUnderTest(principalService, inner);
+            HttpMessageHandler innerHandler = CreateDummyHandler();
+            HttpMessageHandler handler = CreateProductUnderTest(innerHandler);
 
             using (HttpRequestMessage request = new HttpRequestMessage())
             {
+                // Act & Assert
+                Assert.ThrowsArgument(
+                    () => { var ignore = handler.SendAsync(request, CancellationToken.None).Result; },
+                    "request",
+                    "The request must have a request context.");
+            }
+        }
+
+        [Fact]
+        public void SendAsync_SetsCurrentPrincipalToAnonymous_BeforeCallingInnerHandler()
+        {
+            // Arrange
+            IPrincipal requestContextPrincipal = null;
+            Mock<HttpRequestContext> requestContextMock = new Mock<HttpRequestContext>();
+            requestContextMock
+                .SetupSet(c => c.Principal = It.IsAny<IPrincipal>())
+                .Callback<IPrincipal>((value) => requestContextPrincipal = value);
+            IPrincipal principalBeforeInnerHandler = null;
+            HttpMessageHandler inner = new LambdaHttpMessageHandler((ignore1, ignore2) =>
+            {
+                principalBeforeInnerHandler = requestContextPrincipal;
+                return Task.FromResult<HttpResponseMessage>(null);
+            });
+            HttpMessageHandler handler = CreateProductUnderTest(inner);
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            {
+                request.SetRequestContext(requestContextMock.Object);
+
                 // Act
                 handler.SendAsync(request, CancellationToken.None);
             }
@@ -153,33 +96,18 @@ namespace System.Web.Http.Hosting
             return new DummyHttpMessageHandler();
         }
 
-        private static IHostPrincipalService CreateDummyPrincipalService()
+        private static SuppressHostPrincipalMessageHandler CreateProductUnderTest(HttpMessageHandler innerHandler)
         {
-            return new Mock<IHostPrincipalService>(MockBehavior.Strict).Object;
-        }
-
-        private static SuppressHostPrincipalMessageHandler CreateProductUnderTest(
-            IHostPrincipalService principalService, HttpMessageHandler innerHandler)
-        {
-            SuppressHostPrincipalMessageHandler handler = new SuppressHostPrincipalMessageHandler(principalService);
+            SuppressHostPrincipalMessageHandler handler = new SuppressHostPrincipalMessageHandler();
             handler.InnerHandler = innerHandler;
             return handler;
         }
 
-        private static IHostPrincipalService CreateSpyPrincipalService(Action<IPrincipal> setPrincipal)
+        private static HttpRequestMessage CreateRequestWithContext()
         {
-            Mock<IHostPrincipalService> mock = new Mock<IHostPrincipalService>(MockBehavior.Strict);
-            mock.Setup(s => s.SetCurrentPrincipal(It.IsAny<IPrincipal>(),
-                It.IsAny<HttpRequestMessage>())).Callback<IPrincipal, HttpRequestMessage>(
-                (p, ignore) => { setPrincipal(p); });
-            return mock.Object;
-        }
-
-        private static IHostPrincipalService CreateStubPrincipalService()
-        {
-            Mock<IHostPrincipalService> mock = new Mock<IHostPrincipalService>(MockBehavior.Strict);
-            mock.Setup(s => s.SetCurrentPrincipal(It.IsAny<IPrincipal>(), It.IsAny<HttpRequestMessage>()));
-            return mock.Object;
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetRequestContext(new HttpRequestContext());
+            return request;
         }
 
         private class DummyHttpMessageHandler : HttpMessageHandler

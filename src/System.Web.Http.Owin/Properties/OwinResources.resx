@@ -132,10 +132,10 @@
   <data name="OwinContext_NullResponse" xml:space="preserve">
     <value>The OWIN context's Response property must not be null.</value>
   </data>
+  <data name="Request_RequestContextMustNotBeNull" xml:space="preserve">
+    <value>The request must have a request context.</value>
+  </data>
   <data name="SendAsync_ReturnedNull" xml:space="preserve">
     <value>The message handler did not return a response message.</value>
-  </data>
-  <data name="ServicesContainerIHostPrincipalServiceRequired" xml:space="preserve">
-    <value>ServicesContainer must have an IHostPrincipalService.</value>
   </data>
 </root>

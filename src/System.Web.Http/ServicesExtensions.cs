@@ -138,16 +138,6 @@ namespace System.Web.Http
             return services.GetServices<IFilterProvider>();
         }
 
-        public static IHostPrincipalService GetHostPrincipalService(this ServicesContainer services)
-        {
-            if (services == null)
-            {
-                throw new ArgumentNullException("services");
-            }
-
-            return services.GetService<IHostPrincipalService>();
-        }
-
         public static ITraceManager GetTraceManager(this ServicesContainer services)
         {
             return services.GetService<ITraceManager>();

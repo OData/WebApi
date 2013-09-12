@@ -196,7 +196,7 @@ namespace System.Web.Http
             }
 
             Contract.Assert(configuration.MessageHandlers != null);
-            configuration.MessageHandlers.Insert(0, new SuppressHostPrincipalMessageHandler(configuration));
+            configuration.MessageHandlers.Insert(0, new SuppressHostPrincipalMessageHandler());
         }
 
         private static IEnumerable<HttpRouteEntry> CreateRouteEntries(HttpControllerDescriptor controllerDescriptor)

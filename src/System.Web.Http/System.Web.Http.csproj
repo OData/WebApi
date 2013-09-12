@@ -82,7 +82,6 @@
     <Compile Include="Description\ResponseDescription.cs" />
     <Compile Include="EmptyReadOnlyDictionary.cs" />
     <Compile Include="Filters\HttpAuthenticationChallengeContext.cs" />
-    <Compile Include="Hosting\IHostPrincipalService.cs" />
     <Compile Include="Results\BadRequestResult.cs" />
     <Compile Include="Results\RedirectToRouteResult.cs" />
     <Compile Include="Results\RedirectResult.cs" />
@@ -109,7 +108,6 @@
     <Compile Include="RoutePrefixAttribute.cs" />
     <Compile Include="Filters\HttpAuthenticationContext.cs" />
     <Compile Include="Results\ResponseMessageResult.cs" />
-    <Compile Include="Hosting\ThreadPrincipalService.cs" />
     <Compile Include="Filters\IAuthenticationFilter.cs" />
     <Compile Include="Filters\IOverrideFilter.cs" />
     <Compile Include="OverrideActionFiltersAttribute.cs" />

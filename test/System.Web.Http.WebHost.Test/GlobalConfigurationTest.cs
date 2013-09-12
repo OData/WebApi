@@ -30,7 +30,6 @@ namespace System.Web.Http
         [InlineData(typeof(IAssembliesResolver), typeof(WebHostAssembliesResolver))]
         [InlineData(typeof(IHttpControllerTypeResolver), typeof(WebHostHttpControllerTypeResolver))]
         [InlineData(typeof(IHostBufferPolicySelector), typeof(WebHostBufferPolicySelector))]
-        [InlineData(typeof(IHostPrincipalService), typeof(WebHostPrincipalService))]
         public void ConfigurationService_IsWebHost(Type serviceInterfaceType, Type expectedImplementationType)
         {
             // Arrange

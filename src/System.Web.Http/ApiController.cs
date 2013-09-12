@@ -28,7 +28,6 @@ namespace System.Web.Http
         private bool _disposed;
         private ModelStateDictionary _modelState;
         private HttpControllerContext _controllerContext;
-        private IHostPrincipalService _principalService;
         private bool _initialized;
 
         /// <summary>Gets the configuration.</summary>
@@ -222,8 +221,7 @@ namespace System.Web.Http
             }
             if (authenticationFilters.Length > 0)
             {
-                result = new AuthenticationFilterResult(actionContext, this, authenticationFilters, _principalService,
-                    controllerContext.Request, result);
+                result = new AuthenticationFilterResult(actionContext, this, authenticationFilters, result);
             }
 
             return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
@@ -530,12 +528,6 @@ namespace System.Web.Http
 
             _initialized = true;
             _controllerContext = controllerContext;
-            _principalService = Configuration.Services.GetHostPrincipalService();
-
-            if (_principalService == null)
-            {
-                throw new InvalidOperationException(SRResources.ServicesContainerIHostPrincipalServiceRequired);
-            }
         }
 
         internal static async Task<HttpResponseMessage> InvokeActionWithExceptionFilters(IHttpActionResult innerResult,

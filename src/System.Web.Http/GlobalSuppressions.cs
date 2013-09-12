@@ -14,6 +14,8 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace",
     Target = "System.Web.Http.Dependencies", Justification = "Namespace follows folder structure")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace",
+    Target = "System.Web.Http.Hosting", Justification = "Removing this namespace now would be a breaking change.")]
+[assembly: SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace",
     Target = "System.Web.Http.Metadata")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace",
     Target = "System.Web.Http.Services")]

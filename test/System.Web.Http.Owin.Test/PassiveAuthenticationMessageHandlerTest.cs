@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
@@ -16,85 +17,9 @@ namespace System.Web.Http.Owin
     public class PassiveAuthenticationMessageHandlerTest
     {
         [Fact]
-        public void ConstructorWithConfiguration_SetsPrincipalService()
-        {
-            // Arrange
-            IHostPrincipalService expectedPrincipalService = CreateDummyPrincipalService();
-
-            IHostPrincipalService principalService;
-
-            using (HttpConfiguration configuration = new HttpConfiguration())
-            {
-                configuration.Services.Replace(typeof(IHostPrincipalService), expectedPrincipalService);
-                PassiveAuthenticationMessageHandler handler = new PassiveAuthenticationMessageHandler(configuration);
-
-                // Act
-                principalService = handler.HostPrincipalService;
-            }
-
-            // Assert
-            Assert.Same(expectedPrincipalService, principalService);
-        }
-
-        [Fact]
-        public void ConstructorWithConfiguration_Throws_WhenConfigurationIsNull()
-        {
-            // Arrange
-            HttpConfiguration configuration = null;
-
-            // Act & Assert
-            Assert.ThrowsArgumentNull(() => { new PassiveAuthenticationMessageHandler(configuration); },
-                "configuration");
-        }
-
-        [Fact]
-        public void ConstructorWithConfiguration_Throws_WhenPrincipalServiceIsNull()
-        {
-            // Arrange
-            using (HttpConfiguration configuration = new HttpConfiguration())
-            {
-                configuration.Services.Replace(typeof(IHostPrincipalService), null);
-
-                // Act & Assert
-                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
-                {
-                    new PassiveAuthenticationMessageHandler(configuration);
-                });
-                Assert.Equal("ServicesContainer must have an IHostPrincipalService.", exception.Message);
-            }
-        }
-
-        [Fact]
-        public void ConstructorWithPrincipalService_SetsPrincipalService()
-        {
-            // Arrange
-            IHostPrincipalService expectedPrincipalService = CreateDummyPrincipalService();
-            PassiveAuthenticationMessageHandler handler = new PassiveAuthenticationMessageHandler(
-                expectedPrincipalService);
-
-            // Act
-            IHostPrincipalService principalService = handler.HostPrincipalService;
-
-            // Assert
-            Assert.Same(expectedPrincipalService, principalService);
-        }
-
-        [Fact]
-        public void ConstructorWithPrincipalService_Throws_WhenPrincipalServiceIsNull()
-        {
-            // Arrange
-            IHostPrincipalService principalService = null;
-
-            // Act & Assert
-            Assert.ThrowsArgumentNull(() => { new PassiveAuthenticationMessageHandler(principalService); },
-                "principalService");
-        }
-
-        [Fact]
         public void SendAsync_DelegatesToInnerHandler()
         {
             // Arrange
-            IHostPrincipalService principalService = CreateStubPrincipalService();
             HttpRequestMessage request = null;
             CancellationToken cancellationToken = default(CancellationToken);
             IOwinContext context = CreateOwinContext();
@@ -107,10 +32,10 @@ namespace System.Web.Http.Owin
                     cancellationToken = c;
                     return Task.FromResult(expectedResponse);
                 });
-                HttpMessageHandler handler = CreateProductUnderTest(principalService, innerHandler);
+                HttpMessageHandler handler = CreateProductUnderTest(innerHandler);
                 CancellationToken expectedCancellationToken = new CancellationToken(true);
 
-                using (HttpRequestMessage expectedRequest = CreateRequestWithOwinContext(context))
+                using (HttpRequestMessage expectedRequest = CreateRequestWithOwinContextAndRequestContext(context))
                 {
                     // Act
                     HttpResponseMessage response = handler.SendAsync(expectedRequest,
@@ -125,15 +50,33 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
-        public void SendAsync_Throws_WhenOwinContextIsNull()
+        public void SendAsync_Throws_WhenRequestContextIsNull()
         {
             // Arrange
-            IHostPrincipalService principalService = CreateStubPrincipalService();
-            HttpMessageHandler innerHandler = CreateStubHandler();
-            HttpMessageHandler handler = CreateProductUnderTest(principalService, innerHandler);
+            HttpMessageHandler innerHandler = CreateDummyHandler();
+            HttpMessageHandler handler = CreateProductUnderTest(innerHandler);
 
             using (HttpRequestMessage request = new HttpRequestMessage())
             {
+                // Act & Assert
+                Assert.ThrowsArgument(
+                    () => { var ignore = handler.SendAsync(request, CancellationToken.None).Result; },
+                    "request",
+                    "The request must have a request context.");
+            }
+        }
+
+        [Fact]
+        public void SendAsync_Throws_WhenOwinContextIsNull()
+        {
+            // Arrange
+            HttpMessageHandler innerHandler = CreateStubHandler();
+            HttpMessageHandler handler = CreateProductUnderTest(innerHandler);
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            {
+                request.SetRequestContext(new HttpRequestContext());
+
                 // Act & Assert
                 InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
                 {
@@ -147,12 +90,11 @@ namespace System.Web.Http.Owin
         public void SendAsync_Throws_WhenAuthenticationManagerIsNull()
         {
             // Arrange
-            IHostPrincipalService principalService = CreateStubPrincipalService();
             HttpMessageHandler innerHandler = CreateStubHandler();
-            HttpMessageHandler handler = CreateProductUnderTest(principalService, innerHandler);
+            HttpMessageHandler handler = CreateProductUnderTest(innerHandler);
             IOwinContext context = CreateOwinContext(null);
 
-            using (HttpRequestMessage request = CreateRequestWithOwinContext(context))
+            using (HttpRequestMessage request = CreateRequestWithOwinContextAndRequestContext(context))
             {
                 // Act & Assert
                 InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
@@ -164,25 +106,28 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
-        public void SendAsync_SetsCurrentPrincipalToAnonymous_BeforeCallingInnerHandler()
+        public void SendAsync_SetsRequestContextPrincipalToAnonymous_BeforeCallingInnerHandler()
         {
             // Arrange
-            IPrincipal principalServiceCurrentPrincipal = null;
-            IHostPrincipalService principalService = CreateSpyPrincipalService((p) =>
-            {
-                principalServiceCurrentPrincipal = p;
-            });
+            IPrincipal requestContextPrincipal = null;
+            Mock<HttpRequestContext> requestContextMock = new Mock<HttpRequestContext>(MockBehavior.Strict);
+            requestContextMock
+                .SetupSet(c => c.Principal = It.IsAny<IPrincipal>())
+                .Callback<IPrincipal>((value) => requestContextPrincipal = value);
             IPrincipal principalBeforeInnerHandler = null;
             HttpMessageHandler inner = new LambdaHttpMessageHandler((ignore1, ignore2) =>
             {
-                principalBeforeInnerHandler = principalServiceCurrentPrincipal;
+                principalBeforeInnerHandler = requestContextPrincipal;
                 return Task.FromResult<HttpResponseMessage>(null);
             });
-            HttpMessageHandler handler = CreateProductUnderTest(principalService, inner);
+            HttpMessageHandler handler = CreateProductUnderTest(inner);
             IOwinContext context = CreateOwinContext();
 
-            using (HttpRequestMessage request = CreateRequestWithOwinContext(context))
+            using (HttpRequestMessage request = new HttpRequestMessage())
             {
+                request.SetOwinContext(context);
+                request.SetRequestContext(requestContextMock.Object);
+
                 // Act
                 HttpResponseMessage ignore = handler.SendAsync(request, CancellationToken.None).Result;
             }
@@ -200,12 +145,11 @@ namespace System.Web.Http.Owin
         public void SendAsync_SuppressesAuthenticationChallenges_WhenNoChallengeIsSet()
         {
             // Arrange
-            IHostPrincipalService principalService = CreateStubPrincipalService();
             HttpMessageHandler inner = CreateStubHandler();
-            HttpMessageHandler handler = CreateProductUnderTest(principalService, inner);
+            HttpMessageHandler handler = CreateProductUnderTest(inner);
             IOwinContext context = CreateOwinContext();
 
-            using (HttpRequestMessage request = CreateRequestWithOwinContext(context))
+            using (HttpRequestMessage request = CreateRequestWithOwinContextAndRequestContext(context))
             {
                 // Act
                 HttpResponseMessage ignore = handler.SendAsync(request, CancellationToken.None).Result;
@@ -226,9 +170,8 @@ namespace System.Web.Http.Owin
         public void SendAsync_SuppressesAuthenticationChallenges_WhenExistingAuthenticationTypesIsNull()
         {
             // Arrange
-            IHostPrincipalService principalService = CreateStubPrincipalService();
             HttpMessageHandler inner = CreateStubHandler();
-            HttpMessageHandler handler = CreateProductUnderTest(principalService, inner);
+            HttpMessageHandler handler = CreateProductUnderTest(inner);
             IOwinContext context = CreateOwinContext();
             IAuthenticationManager authenticationManager = context.Authentication;
             IDictionary<string, string> expectedExtra = new Dictionary<string, string>();
@@ -236,7 +179,7 @@ namespace System.Web.Http.Owin
             context.Authentication.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(null,
                 extraWrapper);
 
-            using (HttpRequestMessage request = CreateRequestWithOwinContext(context))
+            using (HttpRequestMessage request = CreateRequestWithOwinContextAndRequestContext(context))
             {
                 // Act
                 HttpResponseMessage ignore = handler.SendAsync(request, CancellationToken.None).Result;
@@ -259,9 +202,8 @@ namespace System.Web.Http.Owin
         public void SendAsync_SuppressesAuthenticationChallenges_WhenExistingAuthenticationTypesIsEmpty()
         {
             // Arrange
-            IHostPrincipalService principalService = CreateStubPrincipalService();
             HttpMessageHandler inner = CreateStubHandler();
-            HttpMessageHandler handler = CreateProductUnderTest(principalService, inner);
+            HttpMessageHandler handler = CreateProductUnderTest(inner);
             IOwinContext context = CreateOwinContext();
             IAuthenticationManager authenticationManager = context.Authentication;
             AuthenticationProperties extraWrapper = new AuthenticationProperties();
@@ -269,7 +211,7 @@ namespace System.Web.Http.Owin
             authenticationManager.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(new string[0],
                 extraWrapper);
 
-            using (HttpRequestMessage request = CreateRequestWithOwinContext(context))
+            using (HttpRequestMessage request = CreateRequestWithOwinContextAndRequestContext(context))
             {
                 // Act
                 HttpResponseMessage ignore = handler.SendAsync(request, CancellationToken.None).Result;
@@ -292,9 +234,8 @@ namespace System.Web.Http.Owin
         public void SendAsync_LeavesAuthenticationChallenges_WhenExistingAuthenticationTypesIsNonEmpty()
         {
             // Arrange
-            IHostPrincipalService principalService = CreateStubPrincipalService();
             HttpMessageHandler inner = CreateStubHandler();
-            HttpMessageHandler handler = CreateProductUnderTest(principalService, inner);
+            HttpMessageHandler handler = CreateProductUnderTest(inner);
             IOwinContext context = CreateOwinContext();
             IAuthenticationManager authenticationManager = context.Authentication;
             AuthenticationProperties extraWrapper = new AuthenticationProperties();
@@ -303,7 +244,7 @@ namespace System.Web.Http.Owin
             authenticationManager.AuthenticationResponseChallenge = new AuthenticationResponseChallenge(
                 expectedAuthenticationTypes, extraWrapper);
 
-            using (HttpRequestMessage request = CreateRequestWithOwinContext(context))
+            using (HttpRequestMessage request = CreateRequestWithOwinContextAndRequestContext(context))
             {
                 // Act
                 HttpResponseMessage ignore = handler.SendAsync(request, CancellationToken.None).Result;
@@ -335,39 +276,34 @@ namespace System.Web.Http.Owin
             return mock.Object;
         }
 
-        private static IHostPrincipalService CreateDummyPrincipalService()
-        {
-            return new Mock<IHostPrincipalService>(MockBehavior.Strict).Object;
-        }
+        //private static AuthenticationProperties CreateExtra()
+        //{
+        //    return new AuthenticationProperties();
+        //}
 
-        private static AuthenticationProperties CreateExtra()
+        private static PassiveAuthenticationMessageHandler CreateProductUnderTest(HttpMessageHandler innerHandler)
         {
-            return new AuthenticationProperties();
-        }
-
-        private static PassiveAuthenticationMessageHandler CreateProductUnderTest(
-            IHostPrincipalService principalService, HttpMessageHandler innerHandler)
-        {
-            PassiveAuthenticationMessageHandler handler = new PassiveAuthenticationMessageHandler(principalService);
+            PassiveAuthenticationMessageHandler handler = new PassiveAuthenticationMessageHandler();
             handler.InnerHandler = innerHandler;
             return handler;
         }
 
-        private static HttpRequestMessage CreateRequestWithOwinContext(IOwinContext context)
+        private static HttpRequestMessage CreateRequestWithOwinContextAndRequestContext(IOwinContext context)
         {
             HttpRequestMessage request = new HttpRequestMessage();
             request.SetOwinContext(context);
+            request.SetRequestContext(new HttpRequestContext());
             return request;
         }
 
-        private static IHostPrincipalService CreateSpyPrincipalService(Action<IPrincipal> setPrincipal)
-        {
-            Mock<IHostPrincipalService> mock = new Mock<IHostPrincipalService>(MockBehavior.Strict);
-            mock.Setup(s => s.SetCurrentPrincipal(It.IsAny<IPrincipal>(),
-                It.IsAny<HttpRequestMessage>())).Callback<IPrincipal, HttpRequestMessage>(
-                (p, ignore) => { setPrincipal(p); });
-            return mock.Object;
-        }
+        //private static IHostPrincipalService CreateSpyPrincipalService(Action<IPrincipal> setPrincipal)
+        //{
+        //    Mock<IHostPrincipalService> mock = new Mock<IHostPrincipalService>(MockBehavior.Strict);
+        //    mock.Setup(s => s.SetCurrentPrincipal(It.IsAny<IPrincipal>(),
+        //        It.IsAny<HttpRequestMessage>())).Callback<IPrincipal, HttpRequestMessage>(
+        //        (p, ignore) => { setPrincipal(p); });
+        //    return mock.Object;
+        //}
 
         private static HttpMessageHandler CreateStubHandler()
         {
@@ -375,13 +311,6 @@ namespace System.Web.Http.Owin
             {
                 return Task.FromResult<HttpResponseMessage>(null);
             });
-        }
-
-        private static IHostPrincipalService CreateStubPrincipalService()
-        {
-            Mock<IHostPrincipalService> mock = new Mock<IHostPrincipalService>(MockBehavior.Strict);
-            mock.Setup(s => s.SetCurrentPrincipal(It.IsAny<IPrincipal>(), It.IsAny<HttpRequestMessage>()));
-            return mock.Object;
         }
 
         private class DummyHttpMessageHandler : HttpMessageHandler

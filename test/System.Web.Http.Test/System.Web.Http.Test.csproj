@@ -97,8 +97,6 @@
     <Compile Include="Filters\HttpAuthenticationContextTests.cs" />
     <Compile Include="Hosting\HttpMessageHandlerExtensions.cs" />
     <Compile Include="Hosting\SuppressHostPrincipalMessageHandlerTest.cs" />
-    <Compile Include="Hosting\ThreadCurrentPrincipalContext.cs" />
-    <Compile Include="Hosting\ThreadPrincipalServiceTest.cs" />
     <Compile Include="Results\BadRequestResultTests.cs" />
     <Compile Include="Results\RedirectToRouteResultTests.cs" />
     <Compile Include="Results\CreatedAtRouteNegotiatedContentResultTests.cs" />

@@ -381,24 +381,6 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
-        public void PrincipalGet_ReturnsNull_ByDefault()
-        {
-            // Arrange
-            IOwinContext owinContext = new OwinContext();
-
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                HttpRequestContext context = CreateProductUnderTest(owinContext, request);
-
-                // Act
-                IPrincipal principal = context.Principal;
-
-                // Assert
-                Assert.Null(principal);
-            }
-        }
-
-        [Fact]
         public void PrincipalGet_ReturnsContextRequestUser()
         {
             // Arrange
@@ -420,10 +402,14 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
-        public void PrincipalSet_UpdatesPrincipal()
+        public void PrincipalSet_UpdatesContextRequestUser()
         {
             // Arrange
-            IOwinContext owinContext = CreateStubOwinContext();
+            Mock<IOwinRequest> owinRequestMock = new Mock<IOwinRequest>(MockBehavior.Strict);
+            IPrincipal principal = null;
+            owinRequestMock.SetupSet((r) => r.User = It.IsAny<IPrincipal>()).Callback<IPrincipal>(
+                value => { principal = value; });
+            IOwinContext owinContext = CreateStubOwinContext(owinRequestMock.Object);
 
             using (HttpRequestMessage request = CreateRequest())
             {
@@ -432,52 +418,6 @@ namespace System.Web.Http.Owin
 
                 // Act
                 context.Principal = expectedPrincipal;
-
-                // Assert
-                IPrincipal principal = context.Principal;
-                Assert.Same(expectedPrincipal, principal);
-            }
-        }
-
-        [Fact]
-        public void PrincipalSet_UpdatesPrincipal_WhenNull()
-        {
-            // Arrange
-            Mock<IOwinRequest> owinRequestMock = new Mock<IOwinRequest>(MockBehavior.Strict);
-            owinRequestMock.Setup(r => r.User).Returns(CreateDummyPrincipal());
-            IOwinContext owinContext = CreateStubOwinContext(owinRequestMock.Object);
-
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                HttpRequestContext context = CreateProductUnderTest(owinContext, request);
-
-                // Act
-                context.Principal = null;
-
-                // Assert
-                IPrincipal principal = context.Principal;
-                Assert.Null(principal);
-            }
-        }
-
-        [Fact]
-        public void PrincipalGet_ReturnsFirstObservedContextRequestUser()
-        {
-            // Arrange
-            IPrincipal expectedPrincipal = CreateDummyPrincipal();
-            IPrincipal currentPrincipal = expectedPrincipal;
-            Mock<IOwinRequest> owinRequestMock = new Mock<IOwinRequest>(MockBehavior.Strict);
-            owinRequestMock.Setup(r => r.User).Returns(() => currentPrincipal);
-            IOwinContext owinContext = CreateStubOwinContext(owinRequestMock.Object);
-
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                HttpRequestContext context = CreateProductUnderTest(owinContext, request);
-                IPrincipal ignore = context.Principal;
-                currentPrincipal = CreateDummyPrincipal();
-
-                // Act
-                IPrincipal principal = context.Principal;
 
                 // Assert
                 Assert.Same(expectedPrincipal, principal);

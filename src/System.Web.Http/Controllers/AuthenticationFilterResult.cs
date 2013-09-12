@@ -15,32 +15,26 @@ namespace System.Web.Http.Controllers
         private readonly HttpActionContext _context;
         private readonly ApiController _controller;
         private readonly IAuthenticationFilter[] _filters;
-        private readonly IHostPrincipalService _principalService;
-        private readonly HttpRequestMessage _request;
         private readonly IHttpActionResult _innerResult;
 
         public AuthenticationFilterResult(HttpActionContext context, ApiController controller,
-            IAuthenticationFilter[] filters, IHostPrincipalService principalService, HttpRequestMessage request,
-            IHttpActionResult innerResult)
+            IAuthenticationFilter[] filters, IHttpActionResult innerResult)
         {
             Contract.Assert(context != null);
             Contract.Assert(controller != null);
             Contract.Assert(filters != null);
-            Contract.Assert(principalService != null);
             Contract.Assert(innerResult != null);
 
             _context = context;
             _controller = controller;
             _filters = filters;
-            _principalService = principalService;
-            _request = request;
             _innerResult = innerResult;
         }
 
         public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             IHttpActionResult result = _innerResult;
-            IPrincipal originalPrincipal = _principalService.GetCurrentPrincipal(_request);
+            IPrincipal originalPrincipal = _controller.User;
             HttpAuthenticationContext authenticationContext = new HttpAuthenticationContext(_context,
                 originalPrincipal);
 
@@ -63,10 +57,8 @@ namespace System.Web.Http.Controllers
 
             if (newPrincipal != originalPrincipal)
             {
-                _principalService.SetCurrentPrincipal(newPrincipal, _request);
+                _controller.User = newPrincipal;
             }
-
-            _controller.User = newPrincipal;
 
             // Run challenge on all filters (passing the result of each into the next). If a filter failed, the
             // challenges run on the failure result. If no filter failed, the challenges run on the original inner

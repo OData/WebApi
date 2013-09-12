@@ -60,7 +60,6 @@ namespace System.Web.Http.Services
             Assert.IsType<TraceManager>(defaultServices.GetService(typeof(ITraceManager)));
             Assert.IsType<DataAnnotationsModelMetadataProvider>(defaultServices.GetService(typeof(ModelMetadataProvider)));
             Assert.IsType<ModelValidatorCache>(defaultServices.GetService(typeof(IModelValidatorCache)));
-            Assert.IsType<ThreadPrincipalService>(defaultServices.GetService(typeof(IHostPrincipalService)));
 
             object[] filterProviders = defaultServices.GetServices(typeof(IFilterProvider)).ToArray();
             Assert.Equal(2, filterProviders.Length);

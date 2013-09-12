@@ -14,13 +14,10 @@ namespace System.Web.Http
         public void SuppressDefaultHostAuthentication_InsertsPassiveAuthenticationMessageHandler()
         {
             // Arrange
-            IHostPrincipalService expectedPrincipalService = new Mock<IHostPrincipalService>(
-                MockBehavior.Strict).Object;
             DelegatingHandler existingHandler = new Mock<DelegatingHandler>(MockBehavior.Strict).Object;
 
             using (HttpConfiguration configuration = new HttpConfiguration())
             {
-                configuration.Services.Replace(typeof(IHostPrincipalService), expectedPrincipalService);
                 configuration.MessageHandlers.Add(existingHandler);
 
                 // Act
@@ -30,10 +27,6 @@ namespace System.Web.Http
                 Assert.Equal(2, configuration.MessageHandlers.Count);
                 DelegatingHandler firstHandler = configuration.MessageHandlers[0];
                 Assert.IsType<PassiveAuthenticationMessageHandler>(firstHandler);
-                PassiveAuthenticationMessageHandler passiveAuthenticationHandler =
-                    (PassiveAuthenticationMessageHandler)firstHandler;
-                IHostPrincipalService principalService = passiveAuthenticationHandler.HostPrincipalService;
-                Assert.Same(expectedPrincipalService, principalService);
             }
         }
 

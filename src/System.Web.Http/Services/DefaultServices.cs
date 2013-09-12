@@ -142,8 +142,6 @@ namespace System.Web.Http.Services
             ModelValidatorCache validatorCache = new ModelValidatorCache(new Lazy<IEnumerable<ModelValidatorProvider>>(() => this.GetModelValidatorProviders()));
             SetSingle<IModelValidatorCache>(validatorCache);
 
-            SetSingle<IHostPrincipalService>(new ThreadPrincipalService());
-
             _serviceTypesSingle = new HashSet<Type>(_defaultServicesSingle.Keys);
             _serviceTypesMulti = new HashSet<Type>(_defaultServicesMulti.Keys);
 

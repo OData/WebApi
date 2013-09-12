@@ -15,6 +15,7 @@ using System.Security.Principal;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Security;
+using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
@@ -405,6 +406,50 @@ namespace System.Web.Http.SelfHost
         }
 
         [Fact]
+        [RestoreThreadPrincipal]
+        public void PrincipalGet_ReturnsThreadCurrentPrincipal()
+        {
+            // Arrange
+            IPrincipal expectedPrincipal = CreateDummyPrincipal();
+
+            using (RequestContext serviceModelContext = CreateStubServiceModelContext())
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpRequestContext context = CreateProductUnderTest(serviceModelContext, configuration, request);
+                Thread.CurrentPrincipal = expectedPrincipal;
+
+                // Act
+                IPrincipal principal = context.Principal;
+
+                // Assert
+                Assert.Same(expectedPrincipal, principal);
+            }
+        }
+
+        [Fact]
+        [RestoreThreadPrincipal]
+        public void PrincipalSet_UpdatesThreadCurrentPrincipal()
+        {
+            // Arrange
+            IPrincipal expectedPrincipal = CreateDummyPrincipal();
+
+            using (RequestContext serviceModelContext = CreateStubServiceModelContext())
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpRequestContext context = CreateProductUnderTest(serviceModelContext, configuration, request);
+
+                // Act
+                context.Principal = expectedPrincipal;
+
+                // Assert
+                IPrincipal principal = Thread.CurrentPrincipal;
+                Assert.Same(expectedPrincipal, principal);
+            }
+        }
+
+        [Fact]
         public void UrlGet_ReturnsUrlHelperForRequest()
         {
             // Arrange
@@ -612,6 +657,11 @@ namespace System.Web.Http.SelfHost
         private static HttpConfiguration CreateConfiguration(string virtualPathRoot)
         {
             return new HttpConfiguration(new HttpRouteCollection(virtualPathRoot));
+        }
+
+        private static IPrincipal CreateDummyPrincipal()
+        {
+            return new Mock<IPrincipal>(MockBehavior.Strict).Object;
         }
 
         private static UrlHelper CreateDummyUrlHelper()

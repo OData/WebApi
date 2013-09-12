@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
@@ -542,25 +543,6 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
-        public void PrincipalGet_ReturnsNull_ByDefault()
-        {
-            // Arrange
-            HttpContextBase webContext = new Mock<HttpContextBase>().Object;
-            HttpRequestBase webRequest = CreateDummyWebRequest();
-
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                HttpRequestContext context = CreateProductUnderTest(webContext, webRequest, request);
-
-                // Act
-                IPrincipal principal = context.Principal;
-
-                // Assert
-                Assert.Null(principal);
-            }
-        }
-
-        [Fact]
         public void PrincipalGet_ReturnsWebContextUser()
         {
             // Arrange
@@ -583,10 +565,15 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
-        public void PrincipalSet_UpdatesPrincipal()
+        [RestoreThreadPrincipal]
+        public void PrincipalSet_UpdatesWebContextUser()
         {
             // Arrange
-            HttpContextBase webContext = CreateDummyWebContext();
+            Mock<HttpContextBase> webContextMock = new Mock<HttpContextBase>(MockBehavior.Strict);
+            IPrincipal principal = null;
+            webContextMock.SetupSet(r => r.User = It.IsAny<IPrincipal>()).Callback<IPrincipal>(
+                value => { principal = value; });
+            HttpContextBase webContext = webContextMock.Object;
             HttpRequestBase webRequest = CreateDummyWebRequest();
 
             using (HttpRequestMessage request = CreateRequest())
@@ -598,52 +585,28 @@ namespace System.Web.Http.WebHost
                 context.Principal = expectedPrincipal;
 
                 // Assert
-                IPrincipal principal = context.Principal;
                 Assert.Same(expectedPrincipal, principal);
             }
         }
 
         [Fact]
-        public void PrincipalSet_UpdatesPrincipal_WhenNull()
+        [RestoreThreadPrincipal]
+        public void PrincipalSet_UpdatesThreadCurrentPrincipal()
         {
             // Arrange
-            HttpContextBase webContext = CreateDummyWebContext();
+            HttpContextBase webContext = new Mock<HttpContextBase>().Object;
             HttpRequestBase webRequest = CreateDummyWebRequest();
 
             using (HttpRequestMessage request = CreateRequest())
             {
                 HttpRequestContext context = CreateProductUnderTest(webContext, webRequest, request);
+                IPrincipal expectedPrincipal = CreateDummyPrincipal();
 
                 // Act
-                context.Principal = null;
+                context.Principal = expectedPrincipal;
 
                 // Assert
-                IPrincipal principal = context.Principal;
-                Assert.Null(principal);
-            }
-        }
-
-        [Fact]
-        public void PrincipalGet_ReturnsFirstObservedContextRequestUser()
-        {
-            // Arrange
-            IPrincipal expectedPrincipal = CreateDummyPrincipal();
-            IPrincipal currentPrincipal = expectedPrincipal;
-            Mock<HttpContextBase> webContextMock = new Mock<HttpContextBase>(MockBehavior.Strict);
-            webContextMock.Setup(r => r.User).Returns(() => currentPrincipal);
-            HttpContextBase webContext = webContextMock.Object;
-            HttpRequestBase webRequest = CreateDummyWebRequest();
-
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                HttpRequestContext context = CreateProductUnderTest(webContext, webRequest, request);
-                IPrincipal ignore = context.Principal;
-                currentPrincipal = CreateDummyPrincipal();
-
-                // Act
-                IPrincipal principal = context.Principal;
-
-                // Assert
+                IPrincipal principal = Thread.CurrentPrincipal;
                 Assert.Same(expectedPrincipal, principal);
             }
         }

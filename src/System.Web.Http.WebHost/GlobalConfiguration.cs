@@ -78,7 +78,6 @@ namespace System.Web.Http
                 config.Services.Replace(typeof(IAssembliesResolver), new WebHostAssembliesResolver());
                 config.Services.Replace(typeof(IHttpControllerTypeResolver), new WebHostHttpControllerTypeResolver());
                 config.Services.Replace(typeof(IHostBufferPolicySelector), new WebHostBufferPolicySelector());
-                config.Services.Replace(typeof(IHostPrincipalService), new WebHostPrincipalService());
                 return config;
             });
         }

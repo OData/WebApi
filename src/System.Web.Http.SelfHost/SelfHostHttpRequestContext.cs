@@ -66,8 +66,7 @@ namespace System.Web.Http.SelfHost
             get { return _request; }
         }
 
-        // Principal and RouteData are not overridden; they are provided by later points in the pipeline
-        //  (HttpServer and HttpRoutingDispatcher).
+        // RouteData is not overridden; it is provided in a later point in the pipeline (HttpRoutingDispatcher).
 
         public override X509Certificate2 ClientCertificate
         {
@@ -165,6 +164,18 @@ namespace System.Web.Http.SelfHost
             {
                 _isLocal = value;
                 _isLocalSet = true;
+            }
+        }
+
+        public override IPrincipal Principal
+        {
+            get
+            {
+                return Thread.CurrentPrincipal;
+            }
+            set
+            {
+                Thread.CurrentPrincipal = value;
             }
         }
 

@@ -287,13 +287,10 @@ namespace System.Net.Http
         public void SuppressHostPrincipal_InsertsSuppressHostPrincipalMessageHandler()
         {
             // Arrange
-            IHostPrincipalService expectedPrincipalService = new Mock<IHostPrincipalService>(
-                MockBehavior.Strict).Object;
             DelegatingHandler existingHandler = new Mock<DelegatingHandler>(MockBehavior.Strict).Object;
 
             using (HttpConfiguration configuration = new HttpConfiguration())
             {
-                configuration.Services.Replace(typeof(IHostPrincipalService), expectedPrincipalService);
                 configuration.MessageHandlers.Add(existingHandler);
 
                 // Act
@@ -303,10 +300,6 @@ namespace System.Net.Http
                 Assert.Equal(2, configuration.MessageHandlers.Count);
                 DelegatingHandler firstHandler = configuration.MessageHandlers[0];
                 Assert.IsType<SuppressHostPrincipalMessageHandler>(firstHandler);
-                SuppressHostPrincipalMessageHandler suppressPrincipalHandler =
-                    (SuppressHostPrincipalMessageHandler)firstHandler;
-                IHostPrincipalService principalService = suppressPrincipalHandler.HostPrincipalService;
-                Assert.Same(expectedPrincipalService, principalService);
             }
         }
 

@@ -24,9 +24,6 @@ namespace System.Web.Http.Owin
         private bool _isLocal;
         private bool _isLocalSet;
 
-        private IPrincipal _principal;
-        private bool _principalSet;
-
         private UrlHelper _url;
         private bool _urlSet;
 
@@ -147,18 +144,11 @@ namespace System.Web.Http.Owin
         {
             get
             {
-                if (!_principalSet)
-                {
-                    _principal = _context.Request.User;
-                    _principalSet = true;
-                }
-
-                return _principal;
+                return _context.Request.User;
             }
             set
             {
-                _principal = value;
-                _principalSet = true;
+                _context.Request.User = value;
             }
         }
 

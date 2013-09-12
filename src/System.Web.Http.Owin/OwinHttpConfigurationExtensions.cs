@@ -30,7 +30,7 @@ namespace System.Web.Http
             }
 
             Contract.Assert(configuration.MessageHandlers != null);
-            configuration.MessageHandlers.Insert(0, new PassiveAuthenticationMessageHandler(configuration));
+            configuration.MessageHandlers.Insert(0, new PassiveAuthenticationMessageHandler());
         }
     }
 }

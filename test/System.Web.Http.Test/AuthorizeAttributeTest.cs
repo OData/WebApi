@@ -6,14 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
-using System.Threading;
 using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 using Moq;
 
 namespace System.Web.Http
 {
-    public class AuthorizeAttributeTest : IDisposable
+    public class AuthorizeAttributeTest
     {
         private readonly Mock<HttpActionDescriptor> _actionDescriptorMock = new Mock<HttpActionDescriptor>() { CallBase = true };
         private readonly Collection<AllowAnonymousAttribute> _allowAnonymousAttributeCollection = new Collection<AllowAnonymousAttribute>(new AllowAnonymousAttribute[] { new AllowAnonymousAttribute() });
@@ -23,7 +22,6 @@ namespace System.Web.Http
         private readonly HttpControllerContext _controllerContext;
         private readonly HttpActionContext _actionContext;
         private readonly Mock<IPrincipal> _principalMock = new Mock<IPrincipal>();
-        private readonly IPrincipal _originalPrincipal;
         private readonly HttpRequestMessage _request = new HttpRequestMessage();
 
         public AuthorizeAttributeTest()
@@ -35,13 +33,7 @@ namespace System.Web.Http
             _controllerContext.ControllerDescriptor = _controllerDescriptorMock.Object;
             _controllerContext.Request = _request;
             _actionContext = ContextUtil.CreateActionContext(_controllerContext, _actionDescriptorMock.Object);
-            _originalPrincipal = Thread.CurrentPrincipal;
-            Thread.CurrentPrincipal = _principalMock.Object;
-        }
-
-        public void Dispose()
-        {
-            Thread.CurrentPrincipal = _originalPrincipal;
+            _controllerContext.RequestContext.Principal = _principalMock.Object;
         }
 
         [Fact]
@@ -95,9 +87,19 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void OnAuthorization_IfThreadDoesNotContainPrincipal_DoesShortCircuitRequest()
+        public void OnAuthorization_IfRequestContextDoesNotContainPrincipal_DoesShortCircuitRequest()
         {
-            Thread.CurrentPrincipal = null;
+            _actionContext.ControllerContext.RequestContext.Principal = null;
+
+            _attribute.OnAuthorization(_actionContext);
+
+            AssertUnauthorizedRequestSet(_actionContext);
+        }
+
+        [Fact]
+        public void OnAuthorization_IfPrincipalDoesNotContainIdentity_DoesShortCircuitRequest()
+        {
+            _principalMock.Setup(p => p.Identity).Returns((IIdentity)null);
 
             _attribute.OnAuthorization(_actionContext);
 

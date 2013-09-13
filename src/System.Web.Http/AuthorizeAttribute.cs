@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
-using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Properties;
@@ -76,7 +75,7 @@ namespace System.Web.Http
 
         /// <summary>
         /// Determines whether access for this particular request is authorized. This method uses the user <see cref="IPrincipal"/>
-        /// returned via <see cref="Thread.CurrentPrincipal"/>. Authorization is denied if the user is not authenticated,
+        /// returned via <see cref="HttpRequestContext.Principal"/>. Authorization is denied if the user is not authenticated,
         /// the user is not in the authorized group of <see cref="Users"/> (if defined), or if the user is not in any of the authorized 
         /// <see cref="Roles"/> (if defined).
         /// </summary>
@@ -89,8 +88,8 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("actionContext");
             }
 
-            IPrincipal user = Thread.CurrentPrincipal;
-            if (user == null || !user.Identity.IsAuthenticated)
+            IPrincipal user = actionContext.ControllerContext.RequestContext.Principal;
+            if (user == null || user.Identity == null || !user.Identity.IsAuthenticated)
             {
                 return false;
             }
@@ -110,7 +109,7 @@ namespace System.Web.Http
 
         /// <summary>
         /// Called when an action is being authorized. This method uses the user <see cref="IPrincipal"/>
-        /// returned via <see cref="Thread.CurrentPrincipal"/>. Authorization is denied if
+        /// returned via <see cref="HttpRequestContext.Principal"/>. Authorization is denied if
         /// - the request is not associated with any user.
         /// - the user is not authenticated,
         /// - the user is authenticated but is not in the authorized group of <see cref="Users"/> (if defined), or if the user

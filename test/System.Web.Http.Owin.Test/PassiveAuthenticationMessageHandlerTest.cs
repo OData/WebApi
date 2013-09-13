@@ -276,11 +276,6 @@ namespace System.Web.Http.Owin
             return mock.Object;
         }
 
-        //private static AuthenticationProperties CreateExtra()
-        //{
-        //    return new AuthenticationProperties();
-        //}
-
         private static PassiveAuthenticationMessageHandler CreateProductUnderTest(HttpMessageHandler innerHandler)
         {
             PassiveAuthenticationMessageHandler handler = new PassiveAuthenticationMessageHandler();
@@ -295,15 +290,6 @@ namespace System.Web.Http.Owin
             request.SetRequestContext(new HttpRequestContext());
             return request;
         }
-
-        //private static IHostPrincipalService CreateSpyPrincipalService(Action<IPrincipal> setPrincipal)
-        //{
-        //    Mock<IHostPrincipalService> mock = new Mock<IHostPrincipalService>(MockBehavior.Strict);
-        //    mock.Setup(s => s.SetCurrentPrincipal(It.IsAny<IPrincipal>(),
-        //        It.IsAny<HttpRequestMessage>())).Callback<IPrincipal, HttpRequestMessage>(
-        //        (p, ignore) => { setPrincipal(p); });
-        //    return mock.Object;
-        //}
 
         private static HttpMessageHandler CreateStubHandler()
         {

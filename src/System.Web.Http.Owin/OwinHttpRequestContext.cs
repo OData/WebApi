@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using Microsoft.Owin;
@@ -149,6 +150,7 @@ namespace System.Web.Http.Owin
             set
             {
                 _context.Request.User = value;
+                Thread.CurrentPrincipal = value;
             }
         }
 

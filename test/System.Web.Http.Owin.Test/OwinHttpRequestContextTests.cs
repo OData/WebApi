@@ -3,6 +3,7 @@
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using Microsoft.Owin;
@@ -402,6 +403,7 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
+        [RestoreThreadPrincipal]
         public void PrincipalSet_UpdatesContextRequestUser()
         {
             // Arrange
@@ -420,6 +422,27 @@ namespace System.Web.Http.Owin
                 context.Principal = expectedPrincipal;
 
                 // Assert
+                Assert.Same(expectedPrincipal, principal);
+            }
+        }
+
+        [Fact]
+        [RestoreThreadPrincipal]
+        public void PrincipalSet_UpdatesThreadCurrentPrincipal()
+        {
+            // Arrange
+            IOwinContext owinContext = CreateStubOwinContext(new Mock<IOwinRequest>().Object);
+
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpRequestContext context = CreateProductUnderTest(owinContext, request);
+                IPrincipal expectedPrincipal = CreateDummyPrincipal();
+
+                // Act
+                context.Principal = expectedPrincipal;
+
+                // Assert
+                IPrincipal principal = Thread.CurrentPrincipal;
                 Assert.Same(expectedPrincipal, principal);
             }
         }

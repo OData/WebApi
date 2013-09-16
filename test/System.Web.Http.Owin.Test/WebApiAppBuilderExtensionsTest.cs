@@ -96,24 +96,5 @@ namespace System.Web.Http.Owin
             Assert.Equal(appBuilderMock.Object, returnedAppBuilder);
             appBuilderMock.Verify();
         }
-
-        [Fact]
-        public void UseHttpMessageHandler_UsesAdapter()
-        {
-            var messageHandler = new Mock<HttpMessageHandler>().Object;
-            var appBuilder = new Mock<IAppBuilder>();
-            appBuilder
-                .Setup(ab => ab.Use(
-                    typeof(HttpMessageHandlerAdapter),
-                    messageHandler,
-                    It.IsAny<OwinBufferPolicySelector>()))
-                .Returns(appBuilder.Object)
-                .Verifiable();
-
-            IAppBuilder returnedAppBuilder = appBuilder.Object.UseHttpMessageHandler(messageHandler);
-
-            Assert.Equal(appBuilder.Object, returnedAppBuilder);
-            appBuilder.Verify();
-        }
     }
 }

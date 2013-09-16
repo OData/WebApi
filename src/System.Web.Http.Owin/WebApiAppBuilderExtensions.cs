@@ -2,7 +2,6 @@
 
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.Owin;
@@ -41,17 +40,6 @@ namespace Owin
         {
             IHostBufferPolicySelector bufferPolicySelector = httpServer.Configuration.Services.GetHostBufferPolicySelector() ?? _defaultBufferPolicySelector;
             return builder.Use(typeof(HttpMessageHandlerAdapter), httpServer, bufferPolicySelector);
-        }
-
-        /// <summary>
-        /// Adds a component to the OWIN pipeline for running an <see cref="HttpMessageHandler"/>.
-        /// </summary>
-        /// <param name="builder">The application builder.</param>
-        /// <param name="messageHandler">The message handler.</param>
-        /// <returns>The application builder.</returns>
-        public static IAppBuilder UseHttpMessageHandler(this IAppBuilder builder, HttpMessageHandler messageHandler)
-        {
-            return builder.Use(typeof(HttpMessageHandlerAdapter), messageHandler, _defaultBufferPolicySelector);
         }
     }
 }

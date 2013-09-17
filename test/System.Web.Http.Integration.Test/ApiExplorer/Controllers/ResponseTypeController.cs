@@ -24,11 +24,5 @@ namespace System.Web.Http.ApiExplorer
         {
             return "User deleted";
         }
-
-        [ResponseType(typeof(void))]
-        public IHttpActionResult Head()
-        {
-            return StatusCode(HttpStatusCode.OK);
-        }
     }
 }

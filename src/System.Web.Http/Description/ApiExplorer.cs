@@ -362,7 +362,7 @@ namespace System.Web.Http.Description
             // response formatters
             ResponseDescription responseDescription = CreateResponseDescription(actionDescriptor);
             Type returnType = responseDescription.ResponseType ?? responseDescription.DeclaredType;
-            IEnumerable<MediaTypeFormatter> supportedResponseFormatters = (returnType != null && returnType != typeof(void)) ?
+            IEnumerable<MediaTypeFormatter> supportedResponseFormatters = returnType != null ?
                 actionDescriptor.Configuration.Formatters.Where(f => f.CanWriteType(returnType)) :
                 Enumerable.Empty<MediaTypeFormatter>();
 

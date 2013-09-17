@@ -12,10 +12,11 @@ namespace System.Web.Http.ApiExplorer
     public class ResponseTypeAttributeTest
     {
         [Theory]
-        [InlineData("Get", typeof(IHttpActionResult), typeof(User))]
-        [InlineData("Post", typeof(HttpResponseMessage), typeof(User))]
-        [InlineData("Delete", typeof(string), null)]
-        public void DeclaredResponseType_AppearsOnApiDescription(string actionName, Type declaredType, Type responseType)
+        [InlineData("Get", typeof(IHttpActionResult), typeof(User), 2)]
+        [InlineData("Post", typeof(HttpResponseMessage), typeof(User), 2)]
+        [InlineData("Delete", typeof(string), null, 2)]
+        [InlineData("Head", typeof(IHttpActionResult), typeof(void), 0)]
+        public void DeclaredResponseType_AppearsOnApiDescription(string actionName, Type declaredType, Type responseType, int responseFormattersCount)
         {
             HttpConfiguration config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{id}", new { id = RouteParameter.Optional });
@@ -29,6 +30,7 @@ namespace System.Web.Http.ApiExplorer
                 api.ResponseDescription.ResponseType == responseType);
 
             Assert.NotNull(expectedApi);
+            Assert.Equal(responseFormattersCount, expectedApi.SupportedResponseFormatters.Count);
         }
     }
 }

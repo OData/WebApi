@@ -68,6 +68,7 @@
     <Compile Include="Helpers\Claims\MockClaimsIdentity.cs" />
     <Compile Include="Helpers\AntiXsrf\BinaryBlobTest.cs" />
     <Compile Include="Html\LabelHelperTest.cs" />
+    <Compile Include="LatestRazorVersion.cs" />
     <Compile Include="Mvc\ModelClientValidationMembershipPasswordRuleTest.cs" />
     <Compile Include="Utils\SessionStateUtilTest.cs" />
     <Compile Include="Utils\UrlRewriterHelperTest.cs" />

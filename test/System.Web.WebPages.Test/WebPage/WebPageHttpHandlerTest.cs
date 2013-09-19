@@ -120,7 +120,7 @@ namespace System.Web.WebPages.Test
             webPageHttpHandler.ProcessRequestInternal(context.Object);
 
             // Assert
-            Assert.Equal("3.0", headers[WebPageHttpHandler.WebPagesVersionHeaderName]);
+            Assert.Equal(LatestRazorVersion.MajorMinor, headers[WebPageHttpHandler.WebPagesVersionHeaderName]);
             Assert.Equal("=?UTF-8?B?fi9pbmRleC5jc2h0bWx8fi9MYXlvdXQuY3NodG1s?=", headers["X-SourceFiles"]);
         }
 
@@ -178,7 +178,7 @@ namespace System.Web.WebPages.Test
         public void VersionHeaderTest()
         {
             Mock<HttpResponseBase> mockResponse = new Mock<HttpResponseBase>();
-            mockResponse.Setup(response => response.AppendHeader("X-AspNetWebPages-Version", "3.0")).Verifiable();
+            mockResponse.Setup(response => response.AppendHeader("X-AspNetWebPages-Version", LatestRazorVersion.MajorMinor)).Verifiable();
 
             Mock<HttpContextBase> mockContext = new Mock<HttpContextBase>();
             mockContext.SetupGet(context => context.Response).Returns(mockResponse.Object);

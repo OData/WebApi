@@ -87,6 +87,7 @@
     <Compile Include="TheoryDataSet.cs" />
     <Compile Include="ThreadPoolSyncContext.cs" />
     <Compile Include="TraitAttribute.cs" />
+    <Compile Include="VersionTestHelper.cs" />
     <Compile Include="WebUtils.cs" />
   </ItemGroup>
   <ItemGroup>

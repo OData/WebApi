@@ -30,6 +30,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DeploymentUtil.cs" />
+    <Compile Include="LatestRazorVersion.cs" />
     <Compile Include="PreApplicationStartCodeTest.cs" />
     <Compile Include="TestFileSystem.cs" />
     <Compile Include="WebPagesDeploymentTest.cs">
@@ -37,6 +38,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\System.Web.Razor\System.Web.Razor.csproj">
+      <Project>{8f18041b-9410-4c36-a9c5-067813df5f31}</Project>
+      <Name>System.Web.Razor</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\System.Web.WebPages.Deployment\System.Web.WebPages.Deployment.csproj">
       <Project>{22BABB60-8F02-4027-AFFC-ACF069954536}</Project>
       <Name>System.Web.WebPages.Deployment</Name>

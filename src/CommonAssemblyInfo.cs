@@ -27,14 +27,14 @@ using System.Runtime.InteropServices;
 #error Runtime projects cannot define both ASPNETMVC and ASPNETWEBPAGES
 #elif ASPNETMVC
 #if !BUILD_GENERATED_VERSION
-[assembly: AssemblyVersion("5.0.0.0")] // ASPNETMVC
-[assembly: AssemblyFileVersion("5.0.0.0")] // ASPNETMVC
+[assembly: AssemblyVersion("5.1.0.0")] // ASPNETMVC
+[assembly: AssemblyFileVersion("5.1.0.0")] // ASPNETMVC
 #endif
 [assembly: AssemblyProduct("Microsoft ASP.NET MVC")]
 #elif ASPNETWEBPAGES
 #if !BUILD_GENERATED_VERSION
-[assembly: AssemblyVersion("3.0.0.0")] // ASPNETWEBPAGES
-[assembly: AssemblyFileVersion("3.0.0.0")] // ASPNETWEBPAGES
+[assembly: AssemblyVersion("3.1.0.0")] // ASPNETWEBPAGES
+[assembly: AssemblyFileVersion("3.1.0.0")] // ASPNETWEBPAGES
 #endif
 [assembly: AssemblyProduct("Microsoft ASP.NET Web Pages")]
 #else

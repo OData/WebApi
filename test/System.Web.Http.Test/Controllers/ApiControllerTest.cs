@@ -486,119 +486,6 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void InvokeActionWithExceptionFilters_IfActionTaskIsSuccessful_ReturnsSuccessTask()
-        {
-            // Arrange
-            List<string> log = new List<string>();
-            var response = new HttpResponseMessage();
-            var actionResult = CreateStubActionResult(TaskHelpers.FromResult(response));
-            var exceptionFilterMock = CreateExceptionFilterMock((ec, ct) =>
-            {
-                log.Add("exceptionFilter");
-                return Task.Factory.StartNew(() => { });
-            });
-            var filters = new IExceptionFilter[] { exceptionFilterMock.Object };
-
-            // Act
-            var result = ApiController.InvokeActionWithExceptionFilters(actionResult, _actionContextInstance, CancellationToken.None, filters);
-
-            // Assert
-            Assert.NotNull(result);
-            result.WaitUntilCompleted();
-            Assert.Equal(TaskStatus.RanToCompletion, result.Status);
-            Assert.Same(response, result.Result);
-            Assert.Equal(new string[] { }, log.ToArray());
-        }
-
-        [Fact]
-        public void InvokeActionWithExceptionFilters_IfActionTaskIsCanceled_ReturnsCanceledTask()
-        {
-            // Arrange
-            List<string> log = new List<string>();
-            var actionResult = CreateStubActionResult(TaskHelpers.Canceled<HttpResponseMessage>());
-            var exceptionFilterMock = CreateExceptionFilterMock((ec, ct) =>
-            {
-                log.Add("exceptionFilter");
-                return Task.Factory.StartNew(() => { });
-            });
-            var filters = new IExceptionFilter[] { exceptionFilterMock.Object };
-
-            // Act
-            var result = ApiController.InvokeActionWithExceptionFilters(actionResult, _actionContextInstance, CancellationToken.None, filters);
-
-            // Assert
-            Assert.NotNull(result);
-            result.WaitUntilCompleted();
-            Assert.Equal(TaskStatus.Canceled, result.Status);
-            Assert.Equal(new string[] { "exceptionFilter" }, log.ToArray());
-        }
-
-        [Fact]
-        public void InvokeActionWithExceptionFilters_IfActionTaskIsFaulted_ExecutesFiltersAndReturnsFaultedTaskIfNotHandled()
-        {
-            // Arrange
-            List<string> log = new List<string>();
-            var exception = new Exception();
-            var actionResult = CreateStubActionResult(TaskHelpers.FromError<HttpResponseMessage>(exception));
-            Exception exceptionSeenByFilter = null;
-            var exceptionFilterMock = CreateExceptionFilterMock((ec, ct) =>
-            {
-                exceptionSeenByFilter = ec.Exception;
-                log.Add("exceptionFilter");
-                return Task.Factory.StartNew(() => { });
-            });
-            var filters = new IExceptionFilter[] { exceptionFilterMock.Object };
-
-            // Act
-            var result = ApiController.InvokeActionWithExceptionFilters(actionResult, _actionContextInstance, CancellationToken.None, filters);
-
-            // Assert
-            Assert.NotNull(result);
-            result.WaitUntilCompleted();
-            Assert.Equal(TaskStatus.Faulted, result.Status);
-            Assert.Same(exception, result.Exception.InnerException);
-            Assert.Same(exception, exceptionSeenByFilter);
-            Assert.Equal(new string[] { "exceptionFilter" }, log.ToArray());
-        }
-
-        [Fact]
-        public void InvokeActionWithExceptionFilters_IfActionTaskIsFaulted_ExecutesFiltersAndReturnsResultIfHandled()
-        {
-            // Arrange
-            List<string> log = new List<string>();
-            var exception = new Exception();
-            var actionResult = CreateStubActionResult(TaskHelpers.FromError<HttpResponseMessage>(exception));
-            HttpResponseMessage globalFilterResponse = new HttpResponseMessage();
-            HttpResponseMessage actionFilterResponse = new HttpResponseMessage();
-            HttpResponseMessage resultSeenByGlobalFilter = null;
-            var globalFilterMock = CreateExceptionFilterMock((ec, ct) =>
-            {
-                log.Add("globalFilter");
-                resultSeenByGlobalFilter = ec.Response;
-                ec.Response = globalFilterResponse;
-                return Task.Factory.StartNew(() => { });
-            });
-            var actionFilterMock = CreateExceptionFilterMock((ec, ct) =>
-            {
-                log.Add("actionFilter");
-                ec.Response = actionFilterResponse;
-                return Task.Factory.StartNew(() => { });
-            });
-            var filters = new IExceptionFilter[] { globalFilterMock.Object, actionFilterMock.Object };
-
-            // Act
-            var result = ApiController.InvokeActionWithExceptionFilters(actionResult, _actionContextInstance, CancellationToken.None, filters);
-
-            // Assert
-            Assert.NotNull(result);
-            result.WaitUntilCompleted();
-            Assert.Equal(TaskStatus.RanToCompletion, result.Status);
-            Assert.Same(globalFilterResponse, result.Result);
-            Assert.Same(actionFilterResponse, resultSeenByGlobalFilter);
-            Assert.Equal(new string[] { "actionFilter", "globalFilter" }, log.ToArray());
-        }
-
-        [Fact]
         public void ExecuteAsync_RunsExceptionFilter_WhenActionThrowsException()
         {
             // Arrange
@@ -1162,16 +1049,6 @@ namespace System.Web.Http
             return new Mock<IPrincipal>(MockBehavior.Strict).Object;
         }
 
-        private Mock<IExceptionFilter> CreateExceptionFilterMock(Func<HttpActionExecutedContext, CancellationToken, Task> implementation)
-        {
-            Mock<IExceptionFilter> filterMock = new Mock<IExceptionFilter>();
-            filterMock.Setup(f => f.ExecuteExceptionFilterAsync(It.IsAny<HttpActionExecutedContext>(),
-                                                                CancellationToken.None))
-                      .Returns(implementation)
-                      .Verifiable();
-            return filterMock;
-        }
-
         private static ApiController CreateFakeController()
         {
             return new ExceptionlessController();
@@ -1185,16 +1062,6 @@ namespace System.Web.Http
         private static HttpRequestContext CreateRequestContext()
         {
             return new HttpRequestContext();
-        }
-
-        private IHttpActionResult CreateStubActionResult(Task<HttpResponseMessage> task)
-        {
-            Mock<IHttpActionResult> actionResultMock = new Mock<IHttpActionResult>(MockBehavior.Strict);
-            actionResultMock.Setup(r => r.ExecuteAsync(It.IsAny<CancellationToken>())).Returns(() =>
-            {
-                return task;
-            });
-            return actionResultMock.Object;
         }
 
         private static Mock<DefaultServices> BuildFilterProvidingServicesMock(HttpConfiguration configuration, HttpActionDescriptor action, params FilterInfo[] filters)

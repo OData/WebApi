@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
-using System.Web.Http.Hosting;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 using System.Web.Http.Results;
@@ -223,8 +222,12 @@ namespace System.Web.Http
             {
                 result = new AuthenticationFilterResult(actionContext, this, authenticationFilters, result);
             }
+            if (exceptionFilters.Length > 0)
+            {
+                result = new ExceptionFilterResult(actionContext, exceptionFilters, result);
+            }
 
-            return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
+            return result.ExecuteAsync(cancellationToken);
         }
 
         /// <summary>Creates a <see cref="BadRequestResult"/> (400 Bad Request).</summary>
@@ -528,46 +531,6 @@ namespace System.Web.Http
 
             _initialized = true;
             _controllerContext = controllerContext;
-        }
-
-        internal static async Task<HttpResponseMessage> InvokeActionWithExceptionFilters(IHttpActionResult innerResult,
-            HttpActionContext actionContext, CancellationToken cancellationToken, IExceptionFilter[] filters)
-        {
-            Contract.Assert(innerResult != null);
-            Contract.Assert(actionContext != null);
-            Contract.Assert(filters != null);
-
-            Exception exception = null;
-            try
-            {
-                return await innerResult.ExecuteAsync(cancellationToken);
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            // This code path only runs if the task is faulted with an exception
-            Contract.Assert(exception != null);
-
-            HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, exception);
-
-            // Note: exception filters need to be scheduled in the reverse order so that
-            // the more specific filter (e.g. Action) executes before the less specific ones (e.g. Global)
-            for (int i = filters.Length - 1; i >= 0; i--)
-            {
-                IExceptionFilter exceptionFilter = filters[i];
-                await exceptionFilter.ExecuteExceptionFilterAsync(executedContext, cancellationToken);
-            }
-
-            if (executedContext.Response != null)
-            {
-                return executedContext.Response;
-            }
-            else
-            {
-                throw executedContext.Exception;
-            }
         }
 
         #region IDisposable

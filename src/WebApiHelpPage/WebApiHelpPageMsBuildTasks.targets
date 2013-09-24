@@ -32,7 +32,7 @@
               content = content.Replace(OriginalNamespaceToken, ReplacementNamespaceToken);
             }
 
-            File.WriteAllText(destinationFilePath, content);
+            File.WriteAllText(destinationFilePath, content, Encoding.UTF8); // Always write the file using UTF8 encoding with BOM.
           }
           return true;
           ]]>

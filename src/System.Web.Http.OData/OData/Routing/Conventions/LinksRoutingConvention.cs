@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
@@ -15,8 +13,8 @@ namespace System.Web.Http.OData.Routing.Conventions
     /// </summary>
     public class LinksRoutingConvention : EntitySetRoutingConvention
     {
-        private const string DeleteLinkActionName = "DeleteLink";
-        private const string CreateLinkActionName = "CreateLink";
+        private const string DeleteLinkActionNamePrefix = "DeleteLink";
+        private const string CreateLinkActionNamePrefix = "CreateLink";
 
         /// <summary>
         /// Selects the action.
@@ -43,44 +41,60 @@ namespace System.Web.Http.OData.Routing.Conventions
             }
 
             HttpMethod requestMethod = controllerContext.Request.Method;
-            if (odataPath.PathTemplate == "~/entityset/key/$links/navigation")
+            IHttpRouteData routeData = controllerContext.RouteData;
+
+            if (odataPath.PathTemplate == "~/entityset/key/$links/navigation" ||
+                odataPath.PathTemplate == "~/entityset/key/cast/$links/navigation")
             {
-                if (requestMethod == HttpMethod.Post || requestMethod == HttpMethod.Put)
+                NavigationPathSegment navigationSegment = odataPath.Segments.Last() as NavigationPathSegment;
+                IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
+                IEdmEntityType declaringType = navigationProperty.DeclaringType as IEdmEntityType;
+
+                string linksActionName = FindLinksActionName(actionMap, navigationProperty, declaringType, requestMethod);
+                if (linksActionName != null)
                 {
-                    if (actionMap.Contains(CreateLinkActionName))
-                    {
-                        AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
-                        return CreateLinkActionName;
-                    }
-                }
-                else if (requestMethod == HttpMethod.Delete)
-                {
-                    if (actionMap.Contains(DeleteLinkActionName))
-                    {
-                        AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
-                        return DeleteLinkActionName;
-                    }
+                    routeData.Values[ODataRouteConstants.Key] = (odataPath.Segments[1] as KeyValuePathSegment).Value;
+                    routeData.Values[ODataRouteConstants.NavigationProperty] = navigationSegment.NavigationProperty.Name;
+                    return linksActionName;
                 }
             }
-            else if (odataPath.PathTemplate == "~/entityset/key/$links/navigation/key" && requestMethod == HttpMethod.Delete)
+            else if ((odataPath.PathTemplate == "~/entityset/key/$links/navigation/key" ||
+                odataPath.PathTemplate == "~/entityset/key/cast/$links/navigation/key") && requestMethod == HttpMethod.Delete)
             {
-                if (actionMap.Contains(DeleteLinkActionName))
+                NavigationPathSegment navigationSegment = odataPath.Segments[odataPath.Segments.Count - 2] as NavigationPathSegment;
+                IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
+                IEdmEntityType declaringType = navigationProperty.DeclaringType as IEdmEntityType;
+
+                string linksActionName = FindLinksActionName(actionMap, navigationProperty, declaringType, requestMethod);
+                if (linksActionName != null)
                 {
-                    AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
-                    KeyValuePathSegment relatedKeySegment = odataPath.Segments[4] as KeyValuePathSegment;
-                    controllerContext.RouteData.Values[ODataRouteConstants.RelatedKey] = relatedKeySegment.Value;
-                    return DeleteLinkActionName;
+                    routeData.Values[ODataRouteConstants.Key] = (odataPath.Segments[1] as KeyValuePathSegment).Value;
+                    routeData.Values[ODataRouteConstants.NavigationProperty] = navigationSegment.NavigationProperty.Name;
+                    routeData.Values[ODataRouteConstants.RelatedKey] = (odataPath.Segments.Last() as KeyValuePathSegment).Value;
+                    return linksActionName;
                 }
             }
+
             return null;
         }
 
-        private static void AddLinkInfoToRouteData(IHttpRouteData routeData, ODataPath odataPath)
+        private static string FindLinksActionName(ILookup<string, HttpActionDescriptor> actionMap,
+            IEdmNavigationProperty navigationProperty, IEdmEntityType declaringType, HttpMethod method)
         {
-            KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-            routeData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
-            NavigationPathSegment navigationSegment = odataPath.Segments[3] as NavigationPathSegment;
-            routeData.Values[ODataRouteConstants.NavigationProperty] = navigationSegment.NavigationProperty.Name;
+            string actionNamePrefix;
+            if (method == HttpMethod.Delete)
+            {
+                actionNamePrefix = DeleteLinkActionNamePrefix;
+            }
+            else
+            {
+                actionNamePrefix = CreateLinkActionNamePrefix;
+            }
+
+            return actionMap.FindMatchingAction(
+                        actionNamePrefix + "To" + navigationProperty.Name + "From" + declaringType.Name,
+                        actionNamePrefix + "To" + navigationProperty.Name,
+                        actionNamePrefix);
         }
     }
 }

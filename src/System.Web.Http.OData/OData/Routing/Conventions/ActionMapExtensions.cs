@@ -10,15 +10,14 @@ namespace System.Web.Http.OData.Routing.Conventions
     /// </summary>
     internal static class ActionMapExtensions
     {
-        public static string FindMatchingAction(this ILookup<string, HttpActionDescriptor> actionMap, string targetActionName, string fallbackActionName)
+        public static string FindMatchingAction(this ILookup<string, HttpActionDescriptor> actionMap, params string[] targetActionNames)
         {
-            if (actionMap.Contains(targetActionName))
+            foreach (string targetActionName in targetActionNames)
             {
-                return targetActionName;
-            }
-            else if (actionMap.Contains(fallbackActionName))
-            {
-                return fallbackActionName;
+                if (actionMap.Contains(targetActionName))
+                {
+                    return targetActionName;
+                }
             }
 
             return null;

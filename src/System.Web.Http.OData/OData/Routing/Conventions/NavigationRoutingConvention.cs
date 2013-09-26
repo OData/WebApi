@@ -36,7 +36,9 @@ namespace System.Web.Http.OData.Routing.Conventions
                 throw Error.ArgumentNull("actionMap");
             }
 
-            if (controllerContext.Request.Method == HttpMethod.Get &&
+            HttpMethod method = controllerContext.Request.Method;
+
+            if ((method == HttpMethod.Get || method == HttpMethod.Post) &&
                 (odataPath.PathTemplate == "~/entityset/key/navigation" ||
                  odataPath.PathTemplate == "~/entityset/key/cast/navigation"))
             {
@@ -46,10 +48,12 @@ namespace System.Web.Http.OData.Routing.Conventions
 
                 if (declaringType != null)
                 {
+                    string actionNamePrefix = (method == HttpMethod.Get) ? "Get" : "PostTo";
+
                     // e.g. Try GetNavigationPropertyFromDeclaringType first, then fallback on GetNavigationProperty action name
                     string actionName = actionMap.FindMatchingAction(
-                        "Get" + navigationProperty.Name + "From" + declaringType.Name,
-                        "Get" + navigationProperty.Name);
+                        actionNamePrefix + navigationProperty.Name + "From" + declaringType.Name,
+                        actionNamePrefix + navigationProperty.Name);
 
                     if (actionName != null)
                     {

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="FxCop rules for ASP.NET Web Stack" Description="This rule set contains the rules for ASP.NET Web Stack." ToolsVersion="10.0">
   <RuleHintPaths>
-    <Path>..\packages\Microsoft.Web.FxCop.1.0.0</Path>
+    <Path>..\packages\Microsoft.Web.FxCop.1.0.1</Path>
   </RuleHintPaths>
   <IncludeAll Action="Error" />
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">

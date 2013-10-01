@@ -97,7 +97,7 @@ namespace System.Web.Http.Results
         private HttpResponseMessage Execute()
         {
             HttpError error = new HttpError(_exception, _dependencies.IncludeErrorDetail);
-            return NegotiatedContentResult<HttpError>.Execute(HttpStatusCode.BadRequest, error,
+            return NegotiatedContentResult<HttpError>.Execute(HttpStatusCode.InternalServerError, error,
                 _dependencies.ContentNegotiator, _dependencies.Request, _dependencies.Formatters);
         }
 

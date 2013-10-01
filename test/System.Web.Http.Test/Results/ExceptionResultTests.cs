@@ -243,7 +243,7 @@ namespace System.Web.Http.Results
                 using (HttpResponseMessage response = task.Result)
                 {
                     Assert.NotNull(response);
-                    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+                    Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
                     HttpContent content = response.Content;
                     Assert.IsType<ObjectContent<HttpError>>(content);
                     ObjectContent<HttpError> typedContent = (ObjectContent<HttpError>)content;
@@ -293,7 +293,7 @@ namespace System.Web.Http.Results
                 using (HttpResponseMessage response = task.Result)
                 {
                     Assert.NotNull(response);
-                    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+                    Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
                     HttpContent content = response.Content;
                     Assert.IsType<ObjectContent<HttpError>>(content);
                     ObjectContent<HttpError> typedContent = (ObjectContent<HttpError>)content;
@@ -401,7 +401,7 @@ namespace System.Web.Http.Results
                     using (HttpResponseMessage response = task.Result)
                     {
                         Assert.NotNull(response);
-                        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+                        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
                         HttpContent content = response.Content;
                         Assert.IsType<ObjectContent<HttpError>>(content);
                         ObjectContent<HttpError> typedContent = (ObjectContent<HttpError>)content;

@@ -103,7 +103,6 @@
     <Compile Include="Results\NegotiatedContentResult.cs" />
     <Compile Include="Results\StatusCodeResult.cs" />
     <Compile Include="IHttpActionResult.cs" />
-    <Compile Include="Results\ContinuationResult.cs" />
     <Compile Include="HttpErrorKeys.cs" />
     <Compile Include="Controllers\FilterGrouping.cs" />
     <Compile Include="RoutePrefixAttribute.cs" />

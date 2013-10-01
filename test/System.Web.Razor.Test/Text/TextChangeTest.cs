@@ -74,6 +74,19 @@ namespace System.Web.Razor.Test.Text
         }
 
         [Fact]
+        public void TestDeleteCreatesTheRightSizeChange()
+        {
+            // Arrange 
+            ITextBuffer oldBuffer = new Mock<ITextBuffer>().Object;
+            ITextBuffer newBuffer = new Mock<ITextBuffer>().Object;
+            TextChange change = new TextChange(0, 1, oldBuffer, 0, newBuffer);
+
+            // Assert
+            Assert.Equal(0, change.NewText.Length);
+            Assert.Equal(1, change.OldText.Length);
+        }
+
+        [Fact]
         public void TestIsInsert()
         {
             // Arrange 
@@ -86,6 +99,19 @@ namespace System.Web.Razor.Test.Text
         }
 
         [Fact]
+        public void TestInsertCreateTheRightSizeChange()
+        {
+            // Arrange 
+            ITextBuffer oldBuffer = new Mock<ITextBuffer>().Object;
+            ITextBuffer newBuffer = new Mock<ITextBuffer>().Object;
+            TextChange change = new TextChange(0, 0, oldBuffer, 1, newBuffer);
+
+            // Assert
+            Assert.Equal(1, change.NewText.Length);
+            Assert.Equal(0, change.OldText.Length);
+        }
+
+        [Fact]
         public void TestIsReplace()
         {
             // Arrange 
@@ -95,6 +121,32 @@ namespace System.Web.Razor.Test.Text
 
             // Assert
             Assert.True(change.IsReplace);
+        }
+
+        [Fact]
+        public void ReplaceCreatesTheRightSizeChange()
+        {
+            // Arrange 
+            ITextBuffer oldBuffer = new Mock<ITextBuffer>().Object;
+            ITextBuffer newBuffer = new Mock<ITextBuffer>().Object;
+            TextChange change = new TextChange(0, 5, oldBuffer, 10, newBuffer);
+
+            // Assert
+            Assert.Equal(10, change.NewText.Length);
+            Assert.Equal(5, change.OldText.Length);
+        }
+
+        [Fact]
+        public void ReplaceCreatesTheRightSizeChange1()
+        {
+            // Arrange 
+            ITextBuffer oldBuffer = new Mock<ITextBuffer>().Object;
+            ITextBuffer newBuffer = new Mock<ITextBuffer>().Object;
+            TextChange change = new TextChange(0, 5, oldBuffer, 1, newBuffer);
+
+            // Assert
+            Assert.Equal(1, change.NewText.Length);
+            Assert.Equal(5, change.OldText.Length);
         }
 
         [Fact]
@@ -113,6 +165,21 @@ namespace System.Web.Razor.Test.Text
         }
 
         [Fact]
+        public void OldTextReturnsOldSpanFromOldBuffer2()
+        {
+            // Arrange
+            var newBuffer = new StringTextBuffer("test");
+            var oldBuffer = new StringTextBuffer("text");
+            var textChange = new TextChange(2, 2, oldBuffer, 1, newBuffer);
+
+            // Act
+            string text = textChange.OldText;
+
+            // Assert
+            Assert.Equal("xt", text);
+        }
+
+        [Fact]
         public void NewTextWithInsertReturnsChangedTextFromBuffer()
         {
             // Arrange
@@ -122,9 +189,11 @@ namespace System.Web.Razor.Test.Text
 
             // Act
             string text = textChange.NewText;
+            string oldText = textChange.OldText;
 
             // Assert
             Assert.Equal("tes", text);
+            Assert.Equal("", oldText);
         }
 
         [Fact]
@@ -147,14 +216,16 @@ namespace System.Web.Razor.Test.Text
         {
             // Arrange
             var newBuffer = new StringTextBuffer("test");
-            var oldBuffer = new StringTextBuffer("");
+            var oldBuffer = new StringTextBuffer("tebb");
             var textChange = new TextChange(2, 2, oldBuffer, 1, newBuffer);
 
             // Act
-            string text = textChange.NewText;
+            string newText = textChange.NewText;
+            string oldText = textChange.OldText;
 
             // Assert
-            Assert.Equal("s", text);
+            Assert.Equal("s", newText);
+            Assert.Equal("bb", oldText);
         }
 
         [Fact]

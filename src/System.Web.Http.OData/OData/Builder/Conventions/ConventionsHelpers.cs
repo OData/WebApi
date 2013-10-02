@@ -23,7 +23,6 @@ namespace System.Web.Http.OData.Builder.Conventions
             Contract.Assert(entityContext.EdmObject != null);
 
             IEnumerable<IEdmProperty> keys = entityContext.EntityType.Key();
-            IEdmStructuredObject entityInstance = entityContext.EdmObject;
 
             // TODO: BUG 453795: reflection cleanup
             if (keys.Count() == 1)

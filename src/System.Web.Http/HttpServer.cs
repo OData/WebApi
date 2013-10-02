@@ -64,6 +64,8 @@ namespace System.Web.Http
         /// </summary>
         /// <param name="configuration">The <see cref="HttpConfiguration"/> used to configure this <see cref="HttpServer"/> instance.</param>
         /// <param name="dispatcher">Http dispatcher responsible for handling incoming requests.</param>
+        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "principal",
+            Justification = "Must access Thread.CurrentPrincipal to work around problem in .NET 4.5")]
         public HttpServer(HttpConfiguration configuration, HttpMessageHandler dispatcher)
         {
             if (configuration == null)

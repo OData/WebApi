@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -347,7 +348,7 @@ namespace System.Web.Razor.Editor
                                             RazorEditorTrace.TraceLine(
                                                 RazorResources.Trace_ParseComplete,
                                                 fileNameOnly,
-                                                elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?");
+                                                elapsedMs.HasValue ? elapsedMs.Value.ToString(CultureInfo.InvariantCulture) : "?");
 
                                             if (results != null && !linkedCancel.IsCancellationRequested)
                                             {
@@ -367,7 +368,7 @@ namespace System.Web.Razor.Editor
                                                 _currentParseTree = results.Document;
                                                 RazorEditorTrace.TraceLine(RazorResources.Trace_TreesCompared,
                                                     fileNameOnly,
-                                                    elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?",
+                                                    elapsedMs.HasValue ? elapsedMs.Value.ToString(CultureInfo.InvariantCulture) : "?",
                                                     treeStructureChanged);
 
                                                 // Build Arguments

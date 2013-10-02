@@ -174,7 +174,7 @@ namespace System.Web.Razor
             elapsedMs = sw.ElapsedMilliseconds;
             sw.Reset();
 #endif
-            RazorEditorTrace.TraceLine(RazorResources.Trace_EditorProcessedChange, Path.GetFileName(FileName), changeString, elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?", result.ToString());
+            RazorEditorTrace.TraceLine(RazorResources.Trace_EditorProcessedChange, Path.GetFileName(FileName), changeString, elapsedMs.HasValue ? elapsedMs.Value.ToString(CultureInfo.InvariantCulture) : "?", result.ToString());
             return result;
         }
 

@@ -211,7 +211,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             Contract.Assert(writeContext.ExpandedEntity != null);
 
-            IEdmNavigationProperty expandedProperty = writeContext.NavigationProperty;
             IEdmEntitySet sourceEntitySet = writeContext.ExpandedEntity.EntitySet;
             EntitySetLinkBuilderAnnotation linkBuilder = writeContext.Model.GetEntitySetLinkBuilder(sourceEntitySet);
             Uri navigationLink =

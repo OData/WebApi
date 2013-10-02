@@ -58,7 +58,6 @@ namespace System.Web.Mvc.Routing
                         
             RouteAreaAttribute area = controllerDescriptor.GetAreaFrom();
             string areaName = controllerDescriptor.GetAreaName(area);
-            string areaPrefix = area != null ? area.AreaPrefix ?? area.AreaName : null;
 
             RouteValueDictionary defaults = new RouteValueDictionary
             {

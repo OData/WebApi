@@ -219,8 +219,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Contract.Assert(entityInstanceContext != null);
             Contract.Assert(writer != null);
 
-            ODataSerializerContext writeContext = entityInstanceContext.SerializerContext;
-
             IEdmNavigationProperty navigationProperty = navigationPropertyToExpand.Key;
             SelectExpandClause selectExpandClause = navigationPropertyToExpand.Value;
 

@@ -411,15 +411,17 @@ namespace System.Web.Http.OData.Formatter
 
         public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, IAssembliesResolver assembliesResolver)
         {
-            Contract.Assert(edmType is IEdmSchemaType);
+            IEdmSchemaType edmSchemaType = edmType as IEdmSchemaType;
 
-            ClrTypeAnnotation annotation = edmModel.GetAnnotationValue<ClrTypeAnnotation>(edmType);
+            Contract.Assert(edmSchemaType != null);
+
+            ClrTypeAnnotation annotation = edmModel.GetAnnotationValue<ClrTypeAnnotation>(edmSchemaType);
             if (annotation != null)
             {
                 return annotation.ClrType;
             }
 
-            string typeName = (edmType as IEdmSchemaType).FullName();
+            string typeName = edmSchemaType.FullName();
             IEnumerable<Type> matchingTypes = GetMatchingTypes(typeName, assembliesResolver);
 
             if (matchingTypes.Count() > 1)
@@ -428,7 +430,7 @@ namespace System.Web.Http.OData.Formatter
                     typeName, String.Join(",", matchingTypes.Select(type => type.AssemblyQualifiedName)));
             }
 
-            edmModel.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(matchingTypes.SingleOrDefault()));
+            edmModel.SetAnnotationValue<ClrTypeAnnotation>(edmSchemaType, new ClrTypeAnnotation(matchingTypes.SingleOrDefault()));
 
             return matchingTypes.SingleOrDefault();
         }

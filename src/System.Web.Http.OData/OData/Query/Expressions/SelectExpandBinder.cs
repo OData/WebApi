@@ -69,7 +69,6 @@ namespace System.Web.Http.OData.Query.Expressions
         private IQueryable Bind(IQueryable queryable)
         {
             Type elementType = _selectExpandQuery.Context.ElementClrType;
-            ParameterExpression source = Expression.Parameter(elementType);
 
             LambdaExpression projectionLambda = GetProjectionLambda();
 

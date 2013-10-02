@@ -17,7 +17,7 @@
         <!-- Package sources used to restore packages. By default will used the registered sources under %APPDATA%\NuGet\NuGet.Config -->
         <PackageSource Include="https://nuget.org/api/v2/" />
         <PackageSource Include="https://www.myget.org/F/30de4ee06dd54956a82013fa17a3accb/" /> <!-- Build tools -->
-        <PackageSource Include="http://www.myget.org/F/02a8fd0d231848d2ae32cd901e273000" /> <!-- External component dependencies -->
+        <PackageSource Include="https://www.myget.org/F/02a8fd0d231848d2ae32cd901e273000" /> <!-- External component dependencies -->
     </ItemGroup>
 
     <PropertyGroup Condition=" '$(OS)' == 'Windows_NT'">

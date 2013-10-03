@@ -1060,7 +1060,7 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} Object Type &apos;{1}&apos;..
+        ///   Looks up a localized string similar to {0} Object type &apos;{1}&apos;..
         /// </summary>
         internal static string TypeHelpers_CannotCreateInstance {
             get {

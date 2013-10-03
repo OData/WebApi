@@ -147,7 +147,7 @@ namespace Microsoft.Web.Mvc.ModelBinding.Test
             // Act & Assert, confirming type name and full stack are available in Exception
             MissingMethodException exception = Assert.Throws<MissingMethodException>(
                 () => testableBinder.CreateModelPublic(null, bindingContext),
-                "No parameterless constructor defined for this object. Object Type 'Microsoft.Web.Mvc.ModelBinding.Test.MutableObjectModelBinderTest+NoParameterlessCtor'.");
+                "No parameterless constructor defined for this object. Object type 'Microsoft.Web.Mvc.ModelBinding.Test.MutableObjectModelBinderTest+NoParameterlessCtor'.");
             Assert.Contains("System.Activator.CreateInstance(", exception.ToString());
         }
 

@@ -487,6 +487,6 @@
     <value>The route prefix '{0}' on the controller named '{1}' cannot begin or end with a forward slash.</value>
   </data>
   <data name="TypeHelpers_CannotCreateInstance" xml:space="preserve">
-    <value>{0} Object Type '{1}'.</value>
+    <value>{0} Object type '{1}'.</value>
   </data>
 </root>

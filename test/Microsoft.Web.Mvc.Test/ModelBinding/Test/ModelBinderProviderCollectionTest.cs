@@ -453,7 +453,7 @@ namespace Microsoft.Web.Mvc.ModelBinding.Test
             // Act & Assert, confirming type name and full stack are available in Exception
             MissingMethodException exception = Assert.Throws<MissingMethodException>(
                 () => collection.GetBinder(controllerContext, bindingContext),
-                "No parameterless constructor defined for this object. Object Type 'Microsoft.Web.Mvc.ModelBinding.Test.ModelBinderProviderCollectionTest+NoParameterlessCtorProvider'.");
+                "No parameterless constructor defined for this object. Object type 'Microsoft.Web.Mvc.ModelBinding.Test.ModelBinderProviderCollectionTest+NoParameterlessCtorProvider'.");
             Assert.Contains("System.Activator.CreateInstance(", exception.ToString());
         }
 
@@ -473,7 +473,7 @@ namespace Microsoft.Web.Mvc.ModelBinding.Test
             // Act & Assert, confirming type name and full stack are available in Exception
             MissingMethodException exception = Assert.Throws<MissingMethodException>(
                 () => collection.GetBinder(controllerContext, bindingContext),
-                "No parameterless constructor defined for this object. Object Type 'Microsoft.Web.Mvc.ModelBinding.Test.ModelBinderProviderCollectionTest+NoParameterlessCtorBinder`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]'.");
+                "No parameterless constructor defined for this object. Object type 'Microsoft.Web.Mvc.ModelBinding.Test.ModelBinderProviderCollectionTest+NoParameterlessCtorBinder`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]'.");
             Assert.Contains("System.Activator.CreateInstance(", exception.ToString());
         }
 

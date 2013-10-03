@@ -118,7 +118,7 @@ namespace System.Web.Mvc.Test
             // Depend on the fact that Activator.CreateInstance cannot create an object without a parameterless ctor
             MissingMethodException ex = Assert.Throws<MissingMethodException>(
                 () => view.Render(new Mock<ViewContext>().Object, new Mock<TextWriter>().Object),
-                "No parameterless constructor defined for this object. Object Type 'System.Web.Mvc.Test.CompiledTypeViewTest+NoParameterlessCtor'.");
+                "No parameterless constructor defined for this object. Object type 'System.Web.Mvc.Test.CompiledTypeViewTest+NoParameterlessCtor'.");
             Assert.Contains("System.Activator.CreateInstance(", ex.ToString());
         }
 

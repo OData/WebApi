@@ -235,6 +235,6 @@
     <value>The {0} field only accepts files with one of the following content types: {1}.</value>
   </data>
   <data name="ModelBinderUtil_CannotCreateInstance" xml:space="preserve">
-    <value>{0} Object Type '{1}'.</value>
+    <value>{0} Object type '{1}'.</value>
   </data>
 </root>

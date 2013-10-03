@@ -50,7 +50,22 @@ namespace Microsoft.Web.Mvc.ModelBinding
             _modelBinderFactory = typeArguments =>
             {
                 Type closedModelBinderType = (modelBinderTypeIsOpenGeneric) ? modelBinderType.MakeGenericType(typeArguments) : modelBinderType;
-                return (IExtensibleModelBinder)Activator.CreateInstance(closedModelBinderType);
+                try
+                {
+                    return (IExtensibleModelBinder)Activator.CreateInstance(closedModelBinderType);
+                }
+                catch (MissingMethodException exception)
+                {
+                    // Ensure thrown exception contains the type name.  Might be down a few levels.
+                    MissingMethodException replacementException =
+                        ModelBinderUtil.EnsureDebuggableException(exception, closedModelBinderType.FullName);
+                    if (replacementException != null)
+                    {
+                        throw replacementException;
+                    }
+
+                    throw;
+                }
             };
         }
 

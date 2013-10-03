@@ -158,12 +158,12 @@ namespace Microsoft.Web.Mvc.ModelBinding
 
             if (typeof(ModelBinderProvider).IsAssignableFrom(attr.BinderType))
             {
-                provider = (ModelBinderProvider)Activator.CreateInstance(attr.BinderType);
+                provider = (ModelBinderProvider)CreateInstance(attr.BinderType);
             }
             else if (typeof(IExtensibleModelBinder).IsAssignableFrom(attr.BinderType))
             {
                 Type closedBinderType = (attr.BinderType.IsGenericTypeDefinition) ? attr.BinderType.MakeGenericType(modelType.GetGenericArguments()) : attr.BinderType;
-                IExtensibleModelBinder binderInstance = (IExtensibleModelBinder)Activator.CreateInstance(closedBinderType);
+                IExtensibleModelBinder binderInstance = (IExtensibleModelBinder)CreateInstance(closedBinderType);
                 provider = new SimpleModelBinderProvider(modelType, binderInstance) { SuppressPrefixCheck = attr.SuppressPrefixCheck };
             }
             else
@@ -174,6 +174,26 @@ namespace Microsoft.Web.Mvc.ModelBinding
             }
 
             return true;
+        }
+
+        private static object CreateInstance(Type type)
+        {
+            try
+            {
+                return Activator.CreateInstance(type);
+            }
+            catch (MissingMethodException exception)
+            {
+                // Ensure thrown exception contains the type name.  Might be down a few levels.
+                MissingMethodException replacementException =
+                    ModelBinderUtil.EnsureDebuggableException(exception, type.FullName);
+                if (replacementException != null)
+                {
+                    throw replacementException;
+                }
+
+                throw;
+            }
         }
     }
 }

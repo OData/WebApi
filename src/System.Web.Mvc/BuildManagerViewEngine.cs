@@ -113,7 +113,22 @@ namespace System.Web.Mvc
 
             public object Create(ControllerContext controllerContext, Type type)
             {
-                return _resolverThunk().GetService(type) ?? Activator.CreateInstance(type);
+                try
+                {
+                    return _resolverThunk().GetService(type) ?? Activator.CreateInstance(type);
+                }
+                catch (MissingMethodException exception)
+                {
+                    // Ensure thrown exception contains the type name.  Might be down a few levels.
+                    MissingMethodException replacementException =
+                        TypeHelpers.EnsureDebuggableException(exception, type.FullName);
+                    if (replacementException != null)
+                    {
+                        throw replacementException;
+                    }
+
+                    throw;
+                }
             }
         }
     }

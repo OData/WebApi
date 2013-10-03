@@ -95,7 +95,22 @@ namespace Microsoft.Web.Mvc.ModelBinding
         {
             // If the Activator throws an exception, we want to propagate it back up the call stack, since the application
             // developer should know that this was an invalid type to try to bind to.
-            return Activator.CreateInstance(bindingContext.ModelType);
+            try
+            {
+                return Activator.CreateInstance(bindingContext.ModelType);
+            }
+            catch (MissingMethodException exception)
+            {
+                // Ensure thrown exception contains the type name.  Might be down a few levels.
+                MissingMethodException replacementException =
+                    ModelBinderUtil.EnsureDebuggableException(exception, bindingContext.ModelType.FullName);
+                if (replacementException != null)
+                {
+                    throw replacementException;
+                }
+
+                throw;
+            }
         }
 
         // Called when the property setter null check failed, allows us to add our own error message to ModelState.

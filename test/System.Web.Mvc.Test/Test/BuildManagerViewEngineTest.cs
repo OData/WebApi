@@ -107,13 +107,12 @@ namespace System.Web.Mvc.Test
 
             var engine = new TestableBuildManagerViewEngine(dependencyResolver: dependencyResolver.Object);
 
-            // Act
-            MissingMethodException ex = Assert.Throws<MissingMethodException>( // Depend on the fact that Activator.CreateInstance cannot create an object without a parameterless ctor
-                () => engine.ViewPageActivator.Create(controllerContext, typeof(NoParameterlessCtor))
-                );
-
-            // Assert           
-            Assert.Contains("System.Activator.CreateInstance(", ex.StackTrace);
+            // Act & Assert, confirming type name and full stack are available in Exception
+            // Depend on the fact that Activator.CreateInstance cannot create an object without a parameterless ctor
+            MissingMethodException ex = Assert.Throws<MissingMethodException>(
+                () => engine.ViewPageActivator.Create(controllerContext, typeof(NoParameterlessCtor)),
+                "No parameterless constructor defined for this object. Object Type 'System.Web.Mvc.Test.BuildManagerViewEngineTest+NoParameterlessCtor'.");
+            Assert.Contains("System.Activator.CreateInstance(", ex.InnerException.StackTrace);
         }
 
         [Fact]

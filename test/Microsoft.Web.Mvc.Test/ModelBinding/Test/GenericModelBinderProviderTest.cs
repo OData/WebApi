@@ -235,12 +235,42 @@ namespace Microsoft.Web.Mvc.ModelBinding.Test
                 delegate { provider.GetBinder(null, null); }, "bindingContext");
         }
 
+        [Fact]
+        public void GetBinderThrowsIfModelBinderHasNoParameterlessConstructor()
+        {
+            // Arrange
+            ExtensibleModelBindingContext bindingContext = GetBindingContext(typeof(List<int>));
+            GenericModelBinderProvider provider =
+                new GenericModelBinderProvider(typeof(List<>), typeof(NoParameterlessCtorBinder<>))
+                {
+                    SuppressPrefixCheck = true,
+                };
+
+            // Act & Assert, confirming type name and full stack are available in Exception
+            MissingMethodException exception = Assert.Throws<MissingMethodException>(
+                () => provider.GetBinder(null, bindingContext),
+                "No parameterless constructor defined for this object. Object Type 'Microsoft.Web.Mvc.ModelBinding.Test.GenericModelBinderProviderTest+NoParameterlessCtorBinder`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]'.");
+            Assert.Contains("System.Activator.CreateInstance(", exception.ToString());
+        }
+
         private static ExtensibleModelBindingContext GetBindingContext(Type modelType)
         {
             return new ExtensibleModelBindingContext
             {
                 ModelMetadata = new EmptyModelMetadataProvider().GetMetadataForType(() => null, modelType)
             };
+        }
+
+        private class NoParameterlessCtorBinder<T> : IExtensibleModelBinder
+        {
+            public NoParameterlessCtorBinder(int parameter)
+            {
+            }
+
+            public bool BindModel(ControllerContext controllerContext, ExtensibleModelBindingContext bindingContext)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

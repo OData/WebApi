@@ -125,6 +125,11 @@
     </Compile>
     <Compile Include="ActionMethodSelectorBase.cs" />
     <Compile Include="ControllerDescriptorExtensions.cs" />
+    <Compile Include="Properties\MvcResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MvcResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Routing\RouteParsing\ParsedRoute.cs" />
     <Compile Include="..\Common\Routing\PathContentSegment.cs">
       <Link>Routing\RouteParsing\PathContentSegment.cs</Link>
@@ -531,17 +536,12 @@
     <Compile Include="WebFormView.cs" />
     <Compile Include="WebFormViewEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\MvcResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MvcResources.resx</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\MvcResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>MvcResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>MvcResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

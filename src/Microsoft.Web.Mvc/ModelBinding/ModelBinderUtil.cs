@@ -5,6 +5,7 @@ using System.Collections;
 using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
+using Microsoft.Web.Mvc.Properties;
 
 namespace Microsoft.Web.Mvc.ModelBinding
 {
@@ -79,6 +80,30 @@ namespace Microsoft.Web.Mvc.ModelBinding
             {
                 model = null;
             }
+        }
+
+        /// <summary>
+        /// Provide a new <see cref="MissingMethodException"/> if original Message does not contain given full Type name.
+        /// </summary>
+        /// <param name="originalException"><see cref="MissingMethodException"/> to check.</param>
+        /// <param name="fullTypeName">Full Type name which Message should contain.</param>
+        /// <returns>New <see cref="MissingMethodException"/> if an update is required; null otherwise.</returns>
+        public static MissingMethodException EnsureDebuggableException(
+            MissingMethodException originalException,
+            string fullTypeName)
+        {
+            MissingMethodException replacementException = null;
+            if (!originalException.Message.Contains(fullTypeName))
+            {
+                string message = String.Format(
+                    CultureInfo.CurrentCulture,
+                    MvcResources.ModelBinderUtil_CannotCreateInstance,
+                    originalException.Message,
+                    fullTypeName);
+                replacementException = new MissingMethodException(message, originalException);
+            }
+
+            return replacementException;
         }
 
         // Based on String.IsNullOrWhitespace

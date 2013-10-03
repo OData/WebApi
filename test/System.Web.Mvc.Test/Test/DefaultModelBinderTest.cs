@@ -1329,6 +1329,33 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void CreateInstanceCreatesModelInstanceForGenericIListWithoutParameterlessConstructor()
+        {
+            // Arrange
+            DefaultModelBinderHelper helper = new DefaultModelBinderHelper();
+
+            // Act
+            // No need for type parameter to have a parameterless constructor
+            object modelObject = helper.PublicCreateModel(null, null, typeof(IList<NoParameterlessCtor>));
+
+            // Assert
+            Assert.IsAssignableFrom<IList<NoParameterlessCtor>>(modelObject);
+        }
+
+        [Fact]
+        public void CreateInstanceThrowsWithoutParameterlessConstructor()
+        {
+            // Arrange
+            DefaultModelBinderHelper helper = new DefaultModelBinderHelper();
+
+            // Act & Assert, confirming type name and full stack are available in Exception
+            MissingMethodException exception = Assert.Throws<MissingMethodException>(
+                () => helper.PublicCreateModel(null, null, typeof(NoParameterlessCtor)),
+                "No parameterless constructor defined for this object. Object Type 'System.Web.Mvc.Test.DefaultModelBinderTest+NoParameterlessCtor'.");
+            Assert.Contains("System.Activator.CreateInstance(", exception.ToString());
+        }
+
+        [Fact]
         public void CreateSubIndexNameReturnsPrefixPlusIndex()
         {
             // Arrange
@@ -2922,6 +2949,13 @@ namespace System.Web.Mvc.Test
             public string Name { get; set; }
 
             public IEnumerable<string> States { get; set; }
+        }
+
+        private class NoParameterlessCtor
+        {
+            public NoParameterlessCtor(int parameter)
+            {
+            }
         }
     }
 }

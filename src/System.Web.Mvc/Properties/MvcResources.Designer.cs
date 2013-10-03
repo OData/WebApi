@@ -1060,6 +1060,15 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} Object Type &apos;{1}&apos;..
+        /// </summary>
+        internal static string TypeHelpers_CannotCreateInstance {
+            get {
+                return ResourceManager.GetString("TypeHelpers_CannotCreateInstance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The model object inside the metadata claimed to be compatible with {0}, but was actually {1}..
         /// </summary>
         internal static string ValidatableObjectAdapter_IncompatibleType {

@@ -114,13 +114,12 @@ namespace System.Web.Mvc.Test
             var dependencyResolver = new Mock<IDependencyResolver>();
             var view = new TestableBuildManagerCompiledView(controllerContext, "view path", dependencyResolver: dependencyResolver.Object) { BuildManager = buildManager };
 
-            // Act
-            MissingMethodException ex = Assert.Throws<MissingMethodException>( // Depend on the fact that Activator.CreateInstance cannot create an object without a parameterless ctor
-                () => view.Render(new Mock<ViewContext>().Object, new Mock<TextWriter>().Object)
-                );
-
-            // Assert           
-            Assert.Contains("System.Activator.CreateInstance(", ex.StackTrace);
+            // Act & Assert, confirming type name and full stack are available in Exception
+            // Depend on the fact that Activator.CreateInstance cannot create an object without a parameterless ctor
+            MissingMethodException ex = Assert.Throws<MissingMethodException>(
+                () => view.Render(new Mock<ViewContext>().Object, new Mock<TextWriter>().Object),
+                "No parameterless constructor defined for this object. Object Type 'System.Web.Mvc.Test.CompiledTypeViewTest+NoParameterlessCtor'.");
+            Assert.Contains("System.Activator.CreateInstance(", ex.ToString());
         }
 
         private class NoParameterlessCtor

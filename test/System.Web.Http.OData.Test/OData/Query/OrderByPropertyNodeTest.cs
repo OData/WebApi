@@ -19,7 +19,7 @@ namespace System.Web.Http.OData.Query
         {
             // Arrange & Act & Assert
             Assert.ThrowsArgumentNull(
-                () => new OrderByPropertyNode(null, OrderByDirection.Ascending),
+                () => new OrderByPropertyNode(property: null, direction: OrderByDirection.Ascending),
                 "property");
         }
 
@@ -35,6 +35,48 @@ namespace System.Web.Http.OData.Query
             // Assert
             Assert.ReferenceEquals(mockProperty.Object, node.Property);
             Assert.Equal(OrderByDirection.Descending, node.Direction);
+        }
+
+        [Fact]
+        public void Ctor_TakingOrderByClause_ThrowsArgumentNull_OrderByClause()
+        {
+            Assert.ThrowsArgumentNull(() => new OrderByPropertyNode(orderByClause: null),
+                "orderByClause");
+        }
+
+        [Fact]
+        public void Ctor_TakingOrderByClause_InitializesProperty_Property()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            IEdmProperty property = model.Customer.FindProperty("ID");
+            EntityRangeVariable variable = new EntityRangeVariable("it", model.Customer.AsReference(), model.Customers);
+            SingleValuePropertyAccessNode node = new SingleValuePropertyAccessNode(new EntityRangeVariableReferenceNode("it", variable), property);
+            OrderByClause orderBy = new OrderByClause(thenBy: null, expression: node, direction: OrderByDirection.Ascending, rangeVariable: variable);
+
+            // Act
+            OrderByPropertyNode orderByNode = new OrderByPropertyNode(orderBy);
+
+            // Assert
+            Assert.Equal(property, orderByNode.Property);
+        }
+
+        [Fact]
+        public void Ctor_TakingOrderByClause_InitializesProperty_Direction()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            IEdmProperty property = model.Customer.FindProperty("ID");
+            OrderByDirection direction = OrderByDirection.Ascending;
+            EntityRangeVariable variable = new EntityRangeVariable("it", model.Customer.AsReference(), model.Customers);
+            SingleValuePropertyAccessNode node = new SingleValuePropertyAccessNode(new EntityRangeVariableReferenceNode("it", variable), property);
+            OrderByClause orderBy = new OrderByClause(thenBy: null, expression: node, direction: direction, rangeVariable: variable);
+
+            // Act
+            OrderByPropertyNode orderByNode = new OrderByPropertyNode(orderBy);
+
+            // Assert
+            Assert.Equal(direction, orderByNode.Direction);
         }
 
         [Fact]

@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http.OData.Properties;
-using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
 
@@ -22,13 +20,17 @@ namespace System.Web.Http.OData.Query
             Direction = direction;
         }
 
+        internal OrderByNode()
+        {
+        }
+
         /// <summary>
         /// Gets the <see cref="OrderByDirection"/> for the current node.
         /// </summary>
-        public OrderByDirection Direction { get; private set; }
+        public OrderByDirection Direction { get; internal set; }
 
         /// <summary>
-        /// Creates a list of <see cref="OrderByPropertyNode"/> instances from a linked list of <see cref="OrderByClause"/> instances.
+        /// Creates a list of <see cref="OrderByNode"/> instances from a linked list of <see cref="OrderByClause"/> instances.
         /// </summary>
         /// <param name="orderByClause">The head of the <see cref="OrderByClause"/> linked list.</param>
         /// <returns>The list of new <see cref="OrderByPropertyNode"/> instances.</returns>
@@ -43,15 +45,7 @@ namespace System.Web.Http.OData.Query
                 }
                 else
                 {
-                    SingleValuePropertyAccessNode property = clause.Expression as SingleValuePropertyAccessNode;
-
-                    if (property == null ||
-                        !(property.Source is EntityRangeVariableReferenceNode || property.Source is NonentityRangeVariableReferenceNode))
-                    {
-                        throw new ODataException(SRResources.OrderByClauseNotSupported);
-                    }
-
-                    result.Add(new OrderByPropertyNode(property.Property, clause.Direction));
+                    result.Add(new OrderByPropertyNode(clause));
                 }
             }
 

@@ -251,7 +251,7 @@ namespace System.Web.Http.OData.Query
 
             if (orderBy != null)
             {
-                result = orderBy.ApplyTo(result);
+                result = orderBy.ApplyTo(result, querySettings);
             }
 
             if (Skip != null)

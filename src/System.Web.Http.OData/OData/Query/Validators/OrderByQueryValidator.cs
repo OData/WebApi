@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.OData;
+using Microsoft.Data.OData.Query.SemanticAst;
 
 namespace System.Web.Http.OData.Query.Validators
 {
@@ -26,6 +27,16 @@ namespace System.Web.Http.OData.Query.Validators
             if (validationSettings == null)
             {
                 throw Error.ArgumentNull("validationSettings");
+            }
+
+            int nodeCount = 0;
+            for (OrderByClause clause = orderByOption.OrderByClause; clause != null; clause = clause.ThenBy)
+            {
+                nodeCount++;
+                if (nodeCount > validationSettings.MaxOrderByNodeCount)
+                {
+                    throw new ODataException(Error.Format(SRResources.OrderByNodeCountExceeded, validationSettings.MaxOrderByNodeCount));
+                }
             }
 
             if (validationSettings.AllowedOrderByProperties.Count > 0)

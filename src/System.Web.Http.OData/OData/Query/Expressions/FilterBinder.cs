@@ -63,47 +63,51 @@ namespace System.Web.Http.OData.Query.Expressions
         private IAssembliesResolver _assembliesResolver;
 
         private FilterBinder(IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+            : this(model, querySettings)
+        {
+            _assembliesResolver = assembliesResolver;
+        }
+
+        private FilterBinder(IEdmModel model, ODataQuerySettings querySettings)
         {
             Contract.Assert(model != null);
-            Contract.Assert(assembliesResolver != null);
             Contract.Assert(querySettings != null);
             Contract.Assert(querySettings.HandleNullPropagation != HandleNullPropagationOption.Default);
 
             _querySettings = querySettings;
             _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
             _model = model;
-            _assembliesResolver = assembliesResolver;
         }
 
-        public static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterClause filterClause, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+        public static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterClause filterClause, IEdmModel model,
+            IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
             return Bind(filterClause, typeof(TEntityType), model, assembliesResolver, querySettings) as Expression<Func<TEntityType, bool>>;
         }
 
-        public static Expression Bind(FilterClause filterClause, Type filterType, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+        public static Expression Bind(FilterClause filterClause, Type filterType, IEdmModel model,
+            IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
             if (filterClause == null)
             {
-                throw Error.ArgumentNull("filterNode");
+                throw Error.ArgumentNull("filterClause");
             }
-
             if (filterType == null)
             {
                 throw Error.ArgumentNull("filterType");
             }
-
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
-
             if (assembliesResolver == null)
             {
                 throw Error.ArgumentNull("assembliesResolver");
             }
 
             FilterBinder binder = new FilterBinder(model, assembliesResolver, querySettings);
-            Expression filter = binder.BindFilterClause(filterClause, filterType);
+            LambdaExpression filter = binder.BindExpression(filterClause.Expression, filterClause.RangeVariable, filterType);
+            filter = Expression.Lambda(binder.ApplyNullPropagationForFilterBody(filter.Body), filter.Parameters);
 
             Type expectedFilterType = typeof(Func<,>).MakeGenericType(filterType, typeof(bool));
             if (filter.Type != expectedFilterType)
@@ -112,6 +116,19 @@ namespace System.Web.Http.OData.Query.Expressions
             }
 
             return filter;
+        }
+
+        public static LambdaExpression Bind(OrderByClause orderBy, Type elementType,
+            IEdmModel model, ODataQuerySettings querySettings)
+        {
+            Contract.Assert(orderBy != null);
+            Contract.Assert(elementType != null);
+            Contract.Assert(model != null);
+            Contract.Assert(querySettings != null);
+
+            FilterBinder binder = new FilterBinder(model, querySettings);
+            LambdaExpression orderByLambda = binder.BindExpression(orderBy.Expression, orderBy.RangeVariable, elementType);
+            return orderByLambda;
         }
 
         private Expression Bind(QueryNode node)
@@ -375,17 +392,15 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
-        private Expression BindFilterClause(FilterClause filterClause, Type filterType)
+        private LambdaExpression BindExpression(SingleValueNode expression, RangeVariable rangeVariable, Type elementType)
         {
-            ParameterExpression filterParameter = Expression.Parameter(filterType, filterClause.RangeVariable.Name);
+            ParameterExpression filterParameter = Expression.Parameter(elementType, rangeVariable.Name);
             _lambdaParameters = new Dictionary<string, ParameterExpression>();
-            _lambdaParameters.Add(filterClause.RangeVariable.Name, filterParameter);
+            _lambdaParameters.Add(rangeVariable.Name, filterParameter);
 
-            Expression body = Bind(filterClause.Expression);
+            Expression body = Bind(expression);
+            LambdaExpression lambdaExpression = Expression.Lambda(body, filterParameter);
 
-            body = ApplyNullPropagationForFilterBody(body);
-
-            Expression filterExpression = Expression.Lambda(body, filterParameter);
             if (_parametersStack.Count != 0)
             {
                 _lambdaParameters = _parametersStack.Pop();
@@ -395,7 +410,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 _lambdaParameters = null;
             }
 
-            return filterExpression;
+            return lambdaExpression;
         }
 
         private Expression ApplyNullPropagationForFilterBody(Expression body)

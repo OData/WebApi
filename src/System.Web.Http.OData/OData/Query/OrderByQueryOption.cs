@@ -2,7 +2,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Query.Expressions;
 using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -75,7 +77,7 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Gets the parsed <see cref="OrderByClause"/> for this query option.
         /// </summary>
-        private OrderByClause OrderByClause
+        public OrderByClause OrderByClause
         {
             get
             {
@@ -94,7 +96,18 @@ namespace System.Web.Http.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the orderby query has been applied to.</returns>
         public IOrderedQueryable<T> ApplyTo<T>(IQueryable<T> query)
         {
-            return ApplyToCore(query) as IOrderedQueryable<T>;
+            return ApplyToCore(query, new ODataQuerySettings()) as IOrderedQueryable<T>;
+        }
+
+        /// <summary>
+        /// Apply the $orderby query to the given IQueryable.
+        /// </summary>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the orderby query has been applied to.</returns>
+        public IOrderedQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings)
+        {
+            return ApplyToCore(query, querySettings) as IOrderedQueryable<T>;
         }
 
         /// <summary>
@@ -104,7 +117,18 @@ namespace System.Web.Http.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the orderby query has been applied to.</returns>
         public IOrderedQueryable ApplyTo(IQueryable query)
         {
-            return ApplyToCore(query);
+            return ApplyToCore(query, new ODataQuerySettings());
+        }
+
+        /// <summary>
+        /// Apply the $orderby query to the given IQueryable.
+        /// </summary>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the orderby query has been applied to.</returns>
+        public IOrderedQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
+        {
+            return ApplyToCore(query, querySettings);
         }
 
         /// <summary>
@@ -124,7 +148,7 @@ namespace System.Web.Http.OData.Query
             }
         }
 
-        private IOrderedQueryable ApplyToCore(IQueryable query)
+        private IOrderedQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings)
         {
             if (Context.ElementClrType == null)
             {
@@ -155,7 +179,24 @@ namespace System.Web.Http.OData.Query
                     }
                     propertiesSoFar.Add(property);
 
-                    querySoFar = ExpressionHelpers.OrderByProperty(querySoFar, property, direction, Context.ElementClrType, alreadyOrdered);
+                    if (propertyNode.OrderByClause != null)
+                    {
+                        // Ensure we have decided how to handle null propagation
+                        ODataQuerySettings updatedSettings = querySettings;
+                        if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
+                        {
+                            updatedSettings = new ODataQuerySettings(updatedSettings);
+                            updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
+                        }
+
+                        LambdaExpression orderByExpression =
+                            FilterBinder.Bind(propertyNode.OrderByClause, Context.ElementClrType, Context.Model, updatedSettings);
+                        querySoFar = ExpressionHelpers.OrderBy(querySoFar, orderByExpression, direction, Context.ElementClrType, alreadyOrdered);
+                    }
+                    else
+                    {
+                        querySoFar = ExpressionHelpers.OrderByProperty(querySoFar, property, direction, Context.ElementClrType, alreadyOrdered);
+                    }
                     alreadyOrdered = true;
                 }
                 else

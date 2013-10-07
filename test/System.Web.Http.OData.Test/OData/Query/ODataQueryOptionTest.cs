@@ -639,6 +639,25 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(queryExpression, expectedExpression);
         }
 
+        [Fact]
+        public void Validate_ThrowsValidationErrors_ForOrderBy()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().GetEdmModel();
+
+            var message = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("http://server/service/Customers?$orderby=CustomerId,Name")
+            );
+
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            ODataValidationSettings validationSettings = new ODataValidationSettings { MaxOrderByNodeCount = 1 };
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => options.Validate(validationSettings),
+                "The number of clauses in $orderby query option exceeded the maximum number allowed. The maximum number of $orderby clauses allowed is 1.");
+        }
+
         [Theory]
         [PropertyData("SystemQueryOptionNames")]
         public void IsSystemQueryOption_Returns_True_For_All_Supported_Query_Names(string queryName)

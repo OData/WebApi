@@ -62,7 +62,7 @@ namespace System.Web.Http.OData
             return OrderBy(query, orderByLambda, direction, type, alreadyOrdered);
         }
 
-        private static IQueryable OrderBy(IQueryable query, LambdaExpression orderByLambda, OrderByDirection direction, Type type, bool alreadyOrdered = false)
+        public static IQueryable OrderBy(IQueryable query, LambdaExpression orderByLambda, OrderByDirection direction, Type type, bool alreadyOrdered = false)
         {
             Type returnType = orderByLambda.Body.Type;
 

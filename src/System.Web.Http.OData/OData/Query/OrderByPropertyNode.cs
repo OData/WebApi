@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
+using Microsoft.Data.OData.Query.SemanticAst;
 
 namespace System.Web.Http.OData.Query
 {
@@ -11,7 +14,29 @@ namespace System.Web.Http.OData.Query
     public class OrderByPropertyNode : OrderByNode
     {
         /// <summary>
-        /// Instantiates a new instance of the <see cref="OrderByPropertyNode"/> class.
+        /// Initializes a new instance of the <see cref="OrderByPropertyNode"/> class.
+        /// </summary>
+        /// <param name="orderByClause">The orderby clause representing property access.</param>
+        public OrderByPropertyNode(OrderByClause orderByClause)
+        {
+            if (orderByClause == null)
+            {
+                throw Error.ArgumentNull("orderByClause");
+            }
+
+            OrderByClause = orderByClause;
+            Direction = orderByClause.Direction;
+
+            SingleValuePropertyAccessNode propertyExpression = orderByClause.Expression as SingleValuePropertyAccessNode;
+            if (propertyExpression == null)
+            {
+                throw new ODataException(SRResources.OrderByClauseNotSupported);
+            }
+            Property = propertyExpression.Property;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrderByPropertyNode"/> class.
         /// </summary>
         /// <param name="property">The <see cref="IEdmProperty"/> for this node.</param>
         /// <param name="direction">The <see cref="OrderByDirection"/> for this node.</param>
@@ -25,6 +50,11 @@ namespace System.Web.Http.OData.Query
 
             Property = property;
         }
+
+        /// <summary>
+        /// Gets the <see cref="OrderByClause"/> of this node.
+        /// </summary>
+        public OrderByClause OrderByClause { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="IEdmProperty"/> for the current node.

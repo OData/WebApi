@@ -14,6 +14,7 @@ namespace System.Web.Http.OData.Query
         private const int MinMaxExpansionDepth = 0;
         private const int MinMaxNodeCount = 1;
         private const int MinMaxAnyAllExpressionDepth = 1;
+        private const int MinMaxOrderByNodeCount = 1;
 
         private AllowedArithmeticOperators _allowedArithmeticOperators = AllowedArithmeticOperators.All;
         private AllowedFunctions _allowedFunctions = AllowedFunctions.AllFunctions;
@@ -25,6 +26,7 @@ namespace System.Web.Http.OData.Query
         private int _maxAnyAllExpressionDepth = 1;
         private int _maxNodeCount = 100;
         private int _maxExpansionDepth = 2;
+        private int _maxOrderByNodeCount = 5;
 
         /// <summary>
         /// Gets or sets a list of allowed arithmetic operators including 'add', 'sub', 'mul', 'div', 'mod'.
@@ -136,6 +138,26 @@ namespace System.Web.Http.OData.Query
                 }
 
                 _allowedQueryParameters = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum number of expressions that can be present in the $orderby.
+        /// </summary>
+        public int MaxOrderByNodeCount
+        {
+            get
+            {
+                return _maxOrderByNodeCount;
+            }
+            set
+            {
+                if (value < MinMaxOrderByNodeCount)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinMaxOrderByNodeCount);
+                }
+
+                _maxOrderByNodeCount = value;
             }
         }
 

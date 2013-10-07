@@ -158,5 +158,19 @@ namespace System.Web.Http.OData.Query
              illegalUpperValue: null,
              roundTripTestValue: 100);
         }
+
+        [Fact]
+        public void MaxOrderByNodeCount_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty(
+             new ODataValidationSettings(),
+             o => o.MaxOrderByNodeCount,
+             expectedDefaultValue: 5,
+             minLegalValue: 1,
+             maxLegalValue: int.MaxValue,
+             illegalLowerValue: -1,
+             illegalUpperValue: null,
+             roundTripTestValue: 100);
+        }
     }
 }

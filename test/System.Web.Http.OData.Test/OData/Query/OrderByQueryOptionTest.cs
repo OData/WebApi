@@ -227,16 +227,15 @@ namespace System.Web.Http.OData.Query
         }
 
         [Theory]
-        [InlineData("Address/City")]
         [InlineData("SharePrice add 1")]
-        public void OrderBy_Throws_For_NestedPropertiesAndExpressions(string orderByQuery)
+        public void OrderBy_Throws_For_Expressions(string orderByQuery)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType_With_Address().Add_Customers_EntitySet().GetServiceModel();
             var orderByOption = new OrderByQueryOption(orderByQuery, new ODataQueryContext(model, typeof(Customer)));
 
             Assert.Throws<ODataException>(
                 () => orderByOption.OrderByNodes.Count(),
-                "Only ordering by properties at the root level is supported for non-primitive collections. Nested properties and expressions are not supported.");
+                "Only ordering by properties is supported for non-primitive collections. Expressions are not supported.");
         }
 
         [Fact]
@@ -283,6 +282,68 @@ namespace System.Web.Http.OData.Query
             Assert.Throws<ODataException>(
                 () => orderbyOption.ApplyTo(Enumerable.Empty<int>().AsQueryable()),
                 "Multiple '$it' nodes are not supported in '$orderby'.");
+        }
+
+        [Fact]
+        public void ApplyTo_NestedProperties_Succeeds()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType_With_Address().Add_Customers_EntitySet().GetServiceModel();
+            var orderByOption = new OrderByQueryOption("Address/City asc", new ODataQueryContext(model, typeof(Customer)));
+
+            var customers = (new List<Customer>{
+                new Customer { CustomerId = 1, Address = new Address { City = "C" } },
+                new Customer { CustomerId = 2, Address = new Address { City = "B" } },
+                new Customer { CustomerId = 3, Address = new Address { City = "A" } }
+            }).AsQueryable();
+
+            // Act
+            var results = orderByOption.ApplyTo(customers).ToArray();
+
+            // Assert
+            Assert.Equal(3, results[0].CustomerId);
+            Assert.Equal(2, results[1].CustomerId);
+            Assert.Equal(1, results[2].CustomerId);
+        }
+
+        [Fact]
+        public void ApplyTo_NestedProperties_HandlesNullPropagation_Succeeds()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType_With_Address().Add_Customers_EntitySet().GetServiceModel();
+            var orderByOption = new OrderByQueryOption("Address/City asc", new ODataQueryContext(model, typeof(Customer)));
+
+            var customers = (new List<Customer>{
+                new Customer { CustomerId = 1, Address = null },
+                new Customer { CustomerId = 2, Address = new Address { City = "B" } },
+                new Customer { CustomerId = 3, Address = new Address { City = "A" } }
+            }).AsQueryable();
+
+            // Act
+            var results = orderByOption.ApplyTo(customers).ToArray();
+
+            // Assert
+            Assert.Equal(1, results[0].CustomerId);
+            Assert.Equal(3, results[1].CustomerId);
+            Assert.Equal(2, results[2].CustomerId);
+        }
+
+        [Fact]
+        public void ApplyTo_NestedProperties_DoesNotHandleNullPropagation_IfExplicitInSettings()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType_With_Address().Add_Customers_EntitySet().GetServiceModel();
+            var orderByOption = new OrderByQueryOption("Address/City asc", new ODataQueryContext(model, typeof(Customer)));
+
+            var customers = (new List<Customer>{
+                new Customer { CustomerId = 1, Address = null },
+                new Customer { CustomerId = 2, Address = new Address { City = "B" } },
+                new Customer { CustomerId = 3, Address = new Address { City = "A" } }
+            }).AsQueryable();
+            ODataQuerySettings settings = new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False };
+
+            // Act & Assert
+            Assert.Throws<NullReferenceException>(() => orderByOption.ApplyTo(customers, settings).ToArray());
         }
 
         [Fact]

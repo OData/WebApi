@@ -205,6 +205,20 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
+        public void MaxOrderByNodeCount_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty(
+                new QueryableAttribute(),
+                o => o.MaxOrderByNodeCount,
+                expectedDefaultValue: 5,
+                minLegalValue: 1,
+                illegalLowerValue: -1,
+                illegalUpperValue: null,
+                maxLegalValue: int.MaxValue,
+                roundTripTestValue: 100);
+        }
+
+        [Fact]
         public void OnActionExecuted_Throws_Null_Context()
         {
             Assert.ThrowsArgumentNull(() => new QueryableAttribute().OnActionExecuted(null), "actionExecutedContext");

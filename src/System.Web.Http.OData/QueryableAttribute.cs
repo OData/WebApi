@@ -317,6 +317,18 @@ namespace System.Web.Http
         }
 
         /// <summary>
+        /// Gets or sets the maximum number of expressions that can be present in the $orderby.
+        /// </summary>
+        public int MaxOrderByNodeCount
+        {
+            get { return _validationSettings.MaxOrderByNodeCount; }
+            set
+            {
+                _validationSettings.MaxOrderByNodeCount = value;
+            }
+        }
+
+        /// <summary>
         /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the returning response message.
         /// It then validates the query from uri based on the validation settings on QueryableAttribute. It finally applies the query appropriately,
         /// and reset it back on the response message.

@@ -168,6 +168,20 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         }
 
         /// <summary>
+        /// Resolves the actual type of <see cref="System.Net.Http.ObjectContent{T}"/> passed to the <see cref="System.Net.Http.HttpRequestMessage"/> in an action.
+        /// </summary>
+        /// <param name="api">The <see cref="ApiDescription"/>.</param>
+        /// <returns>The type.</returns>
+        public virtual Type ResolveHttpRequestMessageType(ApiDescription api)
+        {
+            string controllerName = api.ActionDescriptor.ControllerDescriptor.ControllerName;
+            string actionName = api.ActionDescriptor.ActionName;
+            IEnumerable<string> parameterNames = api.ParameterDescriptions.Select(p => p.Name);
+            Collection<MediaTypeFormatter> formatters;
+            return ResolveType(api, controllerName, actionName, parameterNames, SampleDirection.Request, out formatters);
+        }
+
+        /// <summary>
         /// Resolves the type of the action parameter or return value when <see cref="HttpRequestMessage"/> or <see cref="HttpResponseMessage"/> is used.
         /// </summary>
         /// <param name="api">The <see cref="ApiDescription"/>.</param>

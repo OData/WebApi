@@ -1,0 +1,13 @@
+@using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
+@model ComplexTypeModelDescription
+<div>
+    @if (Model.Documentation != null)
+    {
+        <p>@Model.Documentation</p>
+    }
+    @if (Model.Properties.Count > 0)
+    {
+        <b>Parameters</b>
+        @Html.DisplayFor(m => Model.Properties, "PropertyDescriptions")
+    }
+</div>

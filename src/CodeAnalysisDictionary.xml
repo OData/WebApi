@@ -52,6 +52,7 @@
             <Word>Unbuffered</Word>
             <Word>Rfc</Word>
             <Word>Realtime</Word>
+            <Word>ModelName</Word>
         </Recognized>
         <Compound>
             <Term CompoundAlternate="WebPage">WebPage</Term>
@@ -59,6 +60,7 @@
             <Term CompoundAlternate="TimeLine">TimeLine</Term>
             <Term CompoundAlternate="OAuth">oAuth</Term>
             <Term CompoundAlternate="UserName">userName</Term>
+            <Term CompoundAlternate="ModelName">modelName</Term>
             <Term CompoundAlternate="HasId">HasId</Term>
         </Compound>
     </Words>

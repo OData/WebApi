@@ -1,0 +1,19 @@
+@using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
+@model EnumTypeModelDescription
+
+<div>
+    @if (Model.Documentation != null)
+    {
+        <p>@Model.Documentation</p>
+    }
+    <p>Possible enumeration values:</p>
+    <ul>
+        @foreach (var value in Model.Values)
+        {
+            <li>
+                @value.Name: @value.Value
+                <p>@value.Documentation</p>
+            </li>
+        }
+    </ul>
+</div>

@@ -100,6 +100,34 @@ namespace WebApiHelpPageWebHost.UnitTest
             Assert.Equal("Failed to generate the sample for media type 'application/x-www-form-urlencoded'. Cannot use formatter 'JQueryMvcFormUrlEncodedFormatter' to write type 'String'.", model.ErrorMessages[0]);
         }
 
+#if !VB_TEST
+        [Theory]
+        [InlineData("Post-Users", true)]
+        [InlineData("Post-Values", true)]
+        [InlineData("Put-Values", true)]
+        [InlineData("Get-Values", false)]
+        [InlineData("Get-Users", false)]
+        [InlineData("Get-Values-id", false)]
+        [InlineData("Head-Values-id", false)]
+        public void GetHelpPageApiModel_ReturnsExpectedRequestModelDescription(string apiId, bool hasRequestModelDescription)
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "{controller}/{id}", new { id = RouteParameter.Optional });
+
+            HelpPageApiModel model = config.GetHelpPageApiModel(apiId);
+
+            Assert.NotNull(model);
+            if (hasRequestModelDescription)
+            {
+                Assert.NotNull(model.RequestModelDescription);
+            }
+            else
+            {
+                Assert.Null(model.RequestModelDescription);
+            }
+        }
+#endif
+
         [Fact]
         public void SetDocumentationProvider()
         {

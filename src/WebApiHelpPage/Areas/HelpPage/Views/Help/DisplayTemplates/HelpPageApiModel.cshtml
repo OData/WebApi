@@ -25,7 +25,8 @@
         if (hasParameters)
         {
             <h3>Parameters</h3>
-            @Html.DisplayFor(apiModel => apiModel.ApiDescription.ParameterDescriptions, "Parameters")
+            @Html.DisplayFor(apiModel => apiModel.ApiDescription.ParameterDescriptions, "Parameters",
+                new { modelDescription = Model.RequestModelDescription })
         }
         if (hasRequestSamples)
         {

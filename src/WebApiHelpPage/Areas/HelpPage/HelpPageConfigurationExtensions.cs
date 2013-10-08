@@ -4,9 +4,11 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Description;
+using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models;
 
 namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
@@ -102,7 +104,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         }
 
         /// <summary>
-        /// Specifies the actual type of <see cref="System.Net.Http.ObjectContent{T}"/> passed to the <see cref="System.Net.Http.HttpRequestMessage"/> in an action. 
+        /// Specifies the actual type of <see cref="System.Net.Http.ObjectContent{T}"/> passed to the <see cref="System.Net.Http.HttpRequestMessage"/> in an action.
         /// The help page will use this information to produce more accurate request samples.
         /// </summary>
         /// <param name="config">The <see cref="HttpConfiguration"/>.</param>
@@ -115,7 +117,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         }
 
         /// <summary>
-        /// Specifies the actual type of <see cref="System.Net.Http.ObjectContent{T}"/> passed to the <see cref="System.Net.Http.HttpRequestMessage"/> in an action. 
+        /// Specifies the actual type of <see cref="System.Net.Http.ObjectContent{T}"/> passed to the <see cref="System.Net.Http.HttpRequestMessage"/> in an action.
         /// The help page will use this information to produce more accurate request samples.
         /// </summary>
         /// <param name="config">The <see cref="HttpConfiguration"/>.</param>
@@ -129,7 +131,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         }
 
         /// <summary>
-        /// Specifies the actual type of <see cref="System.Net.Http.ObjectContent{T}"/> returned as part of the <see cref="System.Net.Http.HttpRequestMessage"/> in an action. 
+        /// Specifies the actual type of <see cref="System.Net.Http.ObjectContent{T}"/> returned as part of the <see cref="System.Net.Http.HttpRequestMessage"/> in an action.
         /// The help page will use this information to produce more accurate response samples.
         /// </summary>
         /// <param name="config">The <see cref="HttpConfiguration"/>.</param>
@@ -142,7 +144,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         }
 
         /// <summary>
-        /// Specifies the actual type of <see cref="System.Net.Http.ObjectContent{T}"/> returned as part of the <see cref="System.Net.Http.HttpRequestMessage"/> in an action. 
+        /// Specifies the actual type of <see cref="System.Net.Http.ObjectContent{T}"/> returned as part of the <see cref="System.Net.Http.HttpRequestMessage"/> in an action.
         /// The help page will use this information to produce more accurate response samples.
         /// </summary>
         /// <param name="config">The <see cref="HttpConfiguration"/>.</param>
@@ -181,6 +183,18 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         }
 
         /// <summary>
+        /// Gets the model description generator.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        /// <returns>The <see cref="ModelDescriptionGenerator"/></returns>
+        public static ModelDescriptionGenerator GetModelDescriptionGenerator(this HttpConfiguration config)
+        {
+            return (ModelDescriptionGenerator)config.Properties.GetOrAdd(
+                typeof(ModelDescriptionGenerator),
+                k => InitializeModelDescriptionGenerator(config));
+        }
+
+        /// <summary>
         /// Gets the model that represents an API displayed on the help page. The model is initialized on the first call and cached for subsequent calls.
         /// </summary>
         /// <param name="config">The <see cref="HttpConfiguration"/>.</param>
@@ -199,7 +213,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
                 if (apiDescription != null)
                 {
                     HelpPageSampleGenerator sampleGenerator = config.GetHelpPageSampleGenerator();
-                    model = GenerateApiModel(apiDescription, sampleGenerator);
+                    model = GenerateApiModel(apiDescription, sampleGenerator, config);
                     config.Properties.TryAdd(modelId, model);
                 }
             }
@@ -208,7 +222,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The exception is recorded as ErrorMessages.")]
-        private static HelpPageApiModel GenerateApiModel(ApiDescription apiDescription, HelpPageSampleGenerator sampleGenerator)
+        private static HelpPageApiModel GenerateApiModel(ApiDescription apiDescription, HelpPageSampleGenerator sampleGenerator, HttpConfiguration config)
         {
             HelpPageApiModel apiModel = new HelpPageApiModel();
             apiModel.ApiDescription = apiDescription;
@@ -232,7 +246,70 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
                 apiModel.ErrorMessages.Add(String.Format(CultureInfo.CurrentCulture, "An exception has occurred while generating the sample. Exception Message: {0}", e.Message));
             }
 
+            apiModel.RequestModelDescription = GenerateParameterModelDescription(apiDescription, config);
+
             return apiModel;
+        }
+
+        private static ParameterModelDescription GenerateParameterModelDescription(ApiDescription apiDescription, HttpConfiguration config)
+        {
+            ApiParameterDescription parameterDescription;
+            Type parameterType;
+            if (TryGetResourceParameter(apiDescription, config, out parameterDescription, out parameterType))
+            {
+                ModelDescriptionGenerator modelGenerator = config.GetModelDescriptionGenerator();
+                ModelDescription modelDescription = modelGenerator.GetOrCreateModelDescription(parameterType);
+                return new ParameterModelDescription
+                {
+                    ModelDescription = modelDescription,
+                    ParameterDescription = parameterDescription
+                };
+            }
+
+            return null;
+        }
+
+        private static bool TryGetResourceParameter(ApiDescription apiDescription, HttpConfiguration config, out ApiParameterDescription parameterDescription, out Type resourceType)
+        {
+            parameterDescription = apiDescription.ParameterDescriptions.FirstOrDefault(p => p.Source == ApiParameterSource.FromBody || p.ParameterDescriptor.ParameterType == typeof(HttpRequestMessage));
+
+            if (parameterDescription == null)
+            {
+                resourceType = null;
+                return false;
+            }
+
+            resourceType = parameterDescription.ParameterDescriptor.ParameterType;
+
+            if (resourceType == typeof(HttpRequestMessage))
+            {
+                HelpPageSampleGenerator sampleGenerator = config.GetHelpPageSampleGenerator();
+                resourceType = sampleGenerator.ResolveHttpRequestMessageType(apiDescription);
+            }
+
+            if (resourceType == null)
+            {
+                parameterDescription = null;
+                return false;
+            }
+
+            return true;
+        }
+
+        private static ModelDescriptionGenerator InitializeModelDescriptionGenerator(HttpConfiguration config)
+        {
+            ModelDescriptionGenerator modelGenerator = new ModelDescriptionGenerator(config);
+            Collection<ApiDescription> apis = config.Services.GetApiExplorer().ApiDescriptions;
+            foreach (ApiDescription api in apis)
+            {
+                ApiParameterDescription parameterDescription;
+                Type parameterType;
+                if (TryGetResourceParameter(api, config, out parameterDescription, out parameterType))
+                {
+                    modelGenerator.GetOrCreateModelDescription(parameterType);
+                }
+            }
+            return modelGenerator;
         }
 
         private static void LogInvalidSampleAsError(HelpPageApiModel apiModel, object sample)

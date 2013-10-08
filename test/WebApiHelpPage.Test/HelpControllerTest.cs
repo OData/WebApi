@@ -5,7 +5,9 @@ using System.Web.Mvc;
 using Microsoft.TestCommon;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Controllers;
-
+#if !VB_TEST
+using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions;
+#endif
 namespace WebApiHelpPageWebHost.UnitTest
 {
     public class HelpControllerTest
@@ -97,5 +99,48 @@ namespace WebApiHelpPageWebHost.UnitTest
             Assert.Null(result.Model);
             Assert.Null(result2.Model);
         }
+#if !VB_TEST
+        [Theory]
+        [InlineData("WebApiHelpPageWebHost.UnitTest.Controllers.User")]
+        [InlineData("WebApiHelpPageWebHost.UnitTest.Controllers.Order")]
+        [InlineData("WebApiHelpPageWebHost.UnitTest.Controllers.Product")]
+        [InlineData("WebApiHelpPageWebHost.UnitTest.Controllers.Address")]
+        [InlineData("webapihelppagewebhost.unittest.controllers.user")]
+        [InlineData("WEBAPIHELPPAGEWEBHOST.UNITTEST.CONTROLLERS.ORDER")]
+        [InlineData("webApiHelpPageWebHost.UnitTest.Controllers.Product")]
+        [InlineData("WebApiHelpPageWebHost.unittest.Controllers.ADDRESS")]
+        public void ResourceModel_ReturnsCachedModels(string modelName)
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "{controller}/{id}", new { id = RouteParameter.Optional });
+            HelpController controller = new HelpController(config);
+            ModelDescriptionGenerator modelDescriptionGenerator = config.GetModelDescriptionGenerator();
+            ModelDescription expectedModelDescription;
+            modelDescriptionGenerator.GeneratedModels.TryGetValue(modelName, out expectedModelDescription);
+
+            ViewResult result = Assert.IsType<ViewResult>(controller.ResourceModel(modelName));
+            ViewResult result2 = Assert.IsType<ViewResult>(controller.ResourceModel(modelName));
+
+            Assert.Same(expectedModelDescription, result.Model);
+            Assert.Same(result.Model, result2.Model);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        [InlineData("@@@@@@@")]
+        public void ResourceModel_ReturnsNullModels_WhenAModelNameIsInvalid(string modelName)
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "{controller}/{id}", new { id = RouteParameter.Optional });
+            HelpController controller = new HelpController(config);
+
+            ViewResult result = Assert.IsType<ViewResult>(controller.ResourceModel(modelName));
+            ViewResult result2 = Assert.IsType<ViewResult>(controller.ResourceModel(modelName));
+
+            Assert.Null(result.Model);
+            Assert.Null(result2.Model);
+        }
+#endif
     }
 }

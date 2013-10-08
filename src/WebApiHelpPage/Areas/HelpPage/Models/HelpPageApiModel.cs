@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
 using System.Web.Http.Description;
+using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions;
 
 namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
 {
@@ -24,6 +25,11 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
         /// Gets or sets the <see cref="ApiDescription"/> that describes the API.
         /// </summary>
         public ApiDescription ApiDescription { get; set; }
+
+        /// <summary>
+        /// Gets or sets the model description of the parameter in the request.
+        /// </summary>
+        public ParameterModelDescription RequestModelDescription { get; set; }
 
         /// <summary>
         /// Gets the sample requests associated with the API.

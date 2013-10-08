@@ -34,7 +34,10 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             {
                 if (!property.PropertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any())
                 {
-                    edmTypeConfiguration.RemoveProperty(property.PropertyInfo);
+                    if (!property.AddedExplicitly)
+                    {
+                        edmTypeConfiguration.RemoveProperty(property.PropertyInfo);
+                    }
                 }
             }
         }

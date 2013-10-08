@@ -33,17 +33,20 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
                 throw Error.ArgumentNull("edmProperty");
             }
 
-            bool isTypeDataContract = structuralTypeConfiguration.ClrType.GetCustomAttributes(typeof(DataContractAttribute), inherit: true).Any();
-            bool isPropertyDataMember = edmProperty.PropertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any();
+            if (!edmProperty.AddedExplicitly)
+            {
+                bool isTypeDataContract = structuralTypeConfiguration.ClrType.GetCustomAttributes(typeof(DataContractAttribute), inherit: true).Any();
+                bool isPropertyDataMember = edmProperty.PropertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any();
 
-            if (isTypeDataContract && isPropertyDataMember)
-            {
-                // both Datamember and IgnoreDataMember. DataMember wins as this a DataContract
-                return;
-            }
-            else
-            {
-                structuralTypeConfiguration.RemoveProperty(edmProperty.PropertyInfo);
+                if (isTypeDataContract && isPropertyDataMember)
+                {
+                    // both Datamember and IgnoreDataMember. DataMember wins as this a DataContract
+                    return;
+                }
+                else
+                {
+                    structuralTypeConfiguration.RemoveProperty(edmProperty.PropertyInfo);
+                }
             }
         }
     }

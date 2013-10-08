@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.TestCommon;
@@ -42,13 +41,40 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             type.Verify();
         }
 
+        [Fact]
+        public void Apply_DoesnotRemove_ExplicitlyAddedProperties()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            PropertyInfo propertyInfo = typeof(TestEntity).GetProperty("ExplicitlyAddedProperty");
+            EntityTypeConfiguration entity = builder.AddEntity(typeof(TestEntity));
+            PropertyConfiguration property = entity.AddProperty(propertyInfo);
+
+            // Act
+            _convention.Apply(entity, builder);
+
+            // Assert
+            Assert.Contains(propertyInfo, entity.ExplicitProperties.Keys);
+            Assert.DoesNotContain(propertyInfo, entity.RemovedProperties);
+
+        }
+
         private static PropertyConfiguration CreateMockProperty(params Attribute[] attributes)
         {
             StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
             Mock<PropertyInfo> propertyInfo = new Mock<PropertyInfo>();
             propertyInfo.Setup(p => p.PropertyType).Returns(typeof(int));
             propertyInfo.Setup(p => p.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(attributes);
-            return new PrimitivePropertyConfiguration(propertyInfo.Object, structuralType);
+            return new PrimitivePropertyConfiguration(propertyInfo.Object, structuralType) { AddedExplicitly = false };
+        }
+
+        [DataContract]
+        private class TestEntity
+        {
+            [DataMember]
+            public int DataMemberProperty { get; set; }
+
+            public int ExplicitlyAddedProperty { get; set; }
         }
     }
 }

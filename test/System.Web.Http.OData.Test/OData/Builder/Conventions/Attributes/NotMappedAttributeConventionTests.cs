@@ -16,7 +16,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         }
 
         [Fact]
-        public void Apply_Calls_RemovesProperty()
+        public void Apply_Calls_RemovesProperty_ForInferredProperties()
         {
             // Arrange
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
@@ -26,6 +26,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>(MockBehavior.Strict);
             Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(property.Object, structuralType.Object);
+            primitiveProperty.Object.AddedExplicitly = false;
             structuralType.Setup(e => e.RemoveProperty(property.Object)).Verifiable();
 
             // Act
@@ -33,6 +34,29 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
             // Assert
             structuralType.Verify();
+        }
+
+        [Fact]
+        public void Apply_DoesnotRemove_ExplicitlyAddedProperties()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            PropertyInfo propertyInfo = typeof(TestEntity).GetProperty("Property");
+            EntityTypeConfiguration entity = builder.AddEntity(typeof(TestEntity));
+            PropertyConfiguration property = entity.AddProperty(propertyInfo);
+
+            // Act
+            new NotMappedAttributeConvention().Apply(property, entity);
+
+            // Assert
+            Assert.Contains(propertyInfo, entity.ExplicitProperties.Keys);
+            Assert.DoesNotContain(propertyInfo, entity.RemovedProperties);
+        }
+
+        private class TestEntity
+        {
+            [NotMapped]
+            public int Property { get; set; }
         }
     }
 }

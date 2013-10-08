@@ -28,6 +28,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>(MockBehavior.Strict);
             Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(property.Object, structuralType.Object);
+            primitiveProperty.Object.AddedExplicitly = false;
             structuralType.Setup(e => e.RemoveProperty(property.Object)).Verifiable();
             structuralType.Setup(s => s.ClrType).Returns(type.Object);
 
@@ -60,6 +61,31 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
             // Assert
             structuralType.Verify();
+        }
+
+        [Fact]
+        public void Apply_DoesnotRemove_ExplicitlyAddedProperties()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            PropertyInfo propertyInfo = typeof(TestEntity).GetProperty("ExplicitlyAddedProperty");
+            EntityTypeConfiguration entity = builder.AddEntity(typeof(TestEntity));
+            PropertyConfiguration property = entity.AddProperty(propertyInfo);
+
+            // Act
+            new IgnoreDataMemberAttributeEdmPropertyConvention().Apply(property, entity);
+
+            // Assert
+            Assert.Contains(propertyInfo, entity.ExplicitProperties.Keys);
+            Assert.DoesNotContain(propertyInfo, entity.RemovedProperties);
+
+        }
+
+        [DataContract]
+        private class TestEntity
+        {
+            [IgnoreDataMember]
+            public int ExplicitlyAddedProperty { get; set; }
         }
     }
 }

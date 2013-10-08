@@ -34,7 +34,10 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
                 throw Error.ArgumentNull("structuralTypeConfiguration");
             }
 
-            structuralTypeConfiguration.RemoveProperty(edmProperty.PropertyInfo);
+            if (!edmProperty.AddedExplicitly)
+            {
+                structuralTypeConfiguration.RemoveProperty(edmProperty.PropertyInfo);
+            }
         }
     }
 }

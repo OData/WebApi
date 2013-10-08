@@ -5,7 +5,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Annotations;
 using Microsoft.Data.Edm.Library;
@@ -14,6 +16,7 @@ using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.Http.OData.Routing.ODataPath;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -27,6 +30,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private EntityInstanceContext _entityInstanceContext;
         private ODataSerializerProvider _serializerProvider;
         private IEdmEntityTypeReference _customerType;
+        private ODataPath _path;
 
         public ODataEntityTypeSerializerTests()
         {
@@ -46,7 +50,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             _serializerProvider = new DefaultODataSerializerProvider();
             _customerType = _model.GetEdmTypeReference(typeof(Customer)).AsEntity();
             _serializer = new ODataEntityTypeSerializer(_serializerProvider);
-            _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, Model = _model };
+            _path = new ODataPath(new EntitySetPathSegment(_customerSet));
+            _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, Model = _model, Path = _path };
             _entityInstanceContext = new EntityInstanceContext(_writeContext, _customerSet.ElementType.AsReference(), _customer);
         }
 
@@ -571,7 +576,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void CreateEntry_UsesCorrectTypeName()
         {
-            EntityInstanceContext instanceContext = new EntityInstanceContext { EntityType = _customerType.EntityDefinition() };
+            EntityInstanceContext instanceContext =
+                new EntityInstanceContext { EntityType = _customerType.EntityDefinition(), SerializerContext = _writeContext };
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
             serializer.CallBase = true;
             SelectExpandNode selectExpandNode = new SelectExpandNode();
@@ -720,7 +726,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void AddTypeNameAnnotationAsNeeded_AddsAnnotation_InJsonLightMetadataMode()
+        public void AddTypeNameAnnotationAsNeeded_AddsAnnotation_IfTypeOfPathDoesNotMatchEntryType()
         {
             // Arrange
             string expectedTypeName = "TypeName";
@@ -730,12 +736,31 @@ namespace System.Web.Http.OData.Formatter.Serialization
             };
 
             // Act
-            ODataEntityTypeSerializer.AddTypeNameAnnotationAsNeeded(entry, null, ODataMetadataLevel.MinimalMetadata);
+            ODataEntityTypeSerializer.AddTypeNameAnnotationAsNeeded(entry, _customerType.EntityDefinition(), ODataMetadataLevel.MinimalMetadata);
 
             // Assert
             SerializationTypeNameAnnotation annotation = entry.GetAnnotation<SerializationTypeNameAnnotation>();
             Assert.NotNull(annotation); // Guard
             Assert.Equal(expectedTypeName, annotation.TypeName);
+        }
+
+        [Fact] // Issue 984: Redundant type name serialization in OData JSON light minimal metadata mode
+        public void AddTypeNameAnnotationAsNeeded_AddsAnnotationWithNullValue_IfTypeOfPathMatchesEntryType()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataEntry entry = new ODataEntry
+            {
+                TypeName = model.SpecialCustomer.FullName()
+            };
+
+            // Act
+            ODataEntityTypeSerializer.AddTypeNameAnnotationAsNeeded(entry, model.SpecialCustomer, ODataMetadataLevel.MinimalMetadata);
+
+            // Assert
+            SerializationTypeNameAnnotation annotation = entry.GetAnnotation<SerializationTypeNameAnnotation>();
+            Assert.NotNull(annotation); // Guard
+            Assert.Null(annotation.TypeName);
         }
 
         [Theory]
@@ -769,10 +794,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 // The caller uses a namespace-qualified name, which this test leaves empty.
                 TypeName = "." + entryType
             };
-            IEdmEntitySet entitySet = CreateEntitySetWithElementTypeName(entitySetType);
+            IEdmEntityType edmType = CreateEntityTypeWithName(entitySetType);
 
             // Act
-            bool actualResult = ODataEntityTypeSerializer.ShouldSuppressTypeNameSerialization(entry, entitySet,
+            bool actualResult = ODataEntityTypeSerializer.ShouldSuppressTypeNameSerialization(entry, edmType,
                 (ODataMetadataLevel)metadataLevel);
 
             // Assert
@@ -1264,14 +1289,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             };
         }
 
-        private static IEdmEntitySet CreateEntitySetWithElementTypeName(string typeName)
+        private static IEdmEntityType CreateEntityTypeWithName(string typeName)
         {
             Mock<IEdmEntityType> entityTypeMock = new Mock<IEdmEntityType>();
             entityTypeMock.Setup(o => o.Name).Returns(typeName);
-            IEdmEntityType entityType = entityTypeMock.Object;
-            Mock<IEdmEntitySet> entitySetMock = new Mock<IEdmEntitySet>();
-            entitySetMock.Setup(o => o.ElementType).Returns(entityType);
-            return entitySetMock.Object;
+            return entityTypeMock.Object;
         }
 
         private static IEdmDirectValueAnnotationsManager CreateFakeAnnotationsManager()

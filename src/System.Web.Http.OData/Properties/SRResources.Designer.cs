@@ -304,6 +304,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of the property &apos;{1}&apos; on type &apos;{2}&apos; does not have an Clear method. Consider using a collection type that does have an Clear method, such as IList&lt;T&gt; or ICollection&lt;T&gt;..
+        /// </summary>
+        internal static string CollectionShouldHaveClearMethod {
+            get {
+                return ResourceManager.GetString("CollectionShouldHaveClearMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The complex type &apos;{0}&apos; refers to the entity type &apos;{1}&apos; through the property &apos;{2}&apos;..
         /// </summary>
         internal static string ComplexTypeRefersToEntityType {

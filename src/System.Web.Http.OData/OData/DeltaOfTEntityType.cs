@@ -3,7 +3,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http.OData.Formatter;
@@ -85,7 +84,8 @@ namespace System.Web.Http.OData
                 return false;
             }
 
-            if (value != null && !cacheHit.Property.PropertyType.IsAssignableFrom(value.GetType()))
+            Type propertyType = cacheHit.Property.PropertyType;
+            if (value != null && !propertyType.IsCollection() && !propertyType.IsAssignableFrom(value.GetType()))
             {
                 return false;
             }
@@ -253,7 +253,7 @@ namespace System.Web.Http.OData
                 _entityType,
                 (backingType) => backingType
                     .GetProperties()
-                    .Where(p => p.GetSetMethod() != null && p.GetGetMethod() != null)
+                    .Where(p => (p.GetSetMethod() != null || p.PropertyType.IsCollection()) && p.GetGetMethod() != null)
                     .Select<PropertyInfo, PropertyAccessor<TEntityType>>(p => new FastPropertyAccessor<TEntityType>(p))
                     .ToDictionary(p => p.Property.Name));
         }

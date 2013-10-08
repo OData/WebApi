@@ -652,6 +652,9 @@
   <data name="ElementClrTypeNull" xml:space="preserve">
     <value>The property 'ElementClrType' of {0} cannot be null.</value>
   </data>
+  <data name="CollectionShouldHaveClearMethod" xml:space="preserve">
+    <value>The type '{0}' of the property '{1}' on type '{2}' does not have an Clear method. Consider using a collection type that does have an Clear method, such as IList&lt;T&gt; or ICollection&lt;T&gt;.</value>
+  </data>
   <data name="OrderByNodeCountExceeded" xml:space="preserve">
     <value>The number of clauses in $orderby query option exceeded the maximum number allowed. The maximum number of $orderby clauses allowed is {0}.</value>
   </data>

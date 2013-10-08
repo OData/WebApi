@@ -13,6 +13,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 {
     internal static class CollectionDeserializationHelpers
     {
+        private static readonly Type[] _emptyTypeArray = new Type[0];
+        private static readonly object[] _emptyObjectArray = new object[0];
         private static readonly MethodInfo _toArrayMethodInfo = typeof(Enumerable).GetMethod("ToArray");
 
         public static void AddToCollection(this IEnumerable items, IEnumerable collection, Type elementType, Type resourceType, string propertyName, Type propertyType)
@@ -65,6 +67,21 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     addMethod.Invoke(collection, new object[] { element });
                 }
             }
+        }
+
+        public static void Clear(this IEnumerable collection, string propertyName, Type resourceType)
+        {
+            Contract.Assert(collection != null);
+
+            MethodInfo clearMethod = collection.GetType().GetMethod("Clear", _emptyTypeArray);
+            if (clearMethod == null)
+            {
+                string message = Error.Format(SRResources.CollectionShouldHaveClearMethod, collection.GetType().FullName,
+                    propertyName, resourceType.FullName);
+                throw new SerializationException(message);
+            }
+
+            clearMethod.Invoke(collection, _emptyObjectArray);
         }
 
         public static bool TryCreateInstance(Type collectionType, IEdmCollectionTypeReference edmCollectionType, Type elementType, out IEnumerable instance)

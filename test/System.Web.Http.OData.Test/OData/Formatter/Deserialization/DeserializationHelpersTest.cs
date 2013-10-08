@@ -173,6 +173,36 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             propertyName));
         }
 
+        [Theory]
+        [InlineData("ICollection")]
+        [InlineData("IList")]
+        [InlineData("Collection")]
+        [InlineData("List")]
+        [InlineData("CustomCollectionWithNoEmptyCtor")]
+        [InlineData("CustomCollection")]
+        public void SetCollectionProperty_ClearsCollection_IfClearCollectionIsTrue(string propertyName)
+        {
+            // Arrange
+            IEnumerable<int> value = new int[] { 1, 2, 3 };
+            object resource = new SampleClassWithNonSettableCollectionProperties
+                {
+                    ICollection = { 42 },
+                    IList = { 42 },
+                    Collection = { 42 },
+                    List = { 42 },
+                    CustomCollectionWithNoEmptyCtor = { 42 },
+                    CustomCollection = { 42 }
+                };
+
+            // Act
+            DeserializationHelpers.SetCollectionProperty(resource, propertyName, null, value, clearCollection: true);
+
+            // Assert
+            Assert.Equal(
+                value,
+                resource.GetType().GetProperty(propertyName).GetValue(resource, index: null) as IEnumerable<int>);
+        }
+
         [Fact]
         public void ApplyProperty_DoesNotIgnoreKeyProperty()
         {

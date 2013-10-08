@@ -43,10 +43,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             Contract.Assert(edmProperty != null);
 
+            SetCollectionProperty(resource, edmProperty.Name, edmProperty.Type.AsCollection(), value, clearCollection: false);
+        }
+
+        internal static void SetCollectionProperty(object resource, string propertyName,
+            IEdmCollectionTypeReference edmPropertyType, object value, bool clearCollection)
+        {
             if (value != null)
             {
-                string propertyName = edmProperty.Name;
-
                 IEnumerable collection = value as IEnumerable;
                 Contract.Assert(collection != null,
                     "SetCollectionProperty is always passed the result of ODataFeedDeserializer or ODataCollectionDeserializer");
@@ -63,7 +67,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
                 IEnumerable newCollection;
                 if (CanSetProperty(resource, propertyName) &&
-                    CollectionDeserializationHelpers.TryCreateInstance(propertyType, edmProperty.Type.AsCollection(), elementType, out newCollection))
+                    CollectionDeserializationHelpers.TryCreateInstance(propertyType, edmPropertyType, elementType, out newCollection))
                 {
                     // settable collections
                     collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);
@@ -82,6 +86,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     {
                         string message = Error.Format(SRResources.CannotAddToNullCollection, propertyName, resourceType.FullName);
                         throw new SerializationException(message);
+                    }
+
+                    if (clearCollection)
+                    {
+                        newCollection.Clear(propertyName, resourceType);
                     }
 
                     collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);

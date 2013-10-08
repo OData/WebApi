@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Web.Http.Internal;
+using System.Web.Http.OData.Formatter.Deserialization;
 
 namespace System.Web.Http.OData
 {
@@ -13,13 +13,21 @@ namespace System.Web.Http.OData
     /// <typeparam name="TEntityType">The type on which the PropertyInfo exists</typeparam>
     internal class FastPropertyAccessor<TEntityType> : PropertyAccessor<TEntityType> where TEntityType : class
     {
+        private bool _isCollection;
+        private PropertyInfo _property;
         private Action<TEntityType, object> _setter;
         private Func<object, object> _getter;
 
         public FastPropertyAccessor(PropertyInfo property)
             : base(property)
         {
-            _setter = PropertyHelper.MakeFastPropertySetter<TEntityType>(property);
+            _property = property;
+            _isCollection = property.PropertyType.IsCollection();
+
+            if (!_isCollection)
+            {
+                _setter = PropertyHelper.MakeFastPropertySetter<TEntityType>(property);
+            }
             _getter = PropertyHelper.MakeFastPropertyGetter(property);
         }
 
@@ -38,7 +46,16 @@ namespace System.Web.Http.OData
             {
                 throw Error.ArgumentNull("entity");
             }
-            _setter(entity, value);
+
+            if (_isCollection)
+            {
+                DeserializationHelpers.SetCollectionProperty(entity, _property.Name, edmPropertyType: null,
+                    value: value, clearCollection: true);
+            }
+            else
+            {
+                _setter(entity, value);
+            }
         }
     }
 }

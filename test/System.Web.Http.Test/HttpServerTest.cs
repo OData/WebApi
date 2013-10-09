@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
@@ -7,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.ExceptionHandling;
+using System.Web.Http.Results;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 using Moq;
@@ -87,6 +91,95 @@ namespace System.Web.Http
             // Assert
             Assert.Same(config, server.Configuration);
             Assert.Same(controllerDispatcherMock.Object, server.Dispatcher);
+        }
+
+        [Fact]
+        public void ExceptionLogger_IsSpecifiedInstance()
+        {
+            // Arrange
+            IExceptionLogger expectedExceptionLogger = CreateDummyExceptionLogger();
+            IExceptionHandler exceptionHandler = CreateDummyExceptionHandler();
+
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpMessageHandler dispatcher = CreateDummyMessageHandler())
+            using (HttpServer product = CreateProductUnderTest(configuration, dispatcher, expectedExceptionLogger,
+                exceptionHandler))
+            {
+                // Act
+                IExceptionLogger exceptionLogger = product.ExceptionLogger;
+
+                // Assert
+                Assert.Same(expectedExceptionLogger, exceptionLogger);
+            }
+        }
+
+        [Fact]
+        public void ExceptionHandler_IsSpecifiedInstance()
+        {
+            // Arrange
+            IExceptionLogger exceptionLogger = CreateDummyExceptionLogger();
+            IExceptionHandler expectedExceptionHandler = CreateDummyExceptionHandler();
+
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpMessageHandler dispatcher = CreateDummyMessageHandler())
+            using (HttpServer product = CreateProductUnderTest(configuration, dispatcher, exceptionLogger,
+                expectedExceptionHandler))
+            {
+                // Act
+                IExceptionHandler exceptionHandler = product.ExceptionHandler;
+
+                // Assert
+                Assert.Same(expectedExceptionHandler, exceptionHandler);
+            }
+        }
+
+        [Fact]
+        public void ConstructorWithConfigurationAndDispatcher_UsesExceptionLoggerFromConfiguration()
+        {
+            // Arrange
+            using (HttpConfiguration configuration = CreateConfiguration())
+            {
+                IExceptionLogger expectedExceptionLogger = CreateDummyExceptionLogger();
+                configuration.Services.Add(typeof(IExceptionLogger), expectedExceptionLogger);
+
+                using (HttpMessageHandler dispatcher = CreateDummyMessageHandler())
+                using (HttpServer product = new HttpServer(configuration, dispatcher))
+                {
+                    // Act
+                    IExceptionLogger exceptionLogger = product.ExceptionLogger;
+
+                    // Assert
+                    Assert.IsType<CompositeExceptionLogger>(exceptionLogger);
+                    CompositeExceptionLogger compositeLogger = (CompositeExceptionLogger)exceptionLogger;
+                    IEnumerable<IExceptionLogger> loggers = compositeLogger.Loggers;
+                    Assert.NotNull(loggers);
+                    Assert.Equal(1, loggers.Count());
+                    Assert.Same(expectedExceptionLogger, loggers.Single());
+                }
+            }
+        }
+
+        [Fact]
+        public void ConstructorWithConfigurationAndDispatcher_UsesExceptionHandlerFromConfiguration()
+        {
+            // Arrange
+            using (HttpConfiguration configuration = CreateConfiguration())
+            {
+                IExceptionHandler expectedExceptionHandler = CreateDummyExceptionHandler();
+                configuration.Services.Replace(typeof(IExceptionHandler), expectedExceptionHandler);
+
+                using (HttpMessageHandler dispatcher = CreateDummyMessageHandler())
+                using (HttpServer product = new HttpServer(configuration, dispatcher))
+                {
+                    // Act
+                    IExceptionHandler exceptionHandler = product.ExceptionHandler;
+
+                    // Assert
+                    Assert.IsType<LastChanceExceptionHandler>(exceptionHandler);
+                    LastChanceExceptionHandler lastChanceHandler = (LastChanceExceptionHandler)exceptionHandler;
+                    Assert.Same(expectedExceptionHandler, lastChanceHandler.InnerHandler);
+                }
+            }
         }
 
         [Fact]
@@ -292,6 +385,131 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void SendAsync_IfDispatcherTaskIsFaulted_CallsExceptionServices()
+        {
+            // Arrange
+            Exception expectedException = CreateException();
+
+            HttpMessageHandler dispatcher = CreateFaultingMessageHandler(expectedException);
+
+            Mock<IExceptionLogger> exceptionLoggerMock = CreateStubExceptionLoggerMock();
+            IExceptionLogger exceptionLogger = exceptionLoggerMock.Object;
+
+            Mock<IExceptionHandler> exceptionHandlerMock = CreateStubExceptionHandlerMock();
+            IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
+
+            using (HttpRequestMessage expectedRequest = CreateRequest())
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpServer product = CreateProductUnderTest(configuration, dispatcher, exceptionLogger,
+                exceptionHandler))
+            {
+                CancellationToken cancellationToken = CreateCancellationToken();
+
+                Task<HttpResponseMessage> task = product.SendAsync(expectedRequest, cancellationToken);
+
+                // Act
+                task.WaitUntilCompleted();
+
+                // Assert
+                Func<ExceptionContext, bool> exceptionContextMatches = (c) =>
+                    c != null
+                    && c.Exception == expectedException
+                    && c.CatchBlock == ExceptionCatchBlocks.HttpServer
+                    && c.IsTopLevelCatchBlock == true
+                    && c.Request == expectedRequest;
+
+                exceptionLoggerMock.Verify(l => l.LogAsync(
+                    It.Is<ExceptionLoggerContext>(c => c.CanBeHandled == true
+                        && exceptionContextMatches(c.ExceptionContext)),
+                    cancellationToken), Times.Once());
+
+                exceptionHandlerMock.Verify(h => h.HandleAsync(
+                    It.Is<ExceptionHandlerContext>((c) => exceptionContextMatches(c.ExceptionContext)),
+                    cancellationToken), Times.Once());
+            }
+        }
+
+        [Fact]
+        public void SendAsync_IfExceptionHandlerSetsNullResult_PropogatesFaultedTaskException()
+        {
+            // Arrange
+            Exception expectedException = CreateExceptionWithCallStack();
+            string expectedStackTrace = expectedException.StackTrace;
+
+            HttpMessageHandler dispatcher = CreateFaultingMessageHandler(expectedException);
+
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+
+            Mock<IExceptionHandler> exceptionHandlerMock = new Mock<IExceptionHandler>(MockBehavior.Strict);
+            exceptionHandlerMock
+                .Setup(h => h.HandleAsync(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()))
+                .Callback<ExceptionHandlerContext, CancellationToken>((c, i) => c.Result = null)
+                .Returns(Task.FromResult(0))
+                .Verifiable();
+            IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
+
+            using (HttpRequestMessage request = CreateRequest())
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpServer product = CreateProductUnderTest(configuration, dispatcher, exceptionLogger,
+                exceptionHandler))
+            {
+                CancellationToken cancellationToken = CreateCancellationToken();
+
+                Task<HttpResponseMessage> task = product.SendAsync(request, cancellationToken);
+
+                // Act
+                task.WaitUntilCompleted();
+
+                // Assert
+                Assert.Equal(TaskStatus.Faulted, task.Status);
+                Assert.NotNull(task.Exception);
+                Exception exception = task.Exception.GetBaseException();
+                Assert.Same(expectedException, exception);
+                Assert.NotNull(exception.StackTrace);
+                Assert.True(exception.StackTrace.StartsWith(expectedStackTrace));
+            }
+        }
+
+        [Fact]
+        public void SendAsync_IfExceptionHandlerHandlesException_ReturnsResponse()
+        {
+            // Arrange
+            HttpMessageHandler dispatcher = CreateFaultingMessageHandler(CreateException());
+
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+
+            using (HttpResponseMessage expectedResponse = CreateResponse())
+            {
+                Mock<IExceptionHandler> exceptionHandlerMock = new Mock<IExceptionHandler>(MockBehavior.Strict);
+                exceptionHandlerMock
+                    .Setup(h => h.HandleAsync(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()))
+                    .Callback<ExceptionHandlerContext, CancellationToken>((c, i) =>
+                        c.Result = new ResponseMessageResult(expectedResponse))
+                    .Returns(Task.FromResult(0))
+                    .Verifiable();
+                IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
+
+                using (HttpRequestMessage request = CreateRequest())
+                using (HttpConfiguration configuration = new HttpConfiguration())
+                using (HttpServer product = CreateProductUnderTest(configuration, dispatcher, exceptionLogger,
+                    exceptionHandler))
+                {
+                    CancellationToken cancellationToken = CreateCancellationToken();
+
+                    Task<HttpResponseMessage> task = product.SendAsync(request, cancellationToken);
+
+                    // Act
+                    task.WaitUntilCompleted();
+
+                    // Assert
+                    Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+                    HttpResponseMessage response = task.Result;
+                    Assert.Same(expectedResponse, response);
+                }
+            }
+        }
+
+        [Fact]
         public void HttpServerAddsDefaultRequestContext()
         {
             // Arrange
@@ -340,6 +558,108 @@ namespace System.Web.Http
             response.EnsureSuccessStatusCode();
             Assert.True(handler.ContextFound);
             Assert.Equal(context, response.RequestMessage.GetRequestContext());
+        }
+
+        private static CancellationToken CreateCancellationToken()
+        {
+            CancellationTokenSource source = new CancellationTokenSource();
+            return source.Token;
+        }
+
+        private static HttpConfiguration CreateConfiguration()
+        {
+            return new HttpConfiguration();
+        }
+
+        private static IExceptionHandler CreateDummyExceptionHandler()
+        {
+            return new Mock<IExceptionHandler>(MockBehavior.Strict).Object;
+        }
+
+        private static IExceptionLogger CreateDummyExceptionLogger()
+        {
+            return new Mock<IExceptionLogger>(MockBehavior.Strict).Object;
+        }
+
+        private static HttpMessageHandler CreateDummyMessageHandler()
+        {
+            Mock<HttpMessageHandler> mock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            mock.Protected().Setup("Dispose", ItExpr.IsAny<bool>());
+            return mock.Object;
+        }
+
+        private static Exception CreateException()
+        {
+            return new Exception();
+        }
+
+        private static Exception CreateExceptionWithCallStack()
+        {
+            try
+            {
+                throw CreateException();
+            }
+            catch (Exception exception)
+            {
+                return exception;
+            }
+        }
+
+        private static Task<TResult> CreateFaultedTask<TResult>(Exception exception)
+        {
+            TaskCompletionSource<TResult> source = new TaskCompletionSource<TResult>();
+            source.SetException(exception);
+            return source.Task;
+        }
+
+        private static HttpMessageHandler CreateFaultingMessageHandler(Exception exception)
+        {
+            Mock<HttpMessageHandler> mock = new Mock<HttpMessageHandler>();
+            mock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Returns(CreateFaultedTask<HttpResponseMessage>(exception));
+            return mock.Object;
+        }
+
+        private static HttpServer CreateProductUnderTest(HttpConfiguration configuration,
+            HttpMessageHandler dispatcher, IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler)
+        {
+            return new HttpServer(configuration, dispatcher, exceptionLogger, exceptionHandler);
+        }
+
+        private static HttpRequestMessage CreateRequest()
+        {
+            return new HttpRequestMessage();
+        }
+
+        private static HttpResponseMessage CreateResponse()
+        {
+            return new HttpResponseMessage();
+        }
+
+        private static Mock<IExceptionHandler> CreateStubExceptionHandlerMock()
+        {
+            Mock<IExceptionHandler> mock = new Mock<IExceptionHandler>(MockBehavior.Strict);
+            mock
+                .Setup(h => h.HandleAsync(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(0));
+            return mock;
+        }
+
+        private static IExceptionLogger CreateStubExceptionLogger()
+        {
+            return CreateStubExceptionLoggerMock().Object;
+        }
+
+        private static Mock<IExceptionLogger> CreateStubExceptionLoggerMock()
+        {
+            Mock<IExceptionLogger> mock = new Mock<IExceptionLogger>(MockBehavior.Strict);
+            mock
+                .Setup(l => l.LogAsync(It.IsAny<ExceptionLoggerContext>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(0));
+            return mock;
         }
 
         private class ThrowIfNoContext : DelegatingHandler

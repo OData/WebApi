@@ -10,6 +10,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Dependencies;
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
@@ -39,6 +40,8 @@ namespace System.Web.Http.Services
     ///         <item><see cref="IBodyModelValidator"/></item>
     ///         <item><see cref="IContentNegotiator"/></item>
     ///         <item><see cref="IDocumentationProvider"/></item>
+    ///         <item><see cref="IExceptionHandler"/></item>
+    ///         <item><see cref="IExceptionLogger"/></item>
     ///         <item><see cref="IFilterProvider"/></item>
     ///         <item><see cref="IHostBufferPolicySelector"/></item>
     ///         <item><see cref="IHttpActionInvoker"/></item>
@@ -141,6 +144,9 @@ namespace System.Web.Http.Services
 
             ModelValidatorCache validatorCache = new ModelValidatorCache(new Lazy<IEnumerable<ModelValidatorProvider>>(() => this.GetModelValidatorProviders()));
             SetSingle<IModelValidatorCache>(validatorCache);
+
+            SetSingle<IExceptionHandler>(new DefaultExceptionHandler());
+            SetMultiple<IExceptionLogger>();
 
             _serviceTypesSingle = new HashSet<Type>(_defaultServicesSingle.Keys);
             _serviceTypesMulti = new HashSet<Type>(_defaultServicesMulti.Keys);

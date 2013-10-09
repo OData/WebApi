@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
 using System.Web.Http.ModelBinding;
@@ -617,6 +618,54 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void ExecuteAsync_IfActionThrows_CallsExceptionServicesFromConfiguration()
+        {
+            List<string> log = new List<string>();
+            Exception expectedException = new Exception();
+            ExceptionController controller = new ExceptionController(expectedException);
+
+            Mock<IExceptionLogger> exceptionLoggerMock = new Mock<IExceptionLogger>(MockBehavior.Strict);
+            exceptionLoggerMock
+                .Setup(h => h.LogAsync(It.IsAny<ExceptionLoggerContext>(), It.IsAny<CancellationToken>()))
+                .Returns<ExceptionLoggerContext, CancellationToken>((c, i) =>
+                {
+                    log.Add("logger");
+                    return Task.FromResult(0);
+                });
+            IExceptionLogger exceptionLogger = exceptionLoggerMock.Object;
+
+            Mock<IExceptionHandler> exceptionHandlerMock = new Mock<IExceptionHandler>(MockBehavior.Strict);
+            exceptionHandlerMock
+                .Setup(h => h.HandleAsync(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()))
+                .Returns<ExceptionHandlerContext, CancellationToken>((c, i) =>
+                {
+                    log.Add("handler");
+                    return Task.FromResult(0);
+                });
+            IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
+
+            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext();
+
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(
+                controllerContext.Configuration, "Get", typeof(ExceptionController));
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            controllerContext.Controller = controller;
+            controllerContext.Configuration.Services.Add(typeof(IExceptionLogger), exceptionLogger);
+            controllerContext.Configuration.Services.Replace(typeof(IExceptionHandler), exceptionHandler);
+            controllerContext.Configuration.Filters.Add(CreateStubExceptionFilter());
+
+            // Act
+            Task<HttpResponseMessage> task = controller.ExecuteAsync(controllerContext, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(task);
+            Assert.Equal(TaskStatus.Faulted, task.Status);
+            Assert.NotNull(task.Exception);
+            Assert.Same(expectedException, task.Exception.GetBaseException());
+            Assert.Equal(new string[] { "logger", "handler" }, log.ToArray());
+        }
+
+        [Fact]
         public void ApiControllerCannotBeReused()
         {
             // Arrange
@@ -1062,6 +1111,16 @@ namespace System.Web.Http
         private static HttpRequestContext CreateRequestContext()
         {
             return new HttpRequestContext();
+        }
+
+        private static IExceptionFilter CreateStubExceptionFilter()
+        {
+            Mock<IExceptionFilter> mock = new Mock<IExceptionFilter>(MockBehavior.Strict);
+            mock
+                .Setup(f => f.ExecuteExceptionFilterAsync(It.IsAny<HttpActionExecutedContext>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(0));
+            return mock.Object;
         }
 
         private static Mock<DefaultServices> BuildFilterProvidingServicesMock(HttpConfiguration configuration, HttpActionDescriptor action, params FilterInfo[] filters)

@@ -1,0 +1,229 @@
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.TestCommon;
+using Moq;
+
+namespace System.Web.Http.ExceptionHandling
+{
+    public class ExceptionHandlerTests
+    {
+        [Fact]
+        public void HandleAsync_IfContextIsNull_Throws()
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>(MockBehavior.Strict);
+            IExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext context = null;
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => product.HandleAsync(context, cancellationToken), "context");
+        }
+
+        [Fact]
+        public void HandleAsync_IfExceptionContextIsNull_Throws()
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>(MockBehavior.Strict);
+            IExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext context = CreateContext();
+            Assert.Null(context.ExceptionContext); // Guard
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => product.HandleAsync(context, cancellationToken), "context",
+                "ExceptionHandlerContext.ExceptionContext must not be null.");
+        }
+
+        [Fact]
+        public void HandleAsync_IfExceptionIsNull_Throws()
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>(MockBehavior.Strict);
+            IExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext context = CreateContext();
+            context.ExceptionContext = new ExceptionContext();
+            Assert.Null(context.ExceptionContext.Exception); // Guard
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => product.HandleAsync(context, cancellationToken), "context",
+                "ExceptionContext.Exception must not be null.");
+        }
+
+        [Fact]
+        public void HandleAsync_IfShouldHandleReturnsTrue_DelegatesToHandleAsyncCore()
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>(MockBehavior.Strict);
+            Task expectedTask = CreateCompletedTask();
+            mock.Setup(h => h.ShouldHandle(It.IsAny<ExceptionHandlerContext>())).Returns(true);
+            mock
+                .Setup(h => h.HandleAsyncCore(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()))
+                .Returns(expectedTask);
+
+            IExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext expectedContext = CreateValidContext();
+
+            using (CancellationTokenSource tokenSource = CreateTokenSource())
+            {
+                CancellationToken expectedCancellationToken = tokenSource.Token;
+
+                // Act
+                Task task = product.HandleAsync(expectedContext, expectedCancellationToken);
+
+                // Assert
+                Assert.Same(expectedTask, task);
+                mock.Verify(h => h.ShouldHandle(expectedContext), Times.Once());
+                mock.Verify(h => h.HandleAsyncCore(expectedContext, expectedCancellationToken), Times.Once());
+            }
+        }
+
+        [Fact]
+        public void HandleAsync_IfShouldHandleReturnsFalse_ReturnsCompletedTask()
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>(MockBehavior.Strict);
+            Task expectedTask = CreateCompletedTask();
+            mock.Setup(h => h.ShouldHandle(It.IsAny<ExceptionHandlerContext>())).Returns(false);
+
+            IExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext expectedContext = CreateValidContext();
+            CancellationToken expectedCancellationToken = CancellationToken.None;
+
+            // Act
+            Task task = product.HandleAsync(expectedContext, expectedCancellationToken);
+
+            // Assert
+            Assert.NotNull(task);
+            Assert.True(task.IsCompleted);
+            Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+            mock.Verify(h => h.ShouldHandle(expectedContext), Times.Once());
+            mock.Verify(h => h.HandleAsyncCore(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()),
+                Times.Never());
+        }
+
+        [Fact]
+        public void HandleAsyncCore_DelegatesToHandleCore_AndReturnsCompletedTask()
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>();
+            mock.CallBase = true;
+            ExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext expectedContext = CreateContext();
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // Act
+            Task task = product.HandleAsyncCore(expectedContext, cancellationToken);
+
+            // Assert
+            Assert.NotNull(task);
+            task.WaitUntilCompleted();
+            Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+            mock.Verify(h => h.HandleCore(expectedContext), Times.Once());
+        }
+
+        [Fact]
+        public void HandleCore_DoesNotThrow()
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>();
+            mock.CallBase = true;
+            ExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext context = CreateContext();
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => product.HandleCore(context));
+        }
+
+        [Fact]
+        public void ShouldHandle_IfContextIsNull_Throws()
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>();
+            mock.CallBase = true;
+            ExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext context = null;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => product.ShouldHandle(context), "context");
+        }
+
+        [Fact]
+        public void ShouldHandle_IfExceptionContextIsNull_Throws()
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>();
+            mock.CallBase = true;
+            ExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext context = CreateContext();
+            Assert.Null(context.ExceptionContext); // Guard
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => product.ShouldHandle(context), "context",
+                "ExceptionHandlerContext.ExceptionContext must not be null.");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ShouldHandle_ReturnsIsTopLevelCatchBlock(bool isTopLevelCatchBlock)
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>();
+            mock.CallBase = true;
+            ExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext context = CreateContext();
+            context.ExceptionContext = new ExceptionContext
+            {
+                IsTopLevelCatchBlock = isTopLevelCatchBlock
+            };
+
+            // Act
+            bool shouldHandle = product.ShouldHandle(context);
+
+            // Assert
+            Assert.Equal(isTopLevelCatchBlock, shouldHandle);
+        }
+
+        private static Task CreateCompletedTask()
+        {
+            TaskCompletionSource<object> source = new TaskCompletionSource<object>();
+            return source.Task;
+        }
+
+        private static ExceptionHandlerContext CreateContext()
+        {
+            return new ExceptionHandlerContext();
+        }
+
+        private static CancellationTokenSource CreateTokenSource()
+        {
+            return new CancellationTokenSource();
+        }
+
+        private static ExceptionHandlerContext CreateValidContext()
+        {
+            return new ExceptionHandlerContext
+            {
+                ExceptionContext = new ExceptionContext
+                {
+                    Exception = new Exception()
+                }
+            };
+        }
+    }
+}

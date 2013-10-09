@@ -5,7 +5,9 @@ using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Filters;
+using System.Web.Http.Results;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -18,16 +20,20 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             List<string> log = new List<string>();
-            var response = new HttpResponseMessage();
-            var actionResult = CreateStubActionResult(TaskHelpers.FromResult(response));
             HttpActionContext actionContext = ContextUtil.CreateActionContext();
-            var exceptionFilterMock = CreateExceptionFilterMock((ec, ct) =>
+            var exceptionFilter = CreateExceptionFilter((ec, ct) =>
             {
                 log.Add("exceptionFilter");
                 return Task.Factory.StartNew(() => { });
             });
-            var filters = new IExceptionFilter[] { exceptionFilterMock.Object };
-            IHttpActionResult product = CreateProductUnderTest(actionContext, filters, actionResult);
+            var filters = new IExceptionFilter[] { exceptionFilter };
+            IExceptionLogger exceptionLogger = CreateDummyExceptionLogger();
+            IExceptionHandler exceptionHandler = CreateDummyExceptionHandler();
+            var response = new HttpResponseMessage();
+            var actionResult = CreateStubActionResult(TaskHelpers.FromResult(response));
+
+            IHttpActionResult product = CreateProductUnderTest(actionContext, filters, exceptionLogger,
+                exceptionHandler, actionResult);
 
             // Act
             var result = product.ExecuteAsync(CancellationToken.None);
@@ -45,15 +51,19 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             List<string> log = new List<string>();
-            var actionResult = CreateStubActionResult(TaskHelpers.Canceled<HttpResponseMessage>());
             HttpActionContext actionContext = ContextUtil.CreateActionContext();
-            var exceptionFilterMock = CreateExceptionFilterMock((ec, ct) =>
+            var exceptionFilter = CreateExceptionFilter((ec, ct) =>
             {
                 log.Add("exceptionFilter");
                 return Task.Factory.StartNew(() => { });
             });
-            var filters = new IExceptionFilter[] { exceptionFilterMock.Object };
-            IHttpActionResult product = CreateProductUnderTest(actionContext, filters, actionResult);
+            var filters = new IExceptionFilter[] { exceptionFilter };
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+            IExceptionHandler exceptionHandler = CreateStubExceptionHandler();
+            var actionResult = CreateStubActionResult(TaskHelpers.Canceled<HttpResponseMessage>());
+
+            IHttpActionResult product = CreateProductUnderTest(actionContext, filters, exceptionLogger,
+                exceptionHandler, actionResult);
 
             // Act
             var result = product.ExecuteAsync(CancellationToken.None);
@@ -70,18 +80,26 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             List<string> log = new List<string>();
-            var exception = new Exception();
-            var actionResult = CreateStubActionResult(TaskHelpers.FromError<HttpResponseMessage>(exception));
             HttpActionContext actionContext = ContextUtil.CreateActionContext();
             Exception exceptionSeenByFilter = null;
-            var exceptionFilterMock = CreateExceptionFilterMock((ec, ct) =>
+            var exceptionFilter = CreateExceptionFilter((ec, ct) =>
             {
                 exceptionSeenByFilter = ec.Exception;
                 log.Add("exceptionFilter");
                 return Task.Factory.StartNew(() => { });
             });
-            var filters = new IExceptionFilter[] { exceptionFilterMock.Object };
-            IHttpActionResult product = CreateProductUnderTest(actionContext, filters, actionResult);
+            var filters = new IExceptionFilter[] { exceptionFilter };
+            IExceptionLogger exceptionLogger = CreateExceptionLogger((c, i) =>
+            {
+                log.Add("exceptionLogger");
+                return Task.FromResult(0);
+            });
+            IExceptionHandler exceptionHandler = CreateStubExceptionHandler();
+            var exception = new Exception();
+            var actionResult = CreateStubActionResult(TaskHelpers.FromError<HttpResponseMessage>(exception));
+
+            IHttpActionResult product = CreateProductUnderTest(actionContext, filters, exceptionLogger,
+                exceptionHandler, actionResult);
 
             // Act
             var result = product.ExecuteAsync(CancellationToken.None);
@@ -92,7 +110,50 @@ namespace System.Web.Http.Controllers
             Assert.Equal(TaskStatus.Faulted, result.Status);
             Assert.Same(exception, result.Exception.InnerException);
             Assert.Same(exception, exceptionSeenByFilter);
-            Assert.Equal(new string[] { "exceptionFilter" }, log.ToArray());
+            Assert.Equal(new string[] { "exceptionLogger", "exceptionFilter" }, log.ToArray());
+        }
+
+        [Fact]
+        public void ExecuteAsync_IfInnerResultTaskIsFaulted_CallsExceptionLogger()
+        {
+            // Arrange
+            Exception expectedException = CreateException();
+
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpActionContext expectedActionContext = CreateActionContext(request);
+                IExceptionFilter[] filters = new IExceptionFilter[0];
+
+                Mock<IExceptionLogger> exceptionLoggerMock = CreateStubExceptionLoggerMock();
+                IExceptionLogger exceptionLogger = exceptionLoggerMock.Object;
+
+                IExceptionHandler exceptionHandler = CreateStubExceptionHandler();
+                IHttpActionResult innerResult = CreateStubActionResult(
+                    CreateFaultedTask<HttpResponseMessage>(expectedException));
+
+                IHttpActionResult product = CreateProductUnderTest(expectedActionContext, filters, exceptionLogger,
+                    exceptionHandler, innerResult);
+
+                CancellationToken cancellationToken = CreateCancellationToken();
+
+                Task<HttpResponseMessage> task = product.ExecuteAsync(cancellationToken);
+
+                // Act
+                task.WaitUntilCompleted();
+
+                // Assert
+                Func<ExceptionContext, bool> exceptionContextMatches = (c) =>
+                    c != null
+                    && c.Exception == expectedException
+                    && c.CatchBlock == ExceptionCatchBlocks.IExceptionFilter
+                    && c.IsTopLevelCatchBlock == false
+                    && c.ActionContext == expectedActionContext;
+
+                exceptionLoggerMock.Verify(l => l.LogAsync(
+                    It.Is<ExceptionLoggerContext>(c => c.CanBeHandled == true
+                        && exceptionContextMatches(c.ExceptionContext)),
+                    cancellationToken), Times.Once());
+            }
         }
 
         [Fact]
@@ -100,27 +161,31 @@ namespace System.Web.Http.Controllers
         {
             // Arrange
             List<string> log = new List<string>();
-            var exception = new Exception();
-            var actionResult = CreateStubActionResult(TaskHelpers.FromError<HttpResponseMessage>(exception));
             HttpActionContext actionContext = ContextUtil.CreateActionContext();
+            var exception = new Exception();
             HttpResponseMessage globalFilterResponse = new HttpResponseMessage();
             HttpResponseMessage actionFilterResponse = new HttpResponseMessage();
             HttpResponseMessage resultSeenByGlobalFilter = null;
-            var globalFilterMock = CreateExceptionFilterMock((ec, ct) =>
+            var globalFilter = CreateExceptionFilter((ec, ct) =>
             {
                 log.Add("globalFilter");
                 resultSeenByGlobalFilter = ec.Response;
                 ec.Response = globalFilterResponse;
                 return Task.Factory.StartNew(() => { });
             });
-            var actionFilterMock = CreateExceptionFilterMock((ec, ct) =>
+            var actionFilter = CreateExceptionFilter((ec, ct) =>
             {
                 log.Add("actionFilter");
                 ec.Response = actionFilterResponse;
                 return Task.Factory.StartNew(() => { });
             });
-            var filters = new IExceptionFilter[] { globalFilterMock.Object, actionFilterMock.Object };
-            IHttpActionResult product = CreateProductUnderTest(actionContext, filters, actionResult);
+            var filters = new IExceptionFilter[] { globalFilter, actionFilter };
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+            IExceptionHandler exceptionHandler = CreateDummyExceptionHandler();
+            var actionResult = CreateStubActionResult(TaskHelpers.FromError<HttpResponseMessage>(exception));
+
+            IHttpActionResult product = CreateProductUnderTest(actionContext, filters, exceptionLogger,
+                exceptionHandler, actionResult);
 
             // Act
             var result = product.ExecuteAsync(CancellationToken.None);
@@ -135,88 +200,204 @@ namespace System.Web.Http.Controllers
         }
 
         [Fact]
-        public void ExecuteAsync_WhenFilterChangesException_ThrowsUpdatedException()
+        public void ExecuteAsync_IfInnerResultTaskIsFaulted_AndNoFilterHandles_RunsHandlerAndReturnsResultIfHandled()
+        {
+            // Arrange
+            List<string> log = new List<string>();
+            Exception expectedException = CreateException();
+
+            using (HttpRequestMessage request = CreateRequest())
+            using (HttpResponseMessage expectedResponse = CreateResponse())
+            {
+                HttpActionContext expectedActionContext = CreateActionContext(request);
+
+                IExceptionFilter filter = CreateExceptionFilter((c, i) =>
+                {
+                    log.Add("filter");
+                    return Task.FromResult(0);
+                });
+
+                IExceptionFilter[] filters = new IExceptionFilter[] { filter };
+
+                IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+
+                Mock<IExceptionHandler> exceptionHandlerMock = new Mock<IExceptionHandler>();
+                exceptionHandlerMock
+                    .Setup(l => l.HandleAsync(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()))
+                    .Callback<ExceptionHandlerContext, CancellationToken>((c, i) =>
+                    {
+                        log.Add("handler");
+                        c.Result = new ResponseMessageResult(expectedResponse);
+                    })
+                    .Returns(Task.FromResult(0));
+                IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
+
+                IHttpActionResult innerResult = CreateStubActionResult(
+                    CreateFaultedTask<HttpResponseMessage>(expectedException));
+
+                IHttpActionResult product = CreateProductUnderTest(expectedActionContext, filters, exceptionLogger,
+                    exceptionHandler, innerResult);
+
+                CancellationToken cancellationToken = CreateCancellationToken();
+
+                Task<HttpResponseMessage> task = product.ExecuteAsync(cancellationToken);
+
+                // Act
+                task.WaitUntilCompleted();
+                HttpResponseMessage response = task.Result;
+
+                // Assert
+                Func<ExceptionContext, bool> exceptionContextMatches = (c) =>
+                    c != null
+                    && c.Exception == expectedException
+                    && c.CatchBlock == ExceptionCatchBlocks.IExceptionFilter
+                    && c.IsTopLevelCatchBlock == false
+                    && c.ActionContext == expectedActionContext;
+
+                exceptionHandlerMock.Verify(h => h.HandleAsync(
+                    It.Is<ExceptionHandlerContext>((c) => exceptionContextMatches(c.ExceptionContext)),
+                    cancellationToken), Times.Once());
+                Assert.Same(expectedResponse, response);
+                Assert.Equal(new string[] { "filter", "handler" }, log.ToArray());
+            }
+        }
+
+        [Fact]
+        public void ExecuteAsync_IfFilterChangesException_ThrowsUpdatedException()
         {
             // Arrange
             Exception expectedException = new NotImplementedException();
 
-            HttpActionContext context = CreateActionContext();
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpActionContext context = CreateActionContext(request);
 
-            Mock<IExceptionFilter> filterMock = new Mock<IExceptionFilter>();
-            filterMock
-                .Setup(f => f.ExecuteExceptionFilterAsync(It.IsAny<HttpActionExecutedContext>(),
-                    It.IsAny<CancellationToken>()))
-                .Callback<HttpActionExecutedContext, CancellationToken>((c, t) =>
-                {
-                    c.Exception = expectedException;
-                })
-                .Returns(() => Task.FromResult<object>(null));
-            IExceptionFilter filter = filterMock.Object;
-            IExceptionFilter[] filters = new IExceptionFilter[] { filter };
+                Mock<IExceptionFilter> filterMock = new Mock<IExceptionFilter>();
+                filterMock
+                    .Setup(f => f.ExecuteExceptionFilterAsync(It.IsAny<HttpActionExecutedContext>(),
+                        It.IsAny<CancellationToken>()))
+                    .Callback<HttpActionExecutedContext, CancellationToken>((c, t) =>
+                    {
+                        c.Exception = expectedException;
+                    })
+                    .Returns(() => Task.FromResult<object>(null));
+                IExceptionFilter filter = filterMock.Object;
+                IExceptionFilter[] filters = new IExceptionFilter[] { filter };
 
-            TaskCompletionSource<HttpResponseMessage> taskSource = new TaskCompletionSource<HttpResponseMessage>();
-            taskSource.SetException(new InvalidOperationException());
-            IHttpActionResult innerResult = CreateStubActionResult(taskSource.Task);
+                IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+                IExceptionHandler exceptionHandler = CreateStubExceptionHandler();
 
-            IHttpActionResult product = CreateProductUnderTest(context, filters, innerResult);
+                IHttpActionResult innerResult = CreateStubActionResult(
+                    CreateFaultedTask<HttpResponseMessage>(CreateException()));
 
-            // Act
-            Task<HttpResponseMessage> task = product.ExecuteAsync(CancellationToken.None);
+                IHttpActionResult product = CreateProductUnderTest(context, filters, exceptionLogger, exceptionHandler,
+                    innerResult);
 
-            // Assert
-            Assert.NotNull(task);
-            task.WaitUntilCompleted();
-            Assert.Equal(TaskStatus.Faulted, task.Status);
-            Assert.NotNull(task.Exception);
-            Exception exception = task.Exception.GetBaseException();
-            Assert.Same(expectedException, exception);
+                // Act
+                Task<HttpResponseMessage> task = product.ExecuteAsync(CancellationToken.None);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.Faulted, task.Status);
+                Assert.NotNull(task.Exception);
+                Exception exception = task.Exception.GetBaseException();
+                Assert.Same(expectedException, exception);
+            }
         }
 
         [Fact]
-        public void ExecuteAsync_PreservesExceptionStackTrace()
+        public void ExecuteAsync_IfFaultedTaskExceptionIsUnhandled_PreservesExceptionStackTrace()
         {
             // Arrange
             Exception originalException = CreateExceptionWithStackTrace();
             string expectedStackTrace = originalException.StackTrace;
 
-            HttpActionContext context = CreateActionContext();
-            IExceptionFilter[] filters = new IExceptionFilter[0];
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                HttpActionContext context = CreateActionContext(request);
+                IExceptionFilter[] filters = new IExceptionFilter[0];
 
-            TaskCompletionSource<HttpResponseMessage> taskSource = new TaskCompletionSource<HttpResponseMessage>();
-            taskSource.SetException(originalException);
-            IHttpActionResult innerResult = CreateStubActionResult(taskSource.Task);
+                IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+                IExceptionHandler exceptionHandler = CreateStubExceptionHandler();
 
-            IHttpActionResult product = CreateProductUnderTest(context, filters, innerResult);
+                IHttpActionResult innerResult = CreateStubActionResult(
+                    CreateFaultedTask<HttpResponseMessage>(originalException));
 
-            // Act
-            Task<HttpResponseMessage> task = product.ExecuteAsync(CancellationToken.None);
+                IHttpActionResult product = CreateProductUnderTest(context, filters, exceptionLogger, exceptionHandler,
+                    innerResult);
 
-            // Assert
-            Assert.NotNull(task);
-            task.WaitUntilCompleted();
-            Assert.Equal(TaskStatus.Faulted, task.Status);
-            Assert.NotNull(task.Exception);
-            Exception exception = task.Exception.GetBaseException();
-            Assert.NotNull(expectedStackTrace);
-            Assert.NotNull(exception);
-            Assert.NotNull(exception.StackTrace);
-            Assert.True(exception.StackTrace.StartsWith(expectedStackTrace));
+                // Act
+                Task<HttpResponseMessage> task = product.ExecuteAsync(CancellationToken.None);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.Faulted, task.Status);
+                Assert.NotNull(task.Exception);
+                Exception exception = task.Exception.GetBaseException();
+                Assert.NotNull(expectedStackTrace);
+                Assert.NotNull(exception);
+                Assert.NotNull(exception.StackTrace);
+                Assert.True(exception.StackTrace.StartsWith(expectedStackTrace));
+            }
         }
 
-        private HttpActionContext CreateActionContext()
+        private static HttpActionContext CreateActionContext()
         {
             return new HttpActionContext();
         }
 
-        private Mock<IExceptionFilter> CreateExceptionFilterMock(
-            Func<HttpActionExecutedContext, CancellationToken, Task> implementation)
+        private static HttpActionContext CreateActionContext(HttpRequestMessage request)
         {
-            Mock<IExceptionFilter> filterMock = new Mock<IExceptionFilter>();
-            filterMock.Setup(f => f.ExecuteExceptionFilterAsync(It.IsAny<HttpActionExecutedContext>(),
-                                                                CancellationToken.None))
-                      .Returns(implementation)
-                      .Verifiable();
-            return filterMock;
+            HttpActionContext actionContext = CreateActionContext();
+            actionContext.ControllerContext = new HttpControllerContext()
+            {
+                Request = request
+            };
+            return actionContext;
+        }
+
+        private static CancellationToken CreateCancellationToken()
+        {
+            CancellationTokenSource source = new CancellationTokenSource();
+            return source.Token;
+        }
+
+        private static IExceptionHandler CreateDummyExceptionHandler()
+        {
+            return new Mock<IExceptionHandler>(MockBehavior.Strict).Object;
+        }
+
+        private static IExceptionLogger CreateDummyExceptionLogger()
+        {
+            return new Mock<IExceptionLogger>(MockBehavior.Strict).Object;
+        }
+
+        private IExceptionFilter CreateExceptionFilter(
+            Func<HttpActionExecutedContext, CancellationToken, Task> executeExceptionFilterAsync)
+        {
+            Mock<IExceptionFilter> mock = new Mock<IExceptionFilter>();
+            mock
+                .Setup(f => f.ExecuteExceptionFilterAsync(It.IsAny<HttpActionExecutedContext>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(executeExceptionFilterAsync);
+            return mock.Object;
+        }
+
+        private static IExceptionLogger CreateExceptionLogger(
+            Func<ExceptionLoggerContext, CancellationToken, Task> logAsync)
+        {
+            Mock<IExceptionLogger> mock = new Mock<IExceptionLogger>();
+            mock
+                .Setup(l => l.LogAsync(It.IsAny<ExceptionLoggerContext>(), It.IsAny<CancellationToken>()))
+                .Returns(logAsync);
+            return mock.Object;
+        }
+
+        private static Exception CreateException()
+        {
+            return new InvalidOperationException();
         }
 
         private static Exception CreateExceptionWithStackTrace()
@@ -225,7 +406,7 @@ namespace System.Web.Http.Controllers
 
             try
             {
-                throw new InvalidOperationException();
+                throw CreateException();
             }
             catch (Exception ex)
             {
@@ -235,13 +416,30 @@ namespace System.Web.Http.Controllers
             return exception;
         }
 
-        private ExceptionFilterResult CreateProductUnderTest(HttpActionContext context, IExceptionFilter[] filters,
-            IHttpActionResult innerResult)
+        private static Task<TResult> CreateFaultedTask<TResult>(Exception exception)
         {
-            return new ExceptionFilterResult(context, filters, innerResult);
+            TaskCompletionSource<TResult> source = new TaskCompletionSource<TResult>();
+            source.SetException(exception);
+            return source.Task;
         }
 
-        private IHttpActionResult CreateStubActionResult(Task<HttpResponseMessage> task)
+        private static ExceptionFilterResult CreateProductUnderTest(HttpActionContext context, IExceptionFilter[] filters,
+            IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler, IHttpActionResult innerResult)
+        {
+            return new ExceptionFilterResult(context, filters, exceptionLogger, exceptionHandler, innerResult);
+        }
+
+        private static HttpRequestMessage CreateRequest()
+        {
+            return new HttpRequestMessage();
+        }
+
+        private static HttpResponseMessage CreateResponse()
+        {
+            return new HttpResponseMessage();
+        }
+
+        private static IHttpActionResult CreateStubActionResult(Task<HttpResponseMessage> task)
         {
             Mock<IHttpActionResult> actionResultMock = new Mock<IHttpActionResult>(MockBehavior.Strict);
             actionResultMock.Setup(r => r.ExecuteAsync(It.IsAny<CancellationToken>())).Returns(() =>
@@ -249,6 +447,34 @@ namespace System.Web.Http.Controllers
                 return task;
             });
             return actionResultMock.Object;
+        }
+
+        private static IExceptionHandler CreateStubExceptionHandler()
+        {
+            return CreateStubExceptionHandlerMock().Object;
+        }
+
+        private static Mock<IExceptionHandler> CreateStubExceptionHandlerMock()
+        {
+            Mock<IExceptionHandler> mock = new Mock<IExceptionHandler>();
+            mock
+                .Setup(l => l.HandleAsync(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult<HttpResponseMessage>(null));
+            return mock;
+        }
+
+        private static IExceptionLogger CreateStubExceptionLogger()
+        {
+            return CreateStubExceptionLoggerMock().Object;
+        }
+
+        private static Mock<IExceptionLogger> CreateStubExceptionLoggerMock()
+        {
+            Mock<IExceptionLogger> mock = new Mock<IExceptionLogger>();
+            mock
+                .Setup(l => l.LogAsync(It.IsAny<ExceptionLoggerContext>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(0));
+            return mock;
         }
     }
 }

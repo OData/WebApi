@@ -7,6 +7,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Dependencies;
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
@@ -60,6 +61,7 @@ namespace System.Web.Http.Services
             Assert.IsType<TraceManager>(defaultServices.GetService(typeof(ITraceManager)));
             Assert.IsType<DataAnnotationsModelMetadataProvider>(defaultServices.GetService(typeof(ModelMetadataProvider)));
             Assert.IsType<ModelValidatorCache>(defaultServices.GetService(typeof(IModelValidatorCache)));
+            Assert.IsType<DefaultExceptionHandler>(defaultServices.GetService(typeof(IExceptionHandler)));
 
             object[] filterProviders = defaultServices.GetServices(typeof(IFilterProvider)).ToArray();
             Assert.Equal(2, filterProviders.Length);
@@ -86,6 +88,9 @@ namespace System.Web.Http.Services
             Assert.Equal(2, valueProviderFactories.Length);
             Assert.IsType<QueryStringValueProviderFactory>(valueProviderFactories[0]);
             Assert.IsType<RouteDataValueProviderFactory>(valueProviderFactories[1]);
+
+            object[] exceptionLoggers = defaultServices.GetServices(typeof(IExceptionLogger)).ToArray();
+            Assert.Equal(0, exceptionLoggers.Length);
         }
 
         // Add tests

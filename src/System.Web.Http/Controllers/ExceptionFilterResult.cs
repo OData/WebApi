@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Filters;
 
 namespace System.Web.Http.Controllers
@@ -13,17 +15,24 @@ namespace System.Web.Http.Controllers
     {
         private readonly HttpActionContext _context;
         private readonly IExceptionFilter[] _filters;
+        private readonly IExceptionLogger _exceptionLogger;
+        private readonly IExceptionHandler _exceptionHandler;
+
         private readonly IHttpActionResult _innerResult;
 
         public ExceptionFilterResult(HttpActionContext context, IExceptionFilter[] filters,
-            IHttpActionResult innerResult)
+            IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler, IHttpActionResult innerResult)
         {
             Contract.Assert(context != null);
             Contract.Assert(filters != null);
+            Contract.Assert(exceptionLogger != null);
+            Contract.Assert(exceptionHandler != null);
             Contract.Assert(innerResult != null);
 
             _context = context;
             _filters = filters;
+            _exceptionLogger = exceptionLogger;
+            _exceptionHandler = exceptionHandler;
             _innerResult = innerResult;
         }
 
@@ -41,11 +50,18 @@ namespace System.Web.Http.Controllers
             }
 
             // This code path only runs if the task is faulted with an exception
-            Contract.Assert(exceptionInfo != null);
-            Contract.Assert(exceptionInfo.SourceException != null);
+            Debug.Assert(exceptionInfo != null);
 
-            HttpActionExecutedContext executedContext = new HttpActionExecutedContext(_context,
-                exceptionInfo.SourceException);
+            Exception exception = exceptionInfo.SourceException;
+            Debug.Assert(exception != null);
+
+            ExceptionContext exceptionContext = new ExceptionContext(exception, _context,
+                ExceptionCatchBlocks.IExceptionFilter, isTopLevelCatchBlock: false);
+
+            await _exceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
+                cancellationToken: cancellationToken);
+
+            HttpActionExecutedContext executedContext = new HttpActionExecutedContext(_context, exception);
 
             // Note: exception filters need to be scheduled in the reverse order so that
             // the more specific filter (e.g. Action) executes before the less specific ones (e.g. Global)
@@ -55,6 +71,11 @@ namespace System.Web.Http.Controllers
                 await exceptionFilter.ExecuteExceptionFilterAsync(executedContext, cancellationToken);
             }
 
+            if (executedContext.Response == null)
+            {
+                executedContext.Response = await _exceptionHandler.HandleAsync(exceptionContext, cancellationToken);
+            }
+
             if (executedContext.Response != null)
             {
                 return executedContext.Response;
@@ -62,7 +83,7 @@ namespace System.Web.Http.Controllers
             else
             {
                 // Preserve the original stack trace when the exception is not changed by any filter.
-                if (exceptionInfo.SourceException == executedContext.Exception)
+                if (exception == executedContext.Exception)
                 {
                     exceptionInfo.Throw();
                 }

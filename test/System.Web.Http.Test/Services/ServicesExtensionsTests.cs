@@ -1,18 +1,64 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http.Controllers;
+using System.Web.Http.ExceptionHandling;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.Services
 {
-    class ServicesExtensionsTests
+    public class ServicesExtensionsTests
     {
         [Fact]
-        public void Call_With_Null()
+        public void GetValueProviderFactories_Throws_WhenServicesIsNull()
         {
-            ControllerServices sc = null;
+            // Arrange
+            ServicesContainer services = null;
 
-            Assert.ThrowsArgumentNull(() => { sc.GetValueProviderFactories(); }, "services");
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => ServicesExtensions.GetValueProviderFactories(services), "services");
+        }
+
+        [Fact]
+        public void GetExceptionHandler_DelegatesToGetService()
+        {
+            // Arrange
+            IExceptionHandler expectedExceptionHandler = new Mock<IExceptionHandler>(MockBehavior.Strict).Object;
+
+            Mock<ServicesContainer> mock = new Mock<ServicesContainer>(MockBehavior.Strict);
+            mock.Setup(s => s.GetService(typeof(IExceptionHandler))).Returns(expectedExceptionHandler);
+            ServicesContainer services = mock.Object;
+
+            // Act
+            IExceptionHandler exceptionHandler = ServicesExtensions.GetExceptionHandler(services);
+            
+            // Assert
+            mock.Verify(s => s.GetService(typeof(IExceptionHandler)), Times.Once());
+            Assert.Same(expectedExceptionHandler, exceptionHandler);
+        }
+
+        [Fact]
+        public void GetExceptionLoggers_DelegatesToGetServices()
+        {
+            // Arrange
+            IExceptionLogger expectedExceptionLogger = new Mock<IExceptionLogger>(MockBehavior.Strict).Object;
+            IEnumerable<IExceptionLogger> expectedExceptionLoggers =
+                new IExceptionLogger[] { expectedExceptionLogger };
+
+            Mock<ServicesContainer> mock = new Mock<ServicesContainer>(MockBehavior.Strict);
+            mock.Setup(s => s.GetServices(typeof(IExceptionLogger))).Returns(expectedExceptionLoggers);
+            ServicesContainer services = mock.Object;
+
+            // Act
+            IEnumerable<IExceptionLogger> exceptionLoggers = ServicesExtensions.GetExceptionLoggers(services);
+
+            // Assert
+            mock.Verify(s => s.GetServices(typeof(IExceptionLogger)), Times.Once());
+            Assert.NotNull(exceptionLoggers);
+            Assert.Equal(1, exceptionLoggers.Count());
+            Assert.Same(expectedExceptionLogger, exceptionLoggers.Single());
         }
     }
 }

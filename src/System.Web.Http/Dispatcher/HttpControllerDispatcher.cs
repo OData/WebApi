@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
-using System.Web.Http.Hosting;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 
@@ -19,20 +20,35 @@ namespace System.Web.Http.Dispatcher
     /// </summary>
     public class HttpControllerDispatcher : HttpMessageHandler
     {
-        private IHttpControllerSelector _controllerSelector;
         private readonly HttpConfiguration _configuration;
+        private readonly IExceptionLogger _exceptionLogger;
+        private readonly IExceptionHandler _exceptionHandler;
+
+        private IHttpControllerSelector _controllerSelector;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpControllerDispatcher"/> class.
         /// </summary>
         public HttpControllerDispatcher(HttpConfiguration configuration)
+            : this(configuration, ExceptionServices.CreateLogger(EnsureNonNull(configuration)),
+            ExceptionServices.CreateHandler(configuration))
+        {
+        }
+
+        internal HttpControllerDispatcher(HttpConfiguration configuration, IExceptionLogger exceptionLogger,
+            IExceptionHandler exceptionHandler)
         {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
 
+            Contract.Assert(exceptionLogger != null);
+            Contract.Assert(exceptionHandler != null);
+
             _configuration = configuration;
+            _exceptionLogger = exceptionLogger;
+            _exceptionHandler = exceptionHandler;
         }
 
         /// <summary>
@@ -41,6 +57,16 @@ namespace System.Web.Http.Dispatcher
         public HttpConfiguration Configuration
         {
             get { return _configuration; }
+        }
+
+        internal IExceptionLogger ExceptionLogger
+        {
+            get { return _exceptionLogger; }
+        }
+
+        internal IExceptionHandler ExceptionHandler
+        {
+            get { return _exceptionHandler; }
         }
 
         private IHttpControllerSelector ControllerSelector
@@ -65,6 +91,8 @@ namespace System.Web.Http.Dispatcher
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We report the error in the HTTP response.")]
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            ExceptionDispatchInfo exceptionInfo = null;
+
             try
             {
                 return await SendAsyncCore(request, cancellationToken);
@@ -75,7 +103,26 @@ namespace System.Web.Http.Dispatcher
             }
             catch (Exception exception)
             {
-                return request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception);
+                exceptionInfo = ExceptionDispatchInfo.Capture(exception);
+            }
+
+            Debug.Assert(exceptionInfo != null);
+            Debug.Assert(exceptionInfo.SourceException != null);
+
+            ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException, request,
+                ExceptionCatchBlocks.HttpControllerDispatcher, isTopLevelCatchBlock: false);
+            await _exceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
+                cancellationToken: cancellationToken);
+            HttpResponseMessage response = await _exceptionHandler.HandleAsync(exceptionContext, cancellationToken);
+
+            if (response != null)
+            {
+                return response;
+            }
+            else
+            {
+                exceptionInfo.Throw();
+                return null; // We'll never get here, but the compiler doesn't know that.
             }
         }
 
@@ -144,6 +191,16 @@ namespace System.Web.Http.Dispatcher
                 httpControllerDescriptor, httpController);
 
             return httpController.ExecuteAsync(controllerContext, cancellationToken);
+        }
+
+        private static HttpConfiguration EnsureNonNull(HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            return configuration;
         }
     }
 }

@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Filters;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
@@ -224,7 +225,10 @@ namespace System.Web.Http
             }
             if (exceptionFilters.Length > 0)
             {
-                result = new ExceptionFilterResult(actionContext, exceptionFilters, result);
+                IExceptionLogger exceptionLogger = ExceptionServices.CreateLogger(controllerServices);
+                IExceptionHandler exceptionHandler = ExceptionServices.CreateHandler(controllerServices);
+                result = new ExceptionFilterResult(actionContext, exceptionFilters, exceptionLogger, exceptionHandler,
+                    result);
             }
 
             return result.ExecuteAsync(cancellationToken);

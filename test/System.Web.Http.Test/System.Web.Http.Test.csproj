@@ -94,10 +94,24 @@
     <Compile Include="Controllers\HttpConfigurationTest.cs" />
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
     <Compile Include="Description\ApiExplorerTest.cs" />
+    <Compile Include="ExceptionHandling\CompositeExceptionLoggerTests.cs" />
+    <Compile Include="ExceptionHandling\ExceptionLoggerExtensionsTests.cs" />
+    <Compile Include="ExceptionHandling\ExceptionLoggerContextTests.cs" />
+    <Compile Include="ExceptionHandling\DefaultExceptionHandlerTests.cs" />
+    <Compile Include="ExceptionHandling\EmptyExceptionHandlerTests.cs" />
+    <Compile Include="ExceptionHandling\ExceptionCatchBlocksTests.cs" />
+    <Compile Include="ExceptionHandling\ExceptionContextTests.cs" />
+    <Compile Include="ExceptionHandling\ExceptionHandlerContextTests.cs" />
+    <Compile Include="ExceptionHandling\ExceptionHandlerExtensionsTests.cs" />
+    <Compile Include="ExceptionHandling\ExceptionHandlerTests.cs" />
+    <Compile Include="ExceptionHandling\ExceptionLoggerTests.cs" />
+    <Compile Include="ExceptionHandling\ExceptionServicesTests.cs" />
+    <Compile Include="ExceptionHandling\LastChanceExceptionHandlerTests.cs" />
     <Compile Include="Filters\HttpAuthenticationChallengeContextTests.cs" />
     <Compile Include="Filters\HttpAuthenticationContextTests.cs" />
     <Compile Include="Hosting\HttpMessageHandlerExtensions.cs" />
     <Compile Include="Hosting\SuppressHostPrincipalMessageHandlerTest.cs" />
+    <Compile Include="HttpMessageHandlerExtensions.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -353,6 +367,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>

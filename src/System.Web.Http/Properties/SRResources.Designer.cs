@@ -799,6 +799,24 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; type failed to serialize the response body..
+        /// </summary>
+        internal static string Serialize_Response_Failed {
+            get {
+                return ResourceManager.GetString("Serialize_Response_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; type failed to serialize the response body for content type &apos;{1}&apos;..
+        /// </summary>
+        internal static string Serialize_Response_Failed_MediaType {
+            get {
+                return ResourceManager.GetString("Serialize_Response_Failed_MediaType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Action filter for &apos;{0}&apos;.
         /// </summary>
         internal static string TraceActionFilterMessage {
@@ -1020,6 +1038,33 @@ namespace System.Web.Http.Properties {
         internal static string TraceWriteToStreamMessage {
             get {
                 return ResourceManager.GetString("TraceWriteToStreamMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} instance must not be null..
+        /// </summary>
+        internal static string TypeInstanceMustNotBeNull {
+            get {
+                return ResourceManager.GetString("TypeInstanceMustNotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}.{1} must not return null..
+        /// </summary>
+        internal static string TypeMethodMustNotReturnNull {
+            get {
+                return ResourceManager.GetString("TypeMethodMustNotReturnNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}.{1} must not be null..
+        /// </summary>
+        internal static string TypePropertyMustNotBeNull {
+            get {
+                return ResourceManager.GetString("TypePropertyMustNotBeNull", resourceCulture);
             }
         }
         

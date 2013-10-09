@@ -8,6 +8,7 @@ using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
@@ -131,6 +132,24 @@ namespace System.Web.Http
         public static IDocumentationProvider GetDocumentationProvider(this ServicesContainer services)
         {
             return services.GetService<IDocumentationProvider>();
+        }
+
+        /// <summary>Returns the registered unhandled exception handler, if any.</summary>
+        /// <param name="services">The services container.</param>
+        /// <returns>
+        /// The registered unhandled exception hander, if present; otherwise, <see langword="null"/>.
+        /// </returns>
+        public static IExceptionHandler GetExceptionHandler(this ServicesContainer services)
+        {
+            return services.GetService<IExceptionHandler>();
+        }
+
+        /// <summary>Returns the registered unhandled exception loggers.</summary>
+        /// <param name="services">The services container.</param>
+        /// <returns>The registered unhandled exception loggers.</returns>
+        public static IEnumerable<IExceptionLogger> GetExceptionLoggers(this ServicesContainer services)
+        {
+            return services.GetServices<IExceptionLogger>();
         }
 
         public static IEnumerable<IFilterProvider> GetFilterProviders(this ServicesContainer services)

@@ -73,7 +73,12 @@ namespace System.Web.Mvc
                 instance is IResultFilter ||
                 instance is IAuthenticationFilter))
             {
-                throw new InvalidOperationException(MvcResources.GlobalFilterCollection_UnsupportedFilterInstance);
+                throw Error.InvalidOperation(MvcResources.GlobalFilterCollection_UnsupportedFilterInstance,
+                    typeof(IAuthorizationFilter).FullName,
+                    typeof(IActionFilter).FullName,
+                    typeof(IResultFilter).FullName,
+                    typeof(IExceptionFilter).FullName,
+                    typeof(IAuthenticationFilter).FullName);
             }
         }
     }

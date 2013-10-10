@@ -12,16 +12,28 @@ namespace System.Web.Mvc.Test
         private GlobalFilterCollection _collection = new GlobalFilterCollection();
         private object _filterInstance = GetFilterInstance<IActionFilter>();
 
+        public static IEnumerable<object[]> AddRejectsNonFilterInstancesData
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] { "string", },
+                    new object[] { 42, },
+                    new object[] { new System.Web.Http.AuthorizeAttribute(), },
+                };
+            }
+        }
+
         [Theory]
-        [InlineData("string")]
-        [InlineData(42)]
+        [PropertyData("AddRejectsNonFilterInstancesData")]
         public void AddRejectsNonFilterInstances(object instance)
         {
             // Act + Assert
             Assert.Throws<InvalidOperationException>(() =>
             {
                 _collection.Add(instance);
-            }, "The given filter instance must implement one or more of the following filter interfaces: IAuthorizationFilter, IActionFilter, IResultFilter, IExceptionFilter.");
+            }, "The given filter instance must implement one or more of the following filter interfaces: System.Web.Mvc.IAuthorizationFilter, System.Web.Mvc.IActionFilter, System.Web.Mvc.IResultFilter, System.Web.Mvc.IExceptionFilter, System.Web.Mvc.Filters.IAuthenticationFilter.");
         }
 
         [Fact]

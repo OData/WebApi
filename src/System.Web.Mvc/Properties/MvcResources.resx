@@ -457,7 +457,7 @@
     <value>The JSON request was too large to be deserialized.</value>
   </data>
   <data name="GlobalFilterCollection_UnsupportedFilterInstance" xml:space="preserve">
-    <value>The given filter instance must implement one or more of the following filter interfaces: IAuthorizationFilter, IActionFilter, IResultFilter, IExceptionFilter.</value>
+    <value>The given filter instance must implement one or more of the following filter interfaces: {0}, {1}, {2}, {3}, {4}.</value>
   </data>
   <data name="ArgumentMustBeGreaterThanOrEqualTo" xml:space="preserve">
     <value>Value must be greater than or equal to {0}.</value>

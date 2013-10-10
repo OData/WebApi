@@ -322,6 +322,10 @@
     <Compile Include="Util\SimpleViewDataContainer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\System.Web.Http\System.Web.Http.csproj">
+      <Project>{DDC1CE0C-486E-4E35-BB3B-EAB61F8F9440}</Project>
+      <Name>System.Web.Http</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\System.Web.Mvc\System.Web.Mvc.csproj">
       <Project>{3D3FFD8A-624D-4E9B-954B-E1C105507975}</Project>
       <Name>System.Web.Mvc</Name>

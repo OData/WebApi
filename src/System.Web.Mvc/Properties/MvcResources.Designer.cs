@@ -574,7 +574,7 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The given filter instance must implement one or more of the following filter interfaces: IAuthorizationFilter, IActionFilter, IResultFilter, IExceptionFilter..
+        ///   Looks up a localized string similar to The given filter instance must implement one or more of the following filter interfaces: {0}, {1}, {2}, {3}, {4}..
         /// </summary>
         internal static string GlobalFilterCollection_UnsupportedFilterInstance {
             get {

@@ -32,7 +32,7 @@ namespace System.Web.Http.Batch
         /// </summary>
         /// <param name="httpServer">The <see cref="HttpServer"/> for handling the individual batch requests.</param>
         protected HttpBatchHandler(HttpServer httpServer)
-            : this(httpServer, CreateExceptionLogger(EnsureNonNull(httpServer)), CreateExceptionHandler(httpServer))
+            : this(EnsureNonNull(httpServer), CreateExceptionLogger(httpServer), CreateExceptionHandler(httpServer))
         {
         }
 
@@ -101,15 +101,12 @@ namespace System.Web.Http.Batch
                 cancellationToken: cancellationToken);
             HttpResponseMessage response = await _exceptionHandler.HandleAsync(exceptionContext, cancellationToken);
 
-            if (response != null)
-            {
-                return response;
-            }
-            else
+            if (response == null)
             {
                 exceptionInfo.Throw();
-                return null; // We'll never get here, but the compiler doesn't know that.
             }
+
+            return response;
         }
 
         /// <summary>

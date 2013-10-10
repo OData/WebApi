@@ -72,14 +72,14 @@ namespace System.Web.Http
         /// </summary>
         /// <param name="configuration">The <see cref="HttpConfiguration"/> used to configure this <see cref="HttpServer"/> instance.</param>
         /// <param name="dispatcher">Http dispatcher responsible for handling incoming requests.</param>
-        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "principal",
-            Justification = "Must access Thread.CurrentPrincipal to work around problem in .NET 4.5")]
         public HttpServer(HttpConfiguration configuration, HttpMessageHandler dispatcher)
             : this(configuration, dispatcher, ExceptionServices.CreateLogger(EnsureNonNull(configuration)),
             ExceptionServices.CreateHandler(configuration))
         {
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "principal",
+            Justification = "Must access Thread.CurrentPrincipal to work around problem in .NET 4.5")]
         internal HttpServer(HttpConfiguration configuration, HttpMessageHandler dispatcher,
             IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler)
         {
@@ -228,15 +228,12 @@ namespace System.Web.Http
                 HttpResponseMessage response = await _exceptionHandler.HandleAsync(exceptionContext,
                     cancellationToken);
 
-                if (response != null)
-                {
-                    return response;
-                }
-                else
+                if (response == null)
                 {
                     exceptionInfo.Throw();
-                    return null; // We'll never get here, but the compiler doesn't know that.
                 }
+
+                return response;
             }
             finally
             {

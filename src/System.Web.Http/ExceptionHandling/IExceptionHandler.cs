@@ -24,7 +24,7 @@ namespace System.Web.Http.ExceptionHandling
         /// The exception handler either handles the exception or allows it to propagate. An exception is handled by
         /// setting <see cref="ExceptionHandlerContext.Result"/>, which provides the response message to return in
         /// place of the exception thrown. If <see cref="ExceptionHandlerContext.Result"/> is
-        /// <see langword="null"/>, the exception is remains unhandled, and the exception will continue to propagate up
+        /// <see langword="null"/>, the exception remains unhandled, and the exception will continue to propagate up
         /// the call stack.
         /// </para>
         /// <para>

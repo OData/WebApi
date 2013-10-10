@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace System.Web.Http.ExceptionHandling
 {
     /// <summary>
-    /// Represents an exception handler that does leaves exceptions unhandled (allowing them to propogate).
+    /// Represents an exception handler that leaves exceptions unhandled (allowing them to propogate).
     /// </summary>
     /// <remarks>
     /// This class represents the behavior of having no IExceptionHandler service, such as when the registered service

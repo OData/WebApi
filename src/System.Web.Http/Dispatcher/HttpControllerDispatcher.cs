@@ -115,15 +115,12 @@ namespace System.Web.Http.Dispatcher
                 cancellationToken: cancellationToken);
             HttpResponseMessage response = await _exceptionHandler.HandleAsync(exceptionContext, cancellationToken);
 
-            if (response != null)
-            {
-                return response;
-            }
-            else
+            if (response == null)
             {
                 exceptionInfo.Throw();
-                return null; // We'll never get here, but the compiler doesn't know that.
             }
+
+            return response;
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner.")]

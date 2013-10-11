@@ -60,6 +60,35 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.BooleanTemplate(MakeHtmlHelper<Nullable<bool>>(null)));
         }
 
+        public static TheoryDataSet<object, string> BooleanTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input checked=\"checked\" class=\"form-control check-box\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"checkbox\" value=\"true\" /><input name=\"FieldPrefix\" type=\"hidden\" value=\"false\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input checked=\"checked\" class=\"form-control check-box\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"checkbox\" value=\"true\" /><input name=\"FieldPrefix\" type=\"hidden\" value=\"false\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("BooleanTemplateHtmlAttributeData")]
+        public void BooleanTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<bool>(true);
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.BooleanTemplate(htmlHelper));
+        }
+
         // CollectionTemplate
 
         private static string CollectionSpyCallback(HtmlHelper html, ModelMetadata metadata, string htmlFieldName, string templateName, DataBoundControlMode mode, object additionalViewData)
@@ -227,6 +256,26 @@ namespace System.Web.Mvc.Html.Test
                 result);
         }
 
+        [Fact]
+        public void CollectionTemplate_DoesNotAddHtmlAttributes()
+        {
+            // Arrange
+            HtmlHelper html = MakeHtmlHelper<List<string>>(new List<string> { "foo", "bar", "baz" });
+            html.ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = null;
+            html.ViewContext.ViewBag.htmlAttribute = new { @class = "form-control", foo = "bar" };
+
+            // Act
+            string result = RunWithoutViewEngine(() =>
+                DefaultEditorTemplates.CollectionTemplate(html));
+
+            // Assert
+            Assert.Equal(
+                "<input class=\"text-box single-line\" name=\"[0]\" type=\"text\" value=\"foo\" />"
+              + "<input class=\"text-box single-line\" name=\"[1]\" type=\"text\" value=\"bar\" />"
+              + "<input class=\"text-box single-line\" name=\"[2]\" type=\"text\" value=\"baz\" />",
+                result);
+        }
+
         // DecimalTemplate
 
         [Fact]
@@ -246,6 +295,35 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(
                 "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"text\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.DecimalTemplate(MakeHtmlHelper<decimal>(12.3456M, "<script>alert('XSS!')</script>")));
+        }
+
+        public static TheoryDataSet<object, string> DecimalTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"text\" value=\"12.30\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"text\" value=\"12.30\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("DecimalTemplateHtmlAttributeData")]
+        public void DecimalTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<decimal>(12.30);
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.DecimalTemplate(htmlHelper));
         }
 
         // HiddenInputTemplate
@@ -278,6 +356,35 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.HiddenInputTemplate(MakeHtmlHelper<byte[]>(byteValues)));
         }
 
+        public static TheoryDataSet<object, string> HiddenInputTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "Hidden Value<input class=\"form-control\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"hidden\" value=\"Hidden Value\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "Hidden Value<input class=\"form-control\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"hidden\" value=\"Hidden Value\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("HiddenInputTemplateHtmlAttributeData")]
+        public void HiddenInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Hidden Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.HiddenInputTemplate(htmlHelper));
+        }
+
         // MultilineText
 
         [Fact]
@@ -296,6 +403,41 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.MultilineTextTemplate(MakeHtmlHelper<string>("", "<script>alert('XSS!')</script>")));
         }
 
+        public static TheoryDataSet<object, string> MultilineTextTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<textarea class=\"form-control text-box multi-line\" id=\"FieldPrefix\" name=\"FieldPrefix\">" + Environment.NewLine
+                      + "Multiple" + Environment.NewLine
+                      + "Line" + Environment.NewLine
+                      + "Value!</textarea>"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<textarea class=\"form-control text-box multi-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\">" + Environment.NewLine
+                      + "Multiple" + Environment.NewLine
+                      + "Line" + Environment.NewLine
+                      + "Value!</textarea>"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("MultilineTextTemplateHtmlAttributeData")]
+        public void MultilineTextTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("", "Multiple" + Environment.NewLine + "Line" + Environment.NewLine + "Value!");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.MultilineTextTemplate(htmlHelper));
+        }
+
         // ObjectTemplate
 
         private static string SpyCallback(HtmlHelper html, ModelMetadata metadata, string htmlFieldName, string templateName, DataBoundControlMode mode, object additionalViewData)
@@ -310,7 +452,7 @@ namespace System.Web.Mvc.Html.Test
                                  AnonymousObject.Inspect(additionalViewData));
         }
 
-        class ObjectTemplateModel
+        private class ObjectTemplateModel
         {
             public ObjectTemplateModel()
             {
@@ -318,7 +460,9 @@ namespace System.Web.Mvc.Html.Test
             }
 
             public string Property1 { get; set; }
+
             public string Property2 { get; set; }
+
             public object ComplexInnerModel { get; set; }
         }
 
@@ -337,6 +481,28 @@ namespace System.Web.Mvc.Html.Test
 
             // Act
             string result = DefaultEditorTemplates.ObjectTemplate(html, SpyCallback);
+
+            // Assert
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void ObjectTemplate_DoesNotAddHtmlAttributes()
+        {
+            string expected =
+                "<div class=\"editor-label\"><label for=\"FieldPrefix_Property1\">Property1</label></div>" + Environment.NewLine
+              + "<div class=\"editor-field\"><input class=\"text-box single-line\" id=\"FieldPrefix_Property1\" name=\"FieldPrefix.Property1\" type=\"text\" value=\"p1\" /> </div>" + Environment.NewLine
+              + "<div class=\"editor-label\"><label for=\"FieldPrefix_Property2\">Property2</label></div>" + Environment.NewLine
+              + "<div class=\"editor-field\"><input class=\"text-box single-line\" id=\"FieldPrefix_Property2\" name=\"FieldPrefix.Property2\" type=\"text\" value=\"\" /> </div>" + Environment.NewLine;
+
+            // Arrange
+            ObjectTemplateModel model = new ObjectTemplateModel { Property1 = "p1", Property2 = null };
+            HtmlHelper html = MakeHtmlHelper<ObjectTemplateModel>(model);
+            html.ViewContext.ViewBag.htmlAttribute = new { @class = "form-control", foo = "bar" };
+
+            // Act
+            string result = RunWithoutViewEngine(() =>
+                DefaultEditorTemplates.ObjectTemplate(html));
 
             // Assert
             Assert.Equal(expected, result);
@@ -519,6 +685,35 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.PasswordTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
+        public static TheoryDataSet<object, string> PasswordTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line password\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"password\" value=\"Value\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line password\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"password\" value=\"Value\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("PasswordTemplateHtmlAttributeData")]
+        public void PasswordTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.PasswordTemplate(htmlHelper));
+        }
+
         [Fact]
         public void ObjectTemplateWithHiddenHtml()
         {
@@ -572,6 +767,35 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.StringTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
+        public static TheoryDataSet<object, string> StringTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"text\" value=\"Value\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"text\" value=\"Value\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("StringTemplateHtmlAttributeData")]
+        public void StringTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.StringTemplate(htmlHelper));
+        }
+
         // PhoneNumberInputTemplate
 
         [Fact]
@@ -584,6 +808,35 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(
                 "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"tel\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.PhoneNumberInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+        }
+
+        public static TheoryDataSet<object, string> PhoneNumberInputTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"tel\" value=\"Value\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"tel\" value=\"Value\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("PhoneNumberInputTemplateHtmlAttributeData")]
+        public void PhoneNumberInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.PhoneNumberInputTemplate(htmlHelper));
         }
 
         // UrlInputTemplate
@@ -600,6 +853,35 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.UrlInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
+        public static TheoryDataSet<object, string> UrlInputTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"url\" value=\"Value\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"url\" value=\"Value\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("UrlInputTemplateHtmlAttributeData")]
+        public void UrlInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.UrlInputTemplate(htmlHelper));
+        }
+
         // EmailAddressInputTemplate
 
         [Fact]
@@ -614,6 +896,35 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.EmailAddressInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
+        public static TheoryDataSet<object, string> EmailAddressInputTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"email\" value=\"Value\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"email\" value=\"Value\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("EmailAddressInputTemplateHtmlAttributeData")]
+        public void EmailAddressInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.EmailAddressInputTemplate(htmlHelper));
+        }
+
         [Fact]
         public void DateTimeInputTemplateTests()
         {
@@ -625,7 +936,6 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(
                 GetExpectedInputTag(type, "&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"),
                 DefaultEditorTemplates.DateTimeInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
-
 
             var epocInLocalTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).ToLocalTime();
             var helper = MakeHtmlHelper<DateTime>(epocInLocalTime);
@@ -639,6 +949,35 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(
                 GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-ddTHH:mm:ss.fffK")),
                 DefaultEditorTemplates.DateTimeInputTemplate(helper));
+        }
+
+        public static TheoryDataSet<object, string> DateTimeInputTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"datetime\" value=\"Value\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"datetime\" value=\"Value\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("DateTimeInputTemplateHtmlAttributeData")]
+        public void DateTimeInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<DateTime>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.DateTimeInputTemplate(htmlHelper));
         }
 
         [Fact]
@@ -667,6 +1006,35 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.DateTimeLocalInputTemplate(helper));
         }
 
+        public static TheoryDataSet<object, string> DateTimeLocalInputTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"datetime-local\" value=\"Value\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"datetime-local\" value=\"Value\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("DateTimeLocalInputTemplateHtmlAttributeData")]
+        public void DateTimeLocalInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<DateTime>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.DateTimeLocalInputTemplate(htmlHelper));
+        }
+
         [Fact]
         public void DateInputTemplateTests()
         {
@@ -691,6 +1059,35 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(
                 GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-dd")),
                 DefaultEditorTemplates.DateInputTemplate(helper));
+        }
+
+        public static TheoryDataSet<object, string> DateInputTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"date\" value=\"Value\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"date\" value=\"Value\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("DateInputTemplateHtmlAttributeData")]
+        public void DateInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<DateTime>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.DateInputTemplate(htmlHelper));
         }
 
         [Fact]
@@ -719,6 +1116,35 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.TimeInputTemplate(helper));
         }
 
+        public static TheoryDataSet<object, string> TimeInputTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"time\" value=\"Value\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"time\" value=\"Value\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("TimeInputTemplateHtmlAttributeData")]
+        public void TimeInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<DateTime>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.TimeInputTemplate(htmlHelper));
+        }
+
         // NumberInputTemplate
 
         [Fact]
@@ -731,6 +1157,35 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(
                 "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"number\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.NumberInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+        }
+
+        public static TheoryDataSet<object, string> NumberInputTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"number\" value=\"10\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"number\" value=\"10\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("NumberInputTemplateHtmlAttributeData")]
+        public void NumberInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<int>(10);
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.NumberInputTemplate(htmlHelper));
         }
 
         // ColorInputTemplate
@@ -752,9 +1207,39 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.ColorInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
+        public static TheoryDataSet<object, string> ColorInputTemplateHtmlAttributeData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>
+                {
+                    {
+                        new { @class = "form-control" },
+                        "<input class=\"form-control text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"color\" value=\"#33F4CC\" />"
+                    },
+                    {
+                        new { @class = "form-control", custom = "foo" },
+                        "<input class=\"form-control text-box single-line\" custom=\"foo\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"color\" value=\"#33F4CC\" />"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("ColorInputTemplateHtmlAttributeData")]
+        public void ColorInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        {
+            var color = Color.FromArgb(0x33, 0xf4, 0xcc);
+            var htmlHelper = MakeHtmlHelper<Color>(color);
+            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.ColorInputTemplate(htmlHelper));
+        }
+
         // Helpers
 
-        static string GetExpectedInputTag(string type, string value)
+        private static string GetExpectedInputTag(string type, string value)
         {
             return string.Format("<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"{0}\" value=\"{1}\" />", type, value);
         }
@@ -774,7 +1259,7 @@ namespace System.Web.Mvc.Html.Test
             Mock<HttpContextBase> mockHttpContext = new Mock<HttpContextBase>();
             mockHttpContext.Setup(o => o.Items).Returns(new Hashtable());
 
-            ViewContext viewContext = new ViewContext(new ControllerContext(), new DummyView(), viewData, new TempDataDictionary(), new StringWriter())
+            ViewContext viewContext = new ViewContext(new ControllerContext { HttpContext = mockHttpContext.Object }, new DummyView(), viewData, new TempDataDictionary(), new StringWriter())
             {
                 HttpContext = mockHttpContext.Object
             };
@@ -790,6 +1275,27 @@ namespace System.Web.Mvc.Html.Test
             public void Render(ViewContext viewContext, TextWriter writer)
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        private string RunWithoutViewEngine(Func<string> testCode)
+        {
+            lock (ViewEngines.Engines)
+            {
+                List<IViewEngine> viewEngines = new List<IViewEngine>(ViewEngines.Engines);
+                ViewEngines.Engines.Clear();
+
+                try
+                {
+                    return testCode();
+                }
+                finally
+                {
+                    foreach (var engine in viewEngines)
+                    {
+                        ViewEngines.Engines.Add(engine);
+                    }
+                }
             }
         }
     }

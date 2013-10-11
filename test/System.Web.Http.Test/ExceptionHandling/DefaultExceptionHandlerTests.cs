@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Results;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.ExceptionHandling
 {
@@ -115,210 +116,6 @@ namespace System.Web.Http.ExceptionHandling
             }
         }
 
-        [Fact]
-        public void HandleAsync_IfCatchBlockIsWebHostBufferedContent_HandlesWithCustomException()
-        {
-            IExceptionHandler product = CreateProductUnderTest();
-
-            // Arrange
-            using (HttpRequestMessage expectedRequest = CreateRequest())
-            using (HttpResponseMessage originalResponse = CreateResponse())
-            {
-                originalResponse.Content = new StringContent("Error");
-                originalResponse.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
-                expectedRequest.SetRequestContext(new HttpRequestContext { IncludeErrorDetail = true });
-                ExceptionHandlerContext context = CreateValidContext(expectedRequest,
-                    "HttpControllerHandler.WriteBufferedResponseContentAsync");
-                context.ExceptionContext.Response = originalResponse;
-                CancellationToken cancellationToken = CancellationToken.None;
-
-                // Act
-                Task task = product.HandleAsync(context, cancellationToken);
-                task.WaitUntilCompleted();
-
-                // Assert
-                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
-                IHttpActionResult result = context.Result;
-                Assert.IsType(typeof(ResponseMessageResult), result);
-                ResponseMessageResult typedResult = (ResponseMessageResult)result;
-
-                using (HttpResponseMessage response = typedResult.Response)
-                using (HttpResponseMessage expectedResponse = expectedRequest.CreateErrorResponse(
-                    HttpStatusCode.InternalServerError, new InvalidOperationException("The 'StringContent' type " +
-                        "failed to serialize the response body for content type 'text/plain'.",
-                        context.ExceptionContext.Exception)))
-                {
-                    AssertErrorResponse(expectedResponse, response);
-                }
-            }
-        }
-
-        [Fact]
-        public void HandleAsync_IfCatchBlockIsWebHostBufferedContent_WithoutContentType_HandlesWithCustomException()
-        {
-            IExceptionHandler product = CreateProductUnderTest();
-
-            // Arrange
-            using (HttpRequestMessage expectedRequest = CreateRequest())
-            using (HttpResponseMessage originalResponse = CreateResponse())
-            {
-                originalResponse.Content = new StringContent("Error");
-                originalResponse.Content.Headers.ContentType = null;
-                expectedRequest.SetRequestContext(new HttpRequestContext { IncludeErrorDetail = true });
-                ExceptionHandlerContext context = CreateValidContext(expectedRequest,
-                    "HttpControllerHandler.WriteBufferedResponseContentAsync");
-                context.ExceptionContext.Response = originalResponse;
-                CancellationToken cancellationToken = CancellationToken.None;
-
-                // Act
-                Task task = product.HandleAsync(context, cancellationToken);
-                task.WaitUntilCompleted();
-
-                // Assert
-                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
-                IHttpActionResult result = context.Result;
-                Assert.IsType(typeof(ResponseMessageResult), result);
-                ResponseMessageResult typedResult = (ResponseMessageResult)result;
-
-                using (HttpResponseMessage response = typedResult.Response)
-                using (HttpResponseMessage expectedResponse = expectedRequest.CreateErrorResponse(
-                    HttpStatusCode.InternalServerError, new InvalidOperationException(
-                        "The 'StringContent' type failed to serialize the response body.",
-                        context.ExceptionContext.Exception)))
-                {
-                    AssertErrorResponse(expectedResponse, response);
-                }
-            }
-        }
-
-        [Fact]
-        public void HandleAsync_IfCatchBlockIsWebHostBufferedContent_WithFailedNegotiation_HandlesWithCustomException()
-        {
-            IExceptionHandler product = CreateProductUnderTest();
-
-            // Arrange
-            using (HttpRequestMessage expectedRequest = CreateRequest())
-            using (HttpResponseMessage originalResponse = CreateResponse())
-            using (HttpConfiguration configuration = CreateConfiguration())
-            {
-                configuration.Formatters.Clear();
-
-                originalResponse.Content = new StringContent("Error");
-                expectedRequest.SetRequestContext(new HttpRequestContext
-                {
-                    IncludeErrorDetail = true,
-                    Configuration = configuration
-                });
-                ExceptionHandlerContext context = CreateValidContext(expectedRequest,
-                    "HttpControllerHandler.WriteBufferedResponseContentAsync");
-                context.ExceptionContext.Response = originalResponse;
-                CancellationToken cancellationToken = CancellationToken.None;
-
-                // Act
-                Task task = product.HandleAsync(context, cancellationToken);
-                task.WaitUntilCompleted();
-
-                // Assert
-                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
-                IHttpActionResult result = context.Result;
-                Assert.IsType(typeof(ResponseMessageResult), result);
-                ResponseMessageResult typedResult = (ResponseMessageResult)result;
-                using (HttpResponseMessage response = typedResult.Response)
-                {
-                    Assert.NotNull(response);
-                    Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-                    Assert.Null(response.Content);
-                    Assert.Same(expectedRequest, response.RequestMessage);
-                }
-            }
-        }
-
-        [Fact]
-        public void HandleAsync_IfCatchBlockIsWebHostBufferedContent_WithCreateException_HandlesWithCustomException()
-        {
-            IExceptionHandler product = CreateProductUnderTest();
-
-            // Arrange
-            using (HttpRequestMessage expectedRequest = CreateRequest())
-            using (HttpResponseMessage originalResponse = CreateResponse())
-            using (HttpConfiguration configuration = CreateConfiguration())
-            {
-                configuration.Services.Clear(typeof(IContentNegotiator));
-
-                originalResponse.Content = new StringContent("Error");
-                expectedRequest.SetRequestContext(new HttpRequestContext
-                {
-                    IncludeErrorDetail = true,
-                    Configuration = configuration
-                });
-                ExceptionHandlerContext context = CreateValidContext(expectedRequest,
-                    "HttpControllerHandler.WriteBufferedResponseContentAsync");
-                context.ExceptionContext.Response = originalResponse;
-                CancellationToken cancellationToken = CancellationToken.None;
-
-                // Act
-                Task task = product.HandleAsync(context, cancellationToken);
-                task.WaitUntilCompleted();
-
-                // Assert
-                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
-                IHttpActionResult result = context.Result;
-                Assert.IsType(typeof(ResponseMessageResult), result);
-                ResponseMessageResult typedResult = (ResponseMessageResult)result;
-                using (HttpResponseMessage response = typedResult.Response)
-                {
-                    Assert.NotNull(response);
-                    Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-                    Assert.Null(response.Content);
-                    Assert.Same(expectedRequest, response.RequestMessage);
-                }
-            }
-        }
-
-        [Fact]
-        public void HandleAsync_IfCatchBlockIsWebHostBufferedContent_AndResponseIsNull_LeavesExceptionUnhandled()
-        {
-            IExceptionHandler product = CreateProductUnderTest();
-
-            // Arrange
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                ExceptionHandlerContext context = CreateValidContext(request,
-                    "HttpControllerHandler.WriteBufferedResponseContentAsync");
-                Assert.Null(context.ExceptionContext.Response); // Guard
-                CancellationToken cancellationToken = CancellationToken.None;
-
-                // Act
-                Task task = product.HandleAsync(context, cancellationToken);
-                task.WaitUntilCompleted();
-
-                // Assert
-                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
-                Assert.Null(context.Result);
-            }
-        }
-
-        [Fact]
-        public void HandleAsync_IfCatchBlockIsWebHostBufferedContent_AndResponseContentIsNull_Throws()
-        {
-            // Arrange
-            IExceptionHandler product = CreateProductUnderTest();
-
-            using (HttpRequestMessage request = CreateRequest())
-            using (HttpResponseMessage response = CreateResponse())
-            {
-                ExceptionHandlerContext context = CreateValidContext(request,
-                    "HttpControllerHandler.WriteBufferedResponseContentAsync");
-                context.ExceptionContext.Response = response;
-                Assert.Null(context.ExceptionContext.Request.Content); // Guard
-                CancellationToken cancellationToken = CancellationToken.None;
-
-                // Act & Assert
-                Assert.ThrowsArgument(() => product.HandleAsync(context, cancellationToken), "context",
-                    "HttpResponseMessage.Content must not be null.");
-            }
-        }
-
         private static void AssertErrorResponse(HttpResponseMessage expected, HttpResponseMessage actual)
         {
             Assert.NotNull(expected); // Guard
@@ -332,49 +129,8 @@ namespace System.Web.Http.ExceptionHandling
             ObjectContent<HttpError> actualContent = (ObjectContent<HttpError>)actual.Content;
             Assert.NotNull(actualContent.Formatter);
             Assert.Same(expectedContent.Formatter.GetType(), actualContent.Formatter.GetType());
-            Assert.Equal(Flatten(expectedContent.Value), Flatten(actualContent.Value));
+            Assert.Equal(expectedContent.Value, actualContent.Value);
             Assert.Same(expected.RequestMessage, actual.RequestMessage);
-        }
-
-        private static object Flatten(object obj)
-        {
-            IDictionary<string, object> dictionary = obj as IDictionary<string, object>;
-
-            if (dictionary == null)
-            {
-                return obj;
-            }
-
-            IDictionary<string, object> flattened = new Dictionary<string, object>();
-            AddValues(dictionary, null, flattened);
-            return flattened;
-        }
-
-        private static void AddValues(IDictionary<string, object> source, string prefix,
-            IDictionary<string, object> destination)
-        {
-            foreach (string key in source.Keys)
-            {
-                object value = source[key];
-                IDictionary<string, object> dictionaryValue = value as IDictionary<string, object>;
-
-                string prefixedKey = prefix != null ? prefix + "." + key : key;
-
-                if (dictionaryValue != null)
-                {
-                    destination.Add(prefixedKey, "<Flattened>");
-                    AddValues(dictionaryValue, prefixedKey, destination);
-                }
-                else
-                {
-                    destination.Add(prefixedKey, value);
-                }
-            }
-        }
-
-        private static HttpConfiguration CreateConfiguration()
-        {
-            return new HttpConfiguration();
         }
 
         private static ExceptionHandlerContext CreateContext(ExceptionContext exceptionContext)
@@ -395,11 +151,6 @@ namespace System.Web.Http.ExceptionHandling
         private static HttpRequestMessage CreateRequest()
         {
             return new HttpRequestMessage();
-        }
-
-        private static HttpResponseMessage CreateResponse()
-        {
-            return new HttpResponseMessage();
         }
 
         private static ExceptionHandlerContext CreateValidContext(HttpRequestMessage request)

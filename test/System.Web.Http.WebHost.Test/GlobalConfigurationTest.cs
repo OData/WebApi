@@ -2,6 +2,7 @@
 
 using System.Net.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Hosting;
 using System.Web.Http.WebHost;
 using System.Web.Http.WebHost.Routing;
@@ -30,6 +31,7 @@ namespace System.Web.Http
         [InlineData(typeof(IAssembliesResolver), typeof(WebHostAssembliesResolver))]
         [InlineData(typeof(IHttpControllerTypeResolver), typeof(WebHostHttpControllerTypeResolver))]
         [InlineData(typeof(IHostBufferPolicySelector), typeof(WebHostBufferPolicySelector))]
+        [InlineData(typeof(IExceptionHandler), typeof(WebHostExceptionHandler))]
         public void ConfigurationService_IsWebHost(Type serviceInterfaceType, Type expectedImplementationType)
         {
             // Arrange
@@ -42,6 +44,30 @@ namespace System.Web.Http
 
             // Assert
             Assert.IsType(expectedImplementationType, service);
+        }
+
+        [Fact]
+        public void ExceptionHandler_WrapsDefaultExceptionHandler()
+        {
+            // Arrange
+            HttpConfiguration configuration = GlobalConfiguration.Configuration;
+            Assert.NotNull(configuration); // Guard
+            Assert.NotNull(configuration.Services); // Guard
+
+            Type defaultExceptionHandlerType;
+
+            using (HttpConfiguration standardConfiguration = new HttpConfiguration())
+            {
+                defaultExceptionHandlerType = standardConfiguration.Services.GetExceptionHandler().GetType();
+            }
+
+            // Act
+            object service = configuration.Services.GetService(typeof(IExceptionHandler));
+
+            // Assert
+            Assert.IsType(typeof(WebHostExceptionHandler), service); // Guard
+            WebHostExceptionHandler typedHandler = (WebHostExceptionHandler)service;
+            Assert.IsType(defaultExceptionHandlerType, typedHandler.InnerHandler);
         }
 
         [Fact]

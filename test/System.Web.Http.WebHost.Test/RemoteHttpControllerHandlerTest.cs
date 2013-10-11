@@ -12,13 +12,13 @@ namespace System.Web.Http.WebHost
         {
             bool inputStreamCalled = false;
 
-            HttpRequestBase stubRequest = HttpControllerHandlerTest.CreateStubRequest(() =>
+            HttpRequestBase stubRequest = HttpControllerHandlerTest.CreateStubRequestBase(() =>
             {
                 inputStreamCalled = true;
                 return new MemoryStream();
             },
             buffered: false);
-            HttpContextBase context = HttpControllerHandlerTest.CreateStubContext(request: stubRequest, items: null);
+            HttpContextBase context = HttpControllerHandlerTest.CreateStubContextBase(request: stubRequest, items: null);
 
             GlobalConfiguration.Configuration.Services.Replace(typeof(IHostBufferPolicySelector), new BufferOutputOnlyPolicySelector());
             HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context);

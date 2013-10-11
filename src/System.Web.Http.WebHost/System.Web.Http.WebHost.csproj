@@ -42,6 +42,7 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="WebHostExceptionCatchBlocks.cs" />
     <Compile Include="HttpBatchContextWrapper.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />
     <Compile Include="Routing\HttpRequestMessageWrapper.cs" />
@@ -50,6 +51,7 @@
     <Compile Include="PreApplicationStartCode.cs" />
     <Compile Include="HttpControllerTypeCacheSerializer.cs" />
     <Compile Include="Routing\HttpContextBaseExtensions.cs" />
+    <Compile Include="WebHostExceptionHandler.cs" />
     <Compile Include="WebHostHttpControllerTypeResolver.cs" />
     <Compile Include="Routing\HostedHttpRouteCollection.cs" />
     <Compile Include="Routing\HostedHttpRoute.cs" />

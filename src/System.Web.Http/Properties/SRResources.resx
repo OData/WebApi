@@ -471,12 +471,6 @@
   <data name="Request_RequestContextMustNotBeNull" xml:space="preserve">
     <value>The request must have a request context.</value>
   </data>
-  <data name="Serialize_Response_Failed" xml:space="preserve">
-    <value>The '{0}' type failed to serialize the response body.</value>
-  </data>
-  <data name="Serialize_Response_Failed_MediaType" xml:space="preserve">
-    <value>The '{0}' type failed to serialize the response body for content type '{1}'.</value>
-  </data>
   <data name="TypeInstanceMustNotBeNull" xml:space="preserve">
     <value>The {0} instance must not be null.</value>
   </data>

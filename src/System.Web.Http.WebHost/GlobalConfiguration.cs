@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Hosting;
 using System.Web.Http.WebHost;
 using System.Web.Http.WebHost.Routing;
@@ -75,9 +78,13 @@ namespace System.Web.Http
             return new Lazy<HttpConfiguration>(() =>
             {
                 HttpConfiguration config = new HttpConfiguration(new HostedHttpRouteCollection(RouteTable.Routes));
-                config.Services.Replace(typeof(IAssembliesResolver), new WebHostAssembliesResolver());
-                config.Services.Replace(typeof(IHttpControllerTypeResolver), new WebHostHttpControllerTypeResolver());
-                config.Services.Replace(typeof(IHostBufferPolicySelector), new WebHostBufferPolicySelector());
+                ServicesContainer services = config.Services;
+                Contract.Assert(services != null);
+                services.Replace(typeof(IAssembliesResolver), new WebHostAssembliesResolver());
+                services.Replace(typeof(IHttpControllerTypeResolver), new WebHostHttpControllerTypeResolver());
+                services.Replace(typeof(IHostBufferPolicySelector), new WebHostBufferPolicySelector());
+                services.Replace(typeof(IExceptionHandler),
+                    new WebHostExceptionHandler(services.GetExceptionHandler()));
                 return config;
             });
         }

@@ -38,6 +38,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Routing\HttpWebRouteTests.cs" />
+    <Compile Include="WebHostExceptionCatchBlocksTests.cs" />
+    <Compile Include="WebHostExceptionHandlerTests.cs" />
     <Compile Include="WebHostHttpRequestContextTests.cs" />
     <Compile Include="RemoteHttpControllerHandlerTest.cs" />
     <Compile Include="GlobalConfigurationTest.cs" />

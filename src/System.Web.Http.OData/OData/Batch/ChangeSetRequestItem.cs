@@ -35,7 +35,7 @@ namespace System.Web.Http.OData.Batch
         /// Sends the ChangeSet request.
         /// </summary>
         /// <param name="invoker">The invoker.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="ChangeSetResponseItem"/>.</returns>
         public override async Task<ODataBatchResponseItem> SendRequestAsync(HttpMessageInvoker invoker, CancellationToken cancellationToken)
         {

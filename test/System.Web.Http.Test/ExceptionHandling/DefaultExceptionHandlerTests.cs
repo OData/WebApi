@@ -28,28 +28,11 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void HandleAsync_IfExceptionContextIsNull_Throws()
-        {
-            // Arrange
-            IExceptionHandler product = CreateProductUnderTest();
-            ExceptionHandlerContext context = new ExceptionHandlerContext();
-            Assert.Null(context.ExceptionContext); // Guard
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            // Act & Assert
-            Assert.ThrowsArgument(() => product.HandleAsync(context, cancellationToken), "context",
-                "ExceptionHandlerContext.ExceptionContext must not be null.");
-        }
-
-        [Fact]
         public void HandleAsync_IfExceptionIsNull_Throws()
         {
             // Arrange
             IExceptionHandler product = CreateProductUnderTest();
-            ExceptionHandlerContext context = new ExceptionHandlerContext()
-            {
-                ExceptionContext = new ExceptionContext()
-            };
+            ExceptionHandlerContext context = CreateContext(new ExceptionContext());
             Assert.Null(context.ExceptionContext.Exception); // Guard
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -63,13 +46,10 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             IExceptionHandler product = CreateProductUnderTest();
-            ExceptionHandlerContext context = new ExceptionHandlerContext()
+            ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext
             {
-                ExceptionContext = new ExceptionContext
-                {
-                    Exception = CreateException()
-                }
-            };
+                Exception = CreateException()
+            });
             Assert.Null(context.ExceptionContext.Request); // Guard
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -397,6 +377,11 @@ namespace System.Web.Http.ExceptionHandling
             return new HttpConfiguration();
         }
 
+        private static ExceptionHandlerContext CreateContext(ExceptionContext exceptionContext)
+        {
+            return new ExceptionHandlerContext(exceptionContext);
+        }
+
         private static Exception CreateException()
         {
             return new NotSupportedException();
@@ -419,27 +404,21 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionHandlerContext CreateValidContext(HttpRequestMessage request)
         {
-            return new ExceptionHandlerContext
+            return CreateContext(new ExceptionContext
             {
-                ExceptionContext = new ExceptionContext
-                {
-                    Exception = CreateException(),
-                    Request = request
-                }
-            };
+                Exception = CreateException(),
+                Request = request
+            });
         }
 
         private static ExceptionHandlerContext CreateValidContext(HttpRequestMessage request, string catchBlock)
         {
-            return new ExceptionHandlerContext
+            return CreateContext(new ExceptionContext
             {
-                ExceptionContext = new ExceptionContext
-                {
-                    Exception = CreateException(),
-                    Request = request,
-                    CatchBlock = catchBlock
-                }
-            };
+                Exception = CreateException(),
+                Request = request,
+                CatchBlock = catchBlock
+            });
         }
     }
 }

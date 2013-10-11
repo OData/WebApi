@@ -26,30 +26,13 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void LogAsync_IfExceptionContextIsNull_Throws()
-        {
-            // Arrange
-            Mock<ExceptionLogger> mock = new Mock<ExceptionLogger>(MockBehavior.Strict);
-            IExceptionLogger product = mock.Object;
-
-            ExceptionLoggerContext context = CreateContext();
-            Assert.Null(context.ExceptionContext); // Guard
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            // Act & Assert
-            Assert.ThrowsArgument(() => product.LogAsync(context, cancellationToken), "context",
-                "ExceptionLoggerContext.ExceptionContext must not be null.");
-        }
-
-        [Fact]
         public void LogAsync_IfExceptionIsNull_Throws()
         {
             // Arrange
             Mock<ExceptionLogger> mock = new Mock<ExceptionLogger>(MockBehavior.Strict);
             IExceptionLogger product = mock.Object;
 
-            ExceptionLoggerContext context = CreateContext();
-            context.ExceptionContext = new ExceptionContext();
+            ExceptionLoggerContext context = CreateContext(CreateExceptionContext());
             Assert.Null(context.ExceptionContext.Exception); // Guard
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -66,7 +49,7 @@ namespace System.Web.Http.ExceptionHandling
             Task expectedTask = CreateCompletedTask();
             mock.Setup(h => h.ShouldLog(It.IsAny<ExceptionLoggerContext>())).Returns(true);
             mock
-                .Setup(h => h.LogAsyncCore(It.IsAny<ExceptionLoggerContext>(), It.IsAny<CancellationToken>()))
+                .Setup(h => h.LogAsync(It.IsAny<ExceptionLoggerContext>(), It.IsAny<CancellationToken>()))
                 .Returns(expectedTask);
 
             IExceptionLogger product = mock.Object;
@@ -83,7 +66,7 @@ namespace System.Web.Http.ExceptionHandling
                 // Assert
                 Assert.Same(expectedTask, task);
                 mock.Verify(h => h.ShouldLog(expectedContext), Times.Once());
-                mock.Verify(h => h.LogAsyncCore(expectedContext, expectedCancellationToken), Times.Once());
+                mock.Verify(h => h.LogAsync(expectedContext, expectedCancellationToken), Times.Once());
             }
         }
 
@@ -108,7 +91,7 @@ namespace System.Web.Http.ExceptionHandling
             Assert.True(task.IsCompleted);
             Assert.Equal(TaskStatus.RanToCompletion, task.Status);
             mock.Verify(h => h.ShouldLog(expectedContext), Times.Once());
-            mock.Verify(h => h.LogAsyncCore(It.IsAny<ExceptionLoggerContext>(), It.IsAny<CancellationToken>()),
+            mock.Verify(h => h.LogAsync(It.IsAny<ExceptionLoggerContext>(), It.IsAny<CancellationToken>()),
                 Times.Never());
         }
 
@@ -124,14 +107,14 @@ namespace System.Web.Http.ExceptionHandling
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act
-            Task task = product.LogAsyncCore(expectedContext, cancellationToken);
+            Task task = product.LogAsync(expectedContext, cancellationToken);
 
             // Assert
             Assert.NotNull(task);
             task.WaitUntilCompleted();
             Assert.Equal(TaskStatus.RanToCompletion, task.Status);
 
-            mock.Verify(h => h.LogCore(expectedContext), Times.Once());
+            mock.Verify(h => h.Log(expectedContext), Times.Once());
         }
 
         [Fact]
@@ -145,7 +128,7 @@ namespace System.Web.Http.ExceptionHandling
             ExceptionLoggerContext context = CreateContext();
 
             // Act & Assert
-            Assert.DoesNotThrow(() => product.LogCore(context));
+            Assert.DoesNotThrow(() => product.Log(context));
         }
 
         [Fact]
@@ -163,22 +146,6 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void ShouldLog_IfExceptionContextIsNull_Throws()
-        {
-            // Arrange
-            Mock<ExceptionLogger> mock = new Mock<ExceptionLogger>();
-            mock.CallBase = true;
-            ExceptionLogger product = mock.Object;
-
-            ExceptionLoggerContext context = CreateContext();
-            Assert.Null(context.ExceptionContext); // Guard
-
-            // Act & Assert
-            Assert.ThrowsArgument(() => product.ShouldLog(context), "context",
-                "ExceptionLoggerContext.ExceptionContext must not be null.");
-        }
-
-        [Fact]
         public void ShouldLog_IfExceptionIsNull_Throws()
         {
             // Arrange
@@ -186,8 +153,7 @@ namespace System.Web.Http.ExceptionHandling
             mock.CallBase = true;
             ExceptionLogger product = mock.Object;
 
-            ExceptionLoggerContext context = CreateContext();
-            context.ExceptionContext = new ExceptionContext();
+            ExceptionLoggerContext context = CreateContext(CreateExceptionContext());
             Assert.Null(context.ExceptionContext.Exception); // Guard
 
             // Act & Assert
@@ -345,7 +311,12 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionLoggerContext CreateContext()
         {
-            return new ExceptionLoggerContext();
+            return CreateContext(CreateExceptionContext());
+        }
+
+        private static ExceptionLoggerContext CreateContext(ExceptionContext exceptionContext)
+        {
+            return new ExceptionLoggerContext(exceptionContext, canBeHandled: false);
         }
 
         private static Exception CreateException(IDictionary data)
@@ -353,6 +324,11 @@ namespace System.Web.Http.ExceptionHandling
             Mock<Exception> mock = new Mock<Exception>();
             mock.Setup(e => e.Data).Returns(data);
             return mock.Object;
+        }
+
+        private static ExceptionContext CreateExceptionContext()
+        {
+            return new ExceptionContext();
         }
 
         private static CancellationTokenSource CreateTokenSource()
@@ -367,13 +343,10 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionLoggerContext CreateValidContext(Exception exception)
         {
-            return new ExceptionLoggerContext
+            return CreateContext(new ExceptionContext
             {
-                ExceptionContext = new ExceptionContext
-                {
-                    Exception = exception
-                }
-            };
+                Exception = exception
+            });
         }
 
         private class Dictionary : DictionaryBase

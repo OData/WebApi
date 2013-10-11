@@ -24,7 +24,7 @@ namespace System.Web.Http.ExceptionHandling
         public Task HandleAsync(ExceptionHandlerContext context, CancellationToken cancellationToken)
         {
             Handle(context);
-            return Task.FromResult<object>(null);
+            return TaskHelpers.Completed();
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
@@ -37,13 +37,7 @@ namespace System.Web.Http.ExceptionHandling
             }
 
             ExceptionContext exceptionContext = context.ExceptionContext;
-
-            if (exceptionContext == null)
-            {
-                throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
-                    typeof(ExceptionHandlerContext).Name, "ExceptionContext"), "context");
-            }
-
+            Contract.Assert(exceptionContext != null);
             Exception exception = exceptionContext.Exception;
 
             if (exception == null)

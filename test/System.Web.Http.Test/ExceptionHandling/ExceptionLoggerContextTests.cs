@@ -7,33 +7,44 @@ namespace System.Web.Http.ExceptionHandling
     public class ExceptionLoggerContextTests
     {
         [Fact]
-        public void ExceptionContextSet_UpdatesValue()
+        public void Constructor_IfExceptionContextIsNull_Throws()
         {
             // Arrange
-            ExceptionLoggerContext product = CreateProductUnderTest();
+            ExceptionContext context = null;
+            bool canBeHandled = true;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => CreateProductUnderTest(context, canBeHandled), "exceptionContext");
+        }
+
+        [Fact]
+        public void ExceptionContextGet_ReturnsSpecifiedInstance()
+        {
+            // Arrange
             ExceptionContext expectedContext = CreateContext();
+            bool canBeHandled = false;
+            ExceptionLoggerContext product = CreateProductUnderTest(expectedContext, canBeHandled);
 
             // Act
-            product.ExceptionContext = expectedContext;
+            ExceptionContext context = product.ExceptionContext;
 
             // Assert
-            ExceptionContext context = product.ExceptionContext;
             Assert.Same(expectedContext, context);
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void CanBeHandledSet_UpdatesValue(bool expectedCanBeHandled)
+        public void CanBeHandledGet_ReturnsSpecifiedValue(bool expectedCanBeHandled)
         {
             // Arrange
-            ExceptionLoggerContext product = CreateProductUnderTest();
+            ExceptionContext context = CreateContext();
+            ExceptionLoggerContext product = CreateProductUnderTest(context, expectedCanBeHandled);
 
             // Act
-            product.CanBeHandled = expectedCanBeHandled;
+            bool canBeHandled = product.CanBeHandled;
 
             // Assert
-            bool canBeHandled = product.CanBeHandled;
             Assert.Equal(expectedCanBeHandled, canBeHandled);
         }
 
@@ -42,9 +53,10 @@ namespace System.Web.Http.ExceptionHandling
             return new ExceptionContext();
         }
 
-        private static ExceptionLoggerContext CreateProductUnderTest()
+        private static ExceptionLoggerContext CreateProductUnderTest(ExceptionContext exceptionContext,
+            bool canBeHandled)
         {
-            return new ExceptionLoggerContext();
+            return new ExceptionLoggerContext(exceptionContext, canBeHandled);
         }
     }
 }

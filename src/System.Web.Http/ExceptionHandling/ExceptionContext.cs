@@ -11,6 +11,7 @@ namespace System.Web.Http.ExceptionHandling
     public class ExceptionContext
     {
         /// <summary>Initializes a new instance of the <see cref="ExceptionContext"/> class.</summary>
+        /// <remarks>This constructor is for unit testing purposes only.</remarks>
         public ExceptionContext()
         {
         }
@@ -157,33 +158,48 @@ namespace System.Web.Http.ExceptionHandling
             IsTopLevelCatchBlock = isTopLevelCatchBlock;
         }
 
-        /// <summary>The exception caught.</summary>
+        /// <summary>Gets the exception caught.</summary>
+        /// <remarks>The setter is for unit testing purposes only.</remarks>
         public Exception Exception { get; set; }
 
-        /// <summary>The label for the catch block in which the exception was caught.</summary>
+        /// <summary>Gets the label for the catch block in which the exception was caught.</summary>
+        /// <remarks>The setter is for unit testing purposes only.</remarks>
         public string CatchBlock { get; set; }
 
         /// <summary>
-        /// A value indicating whether the catch block where the exception was caught is the last one before the host.
+        /// Gets a value indicating whether the catch block where the exception was caught is the last one before the
+        /// host.
         /// </summary>
+        /// <remarks>The setter is for unit testing purposes only.</remarks>
         public bool IsTopLevelCatchBlock { get; set; }
 
-        /// <summary>The request being processed when the exception was caught.</summary>
+        /// <summary>Gets the request being processed when the exception was caught.</summary>
+        /// <remarks>The setter is for unit testing purposes only.</remarks>
         public HttpRequestMessage Request { get; set; }
 
-        /// <summary>The request context in which the exception occurred.</summary>
+        /// <summary>Gets the request context in which the exception occurred.</summary>
+        /// <remarks>The setter is for unit testing purposes only.</remarks>
         public HttpRequestContext RequestContext { get; set; }
 
-        /// <summary>The controller context in which the exception occurred, if available.</summary>
-        /// <remarks>This property will be <see langword="null"/> in most cases.</remarks>
+        /// <summary>Gets the controller context in which the exception occurred, if available.</summary>
+        /// <remarks>
+        /// <para>This property will be <see langword="null"/> in most cases.</para>
+        /// <para>The setter is for unit testing purposes only.</para>
+        /// </remarks>
         public HttpControllerContext ControllerContext { get; set; }
 
-        /// <summary>The action context in which the exception occurred, if available.</summary>
-        /// <remarks>This property will be <see langword="null"/> in most cases.</remarks>
+        /// <summary>Gets the action context in which the exception occurred, if available.</summary>
+        /// <remarks>
+        /// <para>This property will be <see langword="null"/> in most cases.</para>
+        /// <para>The setter is for unit testing purposes only.</para>
+        /// </remarks>
         public HttpActionContext ActionContext { get; set; }
 
-        /// <summary>The response being sent when the exception was caught.</summary>
-        /// <remarks>This property will be <see langword="null"/> in most cases.</remarks>
+        /// <summary>Gets the response being sent when the exception was caught.</summary>
+        /// <remarks>
+        /// <para>This property will be <see langword="null"/> in most cases.</para>
+        /// <para>The setter is for unit testing purposes only.</para>
+        /// </remarks>
         public HttpResponseMessage Response { get; set; }
     }
 }

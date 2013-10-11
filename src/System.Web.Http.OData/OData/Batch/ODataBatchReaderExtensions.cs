@@ -35,7 +35,7 @@ namespace System.Web.Http.OData.Batch
         /// </summary>
         /// <param name="reader">The <see cref="ODataBatchReader"/>.</param>
         /// <param name="batchId">The Batch Id.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A collection of <see cref="HttpRequestMessage"/> in the ChangeSet.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "We need to return a collection of request messages asynchronously.")]
         public static async Task<IList<HttpRequestMessage>> ReadChangeSetRequestAsync(this ODataBatchReader reader, Guid batchId, CancellationToken cancellationToken)
@@ -82,7 +82,7 @@ namespace System.Web.Http.OData.Batch
         /// <param name="reader">The <see cref="ODataBatchReader"/>.</param>
         /// <param name="batchId">The Batch ID.</param>
         /// <param name="bufferContentStream">if set to <c>true</c> then the request content stream will be buffered.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="HttpRequestMessage"/> representing the operation.</returns>
         public static Task<HttpRequestMessage> ReadOperationRequestAsync(this ODataBatchReader reader, Guid batchId, bool bufferContentStream, CancellationToken cancellationToken)
         {
@@ -121,7 +121,7 @@ namespace System.Web.Http.OData.Batch
         /// <param name="batchId">The Batch ID.</param>
         /// <param name="changeSetId">The ChangeSet ID.</param>
         /// <param name="bufferContentStream">if set to <c>true</c> then the request content stream will be buffered.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="HttpRequestMessage"/> representing a ChangeSet operation</returns>
         public static Task<HttpRequestMessage> ReadChangeSetOperationRequestAsync(
             this ODataBatchReader reader, Guid batchId, Guid changeSetId, bool bufferContentStream, CancellationToken cancellationToken)

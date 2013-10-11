@@ -154,7 +154,7 @@ namespace System.Web.Http
         /// Dispatches an incoming <see cref="HttpRequestMessage"/>.
         /// </summary>
         /// <param name="request">The request to dispatch</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="Task{HttpResponseMessage}"/> representing the ongoing operation.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner.")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "we are converting exceptions to error responses.")]

@@ -54,7 +54,7 @@ namespace System.Net.Http
         /// parsed as HTML form URL-encoded from the <paramref name="content"/> instance.
         /// </summary>
         /// <param name="content">The content.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="Task{T}"/> which will provide the result. If the data can not be read
         /// as HTML form URL-encoded data then the result is null.</returns>
         public static Task<NameValueCollection> ReadAsFormDataAsync(this HttpContent content, CancellationToken cancellationToken)

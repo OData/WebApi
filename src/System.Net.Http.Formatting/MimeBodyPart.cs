@@ -93,7 +93,7 @@ namespace System.Net.Http
         /// Writes the <paramref name="segment"/> into the part's output stream.
         /// </summary>
         /// <param name="segment">The current segment to be written to the part's output stream.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         public async Task WriteSegment(ArraySegment<byte> segment, CancellationToken cancellationToken)
         {
             var stream = GetOutputStream();

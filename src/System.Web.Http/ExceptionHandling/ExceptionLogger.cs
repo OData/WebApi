@@ -15,20 +15,17 @@ namespace System.Web.Http.ExceptionHandling
         internal const string LoggedByKey = "MS_LoggedBy";
 
         /// <inheritdoc />
-        public Task LogAsync(ExceptionLoggerContext context, CancellationToken cancellationToken)
+        Task IExceptionLogger.LogAsync(ExceptionLoggerContext context, CancellationToken cancellationToken)
         {
             if (context == null)
             {
                 throw new ArgumentNullException("context");
             }
 
-            if (context.ExceptionContext == null)
-            {
-                throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
-                    typeof(ExceptionLoggerContext).Name, "ExceptionContext"), "context");
-            }
+            ExceptionContext exceptionContext = context.ExceptionContext;
+            Contract.Assert(exceptionContext != null);
 
-            if (context.ExceptionContext.Exception == null)
+            if (exceptionContext.Exception == null)
             {
                 throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
                     typeof(ExceptionContext).Name, "Exception"), "context");
@@ -36,25 +33,25 @@ namespace System.Web.Http.ExceptionHandling
 
             if (!ShouldLog(context))
             {
-                return Task.FromResult<object>(null);
+                return TaskHelpers.Completed();
             }
 
-            return LogAsyncCore(context, cancellationToken);
+            return LogAsync(context, cancellationToken);
         }
 
         /// <summary>When overridden in a derived class, logs the exception asynchronously.</summary>
         /// <param name="context">The exception logger context.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task.</returns>
-        public virtual Task LogAsyncCore(ExceptionLoggerContext context, CancellationToken cancellationToken)
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task representing the asynchronous exception logging operation.</returns>
+        public virtual Task LogAsync(ExceptionLoggerContext context, CancellationToken cancellationToken)
         {
-            LogCore(context);
-            return Task.FromResult<object>(null);
+            Log(context);
+            return TaskHelpers.Completed();
         }
 
         /// <summary>When overridden in a derived class, logs the exception synchronously.</summary>
         /// <param name="context">The exception logger context.</param>
-        public virtual void LogCore(ExceptionLoggerContext context)
+        public virtual void Log(ExceptionLoggerContext context)
         {
         }
 
@@ -74,13 +71,7 @@ namespace System.Web.Http.ExceptionHandling
             }
 
             ExceptionContext exceptionContext = context.ExceptionContext;
-
-            if (exceptionContext == null)
-            {
-                throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
-                    typeof(ExceptionLoggerContext).Name, "ExceptionContext"), "context");
-            }
-
+            Contract.Assert(exceptionContext != null);
             Exception exception = exceptionContext.Exception;
 
             if (exception == null)

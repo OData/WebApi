@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Properties;
@@ -10,20 +11,17 @@ namespace System.Web.Http.ExceptionHandling
     public abstract class ExceptionHandler : IExceptionHandler
     {
         /// <inheritdoc />
-        public Task HandleAsync(ExceptionHandlerContext context, CancellationToken cancellationToken)
+        Task IExceptionHandler.HandleAsync(ExceptionHandlerContext context, CancellationToken cancellationToken)
         {
             if (context == null)
             {
                 throw new ArgumentNullException("context");
             }
 
-            if (context.ExceptionContext == null)
-            {
-                throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
-                    typeof(ExceptionHandlerContext).Name, "ExceptionContext"), "context");
-            }
+            ExceptionContext exceptionContext = context.ExceptionContext;
+            Contract.Assert(exceptionContext != null);
 
-            if (context.ExceptionContext.Exception == null)
+            if (exceptionContext.Exception == null)
             {
                 throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
                     typeof(ExceptionContext).Name, "Exception"), "context");
@@ -31,25 +29,25 @@ namespace System.Web.Http.ExceptionHandling
 
             if (!ShouldHandle(context))
             {
-                return Task.FromResult<object>(null);
+                return TaskHelpers.Completed();
             }
 
-            return HandleAsyncCore(context, cancellationToken);
+            return HandleAsync(context, cancellationToken);
         }
 
         /// <summary>When overridden in a derived class, handles the exception asynchronously.</summary>
         /// <param name="context">The exception handler context.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task.</returns>
-        public virtual Task HandleAsyncCore(ExceptionHandlerContext context, CancellationToken cancellationToken)
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task representing the asynchronous exception handling operation.</returns>
+        public virtual Task HandleAsync(ExceptionHandlerContext context, CancellationToken cancellationToken)
         {
-            HandleCore(context);
-            return Task.FromResult<object>(null);
+            Handle(context);
+            return TaskHelpers.Completed();
         }
 
         /// <summary>When overridden in a derived class, handles the exception synchronously.</summary>
         /// <param name="context">The exception handler context.</param>
-        public virtual void HandleCore(ExceptionHandlerContext context)
+        public virtual void Handle(ExceptionHandlerContext context)
         {
         }
 
@@ -67,12 +65,7 @@ namespace System.Web.Http.ExceptionHandling
             }
 
             ExceptionContext exceptionContext = context.ExceptionContext;
-
-            if (exceptionContext == null)
-            {
-                throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
-                    typeof(ExceptionHandlerContext).Name, "ExceptionContext"), "context");
-            }
+            Contract.Assert(exceptionContext != null);
 
             return exceptionContext.IsTopLevelCatchBlock;
         }

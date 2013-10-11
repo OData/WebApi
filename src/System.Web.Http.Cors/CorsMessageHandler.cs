@@ -37,7 +37,7 @@ namespace System.Web.Http.Cors
         /// Sends an HTTP request to the inner handler to send to the server as an asynchronous operation.
         /// </summary>
         /// <param name="request">The HTTP request message to send to the server.</param>
-        /// <param name="cancellationToken">A cancellation token to cancel operation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>
         /// Returns <see cref="T:System.Threading.Tasks.Task`1" />. The task object representing the asynchronous operation.
         /// </returns>
@@ -112,7 +112,7 @@ namespace System.Web.Http.Cors
         /// </summary>
         /// <param name="request">The request.</param>
         /// <param name="corsRequestContext">The cors request context.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The <see cref="Task{HttpResponseMessage}"/></returns>
         /// <exception cref="System.ArgumentNullException">
         /// request

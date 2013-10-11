@@ -27,7 +27,7 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionHandlerContext CreateContext()
         {
-            return new ExceptionHandlerContext();
+            return new ExceptionHandlerContext(new ExceptionContext());
         }
 
         private static EmptyExceptionHandler CreateProductUnderTest()

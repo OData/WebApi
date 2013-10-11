@@ -113,7 +113,7 @@ namespace System.Web.Http.Batch
         /// Processes the incoming batch request as a single <see cref="HttpRequestMessage"/>.
         /// </summary>
         /// <param name="request">The batch request.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The batch response.</returns>
         public abstract Task<HttpResponseMessage> ProcessBatchAsync(HttpRequestMessage request, CancellationToken cancellationToken);
 

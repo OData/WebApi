@@ -197,7 +197,7 @@ namespace System.Net.Http.Formatting
         /// <param name="readStream">The <see cref="Stream"/> to read.</param>
         /// <param name="content">The <see cref="HttpContent"/> if available. It may be <c>null</c>.</param>
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
         /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
         /// <seealso cref="CanReadType(Type)"/>
@@ -247,7 +247,7 @@ namespace System.Net.Http.Formatting
         /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
         /// <param name="content">The <see cref="HttpContent"/> if available. It may be <c>null</c>.</param>
         /// <param name="transportContext">The <see cref="TransportContext"/> if available. It may be <c>null</c>.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="Task"/> that will perform the write.</returns>
         /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
         /// <seealso cref="CanWriteType(Type)"/>

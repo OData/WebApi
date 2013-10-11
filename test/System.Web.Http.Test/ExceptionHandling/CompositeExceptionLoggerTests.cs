@@ -132,7 +132,7 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionLoggerContext CreateContext()
         {
-            return new ExceptionLoggerContext();
+            return new ExceptionLoggerContext(new ExceptionContext(), canBeHandled: true);
         }
 
         private static IExceptionLogger CreateDummyLogger()

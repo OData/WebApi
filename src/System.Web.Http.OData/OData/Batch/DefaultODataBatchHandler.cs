@@ -58,7 +58,7 @@ namespace System.Web.Http.OData.Batch
         /// Executes the OData batch requests.
         /// </summary>
         /// <param name="requests">The collection of OData batch requests.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A collection of <see cref="ODataBatchResponseItem"/> for the batch requests.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "We need to return a collection of response messages asynchronously.")]
         public virtual async Task<IList<ODataBatchResponseItem>> ExecuteRequestMessagesAsync(IEnumerable<ODataBatchRequestItem> requests, CancellationToken cancellationToken)
@@ -96,7 +96,7 @@ namespace System.Web.Http.OData.Batch
         /// Converts the incoming OData batch request into a collection of request messages.
         /// </summary>
         /// <param name="request">The request containing the batch request messages.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A collection of <see cref="ODataBatchRequestItem"/>.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "We need to return a collection of request messages asynchronously.")]
         public virtual async Task<IList<ODataBatchRequestItem>> ParseBatchRequestsAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -146,7 +146,7 @@ namespace System.Web.Http.OData.Batch
         /// </summary>
         /// <param name="responses">The responses for the batch requests.</param>
         /// <param name="request">The original request containing all the batch requests.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The batch response message.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing the object.")]
         public virtual Task<HttpResponseMessage> CreateResponseMessageAsync(

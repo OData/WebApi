@@ -17,8 +17,8 @@ namespace System.Web.Http.ExceptionHandling
         /// message to return instead.
         /// </summary>
         /// <param name="context">The exception handler context.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task.</returns>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task representing the asynchronous exception handling operation.</returns>
         /// <remarks>
         /// <para>
         /// The exception handler either handles the exception or allows it to propagate. An exception is handled by

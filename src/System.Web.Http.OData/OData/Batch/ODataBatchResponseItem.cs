@@ -30,7 +30,7 @@ namespace System.Web.Http.OData.Batch
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
         /// <param name="response">The response message.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A task object representing writing the given batch response using the given writer.</returns>
         public static async Task WriteMessageAsync(ODataBatchWriter writer, HttpResponseMessage response,
             CancellationToken cancellationToken)
@@ -79,7 +79,7 @@ namespace System.Web.Http.OData.Batch
         /// Writes the response.
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         public abstract Task WriteResponseAsync(ODataBatchWriter writer, CancellationToken cancellationToken);
 
         /// <summary>

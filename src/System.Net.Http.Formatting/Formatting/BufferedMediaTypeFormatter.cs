@@ -67,7 +67,7 @@ namespace System.Net.Http.Formatting
         /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
         /// <param name="content">The <see cref="HttpContent"/> if available. Note that
         /// modifying the headers of the content will have no effect on the generated HTTP message; they should only be used to guide the writing.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         public virtual void WriteToStream(Type type, object value, Stream writeStream, HttpContent content,
             CancellationToken cancellationToken)
         {
@@ -100,7 +100,7 @@ namespace System.Net.Http.Formatting
         /// <param name="readStream">The <see cref="Stream"/> to read.</param>
         /// <param name="content">The <see cref="HttpContent"/> if available.</param>
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>An object of the given type.</returns>
         public virtual object ReadFromStream(Type type, Stream readStream, HttpContent content,
             IFormatterLogger formatterLogger, CancellationToken cancellationToken)

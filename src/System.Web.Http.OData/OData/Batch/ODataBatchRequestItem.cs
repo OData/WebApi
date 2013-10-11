@@ -18,7 +18,7 @@ namespace System.Web.Http.OData.Batch
         /// </summary>
         /// <param name="invoker">The invoker.</param>
         /// <param name="request">The request.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <param name="contentIdToLocationMapping">The Content-ID to Location mapping.</param>
         /// <returns></returns>
         public static async Task<HttpResponseMessage> SendMessageAsync(HttpMessageInvoker invoker, HttpRequestMessage request, CancellationToken cancellationToken, Dictionary<string, string> contentIdToLocationMapping)
@@ -69,7 +69,7 @@ namespace System.Web.Http.OData.Batch
         /// Sends the request.
         /// </summary>
         /// <param name="invoker">The invoker.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="ODataBatchResponseItem"/>.</returns>
         public abstract Task<ODataBatchResponseItem> SendRequestAsync(HttpMessageInvoker invoker, CancellationToken cancellationToken);
 

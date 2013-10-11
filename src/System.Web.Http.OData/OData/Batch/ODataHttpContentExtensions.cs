@@ -33,7 +33,7 @@ namespace System.Web.Http.OData.Batch
         /// </summary>
         /// <param name="content">The <see cref="HttpContent"/>.</param>
         /// <param name="settings">The <see cref="ODataMessageReaderSettings"/>.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A task object that produces an <see cref="ODataMessageReader"/> when completed.</returns>
         public static async Task<ODataMessageReader> GetODataMessageReaderAsync(this HttpContent content,
             ODataMessageReaderSettings settings, CancellationToken cancellationToken)

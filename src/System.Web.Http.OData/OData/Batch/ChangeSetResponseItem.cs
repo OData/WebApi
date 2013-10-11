@@ -36,7 +36,7 @@ namespace System.Web.Http.OData.Batch
         /// Writes the responses as a ChangeSet.
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         public override async Task WriteResponseAsync(ODataBatchWriter writer, CancellationToken cancellationToken)
         {
             if (writer == null)

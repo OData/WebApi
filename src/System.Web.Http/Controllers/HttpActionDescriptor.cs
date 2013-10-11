@@ -214,7 +214,7 @@ namespace System.Web.Http.Controllers
         /// </summary>
         /// <param name="controllerContext">The context.</param>
         /// <param name="arguments">The arguments.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="Task{T}"/> that once completed will contain the return value of the action.</returns>
         public abstract Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments, CancellationToken cancellationToken);
 

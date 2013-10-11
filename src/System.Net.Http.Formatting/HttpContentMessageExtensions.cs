@@ -88,7 +88,7 @@ namespace System.Net.Http
         /// Read the <see cref="HttpContent"/> as an <see cref="HttpRequestMessage"/>.
         /// </summary>
         /// <param name="content">The content to read.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A task object representing reading the content as an <see cref="HttpRequestMessage"/>.</returns>
         public static Task<HttpRequestMessage> ReadAsHttpRequestMessageAsync(this HttpContent content, CancellationToken cancellationToken)
         {
@@ -112,7 +112,7 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="content">The content to read.</param>
         /// <param name="uriScheme">The URI scheme to use for the request URI.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A task object representing reading the content as an <see cref="HttpRequestMessage"/>.</returns>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "1#", Justification = "This is not a full URI but only the URI scheme")]
         public static Task<HttpRequestMessage> ReadAsHttpRequestMessageAsync(this HttpContent content, string uriScheme,
@@ -142,7 +142,7 @@ namespace System.Net.Http
         /// <param name="uriScheme">The URI scheme to use for the request URI (the 
         /// URI scheme is not actually part of the HTTP Request URI and so must be provided externally).</param>
         /// <param name="bufferSize">Size of the buffer.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A task object representing reading the content as an <see cref="HttpRequestMessage"/>.</returns>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "1#", Justification = "This is not a full URI but only the URI scheme")]
         public static Task<HttpRequestMessage> ReadAsHttpRequestMessageAsync(this HttpContent content, string uriScheme,
@@ -177,7 +177,7 @@ namespace System.Net.Http
         /// URI scheme is not actually part of the HTTP Request URI and so must be provided externally).</param>
         /// <param name="bufferSize">Size of the buffer.</param>
         /// <param name="maxHeaderSize">The max length of the HTTP header.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A task object representing reading the content as an <see cref="HttpRequestMessage"/>.</returns>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "1#", Justification = "This is not a full URI but only the URI scheme")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception translates to parser state.")]
@@ -278,7 +278,7 @@ namespace System.Net.Http
         /// Read the <see cref="HttpContent"/> as an <see cref="HttpResponseMessage"/>.
         /// </summary>
         /// <param name="content">The content to read.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A task object representing reading the content as an <see cref="HttpResponseMessage"/>.</returns>
         public static Task<HttpResponseMessage> ReadAsHttpResponseMessageAsync(this HttpContent content, CancellationToken cancellationToken)
         {
@@ -301,7 +301,7 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="content">The content to read.</param>
         /// <param name="bufferSize">Size of the buffer.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A task object representing reading the content as an <see cref="HttpResponseMessage"/>.</returns>
         public static Task<HttpResponseMessage> ReadAsHttpResponseMessageAsync(this HttpContent content, int bufferSize,
             CancellationToken cancellationToken)
@@ -329,7 +329,7 @@ namespace System.Net.Http
         /// <param name="content">The content to read.</param>
         /// <param name="bufferSize">Size of the buffer.</param>
         /// <param name="maxHeaderSize">The max length of the HTTP header.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The parsed <see cref="HttpResponseMessage"/> instance.</returns>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception translates to parser state.")]
         public static Task<HttpResponseMessage> ReadAsHttpResponseMessageAsync(this HttpContent content, int bufferSize,

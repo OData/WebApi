@@ -32,20 +32,15 @@ namespace System.Web.Http.ExceptionHandling
 
         public Task HandleAsync(ExceptionHandlerContext context, CancellationToken cancellationToken)
         {
-            ExceptionContext exceptionContext;
-
             if (context != null)
             {
-                exceptionContext = context.ExceptionContext;
-            }
-            else
-            {
-                exceptionContext = null;
-            }
+                ExceptionContext exceptionContext = context.ExceptionContext;
+                Contract.Assert(exceptionContext != null);
 
-            if (exceptionContext != null && exceptionContext.IsTopLevelCatchBlock)
-            {
-                context.Result = CreateDefaultLastChanceResult(exceptionContext);
+                if (exceptionContext.IsTopLevelCatchBlock)
+                {
+                    context.Result = CreateDefaultLastChanceResult(exceptionContext);
+                }
             }
 
             return _innerHandler.HandleAsync(context, cancellationToken);

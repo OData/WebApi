@@ -110,7 +110,7 @@ namespace System.Net.Http
         /// <summary>
         /// Read the non-file contents as form data.
         /// </summary>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="Task"/> representing the post processing.</returns>
         public override async Task ExecutePostProcessingAsync(CancellationToken cancellationToken)
         {

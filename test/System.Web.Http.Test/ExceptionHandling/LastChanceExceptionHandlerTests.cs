@@ -95,20 +95,17 @@ namespace System.Web.Http.ExceptionHandling
                 MediaTypeFormatter expectedFormatter = CreateDummyFormatter();
                 configuration.Formatters.Add(expectedFormatter);
 
-                ExceptionHandlerContext context = new ExceptionHandlerContext
+                ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext
                 {
-                    ExceptionContext = new ExceptionContext
+                    Exception = expectedException,
+                    RequestContext = new HttpRequestContext
                     {
-                        Exception = expectedException,
-                        RequestContext = new HttpRequestContext
-                        {
-                            Configuration = configuration,
-                            IncludeErrorDetail = includeDetail
-                        },
-                        Request = expectedRequest,
-                        IsTopLevelCatchBlock = true
-                    }
-                };
+                        Configuration = configuration,
+                        IncludeErrorDetail = includeDetail
+                    },
+                    Request = expectedRequest,
+                    IsTopLevelCatchBlock = true
+                });
 
                 CancellationToken cancellationToken = CancellationToken.None;
 
@@ -162,17 +159,6 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             ExceptionHandlerContext context = null;
-
-            // More Arrange; then Act & Assert
-            TestHandleAsyncLeavesResultNull(context);
-        }
-
-        [Fact]
-        public void HandleAsync_IfExceptionContextIsNull_LeavesResultNull()
-        {
-            // Arrange
-            ExceptionHandlerContext context = new ExceptionHandlerContext();
-            Assert.Null(context.ExceptionContext); // Guard
 
             // More Arrange; then Act & Assert
             TestHandleAsyncLeavesResultNull(context);
@@ -301,7 +287,7 @@ namespace System.Web.Http.ExceptionHandling
 
         private static void TestHandleAsyncLeavesResultNull(ExceptionContext context)
         {
-            TestHandleAsyncLeavesResultNull(new ExceptionHandlerContext { ExceptionContext = context });
+            TestHandleAsyncLeavesResultNull(new ExceptionHandlerContext(context));
         }
 
         private static void TestHandleAsyncLeavesResultNull(ExceptionHandlerContext context)
@@ -351,7 +337,12 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionHandlerContext CreateContext()
         {
-            return new ExceptionHandlerContext();
+            return new ExceptionHandlerContext(new ExceptionContext());
+        }
+
+        private static ExceptionHandlerContext CreateContext(ExceptionContext exceptionContext)
+        {
+            return new ExceptionHandlerContext(exceptionContext);
         }
 
         private static IContentNegotiator CreateDummyContentNegotiator()

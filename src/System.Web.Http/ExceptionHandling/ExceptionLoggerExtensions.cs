@@ -12,8 +12,8 @@ namespace System.Web.Http.ExceptionHandling
         /// <param name="logger">The unhandled exception logger.</param>
         /// <param name="context">The exception context.</param>
         /// <param name="canBeHandled">A value indicating whether the exception can subsequently be handled.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task.</returns>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task representing the asynchronous exception logging operation.</returns>
         public static Task LogAsync(this IExceptionLogger logger, ExceptionContext context, bool canBeHandled,
             CancellationToken cancellationToken)
         {
@@ -27,12 +27,7 @@ namespace System.Web.Http.ExceptionHandling
                 throw new ArgumentNullException("context");
             }
 
-            ExceptionLoggerContext loggerContext = new ExceptionLoggerContext
-            {
-                ExceptionContext = context,
-                CanBeHandled = canBeHandled
-            };
-
+            ExceptionLoggerContext loggerContext = new ExceptionLoggerContext(context, canBeHandled);
             return logger.LogAsync(loggerContext, cancellationToken);
         }
     }

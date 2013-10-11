@@ -8,17 +8,26 @@ namespace System.Web.Http.ExceptionHandling
     public class ExceptionHandlerContextTests
     {
         [Fact]
-        public void ExceptionContextSet_UpdatesValue()
+        public void Constructor_IfExceptionContextIsNull_Throws()
         {
             // Arrange
-            ExceptionHandlerContext product = CreateProductUnderTest();
+            ExceptionContext context = null;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => CreateProductUnderTest(context), "exceptionContext");
+        }
+
+        [Fact]
+        public void ExceptionContextGet_ReturnsSpecifiedInstance()
+        {
+            // Arrange
             ExceptionContext expectedContext = CreateContext();
+            ExceptionHandlerContext product = CreateProductUnderTest(expectedContext);
 
             // Act
-            product.ExceptionContext = expectedContext;
+            ExceptionContext context = product.ExceptionContext;
 
             // Assert
-            ExceptionContext context = product.ExceptionContext;
             Assert.Same(expectedContext, context);
         }
 
@@ -49,7 +58,12 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionHandlerContext CreateProductUnderTest()
         {
-            return new ExceptionHandlerContext();
+            return CreateProductUnderTest(CreateContext());
+        }
+
+        private static ExceptionHandlerContext CreateProductUnderTest(ExceptionContext exceptionContext)
+        {
+            return new ExceptionHandlerContext(exceptionContext);
         }
     }
 }

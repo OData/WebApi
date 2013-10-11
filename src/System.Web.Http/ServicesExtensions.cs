@@ -144,9 +144,9 @@ namespace System.Web.Http
             return services.GetService<IExceptionHandler>();
         }
 
-        /// <summary>Returns the registered unhandled exception loggers.</summary>
+        /// <summary>Returns the collection of registered unhandled exception loggers.</summary>
         /// <param name="services">The services container.</param>
-        /// <returns>The registered unhandled exception loggers.</returns>
+        /// <returns>The collection of registered unhandled exception loggers.</returns>
         public static IEnumerable<IExceptionLogger> GetExceptionLoggers(this ServicesContainer services)
         {
             return services.GetServices<IExceptionLogger>();

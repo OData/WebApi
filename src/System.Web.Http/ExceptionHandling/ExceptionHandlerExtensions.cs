@@ -14,10 +14,10 @@ namespace System.Web.Http.ExceptionHandling
         /// <summary>Calls an exception handler and determines the response handling it, if any.</summary>
         /// <param name="handler">The unhandled exception handler.</param>
         /// <param name="context">The exception context.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>
-        /// A task providing the response message to return when the exception is handled, or <see langword="null"/>
-        /// when the exception remains unhandled.
+        /// A task that, when completed, contains the response message to return when the exception is handled, or
+        /// <see langword="null"/> when the exception remains unhandled.
         /// </returns>
         public static Task<HttpResponseMessage> HandleAsync(this IExceptionHandler handler,
             ExceptionContext context, CancellationToken cancellationToken)
@@ -32,11 +32,7 @@ namespace System.Web.Http.ExceptionHandling
                 throw new ArgumentNullException("context");
             }
 
-            ExceptionHandlerContext handlerContext = new ExceptionHandlerContext
-            {
-                ExceptionContext = context
-            };
-
+            ExceptionHandlerContext handlerContext = new ExceptionHandlerContext(context);
             return HandleAsyncCore(handler, handlerContext, cancellationToken);
         }
 

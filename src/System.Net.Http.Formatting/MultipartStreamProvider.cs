@@ -62,7 +62,7 @@ namespace System.Net.Http
         /// instances that have been read. For example, it can be used to copy the data to another location, or perform
         /// some other kind of post processing on the data before completing the read operation.
         /// </summary>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="Task"/> representing the post processing.</returns>
         public virtual Task ExecutePostProcessingAsync(CancellationToken cancellationToken)
         {

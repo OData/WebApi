@@ -88,7 +88,7 @@ namespace System.Web.Http.OData.Batch
         /// <param name="batchReader">The batch reader.</param>
         /// <param name="batchId">The batch id.</param>
         /// <param name="originalRequest">The original request containing all the batch requests.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The response for the operation.</returns>
         public virtual async Task<ODataBatchResponseItem> ExecuteOperationAsync(ODataBatchReader batchReader, Guid batchId, HttpRequestMessage originalRequest, CancellationToken cancellationToken)
         {
@@ -124,7 +124,7 @@ namespace System.Web.Http.OData.Batch
         /// <param name="batchReader">The batch reader.</param>
         /// <param name="batchId">The batch id.</param>
         /// <param name="originalRequest">The original request containing all the batch requests.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The response for the ChangeSet.</returns>
         public virtual async Task<ODataBatchResponseItem> ExecuteChangeSetAsync(ODataBatchReader batchReader, Guid batchId, HttpRequestMessage originalRequest, CancellationToken cancellationToken)
         {
@@ -185,7 +185,7 @@ namespace System.Web.Http.OData.Batch
         /// </summary>
         /// <param name="responses">The responses for the batch requests.</param>
         /// <param name="request">The original request containing all the batch requests.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The batch response message.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing the object.")]
         public virtual Task<HttpResponseMessage> CreateResponseMessageAsync(

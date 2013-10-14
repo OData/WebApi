@@ -2,7 +2,6 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.ExceptionServices;
@@ -27,9 +26,9 @@ namespace System.Web.Http
 
         private readonly HttpConfiguration _configuration;
         private readonly HttpMessageHandler _dispatcher;
-        private readonly IExceptionLogger _exceptionLogger;
-        private readonly IExceptionHandler _exceptionHandler;
 
+        private IExceptionLogger _exceptionLogger;
+        private IExceptionHandler _exceptionHandler;
         private bool _disposed;
         private bool _initialized = false;
         private object _initializationLock = new object();
@@ -72,16 +71,9 @@ namespace System.Web.Http
         /// </summary>
         /// <param name="configuration">The <see cref="HttpConfiguration"/> used to configure this <see cref="HttpServer"/> instance.</param>
         /// <param name="dispatcher">Http dispatcher responsible for handling incoming requests.</param>
-        public HttpServer(HttpConfiguration configuration, HttpMessageHandler dispatcher)
-            : this(configuration, dispatcher, ExceptionServices.CreateLogger(EnsureNonNull(configuration)),
-            ExceptionServices.CreateHandler(configuration))
-        {
-        }
-
         [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "principal",
             Justification = "Must access Thread.CurrentPrincipal to work around problem in .NET 4.5")]
-        internal HttpServer(HttpConfiguration configuration, HttpMessageHandler dispatcher,
-            IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler)
+        public HttpServer(HttpConfiguration configuration, HttpMessageHandler dispatcher)
         {
             if (configuration == null)
             {
@@ -93,17 +85,12 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("dispatcher");
             }
 
-            Contract.Assert(exceptionLogger != null);
-            Contract.Assert(exceptionHandler != null);
-
             // Read the thread principal to work around a problem up to .NET 4.5.1 that CurrentPrincipal creates a new instance each time it is read in async 
             // code if it has not been queried from the spawning thread.
             IPrincipal principal = Thread.CurrentPrincipal;
 
             _dispatcher = dispatcher;
             _configuration = configuration;
-            _exceptionLogger = exceptionLogger;
-            _exceptionHandler = exceptionHandler;
         }
 
         /// <summary>
@@ -122,14 +109,40 @@ namespace System.Web.Http
             get { return _configuration; }
         }
 
+        /// <remarks>This property is settable only for unit testing purposes.</remarks>
         internal IExceptionLogger ExceptionLogger
         {
-            get { return _exceptionLogger; }
+            get
+            {
+                if (_exceptionLogger == null)
+                {
+                    _exceptionLogger = ExceptionServices.GetLogger(_configuration);
+                }
+
+                return _exceptionLogger;
+            }
+            set
+            {
+                _exceptionLogger = value;
+            }
         }
 
+        /// <remarks>This property is settable only for unit testing purposes.</remarks>
         internal IExceptionHandler ExceptionHandler
         {
-            get { return _exceptionHandler; }
+            get
+            {
+                if (_exceptionHandler == null)
+                {
+                    _exceptionHandler = ExceptionServices.GetHandler(_configuration);
+                }
+
+                return _exceptionHandler;
+            }
+            set
+            {
+                _exceptionHandler = value;
+            }
         }
 
         /// <summary>
@@ -203,7 +216,7 @@ namespace System.Web.Http
 
             try
             {
-                ExceptionDispatchInfo exceptionInfo = null;
+                ExceptionDispatchInfo exceptionInfo;
 
                 try
                 {
@@ -218,14 +231,13 @@ namespace System.Web.Http
                     exceptionInfo = ExceptionDispatchInfo.Capture(exception);
                 }
 
-                Debug.Assert(exceptionInfo != null);
                 Debug.Assert(exceptionInfo.SourceException != null);
 
                 ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException, request,
                     ExceptionCatchBlocks.HttpServer, isTopLevelCatchBlock: true);
-                await _exceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
+                await ExceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
                     cancellationToken: cancellationToken);
-                HttpResponseMessage response = await _exceptionHandler.HandleAsync(exceptionContext,
+                HttpResponseMessage response = await ExceptionHandler.HandleAsync(exceptionContext,
                     cancellationToken);
 
                 if (response == null)

@@ -24,32 +24,21 @@ namespace System.Web.Http.Batch
     //     - UnbufferedODataBatchHandler
     public abstract class HttpBatchHandler : HttpMessageHandler
     {
-        private readonly IExceptionLogger _exceptionLogger;
-        private readonly IExceptionHandler _exceptionHandler;
+        private readonly HttpServer _server;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpBatchHandler"/> class.
         /// </summary>
         /// <param name="httpServer">The <see cref="HttpServer"/> for handling the individual batch requests.</param>
         protected HttpBatchHandler(HttpServer httpServer)
-            : this(EnsureNonNull(httpServer), CreateExceptionLogger(httpServer), CreateExceptionHandler(httpServer))
-        {
-        }
-
-        internal HttpBatchHandler(HttpServer httpServer, IExceptionLogger exceptionLogger,
-            IExceptionHandler exceptionHandler)
         {
             if (httpServer == null)
             {
                 throw Error.ArgumentNull("httpServer");
             }
 
-            Contract.Assert(exceptionLogger != null);
-            Contract.Assert(exceptionHandler != null);
-
+            _server = httpServer;
             Invoker = new HttpMessageInvoker(httpServer);
-            _exceptionLogger = exceptionLogger;
-            _exceptionHandler = exceptionHandler;
         }
 
         /// <summary>
@@ -57,14 +46,30 @@ namespace System.Web.Http.Batch
         /// </summary>
         public HttpMessageInvoker Invoker { get; private set; }
 
+        /// <remarks>This property is internal and settable only for unit testing purposes.</remarks>
         internal IExceptionLogger ExceptionLogger
         {
-            get { return _exceptionLogger; }
+            get
+            {
+                return _server.ExceptionLogger;
+            }
+            set
+            {
+                _server.ExceptionLogger = value;
+            }
         }
 
+        /// <remarks>This property is internal and settable only for unit testing purposes.</remarks>
         internal IExceptionHandler ExceptionHandler
         {
-            get { return _exceptionHandler; }
+            get
+            {
+                return _server.ExceptionHandler;
+            }
+            set
+            {
+                _server.ExceptionHandler = value;
+            }
         }
 
         /// <inheritdoc/>
@@ -77,7 +82,7 @@ namespace System.Web.Http.Batch
 
             request.Properties[HttpPropertyKeys.IsBatchRequest] = true;
 
-            ExceptionDispatchInfo exceptionInfo = null;
+            ExceptionDispatchInfo exceptionInfo;
 
             try
             {
@@ -92,14 +97,12 @@ namespace System.Web.Http.Batch
                 exceptionInfo = ExceptionDispatchInfo.Capture(exception);
             }
 
-            Debug.Assert(exceptionInfo != null);
             Debug.Assert(exceptionInfo.SourceException != null);
 
             ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException, request,
                 ExceptionCatchBlocks.HttpBatchHandler, isTopLevelCatchBlock: false);
-            await _exceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
-                cancellationToken: cancellationToken);
-            HttpResponseMessage response = await _exceptionHandler.HandleAsync(exceptionContext, cancellationToken);
+            await ExceptionLogger.LogAsync(exceptionContext, canBeHandled: true, cancellationToken: cancellationToken);
+            HttpResponseMessage response = await ExceptionHandler.HandleAsync(exceptionContext, cancellationToken);
 
             if (response == null)
             {
@@ -116,33 +119,5 @@ namespace System.Web.Http.Batch
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The batch response.</returns>
         public abstract Task<HttpResponseMessage> ProcessBatchAsync(HttpRequestMessage request, CancellationToken cancellationToken);
-
-        private static IExceptionHandler CreateExceptionHandler(HttpServer httpServer)
-        {
-            Contract.Assert(httpServer != null);
-            HttpConfiguration configuration = httpServer.Configuration;
-            Contract.Assert(configuration != null);
-
-            return ExceptionServices.CreateHandler(configuration);
-        }
-
-        private static IExceptionLogger CreateExceptionLogger(HttpServer httpServer)
-        {
-            Contract.Assert(httpServer != null);
-            HttpConfiguration configuration = httpServer.Configuration;
-            Contract.Assert(configuration != null);
-
-            return ExceptionServices.CreateLogger(configuration);
-        }
-
-        private static HttpServer EnsureNonNull(HttpServer httpServer)
-        {
-            if (httpServer == null)
-            {
-                throw Error.ArgumentNull("httpServer");
-            }
-
-            return httpServer;
-        }
     }
 }

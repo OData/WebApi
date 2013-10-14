@@ -28,7 +28,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ExceptionLogger_ReturnsSpecifiedInstance()
+        public void ExceptionLoggerGet_ReturnsSpecifiedInstance()
         {
             // Arrange
             IExceptionLogger expectedExceptionLogger = CreateDummyExceptionLogger();
@@ -47,7 +47,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ExceptionHandler_ReturnsSpecifiedInstance()
+        public void ExceptionHandlerGet_ReturnsSpecifiedInstance()
         {
             // Arrange
             IExceptionLogger exceptionLogger = CreateDummyExceptionLogger();
@@ -66,7 +66,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ConstructorWithServer_UsesExceptionLoggerFromConfiguration()
+        public void ExceptionLoggerGet_IfUnset_ReturnsExceptionLoggerFromConfiguration()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -92,7 +92,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ConstructorWithServer_UsesExceptionHandlerFromConfiguration()
+        public void ExceptionHandlerGet_IfUnset_ReturnsExceptionHandlerFromConfiguration()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -405,10 +405,12 @@ namespace System.Web.Http
             public LambdaHttpBatchHandler(HttpServer httpServer, IExceptionLogger exceptionLogger,
                 IExceptionHandler exceptionHandler,
                 Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> processBatchAsync)
-                : base(httpServer, exceptionLogger, exceptionHandler)
+                : base(httpServer)
             {
                 Contract.Assert(processBatchAsync != null);
                 _processBatchAsync = processBatchAsync;
+                ExceptionLogger = exceptionLogger;
+                ExceptionHandler = exceptionHandler;
             }
 
             public override Task<HttpResponseMessage> ProcessBatchAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -426,8 +428,10 @@ namespace System.Web.Http
 
             public MockHttpBatchHandler(HttpServer httpServer, IExceptionLogger exceptionLogger,
                 IExceptionHandler exceptionHanlder)
-                : base(httpServer, exceptionLogger, exceptionHanlder)
+                : base(httpServer)
             {
+                ExceptionLogger = exceptionLogger;
+                ExceptionHandler = exceptionHanlder;
             }
 
             public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)

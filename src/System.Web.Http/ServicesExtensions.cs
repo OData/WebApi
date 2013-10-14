@@ -152,6 +152,16 @@ namespace System.Web.Http
             return services.GetServices<IExceptionLogger>();
         }
 
+        internal static CompositeExceptionLogger GetCompositeExceptionLogger(this ServicesContainer services)
+        {
+            return services.GetService<CompositeExceptionLogger>();
+        }
+
+        internal static LastChanceExceptionHandler GetLastChanceExceptionHandler(this ServicesContainer services)
+        {
+            return services.GetService<LastChanceExceptionHandler>();
+        }
+
         public static IEnumerable<IFilterProvider> GetFilterProviders(this ServicesContainer services)
         {
             return services.GetServices<IFilterProvider>();

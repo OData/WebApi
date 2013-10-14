@@ -94,7 +94,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ExceptionLogger_IsSpecifiedInstance()
+        public void ExceptionLoggerGet_ReturnsSpecifiedInstance()
         {
             // Arrange
             IExceptionLogger expectedExceptionLogger = CreateDummyExceptionLogger();
@@ -114,7 +114,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ExceptionHandler_IsSpecifiedInstance()
+        public void ExceptionHandlerGet_ReturnsSpecifiedInstance()
         {
             // Arrange
             IExceptionLogger exceptionLogger = CreateDummyExceptionLogger();
@@ -134,7 +134,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ConstructorWithConfigurationAndDispatcher_UsesExceptionLoggerFromConfiguration()
+        public void ExceptionLoggerGet_IfUnset_ReturnsExceptionLoggerFromConfiguration()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -160,7 +160,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void ConstructorWithConfigurationAndDispatcher_UsesExceptionHandlerFromConfiguration()
+        public void ExceptionHandlerGet_IfUnset_UsesExceptionHandlerFromConfiguration()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -626,7 +626,11 @@ namespace System.Web.Http
         private static HttpServer CreateProductUnderTest(HttpConfiguration configuration,
             HttpMessageHandler dispatcher, IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler)
         {
-            return new HttpServer(configuration, dispatcher, exceptionLogger, exceptionHandler);
+            return new HttpServer(configuration, dispatcher)
+            {
+                ExceptionLogger = exceptionLogger,
+                ExceptionHandler = exceptionHandler
+            };
         }
 
         private static HttpRequestMessage CreateRequest()

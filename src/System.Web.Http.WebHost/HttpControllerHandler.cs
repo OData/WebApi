@@ -51,9 +51,9 @@ namespace System.Web.Http.WebHost
             new Lazy<IHostBufferPolicySelector>(() => GlobalConfiguration.Configuration.Services.GetHostBufferPolicySelector());
 
         private static readonly Lazy<IExceptionHandler> _exceptionHandler = new Lazy<IExceptionHandler>(() =>
-            ExceptionServices.CreateHandler(GlobalConfiguration.Configuration));
+            ExceptionServices.GetHandler(GlobalConfiguration.Configuration));
         private static readonly Lazy<IExceptionLogger> _exceptionLogger = new Lazy<IExceptionLogger>(() =>
-            ExceptionServices.CreateLogger(GlobalConfiguration.Configuration));
+            ExceptionServices.GetLogger(GlobalConfiguration.Configuration));
 
         private static readonly Func<HttpRequestMessage, X509Certificate2> _retrieveClientCertificate = new Func<HttpRequestMessage, X509Certificate2>(RetrieveClientCertificate);
 
@@ -383,7 +383,7 @@ namespace System.Web.Http.WebHost
             // We guarantee we will handle all error responses internally
             // and always return a non-faulted task, except for custom error handlers that choose to propagate these
             // exceptions.
-            ExceptionDispatchInfo exceptionInfo = null;
+            ExceptionDispatchInfo exceptionInfo;
             cancellationToken.ThrowIfCancellationRequested();
 
             try
@@ -398,7 +398,6 @@ namespace System.Web.Http.WebHost
                 exceptionInfo = ExceptionDispatchInfo.Capture(exception);
             }
 
-            Debug.Assert(exceptionInfo != null);
             Debug.Assert(exceptionInfo.SourceException != null);
 
             // If we were using a buffered stream, we can still set the headers and status code, and we can create an

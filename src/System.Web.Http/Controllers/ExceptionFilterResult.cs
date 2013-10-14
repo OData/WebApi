@@ -38,7 +38,7 @@ namespace System.Web.Http.Controllers
 
         public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
-            ExceptionDispatchInfo exceptionInfo = null;
+            ExceptionDispatchInfo exceptionInfo;
 
             try
             {
@@ -50,8 +50,6 @@ namespace System.Web.Http.Controllers
             }
 
             // This code path only runs if the task is faulted with an exception
-            Debug.Assert(exceptionInfo != null);
-
             Exception exception = exceptionInfo.SourceException;
             Debug.Assert(exception != null);
 

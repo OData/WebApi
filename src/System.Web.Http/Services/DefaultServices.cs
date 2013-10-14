@@ -148,6 +148,11 @@ namespace System.Web.Http.Services
             SetSingle<IExceptionHandler>(new DefaultExceptionHandler());
             SetMultiple<IExceptionLogger>();
 
+            // Wrapped/composite versions of the exception service interfaces designed for consumption in catch blocks.
+            // See ExceptionServices.GetLogger/Handler for how these internal services are used.
+            SetSingle<CompositeExceptionLogger>(null);
+            SetSingle<LastChanceExceptionHandler>(null);
+
             _serviceTypesSingle = new HashSet<Type>(_defaultServicesSingle.Keys);
             _serviceTypesMulti = new HashSet<Type>(_defaultServicesMulti.Keys);
 

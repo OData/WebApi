@@ -225,8 +225,8 @@ namespace System.Web.Http
             }
             if (exceptionFilters.Length > 0)
             {
-                IExceptionLogger exceptionLogger = ExceptionServices.CreateLogger(controllerServices);
-                IExceptionHandler exceptionHandler = ExceptionServices.CreateHandler(controllerServices);
+                IExceptionLogger exceptionLogger = ExceptionServices.GetLogger(controllerServices);
+                IExceptionHandler exceptionHandler = ExceptionServices.GetHandler(controllerServices);
                 result = new ExceptionFilterResult(actionContext, exceptionFilters, exceptionLogger, exceptionHandler,
                     result);
             }

@@ -29,7 +29,7 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
-        public void ExceptionLogger_IsSpecifiedInstance()
+        public void ExceptionLoggerGet_ReturnsSpecifiedInstance()
         {
             // Arrange
             IExceptionLogger expectedExceptionLogger = CreateDummyExceptionLogger();
@@ -48,7 +48,7 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
-        public void ExceptionHandler_IsSpecifiedInstance()
+        public void ExceptionHandlerGet_ReturnsSpecifiedInstance()
         {
             // Arrange
             IExceptionLogger exceptionLogger = CreateDummyExceptionLogger();
@@ -67,7 +67,7 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
-        public void ConstructorWithConfiguration_UsesExceptionLoggerFromConfiguration()
+        public void ExceptionLoggerGet_IfUnset_ReturnsExceptionLoggerFromConfiguration()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -92,7 +92,7 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
-        public void ConstructorWithConfiguration_UsesExceptionHandlerFromConfiguration()
+        public void ExceptionHandlerGet_IfUnset_UsesExceptionHandlerFromConfiguration()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -501,7 +501,11 @@ namespace System.Web.Http.Dispatcher
         private static HttpControllerDispatcher CreateProductUnderTest(HttpConfiguration configuration,
             IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler)
         {
-            return new HttpControllerDispatcher(configuration, exceptionLogger, exceptionHandler);
+            return new HttpControllerDispatcher(configuration)
+            {
+                ExceptionLogger = exceptionLogger,
+                ExceptionHandler = exceptionHandler
+            };
         }
 
         private static HttpRequestMessage CreateRequestWithRouteData()

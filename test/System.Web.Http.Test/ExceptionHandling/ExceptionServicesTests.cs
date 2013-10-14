@@ -5,13 +5,14 @@ using System.Linq;
 using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 using Moq;
+using Moq.Protected;
 
 namespace System.Web.Http.ExceptionHandling
 {
     public class ExceptionServicesTests
     {
         [Fact]
-        public void CreateLoggerWithServices_ReturnsCompositeExceptionLoggerWithServicesLoggers()
+        public void GetLoggerWithServices_ReturnsCompositeExceptionLoggerWithServicesLoggers()
         {
             // Arrange
             IExceptionLogger expectedLogger = CreateDummyLogger();
@@ -19,7 +20,7 @@ namespace System.Web.Http.ExceptionHandling
             using (ServicesContainer services = CreateServices(expectedLogger))
             {
                 // Act
-                IExceptionLogger logger = ExceptionServices.CreateLogger(services);
+                IExceptionLogger logger = ExceptionServices.GetLogger(services);
 
                 // Assert
                 Assert.IsType<CompositeExceptionLogger>(logger);
@@ -30,7 +31,25 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void CreateLoggerWithConfiguration_ReturnsCompositeExceptionLoggerWithServicesLoggers()
+        public void GetLoggerWithServices_ReturnsSameInstance()
+        {
+            // Arrange
+            IExceptionLogger innerLogger = CreateDummyLogger();
+
+            using (ServicesContainer services = CreateServices(innerLogger))
+            {
+                IExceptionLogger firstLogger = ExceptionServices.GetLogger(services);
+
+                // Act
+                IExceptionLogger secondLogger = ExceptionServices.GetLogger(services);
+
+                // Assert
+                Assert.Same(firstLogger, secondLogger);
+            }
+        }
+
+        [Fact]
+        public void GetLoggerWithConfiguration_ReturnsCompositeExceptionLoggerWithServicesLoggers()
         {
             // Arrange
             IExceptionLogger expectedLogger = CreateDummyLogger();
@@ -38,7 +57,7 @@ namespace System.Web.Http.ExceptionHandling
             using (HttpConfiguration configuration = CreateConfiguration(expectedLogger))
             {
                 // Act
-                IExceptionLogger logger = ExceptionServices.CreateLogger(configuration);
+                IExceptionLogger logger = ExceptionServices.GetLogger(configuration);
 
                 // Assert
                 Assert.IsType<CompositeExceptionLogger>(logger);
@@ -49,17 +68,17 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void CreateLoggerWithConfiguration_IfConfigurationIsNull_Throws()
+        public void GetLoggerWithConfiguration_IfConfigurationIsNull_Throws()
         {
             // Arrange
             HttpConfiguration configuration = null;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => ExceptionServices.CreateLogger(configuration), "configuration");
+            Assert.ThrowsArgumentNull(() => ExceptionServices.GetLogger(configuration), "configuration");
         }
 
         [Fact]
-        public void CreateHandlerWithServices_ReturnsLastChanceHandlerWithServicesInnerHandler()
+        public void GetHandlerWithServices_ReturnsLastChanceHandlerWithServicesInnerHandler()
         {
             // Arrange
             IExceptionHandler expectedHandler = CreateDummyHandler();
@@ -67,7 +86,7 @@ namespace System.Web.Http.ExceptionHandling
             using (ServicesContainer services = CreateServices(expectedHandler))
             {
                 // Act
-                IExceptionHandler handler = ExceptionServices.CreateHandler(services);
+                IExceptionHandler handler = ExceptionServices.GetHandler(services);
 
                 // Assert
                 Assert.IsType<LastChanceExceptionHandler>(handler);
@@ -77,7 +96,25 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void CreateHandlerWithServices_IfHandlerIsAbsent_ReturnsLastChanceHandlerWithEmptyInnerHandler()
+        public void GetHandlerWithServices_ReturnsSameInstance()
+        {
+            // Arrange
+            IExceptionHandler innerHandler = CreateDummyHandler();
+
+            using (ServicesContainer services = CreateServices(innerHandler))
+            {
+                IExceptionHandler firstHandler = ExceptionServices.GetHandler(services);
+
+                // Act
+                IExceptionHandler secondHandler = ExceptionServices.GetHandler(services);
+
+                // Assert
+                Assert.Same(firstHandler, secondHandler);
+            }
+        }
+
+        [Fact]
+        public void GetHandlerWithServices_IfHandlerIsAbsent_ReturnsLastChanceHandlerWithEmptyInnerHandler()
         {
             // Arrange
             IExceptionHandler servicesHandler = null;
@@ -85,7 +122,7 @@ namespace System.Web.Http.ExceptionHandling
             using (ServicesContainer services = CreateServices(servicesHandler))
             {
                 // Act
-                IExceptionHandler handler = ExceptionServices.CreateHandler(services);
+                IExceptionHandler handler = ExceptionServices.GetHandler(services);
 
                 // Assert
                 Assert.IsType<LastChanceExceptionHandler>(handler);
@@ -95,7 +132,7 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void CreateHandlerWithConfiguration_ReturnsLastChanceHandlerWithServicesInnerHandler()
+        public void GetHandlerWithConfiguration_ReturnsLastChanceHandlerWithServicesInnerHandler()
         {
             // Arrange
             IExceptionHandler expectedHandler = CreateDummyHandler();
@@ -103,7 +140,7 @@ namespace System.Web.Http.ExceptionHandling
             using (HttpConfiguration configuration = CreateConfiguration(expectedHandler))
             {
                 // Act
-                IExceptionHandler handler = ExceptionServices.CreateHandler(configuration);
+                IExceptionHandler handler = ExceptionServices.GetHandler(configuration);
 
                 // Assert
                 Assert.IsType<LastChanceExceptionHandler>(handler);
@@ -113,13 +150,13 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void CreateHandlerWithConfiguration_IfConfigurationIsNull_Throws()
+        public void GetHandlerWithConfiguration_IfConfigurationIsNull_Throws()
         {
             // Arrange
             HttpConfiguration configuration = null;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => ExceptionServices.CreateHandler(configuration), "configuration");
+            Assert.ThrowsArgumentNull(() => ExceptionServices.GetHandler(configuration), "configuration");
         }
 
         private static HttpConfiguration CreateConfiguration(IExceptionHandler handler)
@@ -150,6 +187,13 @@ namespace System.Web.Http.ExceptionHandling
         {
             Mock<ServicesContainer> mock = new Mock<ServicesContainer>(MockBehavior.Strict);
             mock.Setup(s => s.GetService(typeof(IExceptionHandler))).Returns(handler);
+            LastChanceExceptionHandler cached = null;
+            mock.Setup(s => s.GetService(typeof(LastChanceExceptionHandler))).Returns(() => cached);
+            mock.Protected()
+                .Setup("ReplaceSingle", typeof(LastChanceExceptionHandler), ItExpr.IsAny<object>())
+                .Callback<Type, object>((i, o) => cached = (LastChanceExceptionHandler)o);
+            mock.Setup(s => s.IsSingleService(typeof(LastChanceExceptionHandler))).Returns(true);
+            mock.Protected().Setup("ResetCache", typeof(LastChanceExceptionHandler));
             mock.Setup(s => s.Dispose());
             return mock.Object;
         }
@@ -158,6 +202,13 @@ namespace System.Web.Http.ExceptionHandling
         {
             Mock<ServicesContainer> mock = new Mock<ServicesContainer>(MockBehavior.Strict);
             mock.Setup(s => s.GetServices(typeof(IExceptionLogger))).Returns(loggers);
+            CompositeExceptionLogger cached = null;
+            mock.Setup(s => s.GetService(typeof(CompositeExceptionLogger))).Returns(() => cached);
+            mock.Protected()
+                .Setup("ReplaceSingle", typeof(CompositeExceptionLogger), ItExpr.IsAny<object>())
+                .Callback<Type, object>((i, o) => cached = (CompositeExceptionLogger)o);
+            mock.Setup(s => s.IsSingleService(typeof(CompositeExceptionLogger))).Returns(true);
+            mock.Protected().Setup("ResetCache", typeof(CompositeExceptionLogger));
             mock.Setup(s => s.Dispose());
             return mock.Object;
         }

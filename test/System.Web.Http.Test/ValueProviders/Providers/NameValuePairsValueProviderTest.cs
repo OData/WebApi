@@ -22,8 +22,9 @@ namespace System.Web.Http.ValueProviders.Providers
         public void Constructor_GuardClauses()
         {
             // Act & assert
+            IEnumerable<KeyValuePair<string, string>> values = null;
             Assert.ThrowsArgumentNull(
-                () => new NameValuePairsValueProvider(values: null, culture: CultureInfo.InvariantCulture),
+                () => new NameValuePairsValueProvider(values: values, culture: CultureInfo.InvariantCulture),
                 "values");
 
             Assert.ThrowsArgumentNull(

@@ -32,6 +32,22 @@ namespace System.Web.Http.ValueProviders.Providers
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="NameValuePairsValueProvider"/> class.
+        /// </summary>
+        /// <param name="values">The name value pairs.</param>
+        /// <param name="culture">The culture to return with ValueProviderResult instances.</param>
+        public NameValuePairsValueProvider(IDictionary<string, object> values, CultureInfo culture)
+        {
+            if (values == null)
+            {
+                throw Error.ArgumentNull("values");
+            }
+
+            _values = InitializeValues(values);
+            _culture = culture;
+        }
+
+        /// <summary>
         /// Creates a NameValuePairsProvider wrapping a lazily evaluated set of key value pairs.
         /// </summary>
         /// <param name="valuesFactory">A function returning the key value pairs to wrap.</param>
@@ -84,45 +100,51 @@ namespace System.Web.Http.ValueProviders.Providers
 
         // This method turns a collection of name/value pairs into a Dictionary<string, object> for fast lookups
         [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily", Justification = "One of the casts is conditionally compiled")]
-        private static Dictionary<string, object> InitializeValues(IEnumerable<KeyValuePair<string, string>> nameValuePairs)
+        private static Dictionary<string, object> InitializeValues<T>(IEnumerable<KeyValuePair<string, T>> nameValuePairs)
+            where T : class
         {
             // Performance-sensitive.
             // Optimize for the cases of 0 pairs, and for names being unique when present.
-            Dictionary<string, object> values = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, object> valuesDictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
             // Avoid looping in the 0 case.
             KeyValuePair<string, string>[] nameValuePairsArray = nameValuePairs as KeyValuePair<string, string>[];
             if (nameValuePairsArray != null && nameValuePairsArray.Length == 0)
             {
-                return values;
+                return valuesDictionary;
             }
-            foreach (KeyValuePair<string, string> nameValuePair in nameValuePairs)
+            Dictionary<string, object> nameValuePairsDictionary = nameValuePairs as Dictionary<string, object>;
+            if (nameValuePairsDictionary != null && nameValuePairsDictionary.Count == 0)
+            {
+                return valuesDictionary;
+            }
+
+            foreach (KeyValuePair<string, T> nameValuePair in nameValuePairs)
             {
                 string name = nameValuePair.Key;
                 object value;
                 // We optimize for the common case of a name being associated with exactly one value by avoiding a List
                 // allocation if we can avoid it. The first time the key appears, the value gets stored as a string. 
                 // Only if the key appears a second time do we allocate a List to store the values for that key.
-                if (values.TryGetValue(name, out value))
+                if (valuesDictionary.TryGetValue(name, out value))
                 {
-                    List<string> valueStrings = value as List<string>;
-                    if (valueStrings == null)
+                    List<T> values = value as List<T>;
+                    if (values == null)
                     {
-                        Contract.Assert(value is string || value == null);
-
                         // allocate a new list to store the first value and the second, new value
-                        values[name] = new List<string>() { value as string, nameValuePair.Value };
+                        valuesDictionary[name] = new List<T>() { value as T, nameValuePair.Value };
                     }
                     else
                     {
-                        valueStrings.Add(nameValuePair.Value);
+                        values.Add(nameValuePair.Value);
                     }
                 }
                 else
                 {
-                    values[name] = nameValuePair.Value;
+                    valuesDictionary[name] = nameValuePair.Value;
                 }
             }
-            return values;
+            return valuesDictionary;
         }
 
         public virtual bool ContainsPrefix(string prefix)
@@ -164,7 +186,6 @@ namespace System.Web.Http.ValueProviders.Providers
             List<string> valueStrings = value as List<string>;
             if (valueStrings == null)
             {
-                Contract.Assert(value is string || value == null);
                 return value as string;
             }
             else

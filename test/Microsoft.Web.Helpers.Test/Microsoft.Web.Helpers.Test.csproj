@@ -31,7 +31,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnalyticsTest.cs" />
-    <Compile Include="BingTest.cs" />
     <Compile Include="FacebookTest.cs" />
     <Compile Include="FileUploadTest.cs" />
     <Compile Include="GamerCardTest.cs" />

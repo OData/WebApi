@@ -61,24 +61,6 @@ namespace Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search Site.
-        /// </summary>
-        internal static string BingSearch_DefaultSiteSearchText {
-            get {
-                return ResourceManager.GetString("BingSearch_DefaultSiteSearchText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Search Web.
-        /// </summary>
-        internal static string BingSearch_DefaultWebSearchText {
-            get {
-                return ResourceManager.GetString("BingSearch_DefaultWebSearchText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Add more files.
         /// </summary>
         internal static string FileUpload_AddMore {

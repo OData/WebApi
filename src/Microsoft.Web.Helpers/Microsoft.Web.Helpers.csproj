@@ -38,11 +38,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Analytics.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Bing.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Bing.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Facebook.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -138,11 +133,6 @@
       <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Analytics.generated.cs</LastGenOutput>
-    </None>
-    <None Include="Bing.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
-      <LastGenOutput>Bing.generated.cs</LastGenOutput>
     </None>
     <None Include="FileUpload.cshtml">
       <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>

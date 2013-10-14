@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BingSearch_DefaultSiteSearchText" xml:space="preserve">
-    <value>Search Site</value>
-  </data>
-  <data name="BingSearch_DefaultWebSearchText" xml:space="preserve">
-    <value>Search Web</value>
-  </data>
   <data name="FileUpload_AddMore" xml:space="preserve">
     <value>Add more files</value>
   </data>

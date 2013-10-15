@@ -44,7 +44,7 @@ namespace System.Web.Http.WebHost
             Contract.Assert(exceptionContext != null);
 
             if (exceptionContext.CatchBlock ==
-                WebHostExceptionCatchBlocks.HttpControllerHandlerWriteBufferedResponseContentAsync)
+                WebHostExceptionCatchBlocks.HttpControllerHandlerBufferContent)
             {
                 HandleWebHostBufferedContentException(context);
                 return TaskHelpers.Completed();

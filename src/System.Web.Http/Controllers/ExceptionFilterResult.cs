@@ -53,8 +53,8 @@ namespace System.Web.Http.Controllers
             Exception exception = exceptionInfo.SourceException;
             Debug.Assert(exception != null);
 
-            ExceptionContext exceptionContext = new ExceptionContext(exception, _context,
-                ExceptionCatchBlocks.IExceptionFilter, isTopLevelCatchBlock: false);
+            ExceptionContext exceptionContext = new ExceptionContext(exception, ExceptionCatchBlocks.IExceptionFilter,
+                _context);
 
             await _exceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
                 cancellationToken: cancellationToken);

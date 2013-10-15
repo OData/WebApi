@@ -162,7 +162,8 @@ namespace System.Web.Http.ExceptionHandling
             });
         }
 
-        private static ExceptionHandlerContext CreateValidContext(HttpRequestMessage request, string catchBlock)
+        private static ExceptionHandlerContext CreateValidContext(HttpRequestMessage request,
+            ExceptionContextCatchBlock catchBlock)
         {
             return CreateContext(new ExceptionContext
             {

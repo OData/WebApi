@@ -865,14 +865,11 @@ namespace System.Web.Http.WebHost
                 Assert.NotNull(task);
                 task.WaitUntilCompleted();
                 Assert.Equal(TaskStatus.RanToCompletion, task.Status);
-                string expectedCatchBlock =
-                    WebHostExceptionCatchBlocks.HttpControllerHandlerWriteStreamedResponseContentAsync;
                 mock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
                     c.CanBeHandled == false
                     && c.ExceptionContext != null
                     && c.ExceptionContext.Exception == expectedException
-                    && c.ExceptionContext.CatchBlock == expectedCatchBlock
-                    && c.ExceptionContext.IsTopLevelCatchBlock == true
+                    && c.ExceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpControllerHandlerStreamContent
                     && c.ExceptionContext.Request == expectedRequest
                     && c.ExceptionContext.Response == expectedResponse
                     ), expectedCancellationToken), Times.Once());
@@ -909,14 +906,11 @@ namespace System.Web.Http.WebHost
                 Assert.NotNull(task);
                 task.WaitUntilCompleted();
                 Assert.Equal(TaskStatus.Faulted, task.Status);
-                string expectedCatchBlock =
-                    WebHostExceptionCatchBlocks.HttpControllerHandlerWriteBufferedResponseContentAsync;
 
                 Func<ExceptionContext, bool> exceptionContextMatches = (c) =>
                     c != null
                     && c.Exception == expectedException
-                    && c.CatchBlock == expectedCatchBlock
-                    && c.IsTopLevelCatchBlock == true
+                    && c.CatchBlock == WebHostExceptionCatchBlocks.HttpControllerHandlerBufferContent
                     && c.Request == expectedRequest
                     && c.Response == expectedResponse;
 
@@ -1047,25 +1041,20 @@ namespace System.Web.Http.WebHost
                 Assert.NotNull(task);
                 task.WaitUntilCompleted();
                 Assert.Equal(TaskStatus.RanToCompletion, task.Status);
-                string expectedOriginalCatchBlock =
-                    WebHostExceptionCatchBlocks.HttpControllerHandlerWriteBufferedResponseContentAsync;
+                
                 loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
                     c.CanBeHandled == true
                     && c.ExceptionContext != null
                     && c.ExceptionContext.Exception == expectedOriginalException
-                    && c.ExceptionContext.CatchBlock == expectedOriginalCatchBlock
-                    && c.ExceptionContext.IsTopLevelCatchBlock == true
+                    && c.ExceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpControllerHandlerBufferContent
                     && c.ExceptionContext.Request == expectedRequest
                     && c.ExceptionContext.Response == expectedOriginalResponse),
                     expectedCancellationToken), Times.Once());
-                string expectedErrorCatchBlock =
-                    WebHostExceptionCatchBlocks.HttpControllerHandlerWriteErrorResponseContentAsync;
                 loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
                     c.CanBeHandled == false
                     && c.ExceptionContext != null
                     && c.ExceptionContext.Exception == expectedErrorException
-                    && c.ExceptionContext.CatchBlock == expectedErrorCatchBlock
-                    && c.ExceptionContext.IsTopLevelCatchBlock == true
+                    && c.ExceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpControllerHandlerBufferError
                     && c.ExceptionContext.Request == expectedRequest
                     && c.ExceptionContext.Response == expectedErrorResponse),
                     expectedCancellationToken), Times.Once());

@@ -143,6 +143,22 @@ namespace System.Web.Http.ExceptionHandling
             Assert.ThrowsArgumentNull(() => product.ShouldHandle(context), "context");
         }
 
+        [Fact]
+        public void ShouldHandle_IfCallStackIsNull_Throws()
+        {
+            // Arrange
+            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>();
+            mock.CallBase = true;
+            ExceptionHandler product = mock.Object;
+
+            ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext());
+            Assert.Null(context.ExceptionContext.CatchBlock); // Guard
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => product.ShouldHandle(context), "context",
+                "ExceptionContext.CatchBlock must not be null.");
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -155,7 +171,7 @@ namespace System.Web.Http.ExceptionHandling
 
             ExceptionHandlerContext context = CreateContext(new ExceptionContext
             {
-                IsTopLevelCatchBlock = isTopLevelCatchBlock
+                CatchBlock = new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevelCatchBlock)
             });
 
             // Act

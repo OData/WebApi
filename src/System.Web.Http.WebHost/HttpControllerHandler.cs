@@ -347,9 +347,8 @@ namespace System.Web.Http.WebHost
 
             Contract.Assert(exception != null);
 
-            string catchBlock = WebHostExceptionCatchBlocks.HttpControllerHandlerWriteStreamedResponseContentAsync;
-            ExceptionContext exceptionContext = new ExceptionContext(exception, request, response, catchBlock,
-                isTopLevelCatchBlock: true);
+            ExceptionContextCatchBlock catchBlock = WebHostExceptionCatchBlocks.HttpControllerHandlerStreamContent;
+            ExceptionContext exceptionContext = new ExceptionContext(exception, catchBlock, request, response);
             await exceptionLogger.LogAsync(exceptionContext, canBeHandled: false,
                 cancellationToken: cancellationToken);
 
@@ -406,7 +405,7 @@ namespace System.Web.Http.WebHost
             // but before other continuations the caller appends to this task.
             // The error response writing task handles errors internally and will not show as faulted, except for
             // custom error handlers that choose to propagate these exceptions.
-            string catchBlock = WebHostExceptionCatchBlocks.HttpControllerHandlerWriteBufferedResponseContentAsync;
+            ExceptionContextCatchBlock catchBlock = WebHostExceptionCatchBlocks.HttpControllerHandlerBufferContent;
 
             if (!await CopyErrorResponseAsync(catchBlock, httpContextBase, request, response,
                 exceptionInfo.SourceException, cancellationToken, exceptionLogger, exceptionHandler))
@@ -427,7 +426,7 @@ namespace System.Web.Http.WebHost
         /// internally.  The task returned from this method will not show as faulted.
         /// </para>
         /// </remarks>
-        /// <param name="catchBlock">The label for the catch block that caught the exception.</param>
+        /// <param name="catchBlock">The catch block that caught the exception.</param>
         /// <param name="httpContextBase">The HTTP context.</param>
         /// <param name="request">The original request.</param>
         /// <param name="response">The original response whose content we could not write.</param>
@@ -436,9 +435,9 @@ namespace System.Web.Http.WebHost
         /// </param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A task that will create the error response.</returns>
-        internal static Task<bool> CopyErrorResponseAsync(string catchBlock, HttpContextBase httpContextBase,
-            HttpRequestMessage request, HttpResponseMessage response, Exception exception,
-            CancellationToken cancellationToken)
+        internal static Task<bool> CopyErrorResponseAsync(ExceptionContextCatchBlock catchBlock,
+            HttpContextBase httpContextBase, HttpRequestMessage request, HttpResponseMessage response,
+            Exception exception, CancellationToken cancellationToken)
         {
             return CopyErrorResponseAsync(catchBlock, httpContextBase, request, response, exception, cancellationToken,
                 ExceptionLogger, ExceptionHandler);
@@ -447,9 +446,10 @@ namespace System.Web.Http.WebHost
         [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "unused variable necessary to call getter")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "All exceptions caught here become error responses")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "errorResponse gets disposed in the async continuation")]
-        internal static async Task<bool> CopyErrorResponseAsync(string catchBlock, HttpContextBase httpContextBase,
-            HttpRequestMessage request, HttpResponseMessage response, Exception exception,
-            CancellationToken cancellationToken, IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler)
+        internal static async Task<bool> CopyErrorResponseAsync(ExceptionContextCatchBlock catchBlock,
+            HttpContextBase httpContextBase, HttpRequestMessage request, HttpResponseMessage response,
+            Exception exception, CancellationToken cancellationToken, IExceptionLogger exceptionLogger,
+            IExceptionHandler exceptionHandler)
         {
             Contract.Assert(httpContextBase != null);
             Contract.Assert(httpContextBase.Response != null);
@@ -471,8 +471,7 @@ namespace System.Web.Http.WebHost
             }
             else
             {
-                ExceptionContext exceptionContext = new ExceptionContext(exception, request, catchBlock,
-                    isTopLevelCatchBlock: true)
+                ExceptionContext exceptionContext = new ExceptionContext(exception, catchBlock, request)
                 {
                     Response = response
                 };
@@ -534,9 +533,8 @@ namespace System.Web.Http.WebHost
 
                 Contract.Assert(exception != null);
 
-                ExceptionContext exceptionContext = new ExceptionContext(exception, request, errorResponse,
-                    WebHostExceptionCatchBlocks.HttpControllerHandlerWriteErrorResponseContentAsync,
-                    isTopLevelCatchBlock: true);
+                ExceptionContext exceptionContext = new ExceptionContext(exception,
+                    WebHostExceptionCatchBlocks.HttpControllerHandlerBufferError, request, errorResponse);
                 await exceptionLogger.LogAsync(exceptionContext, canBeHandled: false,
                     cancellationToken: cancellationToken);
 

@@ -146,7 +146,6 @@ namespace System.Web.Http.Controllers
                     c != null
                     && c.Exception == expectedException
                     && c.CatchBlock == ExceptionCatchBlocks.IExceptionFilter
-                    && c.IsTopLevelCatchBlock == false
                     && c.ActionContext == expectedActionContext;
 
                 exceptionLoggerMock.Verify(l => l.LogAsync(
@@ -251,7 +250,6 @@ namespace System.Web.Http.Controllers
                     c != null
                     && c.Exception == expectedException
                     && c.CatchBlock == ExceptionCatchBlocks.IExceptionFilter
-                    && c.IsTopLevelCatchBlock == false
                     && c.ActionContext == expectedActionContext;
 
                 exceptionHandlerMock.Verify(h => h.HandleAsync(

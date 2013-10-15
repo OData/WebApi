@@ -9,29 +9,114 @@ namespace System.Web.Http.ExceptionHandling
         [Fact]
         public void HttpBatchHandler_IsSpecifiedValue()
         {
-            // Arrange, Act & Assert
-            Assert.Equal("HttpBatchHandler", ExceptionCatchBlocks.HttpBatchHandler);
+            // Act
+            ExceptionContextCatchBlock catchBlock = ExceptionCatchBlocks.HttpBatchHandler;
+
+            // Assert
+            ExceptionContextCatchBlock expected =
+                new ExceptionContextCatchBlock("HttpBatchHandler", isTopLevel: false);
+            AssertEqual(expected, catchBlock);
+        }
+
+        [Fact]
+        public void HttpBatchHandler_IsSameInstance()
+        {
+            // Arrange
+            ExceptionContextCatchBlock first = ExceptionCatchBlocks.HttpBatchHandler;
+
+            // Act
+            ExceptionContextCatchBlock second = ExceptionCatchBlocks.HttpBatchHandler;
+
+            // Assert
+            Assert.Same(first, second);
         }
 
         [Fact]
         public void HttpControllerDispatcher_IsSpecifiedValue()
         {
-            // Arrange, Act & Assert
-            Assert.Equal("HttpControllerDispatcher", ExceptionCatchBlocks.HttpControllerDispatcher);
+            // Act
+            ExceptionContextCatchBlock catchBlock = ExceptionCatchBlocks.HttpControllerDispatcher;
+
+            // Assert
+            ExceptionContextCatchBlock expected =
+                new ExceptionContextCatchBlock("HttpControllerDispatcher", isTopLevel: false);
+            AssertEqual(expected, catchBlock);
+        }
+
+        [Fact]
+        public void HttpControllerDispatcher_IsSameInstance()
+        {
+            // Arrange
+            ExceptionContextCatchBlock first = ExceptionCatchBlocks.HttpControllerDispatcher;
+
+            // Act
+            ExceptionContextCatchBlock second = ExceptionCatchBlocks.HttpControllerDispatcher;
+
+            // Assert
+            Assert.Same(first, second);
         }
 
         [Fact]
         public void HttpServer_IsSpecifiedValue()
         {
-            // Arrange, Act & Assert
-            Assert.Equal("HttpServer", ExceptionCatchBlocks.HttpServer);
+            // Act
+            ExceptionContextCatchBlock catchBlock = ExceptionCatchBlocks.HttpServer;
+
+            // Assert
+            ExceptionContextCatchBlock expected =
+                new ExceptionContextCatchBlock("HttpServer", isTopLevel: true);
+            AssertEqual(expected, catchBlock);
+        }
+
+        [Fact]
+        public void HttpServer_IsSameInstance()
+        {
+            // Arrange
+            ExceptionContextCatchBlock first = ExceptionCatchBlocks.HttpServer;
+
+            // Act
+            ExceptionContextCatchBlock second = ExceptionCatchBlocks.HttpServer;
+
+            // Assert
+            Assert.Same(first, second);
         }
 
         [Fact]
         public void IExceptionFilter_IsSpecifiedValue()
         {
-            // Arrange, Act & Assert
-            Assert.Equal("IExceptionFilter", ExceptionCatchBlocks.IExceptionFilter);
+            // Act
+            ExceptionContextCatchBlock catchBlock = ExceptionCatchBlocks.IExceptionFilter;
+
+            // Assert
+            ExceptionContextCatchBlock expected =
+                new ExceptionContextCatchBlock("IExceptionFilter", isTopLevel: false);
+            AssertEqual(expected, catchBlock);
+        }
+
+        [Fact]
+        public void IExceptionFilter_IsSameInstance()
+        {
+            // Arrange
+            ExceptionContextCatchBlock first = ExceptionCatchBlocks.IExceptionFilter;
+
+            // Act
+            ExceptionContextCatchBlock second = ExceptionCatchBlocks.IExceptionFilter;
+
+            // Assert
+            Assert.Same(first, second);
+        }
+
+        private static void AssertEqual(ExceptionContextCatchBlock expected, ExceptionContextCatchBlock actual)
+        {
+            if (expected == null)
+            {
+                Assert.Null(actual);
+                return;
+            }
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected.Name, actual.Name);
+            Assert.Equal(expected.IsTopLevel, actual.IsTopLevel);
         }
     }
 }

@@ -28,9 +28,9 @@ namespace System.Web.Http.ExceptionHandling
         /// the call stack.
         /// </para>
         /// <para>
-        /// If the exception propagates when <see cref="ExceptionContext.IsTopLevelCatchBlock"/> is
+        /// If the exception propagates when <see cref="ExceptionContextCatchBlock.IsTopLevel"/> is
         /// <see langword="true"/>, the host will see the exception thrown. If the exception propagates when
-        /// <see cref="ExceptionContext.IsTopLevelCatchBlock"/> is <see langword="false"/>, another catch block within
+        /// <see cref="ExceptionContextCatchBlock.IsTopLevel"/> is <see langword="false"/>, another catch block within
         /// Web API will be the next to see the exception, and the exception handler will be called again to make a
         /// decision at that point.
         /// </para>

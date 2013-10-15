@@ -233,8 +233,8 @@ namespace System.Web.Http
 
                 Debug.Assert(exceptionInfo.SourceException != null);
 
-                ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException, request,
-                    ExceptionCatchBlocks.HttpServer, isTopLevelCatchBlock: true);
+                ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException,
+                    ExceptionCatchBlocks.HttpServer, request);
                 await ExceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
                     cancellationToken: cancellationToken);
                 HttpResponseMessage response = await ExceptionHandler.HandleAsync(exceptionContext,

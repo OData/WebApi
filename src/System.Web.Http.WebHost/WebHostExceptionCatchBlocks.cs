@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.WebHost.Routing;
 
 namespace System.Web.Http.WebHost
@@ -7,6 +8,15 @@ namespace System.Web.Http.WebHost
     /// <summary>Provides labels for catch blocks used within this assembly.</summary>
     public static class WebHostExceptionCatchBlocks
     {
+        private static readonly ExceptionContextCatchBlock _httpControllerHandlerBufferContent =
+            new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".BufferContent", isTopLevel: true);
+        private static readonly ExceptionContextCatchBlock _httpControllerHandlerBufferError =
+            new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".BufferError", isTopLevel: true);
+        private static readonly ExceptionContextCatchBlock _httpControllerHandlerStreamContent =
+            new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".StreamContent", isTopLevel: true);
+        private static readonly ExceptionContextCatchBlock _httpWebRoute =
+            new ExceptionContextCatchBlock(typeof(HttpWebRoute).Name, isTopLevel: true);
+
         /// <summary>
         /// Gets the label for the catch block in
         /// <see cref="HttpControllerHandler"/>.WriteBufferedResponseContentAsync.
@@ -15,9 +25,9 @@ namespace System.Web.Http.WebHost
         /// This catch block handles exceptions when writing the HttpContent under an IHostBufferPolicySelector that
         /// buffers.
         /// </remarks>
-        public static string HttpControllerHandlerWriteBufferedResponseContentAsync
+        public static ExceptionContextCatchBlock HttpControllerHandlerBufferContent
         {
-            get { return typeof(HttpControllerHandler).Name + ".WriteBufferedResponseContentAsync"; }
+            get { return _httpControllerHandlerBufferContent; }
         }
 
         /// <summary>
@@ -25,11 +35,11 @@ namespace System.Web.Http.WebHost
         /// </summary>
         /// <remarks>
         /// This catch block handles exceptions when writing the HttpContent of the error response itself (after
-        /// <see cref="HttpControllerHandlerWriteBufferedResponseContentAsync"/> or <see cref="HttpWebRoute"/>).
+        /// <see cref="HttpControllerHandlerBufferContent"/> or <see cref="HttpWebRoute"/>).
         /// </remarks>
-        public static string HttpControllerHandlerWriteErrorResponseContentAsync
+        public static ExceptionContextCatchBlock HttpControllerHandlerBufferError
         {
-            get { return typeof(HttpControllerHandler).Name + ".WriteErrorResponseContentAsync"; }
+            get { return _httpControllerHandlerBufferError; }
         }
 
         /// <summary>
@@ -40,15 +50,15 @@ namespace System.Web.Http.WebHost
         /// This catch block handles exceptions when writing the HttpContent under an IHostBufferPolicySelector that
         /// does not buffer.
         /// </remarks>
-        public static string HttpControllerHandlerWriteStreamedResponseContentAsync
+        public static ExceptionContextCatchBlock HttpControllerHandlerStreamContent
         {
-            get { return typeof(HttpControllerHandler).Name + ".WriteStreamedResponseContentAsync"; }
+            get { return _httpControllerHandlerStreamContent; }
         }
 
         /// <summary>Gets the label for the catch block in <see cref="HttpWebRoute"/>.GetRouteData.</summary>
-        public static string HttpWebRoute
+        public static ExceptionContextCatchBlock HttpWebRoute
         {
-            get { return typeof(HttpWebRoute).Name; }
+            get { return _httpWebRoute; }
         }
     }
 }

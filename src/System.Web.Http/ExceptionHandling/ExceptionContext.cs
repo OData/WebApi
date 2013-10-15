@@ -19,14 +19,11 @@ namespace System.Web.Http.ExceptionHandling
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionContext"/> class using the values provided.
         /// </summary>
-        /// <param name="exception">The exception.</param>
+        /// <param name="exception">The exception caught.</param>
+        /// <param name="catchBlock">The catch block where the exception was caught.</param>
         /// <param name="actionContext">The action context in which the exception occurred.</param>
-        /// <param name="catchBlock">The label for the catch block where the exception was caught.</param>
-        /// <param name="isTopLevelCatchBlock">
-        /// A value indicating whether the catch block where the exception was caught is the last one before the host.
-        /// </param>
-        public ExceptionContext(Exception exception, HttpActionContext actionContext, string catchBlock,
-            bool isTopLevelCatchBlock)
+        public ExceptionContext(Exception exception, ExceptionContextCatchBlock catchBlock,
+            HttpActionContext actionContext)
         {
             if (exception == null)
             {
@@ -34,6 +31,13 @@ namespace System.Web.Http.ExceptionHandling
             }
 
             Exception = exception;
+
+            if (catchBlock == null)
+            {
+                throw new ArgumentNullException("catchBlock");
+            }
+
+            CatchBlock = catchBlock;
 
             if (actionContext == null)
             {
@@ -65,28 +69,15 @@ namespace System.Web.Http.ExceptionHandling
             }
 
             Request = request;
-
-            if (catchBlock == null)
-            {
-                throw new ArgumentNullException("catchBlock");
-            }
-
-            CatchBlock = catchBlock;
-
-            IsTopLevelCatchBlock = isTopLevelCatchBlock;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionContext"/> class using the values provided.
         /// </summary>
-        /// <param name="exception">The exception.</param>
+        /// <param name="exception">The exception caught.</param>
+        /// <param name="catchBlock">The catch block where the exception was caught.</param>
         /// <param name="request">The request being processed when the exception was caught.</param>
-        /// <param name="catchBlock">The label for the catch block where the exception was caught.</param>
-        /// <param name="isTopLevelCatchBlock">
-        /// A value indicating whether the catch block where the exception was caught is the last one before the host.
-        /// </param>
-        public ExceptionContext(Exception exception, HttpRequestMessage request, string catchBlock,
-            bool isTopLevelCatchBlock)
+        public ExceptionContext(Exception exception, ExceptionContextCatchBlock catchBlock, HttpRequestMessage request)
         {
             if (exception == null)
             {
@@ -94,6 +85,13 @@ namespace System.Web.Http.ExceptionHandling
             }
 
             Exception = exception;
+
+            if (catchBlock == null)
+            {
+                throw new ArgumentNullException("catchBlock");
+            }
+
+            CatchBlock = catchBlock;
 
             if (request == null)
             {
@@ -102,29 +100,17 @@ namespace System.Web.Http.ExceptionHandling
 
             Request = request;
             RequestContext = request.GetRequestContext();
-
-            if (catchBlock == null)
-            {
-                throw new ArgumentNullException("catchBlock");
-            }
-
-            CatchBlock = catchBlock;
-
-            IsTopLevelCatchBlock = isTopLevelCatchBlock;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionContext"/> class using the values provided.
         /// </summary>
-        /// <param name="exception">The exception.</param>
+        /// <param name="exception">The exception caught.</param>
+        /// <param name="catchBlock">The catch block where the exception was caught.</param>
         /// <param name="request">The request being processed when the exception was caught.</param>
         /// <param name="response">The repsonse being returned when the exception was caught.</param>
-        /// <param name="catchBlock">The label for the catch block where the exception was caught.</param>
-        /// <param name="isTopLevelCatchBlock">
-        /// A value indicating whether the catch block where the exception was caught is the last one before the host.
-        /// </param>
-        public ExceptionContext(Exception exception, HttpRequestMessage request, HttpResponseMessage response,
-            string catchBlock, bool isTopLevelCatchBlock)
+        public ExceptionContext(Exception exception, ExceptionContextCatchBlock catchBlock, HttpRequestMessage request,
+            HttpResponseMessage response)
         {
             if (exception == null)
             {
@@ -132,6 +118,13 @@ namespace System.Web.Http.ExceptionHandling
             }
 
             Exception = exception;
+
+            if (catchBlock == null)
+            {
+                throw new ArgumentNullException("catchBlock");
+            }
+
+            CatchBlock = catchBlock;
 
             if (request == null)
             {
@@ -147,31 +140,15 @@ namespace System.Web.Http.ExceptionHandling
             }
 
             Response = response;
-
-            if (catchBlock == null)
-            {
-                throw new ArgumentNullException("catchBlock");
-            }
-
-            CatchBlock = catchBlock;
-
-            IsTopLevelCatchBlock = isTopLevelCatchBlock;
         }
 
         /// <summary>Gets the exception caught.</summary>
         /// <remarks>The setter is for unit testing purposes only.</remarks>
         public Exception Exception { get; set; }
 
-        /// <summary>Gets the label for the catch block in which the exception was caught.</summary>
+        /// <summary>Gets the catch block in which the exception was caught.</summary>
         /// <remarks>The setter is for unit testing purposes only.</remarks>
-        public string CatchBlock { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the catch block where the exception was caught is the last one before the
-        /// host.
-        /// </summary>
-        /// <remarks>The setter is for unit testing purposes only.</remarks>
-        public bool IsTopLevelCatchBlock { get; set; }
+        public ExceptionContextCatchBlock CatchBlock { get; set; }
 
         /// <summary>Gets the request being processed when the exception was caught.</summary>
         /// <remarks>The setter is for unit testing purposes only.</remarks>

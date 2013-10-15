@@ -98,13 +98,13 @@ namespace System.Web.Http.ExceptionHandling
                 ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext
                 {
                     Exception = expectedException,
+                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = new HttpRequestContext
                     {
                         Configuration = configuration,
                         IncludeErrorDetail = includeDetail
                     },
-                    Request = expectedRequest,
-                    IsTopLevelCatchBlock = true
+                    Request = expectedRequest
                 });
 
                 CancellationToken cancellationToken = CancellationToken.None;
@@ -141,12 +141,12 @@ namespace System.Web.Http.ExceptionHandling
                 ExceptionContext context = new ExceptionContext
                 {
                     Exception = exception,
+                    CatchBlock = CreateNonTopLevelCatchBlock(),
                     RequestContext = new HttpRequestContext
                     {
                         Configuration = configuration
                     },
-                    Request = request,
-                    IsTopLevelCatchBlock = false
+                    Request = request
                 };
 
                 // More Arrange; then Act & Assert
@@ -176,12 +176,37 @@ namespace System.Web.Http.ExceptionHandling
                 ExceptionContext context = new ExceptionContext
                 {
                     Exception = exception,
+                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = new HttpRequestContext
                     {
                         Configuration = configuration
                     },
-                    Request = request,
-                    IsTopLevelCatchBlock = true
+                    Request = request
+                };
+
+                // More Arrange; then Act & Assert
+                TestHandleAsyncLeavesResultNull(context);
+            }
+        }
+
+        [Fact]
+        public void HandleAsync_IfCatchBlockIsNull_LeavesResultNull()
+        {
+            // Arrange
+            Exception exception = CreateDummyException();
+
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ExceptionContext context = new ExceptionContext
+                {
+                    Exception = exception,
+                    CatchBlock = null,
+                    RequestContext = new HttpRequestContext
+                    {
+                        Configuration = configuration
+                    },
+                    Request = request
                 };
 
                 // More Arrange; then Act & Assert
@@ -200,12 +225,12 @@ namespace System.Web.Http.ExceptionHandling
                 ExceptionContext context = new ExceptionContext
                 {
                     Exception = exception,
+                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = new HttpRequestContext
                     {
                         Configuration = configuration
                     },
-                    Request = null,
-                    IsTopLevelCatchBlock = true
+                    Request = null
                 };
 
                 // More Arrange; then Act & Assert
@@ -224,9 +249,9 @@ namespace System.Web.Http.ExceptionHandling
                 ExceptionContext context = new ExceptionContext
                 {
                     Exception = exception,
+                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = null,
-                    Request = request,
-                    IsTopLevelCatchBlock = true
+                    Request = request
                 };
 
                 // More Arrange; then Act & Assert
@@ -245,12 +270,12 @@ namespace System.Web.Http.ExceptionHandling
                 ExceptionContext context = new ExceptionContext
                 {
                     Exception = exception,
+                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = new HttpRequestContext
                     {
                         Configuration = null
                     },
-                    Request = request,
-                    IsTopLevelCatchBlock = true
+                    Request = request
                 };
 
                 // More Arrange; then Act & Assert
@@ -272,12 +297,12 @@ namespace System.Web.Http.ExceptionHandling
                 ExceptionContext context = new ExceptionContext
                 {
                     Exception = exception,
+                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = new HttpRequestContext
                     {
                         Configuration = configuration
                     },
-                    Request = request,
-                    IsTopLevelCatchBlock = true
+                    Request = request
                 };
 
                 // More Arrange; then Act & Assert
@@ -365,6 +390,11 @@ namespace System.Web.Http.ExceptionHandling
             return new Mock<IExceptionHandler>(MockBehavior.Strict).Object;
         }
 
+        private static ExceptionContextCatchBlock CreateNonTopLevelCatchBlock()
+        {
+            return new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevel: false);
+        }
+
         private static LastChanceExceptionHandler CreateProductUnderTest(IExceptionHandler innerHandler)
         {
             return new LastChanceExceptionHandler(innerHandler);
@@ -373,6 +403,11 @@ namespace System.Web.Http.ExceptionHandling
         private static HttpRequestMessage CreateRequest()
         {
             return new HttpRequestMessage();
+        }
+
+        private static ExceptionContextCatchBlock CreateTopLevelCatchBlock()
+        {
+            return new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevel: true);
         }
     }
 }

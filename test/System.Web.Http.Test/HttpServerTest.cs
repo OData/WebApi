@@ -415,7 +415,6 @@ namespace System.Web.Http
                     c != null
                     && c.Exception == expectedException
                     && c.CatchBlock == ExceptionCatchBlocks.HttpServer
-                    && c.IsTopLevelCatchBlock == true
                     && c.Request == expectedRequest;
 
                 exceptionLoggerMock.Verify(l => l.LogAsync(

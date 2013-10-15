@@ -67,7 +67,15 @@ namespace System.Web.Http.ExceptionHandling
             ExceptionContext exceptionContext = context.ExceptionContext;
             Contract.Assert(exceptionContext != null);
 
-            return exceptionContext.IsTopLevelCatchBlock;
+            ExceptionContextCatchBlock catchBlock = exceptionContext.CatchBlock;
+
+            if (catchBlock == null)
+            {
+                throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
+                    typeof(ExceptionContext), "CatchBlock"), "context");
+            }
+
+            return catchBlock.IsTopLevel;
         }
     }
 }

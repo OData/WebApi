@@ -83,6 +83,7 @@
     <Compile Include="Description\ResponseDescription.cs" />
     <Compile Include="EmptyReadOnlyDictionary.cs" />
     <Compile Include="ExceptionHandling\CompositeExceptionLogger.cs" />
+    <Compile Include="ExceptionHandling\ExceptionContextCatchBlock.cs" />
     <Compile Include="ExceptionHandling\ExceptionHandlerExtensions.cs" />
     <Compile Include="ExceptionHandling\ExceptionLogger.cs" />
     <Compile Include="ExceptionHandling\DefaultExceptionHandler.cs" />

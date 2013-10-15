@@ -99,8 +99,8 @@ namespace System.Web.Http.Batch
 
             Debug.Assert(exceptionInfo.SourceException != null);
 
-            ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException, request,
-                ExceptionCatchBlocks.HttpBatchHandler, isTopLevelCatchBlock: false);
+            ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException,
+                ExceptionCatchBlocks.HttpBatchHandler, request);
             await ExceptionLogger.LogAsync(exceptionContext, canBeHandled: true, cancellationToken: cancellationToken);
             HttpResponseMessage response = await ExceptionHandler.HandleAsync(exceptionContext, cancellationToken);
 

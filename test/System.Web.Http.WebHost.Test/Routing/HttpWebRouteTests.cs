@@ -50,12 +50,10 @@ namespace System.Web.Http.WebHost.Routing
                 // Assert
                 Assert.Same(expectedException, exception);
 
-                string expectedCatchBlock = WebHostExceptionCatchBlocks.HttpWebRoute;
                 Func<ExceptionContext, bool> exceptionContextMatches = (c) =>
                     c != null
                     && c.Exception == expectedException
-                    && c.CatchBlock == expectedCatchBlock
-                    && c.IsTopLevelCatchBlock == true
+                    && c.CatchBlock == WebHostExceptionCatchBlocks.HttpWebRoute
                     && c.Request == expectedRequest;
 
                 loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
@@ -169,23 +167,18 @@ namespace System.Web.Http.WebHost.Routing
                 product.GetRouteData(contextBase, logger, handler);
 
                 // Assert
-                string expectedOriginalCatchBlock = WebHostExceptionCatchBlocks.HttpWebRoute;
                 loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
                     c.CanBeHandled == true
                     && c.ExceptionContext != null
                     && c.ExceptionContext.Exception == expectedOriginalException
-                    && c.ExceptionContext.CatchBlock == expectedOriginalCatchBlock
-                    && c.ExceptionContext.IsTopLevelCatchBlock == true
+                    && c.ExceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpWebRoute
                     && c.ExceptionContext.Request == expectedRequest),
                     CancellationToken.None), Times.Once());
-                string expectedErrorCatchBlock =
-                    WebHostExceptionCatchBlocks.HttpControllerHandlerWriteErrorResponseContentAsync;
                 loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
                     c.CanBeHandled == false
                     && c.ExceptionContext != null
                     && c.ExceptionContext.Exception == expectedErrorException
-                    && c.ExceptionContext.CatchBlock == expectedErrorCatchBlock
-                    && c.ExceptionContext.IsTopLevelCatchBlock == true
+                    && c.ExceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpControllerHandlerBufferError
                     && c.ExceptionContext.Request == expectedRequest
                     && c.ExceptionContext.Response == expectedErrorResponse),
                     CancellationToken.None), Times.Once());

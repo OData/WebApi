@@ -37,7 +37,9 @@ namespace System.Web.Http.ExceptionHandling
                 ExceptionContext exceptionContext = context.ExceptionContext;
                 Contract.Assert(exceptionContext != null);
 
-                if (exceptionContext.IsTopLevelCatchBlock)
+                ExceptionContextCatchBlock catchBlock = exceptionContext.CatchBlock;
+
+                if (catchBlock != null && catchBlock.IsTopLevel)
                 {
                     context.Result = CreateDefaultLastChanceResult(exceptionContext);
                 }

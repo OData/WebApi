@@ -9,31 +9,39 @@ namespace System.Web.Http.ExceptionHandling
     /// <summary>Provides labels for catch blocks used within this assembly.</summary>
     public static class ExceptionCatchBlocks
     {
-        /// <summary>Gets the label for the catch block in <see cref="HttpBatchHandler"/>.SendAsync.</summary>
-        public static string HttpBatchHandler
+        private static readonly ExceptionContextCatchBlock _httpBatchHandler =
+            new ExceptionContextCatchBlock(typeof(HttpBatchHandler).Name, isTopLevel: false);
+        private static readonly ExceptionContextCatchBlock _httpControllerDispatcher =
+            new ExceptionContextCatchBlock(typeof(HttpControllerDispatcher).Name, isTopLevel: false);
+        private static readonly ExceptionContextCatchBlock _httpServer =
+            new ExceptionContextCatchBlock(typeof(HttpServer).Name, isTopLevel: true);
+        private static readonly ExceptionContextCatchBlock _exceptionFilter =
+            new ExceptionContextCatchBlock(typeof(IExceptionFilter).Name, isTopLevel: false);
+
+        /// <summary>Gets the catch block in <see cref="HttpBatchHandler"/>.SendAsync.</summary>
+        public static ExceptionContextCatchBlock HttpBatchHandler
         {
-            get { return typeof(HttpBatchHandler).Name; }
+            get { return _httpBatchHandler; }
         }
 
-        /// <summary>Gets the label for the catch block in <see cref="HttpControllerDispatcher"/>.SendAsync.</summary>
-        public static string HttpControllerDispatcher
+        /// <summary>Gets the catch block in <see cref="HttpControllerDispatcher"/>.SendAsync.</summary>
+        public static ExceptionContextCatchBlock HttpControllerDispatcher
         {
-            get { return typeof(HttpControllerDispatcher).Name; }
+            get { return _httpControllerDispatcher; }
         }
 
-        /// <summary>Gets the label for the catch block in <see cref="HttpServer"/>.SendAsync</summary>
-        public static string HttpServer
+        /// <summary>Gets the catch block in <see cref="HttpServer"/>.SendAsync</summary>
+        public static ExceptionContextCatchBlock HttpServer
         {
-            get { return typeof(HttpServer).Name; }
+            get { return _httpServer; }
         }
 
         /// <summary>
-        /// Gets the label for the catch block in <see cref="ApiController"/>.ExecuteAsync when using
-        /// <see cref="IExceptionFilter"/>.
+        /// Gets the catch block in <see cref="ApiController"/>.ExecuteAsync when using <see cref="IExceptionFilter"/>.
         /// </summary>
-        public static string IExceptionFilter
+        public static ExceptionContextCatchBlock IExceptionFilter
         {
-            get { return typeof(IExceptionFilter).Name; }
+            get { return _exceptionFilter; }
         }
     }
 }

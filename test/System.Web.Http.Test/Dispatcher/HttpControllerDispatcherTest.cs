@@ -225,7 +225,6 @@ namespace System.Web.Http.Dispatcher
                     c != null
                     && c.Exception == expectedException
                     && c.CatchBlock == ExceptionCatchBlocks.HttpControllerDispatcher
-                    && c.IsTopLevelCatchBlock == false
                     && c.Request == expectedRequest;
 
                 exceptionLoggerMock.Verify(l => l.LogAsync(

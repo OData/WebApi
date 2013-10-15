@@ -122,8 +122,8 @@ namespace System.Web.Http.Dispatcher
 
             Debug.Assert(exceptionInfo.SourceException != null);
 
-            ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException, request,
-                ExceptionCatchBlocks.HttpControllerDispatcher, isTopLevelCatchBlock: false);
+            ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException,
+                ExceptionCatchBlocks.HttpControllerDispatcher, request);
             await ExceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
                 cancellationToken: cancellationToken);
             HttpResponseMessage response = await ExceptionHandler.HandleAsync(exceptionContext, cancellationToken);

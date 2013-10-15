@@ -52,8 +52,10 @@ namespace System.Web.Http.WebHost
 
             if (exceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpWebRoute)
             {
-                // Override LastChanceExceptionHandler and propagate HttpWebRoute exceptions by default (for
-                // back-compat).
+                // LastChanceExceptionHandler will initialize Result so that top level exceptions return 500 by
+                // default. The HttpWebRoute catch block is new, so for back-compat we shouldn't handle exceptions
+                // there in the default handler. Override LastChanceExceptionHandler so that exceptions from
+                // HttpWebRoute will propagate.
                 context.Result = null;
                 return TaskHelpers.Completed();
             }
@@ -76,7 +78,12 @@ namespace System.Web.Http.WebHost
             Contract.Assert(exception != null);
 
             HttpRequestMessage request = exceptionContext.Request;
-            Contract.Assert(request != null);
+
+            if (request == null)
+            {
+                throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
+                    typeof(ExceptionContext).Name, "Request"), "context");
+            }
 
             HttpResponseMessage response = exceptionContext.Response;
 

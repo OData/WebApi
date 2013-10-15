@@ -261,6 +261,26 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
+        public void HandleAsync_IfCatchBlockIsWebHostBufferedContent_AndRequestIsNull_Throws()
+        {
+            IExceptionHandler innerHandler = CreateDummyHandler();
+            IExceptionHandler product = CreateProductUnderTest(innerHandler);
+
+            // Arrange
+            using (HttpResponseMessage response = CreateResponse())
+            {
+                ExceptionHandlerContext context = CreateValidContext(null,
+                    "HttpControllerHandler.WriteBufferedResponseContentAsync");
+                Assert.Null(context.ExceptionContext.Request); // Guard
+                CancellationToken cancellationToken = CancellationToken.None;
+
+                // Act & Assert
+                Assert.ThrowsArgument(() => product.HandleAsync(context, cancellationToken), "context",
+                    "ExceptionContext.Request must not be null.");
+            }
+        }
+
+        [Fact]
         public void HandleAsync_IfCatchBlockIsWebHostBufferedContent_AndResponseIsNull_Throws()
         {
             IExceptionHandler innerHandler = CreateDummyHandler();

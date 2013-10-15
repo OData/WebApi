@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.ExceptionHandling;
@@ -54,16 +55,9 @@ namespace System.Web.Http.WebHost.Routing
             return base.ProcessConstraint(httpContext, constraint, parameterName, values, routeDirection);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification = "Top-level catch block for unhandled routing exceptions.")]
         public override RouteData GetRouteData(HttpContextBase httpContext)
-        {
-            return GetRouteData(httpContext, HttpControllerHandler.ExceptionLogger,
-                HttpControllerHandler.ExceptionHandler);
-        }
-
-        [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask",
-            Justification = "Usage is fine here as it handles error case and that task finishes synchronously in the default code path anyways.")]
-        internal RouteData GetRouteData(HttpContextBase httpContext,
-            IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler)
         {
             try
             {
@@ -79,32 +73,13 @@ namespace System.Web.Http.WebHost.Routing
                     return data == null ? null : data.ToRouteData();
                 }
             }
-            catch (HttpResponseException e)
-            {
-                Task task = HttpControllerHandler.CopyResponseAsync(httpContext, httpContext.GetOrCreateHttpRequestMessage(), e.Response, CancellationToken.None);
-                // Task.Wait is fine here as ConvertResponse calls into MediaTypeFormatter.WriteToStreamAsync which happens
-                // synchronously in the default case (our default formatters are synchronous).
-                task.Wait();
-                httpContext.Response.End();
-                return null;
-            }
             catch (Exception exception)
             {
-                Task<bool> task = HttpControllerHandler.CopyErrorResponseAsync(
-                    WebHostExceptionCatchBlocks.HttpWebRoute, httpContext, httpContext.GetOrCreateHttpRequestMessage(),
-                    null, exception, CancellationToken.None, exceptionLogger, exceptionHandler);
-                // Unfortunately, Task.Wait (.Result) is required here since RouteBase.GetRouteData is synchronous.
-                bool handled = task.Result;
-
-                if (handled)
-                {
-                    httpContext.Response.End();
-                    return null;
-                }
-                else
-                {
-                    throw;
-                }
+                // Processing an exception involves async work, and this method is synchronous.
+                // Instead of waiting on the async work here, it's better to return a handler that will deal with the
+                // exception asynchronously during its request processing method.
+                ExceptionDispatchInfo exceptionInfo = ExceptionDispatchInfo.Capture(exception);
+                return new RouteData(this, new HttpRouteExceptionRouteHandler(exceptionInfo));
             }
         }
 

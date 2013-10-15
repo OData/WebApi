@@ -42,6 +42,8 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="Routing\HttpRouteExceptionHandler.cs" />
+    <Compile Include="Routing\HttpRouteExceptionRouteHandler.cs" />
     <Compile Include="WebHostExceptionCatchBlocks.cs" />
     <Compile Include="HttpBatchContextWrapper.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />

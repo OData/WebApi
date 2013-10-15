@@ -38,6 +38,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Routing\HttpRouteExceptionHandlerTests.cs" />
+    <Compile Include="Routing\HttpRouteExceptionRouteHandlerTests.cs" />
     <Compile Include="Routing\HttpWebRouteTests.cs" />
     <Compile Include="WebHostExceptionCatchBlocksTests.cs" />
     <Compile Include="WebHostExceptionHandlerTests.cs" />

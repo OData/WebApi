@@ -301,8 +301,8 @@ namespace System.Web.Http.WebHost
             // Copy the response content headers only after ensuring they are complete.
             // We ask for Content-Length first because HttpContent lazily computes this
             // and only afterwards writes the value into the content headers.
-            var unused = response.Content.Headers.ContentLength;
-            CopyHeaders(response.Content.Headers, httpContextBase);
+            var unused = responseContent.Headers.ContentLength;
+            CopyHeaders(responseContent.Headers, httpContextBase);
 
             // Select output buffering based on the user-controlled buffering policy
             bool isBuffered = _bufferPolicySelector.Value != null ? _bufferPolicySelector.Value.UseBufferedOutputStream(response) : true;

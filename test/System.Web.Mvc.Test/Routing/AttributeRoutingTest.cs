@@ -130,11 +130,7 @@ namespace System.Web.Routing
             MvcHandler handler = new MvcHandler(requestContext);
             handler.ControllerBuilder.SetControllerFactory(GetControllerFactory(controllerTypes));
 
-            // Act
-            // Bug 1285: Attribute routing with ambiguous actions should throw an AmbiguousMatchException.
-            // This test should fail once that is fixed. Uncomment the line below then.
-            // Assert.Throws<AmbiguousMatchException>(() => handler.ProcessRequest(context));
-            Assert.DoesNotThrow(() => handler.ProcessRequest(context));
+            Assert.Throws<AmbiguousMatchException>(() => handler.ProcessRequest(context));
         }
 
         [Theory]
@@ -155,6 +151,70 @@ namespace System.Web.Routing
             var routes = new RouteCollection();
             object defaults = new { controller = controllerType.Name.Substring(0, controllerType.Name.Length - 10) };
             routes.Add(new Route("standard/{action}", new RouteValueDictionary(defaults), null));
+            routes.MapMvcAttributeRoutes(controllerTypes);
+
+            HttpContextBase context = GetContext(path);
+            RouteData routeData = routes.GetRouteData(context);
+            RequestContext requestContext = new RequestContext(context, routeData);
+            MvcHandler handler = new MvcHandler(requestContext);
+            handler.ControllerBuilder.SetControllerFactory(GetControllerFactory(controllerTypes));
+
+            if (expectedAction == null)
+            {
+                // Act & Assert
+                Assert.Throws<HttpException>(() => handler.ProcessRequest(context));
+            }
+            else
+            {
+                // Act
+                handler.ProcessRequest(context);
+
+                // Assert
+                ContentResult result = Assert.IsType<ContentResult>(context.Items[ResultKey]);
+                Assert.Equal(expectedAction, result.Content);
+            }
+        }
+
+        [Theory]
+        [InlineData(typeof(ActionMethodSelectorsController), "~/Action1", "Action1(int)")]
+        [InlineData(typeof(ActionMethodSelectorsController), "~/DoesntRun", null)]
+        public void AttributeRouting_WithActionMethodSelectors(Type controllerType, string path, string expectedAction)
+        {
+            // Arrange
+            var controllerTypes = new[] { controllerType };
+            var routes = new RouteCollection();
+            routes.MapMvcAttributeRoutes(controllerTypes);
+
+            HttpContextBase context = GetContext(path);
+            RouteData routeData = routes.GetRouteData(context);
+            RequestContext requestContext = new RequestContext(context, routeData);
+            MvcHandler handler = new MvcHandler(requestContext);
+            handler.ControllerBuilder.SetControllerFactory(GetControllerFactory(controllerTypes));
+
+            if (expectedAction == null)
+            {
+                // Act & Assert
+                Assert.Throws<HttpException>(() => handler.ProcessRequest(context));
+            }
+            else
+            {
+                // Act
+                handler.ProcessRequest(context);
+
+                // Assert
+                ContentResult result = Assert.IsType<ContentResult>(context.Items[ResultKey]);
+                Assert.Equal(expectedAction, result.Content);
+            }
+        }
+
+        [Theory]
+        [InlineData(typeof(ActionNameSelectorsController), "~/SpecialName", "Action2()")]
+        [InlineData(typeof(ActionNameSelectorsController), "~/cool/AnotherSpecialName", "Action3()")]
+        public void AttributeRouting_WithActionNameSelectors(Type controllerType, string path, string expectedAction)
+        {
+            // Arrange
+            var controllerTypes = new[] { controllerType };
+            var routes = new RouteCollection();
             routes.MapMvcAttributeRoutes(controllerTypes);
 
             HttpContextBase context = GetContext(path);
@@ -201,6 +261,7 @@ namespace System.Web.Routing
             // mock HttpRequest
             Mock<HttpRequestBase> requestMock = new Mock<HttpRequestBase>();
             requestMock.Setup(request => request.Url).Returns(uri);
+            requestMock.Setup(request => request.HttpMethod).Returns("GET");
             requestMock.Setup(request => request.Form).Returns(new NameValueCollection());
             requestMock.Setup(request => request.ServerVariables).Returns(new NameValueCollection());
             requestMock.Setup(request => request.AppRelativeCurrentExecutionFilePath).Returns("~" + uri.AbsolutePath);
@@ -578,6 +639,98 @@ namespace System.Web.Routing
         public string GetWithRoute()
         {
             return "GetWithRoute";
+        }
+    }
+
+    [Route("{action}")]
+    public class ActionMethodSelectorsController : ResponseStoringController
+    {
+        public string Action1()
+        {
+            return "Action1()";
+        }
+
+        // This is a 'better' action than Action1() because it has a selector
+        [BoolActionMethodSelector(true)]
+        public string Action1(int id = 0)
+        {
+            return "Action1(int)";
+        }
+
+        // All ActionMethodSelectors need to return true
+        [BoolActionMethodSelector(true)]
+        [BoolActionMethodSelector(false)]
+        public string DoesntRun()
+        {
+            return "DoesntRun";
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple=true)]
+    public class BoolActionMethodSelectorAttribute : ActionMethodSelectorAttribute
+    {
+        public BoolActionMethodSelectorAttribute(bool value)
+        {
+            Value = value;
+        }
+
+        private bool Value
+        {
+            get;
+            set;
+        }
+
+        public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
+        {
+            return Value;
+        }
+    }
+
+    [Route("{action}")]
+    public class ActionNameSelectorsController : ResponseStoringController
+    {
+        [StringActionNameSelector("SpecialName")]
+        public string Action1()
+        {
+            return "Action1()";
+        }
+
+        // This is 'better' because it has an action selector also
+        [HttpGet]
+        [StringActionNameSelector("SpecialName")]
+        public string Action2()
+        {
+            return "Action2()";
+        }
+
+        [Route("cool/{action}")]
+        [StringActionNameSelector("AnotherSpecialName")]
+        public string Action3()
+        {
+            return "Action3()";
+        }
+    }
+
+    /// <summary>
+    /// A 'custom' implementation similar to ActionNameAttribute - using a custom attribute for tests
+    /// because ActionNameAttribute is special cased by the ActionDescriptor class.
+    /// </summary>
+    public class StringActionNameSelectorAttribute : ActionNameSelectorAttribute
+    {
+        public StringActionNameSelectorAttribute(string actionName)
+        {
+            ActionName = actionName;
+        }
+
+        private string ActionName
+        {
+            get;
+            set;
+        }
+
+        public override bool IsValidName(ControllerContext controllerContext, string actionName, MethodInfo methodInfo)
+        {
+            return String.Equals(actionName, ActionName, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

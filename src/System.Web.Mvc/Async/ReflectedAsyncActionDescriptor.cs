@@ -182,6 +182,11 @@ namespace System.Web.Mvc.Async
             return ActionDescriptorHelper.GetSelectors(AsyncMethodInfo);
         }
 
+        internal override ICollection<ActionNameSelector> GetNameSelectors()
+        {
+            return ActionDescriptorHelper.GetNameSelectors(AsyncMethodInfo);
+        }
+
         public override bool IsDefined(Type attributeType, bool inherit)
         {
             return ActionDescriptorHelper.IsDefined(AsyncMethodInfo, attributeType, inherit);

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -9,6 +10,8 @@ using System.Security.Principal;
 using System.Threading;
 using System.Web.Mvc.Filters;
 using System.Web.Mvc.Properties;
+using System.Web.Mvc.Routing;
+using System.Web.Routing;
 using Microsoft.Web.Infrastructure.DynamicValidationHelper;
 
 namespace System.Web.Mvc
@@ -86,8 +89,80 @@ namespace System.Web.Mvc
 
         protected virtual ActionDescriptor FindAction(ControllerContext controllerContext, ControllerDescriptor controllerDescriptor, string actionName)
         {
-            ActionDescriptor actionDescriptor = controllerDescriptor.FindAction(controllerContext, actionName);
-            return actionDescriptor;
+            Contract.Assert(controllerContext != null);
+            Contract.Assert(controllerContext.RouteData != null);
+            Contract.Assert(controllerDescriptor != null);
+
+            if (controllerContext.RouteData.HasDirectRouteMatch())
+            {
+                List<DirectRouteCandidate> candidates = GetDirectRouteCandidates(controllerContext);
+
+                DirectRouteCandidate bestCandidate = DirectRouteCandidate.SelectBestCandidate(candidates, controllerContext);
+                if (bestCandidate == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    // We need to stash the RouteData of the matched route into the context, so it can be
+                    // used for binding.
+                    controllerContext.RouteData = bestCandidate.RouteData;
+                    controllerContext.RequestContext.RouteData = bestCandidate.RouteData;
+                    return bestCandidate.ActionDescriptor;
+                }
+            }
+            else
+            {
+                ActionDescriptor actionDescriptor = controllerDescriptor.FindAction(controllerContext, actionName);
+                return actionDescriptor;
+            }
+        }
+
+        private static List<DirectRouteCandidate> GetDirectRouteCandidates(ControllerContext controllerContext)
+        {
+            Debug.Assert(controllerContext != null);
+            Debug.Assert(controllerContext.RouteData != null);
+
+            List<DirectRouteCandidate> candiates = new List<DirectRouteCandidate>();
+
+            RouteData routeData = controllerContext.RouteData;
+            foreach (var directRoute in routeData.GetDirectRouteMatches())
+            {
+                if (directRoute == null)
+                {
+                    continue;
+                }
+
+                ControllerDescriptor controllerDescriptor = directRoute.GetTargetControllerDescriptor();
+                if (controllerDescriptor == null)
+                {
+                    throw new InvalidOperationException(MvcResources.DirectRoute_MissingControllerDescriptor);
+                }
+
+                IEnumerable<ActionDescriptor> actionDescriptors = directRoute.GetTargetActionDescriptors();
+                if (actionDescriptors == null || !actionDescriptors.Any())
+                {
+                    throw new InvalidOperationException(MvcResources.DirectRoute_MissingActionDescriptors);
+                }
+
+                foreach (var actionDescriptor in actionDescriptors)
+                {
+                    if (actionDescriptor != null)
+                    {
+                        candiates.Add(new DirectRouteCandidate()
+                        {
+                            ActionDescriptor = actionDescriptor,
+                            ActionNameSelectors = actionDescriptor.GetNameSelectors(),
+                            ActionSelectors = actionDescriptor.GetSelectors(),
+                            Order = directRoute.GetOrder(),
+                            Precedence = directRoute.GetPrecedence(),
+                            RouteData = directRoute,
+                        });
+                    }
+                }
+            }
+
+            return candiates;
         }
 
         protected virtual FilterInfo GetFilters(ControllerContext controllerContext, ActionDescriptor actionDescriptor)
@@ -149,13 +224,16 @@ namespace System.Web.Mvc
             {
                 throw new ArgumentNullException("controllerContext");
             }
-            if (String.IsNullOrEmpty(actionName))
+
+            Contract.Assert(controllerContext.RouteData != null);
+            if (String.IsNullOrEmpty(actionName) && !controllerContext.RouteData.HasDirectRouteMatch())
             {
                 throw new ArgumentException(MvcResources.Common_NullOrEmpty, "actionName");
             }
 
             ControllerDescriptor controllerDescriptor = GetControllerDescriptor(controllerContext);
             ActionDescriptor actionDescriptor = FindAction(controllerContext, controllerDescriptor, actionName);
+
             if (actionDescriptor != null)
             {
                 FilterInfo filterInfo = GetFilters(controllerContext, actionDescriptor);

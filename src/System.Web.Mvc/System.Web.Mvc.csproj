@@ -117,6 +117,9 @@
     <Compile Include="..\Common\Routing\InlineRouteTemplateParser.cs">
       <Link>Routing\InlineRouteTemplateParser.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\SubRouteCollection.cs">
+      <Link>Routing\SubRouteCollection.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Routing\HttpRouteEntry.cs">
       <Link>Routing\RouteParsing\HttpRouteEntry.cs</Link>
     </Compile>
@@ -124,6 +127,7 @@
       <Link>Routing\RouteParsing\HttpRouteParser.cs</Link>
     </Compile>
     <Compile Include="ActionMethodSelectorBase.cs" />
+    <Compile Include="ActionNameSelector.cs" />
     <Compile Include="ControllerDescriptorExtensions.cs" />
     <Compile Include="Html\EnumHelper.cs" />
     <Compile Include="Properties\MvcResources.Designer.cs">
@@ -131,6 +135,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>MvcResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Routing\DirectRouteCandidate.cs" />
+    <Compile Include="Routing\IOrderedRouteInfoProvider.cs" />
+    <Compile Include="Routing\GenerationRoute.cs" />
+    <Compile Include="Routing\RouteBuilder2.cs" />
+    <Compile Include="Routing\RouteCollectionRoute.cs" />
     <Compile Include="Routing\RouteParsing\ParsedRoute.cs" />
     <Compile Include="..\Common\Routing\PathContentSegment.cs">
       <Link>Routing\RouteParsing\PathContentSegment.cs</Link>

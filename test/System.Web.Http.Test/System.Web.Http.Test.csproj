@@ -186,7 +186,6 @@
     </Compile>
     <Compile Include="Routing\GenerateRouteTest.cs" />
     <Compile Include="Routing\HttpDirectRouteTest.cs" />
-    <Compile Include="Routing\HttpParsedRouteTests.cs" />
     <Compile Include="Routing\HttpRouteBuilderTest.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />

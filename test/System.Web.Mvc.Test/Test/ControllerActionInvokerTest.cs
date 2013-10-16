@@ -9,6 +9,8 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading;
 using System.Web.Mvc.Filters;
+using System.Web.Routing;
+using System.Web.Routing.Test;
 using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 using Moq;
@@ -2330,6 +2332,119 @@ namespace System.Web.Mvc.Test
             Assert.Equal("abc123", customResult.ReturnValue);
         }
 
+        [Fact]
+        public void FindAction_MultipleMethodsSameActionOneWithRouteAttributeAndRouteWasMatched_ReturnsMethodWithRoutingAttribute()
+        {
+            // Arrange
+            Type controllerType = typeof(WithRoutingAttributeController);
+            ControllerDescriptor controllerDescriptor = new ReflectedControllerDescriptor(controllerType);
+
+            var context = new ControllerContext();
+            context.RouteData = new RouteData();
+            context.RouteData.Route = DirectRouteTestHelpers.BuildDirectRouteFromMethod<WithRoutingAttributeController>(c => c.Action());
+            context.RouteData.AddDirectRouteMatches();
+
+            var actionInvoker = new ControllerActionInvokerHelper();
+
+            // Act
+            ActionDescriptor actionDescriptor = actionInvoker.PublicFindAction(context, controllerDescriptor, actionName: null);
+
+            var matchedMethod = ((ReflectedActionDescriptor)actionDescriptor).MethodInfo;
+
+            // Assert
+            Assert.Equal(typeof(WithRoutingAttributeController).GetMethod("Action"), matchedMethod);
+        }
+
+        [Fact]
+        public void FindAction_ControllerLevelDirectRoute_FindsMatch()
+        {
+            // Arrange
+            Type controllerType = typeof(AttributeRoutingOnTheController);
+            ControllerDescriptor controllerDescriptor = new ReflectedControllerDescriptor(controllerType);
+
+            var context = new ControllerContext();
+            context.RouteData = new RouteData();
+            context.RouteData.Route = DirectRouteTestHelpers.BuildDirectRouteFromController<AttributeRoutingOnTheController>();
+
+            // Simulate a match that binds the action parameter
+            context.RouteData.AddDirectRouteMatches((r, rd) => { rd.Values.Add("action", "Action1"); return true; });
+
+            ControllerActionInvokerHelper invoker = new ControllerActionInvokerHelper();
+
+            // Act
+            ActionDescriptor actionDescriptor = invoker.PublicFindAction(context, controllerDescriptor, actionName: null);
+
+            var matchedMethod = ((ReflectedActionDescriptor)actionDescriptor).MethodInfo;
+
+            // Assert
+            Assert.Equal(typeof(AttributeRoutingOnTheController).GetMethod("Action1"), matchedMethod);
+        }
+
+        [Fact]
+        public void FindAction_ControllerLevelDirectRoute_NoMatch()
+        {
+            // Arrange
+            Type controllerType = typeof(AttributeRoutingOnTheController);
+            ControllerDescriptor controllerDescriptor = new ReflectedControllerDescriptor(controllerType);
+
+            var context = new ControllerContext();
+            context.RouteData = new RouteData();
+            context.RouteData.Route = DirectRouteTestHelpers.BuildDirectRouteFromController<AttributeRoutingOnTheController>();
+
+            // Simulate a match that binds the action parameter
+            context.RouteData.AddDirectRouteMatches((r, rd) => { rd.Values.Add("action", "Action3"); return true; });
+
+            ControllerActionInvokerHelper invoker = new ControllerActionInvokerHelper();
+
+            // Act
+            ActionDescriptor actionDescriptor = invoker.PublicFindAction(context, controllerDescriptor, actionName: null);
+
+            // Assert
+            Assert.Null(actionDescriptor);
+        }
+
+        [Fact]
+        public void FindAction_ControllerLevelDirectRoute_AmbiguousMatch()
+        {
+            // Arrange
+            Type controllerType = typeof(AttributeRoutingOnTheController);
+            ControllerDescriptor controllerDescriptor = new ReflectedControllerDescriptor(controllerType);
+
+            var context = new ControllerContext();
+            context.RouteData = new RouteData();
+            context.RouteData.Route = DirectRouteTestHelpers.BuildDirectRouteFromController<AttributeRoutingOnTheController>();
+
+            // Simulate a match that binds the action parameter
+            context.RouteData.AddDirectRouteMatches((r, rd) => { rd.Values.Add("action", "Action2"); return true; });
+
+            ControllerActionInvokerHelper invoker = new ControllerActionInvokerHelper();
+
+            // Act & Assert
+            Assert.Throws<AmbiguousMatchException>(() => invoker.PublicFindAction(context, controllerDescriptor, actionName: null));
+        }
+
+        [Fact]
+        public void FindActionMethod_MultipleMethodsSameActionOneWithRouteAttributeAndRouteWasMatched_ReturnsMethodWithRoutingAttribute()
+        {
+            // Arrange
+            Type controllerType = typeof(WithRoutingAttributeController);
+            ControllerDescriptor controllerDescriptor = new ReflectedControllerDescriptor(controllerType);
+
+            var context = new ControllerContext();
+            context.RouteData = new RouteData();
+            context.RouteData.Route = DirectRouteTestHelpers.BuildDirectRouteFromMethod<WithRoutingAttributeController>(c => c.Action());
+            context.RouteData.AddDirectRouteMatches();
+
+            ControllerActionInvokerHelper invoker = new ControllerActionInvokerHelper();
+
+            // Act
+            ActionDescriptor actionDescriptor = invoker.PublicFindAction(context, controllerDescriptor, actionName: null);
+            MethodInfo matchedMethod = ((ReflectedActionDescriptor)actionDescriptor).MethodInfo;
+
+            // Assert
+            Assert.Equal("Action", matchedMethod.Name);
+        }
+
         private static ControllerContext GetControllerContext(ControllerBase controller)
         {
             return GetControllerContext(controller, null);
@@ -2970,6 +3085,51 @@ namespace System.Web.Mvc.Test
                     Thread.CurrentPrincipal = _originalPrincipal;
                     _disposed = true;
                 }
+            }
+        }
+
+        private class WithRoutingAttributeController : Controller
+        {
+            [Route("route")]
+            [ActionName("Action")] // to make things confusing
+            public void ActionWithoutRoute()
+            {
+            }
+
+            [Route("route")]
+            public void Action()
+            {
+            }
+        }
+
+        [Route("controller/{action}")]
+        private class AttributeRoutingOnTheController : Controller
+        {
+            public void Action1()
+            {
+            }
+
+            public void Action2()
+            {
+            }
+
+            public void Action2(string name)
+            {
+            }
+        }
+
+        private class MatchAttribute : ActionMethodSelectorAttribute
+        {
+            private bool _match;
+
+            public MatchAttribute(bool match)
+            {
+                _match = match;
+            }
+
+            public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
+            {
+                return _match;
             }
         }
     }

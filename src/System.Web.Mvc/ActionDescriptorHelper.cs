@@ -14,6 +14,13 @@ namespace System.Web.Mvc
             return selectors;
         }
 
+        public static ICollection<ActionNameSelector> GetNameSelectors(MethodInfo methodInfo)
+        {
+            ActionNameSelectorAttribute[] attrs = (ActionNameSelectorAttribute[])methodInfo.GetCustomAttributes(typeof(ActionNameSelectorAttribute), inherit: true);
+            ActionNameSelector[] selectors = Array.ConvertAll(attrs, attr => (ActionNameSelector)((controllerContext, actionName) => attr.IsValidName(controllerContext, actionName, methodInfo)));
+            return selectors;
+        }
+
         public static bool IsDefined(MemberInfo methodInfo, Type attributeType, bool inherit)
         {
             return methodInfo.IsDefined(attributeType, inherit);

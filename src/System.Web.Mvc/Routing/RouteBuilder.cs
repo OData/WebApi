@@ -10,6 +10,7 @@ namespace System.Web.Mvc.Routing
     /// <summary>
     /// Builds <see cref="Route"/> instances based on route information.
     /// </summary>
+    [Obsolete("For internal insfructure only, do not use.")]
     public class RouteBuilder
     {
         /// <summary>
@@ -67,7 +68,7 @@ namespace System.Web.Mvc.Routing
             Type controllerType = controllerDescriptor.ControllerType;
 
             RouteValueDictionary dataTokens = new RouteValueDictionary();
-            dataTokens[RouteDataTokenKeys.DirectRouteToController] = controllerDescriptor;
+            dataTokens[RouteDataTokenKeys.DirectRouteController] = controllerDescriptor;
             if (areaName != null)
             {
                 dataTokens.Add(RouteDataTokenKeys.Area, areaName);
@@ -170,7 +171,6 @@ namespace System.Web.Mvc.Routing
                 DataTokens = dataTokens
             };
 
-            route.SetTargetActionMethod(targetMethod);
             return route;
         }
     }

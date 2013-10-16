@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Web.Mvc.Routing;
 using System.Web.Routing;
+using System.Web.Routing.Test;
 using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.Test
@@ -116,24 +117,6 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void FindActionMethod_MultipleMethodsSameActionOneWithRouteAttributeAndRouteWasMatched_ReturnsMethodWithRoutingAttribute()
-        {
-            // Arrange
-            Type controllerType = typeof(WithRoutingAttributeController);
-            ActionMethodSelector selector = new ActionMethodSelector(controllerType);
-
-            var context = new ControllerContext();
-            context.RouteData = new RouteData();
-            context.RouteData.Route = DirectRouteTestHelpers.BuildDirectRouteStubsFrom<WithRoutingAttributeController>(c => c.Action())[0];
-
-            // Act
-            MethodInfo matchedMethod = selector.FindActionMethod(context, "Action");
-
-            // Assert
-            Assert.Equal("Action", matchedMethod.Name);
-        }
-
-        [Fact]
         public void FindActionMethodReturnsNullIfNoMethodMatches()
         {
             // Arrange
@@ -142,6 +125,35 @@ namespace System.Web.Mvc.Test
 
             // Act
             MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "ZeroMatch");
+
+            // Assert
+            Assert.Null(matchedMethod);
+        }
+
+        [Fact]
+        public void FindActionMethod_IgnoresDirectRouteAttributedMethods()
+        {
+            // Arrange
+            Type controllerType = typeof(WithRoutingAttributeController);
+            ActionMethodSelector selector = new ActionMethodSelector(controllerType);
+
+            // Act
+            MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "Action");
+
+            // Assert
+            Assert.NotNull(matchedMethod);
+            Assert.Equal("Action", matchedMethod.Name);
+        }
+
+        [Fact]
+        public void FindActionMethod_IgnoresDirectRouteAttributedMethods_NoMatch()
+        {
+            // Arrange
+            Type controllerType = typeof(WithRoutingAttributeController);
+            ActionMethodSelector selector = new ActionMethodSelector(controllerType);
+
+            // Act
+            MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "DirectRouteOnly");
 
             // Assert
             Assert.Null(matchedMethod);
@@ -337,8 +349,12 @@ namespace System.Web.Mvc.Test
             {
             }
 
-            [Route("route")]
             public void Action()
+            {
+            }
+
+            [Route("routeonly")]
+            public void DirectRouteOnly()
             {
             }
         }

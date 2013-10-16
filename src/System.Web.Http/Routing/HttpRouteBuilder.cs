@@ -116,7 +116,7 @@ namespace System.Web.Http.Routing
             if (actions != null)
             {
                 route.DataTokens[RouteKeys.OrderDataTokenKey] = order;
-                route.DataTokens[RouteKeys.PrecedenceDataTokenKey] = route.ParsedRoute.GetPrecedence(constraints);
+                route.DataTokens[RouteKeys.PrecedenceDataTokenKey] = HttpRouteEntry.GetPrecedence(route.ParsedRoute, constraints);
                 route.DataTokens[RouteKeys.ActionsDataTokenKey] = actions.AsArray();
             }
             

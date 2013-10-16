@@ -132,6 +132,11 @@ namespace System.Web.Mvc
             return ActionDescriptorHelper.GetSelectors(MethodInfo);
         }
 
+        internal override ICollection<ActionNameSelector> GetNameSelectors()
+        {
+            return ActionDescriptorHelper.GetNameSelectors(MethodInfo);
+        }
+
         public override bool IsDefined(Type attributeType, bool inherit)
         {
             return ActionDescriptorHelper.IsDefined(MethodInfo, attributeType, inherit);

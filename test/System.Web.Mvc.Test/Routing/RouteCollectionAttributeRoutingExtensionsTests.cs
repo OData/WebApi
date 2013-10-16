@@ -22,38 +22,25 @@ namespace System.Web.Routing
             routes.MapMvcAttributeRoutes(controllerTypes);
 
             // Assert
-            var expectedResults = new List<Tuple<string, string, string[]>>
+            var expectedResults = new List<Tuple<string, string>>
              {
-                 new Tuple<string, string, string[]>("getme", "GetMe", new[] { "GET" }),
-                 new Tuple<string, string, string[]>("postme", "PostMe", new[] { "POST" }),
-                 new Tuple<string, string, string[]>("getorpostme", "GetOrPostMe", new[] { "GET", "POST" }),
-                 new Tuple<string, string, string[]>("routeme", "RouteMe", null),
-                 new Tuple<string, string, string[]>("once", "FoolMe", new[] { "GET" }),
-                 new Tuple<string, string, string[]>("twice", "FoolMe", new[] { "GET" }),
-                 new Tuple<string, string, string[]>("twice", "FoolMe", new[] { "GET" }),
+                 new Tuple<string, string>("getme", "GetMe"),
+                 new Tuple<string, string>("postme", "PostMe"),
+                 new Tuple<string, string>("getorpostme", "GetOrPostMe"),
+                 new Tuple<string, string>("routeme", "RouteMe"),
+                 new Tuple<string, string>("once", "FoolMe"),
+                 new Tuple<string, string>("twice", "FoolMe"),
+                 new Tuple<string, string>("twice", "FoolMe"),
              };
 
             foreach (var expected in expectedResults)
             {
                 var url = expected.Item1;
                 var methodName = expected.Item2;
-                var expectedHttpMethods = expected.Item3;
-                Route route = routes.Cast<Route>().Single(r => r.Url == url);
-                Assert.Equal(methodName, route.GetTargetActionMethod().Name);
-                var httpMethodConstraint = (HttpMethodConstraint)route.Constraints["httpMethod"];
-                if (expectedHttpMethods == null)
-                {
-                    Assert.Null(httpMethodConstraint);
-                }
-                else
-                {
-                    Assert.NotNull(httpMethodConstraint);
 
-                    var actualHttpMethods = httpMethodConstraint.AllowedMethods.ToArray();
-                    Array.Sort(expectedHttpMethods);
-                    Array.Sort(actualHttpMethods);
-                    Assert.Equal(expectedHttpMethods, actualHttpMethods);
-                }
+                var attributeRoutes = GetAttributeRoutes(routes);
+                Route route = attributeRoutes.Cast<Route>().Single(r => r.Url == url);
+                Assert.Equal(methodName, Assert.Single(route.GetTargetActionDescriptors()).ActionName);
             }
         }
 
@@ -68,8 +55,9 @@ namespace System.Web.Routing
             routes.MapMvcAttributeRoutes(controllerTypes, new FruitConstraintResolver());
 
             // Assert
-            Assert.Equal(1, routes.Count);
-            Route route = (Route)routes.Single();
+            var attributeRoutes = GetAttributeRoutes(routes);
+            Assert.Equal(1, attributeRoutes.Count);
+            Route route = (Route)attributeRoutes.Single();
 
             Assert.Equal("fruits/{apple}", route.Url);
             Assert.IsAssignableFrom<FruitConstraint>(route.Constraints["apple"]);
@@ -86,7 +74,8 @@ namespace System.Web.Routing
             routes.MapMvcAttributeRoutes(controllerTypes);
 
             // Assert
-            Route route = routes.Cast<Route>().Single(r => r.GetTargetActionMethod().Name == "Parameterized");
+            var attributeRoutes = GetAttributeRoutes(routes);
+            Route route = attributeRoutes.Cast<Route>().Single(r => r.GetTargetActionDescriptors().Single().ActionName == "Parameterized");
             Assert.NotNull(route);
 
             Assert.Equal("i/{have}/{id}/{defaultsto}/{name}", route.Url);
@@ -106,11 +95,12 @@ namespace System.Web.Routing
             routes.MapMvcAttributeRoutes(controllerTypes);
 
             // Assert
-            Assert.Equal(1, routes.Count);
+            var attributeRoutes = GetAttributeRoutes(routes);
+            Assert.Equal(1, attributeRoutes.Count);
 
-            Route route = (Route)routes.Single();
+            Route route = (Route)attributeRoutes.Single();
             Assert.Equal("prefpref/getme", route.Url);
-            Assert.Equal("GetMe", route.GetTargetActionMethod().Name);
+            Assert.Equal("GetMe", Assert.Single(route.GetTargetActionDescriptors()).ActionName);
         }
 
         [Fact]
@@ -137,14 +127,15 @@ namespace System.Web.Routing
 
 
             // Assert
-            Assert.Equal(1, routes.Count);
+            var attributeRoutes = GetAttributeRoutes(routes);
+            Assert.Equal(1, attributeRoutes.Count);
 
-            Route route = (Route)routes.Single();
+            Route route = (Route)attributeRoutes.Single();
 
             Assert.Equal("puget-sound/getme", route.Url);
             Assert.Equal("PugetSound", route.DataTokens["area"]);
             Assert.Equal(false, route.DataTokens["usenamespacefallback"]);
-            Assert.Equal("GetMe", route.GetTargetActionMethod().Name);
+            Assert.Equal("GetMe", Assert.Single(route.GetTargetActionDescriptors()).ActionName);
             Assert.Equal(typeof(PugetSoundController).Namespace, ((string[])route.DataTokens["namespaces"])[0]);
         }
 
@@ -158,16 +149,16 @@ namespace System.Web.Routing
             // Act
             routes.MapMvcAttributeRoutes(controllerTypes);
 
-
             // Assert
-            Assert.Equal(1, routes.Count);
+            var attributeRoutes = GetAttributeRoutes(routes);
+            Assert.Equal(1, attributeRoutes.Count);
 
-            Route route = (Route)routes.Single();
+            Route route = (Route)attributeRoutes.Single();
 
             Assert.Equal("puget-sound/prefpref/getme", route.Url);
             Assert.Equal("PugetSound", route.DataTokens["area"]);
             Assert.Equal(false, route.DataTokens["usenamespacefallback"]);
-            Assert.Equal("GetMe", route.GetTargetActionMethod().Name);
+            Assert.Equal("GetMe", Assert.Single(route.GetTargetActionDescriptors()).ActionName);
             Assert.Equal(typeof(PrefixedPugetSoundController).Namespace, ((string[])route.DataTokens["namespaces"])[0]);
         }
 
@@ -254,7 +245,7 @@ namespace System.Web.Routing
             {
                 throw new NotImplementedException();
             }
-            
+
             [HttpGet]
             [Route("once")]
             [Route("twice")]
@@ -402,6 +393,15 @@ namespace System.Web.Routing
 
                 throw new InvalidOperationException();
             }
+        }
+
+        private ICollection<Route> GetAttributeRoutes(RouteCollection routes)
+        {
+            string routeName = RouteCollectionAttributeRoutingExtensions.AttributeRouteName;
+            RouteCollectionRoute attributeRoute = routes[routeName] as RouteCollectionRoute;
+            Assert.NotNull(attributeRoute);
+
+            return attributeRoute.SubRoutes;
         }
     }
 }

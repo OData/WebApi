@@ -38,7 +38,7 @@ namespace System.Web.Mvc.Async
             get { return _allowLegacyAsyncActions; }
         }
 
-        private ActionDescriptorCreator GetActionDescriptorDelegate(MethodInfo entryMethod)
+        internal ActionDescriptorCreator GetActionDescriptorDelegate(MethodInfo entryMethod)
         {
             // Does the action return a Task?
             if (entryMethod.ReturnType != null && typeof(Task).IsAssignableFrom(entryMethod.ReturnType))

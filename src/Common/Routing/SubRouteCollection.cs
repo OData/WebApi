@@ -4,15 +4,35 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
-namespace System.Web.Http.Routing
-{
-    // Similar to HttpRouteCollection, but route name is optional.
-    internal class HttpSubRouteCollection : ICollection<IHttpRoute>
-    {
-        private readonly List<IHttpRoute> _collection = new List<IHttpRoute>();
-        private readonly IDictionary<string, IHttpRoute> _dictionary = new Dictionary<string, IHttpRoute>(StringComparer.OrdinalIgnoreCase);
+#if ASPNETWEBAPI
+using SubRouteType = System.Web.Http.Routing.IHttpRoute;
+#else
+using SubRouteType = System.Web.Routing.Route;
+#endif
 
-        public void Add(string name, IHttpRoute route)
+#if ASPNETWEBAPI
+namespace System.Web.Http.Routing
+#else
+namespace System.Web.Mvc.Routing
+#endif
+{
+    /// <summary>
+    /// This class is similar to HttpRouteCollection, but route name is optional.
+    /// </summary>
+    /// <remarks>
+    /// This is used in attribute routing, where we want to match multiple routes, and then later
+    /// disambiguate which one is best.
+    /// </remarks>
+#if ASPNETWEBAPI
+    internal class HttpSubRouteCollection : ICollection<SubRouteType>
+#else
+    internal class SubRouteCollection : ICollection<SubRouteType>
+#endif
+    {
+        private readonly List<SubRouteType> _collection = new List<SubRouteType>();
+        private readonly IDictionary<string, SubRouteType> _dictionary = new Dictionary<string, SubRouteType>(StringComparer.OrdinalIgnoreCase);
+
+        public void Add(string name, SubRouteType route)
         {
             Contract.Assert(route != null);
 
@@ -24,7 +44,7 @@ namespace System.Web.Http.Routing
             }
         }
 
-        public void Add(IHttpRoute item)
+        public void Add(SubRouteType item)
         {
             Contract.Assert(item != null);
             _collection.Add(item);
@@ -36,13 +56,13 @@ namespace System.Web.Http.Routing
             _dictionary.Clear();
         }
 
-        public bool Contains(IHttpRoute item)
+        public bool Contains(SubRouteType item)
         {
             Contract.Assert(item != null);
             return _collection.Contains(item);
         }
 
-        public void CopyTo(IHttpRoute[] array, int arrayIndex)
+        public void CopyTo(SubRouteType[] array, int arrayIndex)
         {
             _collection.CopyTo(array, arrayIndex);
         }
@@ -57,7 +77,7 @@ namespace System.Web.Http.Routing
             get { return false; }
         }
 
-        public bool Remove(IHttpRoute item)
+        public bool Remove(SubRouteType item)
         {
             Contract.Assert(item != null);
 
@@ -69,7 +89,7 @@ namespace System.Web.Http.Routing
             return _collection.Remove(item);
         }
 
-        public IEnumerator<IHttpRoute> GetEnumerator()
+        public IEnumerator<SubRouteType> GetEnumerator()
         {
             return _collection.GetEnumerator();
         }
@@ -79,17 +99,17 @@ namespace System.Web.Http.Routing
             return ((IEnumerable)_collection).GetEnumerator();
         }
 
-        public IHttpRoute this[int index]
+        public SubRouteType this[int index]
         {
             get { return _collection[index]; }
         }
 
-        public IHttpRoute this[string name]
+        public SubRouteType this[string name]
         {
             get { return _dictionary[name]; }
         }
 
-        public IEnumerable<KeyValuePair<string, IHttpRoute>> NamedRoutes
+        public IEnumerable<KeyValuePair<string, SubRouteType>> NamedRoutes
         {
             get { return _dictionary; }
         }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc.Routing;
 using System.Web.Routing;
 
@@ -8,6 +9,8 @@ namespace System.Web.Mvc
 {
     public static class RouteCollectionAttributeRoutingExtensions
     {
+        internal const string AttributeRouteName = "MS_AttributeRoute";
+
         /// <summary>
         /// Maps the attribute-defined routes for the application.
         /// </summary>
@@ -52,19 +55,26 @@ namespace System.Web.Mvc
         /// <param name="constraintResolver">The <see cref="IInlineConstraintResolver"/> to use for resolving inline constraints in route templates.</param>
         internal static void MapMvcAttributeRoutes(this RouteCollection routes, IEnumerable<Type> controllerTypes, IInlineConstraintResolver constraintResolver)
         {
-            List<RouteEntry> routeEntries = new AttributeRoutingMapper(new RouteBuilder(constraintResolver)).MapMvcAttributeRoutes(controllerTypes);
+            List<RouteEntry> routeEntries = new AttributeRoutingMapper(new RouteBuilder2(constraintResolver)).MapMvcAttributeRoutes(controllerTypes);
 
+            // This sort is here to enforce a static ordering for link generation using these routes. 
+            // We don't apply dynamic criteria like ActionSelectors on link generation, but we can use the static ones.
+            RouteEntry[] sorted = routeEntries.OrderBy(r => r.Route.GetOrder()).ThenBy(r => r.Route.GetPrecedence()).ToArray();
+
+            RouteCollectionRoute aggregateRoute = new RouteCollectionRoute();
             foreach (var routeEntry in routeEntries)
             {
-                string routeName = routeEntry.Name;
-                if (routeName == null)
+                aggregateRoute.SubRoutes.Add(routeEntry.Name, routeEntry.Route);
+
+                if (routeEntry.Name != null)
                 {
-                    routes.Add(routeEntry.Route);
+                    routes.Add(routeEntry.Name, new GenerationRoute(routeEntry.Name, routeEntry.Route));
                 }
-                else
-                {
-                    routes.Add(routeName, routeEntry.Route);
-                }
+            }
+
+            if (aggregateRoute.SubRoutes.Count > 0)
+            {
+                routes.Add(AttributeRouteName, aggregateRoute);
             }
         }
     }

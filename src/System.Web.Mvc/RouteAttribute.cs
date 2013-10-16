@@ -10,7 +10,7 @@ namespace System.Web.Mvc
     /// When placed on a controller, it applies to actions that do not have any <see cref="RouteAttribute"/>s on them.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-    public sealed class RouteAttribute : Attribute, IRouteInfoProvider
+    public sealed class RouteAttribute : Attribute, IOrderedRouteInfoProvider
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RouteAttribute" /> class.
@@ -34,6 +34,9 @@ namespace System.Web.Mvc
 
         /// <inheritdoc />
         public string Name { get; set; }
+
+        /// <inheritdoc />
+        public int Order { get; set; }
         
         /// <inheritdoc />
         public string Template { get; private set; }

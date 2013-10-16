@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Principal;
 using System.Threading;
 using System.Web.Mvc.Filters;
+using System.Web.Mvc.Routing;
 
 namespace System.Web.Mvc.Async
 {
@@ -23,7 +24,9 @@ namespace System.Web.Mvc.Async
             {
                 throw new ArgumentNullException("controllerContext");
             }
-            if (String.IsNullOrEmpty(actionName))
+
+            Contract.Assert(controllerContext.RouteData != null);
+            if (String.IsNullOrEmpty(actionName) && !controllerContext.RouteData.HasDirectRouteMatch())
             {
                 throw Error.ParameterCannotBeNullOrEmpty("actionName");
             }

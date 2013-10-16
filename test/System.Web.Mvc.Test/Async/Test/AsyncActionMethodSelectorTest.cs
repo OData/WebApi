@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Web.Mvc.Routing;
 using System.Web.Routing;
+using System.Web.Routing.Test;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -218,32 +219,12 @@ namespace System.Web.Mvc.Async.Test
         public void FindAction_NullContext_Throws()
         {
             // Arrange
-            Type controllerType = typeof(WithRoutingAttributeController);
+            Type controllerType = typeof(MethodLocatorController);
             AsyncActionMethodSelector selector = new AsyncActionMethodSelector(controllerType);
 
             // Act & Assert
             Assert.Throws<ArgumentNullException>(() => selector.FindAction(null, "Action"));
         }
-
-        [Fact]
-        public void FindAction_MultipleMethodsSameActionOneWithRouteAttributeAndRouteWasMatched_ReturnsMethodWithRoutingAttribute()
-        {
-            // Arrange
-            Type controllerType = typeof(WithRoutingAttributeController);
-            AsyncActionMethodSelector selector = new AsyncActionMethodSelector(controllerType);
-
-            var context = new ControllerContext();
-            context.RouteData = new RouteData();
-            context.RouteData.Route = DirectRouteTestHelpers.BuildDirectRouteStubsFrom<WithRoutingAttributeController>(c => c.Action())[0];
-
-            // Act
-            ActionDescriptor matchedAction = selector.FindAction(context, "Action")("Action", new ReflectedAsyncControllerDescriptor(controllerType));
-            var matchedMethod = ((ReflectedActionDescriptor)matchedAction).MethodInfo;
-
-            // Assert
-            Assert.Equal(context.RouteData.GetTargetActionMethod(), matchedMethod);
-        }
-
 
         [Fact]
         public void NonAliasedMethodsProperty()
@@ -405,20 +386,6 @@ namespace System.Web.Mvc.Async.Test
                 {
                     return _match;
                 }
-            }
-        }
-
-        private class WithRoutingAttributeController : Controller
-        {
-            [Route("route")]
-            [ActionName("Action")] // to make things confusing
-            public void ActionWithoutRoute()
-            {
-            }
-
-            [Route("route")]
-            public void Action()
-            {
             }
         }
     }

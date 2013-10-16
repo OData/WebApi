@@ -15,6 +15,7 @@ namespace System.Web.Mvc
         private static readonly ActionMethodDispatcherCache _staticDispatcherCache = new ActionMethodDispatcherCache();
 
         private static readonly ActionSelector[] _emptySelectors = new ActionSelector[0];
+        private static readonly ActionNameSelector[] _emptyNameSelectors = new ActionNameSelector[0];
         private string _uniqueId;
         private ActionMethodDispatcherCache _instanceDispatcherCache;
 
@@ -149,6 +150,12 @@ namespace System.Web.Mvc
         public virtual ICollection<ActionSelector> GetSelectors()
         {
             return _emptySelectors;
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method may perform non-trivial work.")]
+        internal virtual ICollection<ActionNameSelector> GetNameSelectors()
+        {
+            return _emptyNameSelectors;
         }
 
         public virtual bool IsDefined(Type attributeType, bool inherit)

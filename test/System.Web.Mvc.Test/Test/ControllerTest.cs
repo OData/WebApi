@@ -438,6 +438,19 @@ namespace System.Web.Mvc.Test
                 "A public action method 'UnknownAction' was not found on controller 'System.Web.Mvc.Test.ControllerTest+EmptyController'.");
         }
 
+        /// <summary>
+        /// This is a scenario for attribute routing, we don't have a single action nameat this point
+        /// </summary>
+        [Fact]
+        public void HandleUnknownAction_NoActionName_Throws()
+        {
+            var controller = new EmptyController();
+            Assert.Throws<HttpException>(
+                delegate { controller.HandleUnknownAction(null); },
+                "No matching action was found on controller 'System.Web.Mvc.Test.ControllerTest+EmptyController'. " +
+                "This can happen when a controller uses RouteAttribute for routing, but no action on that controller matches the request.");
+        }
+
         [Fact]
         public void JavaScript()
         {

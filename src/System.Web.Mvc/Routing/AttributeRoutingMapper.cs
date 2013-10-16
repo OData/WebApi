@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -14,9 +15,9 @@ namespace System.Web.Mvc.Routing
 {
     internal class AttributeRoutingMapper
     {
-        private readonly RouteBuilder _routeBuilder;
+        private readonly RouteBuilder2 _routeBuilder;
 
-        public AttributeRoutingMapper(RouteBuilder routeBuilder)
+        public AttributeRoutingMapper(RouteBuilder2 routeBuilder)
         {
             _routeBuilder = routeBuilder;
         }
@@ -37,8 +38,6 @@ namespace System.Web.Mvc.Routing
                 routeEntries.AddRange(MapMvcAttributeRoutes(controllerDescriptor));
             }
 
-            routeEntries.Sort();
-
             return routeEntries;
         }
 
@@ -53,8 +52,6 @@ namespace System.Web.Mvc.Routing
 
             ValidateAreaPrefixTemplate(areaPrefix, areaName, controllerDescriptor);
 
-            string controllerName = controllerDescriptor.ControllerName;
-
             AsyncActionMethodSelector actionSelector = controllerDescriptor.Selector;
             IEnumerable<MethodInfo> actionMethodsInfo = actionSelector.DirectRouteMethods;
 
@@ -63,44 +60,62 @@ namespace System.Web.Mvc.Routing
             foreach (var method in actionMethodsInfo)
             {
                 string actionName = actionSelector.GetActionName(method);
-                IEnumerable<IRouteInfoProvider> routeAttributes = GetRouteAttributes(method, controllerDescriptor.ControllerType);
+                ActionDescriptorCreator creator = actionSelector.GetActionDescriptorDelegate(method);
+                Debug.Assert(creator != null);
 
-                IEnumerable<string> verbs = GetActionVerbs(method);
+                ActionDescriptor actionDescriptor = creator(actionName, controllerDescriptor);
+
+                IEnumerable<IRouteInfoProvider> routeAttributes = GetRouteAttributes(method, controllerDescriptor.ControllerType);
 
                 foreach (var routeAttribute in routeAttributes)
                 {
                     ValidateTemplate(routeAttribute.Template, actionName, controllerDescriptor);
 
                     string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.Template);
-                    Route route = _routeBuilder.BuildDirectRoute(template, verbs, controllerName,
-                                                                    actionName, method, areaName);
+                    Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute, controllerDescriptor, actionDescriptor);
+
                     RouteEntry entry = new RouteEntry
                     {
                         Name = routeAttribute.Name,
                         Route = route,
                         Template = template,
-                        ParsedRoute = RouteParser.Parse(route.Url), 
-                        HasVerbs = verbs.Any()
                     };
-                    routeEntries.Add(entry);                    
+
+                    routeEntries.Add(entry);
                 }
             }
 
             // Check for controller-level routes. 
             IEnumerable<IRouteInfoProvider> controllerRouteAttributes = controllerDescriptor.GetDirectRoutes();
-            foreach (var routeAttribute in controllerRouteAttributes)
-            {               
-                string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.Template);
 
-                Route route = _routeBuilder.BuildDirectRoute(template, controllerDescriptor);
-                RouteEntry entry = new RouteEntry
+            List<ActionDescriptor> actions = new List<ActionDescriptor>();
+            foreach (var actionMethod in actionSelector.StandardRouteMethods)
+            {
+                string actionName = actionSelector.GetActionName(actionMethod);
+                ActionDescriptorCreator creator = actionSelector.GetActionDescriptorDelegate(actionMethod);
+                Debug.Assert(creator != null);
+
+                ActionDescriptor actionDescriptor = creator(actionName, controllerDescriptor);
+                actions.Add(actionDescriptor);
+            }
+
+            // Don't create a route for the controller-level attributes if no actions could possibly match
+            if (actions.Any())
+            {
+                foreach (var routeAttribute in controllerRouteAttributes)
                 {
-                    Name = routeAttribute.Name,
-                    Route = route,
-                    Template = template,
-                    ParsedRoute = RouteParser.Parse(route.Url)
-                };
-                routeEntries.Add(entry);     
+                    string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.Template);
+
+                    Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute, controllerDescriptor, actions);
+                    RouteEntry entry = new RouteEntry
+                    {
+                        Name = routeAttribute.Name,
+                        Route = route,
+                        Template = template,
+                    };
+
+                    routeEntries.Add(entry);
+                }
             }
 
             return routeEntries;
@@ -193,43 +208,6 @@ namespace System.Web.Mvc.Routing
             }
 
             return templateBuilder.ToString();
-        }
-
-        // return list of verbs on the method.
-        private static IEnumerable<string> GetActionVerbs(MethodInfo method)
-        {
-            var list = new List<string>();
-
-            IEnumerable<AcceptVerbsAttribute> verbAttributes = method.GetCustomAttributes<AcceptVerbsAttribute>();
-            foreach (AcceptVerbsAttribute verbAttribute in verbAttributes)
-            {
-                foreach (var verb in verbAttribute.Verbs)
-                {                    
-                    list.Add(verb);
-                }
-            }
-            AddActionVerbForAttribute<HttpDeleteAttribute>(method, "DELETE", list);
-            AddActionVerbForAttribute<HttpGetAttribute>(method, "GET", list);
-            AddActionVerbForAttribute<HttpHeadAttribute>(method, "HEAD", list);
-            AddActionVerbForAttribute<HttpOptionsAttribute>(method, "OPTIONS", list);
-            AddActionVerbForAttribute<HttpPatchAttribute>(method, "PATCH", list);
-            AddActionVerbForAttribute<HttpPostAttribute>(method, "POST", list);
-            AddActionVerbForAttribute<HttpPutAttribute>(method, "PUT", list);
-            return list;
-        }
-
-        private static void AddActionVerbForAttribute<T>(MethodInfo method, string verb, List<string> verbs)
-            where T : Attribute
-        {
-            if (!verbs.Any(v => String.Equals(v, verb, StringComparison.OrdinalIgnoreCase)))
-            {
-                T attribute = method.GetCustomAttribute<T>();
-
-                if (attribute != null)
-                {
-                    verbs.Add(verb);
-                }
-            }
         }
     }
 }

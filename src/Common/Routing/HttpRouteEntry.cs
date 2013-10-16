@@ -9,8 +9,10 @@ using System.Linq;
 #if ASPNETWEBAPI
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using ParsedRouteType = System.Web.Http.Routing.HttpParsedRoute;
 #else
 using System.Web.Routing;
+using ParsedRouteType = System.Web.Mvc.Routing.ParsedRoute;
 #endif
 
 #if ASPNETWEBAPI
@@ -26,7 +28,7 @@ namespace System.Web.Mvc.Routing
 #if ASPNETWEBAPI
     internal class HttpRouteEntry
 #else
-    internal class RouteEntry : IComparable<RouteEntry>
+    internal class RouteEntry
 #endif
     {
 #if ASPNETWEBAPI
@@ -43,95 +45,12 @@ namespace System.Web.Mvc.Routing
         }
 
         public HashSet<ReflectedHttpActionDescriptor> Actions { get; set; }
+        public int Order { get; set; }
 #else
         public Route Route { get; set; }
-        public ParsedRoute ParsedRoute { get; set; }
-        public bool HasVerbs { get; set; }
 #endif
         public string Name { get; set; }
         public string Template { get; set; }
-        public int Order { get; set; }
-
-#if !ASPNETWEBAPI
-        public int CompareTo(RouteEntry other)
-        {
-            Contract.Assert(other != null);            
-                        
-            if (Order > other.Order)
-            {
-                return 1;
-            }
-            else if (Order < other.Order)
-            {
-                return -1;
-            }
-
-            Route httpRoute1 = Route;
-            Route httpRoute2 = other.Route;
-
-            if (httpRoute1 != null && httpRoute2 != null)
-            {
-                int comparison = Compare(this, other);
-                if (comparison != 0)
-                {
-                    return comparison;
-                }
-            }
-
-            // Compare the route templates alphabetically to ensure the sort is stable and deterministic in almost all cases
-            return String.Compare(Template, other.Template, StringComparison.OrdinalIgnoreCase);
-        }
-#endif
-
-#if !ASPNETWEBAPI
-        // Default ordering goes through segments one by one and tries to apply an ordering
-        private static int Compare(RouteEntry entry1, RouteEntry entry2)
-        {
-            ParsedRoute parsedRoute1 = entry1.ParsedRoute;
-            ParsedRoute parsedRoute2 = entry2.ParsedRoute;
-
-            IList<PathContentSegment> segments1 = parsedRoute1.PathSegments.OfType<PathContentSegment>().ToArray();
-            IList<PathContentSegment> segments2 = parsedRoute2.PathSegments.OfType<PathContentSegment>().ToArray();
-
-            for (int i = 0; i < segments1.Count && i < segments2.Count; i++)
-            {
-                PathContentSegment segment1 = segments1[i];
-                PathContentSegment segment2 = segments2[i];
-
-                int order1 = GetPrecedenceDigit(segment1, entry1.Route.Constraints);
-                int order2 = GetPrecedenceDigit(segment2, entry2.Route.Constraints);
-
-                if (order1 > order2)
-                {
-                    return 1;
-                }
-                else if (order1 < order2)
-                {
-                    return -1;
-                }
-            }
-
-            // Routes with constraints should come before the unconstrained routes, lest the unconstrained
-            // routes claim too much. Method constraints are implemented as route constraints, so 
-            // if 2 routes are identical, place the one with method constraints first. 
-            if (entry1.HasVerbs)
-            {
-                if (entry2.HasVerbs)
-                {
-                    return 0;
-                }
-                return -1;
-            } 
-            else 
-            {
-                if (entry2.HasVerbs)
-                {
-                    return 1;
-                }
-                return 0;
-            }
-        }
-#endif
 
         // Segments have the following order:
         // 1 - Literal segments
@@ -168,6 +87,32 @@ namespace System.Web.Mvc.Routing
 
                 return order;
             }
+        }
+
+        public static decimal GetPrecedence(ParsedRouteType parsedRoute, IDictionary<string, object> constraints)
+        {
+            // Each precedence digit corresponds to one decimal place. For example, 3 segments with precedences 2, 1,
+            // and 4 results in a combined precedence of 2.14 (decimal).
+            IList<PathContentSegment> segments = parsedRoute.PathSegments.OfType<PathContentSegment>().ToArray();
+
+            decimal precedence = 0;
+            uint divisor = 1; // The first digit occupies the one's place.
+
+            for (int i = 0; i < segments.Count; i++)
+            {
+                PathContentSegment segment = segments[i];
+
+                int digit = GetPrecedenceDigit(segment, constraints);
+                Contract.Assert(digit >= 0 && digit < 10);
+
+                precedence = precedence + Decimal.Divide(digit, divisor);
+
+                // The next digit occupies the subsequent place (always after the decimal point and growing to the
+                // right).
+                divisor *= 10;
+            }
+
+            return precedence;
         }
     }
 }

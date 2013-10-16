@@ -271,6 +271,11 @@ namespace System.Web.Mvc.Async
             return ActionDescriptorHelper.GetSelectors(TaskMethodInfo);
         }
 
+        internal override ICollection<ActionNameSelector> GetNameSelectors()
+        {
+            return ActionDescriptorHelper.GetNameSelectors(TaskMethodInfo);
+        }
+
         public override bool IsDefined(Type attributeType, bool inherit)
         {
             return ActionDescriptorHelper.IsDefined(TaskMethodInfo, attributeType, inherit);

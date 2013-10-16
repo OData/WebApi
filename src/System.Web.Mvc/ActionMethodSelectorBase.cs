@@ -2,12 +2,14 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Mvc.Async;
 using System.Web.Mvc.Properties;
 using System.Web.Mvc.Routing;
 using System.Web.Routing;
@@ -17,13 +19,17 @@ namespace System.Web.Mvc
     // Common base class for Async and Sync action selectors
     internal abstract class ActionMethodSelectorBase
     {
-        protected void Initialize(Type controllerType)            
+        private static readonly MethodInfo[] _emptyMethodInfo = new MethodInfo[0];
+        private static readonly ILookup<string, MethodInfo> _emptyMethodInfoLookup = Enumerable.Empty<MethodInfo>().ToLookup(m => m.Name);
+
+        protected void Initialize(Type controllerType)
         {
             ControllerType = controllerType;
-            PopulateLookupTables();
 
             // If controller type has a RouteAttribute, then standard routes can't reach it.             
             _hasRouteAttributeOnController = controllerType.GetCustomAttributes(typeof(IRouteInfoProvider), inherit: false).Any();
+
+            PopulateLookupTables();
         }
 
         private bool _hasRouteAttributeOnController;
@@ -34,7 +40,16 @@ namespace System.Web.Mvc
 
         public ILookup<string, MethodInfo> NonAliasedMethods { get; private set; }
 
+        /// <summary>
+        /// Methods with some form of IRouteInfoProvider decorating them directly.
+        /// </summary>
         public MethodInfo[] DirectRouteMethods { get; private set; }
+
+        /// <summary>
+        /// Methods with no IRouteInfoProvider decorating them directly. This set includes action methods in a controller 
+        /// with RouteAttribute but where the method does not have a RouteAttribute.
+        /// </summary>
+        public MethodInfo[] StandardRouteMethods { get; private set; }
 
         protected AmbiguousMatchException CreateAmbiguousActionMatchException(IEnumerable<MethodInfo> ambiguousMethods, string actionName)
         {
@@ -90,7 +105,7 @@ namespace System.Web.Mvc
             string methodName = methodInfo.Name;
             return methodName;
         }
-                
+
         // Does this method have any direct routes on it?
         // This does not include a route attribute on the controller itself.
         private bool HasDirectRoutes(MethodInfo method)
@@ -106,10 +121,21 @@ namespace System.Web.Mvc
             MethodInfo[] allMethods = ControllerType.GetMethods(BindingFlags.InvokeMethod | BindingFlags.Instance | BindingFlags.Public);
             MethodInfo[] actionMethods = Array.FindAll(allMethods, IsValidActionMethodNoDirectRoute);
 
-            AliasedMethods = Array.FindAll(actionMethods, IsMethodDecoratedWithAliasingAttribute);
-            NonAliasedMethods = actionMethods.Except(AliasedMethods).ToLookup(GetCanonicalMethodName, StringComparer.OrdinalIgnoreCase);
+            if (_hasRouteAttributeOnController)
+            {
+                // Short circuit these tables when there's a direct route attribute on the controller, none of these
+                // will be reachable by-name.
+                AliasedMethods = _emptyMethodInfo;
+                NonAliasedMethods = _emptyMethodInfoLookup;
+            }
+            else
+            {
+                AliasedMethods = Array.FindAll(actionMethods, IsMethodDecoratedWithAliasingAttribute);
+                NonAliasedMethods = actionMethods.Except(AliasedMethods).ToLookup(GetCanonicalMethodName, StringComparer.OrdinalIgnoreCase);
+            }
 
             DirectRouteMethods = Array.FindAll(allMethods, IsValidActionMethodWithDirectRoute);
+            StandardRouteMethods = actionMethods;
         }
 
         protected List<MethodInfo> FindActionMethods(ControllerContext controllerContext, string actionName)
@@ -226,7 +252,7 @@ namespace System.Web.Mvc
 
             return GetCanonicalMethodName(methodInfo);
         }
-        
+
         public MethodInfo FindActionMethod(ControllerContext controllerContext, string actionName)
         {
             if (controllerContext == null)
@@ -234,32 +260,9 @@ namespace System.Web.Mvc
                 throw Error.ArgumentNull("controllerContext");
             }
 
-            RouteData routeData = controllerContext.RouteData;
-
-            if (routeData != null)
+            if (actionName == null)
             {
-                MethodInfo target = routeData.GetTargetActionMethod();
-                if (target != null)
-                {
-                    // short circuit the selection process if we matched a direct route that already supplies the method. 
-                    return target;
-                }
-            }
-
-            // If this controller has a Route attribute, then its actions can't be reached by standard routes. 
-            if (_hasRouteAttributeOnController)
-            {
-                if (routeData == null)
-                {
-                    return null;
-                }
-                ControllerDescriptor descriptor = routeData.GetTargetControllerDescriptor();
-
-                if (descriptor == null)
-                {
-                    // Missing descriptor. It's a standard route. Can't reach actions. 
-                    return null;
-                }
+                throw Error.ArgumentNull("actionName");
             }
 
             List<MethodInfo> finalMethods = FindActionMethods(controllerContext, actionName);

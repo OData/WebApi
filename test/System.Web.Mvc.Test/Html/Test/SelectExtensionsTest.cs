@@ -706,6 +706,48 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        public void DropDownListForUsesLambdaDefaultValue()
+        {
+            // Arrange
+            HtmlHelper<FooModel> helper = MvcHelper.GetHtmlHelper(_dropDownListViewData);
+            SelectList selectList = new SelectList(MultiSelectListTest.GetSampleStrings());
+
+            // Act
+            MvcHtmlString html = helper.DropDownListFor(m => m.foo, selectList);
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"foo\" name=\"foo\"><option>Alpha</option>" + Environment.NewLine
+              + "<option selected=\"selected\">Bravo</option>" + Environment.NewLine
+              + "<option>Charlie</option>" + Environment.NewLine
+              + "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void DropDownListForUsesLambdaDefaultValueWithNullSelectListUsesViewData()
+        {
+            // Arrange
+            FooModel model = new FooModel { foo = "Bravo" };
+            ViewDataDictionary<FooModel> vdd = new ViewDataDictionary<FooModel>(model)
+            {
+                { "foo", new SelectList(MultiSelectListTest.GetSampleStrings()) }
+            };
+            HtmlHelper<FooModel> helper = MvcHelper.GetHtmlHelper(vdd);
+
+            // Act
+            MvcHtmlString html = helper.DropDownListFor(m => m.foo, selectList: null);
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"foo\" name=\"foo\"><option>Alpha</option>" + Environment.NewLine
+              + "<option selected=\"selected\">Bravo</option>" + Environment.NewLine
+              + "<option>Charlie</option>" + Environment.NewLine
+              + "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
         public void DropDownListForWithAttributesDictionary()
         {
             // Arrange
@@ -1487,6 +1529,49 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        public void ListBoxForUsesLambdaDefaultValue()
+        {
+            // Arrange
+            FooArrayModel model = new FooArrayModel { foo = new[] { "Bravo" } };
+            HtmlHelper<FooArrayModel> helper = MvcHelper.GetHtmlHelper(new ViewDataDictionary<FooArrayModel>(model));
+            SelectList selectList = new SelectList(MultiSelectListTest.GetSampleStrings());
+
+            // Act
+            MvcHtmlString html = helper.ListBoxFor(m => m.foo, selectList);
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"foo\" multiple=\"multiple\" name=\"foo\"><option>Alpha</option>" + Environment.NewLine
+              + "<option selected=\"selected\">Bravo</option>" + Environment.NewLine
+              + "<option>Charlie</option>" + Environment.NewLine
+              + "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ListBoxForUsesLambdaDefaultValueWithNullSelectListUsesViewData()
+        {
+            // Arrange
+            FooArrayModel model = new FooArrayModel { foo = new[] { "Bravo" } };
+            ViewDataDictionary<FooArrayModel> vdd = new ViewDataDictionary<FooArrayModel>(model)
+            {
+                { "foo", new MultiSelectList(MultiSelectListTest.GetSampleStrings()) }
+            };
+            HtmlHelper<FooArrayModel> helper = MvcHelper.GetHtmlHelper(vdd);
+
+            // Act
+            MvcHtmlString html = helper.ListBoxFor(m => m.foo, selectList: null);
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"foo\" multiple=\"multiple\" name=\"foo\"><option>Alpha</option>" + Environment.NewLine
+              + "<option selected=\"selected\">Bravo</option>" + Environment.NewLine
+              + "<option>Charlie</option>" + Environment.NewLine
+              + "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
         public void ListBoxForWithErrors()
         {
             // Arrange
@@ -1819,6 +1904,11 @@ namespace System.Web.Mvc.Html.Test
         private class FooBarModel : FooModel
         {
             public string bar { get; set; }
+        }
+
+        private class FooArrayModel
+        {
+            public string[] foo { get; set; }
         }
 
         private class NonIEnumerableModel

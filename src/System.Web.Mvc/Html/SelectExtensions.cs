@@ -265,9 +265,16 @@ namespace System.Web.Mvc.Html
 
             // If we haven't already used ViewData to get the entire list of items then we need to
             // use the ViewData-supplied value before using the parameter-supplied value.
-            if (!usedViewData && defaultValue == null && !String.IsNullOrEmpty(name))
+            if (defaultValue == null && !String.IsNullOrEmpty(name))
             {
-                defaultValue = htmlHelper.ViewData.Eval(name);
+                if (!usedViewData)
+                {
+                    defaultValue = htmlHelper.ViewData.Eval(name);
+                }
+                else if (metadata != null)
+                {
+                    defaultValue = metadata.Model;
+                }
             }
 
             if (defaultValue != null)

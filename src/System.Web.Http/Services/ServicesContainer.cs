@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Controllers
@@ -11,6 +12,20 @@ namespace System.Web.Http.Controllers
     // It facilitates sharing all the mutation operations between them.
     public abstract class ServicesContainer : IDisposable
     {
+        // Wrapped/composite versions of the exception service interfaces designed for consumption in catch blocks.
+        // See ExceptionServices.GetLogger/Handler for how these internal services are used.
+        // These instances must be stored separately and not provided via GetService because existing stores for 
+        // GetService do not provide concurrency control and these two wrappers are potentially initialized late.
+        internal readonly Lazy<IExceptionLogger> ExceptionServicesLogger;
+        internal readonly Lazy<IExceptionHandler> ExceptionServicesHandler;
+
+        /// <summary>Initializes a new instance of the <see cref="ServicesContainer"/> class.</summary>
+        protected ServicesContainer()
+        {
+            ExceptionServicesLogger = new Lazy<IExceptionLogger>(CreateExceptionServicesLogger);
+            ExceptionServicesHandler = new Lazy<IExceptionHandler>(CreateExceptionServicesHandler);
+        }
+
         public abstract object GetService(Type serviceType);
         public abstract IEnumerable<object> GetServices(Type serviceType);
 
@@ -304,6 +319,16 @@ namespace System.Web.Http.Controllers
         [SuppressMessage("Microsoft.Usage", "CA1816:CallGCSuppressFinalizeCorrectly", Justification = "Although this class is not sealed, end users cannot set instances of it so in practice it is sealed.")]
         public virtual void Dispose()
         {
+        }
+
+        private IExceptionLogger CreateExceptionServicesLogger()
+        {
+            return ExceptionServices.CreateLogger(this);
+        }
+
+        private IExceptionHandler CreateExceptionServicesHandler()
+        {
+            return ExceptionServices.CreateHandler(this);
         }
     }
 }

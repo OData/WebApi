@@ -9,8 +9,6 @@ namespace System.Web.Http.ExceptionHandling
     /// <summary>Creates exception services to call logging and handling from catch blocks.</summary>
     public static class ExceptionServices
     {
-        private static object _lock = new object();
-
         /// <summary>Gets an exception logger that calls all registered logger services.</summary>
         /// <param name="configuration">The configuration.</param>
         /// <returns>A composite logger.</returns>
@@ -30,29 +28,16 @@ namespace System.Web.Http.ExceptionHandling
         {
             Contract.Assert(services != null);
 
-            CompositeExceptionLogger cached = services.GetCompositeExceptionLogger();
+            return services.ExceptionServicesLogger.Value;
+        }
 
-            if (cached != null)
-            {
-                return cached;
-            }
+        internal static IExceptionLogger CreateLogger(ServicesContainer services)
+        {
+            Contract.Assert(services != null);
 
-            lock (_lock)
-            {
-                CompositeExceptionLogger cachedAfterLock = services.GetCompositeExceptionLogger();
-
-                if (cachedAfterLock != null)
-                {
-                    return cachedAfterLock;
-                }
-
-                IEnumerable<IExceptionLogger> loggers = services.GetExceptionLoggers();
-                Contract.Assert(loggers != null);
-
-                CompositeExceptionLogger composite = new CompositeExceptionLogger(loggers);
-                services.Replace(typeof(CompositeExceptionLogger), composite);
-                return composite;
-            }
+            IEnumerable<IExceptionLogger> loggers = services.GetExceptionLoggers();
+            Contract.Assert(loggers != null);
+            return new CompositeExceptionLogger(loggers);
         }
 
         /// <summary>
@@ -80,27 +65,15 @@ namespace System.Web.Http.ExceptionHandling
         {
             Contract.Assert(services != null);
 
-            LastChanceExceptionHandler cached = services.GetLastChanceExceptionHandler();
+            return services.ExceptionServicesHandler.Value;
+        }
 
-            if (cached != null)
-            {
-                return cached;
-            }
+        internal static IExceptionHandler CreateHandler(ServicesContainer services)
+        {
+            Contract.Assert(services != null);
 
-            lock (_lock)
-            {
-                LastChanceExceptionHandler cachedAfterLock = services.GetLastChanceExceptionHandler();
-
-                if (cachedAfterLock != null)
-                {
-                    return cachedAfterLock;
-                }
-
-                IExceptionHandler innerHandler = services.GetExceptionHandler() ?? new EmptyExceptionHandler();
-                LastChanceExceptionHandler lastChance = new LastChanceExceptionHandler(innerHandler);
-                services.Replace(typeof(LastChanceExceptionHandler), lastChance);
-                return lastChance;
-            }
+            IExceptionHandler innerHandler = services.GetExceptionHandler() ?? new EmptyExceptionHandler();
+            return new LastChanceExceptionHandler(innerHandler);
         }
     }
 }

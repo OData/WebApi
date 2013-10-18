@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -217,9 +219,9 @@ namespace System.Web.WebPages.Html
 
             if (htmlAttributes != null)
             {
-                foreach (PropertyDescriptor property in TypeDescriptor.GetProperties(htmlAttributes))
+                foreach (PropertyHelper property in HtmlAttributePropertyHelper.GetProperties(htmlAttributes))
                 {
-                    result.Add(property.Name.Replace('_', '-'), property.GetValue(htmlAttributes));
+                    result.Add(property.Name, property.GetValue(htmlAttributes));
                 }
             }
 

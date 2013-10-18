@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Web.Mvc.Html;
 using System.Web.Mvc.Properties;
 using System.Web.Routing;
+using System.Web.WebPages;
 
 namespace System.Web.Mvc.Ajax
 {
@@ -52,7 +53,7 @@ namespace System.Web.Mvc.Ajax
 
         public static MvcHtmlString ActionLink(this AjaxHelper ajaxHelper, string linkText, string actionName, string controllerName, object routeValues, AjaxOptions ajaxOptions, object htmlAttributes)
         {
-            RouteValueDictionary newValues = new RouteValueDictionary(routeValues);
+            RouteValueDictionary newValues = TypeHelper.ObjectToDictionary(routeValues);
             RouteValueDictionary newAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
             return ActionLink(ajaxHelper, linkText, actionName, controllerName, newValues, ajaxOptions, newAttributes);
         }
@@ -76,7 +77,7 @@ namespace System.Web.Mvc.Ajax
 
         public static MvcHtmlString ActionLink(this AjaxHelper ajaxHelper, string linkText, string actionName, string controllerName, string protocol, string hostName, string fragment, object routeValues, AjaxOptions ajaxOptions, object htmlAttributes)
         {
-            RouteValueDictionary newValues = new RouteValueDictionary(routeValues);
+            RouteValueDictionary newValues = TypeHelper.ObjectToDictionary(routeValues);
             RouteValueDictionary newAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
             return ActionLink(ajaxHelper, linkText, actionName, controllerName, protocol, hostName, fragment, newValues, ajaxOptions, newAttributes);
         }

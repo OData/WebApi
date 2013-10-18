@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Web.Mvc.Properties;
 using System.Web.Routing;
+using System.Web.WebPages;
 
 namespace System.Web.Mvc.Html
 {
@@ -20,7 +21,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcHtmlString Action(this HtmlHelper htmlHelper, string actionName, object routeValues)
         {
-            return Action(htmlHelper, actionName, null /* controllerName */, new RouteValueDictionary(routeValues));
+            return Action(htmlHelper, actionName, null /* controllerName */, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         public static MvcHtmlString Action(this HtmlHelper htmlHelper, string actionName, RouteValueDictionary routeValues)
@@ -35,7 +36,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcHtmlString Action(this HtmlHelper htmlHelper, string actionName, string controllerName, object routeValues)
         {
-            return Action(htmlHelper, actionName, controllerName, new RouteValueDictionary(routeValues));
+            return Action(htmlHelper, actionName, controllerName, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         public static MvcHtmlString Action(this HtmlHelper htmlHelper, string actionName, string controllerName, RouteValueDictionary routeValues)
@@ -56,7 +57,7 @@ namespace System.Web.Mvc.Html
 
         public static void RenderAction(this HtmlHelper htmlHelper, string actionName, object routeValues)
         {
-            RenderAction(htmlHelper, actionName, null /* controllerName */, new RouteValueDictionary(routeValues));
+            RenderAction(htmlHelper, actionName, null /* controllerName */, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         public static void RenderAction(this HtmlHelper htmlHelper, string actionName, RouteValueDictionary routeValues)
@@ -71,7 +72,7 @@ namespace System.Web.Mvc.Html
 
         public static void RenderAction(this HtmlHelper htmlHelper, string actionName, string controllerName, object routeValues)
         {
-            RenderAction(htmlHelper, actionName, controllerName, new RouteValueDictionary(routeValues));
+            RenderAction(htmlHelper, actionName, controllerName, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         public static void RenderAction(this HtmlHelper htmlHelper, string actionName, string controllerName, RouteValueDictionary routeValues)

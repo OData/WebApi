@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Mvc.Routing;
 using System.Web.Routing;
+using System.Web.WebPages;
 
 namespace System.Web.Mvc
 {
@@ -122,7 +123,7 @@ namespace System.Web.Mvc
 
             IgnoreRouteInternal route = new IgnoreRouteInternal(url)
             {
-                Constraints = new RouteValueDictionary(constraints)
+                Constraints = CreateRouteValueDictionary(constraints)
             };
 
             routes.Add(route);
@@ -195,7 +196,7 @@ namespace System.Web.Mvc
                 return new RouteValueDictionary(dictionary);
             }
 
-            return new RouteValueDictionary(values);
+            return TypeHelper.ObjectToDictionary(values);
         }
 
         private sealed class IgnoreRouteInternal : Route

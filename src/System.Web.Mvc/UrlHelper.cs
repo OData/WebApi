@@ -51,7 +51,7 @@ namespace System.Web.Mvc
 
         public string Action(string actionName, object routeValues)
         {
-            return GenerateUrl(null /* routeName */, actionName, null /* controllerName */, new RouteValueDictionary(routeValues));
+            return GenerateUrl(null /* routeName */, actionName, null /* controllerName */, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         public string Action(string actionName, RouteValueDictionary routeValues)
@@ -66,7 +66,7 @@ namespace System.Web.Mvc
 
         public string Action(string actionName, string controllerName, object routeValues)
         {
-            return GenerateUrl(null /* routeName */, actionName, controllerName, new RouteValueDictionary(routeValues));
+            return GenerateUrl(null /* routeName */, actionName, controllerName, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         public string Action(string actionName, string controllerName, RouteValueDictionary routeValues)
@@ -81,7 +81,7 @@ namespace System.Web.Mvc
         
         public string Action(string actionName, string controllerName, object routeValues, string protocol)
         {
-            return GenerateUrl(null /* routeName */, actionName, controllerName, protocol, null /* hostName */, null /* fragment */, new RouteValueDictionary(routeValues), RouteCollection, RequestContext, true /* includeImplicitMvcValues */);
+            return GenerateUrl(null /* routeName */, actionName, controllerName, protocol, null /* hostName */, null /* fragment */, TypeHelper.ObjectToDictionary(routeValues), RouteCollection, RequestContext, true /* includeImplicitMvcValues */);
         }
 
         public string Action(string actionName, string controllerName, RouteValueDictionary routeValues, string protocol, string hostName)
@@ -228,7 +228,7 @@ namespace System.Web.Mvc
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "As the return value will used only for rendering, string return value is more appropriate.")]
         public string RouteUrl(string routeName, object routeValues, string protocol)
         {
-            return GenerateUrl(routeName, null /* actionName */, null /* controllerName */, protocol, null /* hostName */, null /* fragment */, new RouteValueDictionary(routeValues), RouteCollection, RequestContext, false /* includeImplicitMvcValues */);
+            return GenerateUrl(routeName, null /* actionName */, null /* controllerName */, protocol, null /* hostName */, null /* fragment */, TypeHelper.ObjectToDictionary(routeValues), RouteCollection, RequestContext, false /* includeImplicitMvcValues */);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "As the return value will used only for rendering, string return value is more appropriate.")]
@@ -240,7 +240,7 @@ namespace System.Web.Mvc
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "As the return value will used only for rendering, string return value is more appropriate.")]
         public string HttpRouteUrl(string routeName, object routeValues)
         {
-            return HttpRouteUrl(routeName, new RouteValueDictionary(routeValues));
+            return HttpRouteUrl(routeName, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "As the return value will used only for rendering, string return value is more appropriate.")]

@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics;
+using System.Web.Routing;
 using System.Web.WebPages.Html;
 using Microsoft.TestCommon;
 
@@ -147,6 +149,33 @@ namespace System.Web.WebPages.Test
             // Assert
             Assert.Equal("<b>boldFromObject</b>", markupHtml.ToString());
             Assert.Equal("<b>boldFromObject</b>", markupHtml.ToHtmlString());
+        }
+
+        [Fact]
+        public void ConvertsUnderscoresInNamesToDashes()
+        {
+            // Arrange
+            var attributes = GetAttributes();
+
+            // Act
+            RouteValueDictionary result = HtmlHelper.AnonymousObjectToHtmlAttributes(attributes);
+
+            // Assert
+            Assert.Equal(7, result.Count);
+            Assert.Equal("Bar", result["foo"]);
+            Assert.Equal("pow_wow", result["baz-bif"]);
+        }
+
+        private static object GetAttributes()
+        {
+            return new { foo = "Bar",
+                         baz_bif = "pow_wow",
+                         other1 = "xx",
+                         other2 = "yy",
+                         other3 = "zz",
+                         other4 = "aa",
+                         other5 = "bb",
+                       };
         }
 
         /// <summary>

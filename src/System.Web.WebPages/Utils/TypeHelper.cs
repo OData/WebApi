@@ -12,15 +12,25 @@ namespace System.Web.WebPages
         /// <summary>
         /// Given an object of anonymous type, add each property as a key and associated with its value to a dictionary.
         /// </summary>
-        internal static IDictionary<string, object> ObjectToDictionary(object value)
+        public static RouteValueDictionary ObjectToDictionary(object value)
         {
-            return new RouteValueDictionary(value);
+            RouteValueDictionary dictionary = new RouteValueDictionary();
+
+            if (value != null)
+            {
+                foreach (PropertyHelper helper in PropertyHelper.GetProperties(value))
+                {
+                    dictionary.Add(helper.Name, helper.GetValue(value));
+                }
+            }
+
+            return dictionary;
         }
 
         /// <summary>
         /// Given an object of anonymous type, add each property as a key and associated with its value to the given dictionary.
         /// </summary>
-        internal static void AddAnonymousObjectToDictionary(IDictionary<string, object> dictionary, object value)
+        public static void AddAnonymousObjectToDictionary(IDictionary<string, object> dictionary, object value)
         {
             var values = ObjectToDictionary(value);
             foreach (var item in values)
@@ -30,7 +40,7 @@ namespace System.Web.WebPages
         }
 
         /// <remarks>This code is copied from http://www.liensberger.it/web/blog/?p=191 </remarks>
-        internal static bool IsAnonymousType(Type type)
+        public static bool IsAnonymousType(Type type)
         {
             if (type == null)
             {

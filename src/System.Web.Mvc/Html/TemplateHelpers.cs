@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using System.Web.Mvc.Properties;
 using System.Web.Routing;
 using System.Web.UI.WebControls;
+using System.Web.WebPages;
 
 namespace System.Web.Mvc.Html
 {
@@ -287,7 +288,7 @@ namespace System.Web.Mvc.Html
 
             if (additionalViewData != null)
             {
-                foreach (KeyValuePair<string, object> kvp in new RouteValueDictionary(additionalViewData))
+                foreach (KeyValuePair<string, object> kvp in TypeHelper.ObjectToDictionary(additionalViewData))
                 {
                     viewData[kvp.Key] = kvp.Value;
                 }

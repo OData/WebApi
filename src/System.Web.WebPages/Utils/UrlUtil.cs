@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Web.Routing;
@@ -207,7 +209,7 @@ namespace System.Web.WebPages
             // If this method is called, then obj isn't a type that we can put in the path, instead
             // we want to format it as key-value pairs for the query string. The mostly likely 
             // user scenario for this is an anonymous type.
-            RouteValueDictionary dictionary = new RouteValueDictionary(obj);
+            IDictionary<string, object> dictionary = TypeHelper.ObjectToDictionary(obj);
 
             foreach (var item in dictionary)
             {

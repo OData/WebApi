@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Routing;
+using System.Web.WebPages;
 
 namespace System.Web.Mvc.Html
 {
@@ -17,7 +18,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcForm BeginForm(this HtmlHelper htmlHelper, object routeValues)
         {
-            return BeginForm(htmlHelper, null, null, new RouteValueDictionary(routeValues), FormMethod.Post, new RouteValueDictionary());
+            return BeginForm(htmlHelper, null, null, TypeHelper.ObjectToDictionary(routeValues), FormMethod.Post, new RouteValueDictionary());
         }
 
         public static MvcForm BeginForm(this HtmlHelper htmlHelper, RouteValueDictionary routeValues)
@@ -32,7 +33,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcForm BeginForm(this HtmlHelper htmlHelper, string actionName, string controllerName, object routeValues)
         {
-            return BeginForm(htmlHelper, actionName, controllerName, new RouteValueDictionary(routeValues), FormMethod.Post, new RouteValueDictionary());
+            return BeginForm(htmlHelper, actionName, controllerName, TypeHelper.ObjectToDictionary(routeValues), FormMethod.Post, new RouteValueDictionary());
         }
 
         public static MvcForm BeginForm(this HtmlHelper htmlHelper, string actionName, string controllerName, RouteValueDictionary routeValues)
@@ -47,7 +48,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcForm BeginForm(this HtmlHelper htmlHelper, string actionName, string controllerName, object routeValues, FormMethod method)
         {
-            return BeginForm(htmlHelper, actionName, controllerName, new RouteValueDictionary(routeValues), method, new RouteValueDictionary());
+            return BeginForm(htmlHelper, actionName, controllerName, TypeHelper.ObjectToDictionary(routeValues), method, new RouteValueDictionary());
         }
 
         public static MvcForm BeginForm(this HtmlHelper htmlHelper, string actionName, string controllerName, RouteValueDictionary routeValues, FormMethod method)
@@ -67,7 +68,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcForm BeginForm(this HtmlHelper htmlHelper, string actionName, string controllerName, object routeValues, FormMethod method, object htmlAttributes)
         {
-            return BeginForm(htmlHelper, actionName, controllerName, new RouteValueDictionary(routeValues), method, HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
+            return BeginForm(htmlHelper, actionName, controllerName, TypeHelper.ObjectToDictionary(routeValues), method, HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public static MvcForm BeginForm(this HtmlHelper htmlHelper, string actionName, string controllerName, RouteValueDictionary routeValues, FormMethod method, IDictionary<string, object> htmlAttributes)
@@ -78,7 +79,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcForm BeginRouteForm(this HtmlHelper htmlHelper, object routeValues)
         {
-            return BeginRouteForm(htmlHelper, null /* routeName */, new RouteValueDictionary(routeValues), FormMethod.Post, new RouteValueDictionary());
+            return BeginRouteForm(htmlHelper, null /* routeName */, TypeHelper.ObjectToDictionary(routeValues), FormMethod.Post, new RouteValueDictionary());
         }
 
         public static MvcForm BeginRouteForm(this HtmlHelper htmlHelper, RouteValueDictionary routeValues)
@@ -93,7 +94,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcForm BeginRouteForm(this HtmlHelper htmlHelper, string routeName, object routeValues)
         {
-            return BeginRouteForm(htmlHelper, routeName, new RouteValueDictionary(routeValues), FormMethod.Post, new RouteValueDictionary());
+            return BeginRouteForm(htmlHelper, routeName, TypeHelper.ObjectToDictionary(routeValues), FormMethod.Post, new RouteValueDictionary());
         }
 
         public static MvcForm BeginRouteForm(this HtmlHelper htmlHelper, string routeName, RouteValueDictionary routeValues)
@@ -108,7 +109,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcForm BeginRouteForm(this HtmlHelper htmlHelper, string routeName, object routeValues, FormMethod method)
         {
-            return BeginRouteForm(htmlHelper, routeName, new RouteValueDictionary(routeValues), method, new RouteValueDictionary());
+            return BeginRouteForm(htmlHelper, routeName, TypeHelper.ObjectToDictionary(routeValues), method, new RouteValueDictionary());
         }
 
         public static MvcForm BeginRouteForm(this HtmlHelper htmlHelper, string routeName, RouteValueDictionary routeValues, FormMethod method)
@@ -128,7 +129,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcForm BeginRouteForm(this HtmlHelper htmlHelper, string routeName, object routeValues, FormMethod method, object htmlAttributes)
         {
-            return BeginRouteForm(htmlHelper, routeName, new RouteValueDictionary(routeValues), method, HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
+            return BeginRouteForm(htmlHelper, routeName, TypeHelper.ObjectToDictionary(routeValues), method, HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public static MvcForm BeginRouteForm(this HtmlHelper htmlHelper, string routeName, RouteValueDictionary routeValues, FormMethod method, IDictionary<string, object> htmlAttributes)

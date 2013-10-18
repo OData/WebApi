@@ -10,6 +10,7 @@ using System.Web.Mvc.Filters;
 using System.Web.Mvc.Properties;
 using System.Web.Profile;
 using System.Web.Routing;
+using System.Web.WebPages;
 
 namespace System.Web.Mvc
 {
@@ -427,7 +428,7 @@ namespace System.Web.Mvc
 
         protected internal RedirectToRouteResult RedirectToAction(string actionName, object routeValues)
         {
-            return RedirectToAction(actionName, new RouteValueDictionary(routeValues));
+            return RedirectToAction(actionName, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         protected internal RedirectToRouteResult RedirectToAction(string actionName, RouteValueDictionary routeValues)
@@ -442,7 +443,7 @@ namespace System.Web.Mvc
 
         protected internal RedirectToRouteResult RedirectToAction(string actionName, string controllerName, object routeValues)
         {
-            return RedirectToAction(actionName, controllerName, new RouteValueDictionary(routeValues));
+            return RedirectToAction(actionName, controllerName, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         protected internal virtual RedirectToRouteResult RedirectToAction(string actionName, string controllerName, RouteValueDictionary routeValues)
@@ -468,7 +469,7 @@ namespace System.Web.Mvc
 
         protected internal RedirectToRouteResult RedirectToActionPermanent(string actionName, object routeValues)
         {
-            return RedirectToActionPermanent(actionName, new RouteValueDictionary(routeValues));
+            return RedirectToActionPermanent(actionName, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         protected internal RedirectToRouteResult RedirectToActionPermanent(string actionName, RouteValueDictionary routeValues)
@@ -483,7 +484,7 @@ namespace System.Web.Mvc
 
         protected internal RedirectToRouteResult RedirectToActionPermanent(string actionName, string controllerName, object routeValues)
         {
-            return RedirectToActionPermanent(actionName, controllerName, new RouteValueDictionary(routeValues));
+            return RedirectToActionPermanent(actionName, controllerName, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         protected internal virtual RedirectToRouteResult RedirectToActionPermanent(string actionName, string controllerName, RouteValueDictionary routeValues)
@@ -498,7 +499,7 @@ namespace System.Web.Mvc
 
         protected internal RedirectToRouteResult RedirectToRoute(object routeValues)
         {
-            return RedirectToRoute(new RouteValueDictionary(routeValues));
+            return RedirectToRoute(TypeHelper.ObjectToDictionary(routeValues));
         }
 
         protected internal RedirectToRouteResult RedirectToRoute(RouteValueDictionary routeValues)
@@ -513,7 +514,7 @@ namespace System.Web.Mvc
 
         protected internal RedirectToRouteResult RedirectToRoute(string routeName, object routeValues)
         {
-            return RedirectToRoute(routeName, new RouteValueDictionary(routeValues));
+            return RedirectToRoute(routeName, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         protected internal virtual RedirectToRouteResult RedirectToRoute(string routeName, RouteValueDictionary routeValues)
@@ -523,7 +524,7 @@ namespace System.Web.Mvc
 
         protected internal RedirectToRouteResult RedirectToRoutePermanent(object routeValues)
         {
-            return RedirectToRoutePermanent(new RouteValueDictionary(routeValues));
+            return RedirectToRoutePermanent(TypeHelper.ObjectToDictionary(routeValues));
         }
 
         protected internal RedirectToRouteResult RedirectToRoutePermanent(RouteValueDictionary routeValues)
@@ -538,7 +539,7 @@ namespace System.Web.Mvc
 
         protected internal RedirectToRouteResult RedirectToRoutePermanent(string routeName, object routeValues)
         {
-            return RedirectToRoutePermanent(routeName, new RouteValueDictionary(routeValues));
+            return RedirectToRoutePermanent(routeName, TypeHelper.ObjectToDictionary(routeValues));
         }
 
         protected internal virtual RedirectToRouteResult RedirectToRoutePermanent(string routeName, RouteValueDictionary routeValues)

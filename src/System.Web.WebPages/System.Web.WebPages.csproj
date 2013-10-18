@@ -131,6 +131,9 @@
     <Compile Include="Mvc\ModelClientValidationStringLengthRule.cs" />
     <Compile Include="Mvc\UnobtrusiveValidationAttributesGenerator.cs" />
     <Compile Include="RequestBrowserOverrideStore.cs" />
+    <Compile Include="Utils\HtmlAttributePropertyHelper.cs" />
+    <Compile Include="Utils\PropertyHelper.cs" />
+    <Compile Include="Utils\AnonymousObjectReflectionHelper.cs" />
     <Compile Include="Utils\SessionStateUtil.cs" />
     <Compile Include="Utils\TypeHelper.cs" />
     <Compile Include="Utils\UrlRewriterHelper.cs" />

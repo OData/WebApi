@@ -232,7 +232,7 @@ namespace System.Web.Mvc.Html.Test
         {
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => html.LabelFor(model => new { foo = "Bar" }, null, metadataProvider.Object),
+                () => html.LabelFor(model => new { foo = "Bar" }, null, null, metadataProvider.Object),
                 "Templates can be used only with field access, property access, single-dimension array index, or single-parameter custom indexer expressions.");
         }
 

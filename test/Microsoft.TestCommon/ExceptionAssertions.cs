@@ -479,10 +479,11 @@ namespace Microsoft.TestCommon
 
         private static Exception UnwrapException(Exception exception)
         {
-            AggregateException aggEx;
-            while ((aggEx = exception as AggregateException) != null)
-                exception = aggEx.GetBaseException();
-
+            AggregateException aggEx = exception as AggregateException;
+            if (aggEx != null)
+            {
+                return aggEx.GetBaseException();
+            }
             return exception;
         }
 

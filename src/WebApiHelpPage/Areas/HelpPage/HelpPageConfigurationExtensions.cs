@@ -243,7 +243,9 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
             }
             catch (Exception e)
             {
-                apiModel.ErrorMessages.Add(String.Format(CultureInfo.CurrentCulture, "An exception has occurred while generating the sample. Exception Message: {0}", e.Message));
+                apiModel.ErrorMessages.Add(String.Format(CultureInfo.CurrentCulture, 
+                    "An exception has occurred while generating the sample. Exception message: {0}",
+                    HelpPageSampleGenerator.UnwrapException(e).Message));
             }
 
             apiModel.RequestModelDescription = GenerateParameterModelDescription(apiDescription, config);

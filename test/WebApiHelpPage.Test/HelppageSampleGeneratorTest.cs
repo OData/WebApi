@@ -291,6 +291,27 @@ namespace WebApiHelpPageWebHost.UnitTest
         }
 
         [Fact]
+        public void WriteSampleObjectUsingFormatter_UnwrapsAggregateException()
+        {
+            Mock<MediaTypeFormatter> bogusFormatter = new Mock<MediaTypeFormatter>();
+            bogusFormatter.Setup(f => f.CanWriteType(It.IsAny<Type>())).Returns(true);
+            bogusFormatter.Setup(f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<object>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<TransportContext>())).Returns(() =>
+            {
+                throw new AggregateException(new FormatException("Invalid format."));
+            });
+            HelpPageSampleGenerator sampleGenerator = new HelpPageSampleGenerator();
+            InvalidSample sampleNotProvided = Assert.IsType<InvalidSample>(
+                sampleGenerator.WriteSampleObjectUsingFormatter(
+                    bogusFormatter.Object,
+                    "hello world",
+                    typeof(string),
+                    new MediaTypeHeaderValue("text/json")
+                ));
+            Assert.Equal("An exception has occurred while using the formatter 'MediaTypeFormatterProxy' to generate sample for media type 'text/json'. Exception message: Invalid format.",
+                sampleNotProvided.ErrorMessage);
+        }
+
+        [Fact]
         public void ResolveType_ThrowsInvalidEnumArgumentException()
         {
             Assert.Throws(typeof(InvalidEnumArgumentException), () =>

@@ -267,7 +267,7 @@ Namespace Areas.HelpPage
                     "An exception has occurred while using the formatter '{0}' to generate sample for media type '{1}'. Exception message: {2}",
                     formatter.GetType().Name,
                     mediaType.MediaType,
-                    e.Message))
+                    UnwrapException(e).Message))
             Finally
                 If (Not MS Is Nothing) Then
                     MS.Dispose()
@@ -277,6 +277,14 @@ Namespace Areas.HelpPage
                 End If
             End Try
             Return sample
+        End Function
+
+        Friend Shared Function UnwrapException(exception As Exception) As Exception
+            Dim aggregateException As AggregateException = TryCast(exception, AggregateException)
+            If aggregateException IsNot Nothing Then
+                Return aggregateException.Flatten().InnerException
+            End If
+            Return exception
         End Function
 
         <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="Handling the failure by returning the original string.")>

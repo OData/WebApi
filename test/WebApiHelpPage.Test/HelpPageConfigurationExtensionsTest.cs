@@ -83,7 +83,7 @@ namespace WebApiHelpPageWebHost.UnitTest
             HelpPageApiModel model = config.GetHelpPageApiModel("Get-Values");
             Assert.NotNull(model);
             Assert.NotEmpty(model.ErrorMessages);
-            Assert.Equal("An exception has occurred while generating the sample. Exception Message: This is a faulty sample generator.", model.ErrorMessages[0]);
+            Assert.Equal("An exception has occurred while generating the sample. Exception message: This is a faulty sample generator.", model.ErrorMessages[0]);
         }
 
         [Fact]
@@ -98,6 +98,20 @@ namespace WebApiHelpPageWebHost.UnitTest
             Assert.NotNull(model);
             Assert.NotEmpty(model.ErrorMessages);
             Assert.Equal("Failed to generate the sample for media type 'application/x-www-form-urlencoded'. Cannot use formatter 'JQueryMvcFormUrlEncodedFormatter' to write type 'String'.", model.ErrorMessages[0]);
+        }
+
+        [Fact]
+        public void GetHelpPageApiModel_UnwrapsAggregateException()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "{controller}/{id}", new { id = RouteParameter.Optional });
+            Mock<HelpPageSampleGenerator> faultyGenerator = new Mock<HelpPageSampleGenerator>();
+            faultyGenerator.Setup(g => g.GetSample(It.IsAny<ApiDescription>(), It.IsAny<SampleDirection>())).Returns(() => { throw new AggregateException(new InvalidOperationException("Sample generator failed.")); });
+            config.SetHelpPageSampleGenerator(faultyGenerator.Object);
+            HelpPageApiModel model = config.GetHelpPageApiModel("Get-Values");
+            Assert.NotNull(model);
+            Assert.NotEmpty(model.ErrorMessages);
+            Assert.Equal("An exception has occurred while generating the sample. Exception message: Sample generator failed.", model.ErrorMessages[0]);
         }
 
 #if !VB_TEST

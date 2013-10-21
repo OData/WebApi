@@ -233,6 +233,12 @@ namespace System.Web.Mvc.Html
 
             IEnumerable<string> values = from object value in defaultValues
                                          select Convert.ToString(value, CultureInfo.CurrentCulture);
+
+            // ToString() by default returns an enum value's name.  But selectList may use numeric values.
+            IEnumerable<string> enumValues = from Enum value in defaultValues.OfType<Enum>()
+                                             select value.ToString("d");
+            values = values.Concat(enumValues);
+
             HashSet<string> selectedValues = new HashSet<string>(values, StringComparer.OrdinalIgnoreCase);
             List<SelectListItem> newSelectList = new List<SelectListItem>();
 

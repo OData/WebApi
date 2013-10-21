@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Web.Mvc.Test;
 using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
@@ -457,6 +458,54 @@ namespace System.Web.Mvc.Html.Test
               + "<option value=\"987654321\">Jane</option>" + Environment.NewLine
               + "<option value=\"111111111\">Joe</option>" + Environment.NewLine
               + "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void DropDownListWithIEnumerableOfSelectListItemMatchesEnumName()
+        {
+            // Arrange
+            ViewDataDictionary<EnumWithDisplay> vdd = new ViewDataDictionary<EnumWithDisplay>
+            {
+                { "foo", EnumWithDisplay.Three }
+            };
+            HtmlHelper<EnumWithDisplay> helper = MvcHelper.GetHtmlHelper(vdd);
+
+            // Act
+            MvcHtmlString html = helper.DropDownList("foo", GetSelectListWithNamedValuesForEnumWithDisplay(includeEmpty: false));
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"foo\" name=\"foo\">" +
+                "<option value=\"Zero\">Zero</option>" + Environment.NewLine +
+                "<option value=\"One\">One</option>" + Environment.NewLine +
+                "<option value=\"Two\">Two</option>" + Environment.NewLine +
+                "<option selected=\"selected\" value=\"Three\">Three</option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void DropDownListWithIEnumerableOfSelectListItemMatchesEnumValue()
+        {
+            // Arrange
+            ViewDataDictionary<EnumWithDisplay> vdd = new ViewDataDictionary<EnumWithDisplay>
+            {
+                { "foo", EnumWithDisplay.Three }
+            };
+            HtmlHelper<EnumWithDisplay> helper = MvcHelper.GetHtmlHelper(vdd);
+
+            // Act
+            MvcHtmlString html = helper.DropDownList("foo", GetSelectListWithNumericValuesForEnumWithDisplay(includeEmpty: false));
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"foo\" name=\"foo\">" +
+                "<option value=\"0\">Zero</option>" + Environment.NewLine +
+                "<option value=\"1\">One</option>" + Environment.NewLine +
+                "<option value=\"2\">Two</option>" + Environment.NewLine +
+                "<option selected=\"selected\" value=\"3\">Three</option>" + Environment.NewLine +
+                "</select>",
                 html.ToHtmlString());
         }
 
@@ -1304,6 +1353,58 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        public void ListBoxWithIEnumerableOfSelectListItemMatchesEnumName()
+        {
+            // Arrange
+            ViewDataDictionary<IEnumerable<EnumWithDisplay?>> vdd = new ViewDataDictionary<IEnumerable<EnumWithDisplay?>>
+            {
+                { "foo", new EnumWithDisplay?[] { EnumWithDisplay.One, null, EnumWithDisplay.Three, }}
+            };
+            HtmlHelper<IEnumerable<EnumWithDisplay?>> helper = MvcHelper.GetHtmlHelper(vdd);
+
+            // Act
+            MvcHtmlString html =
+                helper.ListBox("foo", GetSelectListWithNamedValuesForEnumWithDisplay(includeEmpty: true));
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"foo\" multiple=\"multiple\" name=\"foo\">" +
+                "<option selected=\"selected\" value=\"\"></option>" + Environment.NewLine +
+                "<option value=\"Zero\">Zero</option>" + Environment.NewLine +
+                "<option selected=\"selected\" value=\"One\">One</option>" + Environment.NewLine +
+                "<option value=\"Two\">Two</option>" + Environment.NewLine +
+                "<option selected=\"selected\" value=\"Three\">Three</option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ListBoxWithIEnumerableOfSelectListItemMatchesEnumValue()
+        {
+            // Arrange
+            ViewDataDictionary<IEnumerable<EnumWithDisplay?>> vdd = new ViewDataDictionary<IEnumerable<EnumWithDisplay?>>
+            {
+                { "foo", new EnumWithDisplay?[] { EnumWithDisplay.One, null, EnumWithDisplay.Three, }}
+            };
+            HtmlHelper<IEnumerable<EnumWithDisplay?>> helper = MvcHelper.GetHtmlHelper(vdd);
+
+            // Act
+            MvcHtmlString html =
+                helper.ListBox("foo", GetSelectListWithNumericValuesForEnumWithDisplay(includeEmpty: true));
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"foo\" multiple=\"multiple\" name=\"foo\">" +
+                "<option selected=\"selected\" value=\"\"></option>" + Environment.NewLine +
+                "<option value=\"0\">Zero</option>" + Environment.NewLine +
+                "<option selected=\"selected\" value=\"1\">One</option>" + Environment.NewLine +
+                "<option value=\"2\">Two</option>" + Environment.NewLine +
+                "<option selected=\"selected\" value=\"3\">Three</option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
         public void ListBoxThrowsWhenExpressionDoesNotEvaluateToIEnumerable()
         {
             // Arrange
@@ -1896,6 +1997,45 @@ namespace System.Web.Mvc.Html.Test
 
         // Helpers
 
+        // Value and Text is constant name in all returned SelectListItem objects.
+        private static IEnumerable<SelectListItem> GetSelectListWithNamedValuesForEnumWithDisplay(bool includeEmpty)
+        {
+            IList<SelectListItem> selectList = new List<SelectListItem>();
+            if (includeEmpty)
+            {
+                // Similar to what we might generate for a Nullable<T>
+                selectList.Add(new SelectListItem { Text = String.Empty, Value = String.Empty, });
+            }
+
+            foreach (string name in Enum.GetNames(typeof(EnumWithDisplay)))
+            {
+                selectList.Add(new SelectListItem { Text = name, Value = name, });
+            }
+
+            return selectList;
+        }
+
+        // Value is numeric value while Text is constant name in all returned SelectListItem objects.
+        private static IEnumerable<SelectListItem> GetSelectListWithNumericValuesForEnumWithDisplay(bool includeEmpty)
+        {
+            IList<SelectListItem> selectList = new List<SelectListItem>();
+            if (includeEmpty)
+            {
+                // Similar to what we might generate for a Nullable<T>
+                selectList.Add(new SelectListItem { Text = String.Empty, Value = String.Empty, });
+            }
+
+            foreach (FieldInfo field in typeof(EnumWithDisplay).GetFields(
+                BindingFlags.DeclaredOnly | BindingFlags.GetField | BindingFlags.Public | BindingFlags.Static))
+            {
+                string name = field.Name;
+                object value = field.GetRawConstantValue();
+                selectList.Add(new SelectListItem { Text = name, Value = value.ToString(), });
+            }
+
+            return selectList;
+        }
+
         private class FooModel
         {
             public string foo { get; set; }
@@ -1944,6 +2084,18 @@ namespace System.Web.Mvc.Html.Test
         {
             [Required]
             public string foo { get; set; }
+        }
+
+        private enum EnumWithDisplay : byte
+        {
+            [Display(Name = "First")]
+            Zero,
+            [Display(Name = "Second")]
+            One,
+            [Display(Name = "Third")]
+            Two,
+            [Display(Name = "Fourth")]
+            Three,
         }
     }
 }

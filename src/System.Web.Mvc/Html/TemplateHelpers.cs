@@ -165,8 +165,20 @@ namespace System.Web.Mvc.Html
             // TODO: Make better string names for generic types
             yield return fieldType.Name;
 
-            if (!metadata.IsComplexType)
+            if (fieldType == typeof(string))
             {
+                // Nothing more to provide
+                yield break;
+            }
+            else if (!metadata.IsComplexType)
+            {
+                // IsEnum is false for the Enum class itself
+                if (fieldType.IsEnum)
+                {
+                    // Same as fieldType.BaseType.Name in this case
+                    yield return "Enum";
+                }
+
                 yield return "String";
             }
             else if (fieldType.IsInterface)

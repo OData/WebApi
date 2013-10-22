@@ -438,6 +438,57 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        public void GetViewNamesFullOrderingOfString()
+        {
+            // Arrange
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForType(null, typeof(String));
+
+            // Act
+            List<string> result = TemplateHelpers.GetViewNames(metadata, "UIHint", "DataType").ToList();
+
+            // Assert
+            Assert.Equal(3, result.Count);
+            Assert.Equal("UIHint", result[0]);
+            Assert.Equal("DataType", result[1]);
+            Assert.Equal("String", result[2]);
+        }
+
+        [Fact]
+        public void GetViewNamesFullOrderingOfEnumStruct()
+        {
+            // Arrange
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForType(null, typeof(StringSplitOptions));
+
+            // Act
+            List<string> result = TemplateHelpers.GetViewNames(metadata, "UIHint", "DataType").ToList();
+
+            // Assert
+            Assert.Equal(5, result.Count);
+            Assert.Equal("UIHint", result[0]);
+            Assert.Equal("DataType", result[1]);
+            Assert.Equal("StringSplitOptions", result[2]);
+            Assert.Equal("Enum", result[3]);
+            Assert.Equal("String", result[4]);
+        }
+
+        [Fact]
+        public void GetViewNamesFullOrderingOfEnumType()
+        {
+            // Arrange
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForType(null, typeof(Enum));
+
+            // Act
+            List<string> result = TemplateHelpers.GetViewNames(metadata, "UIHint", "DataType").ToList();
+
+            // Assert
+            Assert.Equal(4, result.Count);
+            Assert.Equal("UIHint", result[0]);
+            Assert.Equal("DataType", result[1]);
+            Assert.Equal("Enum", result[2]);
+            Assert.Equal("String", result[3]);
+        }
+
+        [Fact]
         public void GetViewNamesNullUIHintNotIncludedInList()
         {
             // Arrange

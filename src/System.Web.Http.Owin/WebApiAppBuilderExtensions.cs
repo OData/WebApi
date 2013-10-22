@@ -22,11 +22,22 @@ namespace Owin
         /// <param name="builder">The application builder.</param>
         /// <param name="configuration">The <see cref="HttpConfiguration"/> used to configure the endpoint.</param>
         /// <returns>The application builder.</returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Not out of scope")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
+            Justification = "Disposed by HttpMessageHandlerAdapter in the success path.")]
         public static IAppBuilder UseWebApi(this IAppBuilder builder, HttpConfiguration configuration)
         {
-            IHostBufferPolicySelector bufferPolicySelector = configuration.Services.GetHostBufferPolicySelector() ?? _defaultBufferPolicySelector;
-            return builder.Use(typeof(HttpMessageHandlerAdapter), new HttpServer(configuration), bufferPolicySelector);
+            HttpServer server = new HttpServer(configuration);
+
+            try
+            {
+                HttpMessageHandlerOptions options = CreateOptions(server, configuration);
+                return UseMessageHandler(builder, options);
+            }
+            catch
+            {
+                server.Dispose();
+                throw;
+            }
         }
 
         /// <summary>
@@ -35,11 +46,27 @@ namespace Owin
         /// <param name="builder">The application builder.</param>
         /// <param name="httpServer">The http server.</param>
         /// <returns>The application builder.</returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Not out of scope")]
         public static IAppBuilder UseWebApi(this IAppBuilder builder, HttpServer httpServer)
         {
-            IHostBufferPolicySelector bufferPolicySelector = httpServer.Configuration.Services.GetHostBufferPolicySelector() ?? _defaultBufferPolicySelector;
-            return builder.Use(typeof(HttpMessageHandlerAdapter), httpServer, bufferPolicySelector);
+            HttpMessageHandlerOptions options = CreateOptions(httpServer, httpServer.Configuration);
+            return UseMessageHandler(builder, options);
+        }
+
+        private static IAppBuilder UseMessageHandler(this IAppBuilder builder, HttpMessageHandlerOptions options)
+        {
+            return builder.Use(typeof(HttpMessageHandlerAdapter), options);
+        }
+
+        private static HttpMessageHandlerOptions CreateOptions(HttpServer server, HttpConfiguration configuration)
+        {
+            IHostBufferPolicySelector bufferPolicySelector = configuration.Services.GetHostBufferPolicySelector()
+                ?? _defaultBufferPolicySelector;
+
+            return new HttpMessageHandlerOptions
+            {
+                MessageHandler = server,
+                BufferPolicySelector = bufferPolicySelector
+            };
         }
     }
 }

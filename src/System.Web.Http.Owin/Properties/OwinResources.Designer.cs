@@ -122,5 +122,14 @@ namespace System.Web.Http.Owin.Properties {
                 return ResourceManager.GetString("SendAsync_ReturnedNull", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}.{1} must not be null..
+        /// </summary>
+        internal static string TypePropertyMustNotBeNull {
+            get {
+                return ResourceManager.GetString("TypePropertyMustNotBeNull", resourceCulture);
+            }
+        }
     }
 }

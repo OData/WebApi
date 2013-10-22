@@ -138,4 +138,7 @@
   <data name="SendAsync_ReturnedNull" xml:space="preserve">
     <value>The message handler did not return a response message.</value>
   </data>
+  <data name="TypePropertyMustNotBeNull" xml:space="preserve">
+    <value>{0}.{1} must not be null.</value>
+  </data>
 </root>

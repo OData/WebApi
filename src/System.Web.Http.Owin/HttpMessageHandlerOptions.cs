@@ -1,0 +1,22 @@
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Net.Http;
+using System.Web.Http.Hosting;
+
+namespace System.Web.Http.Owin
+{
+    /// <summary>Represents the options for configuring an <see cref="HttpMessageHandlerAdapter"/>.</summary>
+    public class HttpMessageHandlerOptions
+    {
+        /// <summary>
+        /// Gets or sets the <see cref="HttpMessageHandler"/> to submit requests to.
+        /// </summary>
+        public HttpMessageHandler MessageHandler { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IHostBufferPolicySelector"/> that determines whether or not to buffer requests
+        /// and responses.
+        /// </summary>
+        public IHostBufferPolicySelector BufferPolicySelector { get; set; }
+    }
+}

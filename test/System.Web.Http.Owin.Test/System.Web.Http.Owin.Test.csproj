@@ -35,6 +35,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
     <Reference Include="xunit, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\xunit.1.9.1\lib\net20\xunit.dll</HintPath>
@@ -45,6 +46,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HttpMessageHandlerOptionsTests.cs" />
+    <Compile Include="NonOwnedStreamTests.cs" />
     <Compile Include="OwinHttpRequestContextTests.cs" />
     <Compile Include="HostAuthenticationAttributeTest.cs" />
     <Compile Include="HostAuthenticationFilterTest.cs" />

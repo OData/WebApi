@@ -18,8 +18,7 @@ namespace System.Web.Http.Owin
             appBuilder
                 .Setup(ab => ab.Use(
                     typeof(HttpMessageHandlerAdapter),
-                    It.Is<HttpServer>(s => s.Configuration == config),
-                    It.IsAny<OwinBufferPolicySelector>()))
+                    It.Is<HttpMessageHandlerOptions>((o) => ((HttpServer)o.MessageHandler).Configuration == config)))
                 .Returns(appBuilder.Object)
                 .Verifiable();
 
@@ -39,8 +38,8 @@ namespace System.Web.Http.Owin
             appBuilder
                 .Setup(ab => ab.Use(
                     typeof(HttpMessageHandlerAdapter),
-                    It.Is<HttpServer>(s => s.Configuration == config),
-                    bufferPolicySelector))
+                    It.Is<HttpMessageHandlerOptions>((o) => ((HttpServer)o.MessageHandler).Configuration == config
+                        && o.BufferPolicySelector == bufferPolicySelector)))
                 .Returns(appBuilder.Object)
                 .Verifiable();
 
@@ -59,8 +58,7 @@ namespace System.Web.Http.Owin
             appBuilderMock
                 .Setup(ab => ab.Use(
                     typeof(HttpMessageHandlerAdapter),
-                    httpServer,
-                    It.IsAny<OwinBufferPolicySelector>()))
+                    It.Is<HttpMessageHandlerOptions>((o) => o.MessageHandler == httpServer)))
                 .Returns(appBuilderMock.Object)
                 .Verifiable();
 
@@ -84,8 +82,8 @@ namespace System.Web.Http.Owin
             appBuilderMock
                 .Setup(ab => ab.Use(
                     typeof(HttpMessageHandlerAdapter),
-                    httpServer,
-                    bufferPolicySelector))
+                    It.Is<HttpMessageHandlerOptions>((o) => o.MessageHandler == httpServer
+                        && o.BufferPolicySelector == bufferPolicySelector)))
                 .Returns(appBuilderMock.Object)
                 .Verifiable();
 

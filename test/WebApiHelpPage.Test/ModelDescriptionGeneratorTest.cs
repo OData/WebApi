@@ -221,8 +221,8 @@ namespace WebApiHelpPageWebHost.UnitTest
                 annotationMapping = new Dictionary<string, string[]>
                 {
                     { "Name", new[] { "Required" } },
-                    { "Age", new[] { "Required", "Range: inclusive between '1' and '200'" } },
-                    { "Comment", new[] { "String length: inclusive between '0' and '100'" } },
+                    { "Age", new[] { "Required", "Range: inclusive between 1 and 200" } },
+                    { "Comment", new[] { "String length: inclusive between 0 and 100" } },
                     { "PhoneNumber", new string[0] },
                 };
 
@@ -231,9 +231,9 @@ namespace WebApiHelpPageWebHost.UnitTest
                 type = typeof(Address);
                 annotationMapping = new Dictionary<string, string[]>
                 {
-                    { "ZipCode", new[] { "Data type: 'PostalCode'" } },
-                    { "Street", new[] { "Matching regular expression pattern: '[a-z]'" } },
-                    { "Coordinates", new[] { "Min length: '2'", "Max length: '3'" } },
+                    { "ZipCode", new[] { "Data type: PostalCode" } },
+                    { "Street", new[] { "Matching regular expression pattern: [a-z]" } },
+                    { "Coordinates", new[] { "Min length: 2", "Max length: 3" } },
                 };
 
                 yield return new[] { type, annotationMapping };

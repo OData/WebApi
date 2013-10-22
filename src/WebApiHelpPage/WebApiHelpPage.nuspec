@@ -39,6 +39,7 @@
     <file src="Areas\HelpPage\ModelDescriptions\ModelDescriptionGenerator.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\ModelDescriptionGenerator.cs.pp" />
     <file src="Areas\HelpPage\ModelDescriptions\ParameterModelDescription.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\ParameterModelDescription.cs.pp" />
     <file src="Areas\HelpPage\ModelDescriptions\PropertyDescription.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\PropertyDescription.cs.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\PropertyAnnotation.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\PropertyAnnotation.cs.pp" />
     <file src="Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.cs.pp" />
     <file src="Areas\HelpPage\Models\HelpPageApiModel.cs.pp" target="content\Areas\HelpPage\Models\HelpPageApiModel.cs.pp" />
     <file src="Areas\HelpPage\SampleGeneration\HelpPageSampleGenerator.cs.pp" target="content\Areas\HelpPage\SampleGeneration\HelpPageSampleGenerator.cs.pp" />

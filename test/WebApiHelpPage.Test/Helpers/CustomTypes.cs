@@ -249,6 +249,26 @@ namespace WebApiHelpPageWebHost.UnitTest
         public string BarFoo { get; set; }
     }
 
+    public class MultipleDataAnnotations
+    {
+        [Range(1, 200)]
+        [StringLength(100)]
+        [DataType(DataType.PostalCode)]
+        [RegularExpression("[a-z]")]
+        [Required]
+        [MinLength(2)]
+        [MaxLength(3)]
+        public string Property { get; set; }
+
+        [MinLength(2)]
+        [MaxLength(3)]
+        [Range(1, 200)]
+        [StringLength(100)]
+        [DataType(DataType.PostalCode)]
+        [RegularExpression("[a-z]")]
+        public string OptionalProperty { get; set; }
+    }
+
 #endif
 }
 

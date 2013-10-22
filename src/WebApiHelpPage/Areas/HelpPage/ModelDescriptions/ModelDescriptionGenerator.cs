@@ -266,15 +266,43 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 
         private void GenerateAnnotations(MemberInfo property, PropertyDescription propertyModel)
         {
+            List<PropertyAnnotation> annotations = new List<PropertyAnnotation>();
+
             IEnumerable<Attribute> attributes = property.GetCustomAttributes();
             foreach (Attribute attribute in attributes)
             {
-                Func<object, string> converter;
-                if (AnnotationTextGenerator.TryGetValue(attribute.GetType(), out converter))
+                Func<object, string> textGenerator;
+                if (AnnotationTextGenerator.TryGetValue(attribute.GetType(), out textGenerator))
                 {
-                    string annotation = converter(attribute);
-                    propertyModel.Annotations.Add(annotation);
+                    annotations.Add(
+                        new PropertyAnnotation
+                        {
+                            AnnotationAttribute = attribute,
+                            Documentation = textGenerator(attribute)
+                        });
                 }
+            }
+
+            // Rearrange the annotations
+            annotations.Sort((x, y) =>
+            {
+                // Special-case RequiredAttribute so that it shows up on top
+                if (x.AnnotationAttribute is RequiredAttribute)
+                {
+                    return -1;
+                }
+                if (y.AnnotationAttribute is RequiredAttribute)
+                {
+                    return 1;
+                }
+
+                // Sort the rest based on alphabetic order of the documentation
+                return String.Compare(x.Documentation, y.Documentation, StringComparison.OrdinalIgnoreCase);
+            });
+
+            foreach (PropertyAnnotation annotation in annotations)
+            {
+                propertyModel.Annotations.Add(annotation);
             }
         }
 

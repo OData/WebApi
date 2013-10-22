@@ -6,10 +6,10 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
     {
         public PropertyDescription()
         {
-            Annotations = new List<string>();
+            Annotations = new List<PropertyAnnotation>();
         }
 
-        public IList<string> Annotations { get; private set; }
+        public IList<PropertyAnnotation> Annotations { get; private set; }
 
         public string Documentation { get; set; }
 

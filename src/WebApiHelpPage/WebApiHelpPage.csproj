@@ -41,6 +41,7 @@
     <Compile Include="Areas\HelpPage\HelpPageConfigurationExtensions.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\CollectionModelDescription.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ComplexTypeModelDescription.cs" />
+    <Compile Include="Areas\HelpPage\ModelDescriptions\PropertyAnnotation.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\DictionaryModelDescription.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\EnumTypeModelDescription.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\EnumValueDescription.cs" />

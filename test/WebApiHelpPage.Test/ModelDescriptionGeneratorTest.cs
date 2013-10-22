@@ -233,7 +233,33 @@ namespace WebApiHelpPageWebHost.UnitTest
                 {
                     { "ZipCode", new[] { "Data type: PostalCode" } },
                     { "Street", new[] { "Matching regular expression pattern: [a-z]" } },
-                    { "Coordinates", new[] { "Min length: 2", "Max length: 3" } },
+                    { "Coordinates", new[] { "Max length: 3", "Min length: 2" } },
+                };
+
+                yield return new[] { type, annotationMapping };
+
+                type = typeof(MultipleDataAnnotations);
+                annotationMapping = new Dictionary<string, string[]>
+                {
+                    {
+                        "Property", new[] {
+                            "Required",
+                            "Data type: PostalCode",
+                            "Matching regular expression pattern: [a-z]",
+                            "Max length: 3",
+                            "Min length: 2",
+                            "Range: inclusive between 1 and 200",
+                            "String length: inclusive between 0 and 100"}
+                    },
+                    {
+                        "OptionalProperty", new[] {
+                            "Data type: PostalCode",
+                            "Matching regular expression pattern: [a-z]",
+                            "Max length: 3",
+                            "Min length: 2",
+                            "Range: inclusive between 1 and 200",
+                            "String length: inclusive between 0 and 100"}
+                    }
                 };
 
                 yield return new[] { type, annotationMapping };
@@ -256,9 +282,9 @@ namespace WebApiHelpPageWebHost.UnitTest
             {
                 string[] expectedAnnotations = annotationMapping[property.Name];
                 Assert.Equal(expectedAnnotations.Length, property.Annotations.Count);
-                foreach (var expectedAnnotation in expectedAnnotations)
+                for (int i = 0; i < expectedAnnotations.Length; i++)
                 {
-                    Assert.Contains(expectedAnnotation, property.Annotations);
+                    Assert.Equal(expectedAnnotations[i], property.Annotations[i].Documentation);
                 }
             }
         }

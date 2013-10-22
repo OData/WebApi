@@ -50,6 +50,9 @@
     <Compile Include="..\Common\PrefixContainer.cs">
       <Link>Common\PrefixContainer.cs</Link>
     </Compile>
+    <Compile Include="..\Common\PropertyHelper.cs">
+      <Link>Routing\PropertyHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Common\TaskHelpers.cs">
       <Link>Common\TaskHelpers.cs</Link>
     </Compile>

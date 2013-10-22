@@ -2,8 +2,8 @@
 
 using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
-using System.Linq.Expressions;
 using System.Reflection;
+using System.Web.Http.Internal;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter.Serialization
@@ -85,17 +85,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private static Func<object, object> CreatePropertyGetter(Type type, string propertyName)
         {
             PropertyInfo property = type.GetProperty(propertyName);
+
             if (property == null)
             {
                 return null;
             }
 
-            // (object paramater) => (object)((type)parameter).Property;
-            ParameterExpression parameter = Expression.Parameter(typeof(object));
-            Expression<Func<object, object>> lambda = Expression.Lambda<Func<object, object>>(
-                Expression.Convert(Expression.Property(Expression.Convert(parameter, type), property), typeof(object)),
-                parameter);
-            return lambda.Compile();
+            var helper = new PropertyHelper(property);
+
+            return helper.GetValue;
         }
     }
 }

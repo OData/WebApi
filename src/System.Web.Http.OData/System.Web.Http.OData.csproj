@@ -12,6 +12,15 @@
     <DefineConstants>$(DefineConstants);ASPNETMVC</DefineConstants>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;ASPNETMVC;ASPNETWEBAPI</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <DefineConstants>TRACE;ASPNETMVC;ASPNETWEBAPI</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeAnalysis|AnyCPU'">
+    <DefineConstants>TRACE;CODE_ANALYSIS;ASPNETMVC;ASPNETWEBAPI</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Data.Edm, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -42,6 +51,9 @@
   <ItemGroup>
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\PropertyHelper.cs">
+      <Link>Common\PropertyHelper.cs</Link>
     </Compile>
     <Compile Include="..\Common\TaskHelpers.cs">
       <Link>Common\TaskHelpers.cs</Link>
@@ -238,7 +250,7 @@
     <Compile Include="OData\Builder\ComplexTypeConfigurationOfTComplexType.cs" />
     <Compile Include="OData\EntityInstanceContextOfTEntityType.cs" />
     <Compile Include="OData\EntityInstanceContext.cs" />
-    <Compile Include="OData\CompiledPropertyAccessor.cs" />
+    <Compile Include="OData\FastPropertyAccessor.cs" />
     <Compile Include="OData\PerRequestActionValueBinder.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataActionPayloadDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializer.cs" />

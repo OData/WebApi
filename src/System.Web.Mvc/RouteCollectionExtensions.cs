@@ -123,7 +123,7 @@ namespace System.Web.Mvc
 
             IgnoreRouteInternal route = new IgnoreRouteInternal(url)
             {
-                Constraints = CreateRouteValueDictionary(constraints)
+                Constraints = CreateRouteValueDictionaryUncached(constraints)
             };
 
             routes.Add(route);
@@ -173,8 +173,8 @@ namespace System.Web.Mvc
 
             Route route = new Route(url, new MvcRouteHandler())
             {
-                Defaults = CreateRouteValueDictionary(defaults),
-                Constraints = CreateRouteValueDictionary(constraints),
+                Defaults = CreateRouteValueDictionaryUncached(defaults),
+                Constraints = CreateRouteValueDictionaryUncached(constraints),
                 DataTokens = new RouteValueDictionary()
             };
 
@@ -188,7 +188,12 @@ namespace System.Web.Mvc
             return route;
         }
 
-        private static RouteValueDictionary CreateRouteValueDictionary(object values)
+        /// <summary>
+        /// The callers to this method are used at startup only, thus it's a bit better to use
+        /// the uncached method because it will run faster for the first few times, and will not
+        /// consume memory long term.
+        /// </summary>
+        private static RouteValueDictionary CreateRouteValueDictionaryUncached(object values)
         {
             var dictionary = values as IDictionary<string, object>;
             if (dictionary != null)
@@ -196,7 +201,7 @@ namespace System.Web.Mvc
                 return new RouteValueDictionary(dictionary);
             }
 
-            return TypeHelper.ObjectToDictionary(values);
+            return TypeHelper.ObjectToDictionaryUncached(values);
         }
 
         private sealed class IgnoreRouteInternal : Route

@@ -11,23 +11,19 @@ namespace System.Web.WebPages.Test
         [Fact]
         public void PropertyHelperThrowsWhenPropertyIsNull()
         {
-            // Arrange
-            PropertyHelper helper = new PropertyHelper();
-
-            // Act + Assert
-            Assert.Throws<ArgumentNullException>(() => helper.Initialize(null));
+            // Arrange + Act + Assert
+            Assert.ThrowsArgumentNull(() => new PropertyHelper(null), "property");
         }
 
         [Fact]
         public void PropertyHelperReturnsNameCorrectly()
         {
             // Arrange
-            PropertyHelper helper = new PropertyHelper();
             var anonymous = new { foo = "bar" };
             PropertyInfo property = anonymous.GetType().GetProperties().First();
 
             // Act
-            helper.Initialize(property);
+            PropertyHelper helper = new PropertyHelper(property);
 
             // Assert
             Assert.Equal("foo", property.Name);
@@ -38,12 +34,11 @@ namespace System.Web.WebPages.Test
         public void PropertyHelperReturnsValueCorrectly()
         {
             // Arrange
-            PropertyHelper helper = new PropertyHelper();
             var anonymous = new { bar = "baz" };
             PropertyInfo property = anonymous.GetType().GetProperties().First();
 
             // Act
-            helper.Initialize(property);
+            PropertyHelper helper = new PropertyHelper(property);
 
             // Assert
             Assert.Equal("bar", helper.Name);
@@ -54,12 +49,11 @@ namespace System.Web.WebPages.Test
         public void PropertyHelperReturnsValueCorrectlyForValueTypes()
         {
             // Arrange
-            PropertyHelper helper = new PropertyHelper();
             var anonymous = new { foo = 32 };
             PropertyInfo property = anonymous.GetType().GetProperties().First();
 
             // Act
-            helper.Initialize(property);
+            PropertyHelper helper = new PropertyHelper(property);
 
             // Assert
             Assert.Equal("foo", helper.Name);
@@ -169,6 +163,30 @@ namespace System.Web.WebPages.Test
 
             // Assert
             Assert.Equal("Prop6", helper.Name);
+        }
+
+        private struct MyProperties
+        {
+            public int IntProp { get; set; }
+            public string StringProp { get; set; }
+        }
+
+        [Fact]
+        public void PropertyHelperWorksForStruct()
+        {
+            // Arrange
+            var anonymous = new MyProperties();
+
+            anonymous.IntProp = 3;
+            anonymous.StringProp = "Five";
+
+            // Act
+            PropertyHelper helper1 = PropertyHelper.GetProperties(anonymous).Where(prop => prop.Name == "IntProp").Single();
+            PropertyHelper helper2 = PropertyHelper.GetProperties(anonymous).Where(prop => prop.Name == "StringProp").Single();
+
+            // Assert
+            Assert.Equal(3, helper1.GetValue(anonymous));
+            Assert.Equal("Five", helper2.GetValue(anonymous));
         }
     }
 }

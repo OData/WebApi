@@ -2,6 +2,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace System.Web.WebPages
 {
@@ -11,7 +12,17 @@ namespace System.Web.WebPages
 
         public static new PropertyHelper[] GetProperties(object instance)
         {
-            return AnonymousObjectReflectionHelper.GetProperties<HtmlAttributePropertyHelper>(instance, _reflectionCache);
+            return AnonymousObjectReflectionHelper.GetProperties(instance, CreateInstance, _reflectionCache);
+        }
+
+        private static PropertyHelper CreateInstance(PropertyInfo property)
+        {
+            return new HtmlAttributePropertyHelper(property);
+        }
+
+        public HtmlAttributePropertyHelper(PropertyInfo property)
+            : base(property)
+        {
         }
 
         public override string Name

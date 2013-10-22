@@ -91,6 +91,7 @@
     <Compile Include="OData\EdmComplexCollectionObjectTest.cs" />
     <Compile Include="OData\EdmEntityCollectionObjectTest.cs" />
     <Compile Include="OData\EdmStructuredObjectTest.cs" />
+    <Compile Include="OData\FastPropertyAccessorTest.cs" />
     <Compile Include="OData\Formatter\ClrTypeCacheTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerContextTest.cs" />
     <Compile Include="OData\Formatter\ODataMessageWrapperTest.cs" />

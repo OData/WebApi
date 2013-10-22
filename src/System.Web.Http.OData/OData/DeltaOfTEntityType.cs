@@ -254,7 +254,7 @@ namespace System.Web.Http.OData
                 (backingType) => backingType
                     .GetProperties()
                     .Where(p => p.GetSetMethod() != null && p.GetGetMethod() != null)
-                    .Select<PropertyInfo, PropertyAccessor<TEntityType>>(p => new CompiledPropertyAccessor<TEntityType>(p))
+                    .Select<PropertyInfo, PropertyAccessor<TEntityType>>(p => new FastPropertyAccessor<TEntityType>(p))
                     .ToDictionary(p => p.Property.Name));
         }
     }

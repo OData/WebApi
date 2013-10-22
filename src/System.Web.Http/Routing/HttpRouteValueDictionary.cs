@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Web.Http.Internal;
 
 namespace System.Web.Http.Routing
 {
@@ -39,11 +40,11 @@ namespace System.Web.Http.Routing
             }
             else if (values != null)
             {
-                PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(values);
-                foreach (PropertyDescriptor prop in properties)
+                foreach (PropertyHelper property in PropertyHelper.GetProperties(values))
                 {
-                    object val = prop.GetValue(values);
-                    Add(prop.Name, val);
+                    // Extract the property values from the property helper
+                    // The advantage here is that the property helper caches fast accessors.
+                    Add(property.Name, property.GetValue(values));
                 }
             }
         }

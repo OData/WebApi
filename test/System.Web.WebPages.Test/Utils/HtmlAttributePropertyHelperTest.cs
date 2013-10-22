@@ -11,23 +11,19 @@ namespace System.Web.WebPages.Test
         [Fact]
         public void HtmlAttributePropertyHelperThrowsWhenPropertyIsNull()
         {
-            // Arrange
-            HtmlAttributePropertyHelper helper = new HtmlAttributePropertyHelper();
-
-            // Act + Assert
-            Assert.Throws<ArgumentNullException>(() => helper.Initialize(null));
+            // Arrange + Act + Assert
+            Assert.ThrowsArgumentNull(() => new HtmlAttributePropertyHelper(null), "property");
         }
 
         [Fact]
         public void HtmlAttributePropertyHelperRenamesPropertyNames()
         {
             // Arrange
-            HtmlAttributePropertyHelper helper = new HtmlAttributePropertyHelper();
             var anonymous = new { bar_baz = "foo" };
             PropertyInfo property = anonymous.GetType().GetProperties().First();
 
             // Act
-            helper.Initialize(property);
+            HtmlAttributePropertyHelper helper = new HtmlAttributePropertyHelper(property);
 
             // Assert
             Assert.Equal("bar_baz", property.Name);
@@ -38,12 +34,11 @@ namespace System.Web.WebPages.Test
         public void HtmlAttributePropertyHelperReturnsNameCorrectly()
         {
             // Arrange
-            HtmlAttributePropertyHelper helper = new HtmlAttributePropertyHelper();
             var anonymous = new { foo = "bar" };
             PropertyInfo property = anonymous.GetType().GetProperties().First();
 
             // Act
-            helper.Initialize(property);
+            HtmlAttributePropertyHelper helper = new HtmlAttributePropertyHelper(property);
 
             // Assert
             Assert.Equal("foo", property.Name);
@@ -54,12 +49,11 @@ namespace System.Web.WebPages.Test
         public void HtmlAttributePropertyHelperReturnsValueCorrectly()
         {
             // Arrange
-            HtmlAttributePropertyHelper helper = new HtmlAttributePropertyHelper();
             var anonymous = new { bar = "baz" };
             PropertyInfo property = anonymous.GetType().GetProperties().First();
 
             // Act
-            helper.Initialize(property);
+            HtmlAttributePropertyHelper helper = new HtmlAttributePropertyHelper(property);
 
             // Assert
             Assert.Equal("bar", helper.Name);
@@ -70,12 +64,11 @@ namespace System.Web.WebPages.Test
         public void HtmlAttributePropertyHelperReturnsValueCorrectlyForValueTypes()
         {
             // Arrange
-            HtmlAttributePropertyHelper helper = new HtmlAttributePropertyHelper();
             var anonymous = new { foo = 32 };
             PropertyInfo property = anonymous.GetType().GetProperties().First();
 
             // Act
-            helper.Initialize(property);
+            HtmlAttributePropertyHelper helper = new HtmlAttributePropertyHelper(property);
 
             // Assert
             Assert.Equal("foo", helper.Name);

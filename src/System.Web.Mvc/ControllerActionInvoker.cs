@@ -16,6 +16,11 @@ using Microsoft.Web.Infrastructure.DynamicValidationHelper;
 
 namespace System.Web.Mvc
 {
+    [SuppressMessage(
+        "Microsoft.Maintainability", 
+        "CA1506:AvoidExcessiveClassCoupling",
+        Justification = "This class has to work with both traditional and direct routing, which is the cause of the high" +
+        "number of classes it uses.")]
     public class ControllerActionInvoker : IActionInvoker
     {
         private static readonly ControllerDescriptorCache _staticDescriptorCache = new ControllerDescriptorCache();
@@ -108,6 +113,10 @@ namespace System.Web.Mvc
                     // used for binding.
                     controllerContext.RouteData = bestCandidate.RouteData;
                     controllerContext.RequestContext.RouteData = bestCandidate.RouteData;
+
+                    // We need to remove any optional parameters that haven't gotten a value (See MvcHandler)
+                    bestCandidate.RouteData.Values.RemoveFromDictionary((entry) => entry.Value == UrlParameter.Optional);
+
                     return bestCandidate.ActionDescriptor;
                 }
             }

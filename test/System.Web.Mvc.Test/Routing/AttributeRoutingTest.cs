@@ -239,6 +239,32 @@ namespace System.Web.Routing
             }
         }
 
+        [Fact]
+        public void AttributeRouting_OptionalParametersGetRemoved()
+        {
+            // Arrange
+            var controllerTypes = new[] { typeof(OptionalParameterController) };
+            var routes = new RouteCollection();
+            routes.MapMvcAttributeRoutes(controllerTypes);
+
+            HttpContextBase context = GetContext("~/Create");
+            RouteData routeData = routes.GetRouteData(context);
+            RequestContext requestContext = new RequestContext(context, routeData);
+            MvcHandler handler = new MvcHandler(requestContext);
+            handler.ControllerBuilder.SetControllerFactory(GetControllerFactory(controllerTypes));
+
+            // Act
+            handler.ProcessRequest(context);
+
+            // Assert
+            ContentResult result = Assert.IsType<ContentResult>(context.Items[ResultKey]);
+            Assert.Equal("Create()", result.Content);
+
+            // The request context should be updated to to contain the routedata of the direct route
+            Assert.Equal("{action}/{id}", ((Route)requestContext.RouteData.Route).Url);
+            Assert.Null(requestContext.RouteData.Values["id"]);
+        }
+
         private IControllerFactory GetControllerFactory(Type[] controllerTypes)
         {
             return new DefaultControllerFactory
@@ -731,6 +757,15 @@ namespace System.Web.Routing
         public override bool IsValidName(ControllerContext controllerContext, string actionName, MethodInfo methodInfo)
         {
             return String.Equals(actionName, ActionName, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Route("{action}/{id?}")]
+    public class OptionalParameterController : ResponseStoringController
+    {
+        public string Create()
+        {
+            return "Create()";
         }
     }
 }

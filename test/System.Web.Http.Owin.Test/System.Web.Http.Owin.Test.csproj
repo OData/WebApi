@@ -46,8 +46,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExceptionHandling\DefaultExceptionHandlerTests.cs" />
+    <Compile Include="ExceptionHandling\EmptyExceptionLoggerTests.cs" />
     <Compile Include="HttpMessageHandlerOptionsTests.cs" />
     <Compile Include="NonOwnedStreamTests.cs" />
+    <Compile Include="OwinExceptionCatchBlocksTests.cs" />
     <Compile Include="OwinHttpRequestContextTests.cs" />
     <Compile Include="HostAuthenticationAttributeTest.cs" />
     <Compile Include="HostAuthenticationFilterTest.cs" />

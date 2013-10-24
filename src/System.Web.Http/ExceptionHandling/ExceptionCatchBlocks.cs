@@ -6,7 +6,7 @@ using System.Web.Http.Filters;
 
 namespace System.Web.Http.ExceptionHandling
 {
-    /// <summary>Provides labels for catch blocks used within this assembly.</summary>
+    /// <summary>Provides the catch blocks used within this assembly.</summary>
     public static class ExceptionCatchBlocks
     {
         private static readonly ExceptionContextCatchBlock _httpBatchHandler =

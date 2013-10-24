@@ -1,15 +1,19 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.ExceptionServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Hosting;
+using System.Web.Http.Owin.ExceptionHandling;
 using System.Web.Http.Owin.Properties;
 using Microsoft.Owin;
 
@@ -23,6 +27,8 @@ namespace System.Web.Http.Owin
         private readonly HttpMessageHandler _messageHandler;
         private readonly HttpMessageInvoker _messageInvoker;
         private readonly IHostBufferPolicySelector _bufferPolicySelector;
+        private readonly IExceptionLogger _exceptionLogger;
+        private readonly IExceptionHandler _exceptionHandler;
 
         private bool _disposed;
 
@@ -52,6 +58,22 @@ namespace System.Web.Http.Owin
             {
                 throw new ArgumentException(Error.Format(OwinResources.TypePropertyMustNotBeNull,
                     typeof(HttpMessageHandlerOptions).Name, "BufferPolicySelector"), "options");
+            }
+
+            _exceptionLogger = options.ExceptionLogger;
+
+            if (_exceptionLogger == null)
+            {
+                throw new ArgumentException(Error.Format(OwinResources.TypePropertyMustNotBeNull,
+                    typeof(HttpMessageHandlerOptions).Name, "ExceptionLogger"), "options");
+            }
+
+            _exceptionHandler = options.ExceptionHandler;
+
+            if (_exceptionHandler == null)
+            {
+                throw new ArgumentException(Error.Format(OwinResources.TypePropertyMustNotBeNull,
+                    typeof(HttpMessageHandlerOptions).Name, "ExceptionHandler"), "options");
             }
         }
 
@@ -83,6 +105,18 @@ namespace System.Web.Http.Owin
             get { return _bufferPolicySelector; }
         }
 
+        /// <summary>Gets the <see cref="IExceptionLogger"/> to use to log unhandled exceptions.</summary>
+        public IExceptionLogger ExceptionLogger
+        {
+            get { return _exceptionLogger; }
+        }
+
+        /// <summary>Gets the <see cref="IExceptionHandler"/> to use to process unhandled exceptions.</summary>
+        public IExceptionHandler ExceptionHandler
+        {
+            get { return _exceptionHandler; }
+        }
+
         /// <inheritdoc />
         public override Task Invoke(IOwinContext context)
         {
@@ -109,11 +143,12 @@ namespace System.Web.Http.Owin
         private async Task InvokeCore(IOwinContext context, IOwinRequest owinRequest,
             IOwinResponse owinResponse)
         {
+            CancellationToken cancellationToken = owinRequest.CallCancelled;
             HttpContent requestContent;
 
             if (!owinRequest.Body.CanSeek && _bufferPolicySelector.UseBufferedInputStream(hostContext: context))
             {
-                requestContent = await CreateBufferedRequestContentAsync(owinRequest);
+                requestContent = await CreateBufferedRequestContentAsync(owinRequest, cancellationToken);
             }
             else
             {
@@ -130,7 +165,7 @@ namespace System.Web.Http.Owin
 
             try
             {
-                response = await _messageInvoker.SendAsync(request, owinRequest.CallCancelled);
+                response = await _messageInvoker.SendAsync(request, cancellationToken);
 
                 // Handle null responses
                 if (response == null)
@@ -149,11 +184,11 @@ namespace System.Web.Http.Owin
 
                     if (response.Content != null && _bufferPolicySelector.UseBufferedOutputStream(response))
                     {
-                        response = await BufferResponseBodyAsync(request, response);
+                        response = await BufferResponseContentAsync(request, response, cancellationToken);
                     }
 
                     FixUpContentLengthHeaders(response);
-                    await SendResponseMessageAsync(response, owinResponse);
+                    await SendResponseMessageAsync(request, response, owinResponse, cancellationToken);
                 }
             }
             finally
@@ -182,12 +217,15 @@ namespace System.Web.Http.Owin
             return new StreamContent(new NonOwnedStream(owinRequest.Body));
         }
 
-        private static async Task<HttpContent> CreateBufferedRequestContentAsync(IOwinRequest owinRequest)
+        private static async Task<HttpContent> CreateBufferedRequestContentAsync(IOwinRequest owinRequest,
+            CancellationToken cancellationToken)
         {
             // We need to replace the request body with a buffered stream so that other components can read the stream.
             // For this stream to be useful, it must NOT be diposed along with the request. Streams created by
             // StreamContent do get disposed along with the request, so use MemoryStream to buffer separately.
             MemoryStream buffer = new MemoryStream();
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             using (StreamContent copier = new StreamContent(owinRequest.Body))
             {
@@ -264,39 +302,72 @@ namespace System.Web.Http.Owin
             return false;
         }
 
-        private static async Task<HttpResponseMessage> BufferResponseBodyAsync(HttpRequestMessage request,
-            HttpResponseMessage response)
+        private async Task<HttpResponseMessage> BufferResponseContentAsync(HttpRequestMessage request,
+            HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            Exception exception = null;
+            ExceptionDispatchInfo exceptionInfo;
+
+            cancellationToken.ThrowIfCancellationRequested();
+
             try
             {
                 await response.Content.LoadIntoBufferAsync();
+                return response;
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                exception = e;
+                exceptionInfo = ExceptionDispatchInfo.Capture(exception);
             }
 
             // If the content can't be buffered, create a buffered error response for the exception
             // This code will commonly run when a formatter throws during the process of serialization
-            if (exception != null)
-            {
-                response.Dispose();
-                response = request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception);
 
-                try
-                {
-                    await response.Content.LoadIntoBufferAsync();
-                }
-                catch
-                {
-                    response.Dispose();
-                    // We tried to send back an error with the exception, but we couldn't. It's an edge case; the best
-                    // we can do is to send back and empty 500.
-                    response = request.CreateResponse(HttpStatusCode.InternalServerError);
-                }
+            Debug.Assert(exceptionInfo.SourceException != null);
+
+            ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException,
+                OwinExceptionCatchBlocks.HttpMessageHandlerAdapterBufferContent, request, response);
+
+            await _exceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
+                cancellationToken: cancellationToken);
+            HttpResponseMessage errorResponse = await _exceptionHandler.HandleAsync(exceptionContext,
+                cancellationToken);
+
+            response.Dispose();
+
+            if (errorResponse == null)
+            {
+                exceptionInfo.Throw();
+                return null;
             }
-            return response;
+
+            // We have an error response to try to buffer and send back.
+
+            response = errorResponse;
+            cancellationToken.ThrowIfCancellationRequested();
+
+            Exception errorException;
+
+            try
+            {
+                // Try to buffer the error response and send it back.
+                await response.Content.LoadIntoBufferAsync();
+                return response;
+            }
+            catch (Exception exception)
+            {
+                errorException = exception;
+            }
+
+            // We tried to send back an error response with content, but we couldn't. It's an edge case; the best we
+            // can do is to log that exception and send back an empty 500.
+
+            ExceptionContext errorExceptionContext = new ExceptionContext(errorException,
+                OwinExceptionCatchBlocks.HttpMessageHandlerAdapterBufferError, request, response);
+            await _exceptionLogger.LogAsync(errorExceptionContext, canBeHandled: false,
+                cancellationToken: cancellationToken);
+
+            response.Dispose();
+            return request.CreateResponse(HttpStatusCode.InternalServerError);
         }
 
         // Responsible for setting Content-Length and Transfer-Encoding if needed
@@ -326,7 +397,8 @@ namespace System.Web.Http.Owin
             }
         }
 
-        private static Task SendResponseMessageAsync(HttpResponseMessage response, IOwinResponse owinResponse)
+        private Task SendResponseMessageAsync(HttpRequestMessage request, HttpResponseMessage response,
+            IOwinResponse owinResponse, CancellationToken cancellationToken)
         {
             owinResponse.StatusCode = (int)response.StatusCode;
             owinResponse.ReasonPhrase = response.ReasonPhrase;
@@ -353,20 +425,37 @@ namespace System.Web.Http.Owin
                     responseHeaders[contentHeader.Key] = contentHeader.Value.AsArray();
                 }
 
-                return SendResponseContentAsync(responseContent, owinResponse.Body);
+                // Copy body
+                return SendResponseContentAsync(request, response, owinResponse.Body, cancellationToken);
             }
         }
 
-        private static async Task SendResponseContentAsync(HttpContent content, Stream body)
+        private async Task SendResponseContentAsync(HttpRequestMessage request, HttpResponseMessage response,
+            Stream body, CancellationToken cancellationToken)
         {
+            Contract.Assert(response != null);
+            Contract.Assert(response.Content != null);
+
+            Exception exception;
+            cancellationToken.ThrowIfCancellationRequested();
+
             try
             {
-                await content.CopyToAsync(body);
+                await response.Content.CopyToAsync(body);
+                return;
             }
-            catch
+            catch (Exception ex)
             {
-                AbortResponseStream(body);
+                exception = ex;
             }
+            
+            // We're streaming content, so we can only call loggers, not handlers, as we've already (possibly) send the
+            // status code and headers across the wire. Log the exception, but then just abort.
+            ExceptionContext exceptionContext = new ExceptionContext(exception,
+                OwinExceptionCatchBlocks.HttpMessageHandlerAdapterStreamContent, request, response);
+            await _exceptionLogger.LogAsync(exceptionContext, canBeHandled: false,
+                cancellationToken: cancellationToken);
+            AbortResponseStream(body);
         }
 
         private static void AbortResponseStream(Stream body)
@@ -392,7 +481,9 @@ namespace System.Web.Http.Owin
             return new HttpMessageHandlerOptions
             {
                 MessageHandler = messageHandler,
-                BufferPolicySelector = bufferPolicySelector
+                BufferPolicySelector = bufferPolicySelector,
+                ExceptionLogger = new EmptyExceptionLogger(),
+                ExceptionHandler = new DefaultExceptionHandler()
             };
         }
 

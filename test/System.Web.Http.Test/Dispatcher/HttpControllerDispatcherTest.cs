@@ -251,8 +251,7 @@ namespace System.Web.Http.Dispatcher
             exceptionHandlerMock
                 .Setup(h => h.HandleAsync(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()))
                 .Callback<ExceptionHandlerContext, CancellationToken>((c, i) => c.Result = null)
-                .Returns(Task.FromResult(0))
-                .Verifiable();
+                .Returns(Task.FromResult(0));
             IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
 
             using (HttpRequestMessage request = CreateRequestWithRouteData())
@@ -293,8 +292,7 @@ namespace System.Web.Http.Dispatcher
                     .Setup(h => h.HandleAsync(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()))
                     .Callback<ExceptionHandlerContext, CancellationToken>((c, i) =>
                         c.Result = new ResponseMessageResult(expectedResponse))
-                    .Returns(Task.FromResult(0))
-                    .Verifiable();
+                    .Returns(Task.FromResult(0));
                 IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
 
                 using (HttpRequestMessage request = CreateRequestWithRouteData())

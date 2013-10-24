@@ -5,7 +5,7 @@ using System.Web.Http.WebHost.Routing;
 
 namespace System.Web.Http.WebHost
 {
-    /// <summary>Provides labels for catch blocks used within this assembly.</summary>
+    /// <summary>Provides the catch blocks used within this assembly.</summary>
     public static class WebHostExceptionCatchBlocks
     {
         private static readonly ExceptionContextCatchBlock _httpControllerHandlerBufferContent =

@@ -24,11 +24,19 @@ namespace System.Web.Http.ExceptionHandling
             return GetLogger(services);
         }
 
-        internal static IExceptionLogger GetLogger(ServicesContainer services)
+        /// <summary>Gets an exception logger that calls all registered logger services.</summary>
+        /// <param name="services">The services container.</param>
+        /// <returns>A composite logger.</returns>
+        public static IExceptionLogger GetLogger(ServicesContainer services)
         {
-            Contract.Assert(services != null);
+            if (services == null)
+            {
+                throw new ArgumentNullException("services");
+            }
 
-            return services.ExceptionServicesLogger.Value;
+            Lazy<IExceptionLogger> exceptionServicesLogger = services.ExceptionServicesLogger;
+            Contract.Assert(exceptionServicesLogger != null);
+            return exceptionServicesLogger.Value;
         }
 
         internal static IExceptionLogger CreateLogger(ServicesContainer services)
@@ -61,11 +69,25 @@ namespace System.Web.Http.ExceptionHandling
             return GetHandler(services);
         }
 
-        internal static IExceptionHandler GetHandler(ServicesContainer services)
+        /// <summary>
+        /// Gets an exception handler that calls the registered handler service, if any, and ensures exceptions do not
+        /// accidentally propagate to the host.
+        /// </summary>
+        /// <param name="services">The services container.</param>
+        /// <returns>
+        /// An exception handler that calls any registered handler and ensures exceptions do not accidentally propagate
+        /// to the host.
+        /// </returns>
+        public static IExceptionHandler GetHandler(ServicesContainer services)
         {
-            Contract.Assert(services != null);
+            if (services == null)
+            {
+                throw new ArgumentNullException("services");
+            }
 
-            return services.ExceptionServicesHandler.Value;
+            Lazy<IExceptionHandler> exceptionServicesHandler = services.ExceptionServicesHandler;
+            Contract.Assert(exceptionServicesHandler != null);
+            return exceptionServicesHandler.Value;
         }
 
         internal static IExceptionHandler CreateHandler(ServicesContainer services)

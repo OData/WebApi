@@ -46,6 +46,9 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="ExceptionHandling\DefaultExceptionHandler.cs" />
+    <Compile Include="ExceptionHandling\EmptyExceptionLogger.cs" />
+    <Compile Include="OwinExceptionCatchBlocks.cs" />
     <Compile Include="HostAuthenticationAttribute.cs" />
     <Compile Include="HttpMessageHandlerOptions.cs" />
     <Compile Include="NonOwnedStream.cs" />

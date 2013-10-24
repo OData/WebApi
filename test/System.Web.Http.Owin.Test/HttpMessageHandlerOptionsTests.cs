@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Hosting;
 using Microsoft.TestCommon;
 using Moq;
@@ -43,9 +44,49 @@ namespace System.Web.Http.Owin
             Assert.Same(expectedBufferPolicySelector, bufferPolicy);
         }
 
+        [Fact]
+        public void ExceptionLoggerGet_ReturnsSpecifiedInstance()
+        {
+            // Arrange
+            HttpMessageHandlerOptions product = CreateProductUnderTest();
+            IExceptionLogger expectedExceptionLogger = CreateDummyExceptionLogger();
+            product.ExceptionLogger = expectedExceptionLogger;
+
+            // Act
+            IExceptionLogger exceptionLogger = product.ExceptionLogger;
+
+            // Assert
+            Assert.Same(expectedExceptionLogger, exceptionLogger);
+        }
+
+        [Fact]
+        public void ExceptionHandlerGet_ReturnsSpecifiedInstance()
+        {
+            // Arrange
+            HttpMessageHandlerOptions product = CreateProductUnderTest();
+            IExceptionHandler expectedExceptionHandler = CreateDummyExceptionHandler();
+            product.ExceptionHandler = expectedExceptionHandler;
+
+            // Act
+            IExceptionHandler exceptionHandler = product.ExceptionHandler;
+
+            // Assert
+            Assert.Same(expectedExceptionHandler, exceptionHandler);
+        }
+
         private static IHostBufferPolicySelector CreateDummyBufferPolicy()
         {
             return new Mock<IHostBufferPolicySelector>(MockBehavior.Strict).Object;
+        }
+
+        private static IExceptionHandler CreateDummyExceptionHandler()
+        {
+            return new Mock<IExceptionHandler>(MockBehavior.Strict).Object;
+        }
+
+        private static IExceptionLogger CreateDummyExceptionLogger()
+        {
+            return new Mock<IExceptionLogger>(MockBehavior.Strict).Object;
         }
 
         private static HttpMessageHandler CreateDummyMessageHandler()

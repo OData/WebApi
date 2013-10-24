@@ -49,6 +49,16 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
+        public void GetLoggerWithServices_IfServicesIsNull_Throws()
+        {
+            // Arrange
+            ServicesContainer services = null;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => ExceptionServices.GetLogger(services), "services");
+        }
+
+        [Fact]
         public void GetLoggerWithConfiguration_ReturnsCompositeExceptionLoggerWithServicesLoggers()
         {
             // Arrange
@@ -129,6 +139,16 @@ namespace System.Web.Http.ExceptionHandling
                 IExceptionHandler innerHandler = ((LastChanceExceptionHandler)handler).InnerHandler;
                 Assert.IsType<EmptyExceptionHandler>(innerHandler);
             }
+        }
+
+        [Fact]
+        public void GetHandlerWithServices_IfServicesIsNull_Throws()
+        {
+            // Arrange
+            ServicesContainer services = null;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => ExceptionServices.GetHandler(services), "services");
         }
 
         [Fact]

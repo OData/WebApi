@@ -489,4 +489,13 @@
   <data name="TypeHelpers_CannotCreateInstance" xml:space="preserve">
     <value>{0} Object type '{1}'.</value>
   </data>
+  <data name="EnumHelper_InvalidMetadataParameter" xml:space="preserve">
+    <value>ModelType property must not be null.</value>
+  </data>
+  <data name="EnumHelper_InvalidValueParameter" xml:space="preserve">
+    <value>Invalid value parameter type '{0}'. Must match type parameter '{1}'.</value>
+  </data>
+  <data name="EnumHelper_InvalidParameterType" xml:space="preserve">
+    <value>Type '{0}' is not supported.</value>
+  </data>
 </root>

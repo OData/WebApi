@@ -547,6 +547,33 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ModelType property must not be null..
+        /// </summary>
+        internal static string EnumHelper_InvalidMetadataParameter {
+            get {
+                return ResourceManager.GetString("EnumHelper_InvalidMetadataParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; is not supported..
+        /// </summary>
+        internal static string EnumHelper_InvalidParameterType {
+            get {
+                return ResourceManager.GetString("EnumHelper_InvalidParameterType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid value parameter type &apos;{0}&apos;. Must match type parameter &apos;{1}&apos;..
+        /// </summary>
+        internal static string EnumHelper_InvalidValueParameter {
+            get {
+                return ResourceManager.GetString("EnumHelper_InvalidValueParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; does not inherit from Exception..
         /// </summary>
         internal static string ExceptionViewAttribute_NonExceptionType {

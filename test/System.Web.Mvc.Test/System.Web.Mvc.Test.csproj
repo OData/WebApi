@@ -29,6 +29,7 @@
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Routing" />
     <Reference Include="xunit, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -48,6 +49,7 @@
     <Compile Include="Async\Test\TaskAsyncActionDescriptorTest.cs" />
     <Compile Include="Async\Test\TaskWrapperAsyncResultTest.cs" />
     <Compile Include="Html\Test\DisplayNameExtensionsTest.cs" />
+    <Compile Include="Html\Test\EnumHelperTest.cs" />
     <Compile Include="Html\Test\NameExtensionsTest.cs" />
     <Compile Include="Html\Test\ValueExtensionsTest.cs" />
     <Compile Include="Razor\Test\MvcCSharpRazorCodeGeneratorTest.cs" />

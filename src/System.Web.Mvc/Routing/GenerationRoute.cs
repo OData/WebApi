@@ -9,25 +9,18 @@ namespace System.Web.Mvc.Routing
     /// for generating a link (GetVirtualPath). We use these because the subroutes produced by direct
     /// routing, don't go into the main collection and so can't be matched by name.
     /// </summary>
-    internal class GenerationRoute : RouteBase
+    internal class GenerationRoute : Route
     {
-        public GenerationRoute(string name, Route route)
+        public GenerationRoute(Route route)
+            : base(route.Url, route.Defaults, route.Constraints, route.DataTokens, route.RouteHandler)
         {
-            if (String.IsNullOrEmpty(name))
-            {
-                throw Error.ParameterCannotBeNullOrEmpty("name");
-            }
-            
             if (route == null)
             {
                 throw Error.ArgumentNull("route");
             }
 
-            Name = name;
             Route = route;
         }
-
-        public string Name { get; private set; }
 
         public Route Route { get; private set; }
 

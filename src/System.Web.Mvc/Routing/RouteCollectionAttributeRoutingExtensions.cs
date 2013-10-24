@@ -9,8 +9,6 @@ namespace System.Web.Mvc
 {
     public static class RouteCollectionAttributeRoutingExtensions
     {
-        internal const string AttributeRouteName = "MS_AttributeRoute";
-
         /// <summary>
         /// Maps the attribute-defined routes for the application.
         /// </summary>
@@ -62,19 +60,23 @@ namespace System.Web.Mvc
             RouteEntry[] sorted = routeEntries.OrderBy(r => r.Route.GetOrder()).ThenBy(r => r.Route.GetPrecedence()).ToArray();
 
             RouteCollectionRoute aggregateRoute = new RouteCollectionRoute();
+            if (sorted.Length > 0)
+            {
+                routes.Add(aggregateRoute);
+            }
+            
             foreach (var routeEntry in sorted)
             {
                 aggregateRoute.SubRoutes.Add(routeEntry.Name, routeEntry.Route);
 
-                if (routeEntry.Name != null)
+                if (routeEntry.Name == null)
                 {
-                    routes.Add(routeEntry.Name, new GenerationRoute(routeEntry.Name, routeEntry.Route));
+                    routes.Add(new GenerationRoute(routeEntry.Route));
                 }
-            }
-
-            if (aggregateRoute.SubRoutes.Count > 0)
-            {
-                routes.Add(AttributeRouteName, aggregateRoute);
+                else
+                {
+                    routes.Add(routeEntry.Name, new GenerationRoute(routeEntry.Route));
+                }
             }
         }
     }

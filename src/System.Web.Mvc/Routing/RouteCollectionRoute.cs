@@ -67,15 +67,7 @@ namespace System.Web.Mvc.Routing
 
         public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary values)
         {
-            foreach (var route in SubRoutes)
-            {
-                VirtualPathData result = route.GetVirtualPath(requestContext, values);
-                if (result != null)
-                {
-                    return result;
-                }
-            }
-
+            // Link generation is not supported via the RouteCollectionRoute - see GenerationRoute.
             return null;
         }
     }

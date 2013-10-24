@@ -397,8 +397,7 @@ namespace System.Web.Routing
 
         private ICollection<Route> GetAttributeRoutes(RouteCollection routes)
         {
-            string routeName = RouteCollectionAttributeRoutingExtensions.AttributeRouteName;
-            RouteCollectionRoute attributeRoute = routes[routeName] as RouteCollectionRoute;
+            RouteCollectionRoute attributeRoute = routes.OfType<RouteCollectionRoute>().Single();
             Assert.NotNull(attributeRoute);
 
             return attributeRoute.SubRoutes;

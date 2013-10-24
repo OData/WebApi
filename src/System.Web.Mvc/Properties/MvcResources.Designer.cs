@@ -1015,6 +1015,33 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to determine ModelMetadata for expression &apos;{0}&apos;..
+        /// </summary>
+        internal static string SelectExtensions_InvalidExpressionParameterNoMetadata {
+            get {
+                return ResourceManager.GetString("SelectExtensions_InvalidExpressionParameterNoMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to determine type of expression &apos;{0}&apos;..
+        /// </summary>
+        internal static string SelectExtensions_InvalidExpressionParameterNoModelType {
+            get {
+                return ResourceManager.GetString("SelectExtensions_InvalidExpressionParameterNoModelType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Return type &apos;{0}&apos; is not supported..
+        /// </summary>
+        internal static string SelectExtensions_InvalidExpressionParameterType {
+            get {
+                return ResourceManager.GetString("SelectExtensions_InvalidExpressionParameterType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The SessionStateTempDataProvider class requires session state to be enabled..
         /// </summary>
         internal static string SessionStateTempDataProvider_SessionStateDisabled {

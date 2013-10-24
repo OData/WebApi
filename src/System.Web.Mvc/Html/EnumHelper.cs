@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Mvc.Properties;
 
@@ -11,13 +12,15 @@ namespace System.Web.Mvc.Html
     {
         /// <summary>
         /// Gets a value indicating whether the given <paramref name="type"/> or an expression of this
-        /// <see cref="Type"/> is suitable for use in <see cref="GetSelectList(Type)"/> and ...
+        /// <see cref="Type"/> is suitable for use in <see cref="GetSelectList(Type)"/> and <see
+        /// cref="SelectExtensions.EnumDropDownListFor{TModel,TEnum}(HtmlHelper{TModel}, Expression{Func{TModel, TEnum}})"/>
         /// calls.
         /// </summary>
         /// <param name="type">The <see cref="Type"/> to check.</param>
         /// <returns>
         /// <see langword="true"/> if <see cref="GetSelectList(Type)"/> will not throw when passed given
-        /// <see cref="Type"/> and ...
+        /// <see cref="Type"/> and <see
+        /// cref="SelectExtensions.EnumDropDownListFor{TModel,TEnum}(HtmlHelper{TModel}, Expression{Func{TModel, TEnum}})"/>
         /// will not throw when passed an expression of this <see cref="Type"/>; <see langword="false"/> otherwise.
         /// </returns>
         /// <remarks>
@@ -45,13 +48,15 @@ namespace System.Web.Mvc.Html
 
         /// <summary>
         /// Gets a value indicating whether the given <paramref name="metadata"/> or associated expression is suitable
-        /// for use in <see cref="GetSelectList(ModelMetadata)"/> and ...
+        /// for use in <see cref="GetSelectList(ModelMetadata)"/> and <see
+        /// cref="SelectExtensions.EnumDropDownListFor{TModel,TEnum}(HtmlHelper{TModel}, Expression{Func{TModel, TEnum}})"/>
         /// calls.
         /// </summary>
         /// <param name="metadata">The <see cref="ModelMetadata"/> to check.</param>
         /// <returns>
         /// <see langword="true"/> if <see cref="GetSelectList(ModelMetadata)"/> will return not throw when passed
-        /// given <see cref="ModelMetadata"/> and ...
+        /// given <see cref="ModelMetadata"/> and <see
+        /// cref="SelectExtensions.EnumDropDownListFor{TModel,TEnum}(HtmlHelper{TModel}, Expression{Func{TModel, TEnum}})"/>
         /// will not throw when passed associated expression; <see langword="false"/> otherwise.
         /// </returns>
         /// <remarks>

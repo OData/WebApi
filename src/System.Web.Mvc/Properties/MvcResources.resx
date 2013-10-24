@@ -498,4 +498,13 @@
   <data name="EnumHelper_InvalidParameterType" xml:space="preserve">
     <value>Type '{0}' is not supported.</value>
   </data>
+  <data name="SelectExtensions_InvalidExpressionParameterNoMetadata" xml:space="preserve">
+    <value>Unable to determine ModelMetadata for expression '{0}'.</value>
+  </data>
+  <data name="SelectExtensions_InvalidExpressionParameterNoModelType" xml:space="preserve">
+    <value>Unable to determine type of expression '{0}'.</value>
+  </data>
+  <data name="SelectExtensions_InvalidExpressionParameterType" xml:space="preserve">
+    <value>Return type '{0}' is not supported.</value>
+  </data>
 </root>

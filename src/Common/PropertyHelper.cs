@@ -25,12 +25,7 @@ namespace System.Web.WebPages
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "This is intended the Name is auto set differently per type and the type is internal")]
         public PropertyHelper(PropertyInfo property)
         {
-            if (property == null)
-            {
-                throw new ArgumentNullException("property");
-            }
-
-            Contract.Assert(_valueGetter == null);
+            Contract.Assert(property != null);
 
             Name = property.Name;
             _valueGetter = MakeFastPropertyGetter(property);
@@ -42,8 +37,8 @@ namespace System.Web.WebPages
         /// <param name="propertyInfo">propertyInfo to extract the getter for.</param>
         /// <returns>a fast setter.</returns>
         /// <remarks>This method is more memory efficient than a dynamically compiled lambda, and about the same speed.</remarks>
-        public static Action<TInputContainer, object> MakeFastPropertySetter<TInputContainer>(PropertyInfo propertyInfo)
-            where TInputContainer : class
+        public static Action<TDeclaringType, object> MakeFastPropertySetter<TDeclaringType>(PropertyInfo propertyInfo)
+            where TDeclaringType : class
         {
             Contract.Assert(propertyInfo != null);
 
@@ -62,12 +57,12 @@ namespace System.Web.WebPages
 
             Delegate callPropertySetterDelegate;
 
-            // Create a delegate TInput -> TOutput
+            // Create a delegate TValue -> "TDeclaringType.Property"
             var propertySetterAsAction = setMethod.CreateDelegate(typeof(Action<,>).MakeGenericType(typeInput, typeValue));
             var callPropertySetterClosedGenericMethod = _callPropertySetterOpenGenericMethod.MakeGenericMethod(typeInput, typeValue);
-            callPropertySetterDelegate = Delegate.CreateDelegate(typeof(Action<TInputContainer, object>), propertySetterAsAction, callPropertySetterClosedGenericMethod);
+            callPropertySetterDelegate = Delegate.CreateDelegate(typeof(Action<TDeclaringType, object>), propertySetterAsAction, callPropertySetterClosedGenericMethod);
 
-            return (Action<TInputContainer, object>)callPropertySetterDelegate;
+            return (Action<TDeclaringType, object>)callPropertySetterDelegate;
         }
 
         public virtual string Name { get; protected set; }
@@ -86,7 +81,7 @@ namespace System.Web.WebPages
         /// <returns>a cached array of all public property getters from the underlying type of this instance.</returns>
         public static PropertyHelper[] GetProperties(object instance)
         {
-            return AnonymousObjectReflectionHelper.GetProperties(instance, CreateInstance, _reflectionCache);
+            return GetProperties(instance, CreateInstance, _reflectionCache);
         }
 
         /// <summary>
@@ -113,14 +108,14 @@ namespace System.Web.WebPages
             Delegate callPropertyGetterDelegate;
             if (typeInput.IsValueType)
             {
-                // Create a delegate (ref TInput) -> TOutput
+                // Create a delegate (ref TDeclaringType) -> TValue
                 Delegate propertyGetterAsFunc = getMethod.CreateDelegate(typeof(ByRefFunc<,>).MakeGenericType(typeInput, typeOutput));
                 MethodInfo callPropertyGetterClosedGenericMethod = _callPropertyGetterByReferenceOpenGenericMethod.MakeGenericMethod(typeInput, typeOutput);
                 callPropertyGetterDelegate = Delegate.CreateDelegate(typeof(Func<object, object>), propertyGetterAsFunc, callPropertyGetterClosedGenericMethod);
             }
             else
             {
-                // Create a delegate TInput -> TOutput
+                // Create a delegate TDeclaringType -> TValue
                 Delegate propertyGetterAsFunc = getMethod.CreateDelegate(typeof(Func<,>).MakeGenericType(typeInput, typeOutput));
                 MethodInfo callPropertyGetterClosedGenericMethod = _callPropertyGetterOpenGenericMethod.MakeGenericMethod(typeInput, typeOutput);
                 callPropertyGetterDelegate = Delegate.CreateDelegate(typeof(Func<object, object>), propertyGetterAsFunc, callPropertyGetterClosedGenericMethod);
@@ -135,64 +130,61 @@ namespace System.Web.WebPages
         }
 
         // Implementation of the fast getter.
-        private delegate TOutput ByRefFunc<TInput, TOutput>(ref TInput arg);
+        private delegate TValue ByRefFunc<TDeclaringType, TValue>(ref TDeclaringType arg);
 
         private static readonly MethodInfo _callPropertyGetterOpenGenericMethod = typeof(PropertyHelper).GetMethod("CallPropertyGetter", BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly MethodInfo _callPropertyGetterByReferenceOpenGenericMethod = typeof(PropertyHelper).GetMethod("CallPropertyGetterByReference", BindingFlags.NonPublic | BindingFlags.Static);
 
-        private static object CallPropertyGetter<TInput, TOutput>(Func<TInput, TOutput> getter, object @this)
+        private static object CallPropertyGetter<TDeclaringType, TValue>(Func<TDeclaringType, TValue> getter, object @this)
         {
-            return getter((TInput)@this);
+            return getter((TDeclaringType)@this);
         }
 
-        private static object CallPropertyGetterByReference<TInput, TOutput>(ByRefFunc<TInput, TOutput> getter, object @this)
+        private static object CallPropertyGetterByReference<TDeclaringType, TValue>(ByRefFunc<TDeclaringType, TValue> getter, object @this)
         {
-            TInput unboxed = (TInput)@this;
+            TDeclaringType unboxed = (TDeclaringType)@this;
             return getter(ref unboxed);
         }
 
         // Implementation of the fast setter.
         private static readonly MethodInfo _callPropertySetterOpenGenericMethod = typeof(PropertyHelper).GetMethod("CallPropertySetter", BindingFlags.NonPublic | BindingFlags.Static);
 
-        private static void CallPropertySetter<TInputContainer, TInput>(Action<TInputContainer, TInput> setter, object @this, object value)
+        private static void CallPropertySetter<TDeclaringType, TValue>(Action<TDeclaringType, TValue> setter, object @this, object value)
         {
-            setter((TInputContainer)@this, (TInput)value);
+            setter((TDeclaringType)@this, (TValue)value);
         }
 
-        protected static class AnonymousObjectReflectionHelper
+        protected static PropertyHelper[] GetProperties(object instance,
+                                                        Func<PropertyInfo, PropertyHelper> createPropertyHelper,
+                                                        ConcurrentDictionary<Type, PropertyHelper[]> cache)
         {
-            public static PropertyHelper[] GetProperties(object instance,
-                                                            Func<PropertyInfo, PropertyHelper> createPropertyHelper,
-                                                            ConcurrentDictionary<Type, PropertyHelper[]> cache)
+            // Using an array rather than IEnumerable, as this will be called on the hot path numerous times.
+            PropertyHelper[] helpers;
+
+            Type type = instance.GetType();
+
+            if (!cache.TryGetValue(type, out helpers))
             {
-                // Using an array rather than IEnumerable, as this will be called on the hot path numerous times.
-                PropertyHelper[] helpers;
+                // We avoid loading indexed properties using the where statement.
+                // Indexed properties are not useful (or valid) for grabbing properties off an anonymous object.
+                IEnumerable<PropertyInfo> properties = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
+                                                           .Where(prop => prop.GetIndexParameters().Length == 0 &&
+                                                                          prop.GetMethod != null);
 
-                Type type = instance.GetType();
+                var newHelpers = new List<PropertyHelper>();
 
-                if (!cache.TryGetValue(type, out helpers))
+                foreach (PropertyInfo property in properties)
                 {
-                    // We avoid loading indexed properties using the where statement.
-                    // Indexed properties are not useful (or valid) for grabbing properties off an anonymous object.
-                    IEnumerable<PropertyInfo> properties = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
-                                                               .Where(prop => prop.GetIndexParameters().Length == 0 &&
-                                                                              prop.GetMethod != null);
+                    PropertyHelper propertyHelper = createPropertyHelper(property);
 
-                    var newHelpers = new List<PropertyHelper>();
-
-                    foreach (PropertyInfo property in properties)
-                    {
-                        PropertyHelper propertyHelper = createPropertyHelper(property);
-
-                        newHelpers.Add(propertyHelper);
-                    }
-
-                    helpers = newHelpers.ToArray();
-                    cache.TryAdd(type, helpers);
+                    newHelpers.Add(propertyHelper);
                 }
 
-                return helpers;
+                helpers = newHelpers.ToArray();
+                cache.TryAdd(type, helpers);
             }
+
+            return helpers;
         }
     }
 }

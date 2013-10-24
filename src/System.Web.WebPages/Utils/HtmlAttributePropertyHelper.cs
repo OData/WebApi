@@ -12,7 +12,7 @@ namespace System.Web.WebPages
 
         public static new PropertyHelper[] GetProperties(object instance)
         {
-            return AnonymousObjectReflectionHelper.GetProperties(instance, CreateInstance, _reflectionCache);
+            return GetProperties(instance, CreateInstance, _reflectionCache);
         }
 
         private static PropertyHelper CreateInstance(PropertyInfo property)

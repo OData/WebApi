@@ -9,13 +9,6 @@ namespace System.Web.WebPages.Test
     public class PropertyHelperTest
     {
         [Fact]
-        public void PropertyHelperThrowsWhenPropertyIsNull()
-        {
-            // Arrange + Act + Assert
-            Assert.ThrowsArgumentNull(() => new PropertyHelper(null), "property");
-        }
-
-        [Fact]
         public void PropertyHelperReturnsNameCorrectly()
         {
             // Arrange

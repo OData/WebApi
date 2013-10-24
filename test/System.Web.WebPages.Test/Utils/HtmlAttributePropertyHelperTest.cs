@@ -9,13 +9,6 @@ namespace System.Web.WebPages.Test
     public class HtmlAttributePropertyHelperTest
     {
         [Fact]
-        public void HtmlAttributePropertyHelperThrowsWhenPropertyIsNull()
-        {
-            // Arrange + Act + Assert
-            Assert.ThrowsArgumentNull(() => new HtmlAttributePropertyHelper(null), "property");
-        }
-
-        [Fact]
         public void HtmlAttributePropertyHelperRenamesPropertyNames()
         {
             // Arrange

@@ -1,4 +1,4 @@
-﻿/*!
+/*!
 ** Unobtrusive Ajax support library for jQuery
 ** Copyright (C) Microsoft Corporation. All rights reserved.
 */
@@ -8,6 +8,7 @@
 
 (function ($) {
     var data_click = "unobtrusiveAjaxClick",
+        data_target = "unobtrusiveAjaxClickTarget"
         data_validation = "unobtrusiveValidation";
 
     function getFunction(code, argNames) {
@@ -123,35 +124,40 @@
 
     $(document).on("click", "form[data-ajax=true] input[type=image]", function (evt) {
         var name = evt.target.name,
-            $target = $(evt.target),
-            form = $target.parents("form")[0],
-            offset = $target.offset();
+            target = $(evt.target),
+            form = $(target.parents("form")[0]),
+            offset = target.offset();
 
-        $(form).data(data_click, [
+        form.data(data_click, [
             { name: name + ".x", value: Math.round(evt.pageX - offset.left) },
             { name: name + ".y", value: Math.round(evt.pageY - offset.top) }
         ]);
 
         setTimeout(function () {
-            $(form).removeData(data_click);
+            form.removeData(data_click);
         }, 0);
     });
 
     $(document).on("click", "form[data-ajax=true] :submit", function (evt) {
         var name = evt.currentTarget.name,
-            form = $(evt.target).parents("form")[0];
+            target = $(evt.target),
+            form = $(target.parents("form")[0]);
 
-        $(form).data(data_click, name ? [{ name: name, value: evt.currentTarget.value }] : []);
+        form.data(data_click, name ? [{ name: name, value: evt.currentTarget.value }] : []);
+        form.data(data_target, target);
 
         setTimeout(function () {
-            $(form).removeData(data_click);
+            form.removeData(data_click);
+            form.removeData(data_target);
         }, 0);
     });
 
     $(document).on("submit", "form[data-ajax=true]", function (evt) {
-        var clickInfo = $(this).data(data_click) || [];
+        var clickInfo = $(this).data(data_click) || [],
+            clickTarget = $(this).data(data_target),
+            isCancel = clickTarget && clickTarget.hasClass("cancel");
         evt.preventDefault();
-        if (!validate(this)) {
+        if (!isCancel && !validate(this)) {
             return;
         }
         asyncRequest(this, {

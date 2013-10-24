@@ -62,7 +62,7 @@ namespace System.Web.Mvc
             RouteEntry[] sorted = routeEntries.OrderBy(r => r.Route.GetOrder()).ThenBy(r => r.Route.GetPrecedence()).ToArray();
 
             RouteCollectionRoute aggregateRoute = new RouteCollectionRoute();
-            foreach (var routeEntry in routeEntries)
+            foreach (var routeEntry in sorted)
             {
                 aggregateRoute.SubRoutes.Add(routeEntry.Name, routeEntry.Route);
 

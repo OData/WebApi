@@ -210,6 +210,41 @@ namespace System.Web.Mvc.Routing.Test
         }
 
         [Fact]
+        public void SelectBestCandidate_ChoosesByActionSelector()
+        {
+            // Arrange
+            Type controllerType = typeof(TestController);
+            ReflectedControllerDescriptor controllerDescriptor = new ReflectedControllerDescriptor(controllerType);
+
+            DirectRouteCandidate better = new DirectRouteCandidate()
+            {
+                ActionDescriptor = ActionDescriptorFrom<TestController>(c => c.Action1()),
+                ActionSelectors = new ActionSelector[] { (context) => true },
+                ControllerDescriptor = controllerDescriptor,
+                RouteData = new RouteData(),
+            };
+
+            DirectRouteCandidate worse = new DirectRouteCandidate()
+            {
+                ActionDescriptor = ActionDescriptorFrom<TestController>(c => c.Action1()),
+                ControllerDescriptor = controllerDescriptor,
+                RouteData = new RouteData(),
+            };
+
+            List<DirectRouteCandidate> candidates = new List<DirectRouteCandidate>()
+            {
+                better, 
+                worse,
+            };
+
+            // Act
+            DirectRouteCandidate actual = DirectRouteCandidate.SelectBestCandidate(candidates, new ControllerContext());
+
+            // Assert
+            Assert.Same(better, actual);
+        }
+
+        [Fact]
         public void SelectBestCandidate_ChoosesByOrder()
         {
             // Arrange
@@ -284,7 +319,7 @@ namespace System.Web.Mvc.Routing.Test
         }
 
         [Fact]
-        public void SelectBestCandidate_ChoosesByActionSelector()
+        public void SelectBestCandidate_ChoosesByOrder_AfterActionSelectors()
         {
             // Arrange
             Type controllerType = typeof(TestController);
@@ -295,13 +330,16 @@ namespace System.Web.Mvc.Routing.Test
                 ActionDescriptor = ActionDescriptorFrom<TestController>(c => c.Action1()),
                 ActionSelectors = new ActionSelector[] { (context) => true },
                 ControllerDescriptor = controllerDescriptor,
+                Order = 1,
                 RouteData = new RouteData(),
             };
 
             DirectRouteCandidate worse = new DirectRouteCandidate()
             {
                 ActionDescriptor = ActionDescriptorFrom<TestController>(c => c.Action1()),
+                ActionSelectors = new ActionSelector[] { (context) => false },
                 ControllerDescriptor = controllerDescriptor,
+                Order = 0,
                 RouteData = new RouteData(),
             };
 

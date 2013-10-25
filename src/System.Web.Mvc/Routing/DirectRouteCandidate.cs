@@ -92,8 +92,7 @@ namespace System.Web.Mvc.Routing
             //
             // Order is first, because it's the 'override' to our algorithm
             List<DirectRouteCandidate> filteredByOrder = FilterByOrder(applicableCandidates);
-            List<DirectRouteCandidate> filteredByActionSelectors = FilterByActionSelectors(filteredByOrder);
-            List<DirectRouteCandidate> filteredByPrecedence = FilterByPrecedence(filteredByActionSelectors);
+            List<DirectRouteCandidate> filteredByPrecedence = FilterByPrecedence(filteredByOrder);
 
             if (filteredByPrecedence.Count == 0)
             {
@@ -189,36 +188,25 @@ namespace System.Web.Mvc.Routing
 
         private static List<DirectRouteCandidate> ApplyActionSelectors(List<DirectRouteCandidate> candidates, ControllerContext controllerContext)
         {
-            List<DirectRouteCandidate> filtered = new List<DirectRouteCandidate>();
+            List<DirectRouteCandidate> matchesWithActionSelectors = new List<DirectRouteCandidate>();
+            List<DirectRouteCandidate> matchesWithoutActionSelectors = new List<DirectRouteCandidate>();
+
             foreach (DirectRouteCandidate candidate in candidates)
             {
                 if (candidate.HasActionSelectors)
                 {
                     if (candidate.ActionSelectors.All(selector => selector(controllerContext)))
                     {
-                        filtered.Add(candidate);
+                        matchesWithActionSelectors.Add(candidate);
                     }
                 }
                 else
                 {
-                    filtered.Add(candidate);
+                    matchesWithoutActionSelectors.Add(candidate);
                 }
             }
 
-            return filtered;
-        }
-
-        private static List<DirectRouteCandidate> FilterByActionSelectors(List<DirectRouteCandidate> candidates)
-        {
-            bool hasActionSelectors = candidates.Any(c => c.HasActionSelectors);
-            if (hasActionSelectors)
-            {
-                return candidates.Where(c => c.HasActionSelectors).AsList();
-            }
-            else
-            {
-                return candidates;
-            }
+            return matchesWithActionSelectors.Any() ? matchesWithActionSelectors : matchesWithoutActionSelectors;
         }
 
         private static List<DirectRouteCandidate> FilterByOrder(List<DirectRouteCandidate> candidates)

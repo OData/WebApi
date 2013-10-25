@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Formatting;
+using System.Runtime.CompilerServices;
 using System.Web.Http.Controllers;
 using System.Web.Http.Internal;
 using System.Web.Http.Metadata;
@@ -88,6 +89,9 @@ namespace System.Web.Http.Validation
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "See comment below")]
         private bool ValidateNodeAndChildren(ModelMetadata metadata, ValidationContext validationContext, object container)
         {
+            // Recursion guard to avoid stack overflows
+            RuntimeHelpers.EnsureSufficientExecutionStack();
+
             object model = null;
             try
             {

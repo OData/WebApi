@@ -4,11 +4,13 @@ Imports System.Collections.ObjectModel
 Imports System.Diagnostics.CodeAnalysis
 Imports System.Globalization
 Imports System.Linq
+Imports System.Net.Http
 Imports System.Net.Http.Headers
 Imports System.Runtime.CompilerServices
 Imports System.Web.Http
 Imports System.Web.Http.Description
 Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
+Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 
 Namespace Areas.HelpPage
     Public Module HelpPageConfigurationExtensions
@@ -167,6 +169,16 @@ Namespace Areas.HelpPage
         End Function
 
         ''' <summary>
+        ''' Gets the model description generator.
+        ''' </summary>
+        ''' <param name="config">The configuration.</param>
+        ''' <returns>The <see cref="ModelDescriptionGenerator"/></returns>
+        <Extension()>
+        Public Function GetModelDescriptionGenerator(config As HttpConfiguration) As ModelDescriptionGenerator
+            Return DirectCast(config.Properties.GetOrAdd(GetType(ModelDescriptionGenerator), Function(k) InitializeModelDescriptionGenerator(config)), ModelDescriptionGenerator)
+        End Function
+
+        ''' <summary>
         ''' Sets the help page sample generator.
         ''' </summary>
         ''' <param name="config">The <see cref="HttpConfiguration"/>.</param>
@@ -198,7 +210,7 @@ Namespace Areas.HelpPage
                 Dim ApiDescription As ApiDescription = apiDescriptions.FirstOrDefault(Function(api) String.Equals(api.GetFriendlyId(), apiDescriptionId, StringComparison.OrdinalIgnoreCase))
                 If (Not ApiDescription Is Nothing) Then
                     Dim sampleGenerator As HelpPageSampleGenerator = config.GetHelpPageSampleGenerator()
-                    model = GenerateApiModel(ApiDescription, sampleGenerator)
+                    model = GenerateApiModel(ApiDescription, sampleGenerator, config)
                     config.Properties.TryAdd(modelId, model)
                 End If
             End If
@@ -206,7 +218,7 @@ Namespace Areas.HelpPage
         End Function
 
         <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="The exception is recorded as ErrorMessages.")>
-        Public Function GenerateApiModel(apiDescription As ApiDescription, sampleGenerator As HelpPageSampleGenerator) As HelpPageApiModel
+        Public Function GenerateApiModel(apiDescription As ApiDescription, sampleGenerator As HelpPageSampleGenerator, config As HttpConfiguration) As HelpPageApiModel
             Dim apiModel As New HelpPageApiModel()
             apiModel.ApiDescription = apiDescription
 
@@ -226,7 +238,60 @@ Namespace Areas.HelpPage
                                                          HelpPageSampleGenerator.UnwrapException(e).Message))
             End Try
 
+            apiModel.RequestModelDescription = GenerateParameterModelDescription(apiDescription, config)
+
             Return apiModel
+        End Function
+
+        Private Function GenerateParameterModelDescription(apiDescription As ApiDescription, config As HttpConfiguration) As ParameterModelDescription
+            Dim parameterDescription As ApiParameterDescription = Nothing
+            Dim parameterType As Type = Nothing
+            If TryGetResourceParameter(apiDescription, config, parameterDescription, parameterType) Then
+                Dim modelGenerator As ModelDescriptionGenerator = config.GetModelDescriptionGenerator()
+                Dim modelDescription As ModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType)
+                Return New ParameterModelDescription() With {
+                    .ModelDescription = modelDescription,
+                    .ParameterDescription = parameterDescription
+                }
+            End If
+
+            Return Nothing
+        End Function
+
+        Private Function TryGetResourceParameter(apiDescription As ApiDescription, config As HttpConfiguration, ByRef parameterDescription As ApiParameterDescription, ByRef resourceType As Type) As Boolean
+            parameterDescription = apiDescription.ParameterDescriptions.FirstOrDefault(Function(p) p.Source = ApiParameterSource.FromBody OrElse p.ParameterDescriptor.ParameterType = GetType(HttpRequestMessage))
+
+            If parameterDescription Is Nothing Then
+                resourceType = Nothing
+                Return False
+            End If
+
+            resourceType = parameterDescription.ParameterDescriptor.ParameterType
+
+            If resourceType = GetType(HttpRequestMessage) Then
+                Dim sampleGenerator As HelpPageSampleGenerator = config.GetHelpPageSampleGenerator()
+                resourceType = sampleGenerator.ResolveHttpRequestMessageType(apiDescription)
+            End If
+
+            If resourceType Is Nothing Then
+                parameterDescription = Nothing
+                Return False
+            End If
+
+            Return True
+        End Function
+
+        Private Function InitializeModelDescriptionGenerator(config As HttpConfiguration) As ModelDescriptionGenerator
+            Dim modelGenerator As New ModelDescriptionGenerator(config)
+            Dim apis As Collection(Of ApiDescription) = config.Services.GetApiExplorer().ApiDescriptions
+            For Each api As ApiDescription In apis
+                Dim parameterDescription As ApiParameterDescription = Nothing
+                Dim parameterType As Type = Nothing
+                If TryGetResourceParameter(api, config, parameterDescription, parameterType) Then
+                    modelGenerator.GetOrCreateModelDescription(parameterType)
+                End If
+            Next
+            Return modelGenerator
         End Function
 
         Private Sub LogInvalidSampleAsError(apiModel As HelpPageApiModel, sample As Object)

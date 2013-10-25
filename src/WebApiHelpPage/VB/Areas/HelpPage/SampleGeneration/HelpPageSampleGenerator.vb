@@ -174,6 +174,19 @@ Namespace Areas.HelpPage
         End Function
 
         ''' <summary>
+        ''' Resolves the actual type of <see cref="System.Net.Http.ObjectContent(Of T)"/> passed to the <see cref="System.Net.Http.HttpRequestMessage"/> in an action.
+        ''' </summary>
+        ''' <param name="api">The <see cref="ApiDescription"/>.</param>
+        ''' <returns>The type.</returns>
+        Public Overridable Function ResolveHttpRequestMessageType(api As ApiDescription) As Type
+            Dim controllerName As String = api.ActionDescriptor.ControllerDescriptor.ControllerName
+            Dim actionName As String = api.ActionDescriptor.ActionName
+            Dim parameterNames As IEnumerable(Of String) = api.ParameterDescriptions.[Select](Function(p) p.Name)
+            Dim formatters As Collection(Of MediaTypeFormatter) = Nothing
+            Return ResolveType(api, controllerName, actionName, parameterNames, SampleDirection.Request, formatters)
+        End Function
+
+        ''' <summary>
         ''' Resolves the type of the action parameter or return value when <see cref="HttpRequestMessage"/> or <see cref="HttpResponseMessage"/> is used.
         ''' </summary>
         ''' <param name="api">The <see cref="ApiDescription"/>.</param>

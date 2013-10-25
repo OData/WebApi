@@ -2,6 +2,7 @@ Imports System
 Imports System.Web.Http
 Imports System.Web.Mvc
 Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
+Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 
 Namespace Areas.HelpPage.Controllers
     ''' <summary>
@@ -10,6 +11,7 @@ Namespace Areas.HelpPage.Controllers
     Public Class HelpController
         Inherits Controller
 
+        Private Const ErrorViewName As String = "Error"
         Private httpConfiguration As HttpConfiguration
 
         Public Sub New()
@@ -41,7 +43,19 @@ Namespace Areas.HelpPage.Controllers
                     Return View(apiModel)
                 End If
             End If
-            Return View("Error")
+            Return View(ErrorViewName)
+        End Function
+
+        Public Function ResourceModel(modelName As String) As ActionResult
+            If Not [String].IsNullOrEmpty(modelName) Then
+                Dim modelDescriptionGenerator As ModelDescriptionGenerator = Configuration.GetModelDescriptionGenerator()
+                Dim modelDescription As ModelDescription = Nothing
+                If modelDescriptionGenerator.GeneratedModels.TryGetValue(modelName, modelDescription) Then
+                    Return View(modelDescription)
+                End If
+            End If
+
+            Return View(ErrorViewName)
         End Function
     End Class
 End Namespace

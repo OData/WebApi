@@ -114,7 +114,6 @@ namespace WebApiHelpPageWebHost.UnitTest
             Assert.Equal("An exception has occurred while generating the sample. Exception message: Sample generator failed.", model.ErrorMessages[0]);
         }
 
-#if !VB_TEST
         [Theory]
         [InlineData("Post-Users", true)]
         [InlineData("Post-Values", true)]
@@ -140,7 +139,6 @@ namespace WebApiHelpPageWebHost.UnitTest
                 Assert.Null(model.RequestModelDescription);
             }
         }
-#endif
 
         [Fact]
         public void SetDocumentationProvider()

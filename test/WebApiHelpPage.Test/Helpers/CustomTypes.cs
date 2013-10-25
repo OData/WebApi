@@ -7,9 +7,7 @@ using System.Runtime.Serialization;
 using System.Web.Http.Description;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
-#if !VB_TEST
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions;
-#endif
 
 namespace WebApiHelpPageWebHost.UnitTest
 {
@@ -74,8 +72,6 @@ namespace WebApiHelpPageWebHost.UnitTest
     internal class NonPublicType { }
 
     public enum EmptyEnum { }
-
-#if !VB_TEST
 
     [ModelName("CustomUser")]
     public class User
@@ -268,8 +264,6 @@ namespace WebApiHelpPageWebHost.UnitTest
         [RegularExpression("[a-z]")]
         public string OptionalProperty { get; set; }
     }
-
-#endif
 }
 
 namespace WebApiHelpPageWebHost.UnitTest2

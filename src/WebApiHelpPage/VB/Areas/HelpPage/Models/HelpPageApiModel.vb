@@ -2,6 +2,7 @@ Imports System.Collections.Generic
 Imports System.Collections.ObjectModel
 Imports System.Net.Http.Headers
 Imports System.Web.Http.Description
+Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 
 Namespace Areas.HelpPage.Models
     ''' <summary>
@@ -12,6 +13,7 @@ Namespace Areas.HelpPage.Models
         Private _sampleResponses As IDictionary(Of MediaTypeHeaderValue, Object)
         Private _errorMessages As Collection(Of String)
         Private _apiDescription As ApiDescription
+        Private _requestModelDescription As ParameterModelDescription
 
         '''<summary>
         ''' Initializes a new instance of the <see cref="HelpPageApiModel"/> class.
@@ -31,6 +33,18 @@ Namespace Areas.HelpPage.Models
             End Get
             Set(value As ApiDescription)
                 _apiDescription = value
+            End Set
+        End Property
+
+        ''' <summary>
+        ''' Gets or sets the model description of the parameter in the request.
+        ''' </summary>
+        Public Property RequestModelDescription() As ParameterModelDescription
+            Get
+                Return _requestModelDescription
+            End Get
+            Set(value As ParameterModelDescription)
+                _requestModelDescription = value
             End Set
         End Property
 

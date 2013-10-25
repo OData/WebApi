@@ -16,36 +16,64 @@
       <dependency id="Microsoft.AspNet.Mvc" version="[5.0.0.0, 5.0.65535.65535)" />
       <dependency id="Microsoft.AspNet.Razor" version="[3.0.0.0, 3.0.65535.65535)" />
     </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Runtime.Serialization" />
+      <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations"  />
+    </frameworkAssemblies>
     <language>en-US</language>
     <tags>Microsoft AspNet WebApi AspNetWebApi HelpPage VB VisualBasic</tags>
   </metadata>
   <files>
-    <file src="Areas\HelpPage\HelpPageAreaRegistration.vb.pp" target="content\Areas\HelpPage" />  
-    <file src="Areas\HelpPage\ApiDescriptionExtensions.vb.pp" target="content\Areas\HelpPage" />
-    <file src="Areas\HelpPage\HelpPage.css.pp" target="content\Areas\HelpPage" />
-    <file src="Areas\HelpPage\HelpPageConfigurationExtensions.vb.pp" target="content\Areas\HelpPage" />
-    <file src="Areas\HelpPage\XmlDocumentationProvider.vb.pp" target="content\Areas\HelpPage" />
-    <file src="Areas\HelpPage\App_Start\HelpPageConfig.vb.pp" target="content\Areas\HelpPage\App_Start" />
-    <file src="Areas\HelpPage\Controllers\HelpController.vb.pp" target="content\Areas\HelpPage\Controllers" />
-    <file src="Areas\HelpPage\Models\HelpPageApiModel.vb.pp" target="content\Areas\HelpPage\Models" />
-    <file src="Areas\HelpPage\SampleGeneration\HelpPageSampleGenerator.vb.pp" target="content\Areas\HelpPage\SampleGeneration" />
-    <file src="Areas\HelpPage\SampleGeneration\HelpPageSampleKey.vb.pp" target="content\Areas\HelpPage\SampleGeneration" />
-    <file src="Areas\HelpPage\SampleGeneration\ImageSample.vb.pp" target="content\Areas\HelpPage\SampleGeneration" />
-    <file src="Areas\HelpPage\SampleGeneration\InvalidSample.vb.pp" target="content\Areas\HelpPage\SampleGeneration" />
-    <file src="Areas\HelpPage\SampleGeneration\ObjectGenerator.vb.pp" target="content\Areas\HelpPage\SampleGeneration" />
-    <file src="Areas\HelpPage\SampleGeneration\SampleDirection.vb.pp" target="content\Areas\HelpPage\SampleGeneration" />
-    <file src="Areas\HelpPage\SampleGeneration\TextSample.vb.pp" target="content\Areas\HelpPage\SampleGeneration" />
-    <file src="Areas\HelpPage\Views\Web.config" target="content\Areas\HelpPage\Views" />
-    <file src="Areas\HelpPage\Views\_viewStart.vbhtml.pp" target="content\Areas\HelpPage\Views" />
-    <file src="Areas\HelpPage\Views\Help\Api.vbhtml.pp" target="content\Areas\HelpPage\Views\Help" />
-    <file src="Areas\HelpPage\Views\Help\Index.vbhtml.pp" target="content\Areas\HelpPage\Views\Help" />
-    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates" />
-    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\HelpPageApiModel.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates" />
-    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\ImageSample.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates" />
-    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\InvalidSample.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates" />
-    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\Parameters.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates" />
-    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\Samples.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates" />
-    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\TextSample.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates" />
-    <file src="Areas\HelpPage\Views\Shared\_Layout.vbhtml.pp" target="content\Areas\HelpPage\Views\Shared" />
+    <file src="Areas\HelpPage\App_Start\HelpPageConfig.vb.pp" target="content\Areas\HelpPage\App_Start\HelpPageConfig.vb.pp" />
+    <file src="Areas\HelpPage\Controllers\HelpController.vb.pp" target="content\Areas\HelpPage\Controllers\HelpController.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\CollectionModelDescription.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\CollectionModelDescription.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\ComplexTypeModelDescription.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\ComplexTypeModelDescription.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\DictionaryModelDescription.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\DictionaryModelDescription.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\EnumTypeModelDescription.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\EnumTypeModelDescription.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\EnumValueDescription.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\EnumValueDescription.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\IModelDocumentationProvider.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\IModelDocumentationProvider.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\KeyValuePairModelDescription.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\KeyValuePairModelDescription.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\ModelDescription.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\ModelDescription.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\ModelNameAttribute.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\ModelNameAttribute.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\ModelNameHelper.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\ModelNameHelper.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\ModelDescriptionGenerator.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\ModelDescriptionGenerator.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\ParameterModelDescription.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\ParameterModelDescription.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\PropertyDescription.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\PropertyDescription.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\PropertyAnnotation.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\PropertyAnnotation.vb.pp" />
+    <file src="Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.vb.pp" target="content\Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.vb.pp" />
+    <file src="Areas\HelpPage\Models\HelpPageApiModel.vb.pp" target="content\Areas\HelpPage\Models\HelpPageApiModel.vb.pp" />
+    <file src="Areas\HelpPage\SampleGeneration\HelpPageSampleGenerator.vb.pp" target="content\Areas\HelpPage\SampleGeneration\HelpPageSampleGenerator.vb.pp" />
+    <file src="Areas\HelpPage\SampleGeneration\HelpPageSampleKey.vb.pp" target="content\Areas\HelpPage\SampleGeneration\HelpPageSampleKey.vb.pp" />
+    <file src="Areas\HelpPage\SampleGeneration\ImageSample.vb.pp" target="content\Areas\HelpPage\SampleGeneration\ImageSample.vb.pp" />
+    <file src="Areas\HelpPage\SampleGeneration\InvalidSample.vb.pp" target="content\Areas\HelpPage\SampleGeneration\InvalidSample.vb.pp" />
+    <file src="Areas\HelpPage\SampleGeneration\ObjectGenerator.vb.pp" target="content\Areas\HelpPage\SampleGeneration\ObjectGenerator.vb.pp" />
+    <file src="Areas\HelpPage\SampleGeneration\SampleDirection.vb.pp" target="content\Areas\HelpPage\SampleGeneration\SampleDirection.vb.pp" />
+    <file src="Areas\HelpPage\SampleGeneration\TextSample.vb.pp" target="content\Areas\HelpPage\SampleGeneration\TextSample.vb.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\ComplexTypeModelDescription.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\ComplexTypeModelDescription.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\DictionaryModelDescription.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\DictionaryModelDescription.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\EnumTypeModelDescription.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\EnumTypeModelDescription.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\HelpPageApiModel.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\HelpPageApiModel.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\ImageSample.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\ImageSample.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\InvalidSample.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\InvalidSample.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\KeyValuePairModelDescription.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\KeyValuePairModelDescription.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\ModelDescriptionLink.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\ModelDescriptionLink.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\Parameters.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\Parameters.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\PropertyDescriptions.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\PropertyDescriptions.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\Samples.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\Samples.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\SimpleTypeModelDescription.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\SimpleTypeModelDescription.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\TextSample.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\TextSample.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\Api.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\Api.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\Index.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\Index.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Help\ResourceModel.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\ResourceModel.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Shared\_Layout.vbhtml.pp" target="content\Areas\HelpPage\Views\Shared\_Layout.vbhtml.pp" />
+    <file src="Areas\HelpPage\Views\Web.config" target="content\Areas\HelpPage\Views\Web.config" />
+    <file src="Areas\HelpPage\Views\_ViewStart.vbhtml.pp" target="content\Areas\HelpPage\Views\_ViewStart.vbhtml.pp" />
+    <file src="Areas\HelpPage\ApiDescriptionExtensions.vb.pp" target="content\Areas\HelpPage\ApiDescriptionExtensions.vb.pp" />
+    <file src="Areas\HelpPage\HelpPage.css.pp" target="content\Areas\HelpPage\HelpPage.css.pp" />
+    <file src="Areas\HelpPage\HelpPageAreaRegistration.vb.pp" target="content\Areas\HelpPage\HelpPageAreaRegistration.vb.pp" />
+    <file src="Areas\HelpPage\HelpPageConfigurationExtensions.vb.pp" target="content\Areas\HelpPage\HelpPageConfigurationExtensions.vb.pp" />
+    <file src="Areas\HelpPage\XmlDocumentationProvider.vb.pp" target="content\Areas\HelpPage\XmlDocumentationProvider.vb.pp" />
   </files>
 </package>

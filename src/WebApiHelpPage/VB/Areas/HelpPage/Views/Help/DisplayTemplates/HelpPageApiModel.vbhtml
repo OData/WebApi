@@ -21,7 +21,7 @@ End Code
         @<h2>Request Information</h2>
         If hasParameters Then
             @<h3>Parameters</h3>
-            @Html.DisplayFor(Function(apiModel) apiModel.ApiDescription.ParameterDescriptions, "Parameters")
+            @Html.DisplayFor(Function(apiModel) apiModel.ApiDescription.ParameterDescriptions, "Parameters", New With { .modelDescription = Model.RequestModelDescription })
         End If
         If hasRequestSamples Then
             @<h3>Request body formats</h3>

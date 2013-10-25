@@ -5,9 +5,8 @@ using System.Web.Mvc;
 using Microsoft.TestCommon;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Controllers;
-#if !VB_TEST
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions;
-#endif
+
 namespace WebApiHelpPageWebHost.UnitTest
 {
     public class HelpControllerTest
@@ -99,7 +98,7 @@ namespace WebApiHelpPageWebHost.UnitTest
             Assert.Null(result.Model);
             Assert.Null(result2.Model);
         }
-#if !VB_TEST
+
         [Theory]
         [InlineData("WebApiHelpPageWebHost.UnitTest.Controllers.User")]
         [InlineData("WebApiHelpPageWebHost.UnitTest.Controllers.Order")]
@@ -141,6 +140,5 @@ namespace WebApiHelpPageWebHost.UnitTest
             Assert.Null(result.Model);
             Assert.Null(result2.Model);
         }
-#endif
     }
 }

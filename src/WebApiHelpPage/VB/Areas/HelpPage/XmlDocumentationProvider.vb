@@ -5,6 +5,7 @@ Imports System.Reflection
 Imports System.Web.Http.Controllers
 Imports System.Web.Http.Description
 Imports System.Xml.XPath
+Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 
 Namespace Areas.HelpPage
     ''' <summary>
@@ -12,10 +13,13 @@ Namespace Areas.HelpPage
     ''' </summary>
     Public Class XmlDocumentationProvider
         Implements IDocumentationProvider
+        Implements IModelDocumentationProvider
 
         Private _documentNavigator As XPathNavigator
         Private Const TypeExpression As String = "/doc/members/member[@name='T:{0}']"
         Private Const MethodExpression As String = "/doc/members/member[@name='M:{0}']"
+        Private Const PropertyExpression As String = "/doc/members/member[@name='P:{0}']"
+        Private Const FieldExpression As String = "/doc/members/member[@name='F:{0}']"
         Private Const ParameterExpression As String = "param[@name='{0}']"
 
         ''' <summary>
@@ -31,7 +35,7 @@ Namespace Areas.HelpPage
         End Sub
 
         Public Function GetDocumentation(controllerDescriptor As HttpControllerDescriptor) As String Implements IDocumentationProvider.GetDocumentation
-            Dim typeNode As XPathNavigator = GetTypeNode(controllerDescriptor)
+            Dim typeNode As XPathNavigator = GetTypeNode(controllerDescriptor.ControllerType)
             Return GetTagValue(typeNode, "summary")
         End Function
 
@@ -59,6 +63,19 @@ Namespace Areas.HelpPage
         Public Function GetResponseDocumentation(actionDescriptor As HttpActionDescriptor) As String Implements IDocumentationProvider.GetResponseDocumentation
             Dim methodNode As XPathNavigator = GetMethodNode(actionDescriptor)
             Return GetTagValue(methodNode, "returns")
+        End Function
+
+        Public Function GetDocumentation(member As MemberInfo) As String Implements IModelDocumentationProvider.GetDocumentation
+            Dim memberName As String = [String].Format(CultureInfo.InvariantCulture, "{0}.{1}", GetTypeName(member.DeclaringType), member.Name)
+            Dim expression As String = If(member.MemberType = MemberTypes.Field, FieldExpression, PropertyExpression)
+            Dim selectExpression As String = [String].Format(CultureInfo.InvariantCulture, expression, memberName)
+            Dim propertyNode As XPathNavigator = _documentNavigator.SelectSingleNode(selectExpression)
+            Return GetTagValue(propertyNode, "summary")
+        End Function
+
+        Public Function GetDocumentation(type As Type) As String Implements IModelDocumentationProvider.GetDocumentation
+            Dim typeNode As XPathNavigator = GetTypeNode(type)
+            Return GetTagValue(typeNode, "summary")
         End Function
 
         Private Function GetMethodNode(actionDescriptor As HttpActionDescriptor) As XPathNavigator
@@ -93,32 +110,31 @@ Namespace Areas.HelpPage
             Return Nothing
         End Function
 
-        Private Shared Function GetTypeName(type As Type) As String
-            If (type.IsGenericType) Then
-                ' Format the generic type name to something like: Generic{System.Int32,System.String}
-                Dim genericType As Type = type.GetGenericTypeDefinition()
-                Dim genericArguments() As Type = type.GetGenericArguments()
-                Dim typeName As String = genericType.FullName
-
-                ' Trim the generic parameter counts from the name
-                typeName = typeName.Substring(0, typeName.IndexOf("`"c))
-                Dim argumentTypeNames() As String = genericArguments.Select(Function(t) GetTypeName(t)).ToArray()
-                Return String.Format(CultureInfo.InvariantCulture, "{0}{{{1}}}", typeName, String.Join(",", argumentTypeNames))
-            End If
-
-            Return type.FullName
+        Private Function GetTypeNode(type As Type) As XPathNavigator
+            Dim controllerTypeName As String = GetTypeName(type)
+            Dim selectExpression As String = [String].Format(CultureInfo.InvariantCulture, TypeExpression, controllerTypeName)
+            Return _documentNavigator.SelectSingleNode(selectExpression)
         End Function
 
-        Private Function GetTypeNode(controllerDescriptor As HttpControllerDescriptor) As XPathNavigator
-            Dim controllerType As Type = controllerDescriptor.ControllerType
-            Dim controllerTypeName As String = controllerType.FullName
+        Private Shared Function GetTypeName(type As Type) As String
+            Dim name As String = type.FullName
+            If type.IsGenericType Then
+                ' Format the generic type name to something like: Generic{System.Int32,System.String}
+                Dim genericType As Type = type.GetGenericTypeDefinition()
+                Dim genericArguments As Type() = type.GetGenericArguments()
+                Dim genericTypeName As String = genericType.FullName
 
-            If (controllerType.IsNested) Then
-                ' Changing the nested type name from OuterType+InnerType to OuterType.InnerType to match the XML documentation syntax.
-                controllerTypeName = controllerTypeName.Replace("+", ".")
+                ' Trim the generic parameter counts from the name
+                genericTypeName = genericTypeName.Substring(0, genericTypeName.IndexOf("`"c))
+                Dim argumentTypeNames As String() = genericArguments.[Select](Function(t) GetTypeName(t)).ToArray()
+                name = [String].Format(CultureInfo.InvariantCulture, "{0}{{{1}}}", genericTypeName, [String].Join(",", argumentTypeNames))
             End If
-            Dim selectExpression = String.Format(CultureInfo.InvariantCulture, TypeExpression, controllerTypeName)
-            Return _documentNavigator.SelectSingleNode(selectExpression)
+            If type.IsNested Then
+                ' Changing the nested type name from OuterType+InnerType to OuterType.InnerType to match the XML documentation syntax.
+                name = name.Replace("+", ".")
+            End If
+
+            Return name
         End Function
     End Class
 End Namespace

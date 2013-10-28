@@ -11,7 +11,6 @@
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\..\Strict.ruleset</CodeAnalysisRuleSet>
     <MyType>Windows</MyType>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineDebug>true</DefineDebug>
@@ -172,7 +171,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <Target Name="AfterBuild">
     <!--Build the NuGet package for help page-->
     <ItemGroup>
@@ -180,6 +178,6 @@
     </ItemGroup>
     <MakeDir Directories="$(OutputPath)\NuGet" />
     <ConvertToNuGetTransformationFiles SourceFiles="@(SourceFiles)" OutputPath="$(OutputPath)VB\" OriginalNamespaceToken="ROOT_PROJECT_NAMESPACE" ReplacementNamespaceToken="$rootnamespace$" />
-    <Exec Command="&quot;$(SolutionDir)\.nuget\nuget.exe&quot; pack &quot;$(ProjectDir)WebApiHelpPage.VB.nuspec&quot; -BasePath &quot;$(OutputPath)VB&quot; -OutputDirectory &quot;$(OutputPath)NuGet&quot;" />
+    <NuGetPack NuGetExe="..\..\..\.nuget\NuGet.exe" Source="$(ProjectDir)WebApiHelpPage.VB.nuspec" BasePath="$(OutputPath)VB" OutputDirectory="$(OutputPath)NuGet" />
   </Target>
 </Project>

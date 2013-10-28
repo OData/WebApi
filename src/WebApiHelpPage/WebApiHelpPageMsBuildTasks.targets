@@ -1,4 +1,69 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\tools\WebStack.tasks.targets"/>
+  <UsingTask TaskName="NuGetPack" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <NuGetExe ParameterType="System.String" Required="true" />
+      <Source ParameterType="System.String" Required="true" />
+      <OutputDirectory ParameterType="System.String" Required="true" />
+      <BasePath ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="Microsoft.Build.Tasks.v4.0" />
+      <Using Namespace="System.Net" />
+      <Using Namespace="Microsoft.Build.Tasks" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+          try
+          {
+            NuGetExe = Path.GetFullPath(NuGetExe);
+
+            if (!File.Exists(NuGetExe))
+            {
+              string tempFile = Path.GetTempFileName();
+
+              try
+              {
+                Log.LogMessage("Downloading latest version of NuGet.exe...");
+                WebClient webClient = new WebClient();
+                webClient.DownloadFile("https://nuget.org/nuget.exe", tempFile);
+
+                if (!File.Exists(NuGetExe))
+                {
+                  try
+                  {
+                    File.Move(tempFile, NuGetExe);
+                  }
+                  catch (IOException)
+                  {
+                    // Another project downloaded and moved the file before us. That's OK; just delete this duplicate
+                    // temp copy and continue.
+                  }
+                }
+              }
+              finally
+              {
+                File.Delete(tempFile);
+              }
+            }
+          }
+          catch (Exception ex)
+          {
+              Log.LogErrorFromException(ex);
+              return false;
+          }
+
+          Exec execTask = new Exec();
+          execTask.BuildEngine = BuildEngine;
+          execTask.HostObject = HostObject;
+
+          execTask.Command = String.Format(@"""{0}"" pack ""{1}"" -OutputDirectory ""{2}"" -BasePath ""{3}""",
+            NuGetExe, Path.GetFullPath(Source), Path.GetFullPath(OutputDirectory), Path.GetFullPath(BasePath));
+
+          return execTask.Execute();
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
   <UsingTask TaskName="ConvertToNuGetTransformationFiles" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
     <ParameterGroup>
       <OutputPath ParameterType="System.String" Required="true" />
@@ -9,7 +74,8 @@
     <Task>
       <Code Type="Fragment" Language="cs">
         <![CDATA[
-          foreach (var sourceFile in SourceFiles) {
+          foreach (var sourceFile in SourceFiles)
+          {
             string sourceFilePath = sourceFile.GetMetadata("FullPath");
             string relativeDirectory = sourceFile.GetMetadata("RelativeDir");
             string fileName = sourceFile.GetMetadata("Filename");
@@ -35,7 +101,7 @@
             File.WriteAllText(destinationFilePath, content, Encoding.UTF8); // Always write the file using UTF8 encoding with BOM.
           }
           return true;
-          ]]>
+        ]]>
       </Code>
     </Task>
   </UsingTask>

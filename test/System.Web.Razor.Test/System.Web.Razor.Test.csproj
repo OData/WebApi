@@ -9,7 +9,6 @@
     <AssemblyName>System.Web.Razor.Test</AssemblyName>
     <OutputPath>..\..\bin\$(Configuration)\Test\</OutputPath>
     <NoWarn>0618</NoWarn>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
@@ -461,5 +460,4 @@
     <EmbeddedResource Include="TestFiles\CodeGenerator\VB\Output\FunctionsBlock.DesignTime.Tabs.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>

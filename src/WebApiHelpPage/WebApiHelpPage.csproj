@@ -13,7 +13,6 @@
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <DefineConstants>$(DefineConstants);ASPNETMVC</DefineConstants>
     <NoWarn>1591</NoWarn>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -142,7 +141,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <Target Name="AfterBuild">
     <!--Build the NuGet package for help page-->
     <ItemGroup>
@@ -150,6 +148,6 @@
     </ItemGroup>
     <MakeDir Directories="$(OutputPath)\NuGet" />
     <ConvertToNuGetTransformationFiles SourceFiles="@(SourceFiles)" OutputPath="$(OutputPath)" OriginalNamespaceToken="ROOT_PROJECT_NAMESPACE" ReplacementNamespaceToken="$rootnamespace$" />
-    <Exec Command="&quot;$(SolutionDir)\.nuget\nuget.exe&quot; pack &quot;$(ProjectDir)WebApiHelpPage.nuspec&quot; -BasePath &quot;$(OutputPath).&quot; -OutputDirectory &quot;$(OutputPath)NuGet&quot;" />
+    <NuGetPack NuGetExe="..\..\.nuget\NuGet.exe" Source="$(ProjectDir)WebApiHelpPage.nuspec" BasePath="$(OutputPath)." OutputDirectory="$(OutputPath)NuGet" />
   </Target>
 </Project>

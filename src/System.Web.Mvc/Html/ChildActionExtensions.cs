@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc.Properties;
+using System.Web.Mvc.Routing;
 using System.Web.Routing;
 using System.Web.WebPages;
 
@@ -146,7 +147,18 @@ namespace System.Web.Mvc.Html
 
             routeData.Route = route;
             routeData.DataTokens[ControllerContext.ParentActionViewContextToken] = parentViewContext;
-            return routeData;
+
+            // It's possible that the outgoing route is a direct route - in which case it's not possible to reach using
+            // the action name and controller name. We need to check for that case to determine if we need to create a 
+            // 'direct route' routedata to reach it.
+            if (route.IsDirectRoute())
+            {
+                return RouteCollectionRoute.CreateDirectRouteMatch(route, new List<RouteData>() { routeData });
+            }
+            else
+            {
+                return routeData;
+            }
         }
 
         private static RouteValueDictionary MergeDictionaries(params RouteValueDictionary[] dictionaries)

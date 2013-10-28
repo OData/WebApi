@@ -155,6 +155,20 @@ namespace System.Web.Mvc.Routing
             SetRouteDataValue(routeData, RouteDataTokenKeys.DirectRouteMatches, matches);
         }
 
+        public static bool IsDirectRoute(this RouteBase routeBase)
+        {
+            Route route = routeBase as Route;
+            if (route == null)
+            {
+                return false;
+            }
+            else
+            {
+                // All direct routes need to have a controller associated.
+                return route.GetTargetControllerDescriptor() != null;
+            }
+        }
+
         private static T GetRouteDataTokenValue<T>(this Route route, string key)
         {
             if (route == null)

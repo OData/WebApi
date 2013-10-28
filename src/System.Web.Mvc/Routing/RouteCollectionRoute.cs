@@ -38,6 +38,17 @@ namespace System.Web.Mvc.Routing
                 }
             }
 
+            return CreateDirectRouteMatch(this, matches);
+        }
+
+        public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary values)
+        {
+            // Link generation is not supported via the RouteCollectionRoute - see GenerationRoute.
+            return null;
+        }
+
+        public static RouteData CreateDirectRouteMatch(RouteBase route, List<RouteData> matches)
+        {
             if (matches.Count == 0)
             {
                 return null;
@@ -45,7 +56,7 @@ namespace System.Web.Mvc.Routing
             else
             {
                 var routeData = new RouteData();
-                routeData.Route = this;
+                routeData.Route = route;
                 routeData.RouteHandler = new MvcRouteHandler();
                 routeData.SetDirectRouteMatches(matches);
 
@@ -63,12 +74,6 @@ namespace System.Web.Mvc.Routing
 
                 return routeData;
             }
-        }
-
-        public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary values)
-        {
-            // Link generation is not supported via the RouteCollectionRoute - see GenerationRoute.
-            return null;
         }
     }
 }

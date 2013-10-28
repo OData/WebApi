@@ -34,7 +34,6 @@ namespace System.Web.Http
         private Action<HttpConfiguration> _initializer = DefaultInitializer;
         private bool _initialized;
 
-        private List<IDisposable> _resourcesToDispose = new List<IDisposable>();
         private bool _disposed;
 
         /// <summary>
@@ -266,20 +265,6 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Adds the given <paramref name="resource"/> to a list of resources that will be disposed once the configuration is disposed.
-        /// </summary>
-        /// <param name="resource">The resource to dispose. Can be <c>null</c>.</param>
-        internal void RegisterForDispose(IDisposable resource)
-        {
-            if (resource == null)
-            {
-                return;
-            }
-
-            _resourcesToDispose.Add(resource);
-        }
-
-        /// <summary>
         /// Invoke the Intializer hook. It is considered immutable from this point forward.
         /// It's safe to call this multiple times. 
         /// </summary>
@@ -304,16 +289,11 @@ namespace System.Web.Http
             if (!_disposed)
             {
                 _disposed = true;
+
                 if (disposing)
                 {
                     _routes.Dispose();
-                    Services.Dispose();
                     DependencyResolver.Dispose();
-
-                    foreach (IDisposable resource in _resourcesToDispose)
-                    {
-                        resource.Dispose();
-                    }
                 }
             }
         }

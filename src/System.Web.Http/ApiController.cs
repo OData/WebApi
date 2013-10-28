@@ -25,7 +25,6 @@ namespace System.Web.Http
 {
     public abstract class ApiController : IHttpController, IDisposable
     {
-        private bool _disposed;
         private ModelStateDictionary _modelState;
         private HttpControllerContext _controllerContext;
         private bool _initialized;
@@ -547,14 +546,6 @@ namespace System.Web.Http
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
-            {
-                _disposed = true;
-                if (disposing)
-                {
-                    // TODO: Dispose controller state
-                }
-            }
         }
 
         #endregion IDisposable

@@ -252,7 +252,8 @@ namespace System.Web.Mvc
                 {
                     for (Exception exception = error.Exception; exception != null; exception = exception.InnerException)
                     {
-                        if (exception is FormatException)
+                        // We only consider "known" type of exception and do not make too aggressive changes here
+                        if (exception is FormatException || exception is OverflowException)
                         {
                             string displayName = propertyMetadata.GetDisplayName();
                             string errorMessageTemplate = GetValueInvalidResource(controllerContext);

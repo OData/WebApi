@@ -10,6 +10,6 @@ namespace System.Web.Http.Validation
     /// </summary>
     internal interface IModelValidatorCache
     {
-        IEnumerable<ModelValidator> GetValidators(ModelMetadata metadata);
+        ModelValidator[] GetValidators(ModelMetadata metadata);
     }
 }

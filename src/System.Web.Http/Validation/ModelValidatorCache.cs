@@ -13,7 +13,7 @@ namespace System.Web.Http.Validation
     /// </summary>
     internal class ModelValidatorCache : IModelValidatorCache
     {
-        private ConcurrentDictionary<Tuple<Type, string>, ModelValidator[]> _validatorCache = new ConcurrentDictionary<Tuple<Type, string>, ModelValidator[]>();
+        private ConcurrentDictionary<EfficientTypePropertyKey<Type, string>, ModelValidator[]> _validatorCache = new ConcurrentDictionary<EfficientTypePropertyKey<Type, string>, ModelValidator[]>();
         private Lazy<IEnumerable<ModelValidatorProvider>> _validatorProviders;
 
         public ModelValidatorCache(Lazy<IEnumerable<ModelValidatorProvider>> validatorProviders)
@@ -21,20 +21,15 @@ namespace System.Web.Http.Validation
             _validatorProviders = validatorProviders;
         }
 
-        public IEnumerable<ModelValidator> GetValidators(ModelMetadata metadata)
+        public ModelValidator[] GetValidators(ModelMetadata metadata)
         {
-            // If metadata is for a property then containerType != null && propertyName != null
-            // If metadata is for a type then containerType == null && propertyName == null, so we have to use modelType for the cache key.
-            Type typeForCache = metadata.ContainerType ?? metadata.ModelType;
-            Tuple<Type, string> cacheKey = Tuple.Create(typeForCache, metadata.PropertyName);
-
             ModelValidator[] validators;
-            if (!_validatorCache.TryGetValue(cacheKey, out validators))
+            if (!_validatorCache.TryGetValue(metadata.CacheKey, out validators))
             {
                 // Compute validators
                 // There are no side-effects if the same validators are created more than once
                 validators = metadata.GetValidators(_validatorProviders.Value).ToArray();
-                _validatorCache.TryAdd(cacheKey, validators);
+                _validatorCache.TryAdd(metadata.CacheKey, validators);
             }
             return validators;
         }

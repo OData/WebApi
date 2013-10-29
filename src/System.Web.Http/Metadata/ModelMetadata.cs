@@ -15,6 +15,7 @@ namespace System.Web.Http.Metadata
         private readonly Type _containerType;
         private readonly Type _modelType;
         private readonly string _propertyName;
+        private readonly EfficientTypePropertyKey<Type, string> _cacheKey;
 
         /// <summary>
         /// Explicit backing store for the things we want initialized by default, so don't have to call
@@ -44,6 +45,10 @@ namespace System.Web.Http.Metadata
             _modelAccessor = modelAccessor;
             _modelType = modelType;
             _propertyName = propertyName;
+
+            // If metadata is for a property then containerType != null && propertyName != null
+            // If metadata is for a type then containerType == null && propertyName == null, so we have to use modelType for the cache key.
+            _cacheKey = new EfficientTypePropertyKey<Type, string>(_containerType ?? _modelType, _propertyName);
         }
 
         public virtual Dictionary<string, object> AdditionalValues
@@ -154,6 +159,14 @@ namespace System.Web.Http.Metadata
             }
 
             return validatorProviders.SelectMany(provider => provider.GetValidators(this, validatorProviders));
+        }
+
+        internal EfficientTypePropertyKey<Type, string> CacheKey
+        {
+            get
+            {
+                return _cacheKey;
+            }
         }
     }
 }

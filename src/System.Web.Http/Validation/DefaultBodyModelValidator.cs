@@ -73,7 +73,7 @@ namespace System.Web.Http.Validation
                 KeyBuilders = new Stack<IKeyBuilder>(),
                 RootPrefix = keyPrefix
             };
-            return ValidateNodeAndChildren(metadata, validationContext, container: null);
+            return ValidateNodeAndChildren(metadata, validationContext, container: null, validators: null);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace System.Web.Http.Validation
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "See comment below")]
-        private bool ValidateNodeAndChildren(ModelMetadata metadata, ValidationContext validationContext, object container)
+        private bool ValidateNodeAndChildren(ModelMetadata metadata, ValidationContext validationContext, object container, IEnumerable<ModelValidator> validators)
         {
             // Recursion guard to avoid stack overflows
             RuntimeHelpers.EnsureSufficientExecutionStack();
@@ -107,17 +107,22 @@ namespace System.Web.Http.Validation
 
             bool isValid = true;
 
+            if (validators == null)
+            {
+                validators = validationContext.ActionContext.GetValidators(metadata, validationContext.ValidatorCache);
+            }
+
             // We don't need to recursively traverse the graph for null values
             if (model == null)
             {
-                return ShallowValidate(metadata, validationContext, container);
+                return ShallowValidate(metadata, validationContext, container, validators);
             }
 
             // We don't need to recursively traverse the graph for types that shouldn't be validated
             Type modelType = model.GetType();
             if (TypeHelper.IsSimpleType(modelType) || !ShouldValidateType(modelType))
             {
-                return ShallowValidate(metadata, validationContext, container);
+                return ShallowValidate(metadata, validationContext, container, validators);
             }
 
             // Check to avoid infinite recursion. This can happen with cycles in an object graph.
@@ -140,7 +145,7 @@ namespace System.Web.Http.Validation
             if (isValid)
             {
                 // Don't bother to validate this node if children failed.
-                isValid = ShallowValidate(metadata, validationContext, container);
+                isValid = ShallowValidate(metadata, validationContext, container, validators);
             }
 
             // Pop the object so that it can be validated again in a different path
@@ -157,7 +162,7 @@ namespace System.Web.Http.Validation
             foreach (ModelMetadata childMetadata in validationContext.MetadataProvider.GetMetadataForProperties(metadata.Model, metadata.RealModelType))
             {
                 propertyScope.PropertyName = childMetadata.PropertyName;
-                if (!ValidateNodeAndChildren(childMetadata, validationContext, metadata.Model))
+                if (!ValidateNodeAndChildren(childMetadata, validationContext, metadata.Model, validators: null))
                 {
                     isValid = false;
                 }
@@ -174,13 +179,27 @@ namespace System.Web.Http.Validation
 
             ElementScope elementScope = new ElementScope() { Index = 0 };
             validationContext.KeyBuilders.Push(elementScope);
+            var validators = validationContext.ActionContext.GetValidators(elementMetadata, validationContext.ValidatorCache);
+
+            // if there are no validators or the object is null we bail out quickly
+            // when there are large arrays of null, this will save a significant amount of processing
+            // with minimal impact to other scenarios.
+            bool anyValidatorsDefined = validators.Any();
+
             foreach (object element in model)
             {
-                elementMetadata.Model = element;
-                if (!ValidateNodeAndChildren(elementMetadata, validationContext, model))
+                // If the element is non null, the recursive calls might find more validators.
+                // If it's null, then a shallow validation will be performed.
+                if (element != null || anyValidatorsDefined)
                 {
-                    isValid = false;
+                    elementMetadata.Model = element;
+
+                    if (!ValidateNodeAndChildren(elementMetadata, validationContext, model, validators))
+                    {
+                        isValid = false;
+                    }
                 }
+
                 elementScope.Index++;
             }
             validationContext.KeyBuilders.Pop();
@@ -189,11 +208,22 @@ namespace System.Web.Http.Validation
 
         // Validates a single node (not including children)
         // Returns true if validation passes successfully
-        private static bool ShallowValidate(ModelMetadata metadata, ValidationContext validationContext, object container)
+        private static bool ShallowValidate(ModelMetadata metadata, ValidationContext validationContext, object container, IEnumerable<ModelValidator> validators)
         {
             bool isValid = true;
             string modelKey = null;
-            foreach (ModelValidator validator in validationContext.ActionContext.GetValidators(metadata, validationContext.ValidatorCache))
+
+            Contract.Assert(validators != null);
+
+            // When the are no validators we bail quickly. This saves a GetEnumerator allocation.
+            // In a large array (tens of thousands or more) scenario it's very significant.
+            IList validatorsAsList = validators as IList;
+            if (validatorsAsList != null && validatorsAsList.Count == 0)
+            {
+                return isValid;
+            }
+
+            foreach (ModelValidator validator in validators)
             {
                 foreach (ModelValidationResult error in validator.Validate(metadata, container))
                 {

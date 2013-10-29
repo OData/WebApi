@@ -37,6 +37,9 @@
     <Compile Include="..\Common\DictionaryExtensions.cs">
       <Link>Common\DictionaryExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Common\EfficientTypePropertyKey.cs">
+      <Link>Metadata\EfficientTypePropertyKey.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Error.cs">
       <Link>Common\Error.cs</Link>
     </Compile>

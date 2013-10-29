@@ -144,7 +144,7 @@ namespace System.Web.Http.Controllers
                             .Select(binding => binding.Descriptor.Prefix ?? binding.Descriptor.ParameterName).ToArray());
                 }
 
-                if (controllerDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false).Any())
+                if (controllerDescriptor.HasRoutingAttribute())
                 {
                     // The controller has an attribute route; no actions are accessible via standard routing.
                     _standardCandidateActions = new CandidateAction[0];
@@ -159,8 +159,8 @@ namespace System.Web.Http.Controllers
                     {
                         CandidateAction candidate = _combinedCandidateActions[i];
                         // Allow standard routes access inherited actions or actions without Route attributes.
-                        if (candidate.ActionDescriptor.MethodInfo.DeclaringType != controllerDescriptor.ControllerType ||
-                            !candidate.ActionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false).Any())
+                        if (candidate.ActionDescriptor.MethodInfo.DeclaringType != controllerDescriptor.ControllerType
+                            || !candidate.ActionDescriptor.HasRoutingAttribute())
                         {
                             standardCandidateActions.Add(candidate);
                         }

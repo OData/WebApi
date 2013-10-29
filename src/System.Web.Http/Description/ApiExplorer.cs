@@ -282,7 +282,7 @@ namespace System.Web.Http.Description
         private void ExploreRouteActions(IHttpRoute route, string localPath, HttpControllerDescriptor controllerDescriptor, Collection<ApiDescription> apiDescriptions)
         {
             // exclude controllers that are marked with route attributes.
-            if (!controllerDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false).Any())
+            if (!controllerDescriptor.HasRoutingAttribute())
             {
                 ServicesContainer controllerServices = controllerDescriptor.Configuration.Services;
                 ILookup<string, HttpActionDescriptor> actionMappings = controllerServices.GetActionSelector().GetActionMapping(controllerDescriptor);
@@ -326,7 +326,7 @@ namespace System.Web.Http.Description
                     ReflectedHttpActionDescriptor reflectedAction = actionDescriptor as ReflectedHttpActionDescriptor;
 
                     // exclude actions that are marked with route attributes except for the inherited actions.
-                    if (!actionDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false).Any() ||
+                    if (!actionDescriptor.HasRoutingAttribute() ||
                         (reflectedAction != null && reflectedAction.MethodInfo.DeclaringType != controllerDescriptor.ControllerType))
                     {
                         PopulateActionDescriptions(actionDescriptor, route, localPath, apiDescriptions);

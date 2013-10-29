@@ -58,6 +58,9 @@
     <Compile Include="..\Common\PrefixContainerTest.cs">
       <Link>Common\PrefixContainerTest.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\RoutePrecedenceTests.cs">
+      <Link>Routing\RoutePrecedenceTests.cs</Link>
+    </Compile>
     <Compile Include="..\Common\TaskHelpersExtensionsTest.cs">
       <Link>Common\TaskHelpersExtensionsTest.cs</Link>
     </Compile>
@@ -180,12 +183,8 @@
     <Compile Include="..\Common\Routing\InlineRouteTemplateParserTests.cs">
       <Link>Routing\InlineRouteTemplateParserTests.cs</Link>
     </Compile>
-    <Compile Include="..\Common\Routing\RouteEntryTest.cs">
-      <Link>Routing\RouteEntryTest.cs</Link>
-    </Compile>
     <Compile Include="Routing\GenerateRouteTest.cs" />
-    <Compile Include="Routing\HttpDirectRouteTest.cs" />
-    <Compile Include="Routing\HttpRouteBuilderTest.cs" />
+    <Compile Include="Routing\DirectRouteProviderContextTests.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />

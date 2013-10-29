@@ -119,7 +119,7 @@ namespace System.Web.Mvc.Routing
             ParsedRoute parsedRoute = RouteParser.Parse(detokenizedRouteTemplate);
 
             RouteValueDictionary dataTokens = new RouteValueDictionary();
-            dataTokens[RouteDataTokenKeys.DirectRoutePrecedence] = RouteEntry.GetPrecedence(parsedRoute, constraints);
+            dataTokens[RouteDataTokenKeys.DirectRoutePrecedence] = RoutePrecedence.Compute(parsedRoute, constraints);
             dataTokens[RouteDataTokenKeys.DirectRouteController] = controllerDescriptor;
             dataTokens[RouteDataTokenKeys.DirectRouteActions] = actionDescriptors;
 

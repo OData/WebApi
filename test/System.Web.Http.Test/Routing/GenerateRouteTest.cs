@@ -12,7 +12,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void GenerateRoute_DoesNotClaimData()
         {
-            GenerateRoute route = new GenerateRoute(new NotImplementedRoute());
+            GenerationRoute route = new GenerationRoute(new NotImplementedRoute());
 
             IHttpRouteData data = route.GetRouteData(string.Empty, new HttpRequestMessage());
 
@@ -22,7 +22,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void GenerateRoute_EmptyProperties()
         {
-            GenerateRoute route = new GenerateRoute(new NotImplementedRoute());
+            GenerationRoute route = new GenerationRoute(new NotImplementedRoute());
 
             AssertDictionaryIsEmptyAndImmutable(route.Defaults);
             AssertDictionaryIsEmptyAndImmutable(route.Constraints);
@@ -42,7 +42,7 @@ namespace System.Web.Http.Routing
             Mock<IHttpRoute> inner = new Mock<IHttpRoute>();
             inner.Setup(r => r.GetVirtualPath(request, values)).Returns(data);
 
-            GenerateRoute route = new GenerateRoute(inner.Object);
+            GenerationRoute route = new GenerationRoute(inner.Object);
 
             IHttpVirtualPathData result = route.GetVirtualPath(request, values);
 

@@ -30,31 +30,36 @@ namespace System.Web.Http.Routing
         private HttpRouteValueDictionary _dataTokens;
 
         public HttpRoute()
-            : this(routeTemplate: null, defaults: null, constraints: null, dataTokens: null, handler: null)
+            : this(routeTemplate: null, defaults: null, constraints: null, dataTokens: null, handler: null, parsedRoute: null)
         {
         }
 
         public HttpRoute(string routeTemplate)
-            : this(routeTemplate, defaults: null, constraints: null, dataTokens: null, handler: null)
+            : this(routeTemplate, defaults: null, constraints: null, dataTokens: null, handler: null, parsedRoute: null)
         {
         }
 
         public HttpRoute(string routeTemplate, HttpRouteValueDictionary defaults)
-            : this(routeTemplate, defaults, constraints: null, dataTokens: null, handler: null)
+            : this(routeTemplate, defaults, constraints: null, dataTokens: null, handler: null, parsedRoute: null)
         {
         }
 
         public HttpRoute(string routeTemplate, HttpRouteValueDictionary defaults, HttpRouteValueDictionary constraints)
-            : this(routeTemplate, defaults, constraints, dataTokens: null, handler: null)
+            : this(routeTemplate, defaults, constraints, dataTokens: null, handler: null, parsedRoute: null)
         {
         }
 
         public HttpRoute(string routeTemplate, HttpRouteValueDictionary defaults, HttpRouteValueDictionary constraints, HttpRouteValueDictionary dataTokens)
-            : this(routeTemplate, defaults, constraints, dataTokens, handler: null)
+            : this(routeTemplate, defaults, constraints, dataTokens, handler: null, parsedRoute: null)
         {
         }
 
         public HttpRoute(string routeTemplate, HttpRouteValueDictionary defaults, HttpRouteValueDictionary constraints, HttpRouteValueDictionary dataTokens, HttpMessageHandler handler)
+            : this(routeTemplate, defaults, constraints, dataTokens, handler, parsedRoute: null)
+        {
+        }
+
+        internal HttpRoute(string routeTemplate, HttpRouteValueDictionary defaults, HttpRouteValueDictionary constraints, HttpRouteValueDictionary dataTokens, HttpMessageHandler handler, HttpParsedRoute parsedRoute)
         {
             _routeTemplate = routeTemplate == null ? String.Empty : routeTemplate;
             _defaults = defaults ?? new HttpRouteValueDictionary();
@@ -62,8 +67,15 @@ namespace System.Web.Http.Routing
             _dataTokens = dataTokens ?? new HttpRouteValueDictionary();
             Handler = handler;
 
-            // The parser will throw for invalid routes.
-            ParsedRoute = HttpRouteParser.Parse(RouteTemplate);
+            if (parsedRoute == null)
+            {
+                // The parser will throw for invalid routes.
+                ParsedRoute = HttpRouteParser.Parse(routeTemplate);
+            }
+            else
+            {
+                ParsedRoute = parsedRoute;
+            }
         }
 
         public IDictionary<string, object> Defaults

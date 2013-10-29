@@ -1,10 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics.Contracts;
 using System.Web.Http.Routing;
 
 namespace System.Web.Http
@@ -14,7 +10,7 @@ namespace System.Web.Http
     /// When placed on a controller, it applies to actions that do not have any <see cref="RouteAttribute"/>s on them.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class RouteAttribute : Attribute, IHttpRouteInfoProvider
+    public sealed class RouteAttribute : Attribute, IHttpRouteInfoProvider, IDirectRouteProvider
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RouteAttribute" /> class.
@@ -45,5 +41,17 @@ namespace System.Web.Http
 
         /// <inheritdoc />
         public string Template { get; private set; }
+
+        HttpRouteEntry IDirectRouteProvider.CreateRoute(DirectRouteProviderContext context)
+        {
+            Contract.Assert(context != null);
+
+            DirectRouteBuilder builder = context.CreateBuilder(Template);
+            Contract.Assert(builder != null);
+
+            builder.Name = Name;
+            builder.Order = Order;
+            return builder.Build();
+        }
     }
 }

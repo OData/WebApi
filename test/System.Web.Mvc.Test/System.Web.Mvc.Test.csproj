@@ -45,6 +45,9 @@
     <Compile Include="..\Common\AttributeListTest.cs">
       <Link>Common\AttributeListTest.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\RoutePrecedenceTests.cs">
+      <Link>Routing\RoutePrecedenceTests.cs</Link>
+    </Compile>
     <Compile Include="Async\Test\TaskAsyncActionDescriptorTest.cs" />
     <Compile Include="Async\Test\TaskWrapperAsyncResultTest.cs" />
     <Compile Include="Html\Test\DisplayNameExtensionsTest.cs" />
@@ -68,9 +71,6 @@
       <Link>Routing\InlineRouteTemplateParserTests.cs</Link>
     </Compile>
     <Compile Include="Routing\RouteCollectionAttributeRoutingExtensionsTests.cs" />
-    <Compile Include="..\Common\Routing\RouteEntryTest.cs">
-      <Link>Routing\RouteEntryTest.cs</Link>
-    </Compile>
     <Compile Include="Test\AjaxHelperOfTModelTest.cs" />
     <Compile Include="Test\CancellationTokenModelBinderTest.cs" />
     <Compile Include="Test\CachedAssociatedMetadataProviderTest.cs" />

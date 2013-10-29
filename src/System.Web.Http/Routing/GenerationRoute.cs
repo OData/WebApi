@@ -12,11 +12,11 @@ namespace System.Web.Http.Routing
     // Route that generates a virtual path, but does not claim any routes. 
     // This can be used with RouteCollectionRoute to provide generation by names. 
     // Delegates to an inner route to do actual generation.
-    internal class GenerateRoute : IHttpRoute
+    internal class GenerationRoute : IHttpRoute
     {
         private readonly IHttpRoute _innerRoute;
 
-        public GenerateRoute(IHttpRoute inner)
+        public GenerationRoute(IHttpRoute inner)
         {
             _innerRoute = inner;
         }

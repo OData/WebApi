@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
@@ -18,7 +19,7 @@ namespace System.Web.Http.Description
             var controllerDescriptor = new HttpControllerDescriptor(config, "ApiExplorerValues", typeof(ApiExplorerValuesController));
             var action = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(ApiExplorerValuesController).GetMethod("Get"));
             var actions = new ReflectedHttpActionDescriptor[] { action };
-            config.Routes.Add("Route", HttpRouteBuilder.BuildDirectRoute(routeTemplate, 0, actions));
+            config.Routes.Add("Route", CreateDirectRoute(routeTemplate, actions));
 
             var descriptions = new ApiExplorer(config).ApiDescriptions;
 
@@ -39,7 +40,7 @@ namespace System.Web.Http.Description
                 new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(ApiExplorerValuesController).GetMethod("Get")),
                 new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(ApiExplorerValuesController).GetMethod("Post")),
             };
-            config.Routes.Add("Route", HttpRouteBuilder.BuildDirectRoute(routeTemplate, 0, actions));
+            config.Routes.Add("Route", CreateDirectRoute(routeTemplate, actions));
 
             var descriptions = new ApiExplorer(config).ApiDescriptions;
 
@@ -59,7 +60,7 @@ namespace System.Web.Http.Description
                 new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(IgnoreApiValuesController).GetMethod("Get")),
                 new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(IgnoreApiValuesController).GetMethod("Post")),
             };
-            config.Routes.Add("Route", HttpRouteBuilder.BuildDirectRoute(routeTemplate, 0, actions));
+            config.Routes.Add("Route", CreateDirectRoute(routeTemplate, actions));
 
             var descriptions = new ApiExplorer(config).ApiDescriptions;
 
@@ -91,7 +92,7 @@ namespace System.Web.Http.Description
             var actions = new ReflectedHttpActionDescriptor[] { action };
 
             var routeCollection = new HttpSubRouteCollection();
-            routeCollection.Add("testroute", HttpRouteBuilder.BuildDirectRoute(routeTemplate, 0, actions));
+            routeCollection.Add("testroute", CreateDirectRoute(routeTemplate, actions));
 
             RouteCollectionRoute route = new RouteCollectionRoute();
             route.EnsureInitialized(() => routeCollection);
@@ -111,6 +112,14 @@ namespace System.Web.Http.Description
             [Route("")]
             [HttpGet]
             public void Action() { }
+        }
+
+        private static IHttpRoute CreateDirectRoute(string template,
+            IEnumerable<ReflectedHttpActionDescriptor> actions)
+        {
+            DirectRouteBuilder builder = new DirectRouteBuilder(actions);
+            builder.Template = template;
+            return builder.Build().Route;
         }
     }
 }

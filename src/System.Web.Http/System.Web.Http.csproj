@@ -55,6 +55,9 @@
     <Compile Include="..\Common\PropertyHelper.cs">
       <Link>Routing\PropertyHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\RoutePrecedence.cs">
+      <Link>Routing\RoutePrecedence.cs</Link>
+    </Compile>
     <Compile Include="..\Common\TaskHelpers.cs">
       <Link>Common\TaskHelpers.cs</Link>
     </Compile>
@@ -77,6 +80,8 @@
     <Compile Include="Controllers\AuthenticationFilterResult.cs" />
     <Compile Include="Controllers\AuthorizationFilterResult.cs" />
     <Compile Include="Controllers\ExceptionFilterResult.cs" />
+    <Compile Include="Controllers\HttpActionDescriptorExtensions.cs" />
+    <Compile Include="Controllers\HttpControllerDescriptorExtensions.cs" />
     <Compile Include="Controllers\RequestBackedHttpRequestContext.cs" />
     <Compile Include="Controllers\HttpControllerSettings.cs" />
     <Compile Include="Controllers\HttpParameterDescriptorExtensions.cs" />
@@ -137,10 +142,15 @@
     <Compile Include="OverrideExceptionFiltersAttribute.cs" />
     <Compile Include="RouteAttribute.cs" />
     <Compile Include="Controllers\CandidateAction.cs" />
+    <Compile Include="Routing\DirectRouteBuilder.cs" />
+    <Compile Include="Routing\DirectRouteProviderContext.cs" />
+    <Compile Include="Routing\HttpRouteEntry.cs" />
+    <Compile Include="Routing\IDirectRouteProvider.cs" />
     <Compile Include="Routing\RouteCollectionRoute.cs" />
     <Compile Include="Routing\GenerationRoute.cs" />
     <Compile Include="Routing\HttpRouteDataExtensions.cs" />
     <Compile Include="Routing\HttpRouteExtensions.cs" />
+    <Compile Include="Routing\RouteInfoDirectRouteProvider.cs" />
     <Compile Include="Routing\RouteKeys.cs" />
     <Compile Include="..\Common\Routing\Constraints\AlphaRouteConstraint.cs">
       <Link>Routing\Constraints\AlphaRouteConstraint.cs</Link>
@@ -204,10 +214,6 @@
     </Compile>
     <Compile Include="..\Common\Routing\SubRouteCollection.cs">
       <Link>Routing\SubRouteCollection.cs</Link>
-    </Compile>
-    <Compile Include="Routing\HttpRouteBuilder.cs" />
-    <Compile Include="..\Common\Routing\HttpRouteEntry.cs">
-      <Link>Routing\HttpRouteEntry.cs</Link>
     </Compile>
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />
     <Compile Include="Routing\IInlineConstraintResolver.cs" />

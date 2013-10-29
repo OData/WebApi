@@ -51,7 +51,7 @@ namespace System.Net.Http
             // Arrange
             var config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix") };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { };
+            var routeProviders = new Collection<RouteAttribute>() { };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act
@@ -68,7 +68,7 @@ namespace System.Net.Http
             // Arrange
             var config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix") };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { };
+            var routeProviders = new Collection<RouteAttribute>() { };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act
@@ -105,7 +105,7 @@ namespace System.Net.Http
                 routePrefixes.Add(new RoutePrefixAttribute(prefix));
             }
 
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new RouteAttribute(template) };
+            var routeProviders = new Collection<RouteAttribute>() { new RouteAttribute(template) };
 
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
@@ -124,7 +124,7 @@ namespace System.Net.Http
             // Arrange
             var config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix/") };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("") };
+            var routeProviders = new Collection<RouteAttribute>() { new RouteAttribute("") };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act & Assert
@@ -139,7 +139,7 @@ namespace System.Net.Http
             // Arrange
             var config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>() { };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("/get") };
+            var routeProviders = new Collection<RouteAttribute>() { new RouteAttribute("/get") };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act & Assert
@@ -154,7 +154,7 @@ namespace System.Net.Http
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>();
-            var routeProviders = new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("controller/get1"), new RouteAttribute("controller/get2") };
+            var routeProviders = new Collection<RouteAttribute>() { new RouteAttribute("controller/get1"), new RouteAttribute("controller/get2") };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
             // Act
@@ -192,7 +192,7 @@ namespace System.Net.Http
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
             var routePrefixes = new Collection<RoutePrefixAttribute>() { };
-            var routeProviders = new Collection<IHttpRouteInfoProvider>()
+            var routeProviders = new Collection<RouteAttribute>()
                 {
                     new RouteAttribute("get1") { Name = "one" },
                     new RouteAttribute("get2") { Name = "two" },
@@ -210,12 +210,12 @@ namespace System.Net.Http
             Assert.IsType<RouteCollectionRoute>(routes.ElementAt(0));
             for (int i = 1; i < 4; i++)
             {
-                Assert.IsType<GenerateRoute>(routes.ElementAt(i));
+                Assert.IsType<GenerationRoute>(routes.ElementAt(i));
             }
 
-            Assert.IsType<GenerateRoute>(routes["one"]);
-            Assert.IsType<GenerateRoute>(routes["two"]);
-            Assert.IsType<GenerateRoute>(routes["three"]);
+            Assert.IsType<GenerationRoute>(routes["one"]);
+            Assert.IsType<GenerationRoute>(routes["two"]);
+            Assert.IsType<GenerationRoute>(routes["three"]);
         }
 
         [Fact]
@@ -229,7 +229,7 @@ namespace System.Net.Http
             var controllerSelector = CreateControllerSelector(new HttpControllerDescriptor[] { _controllerDescriptor });
             globalConfiguration.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
 
-            var globalAction = CreateActionDescriptor("Global", new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("Global") });
+            var globalAction = CreateActionDescriptor("Global", new Collection<RouteAttribute>() { new RouteAttribute("Global") });
             var globalActionSelector = CreateActionSelector(
                 new Dictionary<HttpControllerDescriptor, IEnumerable<HttpActionDescriptor>>()
                     {
@@ -240,7 +240,7 @@ namespace System.Net.Http
             // Configure the per controller action selector to return the action with route "PerController"
             var perControllerAction = CreateActionDescriptor(
                 "PerController",
-                new Collection<IHttpRouteInfoProvider>() { new RouteAttribute("PerController") });
+                new Collection<RouteAttribute>() { new RouteAttribute("PerController") });
             ActionSelectorConfigurationAttribute.PerControllerActionSelectorMock
                 .Setup(a => a.GetActionMapping(_controllerDescriptor))
                 .Returns(new HttpActionDescriptor[] { perControllerAction }.ToLookup(ad => ad.ActionName));
@@ -251,36 +251,6 @@ namespace System.Net.Http
             // Assert
             HttpSubRouteCollection routes = globalConfiguration.GetAttributeRoutes();
             Assert.Equal("PerController", Assert.Single(routes).RouteTemplate);
-        }
-
-        [Fact]
-        public void MapHttpAttributeRoutes_AddsOnlyOneActionToRoute_ForMultipleAttributesOnASingleAction()
-        {
-            // Arrange
-            var config = new HttpConfiguration();
-            string routeTemplate = "api/values";
-            HttpControllerDescriptor controllerDescriptor = CreateControllerDescriptor(config, "Controller", new Collection<RoutePrefixAttribute>());
-            HttpActionDescriptor actionDescriptor = CreateActionDescriptor(
-                "Action",
-                new Collection<IHttpRouteInfoProvider>() { new RouteAttribute(routeTemplate), new RouteAttribute(routeTemplate) });
-
-            var controllerSelector = CreateControllerSelector(new[] { controllerDescriptor });
-            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
-            var actionSelector = CreateActionSelector(
-                new Dictionary<HttpControllerDescriptor, IEnumerable<HttpActionDescriptor>>()
-                {
-                    { controllerDescriptor, new HttpActionDescriptor[] { actionDescriptor } }
-                });
-            config.Services.Replace(typeof(IHttpActionSelector), actionSelector);
-
-            // Act
-            config.MapHttpAttributeRoutes();
-
-            // Assert
-            HttpSubRouteCollection routes = config.GetAttributeRoutes();
-            IHttpRoute route = Assert.Single(routes);
-            Assert.Equal(routeTemplate, route.RouteTemplate);
-            Assert.Equal(actionDescriptor, Assert.Single(route.DataTokens["actions"] as ReflectedHttpActionDescriptor[]));
         }
 
         [Fact]
@@ -311,10 +281,10 @@ namespace System.Net.Http
                 "configuration");
         }
 
-        private static void SetUpConfiguration(HttpConfiguration config, Collection<RoutePrefixAttribute> routePrefixes, Collection<IHttpRouteInfoProvider> routeProviders)
+        private static void SetUpConfiguration(HttpConfiguration config, Collection<RoutePrefixAttribute> routePrefixes, IEnumerable<RouteAttribute> routeAttributes)
         {
             HttpControllerDescriptor controllerDescriptor = CreateControllerDescriptor(config, "Controller", routePrefixes);
-            HttpActionDescriptor actionDescriptor = CreateActionDescriptor("Action", routeProviders);
+            HttpActionDescriptor actionDescriptor = CreateActionDescriptor("Action", routeAttributes);
 
             var controllerSelector = CreateControllerSelector(new[] { controllerDescriptor });
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
@@ -333,14 +303,19 @@ namespace System.Net.Http
             controllerDescriptor.Object.Configuration = configuration;
             controllerDescriptor.Object.ControllerName = controllerName;
             controllerDescriptor.Setup(cd => cd.GetCustomAttributes<RoutePrefixAttribute>(false)).Returns(routePrefixes);
+            controllerDescriptor.Setup(cd => cd.GetCustomAttributes<IHttpRouteInfoProvider>(false)).Returns(new Collection<IHttpRouteInfoProvider>());
+            controllerDescriptor.Setup(cd => cd.GetCustomAttributes<IDirectRouteProvider>(false)).Returns(new Collection<IDirectRouteProvider>());
             return controllerDescriptor.Object;
         }
 
-        private static HttpActionDescriptor CreateActionDescriptor(string actionName, Collection<IHttpRouteInfoProvider> routeProviders)
+        private static HttpActionDescriptor CreateActionDescriptor(string actionName, IEnumerable<RouteAttribute> routeAttributes)
         {
+            Collection<IDirectRouteProvider> newProviders = new Collection<IDirectRouteProvider>(new List<IDirectRouteProvider>(routeAttributes));
+            Collection<IHttpRouteInfoProvider> oldProviders = new Collection<IHttpRouteInfoProvider>(new List<IHttpRouteInfoProvider>(routeAttributes));
             Mock<ReflectedHttpActionDescriptor> actionDescriptor = new Mock<ReflectedHttpActionDescriptor>();
             actionDescriptor.Setup(ad => ad.ActionName).Returns(actionName);
-            actionDescriptor.Setup(ad => ad.GetCustomAttributes<IHttpRouteInfoProvider>(false)).Returns(routeProviders);
+            actionDescriptor.Setup(ad => ad.GetCustomAttributes<IDirectRouteProvider>(false)).Returns(newProviders);
+            actionDescriptor.Setup(ad => ad.GetCustomAttributes<IHttpRouteInfoProvider>(false)).Returns(oldProviders);
             actionDescriptor.Setup(ad => ad.SupportedHttpMethods).Returns(new Collection<HttpMethod>());
             actionDescriptor.CallBase = true;
             return actionDescriptor.Object;

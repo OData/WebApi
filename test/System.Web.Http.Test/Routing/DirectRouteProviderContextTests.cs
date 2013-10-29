@@ -1,0 +1,89 @@
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Web.Http.Controllers;
+using Microsoft.TestCommon;
+using Moq;
+
+namespace System.Web.Http.Routing
+{
+    public class DirectRouteProviderContextTests
+    {
+        [Fact]
+        public void CreateBuilderWithoutResolverAndBuild_SetsActionsDataToken()
+        {
+            var actions = new ReflectedHttpActionDescriptor[] { new ReflectedHttpActionDescriptor() };
+
+            var route = BuildWithoutResolver("route", actions);
+
+            var actualActions = route.DataTokens[RouteKeys.ActionsDataTokenKey];
+            Assert.Equal(actions, actualActions);
+        }
+
+        [Fact]
+        public void CreateBuilderWithoutResolverAndBuild_AddsDefaultValuesAsOptional()
+        {
+            var actions = new ReflectedHttpActionDescriptor[] { new ReflectedHttpActionDescriptor() };
+            var route = BuildWithoutResolver("movies/{id}", actions);
+            route.Defaults.Add("id", RouteParameter.Optional);
+
+            var routeData = route.GetRouteData("", new HttpRequestMessage(HttpMethod.Get, "http://localhost/movies"));
+
+            Assert.Equal(RouteParameter.Optional, routeData.Values["id"]);
+        }
+
+        [Fact]
+        public void CreateBuilderWithResolverAndBuild_Throws_WhenConstraintResolverReturnsNull()
+        {
+            Mock<IInlineConstraintResolver> constraintResolver = new Mock<IInlineConstraintResolver>();
+            constraintResolver.Setup(r => r.ResolveConstraint("constraint")).Returns<IHttpRouteConstraint>(null);
+
+            Assert.Throws<InvalidOperationException>(
+                () => BuildWithResolver(@"hello/{param:constraint}", constraintResolver: constraintResolver.Object),
+                "The inline constraint resolver of type 'IInlineConstraintResolverProxy' was unable to resolve the following inline constraint: 'constraint'.");
+        }
+
+        [Fact]
+        public void CreateBuilderWithResolverAndBuild_ResolvesConstraintUsingConstraintResolver()
+        {
+            IHttpRouteConstraint routeConstraint = new Mock<IHttpRouteConstraint>().Object;
+            Mock<IInlineConstraintResolver> constraintResolver = new Mock<IInlineConstraintResolver>();
+            constraintResolver.Setup(r => r.ResolveConstraint("constraint")).Returns(routeConstraint);
+
+            var route = BuildWithResolver(@"hello/{param:constraint}", constraintResolver: constraintResolver.Object);
+
+            Assert.Equal("hello/{param}", route.RouteTemplate);
+            Assert.Equal(routeConstraint, route.Constraints["param"]);
+        }
+
+        private static IHttpRoute BuildWithoutResolver(string template,
+            IEnumerable<ReflectedHttpActionDescriptor> actions)
+        {
+            DirectRouteProviderContext context = new DirectRouteProviderContext(null, actions,
+                new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object);
+            DirectRouteBuilder builder = context.CreateBuilder(template, constraintResolver: null);
+            return builder.Build().Route;
+        }
+
+        private static IHttpRoute BuildWithResolver(string template, IInlineConstraintResolver constraintResolver)
+        {
+            ReflectedHttpActionDescriptor[] actions = new ReflectedHttpActionDescriptor[]
+            {
+                new ReflectedHttpActionDescriptor()
+            };
+            DirectRouteProviderContext context = new DirectRouteProviderContext(null, actions, constraintResolver);
+
+            // Act
+            DirectRouteBuilder builder = context.CreateBuilder(template);
+            IHttpRoute route = builder.Build().Route;
+
+            // Assertions for default, unspecified behavior:
+            Assert.NotNull(route);
+            Assert.Equal(actions, route.DataTokens["actions"]);
+
+            return route;
+        }
+
+    }
+}

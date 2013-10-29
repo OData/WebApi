@@ -128,6 +128,172 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        public void FormatterThrowsOnWriteWhenOverridenCreateFails()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+            formatter.ThrowAnExceptionOnCreate = true;
+
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContent content = new StringContent(String.Empty);
+
+            // Act & Assert
+            Action action = () => formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null).Wait();
+            Assert.Throws<InvalidOperationException>(action, "The 'CreateJsonSerializer' method threw an exception when attempting to create a JSON serializer.");
+
+            Assert.Null(formatter.InnerDataContractSerializer);
+            Assert.NotNull(formatter.InnerJsonSerializer);
+        }
+
+        [Fact]
+        public void FormatterThrowsOnWriteWhenOverridenCreateReturnsNull()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+            formatter.ReturnNullOnCreate = true;
+
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContent content = new StringContent(String.Empty);
+
+            // Act & Assert
+            Action action = () => formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null).Wait();
+            Assert.Throws<InvalidOperationException>(action, "The 'CreateJsonSerializer' method did not return a JSON serializer.");
+
+            Assert.Null(formatter.InnerDataContractSerializer);
+            Assert.NotNull(formatter.InnerJsonSerializer);
+        }
+
+        [Fact]
+        public void FormatterThrowsOnReadWhenOverridenCreateFails()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+            formatter.ThrowAnExceptionOnCreate = true;
+
+            byte[] array = Encoding.UTF8.GetBytes("foo");
+            MemoryStream memoryStream = new MemoryStream(array);
+
+            HttpContent content = new StringContent("foo");
+
+            // Act & Assert
+            Action action = () => formatter.ReadFromStreamAsync(typeof(SampleType), memoryStream, content, null).Wait();
+            Assert.Throws<InvalidOperationException>(action, "The 'CreateJsonSerializer' method threw an exception when attempting to create a JSON serializer.");
+
+            Assert.Null(formatter.InnerDataContractSerializer);
+            Assert.NotNull(formatter.InnerJsonSerializer);
+        }
+
+        [Fact]
+        public void FormatterThrowsOnReadWhenOverridenCreateReturnsNull()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+            formatter.ReturnNullOnCreate = true;
+
+            byte[] array = Encoding.UTF8.GetBytes("foo");
+            MemoryStream memoryStream = new MemoryStream(array);
+
+            HttpContent content = new StringContent("foo");
+
+            // Act & Assert
+            Action action = () => formatter.ReadFromStreamAsync(typeof(SampleType), memoryStream, content, null).Wait();
+
+            Assert.Throws<InvalidOperationException>(action, "The 'CreateJsonSerializer' method did not return a JSON serializer.");
+
+            Assert.Null(formatter.InnerDataContractSerializer);
+            Assert.NotNull(formatter.InnerJsonSerializer);
+        }
+
+        [Fact]
+        public void DataContractFormatterThrowsOnWriteWhenOverridenCreateFails()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+            formatter.ThrowAnExceptionOnCreate = true;
+            formatter.UseDataContractJsonSerializer = true;
+
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContent content = new StringContent(String.Empty);
+
+            // Act & Assert
+            Action action = () => formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null).Wait();
+            Assert.Throws<InvalidOperationException>(action, "The 'DataContractJsonSerializer' serializer cannot serialize the type 'SampleType'.");
+
+            Assert.NotNull(formatter.InnerDataContractSerializer);
+            Assert.Null(formatter.InnerJsonSerializer);
+        }
+
+        [Fact]
+        public void DataContractFormatterThrowsOnWriteWhenOverridenCreateReturnsNull()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+            formatter.ReturnNullOnCreate = true;
+            formatter.UseDataContractJsonSerializer = true;
+
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContent content = new StringContent(String.Empty);
+
+            // Act & Assert
+            Action action = () => formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null).Wait();
+            Assert.Throws<InvalidOperationException>(action, "The 'DataContractJsonSerializer' serializer cannot serialize the type 'SampleType'.");
+
+            Assert.NotNull(formatter.InnerDataContractSerializer);
+            Assert.Null(formatter.InnerJsonSerializer);
+        }
+
+        [Fact]
+        public void DataContractFormatterThrowsOnReadWhenOverridenCreateFails()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+            formatter.ThrowAnExceptionOnCreate = true;
+            formatter.UseDataContractJsonSerializer = true;
+
+            byte[] array = Encoding.UTF8.GetBytes("foo");
+            MemoryStream memoryStream = new MemoryStream(array);
+
+            HttpContent content = new StringContent("foo");
+
+            // Act & Assert
+            Action action = () => formatter.ReadFromStreamAsync(typeof(SampleType), memoryStream, content, null).Wait();
+            Assert.Throws<InvalidOperationException>(action, "The 'DataContractJsonSerializer' serializer cannot serialize the type 'SampleType'.");
+
+            Assert.NotNull(formatter.InnerDataContractSerializer);
+            Assert.Null(formatter.InnerJsonSerializer);
+        }
+
+        [Fact]
+        public void DataContractFormatterThrowsOnReadWhenOverridenCreateReturnsNull()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+            formatter.ReturnNullOnCreate = true;
+            formatter.UseDataContractJsonSerializer = true;
+
+            byte[] array = Encoding.UTF8.GetBytes("foo");
+            MemoryStream memoryStream = new MemoryStream(array);
+
+            HttpContent content = new StringContent("foo");
+
+            // Act & Assert
+            Action action = () => formatter.ReadFromStreamAsync(typeof(SampleType), memoryStream, content, null).Wait();
+
+            Assert.Throws<InvalidOperationException>(action, "The 'DataContractJsonSerializer' serializer cannot serialize the type 'SampleType'.");
+
+            Assert.NotNull(formatter.InnerDataContractSerializer);
+            Assert.Null(formatter.InnerJsonSerializer);
+        }
+
+        [Fact]
         public void CanReadType_ReturnsTrueOnJtoken()
         {
             TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
@@ -193,8 +359,8 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void UseDataContractJsonSerializer_False()
         {
-            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter 
-            { 
+            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter
+            {
 #if !NETFX_CORE // No JsonSerializer in portable libraries
                 UseDataContractJsonSerializer = false
 #endif
@@ -215,9 +381,9 @@ namespace System.Net.Http.Formatting
             JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter
             {
 #if !NETFX_CORE // No JsonSerializer in portable libraries
-                UseDataContractJsonSerializer = false, 
+                UseDataContractJsonSerializer = false,
 #endif
-                Indent = true 
+                Indent = true
             };
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
@@ -235,7 +401,7 @@ namespace System.Net.Http.Formatting
             JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter
             {
 #if !NETFX_CORE // No JsonSerializer in portable libraries
-                UseDataContractJsonSerializer = false 
+                UseDataContractJsonSerializer = false
 #endif
             };
             MemoryStream memoryStream = new MemoryStream();
@@ -301,6 +467,11 @@ namespace System.Net.Http.Formatting
             {
             }
 
+            public bool ThrowAnExceptionOnCreate { get; set; }
+            public bool ReturnNullOnCreate { get; set; }
+            public JsonSerializer InnerJsonSerializer { get; private set; }
+            public DataContractJsonSerializer InnerDataContractSerializer { get; private set; }
+
             public bool CanReadTypeProxy(Type type)
             {
                 return CanReadType(type);
@@ -309,6 +480,40 @@ namespace System.Net.Http.Formatting
             public bool CanWriteTypeProxy(Type type)
             {
                 return CanWriteType(type);
+            }
+
+            public override JsonSerializer CreateJsonSerializer()
+            {
+                InnerJsonSerializer = base.CreateJsonSerializer();
+
+                if (ReturnNullOnCreate)
+                {
+                    return null;
+                }
+
+                if (ThrowAnExceptionOnCreate)
+                {
+                    throw new Exception("Throwing exception directly, since it needs to get caught by a catch all");
+                }
+
+                return InnerJsonSerializer;
+            }
+
+            public override DataContractJsonSerializer CreateDataContractSerializer(Type type)
+            {
+                InnerDataContractSerializer = base.CreateDataContractSerializer(type);
+
+                if (ReturnNullOnCreate)
+                {
+                    return null;
+                }
+
+                if (ThrowAnExceptionOnCreate)
+                {
+                    throw new Exception("Throwing exception directly, since it needs to get caught by a catch all");
+                }
+
+                return InnerDataContractSerializer;
             }
         }
 

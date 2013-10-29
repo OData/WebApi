@@ -179,7 +179,7 @@ namespace System.Web.Http.Validation
 
             ElementScope elementScope = new ElementScope() { Index = 0 };
             validationContext.KeyBuilders.Push(elementScope);
-            var validators = validationContext.ActionContext.GetValidators(elementMetadata, validationContext.ValidatorCache);
+            IEnumerable<ModelValidator> validators = validationContext.ActionContext.GetValidators(elementMetadata, validationContext.ValidatorCache);
 
             // if there are no validators or the object is null we bail out quickly
             // when there are large arrays of null, this will save a significant amount of processing

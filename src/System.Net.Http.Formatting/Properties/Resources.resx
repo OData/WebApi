@@ -318,4 +318,10 @@
   <data name="XmlMediaTypeFormatter_NullReturnedSerializer" xml:space="preserve">
     <value>The object returned by {0} must not be a null value.</value>
   </data>
+  <data name="JsonSerializerFactoryReturnedNull" xml:space="preserve">
+    <value>The '{0}' method did not return a JSON serializer.</value>
+  </data>
+  <data name="JsonSerializerFactoryThrew" xml:space="preserve">
+    <value>The '{0}' method threw an exception when attempting to create a JSON serializer.</value>
+  </data>
 </root>

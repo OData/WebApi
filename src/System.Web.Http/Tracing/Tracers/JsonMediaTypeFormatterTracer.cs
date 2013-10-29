@@ -5,8 +5,10 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using System.Web.Http.Services;
+using Newtonsoft.Json;
 
 namespace System.Web.Http.Tracing.Tracers
 {
@@ -81,6 +83,16 @@ namespace System.Web.Http.Tracing.Tracers
         public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, MediaTypeHeaderValue mediaType)
         {
             _innerTracer.SetDefaultContentHeaders(type, headers, mediaType);
+        }
+
+        public override DataContractJsonSerializer CreateDataContractSerializer(Type type)
+        {
+            return _inner.CreateDataContractSerializer(type);
+        }
+
+        public override JsonSerializer CreateJsonSerializer()
+        {
+            return _inner.CreateJsonSerializer();
         }
     }
 }

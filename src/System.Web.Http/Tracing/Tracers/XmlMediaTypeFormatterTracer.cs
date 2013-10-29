@@ -5,8 +5,10 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Web.Http.Services;
+using System.Xml.Serialization;
 
 namespace System.Web.Http.Tracing.Tracers
 {
@@ -17,7 +19,7 @@ namespace System.Web.Http.Tracing.Tracers
     internal class XmlMediaTypeFormatterTracer : XmlMediaTypeFormatter, IFormatterTracer, IDecorator<XmlMediaTypeFormatter>
     {
         private readonly XmlMediaTypeFormatter _inner;
-        private MediaTypeFormatterTracer _innerTracer;
+        private readonly MediaTypeFormatterTracer _innerTracer;
 
         public XmlMediaTypeFormatterTracer(XmlMediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
             : base(innerFormatter)
@@ -81,6 +83,16 @@ namespace System.Web.Http.Tracing.Tracers
         public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, MediaTypeHeaderValue mediaType)
         {
             _innerTracer.SetDefaultContentHeaders(type, headers, mediaType);
+        }
+
+        public override XmlSerializer CreateXmlSerializer(Type type)
+        {
+            return _inner.CreateXmlSerializer(type);
+        }
+
+        public override DataContractSerializer CreateDataContractSerializer(Type type)
+        {
+            return _inner.CreateDataContractSerializer(type);
         }
     }
 }

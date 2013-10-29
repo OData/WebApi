@@ -447,6 +447,27 @@ namespace System.Net.Http.Formatting
             return XmlWriter.Create(writeStream, writerSettings);
         }
 
+        /// <summary>
+        /// Called during deserialization to get the XML serializer.
+        /// </summary>
+        /// <param name="type">The type of object that will be serialized or deserialized.</param>
+        /// <returns>The <see cref="XmlSerializer"/> used to serialize the object.</returns>
+        public virtual XmlSerializer CreateXmlSerializer(Type type)
+        {
+            return new XmlSerializer(type);
+        }
+
+        /// <summary>
+        /// Called during deserialization to get the DataContractSerializer serializer.
+        /// </summary>
+        /// <param name="type">The type of object that will be serialized or deserialized.</param>
+        /// <returns>The <see cref="DataContractSerializer"/> used to serialize the object.</returns>
+        public virtual DataContractSerializer CreateDataContractSerializer(Type type)
+        {
+            return new DataContractSerializer(type);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Since we use an extensible factory method we cannot control the exceptions being thrown")]
         private object CreateDefaultSerializer(Type type, bool throwOnError)
         {
             Contract.Assert(type != null, "type cannot be null.");
@@ -457,7 +478,7 @@ namespace System.Net.Http.Formatting
             {
                 if (UseXmlSerializer)
                 {
-                    serializer = new XmlSerializer(type);
+                    serializer = CreateXmlSerializer(type);
                 }
                 else
                 {
@@ -466,29 +487,27 @@ namespace System.Net.Http.Formatting
                     // Verify that type is a valid data contract by forcing the serializer to try to create a data contract
                     FormattingUtilities.XsdDataContractExporter.GetRootElementName(type);
 #endif
-                    serializer = new DataContractSerializer(type);
+                    serializer = CreateDataContractSerializer(type);
                 }
             }
-            catch (InvalidOperationException invalidOperationException)
+            catch (Exception caught)
             {
-                exception = invalidOperationException;
-            }
-            catch (NotSupportedException notSupportedException)
-            {
-                exception = notSupportedException;
-            }
-            catch (InvalidDataContractException invalidDataContractException)
-            {
-                exception = invalidDataContractException;
+                exception = caught;
             }
 
-            if (exception != null)
+            if (serializer == null && throwOnError)
             {
-                if (throwOnError)
+                if (exception != null)
                 {
                     throw Error.InvalidOperation(exception, Properties.Resources.SerializerCannotSerializeType,
                                   UseXmlSerializer ? typeof(XmlSerializer).Name : typeof(DataContractSerializer).Name,
                                   type.Name);
+                }
+                else
+                {
+                    throw Error.InvalidOperation(Properties.Resources.SerializerCannotSerializeType,
+                              UseXmlSerializer ? typeof(XmlSerializer).Name : typeof(DataContractSerializer).Name,
+                              type.Name);
                 }
             }
 

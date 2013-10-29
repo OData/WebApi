@@ -6,7 +6,6 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Http.Internal;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -286,9 +285,10 @@ namespace System.Net.Http.Formatting
                 else
 #endif
                 {
-                    using (JsonTextReader jsonTextReader = new JsonTextReader(new StreamReader(readStream, effectiveEncoding)) { CloseInput = false, MaxDepth = _maxDepth })
+                    using (JsonReader jsonTextReader = new JsonTextReader(new StreamReader(readStream, effectiveEncoding)) { CloseInput = false, MaxDepth = _maxDepth })
                     {
-                        JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
+                        JsonSerializer jsonSerializer = CreateJsonSerializerInternal();
+
                         if (formatterLogger != null)
                         {
                             // Error must always be marked as handled
@@ -300,6 +300,7 @@ namespace System.Net.Http.Formatting
                                 e.ErrorContext.Handled = true;
                             };
                         }
+
                         return jsonSerializer.Deserialize(jsonTextReader, type);
                     }
                 }
@@ -313,6 +314,36 @@ namespace System.Net.Http.Formatting
                 formatterLogger.LogError(String.Empty, e);
                 return GetDefaultValueForType(type);
             }
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "This is a public extensibility point, we can't predict what exceptions will come through")]
+        private JsonSerializer CreateJsonSerializerInternal()
+        {
+            Exception exception = null;
+            JsonSerializer serializer = null;
+
+            try
+            {
+                serializer = CreateJsonSerializer();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            if (serializer == null)
+            {
+                if (exception == null)
+                {
+                    throw Error.InvalidOperation(Properties.Resources.JsonSerializerFactoryReturnedNull, "CreateJsonSerializer");
+                }
+                else
+                {
+                    throw Error.InvalidOperation(exception, Properties.Resources.JsonSerializerFactoryThrew, "CreateJsonSerializer");
+                }
+            }
+
+            return serializer;
         }
 
         /// <summary>
@@ -356,6 +387,16 @@ namespace System.Net.Http.Formatting
             }
         }
 
+        /// <summary>
+        /// Called during deserialization to get the <see cref="JsonSerializer"/>.
+        /// </summary>
+        /// <returns>The <see cref="JsonSerializer"/> used during serialization.</returns>
+        public virtual JsonSerializer CreateJsonSerializer()
+        {
+            JsonSerializer jsonSerializer = JsonSerializer.Create(SerializerSettings);
+            return jsonSerializer;
+        }
+
 #if NETFX_CORE
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", Justification = "The type parameter is only used by the non-portable version of the library.")]
 #endif
@@ -383,21 +424,24 @@ namespace System.Net.Http.Formatting
             else
 #endif
             {
-                using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(writeStream, effectiveEncoding)) { CloseOutput = false })
+                using (JsonWriter jsonWriter = new JsonTextWriter(new StreamWriter(writeStream, effectiveEncoding)))
                 {
+                    jsonWriter.CloseOutput = false;
+
                     if (Indent)
                     {
-                        jsonTextWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
+                        jsonWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
                     }
-                    JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
-                    jsonSerializer.Serialize(jsonTextWriter, value);
-                    jsonTextWriter.Flush();
+                    JsonSerializer jsonSerializer = CreateJsonSerializerInternal();
+                    jsonSerializer.Serialize(jsonWriter, value);
+                    jsonWriter.Flush();
                 }
             }
         }
 
 #if !NETFX_CORE // No DataContractJsonSerializer in portable library version
-        private static DataContractJsonSerializer CreateDataContractSerializer(Type type, bool throwOnError)
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catch all is around an extensibile method")]
+        private DataContractJsonSerializer CreateDataContractSerializer(Type type, bool throwOnError)
         {
             if (type == null)
             {
@@ -411,24 +455,40 @@ namespace System.Net.Http.Formatting
             {
                 // Verify that type is a valid data contract by forcing the serializer to try to create a data contract
                 FormattingUtilities.XsdDataContractExporter.GetRootElementName(type);
-                serializer = new DataContractJsonSerializer(type);
+                serializer = CreateDataContractSerializer(type);
             }
-            catch (InvalidDataContractException invalidDataContractException)
+            catch (Exception caught)
             {
-                exception = invalidDataContractException;
+                exception = caught;
             }
 
-            if (exception != null)
+            if (serializer == null && throwOnError)
             {
-                if (throwOnError)
+                if (exception != null)
                 {
                     throw Error.InvalidOperation(exception, Properties.Resources.SerializerCannotSerializeType,
+                                  typeof(DataContractJsonSerializer).Name,
+                                  type.Name);
+                }
+                else
+                {
+                    throw Error.InvalidOperation(Properties.Resources.SerializerCannotSerializeType,
                                   typeof(DataContractJsonSerializer).Name,
                                   type.Name);
                 }
             }
 
             return serializer;
+        }
+
+        /// <summary>
+        /// Called during deserialization to get the <see cref="DataContractJsonSerializer"/>.
+        /// </summary>
+        /// <param name="type">The type of object that will be serialized or deserialized.</param>
+        /// <returns>The <see cref="DataContractJsonSerializer"/> used to serialize the object.</returns>
+        public virtual DataContractJsonSerializer CreateDataContractSerializer(Type type)
+        {
+            return new DataContractJsonSerializer(type);
         }
 
         private DataContractJsonSerializer GetDataContractSerializer(Type type)

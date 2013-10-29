@@ -204,6 +204,172 @@ namespace System.Net.Http.Formatting
             Assert.ThrowsArgumentNull(() => { formatter.RemoveSerializer(null); }, "type");
         }
 
+        [Fact]
+        public void FormatterThrowsOnWriteWhenOverridenCreateFails()
+        {
+            // Arrange
+            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
+
+            formatter.ThrowAnExceptionOnCreate = true;
+
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContent content = new StringContent(String.Empty);
+
+            // Act & Assert
+            Action action = () => formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null).Wait();
+            Assert.Throws<InvalidOperationException>(action);
+
+            Assert.NotNull(formatter.InnerDataContractSerializer);
+            Assert.Null(formatter.InnerXmlSerializer);
+        }
+
+        [Fact]
+        public void FormatterThrowsOnWriteWhenOverridenCreateReturnsNull()
+        {
+            // Arrange
+            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
+
+            formatter.ReturnNullOnCreate = true;
+
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContent content = new StringContent(String.Empty);
+
+            // Act & Assert
+            Action action = () => formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null).Wait();
+            Assert.Throws<InvalidOperationException>(action);
+
+            Assert.NotNull(formatter.InnerDataContractSerializer);
+            Assert.Null(formatter.InnerXmlSerializer);
+        }
+
+        [Fact]
+        public void FormatterThrowsOnReadWhenOverridenCreateFails()
+        {
+            // Arrange
+            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
+
+            formatter.ThrowAnExceptionOnCreate = true;
+
+            byte[] array = Encoding.UTF8.GetBytes("foo");
+            MemoryStream memoryStream = new MemoryStream(array);
+
+            HttpContent content = new StringContent("foo");
+
+            // Act & Assert
+            Action action = () => formatter.ReadFromStreamAsync(typeof(SampleType), memoryStream, content, null).Wait();
+            Assert.Throws<InvalidOperationException>(action);
+
+            Assert.NotNull(formatter.InnerDataContractSerializer);
+            Assert.Null(formatter.InnerXmlSerializer);
+        }
+
+        [Fact]
+        public void FormatterThrowsOnReadWhenOverridenCreateReturnsNull()
+        {
+            // Arrange
+            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
+
+            formatter.ReturnNullOnCreate = true;
+
+            byte[] array = Encoding.UTF8.GetBytes("foo");
+            MemoryStream memoryStream = new MemoryStream(array);
+
+            HttpContent content = new StringContent("foo");
+
+            // Act & Assert
+            Action action = () => formatter.ReadFromStreamAsync(typeof(SampleType), memoryStream, content, null).Wait();
+
+            Assert.Throws<InvalidOperationException>(action);
+
+            Assert.NotNull(formatter.InnerDataContractSerializer);
+            Assert.Null(formatter.InnerXmlSerializer);
+        }
+
+        [Fact]
+        public void DataContractFormatterThrowsOnWriteWhenOverridenCreateFails()
+        {
+            // Arrange
+            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
+
+            formatter.ThrowAnExceptionOnCreate = true;
+            formatter.UseXmlSerializer = true;
+
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContent content = new StringContent(String.Empty);
+
+            // Act & Assert
+            Action action = () => formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null).Wait();
+            Assert.Throws<InvalidOperationException>(action);
+
+            Assert.Null(formatter.InnerDataContractSerializer);
+            Assert.NotNull(formatter.InnerXmlSerializer);
+        }
+
+        [Fact]
+        public void DataContractFormatterThrowsOnWriteWhenOverridenCreateReturnsNull()
+        {
+            // Arrange
+            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
+
+            formatter.ReturnNullOnCreate = true;
+            formatter.UseXmlSerializer = true;
+
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContent content = new StringContent(String.Empty);
+
+            // Act & Assert
+            Action action = () => formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null).Wait();
+            Assert.Throws<InvalidOperationException>(action);
+
+            Assert.Null(formatter.InnerDataContractSerializer);
+            Assert.NotNull(formatter.InnerXmlSerializer);
+        }
+
+        [Fact]
+        public void DataContractFormatterThrowsOnReadWhenOverridenCreateFails()
+        {
+            // Arrange
+            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
+
+            formatter.ThrowAnExceptionOnCreate = true;
+            formatter.UseXmlSerializer = true;
+
+            byte[] array = Encoding.UTF8.GetBytes("foo");
+            MemoryStream memoryStream = new MemoryStream(array);
+
+            HttpContent content = new StringContent("foo");
+
+            // Act & Assert
+            Action action = () => formatter.ReadFromStreamAsync(typeof(SampleType), memoryStream, content, null).Wait();
+            Assert.Throws<InvalidOperationException>(action);
+
+            Assert.Null(formatter.InnerDataContractSerializer);
+            Assert.NotNull(formatter.InnerXmlSerializer);
+        }
+
+        [Fact]
+        public void DataContractFormatterThrowsOnReadWhenOverridenCreateReturnsNull()
+        {
+            // Arrange
+            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
+
+            formatter.ReturnNullOnCreate = true;
+            formatter.UseXmlSerializer = true;
+
+            byte[] array = Encoding.UTF8.GetBytes("foo");
+            MemoryStream memoryStream = new MemoryStream(array);
+
+            HttpContent content = new StringContent("foo");
+
+            // Act & Assert
+            Action action = () => formatter.ReadFromStreamAsync(typeof(SampleType), memoryStream, content, null).Wait();
+
+            Assert.Throws<InvalidOperationException>(action);
+
+            Assert.Null(formatter.InnerDataContractSerializer);
+            Assert.NotNull(formatter.InnerXmlSerializer);
+        }
+
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsyncUsingXmlSerializer(Type variationType, object testData)
@@ -494,6 +660,11 @@ namespace System.Net.Http.Formatting
             {
             }
 
+            public bool ThrowAnExceptionOnCreate { get; set; }
+            public bool ReturnNullOnCreate { get; set; }
+            public XmlSerializer InnerXmlSerializer { get; private set; }
+            public DataContractSerializer InnerDataContractSerializer { get; private set; }
+
             public bool CanReadTypeCaller(Type type)
             {
                 return CanReadType(type);
@@ -502,6 +673,40 @@ namespace System.Net.Http.Formatting
             public bool CanWriteTypeCaller(Type type)
             {
                 return CanWriteType(type);
+            }
+
+            public override XmlSerializer CreateXmlSerializer(Type type)
+            {
+                InnerXmlSerializer = base.CreateXmlSerializer(type);
+
+                if (ReturnNullOnCreate)
+                {
+                    return null;
+                }
+
+                if (ThrowAnExceptionOnCreate)
+                {
+                    throw new Exception("Throwing exception directly, since it needs to get caught by a catch all");
+                }
+
+                return InnerXmlSerializer;
+            }
+
+            public override DataContractSerializer CreateDataContractSerializer(Type type)
+            {
+                InnerDataContractSerializer = base.CreateDataContractSerializer(type);
+
+                if (ReturnNullOnCreate)
+                {
+                    return null;
+                }
+
+                if (ThrowAnExceptionOnCreate)
+                {
+                    throw new Exception("Throwing exception directly, since it needs to get caught by a catch all");
+                }
+
+                return InnerDataContractSerializer;
             }
         }
 

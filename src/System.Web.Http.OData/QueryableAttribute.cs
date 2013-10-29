@@ -394,7 +394,7 @@ namespace System.Web.Http
                     {
                         actionExecutedContext.Response = request.CreateErrorResponse(
                             HttpStatusCode.BadRequest,
-                            SRResources.UriQueryStringInvalid,
+                            Error.Format(SRResources.UriQueryStringInvalid, e.Message),
                             e);
                         return;
                     }

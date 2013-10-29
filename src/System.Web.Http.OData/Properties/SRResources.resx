@@ -139,7 +139,7 @@
     <value>{0} does not support WriteObject.</value>
   </data>
   <data name="UriQueryStringInvalid" xml:space="preserve">
-    <value>The query specified in the URI is not valid.</value>
+    <value>The query specified in the URI is not valid. {0}</value>
   </data>
   <data name="LambdaExpressionMustHaveExactlyOneParameter" xml:space="preserve">
     <value>The LambdaExpression must have exactly one parameter.</value>

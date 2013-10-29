@@ -358,7 +358,7 @@ namespace System.Web.Http.OData.Formatter
                     XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
 
                     Assert.Equal("error", xml.Name.LocalName);
-                    Assert.Equal("The query specified in the URI is not valid.",
+                    Assert.Equal("The query specified in the URI is not valid. Could not find a property named 'abc' on type 'System.Web.Http.OData.Formatter.FormatterPerson'.",
                         xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
                     XElement innerErrorXml = xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}innererror"));
                     Assert.NotNull(innerErrorXml);

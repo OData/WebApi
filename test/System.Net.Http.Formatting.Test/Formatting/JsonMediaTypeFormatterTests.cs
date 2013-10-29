@@ -208,6 +208,7 @@ namespace System.Net.Http.Formatting
             Assert.NotNull(formatter.InnerJsonSerializer);
         }
 
+#if !NETFX_CORE
         [Fact]
         public void DataContractFormatterThrowsOnWriteWhenOverridenCreateFails()
         {
@@ -292,6 +293,7 @@ namespace System.Net.Http.Formatting
             Assert.NotNull(formatter.InnerDataContractSerializer);
             Assert.Null(formatter.InnerJsonSerializer);
         }
+#endif
 
         [Fact]
         public void CanReadType_ReturnsTrueOnJtoken()
@@ -499,6 +501,7 @@ namespace System.Net.Http.Formatting
                 return InnerJsonSerializer;
             }
 
+#if !NETFX_CORE
             public override DataContractJsonSerializer CreateDataContractSerializer(Type type)
             {
                 InnerDataContractSerializer = base.CreateDataContractSerializer(type);
@@ -515,6 +518,7 @@ namespace System.Net.Http.Formatting
 
                 return InnerDataContractSerializer;
             }
+#endif
         }
 
         private bool IsTypeSerializableWithJsonSerializer(Type type, object obj)

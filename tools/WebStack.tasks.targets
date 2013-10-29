@@ -1,27 +1,79 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- This task does not support concurrent execution from multiple project files. Its use is only appropriate when
+        NuGet.exe is not in use. -->
   <UsingTask TaskName="DownloadNuGet" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
     <ParameterGroup>
-      <OutputFilename ParameterType="System.String" Required="true" />
+      <OutputFileName ParameterType="System.String" Required="true" />
+      <MinimumVersion ParameterType="System.String" Required="true" />
     </ParameterGroup>
     <Task>
       <Reference Include="System.Core" />
       <Using Namespace="System" />
+      <Using Namespace="System.Diagnostics" />
       <Using Namespace="System.IO" />
       <Using Namespace="System.Net" />
       <Using Namespace="Microsoft.Build.Framework" />
       <Using Namespace="Microsoft.Build.Utilities" />
       <Code Type="Fragment" Language="cs">
         <![CDATA[
-                try {
-                    OutputFilename = Path.GetFullPath(OutputFilename);
-
-                    Log.LogMessage("Downloading latest version of NuGet.exe...");
-                    WebClient webClient = new WebClient();
-                    webClient.DownloadFile("https://nuget.org/nuget.exe", OutputFilename);
+                Version minimumRequiredVersion;
+                
+                if (!Version.TryParse(MinimumVersion, out minimumRequiredVersion))
+                {
+                    Log.LogError("MinimumVersion '{0}' is not a valid Version.", MinimumVersion);
+                }
+        
+                try
+                {
+                    OutputFileName = Path.GetFullPath(OutputFileName);
+                    
+                    if (File.Exists(OutputFileName))
+                    {
+                        // If NuGet.exe exists but is less than the minimum required version, delete it so that the
+                        // latest version will be downloaded.
+                        FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(OutputFileName);
+                        
+                        string toParse;
+                        
+                        if (versionInfo != null && versionInfo.ProductVersion != null)
+                        {
+                            toParse = versionInfo.ProductVersion;
+                        }
+                        else
+                        {
+                            toParse = null;
+                        }
+                        
+                        Version current;
+                        Version parsed;
+                        
+                        if (toParse != null && Version.TryParse(toParse, out parsed))
+                        {
+                            current = parsed;
+                        }
+                        else
+                        {
+                            // Treat a missing or invalid version like V0.0 (which will trigger a delete and download).
+                            current = new Version(0, 0);
+                        }
+                        
+                        if (current < minimumRequiredVersion)
+                        {
+                            File.Delete(OutputFileName);
+                        }
+                    }
+                    
+                    if (!File.Exists(OutputFileName))
+                    {
+                        Log.LogMessage("Downloading latest version of NuGet.exe...");
+                        WebClient webClient = new WebClient();
+                        webClient.DownloadFile("https://nuget.org/nuget.exe", OutputFileName);
+                    }
 
                     return true;
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Log.LogErrorFromException(ex);
                     return false;
                 }
@@ -46,20 +98,25 @@
       <Using Namespace="Microsoft.Build.Utilities" />
       <Code Type="Fragment" Language="cs">
         <![CDATA[
-                try {
+                try
+                {
                     Regex regex = new Regex(Find, RegexOptions.Multiline | RegexOptions.Compiled);
 
-                    foreach (ITaskItem file in Files) {
+                    foreach (ITaskItem file in Files)
+                    {
                         string fullPath = Path.GetFullPath(file.ItemSpec);
                         string originalText = File.ReadAllText(fullPath);
                         bool matched = regex.IsMatch(originalText);
 
-                        if (!matched) {
-                            if (WarnOnNoMatch) {
+                        if (!matched)
+                        {
+                            if (WarnOnNoMatch)
+                            {
                                 Log.LogWarning("No matches for '{0}' in '{1}'.", Find, fullPath);
                             }
                         }
-                        else {
+                        else
+                        {
                             File.SetAttributes(fullPath, File.GetAttributes(fullPath) & ~FileAttributes.ReadOnly);
                             File.WriteAllText(fullPath, regex.Replace(originalText, Replace), Encoding.UTF8);
                         }
@@ -67,7 +124,8 @@
 
                     return true;
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Log.LogErrorFromException(ex);
                     return false;
                 }
@@ -151,7 +209,8 @@
                     Console.WriteLine("  Time spent running tests: {0} seconds", timeSpent);
                     return true;
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Log.LogErrorFromException(ex);
                     return false;
                 }

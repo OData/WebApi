@@ -30,6 +30,11 @@ namespace System.Web.Http.Hosting
         [InlineData("{controller}/{id}", "", "http://localhost")]
         [InlineData("api", "", "http://localhost/api")]
         [InlineData("api", "", "http://LOCALHOST/API")]
+        [InlineData("{controller}/{id}", "/SelfHostServer/Customer/999", "http://localhost/SelfHostServer/Customer/999")]
+        [InlineData("{controller}/{id}", "/SelfHostServer/Customer/999", "http://localhost/SelfHostServer/Customer/999/")]
+        [InlineData("{controller}/{id}", "/SelfHostServer/Customer/999/", "http://localhost/SelfHostServer/Customer/999/")]
+        [InlineData("{controller}", "/SelfHostServer", "http://localhost/SelfHostServer/")]
+        [InlineData("{controller}", "/SelfHostServer/", "http://localhost/SelfHostServer/")]
         public void GetRouteDataShouldMatch(string uriTemplate, string virtualPathRoot, string requestUri)
         {
             HttpRoute route = new HttpRoute(uriTemplate);
@@ -46,6 +51,23 @@ namespace System.Web.Http.Hosting
             expectedResult["controller"] = "Customer";
             expectedResult["id"] = "999";
             Assert.Equal(expectedResult, data.Values, new DictionaryEqualityComparer());
+        }
+
+        [Theory]
+        [InlineData("{controller}/{id}", "/SelfHostServer/Customer/999/Invalid", "http://localhost/SelfHostServer/Customer/999")]
+        [InlineData("{controller}", "/SelfHostServer/", "http://localhost/SelfHostServer")]
+        public void GetRouteDataDoesNotMatch(string uriTemplate, string virtualPathRoot, string requestUri)
+        {
+            HttpRoute route = new HttpRoute(uriTemplate);
+            route.Defaults.Add("controller", "Customer");
+            route.Defaults.Add("id", "999");
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.RequestUri = new Uri(requestUri);
+
+            IHttpRouteData data = route.GetRouteData(virtualPathRoot, request);
+
+            // Assert
+            Assert.Null(data);
         }
 
         [Theory]

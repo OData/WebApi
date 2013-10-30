@@ -24,7 +24,7 @@ namespace System.Web.Http.Metadata.Providers
 
         // Constructor for creating real instances of the metadata class based on a prototype
         protected CachedModelMetadata(CachedModelMetadata<TPrototypeCache> prototype, Func<object> modelAccessor)
-            : base(prototype.Provider, prototype.ContainerType, modelAccessor, prototype.ModelType, prototype.PropertyName)
+            : base(prototype.Provider, prototype.ContainerType, modelAccessor, prototype.ModelType, prototype.PropertyName, prototype.CacheKey)
         {
             PrototypeCache = prototype.PrototypeCache;
 

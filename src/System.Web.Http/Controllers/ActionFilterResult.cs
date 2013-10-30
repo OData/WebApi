@@ -12,22 +12,19 @@ namespace System.Web.Http.Controllers
     {
         private readonly HttpActionBinding _binding;
         private readonly HttpActionContext _context;
-        private readonly ApiController _controller;
         private readonly ServicesContainer _services;
         private readonly IActionFilter[] _filters;
 
-        public ActionFilterResult(HttpActionBinding binding, HttpActionContext context, ApiController controller,
-            ServicesContainer services, IActionFilter[] filters)
+        public ActionFilterResult(HttpActionBinding binding, HttpActionContext context, ServicesContainer services,
+            IActionFilter[] filters)
         {
             Contract.Assert(binding != null);
             Contract.Assert(context != null);
-            Contract.Assert(controller != null);
             Contract.Assert(services != null);
             Contract.Assert(filters != null);
 
             _binding = binding;
             _context = context;
-            _controller = controller;
             _services = services;
             _filters = filters;
         }
@@ -36,7 +33,6 @@ namespace System.Web.Http.Controllers
         {
             await _binding.ExecuteBindingAsync(_context, cancellationToken);
 
-            _controller.ModelState = _context.ModelState;
             ActionInvoker actionInvoker = new ActionInvoker(_context, cancellationToken, _services);
             // Empty filters is the default case so avoid delegates
             // Ensure empty case remains the same as the filtered case

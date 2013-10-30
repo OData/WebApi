@@ -655,4 +655,7 @@
   <data name="OrderByNodeCountExceeded" xml:space="preserve">
     <value>The number of clauses in $orderby query option exceeded the maximum number allowed. The maximum number of $orderby clauses allowed is {0}.</value>
   </data>
+  <data name="TypePropertyMustNotBeNull" xml:space="preserve">
+    <value>{0}.{1} must not be null.</value>
+  </data>
 </root>

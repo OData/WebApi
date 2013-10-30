@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -25,8 +24,7 @@ namespace System.Web.Http
 {
     public abstract class ApiController : IHttpController, IDisposable
     {
-        private ModelStateDictionary _modelState;
-        private HttpControllerContext _controllerContext;
+        private HttpActionContext _actionContext = new HttpActionContext();
         private bool _initialized;
 
         /// <summary>Gets the configuration.</summary>
@@ -43,16 +41,15 @@ namespace System.Web.Http
         {
             get
             {
-                // unit test only.
-                if (_controllerContext == null)
+                // unit test only
+                if (ActionContext.ControllerContext == null)
                 {
-                    _controllerContext = new HttpControllerContext
+                    ActionContext.ControllerContext = new HttpControllerContext
                     {
                         RequestContext = new RequestBackedHttpRequestContext()
                     };
                 }
-
-                return _controllerContext;
+                return ActionContext.ControllerContext;
             }
             set
             {
@@ -61,7 +58,22 @@ namespace System.Web.Http
                     throw Error.PropertyNull();
                 }
 
-                _controllerContext = value;
+                ActionContext.ControllerContext = value;
+            }
+        }
+
+        /// <summary>Gets the action context.</summary>
+        /// <remarks>The setter is intended for unit testing purposes only.</remarks>
+        public HttpActionContext ActionContext
+        {
+            get { return _actionContext; }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+                _actionContext = value;
             }
         }
 
@@ -73,18 +85,7 @@ namespace System.Web.Http
         {
             get
             {
-                if (_modelState == null)
-                {
-                    // The getter is not intended to be used by multiple threads, so it is fine to initialize here.
-                    _modelState = new ModelStateDictionary();
-                }
-
-                return _modelState;
-            }
-            internal set
-            {
-                Contract.Assert(value != null);
-                _modelState = value;
+                return ActionContext.ModelState;
             }
         }
 
@@ -196,14 +197,13 @@ namespace System.Web.Http
 
             HttpControllerDescriptor controllerDescriptor = controllerContext.ControllerDescriptor;
             ServicesContainer controllerServices = controllerDescriptor.Configuration.Services;
-            HttpActionDescriptor actionDescriptor = controllerServices.GetActionSelector().SelectAction(controllerContext);
 
+            HttpActionDescriptor actionDescriptor = controllerServices.GetActionSelector().SelectAction(controllerContext);
+            ActionContext.ActionDescriptor = actionDescriptor;
             if (Request != null)
             {
                 Request.SetActionDescriptor(actionDescriptor);
             }
-
-            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
 
             FilterGrouping filterGrouping = actionDescriptor.GetFilterGrouping();
 
@@ -212,21 +212,21 @@ namespace System.Web.Http
             IAuthorizationFilter[] authorizationFilters = filterGrouping.AuthorizationFilters;
             IExceptionFilter[] exceptionFilters = filterGrouping.ExceptionFilters;
 
-            IHttpActionResult result = new ActionFilterResult(actionDescriptor.ActionBinding, actionContext, this,
+            IHttpActionResult result = new ActionFilterResult(actionDescriptor.ActionBinding, ActionContext,
                 controllerServices, actionFilters);
             if (authorizationFilters.Length > 0)
             {
-                result = new AuthorizationFilterResult(actionContext, authorizationFilters, result);
+                result = new AuthorizationFilterResult(ActionContext, authorizationFilters, result);
             }
             if (authenticationFilters.Length > 0)
             {
-                result = new AuthenticationFilterResult(actionContext, this, authenticationFilters, result);
+                result = new AuthenticationFilterResult(ActionContext, this, authenticationFilters, result);
             }
             if (exceptionFilters.Length > 0)
             {
                 IExceptionLogger exceptionLogger = ExceptionServices.GetLogger(controllerServices);
                 IExceptionHandler exceptionHandler = ExceptionServices.GetHandler(controllerServices);
-                result = new ExceptionFilterResult(actionContext, exceptionFilters, exceptionLogger, exceptionHandler,
+                result = new ExceptionFilterResult(ActionContext, exceptionFilters, exceptionLogger, exceptionHandler,
                     result);
             }
 
@@ -533,7 +533,7 @@ namespace System.Web.Http
             }
 
             _initialized = true;
-            _controllerContext = controllerContext;
+            ControllerContext = controllerContext;
         }
 
         #region IDisposable

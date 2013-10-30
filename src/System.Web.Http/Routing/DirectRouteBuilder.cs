@@ -57,7 +57,7 @@ namespace System.Web.Http.Routing
             get { return _actions; }
         }
 
-        public HttpRouteEntry Build()
+        public virtual HttpRouteEntry Build()
         {
             HttpRouteValueDictionary dataTokens = DataTokens;
 

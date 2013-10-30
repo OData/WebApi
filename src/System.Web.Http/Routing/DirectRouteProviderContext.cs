@@ -52,12 +52,13 @@ namespace System.Web.Http.Routing
             get { return _inlineConstraintResolver; }
         }
 
-        public DirectRouteBuilder CreateBuilder(string template)
+        public virtual DirectRouteBuilder CreateBuilder(string template)
         {
             return CreateBuilder(template, _inlineConstraintResolver);
         }
 
-        internal DirectRouteBuilder CreateBuilder(string template, IInlineConstraintResolver constraintResolver)
+        internal virtual DirectRouteBuilder CreateBuilder(string template,
+            IInlineConstraintResolver constraintResolver)
         {
             DirectRouteBuilder builder = new DirectRouteBuilder(_actions);
 

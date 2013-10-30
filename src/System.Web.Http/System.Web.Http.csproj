@@ -143,6 +143,7 @@
     <Compile Include="RouteAttribute.cs" />
     <Compile Include="Controllers\CandidateAction.cs" />
     <Compile Include="Routing\DirectRouteBuilder.cs" />
+    <Compile Include="Routing\RouteProviderAttribute.cs" />
     <Compile Include="Routing\DirectRouteProviderContext.cs" />
     <Compile Include="Routing\HttpRouteEntry.cs" />
     <Compile Include="Routing\IDirectRouteProvider.cs" />

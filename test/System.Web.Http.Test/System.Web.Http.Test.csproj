@@ -189,6 +189,7 @@
     <Compile Include="Routing\HttpRouteTest.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />
     <Compile Include="Routing\RouteAttributeTests.cs" />
+    <Compile Include="Routing\RouteProviderAttributeTests.cs" />
     <Compile Include="Routing\UriPathExtensionMappingTests.cs" />
     <Compile Include="Routing\UrlHelperTest.cs" />
     <Compile Include="Services\ControllerServicesTests.cs" />

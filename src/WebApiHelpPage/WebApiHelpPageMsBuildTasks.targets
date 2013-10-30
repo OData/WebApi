@@ -1,13 +1,11 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\tools\WebStack.tasks.targets"/>
   <PropertyGroup>
-    <CodeTaskFactoryAssemblyFile Condition=" '$(VisualStudioVersion)' == '12.0' ">$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll</CodeTaskFactoryAssemblyFile>
-    <CodeTaskFactoryAssemblyFile Condition=" '$(VisualStudioVersion)' != '12.0' ">$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll</CodeTaskFactoryAssemblyFile>
+    <CodeTaskFactoryAssemblyFile Condition=" '$(CodeTaskFactoryAssemblyFile)' == '' And '$(VisualStudioVersion)' == '12.0' ">$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll</CodeTaskFactoryAssemblyFile>
+    <CodeTaskFactoryAssemblyFile Condition=" '$(CodeTaskFactoryAssemblyFile)' == '' ">$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll</CodeTaskFactoryAssemblyFile>
+    <BuildTaskAssemblyReference Condition=" '$(BuildTaskAssemblyReference)' == '' And '$(VisualStudioVersion)' == '12.0' ">Microsoft.Build.Tasks.v12.0</BuildTaskAssemblyReference>
+    <BuildTaskAssemblyReference Condition=" '$(BuildTaskAssemblyReference)' == '' ">Microsoft.Build.Tasks.v4.0</BuildTaskAssemblyReference>
   </PropertyGroup>
-  <ItemGroup>
-    <TaskAssemblyReferences Condition=" '$(VisualStudioVersion)' == '12.0' " Include="Microsoft.Build.Tasks.v12.0" />
-    <TaskAssemblyReferences Condition=" '$(VisualStudioVersion)' != '12.0' " Include="Microsoft.Build.Tasks.v4.0" />
-  </ItemGroup>
   <UsingTask TaskName="NuGetPack" TaskFactory="CodeTaskFactory" AssemblyFile="$(CodeTaskFactoryAssemblyFile)">
     <ParameterGroup>
       <NuGetExe ParameterType="System.String" Required="true" />
@@ -16,7 +14,7 @@
       <BasePath ParameterType="System.String" Required="true" />
     </ParameterGroup>
     <Task>
-      <Reference Include="@(TaskAssemblyReferences)" />
+      <Reference Include="$(BuildTaskAssemblyReference)" />
       <Using Namespace="System.Net" />
       <Using Namespace="Microsoft.Build.Tasks" />
       <Code Type="Fragment" Language="cs">

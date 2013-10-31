@@ -480,4 +480,11 @@
   <data name="TypeMethodMustNotReturnNull" xml:space="preserve">
     <value>{0}.{1} must not return null.</value>
   </data>
+  <data name="SubRouteCollection_DuplicateRouteName" xml:space="preserve">
+    <value>A route named '{0}' is already in the route collection. Route names must be unique.
+
+Duplicates:
+{1}
+{2}</value>
+  </data>
 </root>

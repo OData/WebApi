@@ -3,10 +3,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 
 #if ASPNETWEBAPI
+using System.Web.Http.Properties;
 using SubRouteType = System.Web.Http.Routing.IHttpRoute;
 #else
+using System.Web.Mvc.Properties;
 using SubRouteType = System.Web.Routing.Route;
 #endif
 
@@ -40,7 +43,14 @@ namespace System.Web.Mvc.Routing
 
             if (name != null)
             {
-                _dictionary.Add(name, route);
+                if (_dictionary.ContainsKey(name))
+                {
+                    ThrowExceptionForDuplicateRouteNames(name, route, _dictionary[name]);
+                }
+                else
+                {
+                    _dictionary.Add(name, route);
+                }
             }
         }
 
@@ -112,6 +122,25 @@ namespace System.Web.Mvc.Routing
         public IEnumerable<KeyValuePair<string, SubRouteType>> NamedRoutes
         {
             get { return _dictionary; }
+        }
+
+        private void ThrowExceptionForDuplicateRouteNames(string name, SubRouteType route1, SubRouteType route2)
+        {
+#if ASPNETWEBAPI
+            throw new InvalidOperationException(String.Format(
+                CultureInfo.CurrentCulture,
+                SRResources.SubRouteCollection_DuplicateRouteName,
+                name,
+                route1.RouteTemplate,
+                route2.RouteTemplate));
+#else
+            throw new InvalidOperationException(String.Format(
+                CultureInfo.CurrentCulture,
+                MvcResources.SubRouteCollection_DuplicateRouteName,
+                name,
+                route1.Url,
+                route2.Url));
+#endif
         }
     }
 }

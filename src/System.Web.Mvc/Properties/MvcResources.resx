@@ -525,4 +525,11 @@
   <data name="DirectRoute_MissingControllerDescriptor" xml:space="preserve">
     <value>The route does not have an associated controller descriptor. Routing requires that each direct route map to a single controller.</value>
   </data>
+  <data name="SubRouteCollection_DuplicateRouteName" xml:space="preserve">
+    <value>A route named '{0}' is already in the route collection. Route names must be unique.
+
+Duplicates:
+{1}
+{2}</value>
+  </data>
 </root>

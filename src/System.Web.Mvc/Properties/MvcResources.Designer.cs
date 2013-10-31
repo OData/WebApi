@@ -1114,6 +1114,19 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A route named &apos;{0}&apos; is already in the route collection. Route names must be unique.
+        ///
+        ///Duplicates:
+        ///{1}
+        ///{2}.
+        /// </summary>
+        internal static string SubRouteCollection_DuplicateRouteName {
+            get {
+                return ResourceManager.GetString("SubRouteCollection_DuplicateRouteName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An operation that crossed a synchronization context failed. See the inner exception for more information..
         /// </summary>
         internal static string SynchronizationContextUtil_ExceptionThrown {

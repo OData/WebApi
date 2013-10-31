@@ -265,6 +265,35 @@ namespace System.Web.Routing
             Assert.Null(requestContext.RouteData.Values["id"]);
         }
 
+        [Theory]
+        [InlineData("~/Home1/Index", "Home1.Index()")]
+        [InlineData("~/Home2/Index", "Home2.Index()")]
+        public void AttributeRouting_WithSameControllerName(string path, string expectedAction)
+        {
+            // Arrange
+            var controllerTypes = new[] 
+            { 
+                typeof(ControllersWithTheSameName.NS1.HomeController), 
+                typeof(ControllersWithTheSameName.NS2.HomeController), 
+            };
+
+            var routes = new RouteCollection();
+            routes.MapMvcAttributeRoutes(controllerTypes);
+
+            HttpContextBase context = GetContext(path);
+            RouteData routeData = routes.GetRouteData(context);
+            RequestContext requestContext = new RequestContext(context, routeData);
+            MvcHandler handler = new MvcHandler(requestContext);
+            handler.ControllerBuilder.SetControllerFactory(GetControllerFactory(controllerTypes));
+
+            // Act
+            handler.ProcessRequest(context);
+
+            // Assert
+            ContentResult result = Assert.IsType<ContentResult>(context.Items[ResultKey]);
+            Assert.Equal(expectedAction, result.Content);
+        }
+
         private IControllerFactory GetControllerFactory(Type[] controllerTypes)
         {
             return new DefaultControllerFactory
@@ -692,7 +721,7 @@ namespace System.Web.Routing
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple=true)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
     public class BoolActionMethodSelectorAttribute : ActionMethodSelectorAttribute
     {
         public BoolActionMethodSelectorAttribute(bool value)
@@ -766,6 +795,33 @@ namespace System.Web.Routing
         public string Create()
         {
             return "Create()";
+        }
+    }
+
+    namespace ControllersWithTheSameName
+    {
+        namespace NS1
+        {
+            [Route("Home1/{action}")]
+            public class HomeController : ResponseStoringController
+            {
+                public ActionResult Index()
+                {
+                    return Content("Home1.Index()");
+                }
+            }
+        }
+
+        namespace NS2
+        {
+            [Route("Home2/{action}")]
+            public class HomeController : ResponseStoringController
+            {
+                public ActionResult Index()
+                {
+                    return Content("Home2.Index()");
+                }
+            }
         }
     }
 }

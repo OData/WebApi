@@ -27,6 +27,9 @@ namespace System.Net.Http
         // Set of indexes of which HttpContents we designate as form data
         private Collection<bool> _isFormData = new Collection<bool>();
 
+        // pass around cancellation token through field to maintain backward compat.
+        private CancellationToken _cancellationToken;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MultipartFormDataStreamProvider"/> class.
         /// </summary>
@@ -102,17 +105,7 @@ namespace System.Net.Http
         /// Read the non-file contents as form data.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the post processing.</returns>
-        public override Task ExecutePostProcessingAsync()
-        {
-            return ExecutePostProcessingAsync(CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Read the non-file contents as form data.
-        /// </summary>
-        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>A <see cref="Task"/> representing the post processing.</returns>
-        public override async Task ExecutePostProcessingAsync(CancellationToken cancellationToken)
+        public override async Task ExecutePostProcessingAsync()
         {
             // Find instances of HttpContent for which we created a memory stream and read them asynchronously
             // to get the string content and then add that as form data
@@ -126,11 +119,22 @@ namespace System.Net.Http
                     string formFieldName = FormattingUtilities.UnquoteToken(contentDisposition.Name) ?? String.Empty;
 
                     // Read the contents as string data and add to form data
-                    cancellationToken.ThrowIfCancellationRequested();
+                    _cancellationToken.ThrowIfCancellationRequested();
                     string formFieldValue = await formContent.ReadAsStringAsync();
                     FormData.Add(formFieldName, formFieldValue);
                 }
             }
+        }
+
+        /// <summary>
+        /// Read the non-file contents as form data.
+        /// </summary>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A <see cref="Task"/> representing the post processing.</returns>
+        public override Task ExecutePostProcessingAsync(CancellationToken cancellationToken)
+        {
+            _cancellationToken = cancellationToken;
+            return ExecutePostProcessingAsync();
         }
     }
 }

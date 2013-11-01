@@ -3,9 +3,9 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
-using System.Net.Http.Internal;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Net.Http
 {
@@ -128,6 +128,21 @@ namespace System.Net.Http
                         Assert.Equal(content, provider.FormData[formName]);
                     }
                 });
+        }
+
+        [Fact]
+        public async Task ExecutePostProcessingAsyncWithoutCancellationToken_GetCalledBy_ReadAsMultipartAsync()
+        {
+            // Arrange
+            MultipartFormDataContent multipartContent = new MultipartFormDataContent();
+            Mock<MultipartFormDataStreamProvider> mockProvider = new Mock<MultipartFormDataStreamProvider>(ValidPath);
+            mockProvider.CallBase = true;
+
+            // Act
+            var provider = await multipartContent.ReadAsMultipartAsync(mockProvider.Object);
+
+            // Assert
+            mockProvider.Verify(p => p.ExecutePostProcessingAsync(), Times.Once());
         }
     }
 }

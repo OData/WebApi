@@ -12,7 +12,7 @@ namespace System.Web.Http.Routing
     [DebuggerDisplay("{DebuggerToString()}")]
     internal class CandidateAction
     {
-        public ReflectedHttpActionDescriptor ActionDescriptor { get; set; }
+        public HttpActionDescriptor ActionDescriptor { get; set; }
         public int Order { get; set; }
         public decimal Precedence { get; set; }
 

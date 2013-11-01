@@ -226,7 +226,7 @@ namespace System.Web.Http.Description
             {
                 foreach (CandidateAction action in candidates)
                 {
-                    ReflectedHttpActionDescriptor actionDescriptor = action.ActionDescriptor;
+                    HttpActionDescriptor actionDescriptor = action.ActionDescriptor;
                     string actionName = actionDescriptor.ActionName;
 
                     if (ShouldExploreAction(actionName, actionDescriptor, route))

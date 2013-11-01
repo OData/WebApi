@@ -22,9 +22,9 @@ namespace System.Web.Http.Routing
 
             List<CandidateAction> candidates = new List<CandidateAction>();
 
-            ReflectedHttpActionDescriptor[] directRouteActions = null;
-            ReflectedHttpActionDescriptor[] possibleDirectRouteActions;
-            if (dataTokens.TryGetValue<ReflectedHttpActionDescriptor[]>(RouteKeys.ActionsDataTokenKey, out possibleDirectRouteActions))
+            HttpActionDescriptor[] directRouteActions = null;
+            HttpActionDescriptor[] possibleDirectRouteActions;
+            if (dataTokens.TryGetValue<HttpActionDescriptor[]>(RouteKeys.ActionsDataTokenKey, out possibleDirectRouteActions))
             {
                 if (possibleDirectRouteActions != null && possibleDirectRouteActions.Length > 0)
                 {

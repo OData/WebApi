@@ -9,11 +9,11 @@ namespace System.Web.Http.Routing
 {
     internal class DirectRouteBuilder
     {
-        private readonly ReflectedHttpActionDescriptor[] _actions;
+        private readonly HttpActionDescriptor[] _actions;
 
         private string _template;
 
-        public DirectRouteBuilder(IEnumerable<ReflectedHttpActionDescriptor> actions)
+        public DirectRouteBuilder(IEnumerable<HttpActionDescriptor> actions)
         {
             if (actions == null)
             {
@@ -52,7 +52,7 @@ namespace System.Web.Http.Routing
 
         public decimal Precedence { get; set; }
 
-        public IEnumerable<ReflectedHttpActionDescriptor> Actions
+        public IEnumerable<HttpActionDescriptor> Actions
         {
             get { return _actions; }
         }

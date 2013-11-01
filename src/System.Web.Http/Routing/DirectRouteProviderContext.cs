@@ -12,10 +12,10 @@ namespace System.Web.Http.Routing
     {
         private readonly string _actionName;
         private readonly string _prefix;
-        private readonly IEnumerable<ReflectedHttpActionDescriptor> _actions;
+        private readonly IEnumerable<HttpActionDescriptor> _actions;
         private readonly IInlineConstraintResolver _inlineConstraintResolver;
 
-        public DirectRouteProviderContext(string prefix, IEnumerable<ReflectedHttpActionDescriptor> actions,
+        public DirectRouteProviderContext(string prefix, IEnumerable<HttpActionDescriptor> actions,
             IInlineConstraintResolver inlineConstraintResolver)
         {
             if (actions == null)
@@ -32,7 +32,7 @@ namespace System.Web.Http.Routing
             _actions = actions;
             _inlineConstraintResolver = inlineConstraintResolver;
 
-            ReflectedHttpActionDescriptor firstDescriptor = actions.FirstOrDefault();
+            HttpActionDescriptor firstDescriptor = actions.FirstOrDefault();
             Contract.Assert(firstDescriptor != null);
             _actionName = firstDescriptor.ActionName;
         }
@@ -42,7 +42,7 @@ namespace System.Web.Http.Routing
             get { return _prefix; }
         }
 
-        public IEnumerable<ReflectedHttpActionDescriptor> Actions
+        public IEnumerable<HttpActionDescriptor> Actions
         {
             get { return _actions; }
         }

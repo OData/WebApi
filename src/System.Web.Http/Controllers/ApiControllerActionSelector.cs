@@ -96,13 +96,13 @@ namespace System.Web.Http.Controllers
             // Includes action descriptors only for actions accessible via standard routing (without route attributes).
             private readonly CandidateAction[] _standardCandidateActions;
 
-            private readonly IDictionary<ReflectedHttpActionDescriptor, string[]> _actionParameterNames = new Dictionary<ReflectedHttpActionDescriptor, string[]>();
+            private readonly IDictionary<HttpActionDescriptor, string[]> _actionParameterNames = new Dictionary<HttpActionDescriptor, string[]>();
 
             // Includes action descriptors for actions with and without route attributes.
-            private readonly ILookup<string, ReflectedHttpActionDescriptor> _combinedActionNameMapping;
+            private readonly ILookup<string, HttpActionDescriptor> _combinedActionNameMapping;
 
             // Includes action descriptors only for actions accessible via standard routing (without route attributes).
-            private readonly ILookup<string, ReflectedHttpActionDescriptor> _standardActionNameMapping;
+            private readonly ILookup<string, HttpActionDescriptor> _standardActionNameMapping;
 
             // Selection commonly looks up an action by verb.
             // Cache this mapping. These caches are completely optional and we still behave correctly if we cache miss.
@@ -159,7 +159,7 @@ namespace System.Web.Http.Controllers
                     {
                         CandidateAction candidate = _combinedCandidateActions[i];
                         // Allow standard routes access inherited actions or actions without Route attributes.
-                        if (candidate.ActionDescriptor.MethodInfo.DeclaringType != controllerDescriptor.ControllerType
+                        if (((ReflectedHttpActionDescriptor)candidate.ActionDescriptor).MethodInfo.DeclaringType != controllerDescriptor.ControllerType
                             || !candidate.ActionDescriptor.HasRoutingAttribute())
                         {
                             standardCandidateActions.Add(candidate);
@@ -353,7 +353,7 @@ namespace System.Web.Http.Controllers
                 if (routeData.Values.TryGetValue(RouteKeys.ActionKey, out actionName))
                 {
                     // We have an explicit {action} value, do traditional binding. Just lookup by actionName
-                    ReflectedHttpActionDescriptor[] actionsFoundByName = _standardActionNameMapping[actionName].ToArray();
+                    HttpActionDescriptor[] actionsFoundByName = _standardActionNameMapping[actionName].ToArray();
 
                     // Throws HttpResponseException with NotFound status because no action matches the Name
                     if (actionsFoundByName.Length == 0)
@@ -403,7 +403,7 @@ namespace System.Web.Http.Controllers
 
             public ILookup<string, HttpActionDescriptor> GetActionMapping()
             {
-                return new LookupAdapter() { Source = _combinedActionNameMapping };
+                return _combinedActionNameMapping;
             }
 
             // Get a non-null set that combines both the route and query parameters. 
@@ -430,7 +430,7 @@ namespace System.Web.Http.Controllers
 
                 foreach (var candidate in candidatesFound)
                 {
-                    ReflectedHttpActionDescriptor descriptor = candidate.ActionDescriptor;
+                    HttpActionDescriptor descriptor = candidate.ActionDescriptor;
                     if (IsSubset(_actionParameterNames[descriptor], candidate.CombinedParameterNames))
                     {
                         matches.Add(candidate);
@@ -557,13 +557,25 @@ namespace System.Web.Http.Controllers
                 StringBuilder exceptionMessageBuilder = new StringBuilder();
                 foreach (CandidateActionWithParams candidate in ambiguousCandidates)
                 {
-                    ReflectedHttpActionDescriptor descriptor = candidate.ActionDescriptor;
-                    MethodInfo methodInfo = descriptor.MethodInfo;
+                    HttpActionDescriptor descriptor = candidate.ActionDescriptor;
+                    Contract.Assert(descriptor != null);
+
+                    string controllerTypeName;
+
+                    if (descriptor.ControllerDescriptor != null
+                        && descriptor.ControllerDescriptor.ControllerType != null)
+                    {
+                        controllerTypeName = descriptor.ControllerDescriptor.ControllerType.FullName;
+                    }
+                    else
+                    {
+                        controllerTypeName = String.Empty;
+                    }
 
                     exceptionMessageBuilder.AppendLine();
                     exceptionMessageBuilder.Append(Error.Format(
                         SRResources.ActionSelector_AmbiguousMatchType,
-                        methodInfo, methodInfo.DeclaringType.FullName));
+                        descriptor.ActionName, controllerTypeName));
                 }
 
                 return exceptionMessageBuilder.ToString();
@@ -613,7 +625,7 @@ namespace System.Web.Http.Controllers
             // Remember this so that we can apply it for model binding. 
             public IHttpRouteData RouteDataSource { get; private set; }
 
-            public ReflectedHttpActionDescriptor ActionDescriptor
+            public HttpActionDescriptor ActionDescriptor
             {
                 get
                 {
@@ -635,40 +647,6 @@ namespace System.Web.Http.Controllers
                     }
                 }
                 return sb.ToString();
-            }
-        }
-
-        // We need to expose ILookup<string, HttpActionDescriptor>, but we have a ILookup<string, ReflectedHttpActionDescriptor>
-        // ReflectedHttpActionDescriptor derives from HttpActionDescriptor, but ILookup doesn't support Covariance.
-        // Adapter class since ILookup doesn't support Covariance.
-        // Fortunately, IGrouping, IEnumerable support Covariance, so it's easy to forward.
-        private class LookupAdapter : ILookup<string, HttpActionDescriptor>
-        {
-            public ILookup<string, ReflectedHttpActionDescriptor> Source;
-
-            public int Count
-            {
-                get { return Source.Count; }
-            }
-
-            public IEnumerable<HttpActionDescriptor> this[string key]
-            {
-                get { return Source[key]; }
-            }
-
-            public bool Contains(string key)
-            {
-                return Source.Contains(key);
-            }
-
-            public IEnumerator<IGrouping<string, HttpActionDescriptor>> GetEnumerator()
-            {
-                return Source.GetEnumerator();
-            }
-
-            Collections.IEnumerator Collections.IEnumerable.GetEnumerator()
-            {
-                return Source.GetEnumerator();
             }
         }
     }

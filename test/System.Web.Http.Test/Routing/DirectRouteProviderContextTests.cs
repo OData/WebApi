@@ -13,7 +13,7 @@ namespace System.Web.Http.Routing
         [Fact]
         public void CreateBuilderWithoutResolverAndBuild_SetsActionsDataToken()
         {
-            var actions = new ReflectedHttpActionDescriptor[] { new ReflectedHttpActionDescriptor() };
+            var actions = new HttpActionDescriptor[] { new ReflectedHttpActionDescriptor() };
 
             var route = BuildWithoutResolver("route", actions);
 
@@ -58,7 +58,7 @@ namespace System.Web.Http.Routing
         }
 
         private static IHttpRoute BuildWithoutResolver(string template,
-            IEnumerable<ReflectedHttpActionDescriptor> actions)
+            IEnumerable<HttpActionDescriptor> actions)
         {
             DirectRouteProviderContext context = new DirectRouteProviderContext(null, actions,
                 new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object);
@@ -68,10 +68,7 @@ namespace System.Web.Http.Routing
 
         private static IHttpRoute BuildWithResolver(string template, IInlineConstraintResolver constraintResolver)
         {
-            ReflectedHttpActionDescriptor[] actions = new ReflectedHttpActionDescriptor[]
-            {
-                new ReflectedHttpActionDescriptor()
-            };
+            HttpActionDescriptor[] actions = new HttpActionDescriptor[] { new ReflectedHttpActionDescriptor() };
             DirectRouteProviderContext context = new DirectRouteProviderContext(null, actions, constraintResolver);
 
             // Act

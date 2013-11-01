@@ -228,7 +228,10 @@ namespace System.Net.Http.Formatting
         /// <seealso cref="CanWriteType(Type)"/>
         public virtual Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
-            throw Error.NotSupported(Properties.Resources.MediaTypeFormatterCannotWrite, GetType().Name);
+            // HttpContent.SerializeToStreamAsync doesn't take in a CancellationToken. So, there is no easy way to get the CancellationToken
+            // to the formatter while writing response. We are cheating here by passing fake cancellation tokens. We should fix this
+            // when we fix HttpContent.
+            return WriteToStreamAsync(type, value, writeStream, content, transportContext, CancellationToken.None);
         }
 
         /// <summary>
@@ -254,7 +257,7 @@ namespace System.Net.Http.Formatting
         public virtual Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content,
             TransportContext transportContext, CancellationToken cancellationToken)
         {
-            return WriteToStreamAsync(type, value, writeStream, content, transportContext);
+            throw Error.NotSupported(Properties.Resources.MediaTypeFormatterCannotWrite, GetType().Name);
         }
 
         private static bool TryGetDelegatingType(Type interfaceType, ref Type type)

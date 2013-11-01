@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.TestCommon;
 using Moq;
@@ -324,6 +327,30 @@ namespace System.Net.Http.Formatting
             // Assert
             Assert.Equal(TestMediaType, contentHeaders.ContentType.MediaType);
             Assert.Equal(encoding.WebName, contentHeaders.ContentType.CharSet);
+        }
+
+        [Fact]
+        public async Task WriteToStreamAsyncWithCancellationToken_GetsCalled_DuringObjectContentWrite()
+        {
+            // Arrange
+            object value = new object();
+            Type type = typeof(object);
+            MemoryStream stream = new MemoryStream();
+            Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>{ CallBase = true };
+
+            formatter.Setup(f => f.CanWriteType(type)).Returns(true);
+            formatter
+                .Setup(f => f.WriteToStreamAsync(type, value, stream, It.IsAny<ObjectContent>(), null, CancellationToken.None))
+                .Returns(TaskHelpers.Completed())
+                .Verifiable();
+
+            ObjectContent content = new ObjectContent(type, value, formatter.Object);
+
+            // Act
+            await content.CopyToAsync(stream);
+
+            // Assert
+            formatter.Verify();
         }
 
         public struct TestStruct

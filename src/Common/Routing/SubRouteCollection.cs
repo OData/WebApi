@@ -124,7 +124,7 @@ namespace System.Web.Mvc.Routing
             get { return _dictionary; }
         }
 
-        private void ThrowExceptionForDuplicateRouteNames(string name, SubRouteType route1, SubRouteType route2)
+        private static void ThrowExceptionForDuplicateRouteNames(string name, SubRouteType route1, SubRouteType route2)
         {
 #if ASPNETWEBAPI
             throw new InvalidOperationException(String.Format(

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Mvc;
@@ -13,15 +14,13 @@ namespace System.Web.Routing.Test
     {
         public static RouteCollectionRoute BuildDirectRouteFromMethod<T>(Expression<Action<T>> methodCall)
         {
-            var route = new RouteCollectionRoute();
-            AddDirectRouteFromMethod(route, methodCall);
-            return route;
+            SubRouteCollection collector = new SubRouteCollection();
+            AddDirectRouteFromMethod(collector, methodCall);
+            return new RouteCollectionRoute(collector);
         }
 
-        public static void AddDirectRouteFromMethod<T>(this RouteBase routeBase, Expression<Action<T>> methodCall)
+        public static void AddDirectRouteFromMethod<T>(SubRouteCollection collector, Expression<Action<T>> methodCall)
         {
-            RouteCollectionRoute route = (RouteCollectionRoute)routeBase;
-
             var method = ((MethodCallExpression)methodCall.Body).Method;
             var attributes = method.GetCustomAttributes(false).OfType<IRouteInfoProvider>();
 
@@ -33,39 +32,29 @@ namespace System.Web.Routing.Test
                 var subRoute = new Route(attribute.Template, routeHandler: null);
                 subRoute.SetTargetActionDescriptors(new ActionDescriptor[] { actionDescriptor });
                 subRoute.SetTargetControllerDescriptor(controllerDescriptor);
-                route.SubRoutes.Add(subRoute);
+                collector.Add(new RouteEntry { Route = subRoute });
             }
         }
 
         public static RouteCollectionRoute BuildDirectRouteFromController<T>()
         {
-            RouteCollectionRoute route = new RouteCollectionRoute();
-            AddDirectRouteFromController<T>(route);
-            return route;
+            SubRouteCollection collector = new SubRouteCollection();
+            AddDirectRouteFromController<T>(collector);
+            return new RouteCollectionRoute(collector);
         }
 
-        public static void AddDirectRouteFromController<T>(this RouteBase routeBase)
+        public static void AddDirectRouteFromController<T>(SubRouteCollection collector)
         {
-            RouteCollectionRoute route = (RouteCollectionRoute)routeBase;
-
             var controllerType = typeof(T);
-            var entries = new AttributeRoutingMapper(new RouteBuilder2()).MapMvcAttributeRoutes(new Type[] 
-            { 
-                controllerType,
-            });
-
-            foreach (var entry in entries)
-            {
-                route.SubRoutes.Add(entry.Route);
-            }
+            new AttributeRoutingMapper(new RouteBuilder2()).AddRouteEntries(collector, new Type[] { controllerType });
         }
 
-        public static void AddDirectRouteMatches(this RouteData routeData, Func<Route, RouteData, bool> selector = null)
+        public static void AddDirectRouteMatches(this RouteData routeData, Func<RouteBase, RouteData, bool> selector = null)
         {
             RouteCollectionRoute route = (RouteCollectionRoute)routeData.Route;
 
             List<RouteData> matches = new List<RouteData>();
-            foreach (var subRoute in route.SubRoutes)
+            foreach (var subRoute in route)
             {
                 RouteData match = new RouteData() { Route = subRoute };
                 bool isMatch = selector == null ? true : selector(subRoute, match);

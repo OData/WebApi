@@ -9,29 +9,34 @@ namespace System.Web.Mvc.Routing
     /// for generating a link (GetVirtualPath). We use these because the subroutes produced by direct
     /// routing, don't go into the main collection and so can't be matched by name.
     /// </summary>
+    /// <remarks>
+    /// Corresponds to the Web API implementation of attribute routing in System.Web.Http.Routing.GenerationRoute.
+    /// </remarks>
     internal class GenerationRoute : Route
     {
-        public GenerationRoute(Route route)
-            : base(route.Url, route.Defaults, route.Constraints, route.DataTokens, route.RouteHandler)
+        private readonly Route _innerRoute;
+
+        public GenerationRoute(Route innerRoute)
+            : base(innerRoute.Url, innerRoute.Defaults, innerRoute.Constraints, innerRoute.DataTokens,
+            innerRoute.RouteHandler)
         {
-            if (route == null)
+            if (innerRoute == null)
             {
-                throw Error.ArgumentNull("route");
+                throw Error.ArgumentNull("innerRoute");
             }
 
-            Route = route;
+            _innerRoute = innerRoute;
         }
-
-        public Route Route { get; private set; }
 
         public override RouteData GetRouteData(HttpContextBase httpContext)
         {
+            // Claims no routes
             return null;
         }
 
         public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary values)
         {
-            return Route.GetVirtualPath(requestContext, values);
+            return _innerRoute.GetVirtualPath(requestContext, values);
         }
     }
 }

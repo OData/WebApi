@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -11,25 +12,26 @@ namespace System.Web.Mvc.Routing
     /// A single route that is the composite of multiple "sub routes".  
     /// </summary>
     /// <remarks>
-    /// This is used in attribute routing.
+    /// Corresponds to the Web API implementation of attribute routing in System.Web.Http.Routing.RouteCollectionRoute.
     /// </remarks>
-    internal class RouteCollectionRoute : RouteBase
+    internal class RouteCollectionRoute : RouteBase, IReadOnlyCollection<RouteBase>
     {
-        public RouteCollectionRoute()
-        {
-            SubRoutes = new SubRouteCollection();
-        }
+        private readonly IReadOnlyCollection<RouteBase> _subRoutes;
 
-        public SubRouteCollection SubRoutes
+        public RouteCollectionRoute(IReadOnlyCollection<RouteBase> subRoutes)
         {
-            get;
-            private set;
+            if (subRoutes == null)
+            {
+                throw new ArgumentNullException("subRoutes");
+            }
+
+            _subRoutes = subRoutes;
         }
 
         public override RouteData GetRouteData(HttpContextBase httpContext)
         {
             List<RouteData> matches = new List<RouteData>();
-            foreach (RouteBase route in SubRoutes)
+            foreach (RouteBase route in _subRoutes)
             {
                 var match = route.GetRouteData(httpContext);
                 if (match != null)
@@ -45,6 +47,21 @@ namespace System.Web.Mvc.Routing
         {
             // Link generation is not supported via the RouteCollectionRoute - see GenerationRoute.
             return null;
+        }
+
+        public int Count
+        {
+            get { return _subRoutes.Count; }
+        }
+
+        public IEnumerator<RouteBase> GetEnumerator()
+        {
+            return _subRoutes.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _subRoutes.GetEnumerator();
         }
 
         public static RouteData CreateDirectRouteMatch(RouteBase route, List<RouteData> matches)

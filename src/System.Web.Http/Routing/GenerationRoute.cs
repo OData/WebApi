@@ -1,24 +1,30 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Net.Http;
-using System.Text.RegularExpressions;
-using System.Web.Http.Properties;
 
 namespace System.Web.Http.Routing
 {
-    // Route that generates a virtual path, but does not claim any routes. 
-    // This can be used with RouteCollectionRoute to provide generation by names. 
-    // Delegates to an inner route to do actual generation.
+    /// <summary>
+    /// Route that generates a virtual path, but does not claim any routes. 
+    /// This can be used with RouteCollectionRoute to provide generation by names. 
+    /// Delegates to an inner route to do actual generation.
+    /// </summary>
+    /// <remarks>
+    /// Corresponds to the MVC implementation of attribute routing in System.Web.Mvc.Routing.GenerationRoute.
+    /// </remarks>
     internal class GenerationRoute : IHttpRoute
     {
         private readonly IHttpRoute _innerRoute;
 
-        public GenerationRoute(IHttpRoute inner)
+        public GenerationRoute(IHttpRoute innerRoute)
         {
-            _innerRoute = inner;
+            if (innerRoute == null)
+            {
+                throw new ArgumentNullException("innerRoute");
+            }
+
+            _innerRoute = innerRoute;
         }
 
         private static readonly IDictionary<string, object> _empty = EmptyReadOnlyDictionary<string, object>.Value;

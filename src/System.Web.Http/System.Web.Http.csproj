@@ -55,6 +55,9 @@
     <Compile Include="..\Common\PropertyHelper.cs">
       <Link>Routing\PropertyHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\IInlineConstraintResolver.cs">
+      <Link>Routing\IInlineConstraintResolver.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Routing\RoutePrecedence.cs">
       <Link>Routing\RoutePrecedence.cs</Link>
     </Compile>
@@ -142,6 +145,7 @@
     <Compile Include="OverrideExceptionFiltersAttribute.cs" />
     <Compile Include="RouteAttribute.cs" />
     <Compile Include="Controllers\CandidateAction.cs" />
+    <Compile Include="Routing\AttributeRoutingMapper.cs" />
     <Compile Include="Routing\DirectRouteBuilder.cs" />
     <Compile Include="Routing\RouteProviderAttribute.cs" />
     <Compile Include="Routing\DirectRouteProviderContext.cs" />
@@ -217,7 +221,6 @@
       <Link>Routing\SubRouteCollection.cs</Link>
     </Compile>
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />
-    <Compile Include="Routing\IInlineConstraintResolver.cs" />
     <Compile Include="Services\Decorator.cs" />
     <Compile Include="Services\IDecorator.cs" />
     <Compile Include="Tracing\TraceLevelHelper.cs" />

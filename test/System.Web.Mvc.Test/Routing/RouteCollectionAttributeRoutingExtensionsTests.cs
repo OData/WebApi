@@ -19,7 +19,7 @@ namespace System.Web.Routing
             var routes = new RouteCollection();
 
             // Act
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             // Assert
             var expectedResults = new List<Tuple<string, string>>
@@ -52,7 +52,7 @@ namespace System.Web.Routing
             var routes = new RouteCollection();
 
             // Act
-            routes.MapMvcAttributeRoutes(controllerTypes, new FruitConstraintResolver());
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes, new FruitConstraintResolver());
 
             // Assert
             var attributeRoutes = GetAttributeRoutes(routes);
@@ -71,7 +71,7 @@ namespace System.Web.Routing
             var routes = new RouteCollection();
 
             // Act
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             // Assert
             var attributeRoutes = GetAttributeRoutes(routes);
@@ -92,7 +92,7 @@ namespace System.Web.Routing
             var routes = new RouteCollection();
 
             // Act
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             // Assert
             var attributeRoutes = GetAttributeRoutes(routes);
@@ -123,8 +123,7 @@ namespace System.Web.Routing
             var routes = new RouteCollection();
 
             // Act
-            routes.MapMvcAttributeRoutes(controllerTypes);
-
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             // Assert
             var attributeRoutes = GetAttributeRoutes(routes);
@@ -147,7 +146,7 @@ namespace System.Web.Routing
             var routes = new RouteCollection();
 
             // Act
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             // Assert
             var attributeRoutes = GetAttributeRoutes(routes);
@@ -209,11 +208,11 @@ namespace System.Web.Routing
             // Act & Assert
             if (expectedErrorMessage == null)
             {
-                Assert.DoesNotThrow(() => routes.MapMvcAttributeRoutes(controllerTypes));
+                Assert.DoesNotThrow(() => AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes));
             }
             else
             {
-                Assert.Throws<InvalidOperationException>(() => routes.MapMvcAttributeRoutes(controllerTypes), expectedErrorMessage);
+                Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes), expectedErrorMessage);
             }
         }
 
@@ -395,12 +394,9 @@ namespace System.Web.Routing
             }
         }
 
-        private ICollection<Route> GetAttributeRoutes(RouteCollection routes)
+        private IReadOnlyCollection<RouteBase> GetAttributeRoutes(RouteCollection routes)
         {
-            RouteCollectionRoute attributeRoute = routes.OfType<RouteCollectionRoute>().Single();
-            Assert.NotNull(attributeRoute);
-
-            return attributeRoute.SubRoutes;
+            return routes.OfType<IReadOnlyCollection<RouteBase>>().Single();
         }
     }
 }

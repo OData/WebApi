@@ -4,12 +4,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Linq;
 
 #if ASPNETWEBAPI
 using System.Web.Http.Properties;
+using SubRouteEntryType = System.Web.Http.Routing.HttpRouteEntry;
 using SubRouteType = System.Web.Http.Routing.IHttpRoute;
 #else
 using System.Web.Mvc.Properties;
+using SubRouteEntryType = System.Web.Mvc.Routing.RouteEntry;
 using SubRouteType = System.Web.Routing.Route;
 #endif
 
@@ -19,109 +22,60 @@ namespace System.Web.Http.Routing
 namespace System.Web.Mvc.Routing
 #endif
 {
-    /// <summary>
-    /// This class is similar to HttpRouteCollection, but route name is optional.
-    /// </summary>
+    /// <summary>Represents a collection of route entries and the routes they contain.</summary>
     /// <remarks>
     /// This is used in attribute routing, where we want to match multiple routes, and then later
     /// disambiguate which one is best.
     /// </remarks>
 #if ASPNETWEBAPI
-    internal class HttpSubRouteCollection : ICollection<SubRouteType>
+    internal class HttpSubRouteCollection : IReadOnlyCollection<SubRouteType>
 #else
-    internal class SubRouteCollection : ICollection<SubRouteType>
+    internal class SubRouteCollection : IReadOnlyCollection<SubRouteType>
 #endif
     {
-        private readonly List<SubRouteType> _collection = new List<SubRouteType>();
-        private readonly IDictionary<string, SubRouteType> _dictionary = new Dictionary<string, SubRouteType>(StringComparer.OrdinalIgnoreCase);
+        private readonly List<SubRouteType> _routes = new List<SubRouteType>();
+        private readonly List<SubRouteEntryType> _entries = new List<SubRouteEntryType>();
 
-        public void Add(string name, SubRouteType route)
+        public void Add(SubRouteEntryType entry)
         {
+            Contract.Assert(entry != null);
+            SubRouteType route = entry.Route;
             Contract.Assert(route != null);
 
-            _collection.Add(route);
+            string name = entry.Name;
 
             if (name != null)
             {
-                if (_dictionary.ContainsKey(name))
+                SubRouteEntryType duplicateEntry = _entries.SingleOrDefault((e) => e.Name == name);
+
+                if (duplicateEntry != null)
                 {
-                    ThrowExceptionForDuplicateRouteNames(name, route, _dictionary[name]);
-                }
-                else
-                {
-                    _dictionary.Add(name, route);
+                    ThrowExceptionForDuplicateRouteNames(name, route, duplicateEntry.Route);
                 }
             }
-        }
 
-        public void Add(SubRouteType item)
-        {
-            Contract.Assert(item != null);
-            _collection.Add(item);
-        }
-
-        public void Clear()
-        {
-            _collection.Clear();
-            _dictionary.Clear();
-        }
-
-        public bool Contains(SubRouteType item)
-        {
-            Contract.Assert(item != null);
-            return _collection.Contains(item);
-        }
-
-        public void CopyTo(SubRouteType[] array, int arrayIndex)
-        {
-            _collection.CopyTo(array, arrayIndex);
+            _routes.Add(route);
+            _entries.Add(entry);
         }
 
         public int Count
         {
-            get { return _collection.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
-
-        public bool Remove(SubRouteType item)
-        {
-            Contract.Assert(item != null);
-
-            if (_dictionary.Values.Contains(item))
-            {
-                _dictionary.Values.Remove(item);
-            }
-
-            return _collection.Remove(item);
+            get { return _entries.Count; }
         }
 
         public IEnumerator<SubRouteType> GetEnumerator()
         {
-            return _collection.GetEnumerator();
+            return _routes.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)_collection).GetEnumerator();
+            return ((IEnumerable)_routes).GetEnumerator();
         }
 
-        public SubRouteType this[int index]
+        public IReadOnlyCollection<SubRouteEntryType> Entries
         {
-            get { return _collection[index]; }
-        }
-
-        public SubRouteType this[string name]
-        {
-            get { return _dictionary[name]; }
-        }
-
-        public IEnumerable<KeyValuePair<string, SubRouteType>> NamedRoutes
-        {
-            get { return _dictionary; }
+            get { return _entries; }
         }
 
         private static void ThrowExceptionForDuplicateRouteNames(string name, SubRouteType route1, SubRouteType route2)

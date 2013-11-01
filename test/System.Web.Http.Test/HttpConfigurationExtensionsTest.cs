@@ -113,7 +113,7 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpSubRouteCollection routes = config.GetAttributeRoutes();
+            var routes = config.GetAttributeRoutes();
             IHttpRoute route = Assert.Single(routes);
             Assert.Equal(expectedTemplate, route.RouteTemplate);
         }
@@ -161,7 +161,7 @@ namespace System.Net.Http
             config.MapHttpAttributeRoutes();
 
             // Assert
-            HttpSubRouteCollection routes = config.GetAttributeRoutes();
+            var routes = config.GetAttributeRoutes();
             Assert.Equal(2, routes.Count);
             Assert.Single(routes.Where(route => route.RouteTemplate == "controller/get1"));
             Assert.Single(routes.Where(route => route.RouteTemplate == "controller/get2"));
@@ -249,7 +249,7 @@ namespace System.Net.Http
             globalConfiguration.MapHttpAttributeRoutes();
 
             // Assert
-            HttpSubRouteCollection routes = globalConfiguration.GetAttributeRoutes();
+            var routes = globalConfiguration.GetAttributeRoutes();
             Assert.Equal("PerController", Assert.Single(routes).RouteTemplate);
         }
 

@@ -11,11 +11,6 @@ namespace System.Web.Mvc
 {
     internal static class ControllerDescriptorExtensions
     {
-        public static IEnumerable<IRouteInfoProvider> GetDirectRoutes(this ControllerDescriptor controller)
-        {
-            return controller.GetCustomAttributes(inherit: false).OfType<IRouteInfoProvider>();
-        }
-
         public static string GetAreaName(this ControllerDescriptor controllerDescriptor, RouteAreaAttribute area)
         {
             if (area == null)
@@ -42,23 +37,6 @@ namespace System.Web.Mvc
                                     .Cast<RouteAreaAttribute>()
                                     .FirstOrDefault();
             return areaAttribute;
-        }
-
-        public static string GetPrefixFrom(this ControllerDescriptor controllerDescriptor)
-        {
-            // this only happens once per controller type, for the lifetime of the application,
-            // so we do not need to cache the results
-            object[] routePrefixAttributes = controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute), inherit: false);
-            if (routePrefixAttributes.Length > 0)
-            {
-                RoutePrefixAttribute routePrefixAttribute = routePrefixAttributes[0] as RoutePrefixAttribute;
-                if (routePrefixAttribute != null)
-                {
-                    return routePrefixAttribute.Prefix;
-                }
-            }
-
-            return null;
         }
     }
 }

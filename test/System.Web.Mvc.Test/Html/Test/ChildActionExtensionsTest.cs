@@ -2,6 +2,7 @@
 
 using System.IO;
 using System.Web.Mvc.Properties;
+using System.Web.Mvc.Routing;
 using System.Web.Routing;
 using Microsoft.TestCommon;
 using Moq;
@@ -258,7 +259,7 @@ namespace System.Web.Mvc.Html.Test
         public void ActionHelper_ChildAction_WithControllerDirectRoute()
         {
             // Arrange
-            _routes.MapMvcAttributeRoutes(new Type[] { typeof(DirectRouteController) });
+            AttributeRoutingMapper.MapAttributeRoutes(_routes, new Type[] { typeof(DirectRouteController) });
             
             MvcHandler mvcHandler = null;
             _httpContext.Setup(hc => hc.Server.Execute(It.IsAny<IHttpHandler>(), It.IsAny<TextWriter>(), It.IsAny<bool>()))
@@ -276,7 +277,7 @@ namespace System.Web.Mvc.Html.Test
         public void ActionHelper_ChildAction_WithActionDirectRoute()
         {
             // Arrange
-            _routes.MapMvcAttributeRoutes(new Type[] { typeof(DirectRouteActionController) });
+            AttributeRoutingMapper.MapAttributeRoutes(_routes, new Type[] { typeof(DirectRouteActionController) });
 
             MvcHandler mvcHandler = null;
             _httpContext.Setup(hc => hc.Server.Execute(It.IsAny<IHttpHandler>(), It.IsAny<TextWriter>(), It.IsAny<bool>()))

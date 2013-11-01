@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -13,6 +12,10 @@ using System.Web.Routing;
 
 namespace System.Web.Mvc.Routing
 {
+    /// <remarks>
+    /// Corresponds to the Web API implementation of attribute routing in
+    /// System.Web.Http.Routing.AttributeRoutingMapper.
+    /// </remarks>
     internal class AttributeRoutingMapper
     {
         private readonly RouteBuilder2 _routeBuilder;
@@ -22,7 +25,105 @@ namespace System.Web.Mvc.Routing
             _routeBuilder = routeBuilder;
         }
 
-        internal List<RouteEntry> MapMvcAttributeRoutes(IEnumerable<Type> controllerTypes)
+        /// <summary>
+        /// Maps the attribute-defined routes for the application.
+        /// </summary>
+        /// <param name="routes"></param>
+        /// <param name="constraintResolver">
+        /// The <see cref="IInlineConstraintResolver"/> to use for resolving inline constraints in route templates.
+        /// </param>
+        public static void MapAttributeRoutes(RouteCollection routes, IInlineConstraintResolver constraintResolver)
+        {
+            if (routes == null)
+            {
+                throw new ArgumentNullException("routes");
+            }
+
+            if (constraintResolver == null)
+            {
+                throw new ArgumentNullException("constraintResolver");
+            }
+
+            DefaultControllerFactory typesLocator =
+                DependencyResolver.Current.GetService<IControllerFactory>() as DefaultControllerFactory
+                ?? ControllerBuilder.Current.GetControllerFactory() as DefaultControllerFactory
+                ?? new DefaultControllerFactory();
+
+            IReadOnlyList<Type> controllerTypes = typesLocator.GetControllerTypes();
+
+            MapAttributeRoutes(routes, controllerTypes, constraintResolver);
+        }
+
+        /// <summary>
+        /// Maps the attribute-defined routes for the application.
+        /// </summary>
+        /// <param name="routes"></param>
+        /// <param name="controllerTypes">The controller types to scan.</param>
+        public static void MapAttributeRoutes(RouteCollection routes, IEnumerable<Type> controllerTypes)
+        {
+            MapAttributeRoutes(routes, controllerTypes, new DefaultInlineConstraintResolver());
+        }
+
+        /// <summary>
+        /// Maps the attribute-defined routes for the application.
+        /// </summary>
+        /// <param name="routes"></param>
+        /// <param name="controllerTypes">The controller types to scan.</param>
+        /// <param name="constraintResolver">
+        /// The <see cref="IInlineConstraintResolver"/> to use for resolving inline constraints in route templates.
+        /// </param>
+        public static void MapAttributeRoutes(RouteCollection routes, IEnumerable<Type> controllerTypes,
+            IInlineConstraintResolver constraintResolver)
+        {
+            AttributeRoutingMapper mapper = new AttributeRoutingMapper(new RouteBuilder2(constraintResolver));
+
+            SubRouteCollection subRoutes = new SubRouteCollection();
+            mapper.AddRouteEntries(subRoutes, controllerTypes);
+            IReadOnlyCollection<RouteEntry> entries = subRoutes.Entries;
+
+            if (entries.Count > 0)
+            {
+                RouteCollectionRoute aggregrateRoute = new RouteCollectionRoute(subRoutes);
+                routes.Add(aggregrateRoute);
+
+                // This sort is here to enforce a static ordering for link generation using these routes. 
+                // We don't apply dynamic criteria like ActionSelectors on link generation, but we can use the static
+                // ones.
+                RouteEntry[] sorted = entries
+                    .OrderBy(r => r.Route.GetOrder())
+                    .ThenBy(r => r.Route.GetPrecedence())
+                    .ToArray();
+
+                AddGenerationHooksForSubRoutes(routes, sorted);
+            }
+        }
+
+        // Add generation hooks for the Attribute-routing subroutes. 
+        // This lets us generate urls for routes supplied by attr-based routing.
+        private static void AddGenerationHooksForSubRoutes(RouteCollection routeTable, IList<RouteEntry> entries)
+        {
+            Contract.Assert(entries != null);
+
+            foreach (RouteEntry entry in entries)
+            {
+                Contract.Assert(entry != null);
+                Route route = entry.Route;
+                Contract.Assert(route != null);
+                RouteBase generationRoute = new GenerationRoute(route);
+                string name = entry.Name;
+
+                if (name == null)
+                {
+                    routeTable.Add(generationRoute);
+                }
+                else
+                {
+                    routeTable.Add(name, generationRoute);
+                }
+            }
+        }
+
+        internal void AddRouteEntries(SubRouteCollection collector, IEnumerable<Type> controllerTypes)
         {
             ControllerDescriptorCache descriptorsCache = new AsyncControllerActionInvoker().DescriptorCache;
             IEnumerable<ReflectedAsyncControllerDescriptor> descriptors = controllerTypes
@@ -31,127 +132,139 @@ namespace System.Web.Mvc.Routing
                     descriptorsCache.GetDescriptor(type, innerType => new ReflectedAsyncControllerDescriptor(innerType), type))
                 .Cast<ReflectedAsyncControllerDescriptor>();
 
-            List<RouteEntry> routeEntries = new List<RouteEntry>();
-
             foreach (ReflectedAsyncControllerDescriptor controllerDescriptor in descriptors)
             {
-                routeEntries.AddRange(MapMvcAttributeRoutes(controllerDescriptor));
+                AddRouteEntries(collector, controllerDescriptor);
             }
-
-            return routeEntries;
         }
 
-        internal List<RouteEntry> MapMvcAttributeRoutes(ReflectedAsyncControllerDescriptor controllerDescriptor)
+        internal IReadOnlyCollection<RouteEntry> MapAttributeRoutes(ReflectedAsyncControllerDescriptor controller)
         {
-            string prefix = controllerDescriptor.GetPrefixFrom();
-            ValidatePrefixTemplate(prefix, controllerDescriptor);
+            SubRouteCollection collector = new SubRouteCollection();
+            AddRouteEntries(collector, controller);
+            return collector.Entries;
+        }
 
-            RouteAreaAttribute area = controllerDescriptor.GetAreaFrom();
-            string areaName = controllerDescriptor.GetAreaName(area);
+        internal void AddRouteEntries(SubRouteCollection collector, ReflectedAsyncControllerDescriptor controller)
+        {
+            string prefix = GetRoutePrefix(controller);
+
+            RouteAreaAttribute area = controller.GetAreaFrom();
+            string areaName = controller.GetAreaName(area);
             string areaPrefix = area != null ? area.AreaPrefix ?? area.AreaName : null;
+            ValidateAreaPrefixTemplate(areaPrefix, areaName, controller);
 
-            ValidateAreaPrefixTemplate(areaPrefix, areaName, controllerDescriptor);
+            AsyncActionMethodSelector actionSelector = controller.Selector;
 
-            AsyncActionMethodSelector actionSelector = controllerDescriptor.Selector;
-            IEnumerable<MethodInfo> actionMethodsInfo = actionSelector.DirectRouteMethods;
-
-            List<RouteEntry> routeEntries = new List<RouteEntry>();
-
-            foreach (var method in actionMethodsInfo)
+            foreach (var method in actionSelector.DirectRouteMethods)
             {
-                string actionName = actionSelector.GetActionName(method);
-                ActionDescriptorCreator creator = actionSelector.GetActionDescriptorDelegate(method);
-                Debug.Assert(creator != null);
+                ActionDescriptor action = CreateActionDescriptor(controller, actionSelector, method);
 
-                ActionDescriptor actionDescriptor = creator(actionName, controllerDescriptor);
+                IEnumerable<IRouteInfoProvider> providers = GetRouteProviders(method, controller.ControllerType);
 
-                IEnumerable<IRouteInfoProvider> routeAttributes = GetRouteAttributes(method, controllerDescriptor.ControllerType);
-
-                foreach (var routeAttribute in routeAttributes)
-                {
-                    ValidateTemplate(routeAttribute.Template, actionName, controllerDescriptor);
-
-                    string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.Template);
-                    Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute, controllerDescriptor, actionDescriptor);
-
-                    RouteEntry entry = new RouteEntry
-                    {
-                        Name = routeAttribute.Name,
-                        Route = route,
-                        Template = template,
-                    };
-
-                    routeEntries.Add(entry);
-                }
+                AddRouteEntries(collector, areaPrefix, prefix, providers, controller,
+                    new ActionDescriptor[] { action }, routeIsForAction: true);
             }
 
             // Check for controller-level routes. 
-            IEnumerable<IRouteInfoProvider> controllerRouteAttributes = controllerDescriptor.GetDirectRoutes();
+            List<ActionDescriptor> actionsWithoutRoutes = new List<ActionDescriptor>();
 
-            List<ActionDescriptor> actions = new List<ActionDescriptor>();
-            foreach (var actionMethod in actionSelector.StandardRouteMethods)
+            foreach (var method in actionSelector.StandardRouteMethods)
             {
-                string actionName = actionSelector.GetActionName(actionMethod);
-                ActionDescriptorCreator creator = actionSelector.GetActionDescriptorDelegate(actionMethod);
-                Debug.Assert(creator != null);
+                ActionDescriptor action = CreateActionDescriptor(controller, actionSelector, method);
 
-                ActionDescriptor actionDescriptor = creator(actionName, controllerDescriptor);
-                actions.Add(actionDescriptor);
+                actionsWithoutRoutes.Add(action);
             }
 
-            // Don't create a route for the controller-level attributes if no actions could possibly match
-            if (actions.Any())
+            IReadOnlyCollection<IRouteInfoProvider> controllerProviders = GetRouteProviders(controller);
+
+            // If they exist and have not been overridden, create routes for controller-level route providers.
+            if (controllerProviders.Count > 0 && actionsWithoutRoutes.Count > 0)
             {
-                foreach (var routeAttribute in controllerRouteAttributes)
+                AddRouteEntries(collector, areaPrefix, prefix, controllerProviders, controller, actionsWithoutRoutes,
+                    routeIsForAction: false);
+            }
+        }
+
+        private static ActionDescriptor CreateActionDescriptor(ControllerDescriptor controller,
+            AsyncActionMethodSelector actionSelector, MethodInfo method)
+        {
+            string actionName = actionSelector.GetActionName(method);
+            ActionDescriptorCreator creator = actionSelector.GetActionDescriptorDelegate(method);
+            Debug.Assert(creator != null);
+
+            return creator(actionName, controller);
+        }
+
+        private void AddRouteEntries(SubRouteCollection collector, string areaPrefix, string prefix,
+            IEnumerable<IRouteInfoProvider> providers, ControllerDescriptor controller,
+            IList<ActionDescriptor> actions, bool routeIsForAction)
+        {
+            foreach (IRouteInfoProvider provider in providers)
+            {
+                RouteEntry entry = CreateRouteEntry(areaPrefix, prefix, provider, controller, actions,
+                    routeIsForAction);
+                collector.Add(entry);
+            }
+        }
+
+        private RouteEntry CreateRouteEntry(string areaPrefix, string prefix, IRouteInfoProvider provider,
+            ControllerDescriptor controller, IList<ActionDescriptor> actions, bool routeIsForAction)
+        {
+            ValidateTemplate(provider.Template, actions[0].ActionName, controller);
+            string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, provider.Template);
+            Route route = _routeBuilder.BuildDirectRoute(template, provider, controller, actions, routeIsForAction);
+
+            RouteEntry entry = new RouteEntry
+            {
+                Name = provider.Name,
+                Route = route,
+                Template = template,
+            };
+
+            return entry;
+        }
+
+        private static string GetRoutePrefix(ControllerDescriptor controllerDescriptor)
+        {
+            // this only happens once per controller type, for the lifetime of the application,
+            // so we do not need to cache the results
+            object[] attributes = controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute),
+                inherit: false);
+
+            if (attributes.Length > 0)
+            {
+                RoutePrefixAttribute attribute = attributes[0] as RoutePrefixAttribute;
+
+                if (attribute != null)
                 {
-                    string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, routeAttribute.Template);
+                    string prefix = attribute.Prefix;
 
-                    Route route = _routeBuilder.BuildDirectRoute(template, routeAttribute, controllerDescriptor, actions);
-                    RouteEntry entry = new RouteEntry
+                    if (prefix != null)
                     {
-                        Name = routeAttribute.Name,
-                        Route = route,
-                        Template = template,
-                    };
+                        if (prefix.StartsWith("/", StringComparison.Ordinal)
+                            || prefix.EndsWith("/", StringComparison.Ordinal))
+                        {
+                            string errorMessage = Error.Format(
+                                MvcResources.RoutePrefix_CannotStartOrEnd_WithForwardSlash, prefix,
+                                controllerDescriptor.ControllerName);
+                            throw new InvalidOperationException(errorMessage);
+                        }
 
-                    routeEntries.Add(entry);
+                        return prefix;
+                    }
                 }
             }
 
-            return routeEntries;
+            return null;
         }
 
-        private static void ValidatePrefixTemplate(string prefix, ControllerDescriptor controllerDescriptor)
+        public static IReadOnlyCollection<IRouteInfoProvider> GetRouteProviders(ControllerDescriptor controller)
         {
-            if (prefix != null && (prefix.StartsWith("/", StringComparison.Ordinal) || prefix.EndsWith("/", StringComparison.Ordinal)))
-            {
-                string errorMessage = Error.Format(MvcResources.RoutePrefix_CannotStartOrEnd_WithForwardSlash,
-                                                   prefix, controllerDescriptor.ControllerName);
-                throw new InvalidOperationException(errorMessage);
-            }
+            return controller.GetCustomAttributes(inherit: false).OfType<IRouteInfoProvider>().AsArray();
         }
 
-        private static void ValidateAreaPrefixTemplate(string areaPrefix, string areaName, ControllerDescriptor controllerDescriptor)
-        {
-            if (areaPrefix != null && areaPrefix.EndsWith("/", StringComparison.Ordinal))
-            {
-                string errorMessage = Error.Format(MvcResources.RouteAreaPrefix_CannotEnd_WithForwardSlash,
-                                                   areaPrefix, areaName, controllerDescriptor.ControllerName);
-                throw new InvalidOperationException(errorMessage);
-            }
-        }
-
-        private static void ValidateTemplate(string routeTemplate, string actionName, ControllerDescriptor controllerDescriptor)
-        {
-            if (routeTemplate.StartsWith("/", StringComparison.Ordinal))
-            {
-                string errorMessage = Error.Format(MvcResources.RouteTemplate_CannotStart_WithForwardSlash,
-                                                   routeTemplate, actionName, controllerDescriptor.ControllerName);
-                throw new InvalidOperationException(errorMessage);
-            }
-        }
-
-        private static IEnumerable<IRouteInfoProvider> GetRouteAttributes(MethodInfo methodInfo, Type controllerType)
+        private static IEnumerable<IRouteInfoProvider> GetRouteProviders(MethodInfo methodInfo, Type controllerType)
         {
             // Skip Route attributes on inherited actions.
             if (methodInfo.DeclaringType != controllerType)
@@ -208,6 +321,26 @@ namespace System.Web.Mvc.Routing
             }
 
             return templateBuilder.ToString();
+        }
+
+        private static void ValidateAreaPrefixTemplate(string areaPrefix, string areaName, ControllerDescriptor controllerDescriptor)
+        {
+            if (areaPrefix != null && areaPrefix.EndsWith("/", StringComparison.Ordinal))
+            {
+                string errorMessage = Error.Format(MvcResources.RouteAreaPrefix_CannotEnd_WithForwardSlash,
+                                                   areaPrefix, areaName, controllerDescriptor.ControllerName);
+                throw new InvalidOperationException(errorMessage);
+            }
+        }
+
+        private static void ValidateTemplate(string routeTemplate, string actionName, ControllerDescriptor controllerDescriptor)
+        {
+            if (routeTemplate.StartsWith("/", StringComparison.Ordinal))
+            {
+                string errorMessage = Error.Format(MvcResources.RouteTemplate_CannotStart_WithForwardSlash,
+                                                   routeTemplate, actionName, controllerDescriptor.ControllerName);
+                throw new InvalidOperationException(errorMessage);
+            }
         }
     }
 }

@@ -86,7 +86,8 @@ namespace System.Web.Mvc.Routing
                 routeTemplate,
                 new RouteAttribute(),
                 controllerDescriptor,
-                actionDescriptor);
+                new ActionDescriptor[] { actionDescriptor },
+                routeIsForAction: true);
 
             var entry = new RouteEntry()
             {

@@ -16,17 +16,17 @@ namespace System.Web.Mvc.Routing
             var route1 = new Route("Home/Index", new Mock<IRouteHandler>().Object);
             var route2 = new Route("Person/Index", new Mock<IRouteHandler>().Object);
 
-            collection.Add("route", route1);
+            collection.Add(new RouteEntry { Name = "route", Route = route1 });
 
             var expectedError =
-                "A route named 'route' is already in the route collection. Route names must be unique." + Environment.NewLine + 
+                "A route named 'route' is already in the route collection. Route names must be unique." + Environment.NewLine +
                 Environment.NewLine +
                 "Duplicates:" + Environment.NewLine +
                 "Person/Index" + Environment.NewLine +
                 "Home/Index";
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => collection.Add("route", route2), expectedError);
+            Assert.Throws<InvalidOperationException>(() => collection.Add(new RouteEntry { Name = "route", Route = route2 }), expectedError);
         }
     }
 }

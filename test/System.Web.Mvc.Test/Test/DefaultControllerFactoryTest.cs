@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Reflection;
+using System.Web.Mvc.Routing;
 using System.Web.Routing;
 using System.Web.Routing.Test;
 using System.Web.SessionState;
@@ -742,8 +744,10 @@ namespace System.Web.Mvc.Test
             // Arrange
             var requestContext = new RequestContext();
             requestContext.RouteData = new RouteData();
-            requestContext.RouteData.Route = DirectRouteTestHelpers.BuildDirectRouteFromController<AttributeRouteAtControllerLevelController>();
-            requestContext.RouteData.Route.AddDirectRouteFromMethod<WithRoutingAttributeController>(c => c.Action());
+            SubRouteCollection subRoutes = new SubRouteCollection();
+            DirectRouteTestHelpers.AddDirectRouteFromController<AttributeRouteAtControllerLevelController>(subRoutes);
+            DirectRouteTestHelpers.AddDirectRouteFromMethod<WithRoutingAttributeController>(subRoutes, c => c.Action());
+            requestContext.RouteData.Route = new RouteCollectionRoute(subRoutes);
             requestContext.RouteData.AddDirectRouteMatches();
 
             var controllerActivator = new Mock<IControllerActivator>(MockBehavior.Strict).Object;

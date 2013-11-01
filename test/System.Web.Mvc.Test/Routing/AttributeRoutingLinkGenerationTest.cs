@@ -118,7 +118,7 @@ namespace System.Web.Mvc.Routing.Test
         private RouteCollection MapControllers(Type[] types)
         {
             RouteCollection routes = new RouteCollection();
-            routes.MapMvcAttributeRoutes(types);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, types);
             return routes;
         }
 

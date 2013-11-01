@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Reflection;
 using System.Web.Mvc;
+using System.Web.Mvc.Routing;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -55,7 +56,7 @@ namespace System.Web.Routing
             // Arrange
             var controllerTypes = new[] { derivedController, derivedController.BaseType };
             var routes = new RouteCollection();
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             HttpContextBase context = GetContext(path);
             RouteData routeData = routes.GetRouteData(context);
@@ -81,7 +82,7 @@ namespace System.Web.Routing
             // Arrange
             var controllerTypes = new[] { derivedController, derivedController.BaseType };
             var routes = new RouteCollection();
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
             HttpContextBase context = GetContext(path);
 
             // Act
@@ -99,7 +100,7 @@ namespace System.Web.Routing
             // Arrange
             var controllerTypes = new[] { controllerType };
             var routes = new RouteCollection();
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             HttpContextBase context = GetContext(path);
             RouteData routeData = routes.GetRouteData(context);
@@ -122,7 +123,7 @@ namespace System.Web.Routing
             // Arrange
             var controllerTypes = new[] { controllerType };
             var routes = new RouteCollection();
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             HttpContextBase context = GetContext(path);
             RouteData routeData = routes.GetRouteData(context);
@@ -151,7 +152,7 @@ namespace System.Web.Routing
             var routes = new RouteCollection();
             object defaults = new { controller = controllerType.Name.Substring(0, controllerType.Name.Length - 10) };
             routes.Add(new Route("standard/{action}", new RouteValueDictionary(defaults), null));
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             HttpContextBase context = GetContext(path);
             RouteData routeData = routes.GetRouteData(context);
@@ -183,7 +184,7 @@ namespace System.Web.Routing
             // Arrange
             var controllerTypes = new[] { controllerType };
             var routes = new RouteCollection();
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             HttpContextBase context = GetContext(path);
             RouteData routeData = routes.GetRouteData(context);
@@ -215,7 +216,7 @@ namespace System.Web.Routing
             // Arrange
             var controllerTypes = new[] { controllerType };
             var routes = new RouteCollection();
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             HttpContextBase context = GetContext(path);
             RouteData routeData = routes.GetRouteData(context);
@@ -245,7 +246,7 @@ namespace System.Web.Routing
             // Arrange
             var controllerTypes = new[] { typeof(OptionalParameterController) };
             var routes = new RouteCollection();
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             HttpContextBase context = GetContext("~/Create");
             RouteData routeData = routes.GetRouteData(context);
@@ -278,7 +279,7 @@ namespace System.Web.Routing
             };
 
             var routes = new RouteCollection();
-            routes.MapMvcAttributeRoutes(controllerTypes);
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
 
             HttpContextBase context = GetContext(path);
             RouteData routeData = routes.GetRouteData(context);

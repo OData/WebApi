@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Web.Routing;
 
 namespace System.Web.Mvc.Routing
@@ -37,45 +36,20 @@ namespace System.Web.Mvc.Routing
         public IInlineConstraintResolver ConstraintResolver { get; private set; }
 
         /// <summary>
-        /// Builds an <see cref="Route"/> for a particular action.
-        /// </summary>
-        /// <param name="routeTemplate">The tokenized route template for the route.</param>
-        /// <param name="routeInfoProvider">The info provider for the route.</param>
-        /// <param name="controllerDescriptor">The controller the route attribute has been applied on.</param>
-        /// <param name="actionDescriptor">The action reachable by this route.</param>
-        /// <returns>The generated <see cref="Route"/>.</returns>
-        public Route BuildDirectRoute(
-            string routeTemplate,
-            IRouteInfoProvider routeInfoProvider,
-            ControllerDescriptor controllerDescriptor,
-            ActionDescriptor actionDescriptor)
-        {
-            return BuildDirectRoute(routeTemplate, routeInfoProvider, controllerDescriptor, new ActionDescriptor[] { actionDescriptor }, isActionDirectRoute: true);
-        }
-
-        /// <summary>
         /// Builds an <see cref="Route"/> for a particular controller.
         /// </summary>
         /// <param name="routeTemplate">The tokenized route template for the route.</param>
         /// <param name="routeInfoProvider">The info provider for the route.</param>
         /// <param name="controllerDescriptor">The controller the route attribute has been applied on.</param>
         /// <param name="actionDescriptors">The actions reachable by this route.</param>
+        /// <param name="routeIsForAction">Whether or not the direct route is for an action.</param>
         /// <returns>The generated <see cref="Route"/>.</returns>
         public Route BuildDirectRoute(
-            string routeTemplate, 
-            IRouteInfoProvider routeInfoProvider, 
-            ControllerDescriptor controllerDescriptor, 
-            IEnumerable<ActionDescriptor> actionDescriptors)
-        {
-            return BuildDirectRoute(routeTemplate, routeInfoProvider, controllerDescriptor, actionDescriptors, isActionDirectRoute: false);
-        }
-
-        private Route BuildDirectRoute(
             string routeTemplate,
             IRouteInfoProvider routeInfoProvider,
             ControllerDescriptor controllerDescriptor,
             IEnumerable<ActionDescriptor> actionDescriptors,
-            bool isActionDirectRoute)
+            bool routeIsForAction)
         {
             if (routeTemplate == null)
             {
@@ -107,7 +81,7 @@ namespace System.Web.Mvc.Routing
                 { "controller", controllerName }
             };
 
-            if (isActionDirectRoute)
+            if (routeIsForAction)
             {
                 ActionDescriptor actionDescriptor = actionDescriptors.Single();
                 defaults.Add("action", actionDescriptor.ActionName);

@@ -8,9 +8,13 @@ using System.Web.Http.Properties;
 
 namespace System.Web.Http.Routing
 {
-    // A single route that is the composite of multiple "sub routes".  
-    // This is used in attribute routing. 
-    internal class RouteCollectionRoute : IHttpRoute, IEnumerable<IHttpRoute>
+    /// <summary>
+    /// A single route that is the composite of multiple "sub routes".  
+    /// </summary>
+    /// <remarks>
+    /// Corresponds to the MVC implementation of attribute routing in System.Web.Mvc.Routing.RouteCollectionRoute.
+    /// </remarks>
+    internal class RouteCollectionRoute : IHttpRoute, IReadOnlyCollection<IHttpRoute>
     {
         // Key for accessing SubRoutes on a RouteData.
         // We expose this through the RouteData.Values instead of a derived class because 
@@ -18,7 +22,7 @@ namespace System.Web.Http.Routing
         // Prefix with a \0 to protect against conflicts with user keys. 
         public const string SubRouteDataKey = "MS_SubRoutes";
 
-        private HttpSubRouteCollection _subRoutes;
+        private IReadOnlyCollection<IHttpRoute> _subRoutes;
 
         private static readonly IDictionary<string, object> _empty = EmptyReadOnlyDictionary<string, object>.Value;
         
@@ -33,12 +37,12 @@ namespace System.Web.Http.Routing
 
         // deferred hook for initializing the sub routes. The composite route can be added during the middle of 
         // intializing, but then the actual sub routes can get populated after initialization has finished. 
-        public HttpSubRouteCollection EnsureInitialized(Func<HttpSubRouteCollection> initializer)
+        public void EnsureInitialized(Func<IReadOnlyCollection<IHttpRoute>> initializer)
         {
             if (_beingInitialized && _subRoutes == null)
             {
                 // Avoid reentrant initialization
-                return null;
+                return;
             }
 
             try
@@ -47,7 +51,6 @@ namespace System.Web.Http.Routing
 
                 _subRoutes = initializer();
                 Contract.Assert(_subRoutes != null);                
-                return _subRoutes;
             }
             finally
             {
@@ -55,7 +58,7 @@ namespace System.Web.Http.Routing
             }
         }
 
-        public HttpSubRouteCollection SubRoutes
+        private IReadOnlyCollection<IHttpRoute> SubRoutes
         {
             get
             {
@@ -69,14 +72,6 @@ namespace System.Web.Http.Routing
                 }
 
                 return _subRoutes;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-                _subRoutes = value;
             }
         }
 
@@ -112,27 +107,32 @@ namespace System.Web.Http.Routing
         // Else, returns a composite route data that encapsulates the possible routes this may match against. 
         public IHttpRouteData GetRouteData(string virtualPathRoot, HttpRequestMessage request)
         {
-            List<IHttpRouteData> list = new List<IHttpRouteData>();
+            List<IHttpRouteData> matches = new List<IHttpRouteData>();
             foreach (IHttpRoute route in SubRoutes)
             {
                 IHttpRouteData match = route.GetRouteData(virtualPathRoot, request);
                 if (match != null)
                 {
-                    list.Add(match);
+                    matches.Add(match);
                 }
             }
-            if (list.Count == 0)
+            if (matches.Count == 0)
             {
                 return null;  // no matches
             }
 
-            return new RouteCollectionRouteData(this, list.ToArray());
+            return new RouteCollectionRouteData(this, matches.ToArray());
         }
 
         public IHttpVirtualPathData GetVirtualPath(HttpRequestMessage request, IDictionary<string, object> values)
         {
             // Use GenerationRoute stubs to get placeholders for all the sub routes. 
             return null;
+        }
+
+        public int Count
+        {
+            get { return SubRoutes.Count; }
         }
 
         public IEnumerator<IHttpRoute> GetEnumerator()

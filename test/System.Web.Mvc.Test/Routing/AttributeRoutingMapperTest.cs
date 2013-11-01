@@ -14,7 +14,7 @@ namespace System.Web.Mvc.Routing
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(MyController));
             var mapper = new AttributeRoutingMapper(new RouteBuilder2());
 
-            var routeEntries = mapper.MapMvcAttributeRoutes(controllerDescriptor);
+            var routeEntries = mapper.MapAttributeRoutes(controllerDescriptor);
 
             var routeEntry = Assert.Single(routeEntries);
             Assert.Null(routeEntry.Name);
@@ -28,7 +28,7 @@ namespace System.Web.Mvc.Routing
             var mapper = new AttributeRoutingMapper(new RouteBuilder2());
 
             // Act
-            var routeEntries = mapper.MapMvcAttributeRoutes(controllerDescriptor);
+            var routeEntries = mapper.MapAttributeRoutes(controllerDescriptor);
 
             // Assert
             var routeEntry = Assert.Single(routeEntries);
@@ -43,7 +43,7 @@ namespace System.Web.Mvc.Routing
             var mapper = new AttributeRoutingMapper(new RouteBuilder2());
 
             // Act
-            var entries = mapper.MapMvcAttributeRoutes(controllerDescriptor);
+            var entries = mapper.MapAttributeRoutes(controllerDescriptor);
 
             // Assert
             var controllerEntry = Assert.Single(entries.Where(r => !r.Route.Defaults.ContainsKey("action")));
@@ -63,7 +63,7 @@ namespace System.Web.Mvc.Routing
             var mapper = new AttributeRoutingMapper(new RouteBuilder2());
 
             // Act
-            var entries = mapper.MapMvcAttributeRoutes(controllerDescriptor);
+            var entries = mapper.MapAttributeRoutes(controllerDescriptor);
 
             // Assert
             Assert.Empty(entries);
@@ -77,7 +77,7 @@ namespace System.Web.Mvc.Routing
             var mapper = new AttributeRoutingMapper(new RouteBuilder2());
 
             // Act
-            var entries = mapper.MapMvcAttributeRoutes(controllerDescriptor);
+            var entries = mapper.MapAttributeRoutes(controllerDescriptor);
 
             // Assert
             var controllerEntry = Assert.Single(entries.Where(r => !r.Route.Defaults.ContainsKey("action")));

@@ -1,11 +1,27 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+#if ASPNETWEBAPI
 using System.Web.Http.Controllers;
+#endif
 using Microsoft.TestCommon;
 using Moq;
 
+#if ASPNETWEBAPI
+using TActionDescriptor = System.Web.Http.Controllers.HttpActionDescriptor;
+using TRoute = System.Web.Http.Routing.IHttpRoute;
+using TRouteDictionary = System.Web.Http.Routing.HttpRouteValueDictionary;
+#else
+using TActionDescriptor = System.Web.Mvc.ActionDescriptor;
+using TRoute = System.Web.Routing.Route;
+using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
+#endif
+
+#if ASPNETWEBAPI
 namespace System.Web.Http.Routing
+#else
+namespace System.Web.Mvc.Routing
+#endif
 {
     public class RouteProviderAttributeTests
     {
@@ -56,7 +72,7 @@ namespace System.Web.Http.Routing
             RouteProviderAttribute product = CreateProductUnderTest();
 
             // Act
-            HttpRouteValueDictionary constraints = product.Constraints;
+            TRouteDictionary constraints = product.Constraints;
 
             // Assert
             Assert.Null(constraints);
@@ -72,8 +88,12 @@ namespace System.Web.Http.Routing
             RouteEntry expectedEntry = CreateEntry();
 
             DirectRouteBuilder builder = CreateBuilder(() => expectedEntry);
-            DirectRouteProviderContext context = CreateContext((template) =>
-                template == expectedTemplate ? builder : new DirectRouteBuilder(new ReflectedHttpActionDescriptor[0]));
+            DirectRouteProviderContext context = CreateContext((template) => template == expectedTemplate ? builder :
+#if ASPNETWEBAPI
+                new DirectRouteBuilder(new TActionDescriptor[0]));
+#else
+                new DirectRouteBuilder(new TActionDescriptor[0], targetIsAction: true));
+#endif
 
             // Act
             RouteEntry entry = product.CreateRoute(context);
@@ -134,14 +154,14 @@ namespace System.Web.Http.Routing
         public void CreateRoute_IfBuilderContraintsIsNull_UsesConstraintsPropertyWhenBuilding()
         {
             // Arrange
-            HttpRouteValueDictionary expectedConstraints = new HttpRouteValueDictionary();
+            TRouteDictionary expectedConstraints = new TRouteDictionary();
             Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.Constraints).Returns(expectedConstraints);
             IDirectRouteProvider product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
-            HttpRouteValueDictionary constraints = null;
+            TRouteDictionary constraints = null;
             DirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
@@ -162,12 +182,12 @@ namespace System.Web.Http.Routing
         public void CreateRoute_IfBuilderContraintsIsNotNull_AddsConstraintsFromPropertyWhenBuilding()
         {
             // Arrange
-            HttpRouteValueDictionary existingConstraints = new HttpRouteValueDictionary();
+            TRouteDictionary existingConstraints = new TRouteDictionary();
             string existingConstraintKey = "ExistingContraintKey";
             object existingConstraintValue = "ExistingContraint";
             existingConstraints.Add(existingConstraintKey, existingConstraintValue);
 
-            HttpRouteValueDictionary additionalConstraints = new HttpRouteValueDictionary();
+            TRouteDictionary additionalConstraints = new TRouteDictionary();
             string additionalConstraintKey = "NewConstraintKey";
             string additionalConstraintValue = "NewConstraint";
             additionalConstraints.Add(additionalConstraintKey, additionalConstraintValue);
@@ -178,7 +198,7 @@ namespace System.Web.Http.Routing
 
             RouteEntry expectedEntry = CreateEntry();
 
-            HttpRouteValueDictionary constraints = null;
+            TRouteDictionary constraints = null;
             DirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
@@ -206,15 +226,15 @@ namespace System.Web.Http.Routing
         public void CreateRoute_IfBuilderContraintsIsNotNullAndConstraintsPropertyIsNull_UsesBuilderConstraints()
         {
             // Arrange
-            HttpRouteValueDictionary existingConstraints = new HttpRouteValueDictionary();
+            TRouteDictionary existingConstraints = new TRouteDictionary();
 
             Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
-            productMock.SetupGet(p => p.Constraints).Returns((HttpRouteValueDictionary)null);
+            productMock.SetupGet(p => p.Constraints).Returns((TRouteDictionary)null);
             IDirectRouteProvider product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
-            HttpRouteValueDictionary constraints = null;
+            TRouteDictionary constraints = null;
             DirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
@@ -245,7 +265,12 @@ namespace System.Web.Http.Routing
 
         private static RouteEntry CreateEntry()
         {
-            return new RouteEntry("IgnoreEntry", new Mock<IHttpRoute>(MockBehavior.Strict).Object);
+#if ASPNETWEBAPI
+            TRoute route = new Mock<TRoute>(MockBehavior.Strict).Object;
+#else
+            TRoute route = new Mock<TRoute>(MockBehavior.Strict, null, null).Object;
+#endif
+            return new RouteEntry("IgnoreEntry", route);
         }
 
         private static RouteProviderAttribute CreateProductUnderTest()
@@ -275,8 +300,13 @@ namespace System.Web.Http.Routing
             private readonly Func<string, DirectRouteBuilder> _createBuilder;
 
             public LambdaDirectRouteProviderContext(Func<string, DirectRouteBuilder> createBuilder)
-                : base(null, new ReflectedHttpActionDescriptor[] { new ReflectedHttpActionDescriptor() },
+#if ASPNETWEBAPI
+                : base(null, new TActionDescriptor[] { new Mock<TActionDescriptor>().Object },
                 new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object)
+#else
+                : base(null, null, new TActionDescriptor[] { CreateStubActionDescriptor() },
+                new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object, targetIsAction: true)
+#endif
             {
                 Contract.Assert(createBuilder != null);
                 _createBuilder = createBuilder;
@@ -286,6 +316,15 @@ namespace System.Web.Http.Routing
             {
                 return _createBuilder.Invoke(template);
             }
+
+#if !ASPNETWEBAPI
+            private static ActionDescriptor CreateStubActionDescriptor()
+            {
+                Mock<ActionDescriptor> mock = new Mock<TActionDescriptor>();
+                mock.Setup(m => m.ControllerDescriptor).Returns(new Mock<ControllerDescriptor>().Object);
+                return mock.Object;
+            }
+#endif
         }
 
         private class LambdaDirectRouteBuilder : DirectRouteBuilder
@@ -293,7 +332,11 @@ namespace System.Web.Http.Routing
             private readonly Func<RouteEntry> _build;
 
             public LambdaDirectRouteBuilder(Func<RouteEntry> build)
-                : base(new ReflectedHttpActionDescriptor[0])
+#if ASPNETWEBAPI
+                : base(new TActionDescriptor[0])
+#else
+                : base(new TActionDescriptor[0], targetIsAction: true)
+#endif
             {
                 Contract.Assert(build != null);
                 _build = build;

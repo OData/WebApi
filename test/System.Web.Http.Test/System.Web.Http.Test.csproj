@@ -61,6 +61,9 @@
     <Compile Include="..\Common\Routing\RoutePrecedenceTests.cs">
       <Link>Routing\RoutePrecedenceTests.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\RouteProviderAttributeTests.cs">
+      <Link>Routing\RouteProviderAttributeTests.cs</Link>
+    </Compile>
     <Compile Include="..\Common\TaskHelpersExtensionsTest.cs">
       <Link>Common\TaskHelpersExtensionsTest.cs</Link>
     </Compile>
@@ -190,7 +193,6 @@
     <Compile Include="Routing\SubRouteCollectionTest.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />
     <Compile Include="Routing\RouteAttributeTests.cs" />
-    <Compile Include="Routing\RouteProviderAttributeTests.cs" />
     <Compile Include="Routing\UriPathExtensionMappingTests.cs" />
     <Compile Include="Routing\UrlHelperTest.cs" />
     <Compile Include="Services\ControllerServicesTests.cs" />

@@ -3,7 +3,17 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
+#if ASPNETWEBAPI
+using TRouteDictionary = System.Web.Http.Routing.HttpRouteValueDictionary;
+#else
+using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
+#endif
+
+#if ASPNETWEBAPI
 namespace System.Web.Http.Routing
+#else
+namespace System.Web.Mvc.Routing
+#endif
 {
     /// <summary>Represents an attribute route that may contain custom constraints.</summary>
     public abstract class RouteProviderAttribute : Attribute, IDirectRouteProvider
@@ -17,7 +27,7 @@ namespace System.Web.Http.Routing
             _template = template;
         }
 
-        /// <summary>When implemented in a derived class, gets the route template.</summary>
+        /// <summary>Gets the route template.</summary>
         public string Template
         {
             get { return _template; }
@@ -30,7 +40,7 @@ namespace System.Web.Http.Routing
         public int Order { get; set; }
 
         /// <summary>Gets the route constraints, if any; otherwise <see langword="null"/>.</summary>
-        public virtual HttpRouteValueDictionary Constraints
+        public virtual TRouteDictionary Constraints
         {
             get { return null; }
         }
@@ -48,7 +58,7 @@ namespace System.Web.Http.Routing
             builder.Name = Name;
             builder.Order = Order;
 
-            HttpRouteValueDictionary builderConstraints = builder.Constraints;
+            TRouteDictionary builderConstraints = builder.Constraints;
 
             if (builderConstraints == null)
             {
@@ -56,7 +66,7 @@ namespace System.Web.Http.Routing
             }
             else
             {
-                HttpRouteValueDictionary constraints = Constraints;
+                TRouteDictionary constraints = Constraints;
 
                 if (constraints != null)
                 {

@@ -48,6 +48,9 @@
     <Compile Include="..\Common\Routing\RoutePrecedenceTests.cs">
       <Link>Routing\RoutePrecedenceTests.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\RouteProviderAttributeTests.cs">
+      <Link>Routing\RouteProviderAttributeTests.cs</Link>
+    </Compile>
     <Compile Include="Async\Test\TaskAsyncActionDescriptorTest.cs" />
     <Compile Include="Async\Test\TaskWrapperAsyncResultTest.cs" />
     <Compile Include="Html\Test\DisplayNameExtensionsTest.cs" />

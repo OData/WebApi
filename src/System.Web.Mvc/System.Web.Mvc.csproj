@@ -74,6 +74,9 @@
     <Compile Include="..\Common\Routing\RoutePrecedence.cs">
       <Link>Routing\RoutePrecedence.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\RouteProviderAttribute.cs">
+      <Link>Routing\RouteProviderAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\Common\TaskHelpers.cs">
       <Link>Common\TaskHelpers.cs</Link>
     </Compile>

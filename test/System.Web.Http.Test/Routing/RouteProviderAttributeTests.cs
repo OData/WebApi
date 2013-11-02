@@ -69,14 +69,14 @@ namespace System.Web.Http.Routing
             string expectedTemplate = "RouteTemplate";
             IDirectRouteProvider product = CreateProductUnderTest(expectedTemplate);
 
-            HttpRouteEntry expectedEntry = CreateEntry();
+            RouteEntry expectedEntry = CreateEntry();
 
             DirectRouteBuilder builder = CreateBuilder(() => expectedEntry);
             DirectRouteProviderContext context = CreateContext((template) =>
                 template == expectedTemplate ? builder : new DirectRouteBuilder(new ReflectedHttpActionDescriptor[0]));
 
             // Act
-            HttpRouteEntry entry = product.CreateRoute(context);
+            RouteEntry entry = product.CreateRoute(context);
 
             // Assert
             Assert.Same(expectedEntry, entry);
@@ -100,7 +100,7 @@ namespace System.Web.Http.Routing
             DirectRouteProviderContext context = CreateContext((i) => builder);
 
             // Act
-            HttpRouteEntry ignore = product.CreateRoute(context);
+            RouteEntry ignore = product.CreateRoute(context);
 
             // Assert
             Assert.Same(expectedName, name);
@@ -124,7 +124,7 @@ namespace System.Web.Http.Routing
             DirectRouteProviderContext context = CreateContext((i) => builder);
 
             // Act
-            HttpRouteEntry ignore = product.CreateRoute(context);
+            RouteEntry ignore = product.CreateRoute(context);
 
             // Assert
             Assert.Equal(expectedOrder, order);
@@ -139,7 +139,7 @@ namespace System.Web.Http.Routing
             productMock.SetupGet(p => p.Constraints).Returns(expectedConstraints);
             IDirectRouteProvider product = productMock.Object;
 
-            HttpRouteEntry expectedEntry = CreateEntry();
+            RouteEntry expectedEntry = CreateEntry();
 
             HttpRouteValueDictionary constraints = null;
             DirectRouteBuilder builder = null;
@@ -152,7 +152,7 @@ namespace System.Web.Http.Routing
             DirectRouteProviderContext context = CreateContext((i) => builder);
 
             // Act
-            HttpRouteEntry ignore = product.CreateRoute(context);
+            RouteEntry ignore = product.CreateRoute(context);
 
             // Assert
             Assert.Same(expectedConstraints, constraints);
@@ -176,7 +176,7 @@ namespace System.Web.Http.Routing
             productMock.SetupGet(p => p.Constraints).Returns(additionalConstraints);
             IDirectRouteProvider product = productMock.Object;
 
-            HttpRouteEntry expectedEntry = CreateEntry();
+            RouteEntry expectedEntry = CreateEntry();
 
             HttpRouteValueDictionary constraints = null;
             DirectRouteBuilder builder = null;
@@ -191,7 +191,7 @@ namespace System.Web.Http.Routing
             DirectRouteProviderContext context = CreateContext((i) => builder);
 
             // Act
-            HttpRouteEntry ignore = product.CreateRoute(context);
+            RouteEntry ignore = product.CreateRoute(context);
 
             // Assert
             Assert.Same(existingConstraints, constraints);
@@ -212,7 +212,7 @@ namespace System.Web.Http.Routing
             productMock.SetupGet(p => p.Constraints).Returns((HttpRouteValueDictionary)null);
             IDirectRouteProvider product = productMock.Object;
 
-            HttpRouteEntry expectedEntry = CreateEntry();
+            RouteEntry expectedEntry = CreateEntry();
 
             HttpRouteValueDictionary constraints = null;
             DirectRouteBuilder builder = null;
@@ -227,13 +227,13 @@ namespace System.Web.Http.Routing
             DirectRouteProviderContext context = CreateContext((i) => builder);
 
             // Act
-            HttpRouteEntry ignore = product.CreateRoute(context);
+            RouteEntry ignore = product.CreateRoute(context);
 
             // Assert
             Assert.Same(existingConstraints, constraints);
         }
 
-        private static DirectRouteBuilder CreateBuilder(Func<HttpRouteEntry> build)
+        private static DirectRouteBuilder CreateBuilder(Func<RouteEntry> build)
         {
             return new LambdaDirectRouteBuilder(build);
         }
@@ -243,9 +243,9 @@ namespace System.Web.Http.Routing
             return new LambdaDirectRouteProviderContext(createBuilder);
         }
 
-        private static HttpRouteEntry CreateEntry()
+        private static RouteEntry CreateEntry()
         {
-            return new HttpRouteEntry("IgnoreEntry", new Mock<IHttpRoute>(MockBehavior.Strict).Object);
+            return new RouteEntry("IgnoreEntry", new Mock<IHttpRoute>(MockBehavior.Strict).Object);
         }
 
         private static RouteProviderAttribute CreateProductUnderTest()
@@ -290,16 +290,16 @@ namespace System.Web.Http.Routing
 
         private class LambdaDirectRouteBuilder : DirectRouteBuilder
         {
-            private readonly Func<HttpRouteEntry> _build;
+            private readonly Func<RouteEntry> _build;
 
-            public LambdaDirectRouteBuilder(Func<HttpRouteEntry> build)
+            public LambdaDirectRouteBuilder(Func<RouteEntry> build)
                 : base(new ReflectedHttpActionDescriptor[0])
             {
                 Contract.Assert(build != null);
                 _build = build;
             }
 
-            public override HttpRouteEntry Build()
+            public override RouteEntry Build()
             {
                 return _build.Invoke();
             }

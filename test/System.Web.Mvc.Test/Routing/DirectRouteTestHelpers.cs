@@ -31,8 +31,7 @@ namespace System.Web.Routing.Test
             {
                 var subRoute = new Route(attribute.Template, routeHandler: null);
                 subRoute.SetTargetActionDescriptors(new ActionDescriptor[] { actionDescriptor });
-                subRoute.SetTargetControllerDescriptor(controllerDescriptor);
-                collector.Add(new RouteEntry { Route = subRoute });
+                collector.Add(new RouteEntry(null, subRoute));
             }
         }
 
@@ -46,7 +45,8 @@ namespace System.Web.Routing.Test
         public static void AddDirectRouteFromController<T>(SubRouteCollection collector)
         {
             var controllerType = typeof(T);
-            new AttributeRoutingMapper(new RouteBuilder2()).AddRouteEntries(collector, new Type[] { controllerType });
+            AttributeRoutingMapper.AddRouteEntries(collector, new Type[] { controllerType },
+                new DefaultInlineConstraintResolver());
         }
 
         public static void AddDirectRouteMatches(this RouteData routeData, Func<RouteBase, RouteData, bool> selector = null)

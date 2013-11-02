@@ -4,17 +4,17 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing
 {
-    public class HttpSubRouteCollectionTest
+    public class SubRouteCollectionTest
     {
         [Fact]
-        public void HttpSubRouteCollection_Throws_OnDuplicateNamedRoute()
+        public void SubRouteCollection_Throws_OnDuplicateNamedRoute()
         {
             // Arrange
-            var collection = new HttpSubRouteCollection();
+            var collection = new SubRouteCollection();
             var route1 = new HttpRoute("api/Person");
             var route2 = new HttpRoute("api/Car");
 
-            collection.Add(new HttpRouteEntry("route", route1));
+            collection.Add(new RouteEntry("route", route1));
 
             var expectedError =
                 "A route named 'route' is already in the route collection. Route names must be unique." + Environment.NewLine +
@@ -24,7 +24,7 @@ namespace System.Web.Http.Routing
                 "api/Person";
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => collection.Add(new HttpRouteEntry("route", route2)), expectedError);
+            Assert.Throws<InvalidOperationException>(() => collection.Add(new RouteEntry("route", route2)), expectedError);
         }
     }
 }

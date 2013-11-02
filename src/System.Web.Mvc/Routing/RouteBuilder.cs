@@ -68,7 +68,6 @@ namespace System.Web.Mvc.Routing
             Type controllerType = controllerDescriptor.ControllerType;
 
             RouteValueDictionary dataTokens = new RouteValueDictionary();
-            dataTokens[RouteDataTokenKeys.DirectRouteController] = controllerDescriptor;
             if (areaName != null)
             {
                 dataTokens.Add(RouteDataTokenKeys.Area, areaName);

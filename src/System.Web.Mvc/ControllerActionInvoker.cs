@@ -148,8 +148,8 @@ namespace System.Web.Mvc
                     throw new InvalidOperationException(MvcResources.DirectRoute_MissingControllerDescriptor);
                 }
 
-                IEnumerable<ActionDescriptor> actionDescriptors = directRoute.GetTargetActionDescriptors();
-                if (actionDescriptors == null || !actionDescriptors.Any())
+                ActionDescriptor[] actionDescriptors = directRoute.GetTargetActionDescriptors();
+                if (actionDescriptors == null || actionDescriptors.Length == 0)
                 {
                     throw new InvalidOperationException(MvcResources.DirectRoute_MissingActionDescriptors);
                 }

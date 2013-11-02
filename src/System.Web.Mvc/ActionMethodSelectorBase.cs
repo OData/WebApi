@@ -27,7 +27,8 @@ namespace System.Web.Mvc
             ControllerType = controllerType;
 
             // If controller type has a RouteAttribute, then standard routes can't reach it.             
-            _hasRouteAttributeOnController = controllerType.GetCustomAttributes(typeof(IRouteInfoProvider), inherit: false).Any();
+            _hasRouteAttributeOnController = controllerType.GetCustomAttributes(typeof(IDirectRouteProvider), inherit: false).Any()
+                || controllerType.GetCustomAttributes(typeof(IRouteInfoProvider), inherit: false).Any();
 
             PopulateLookupTables();
         }
@@ -113,7 +114,8 @@ namespace System.Web.Mvc
             // Inherited actions should not inherit the Route attributes.
             // Only check the attribute on declared actions.
             bool isDeclaredAction = method.DeclaringType == ControllerType;
-            return isDeclaredAction && method.GetCustomAttributes(typeof(IRouteInfoProvider), inherit: false).Any();
+            return isDeclaredAction && (method.GetCustomAttributes(typeof(IDirectRouteProvider), inherit: false).Any()
+                || method.GetCustomAttributes(typeof(IRouteInfoProvider), inherit: false).Any());
         }
 
         private void PopulateLookupTables()

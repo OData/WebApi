@@ -23,8 +23,8 @@ namespace System.Web.Http.Description
     {
         private Lazy<Collection<ApiDescription>> _apiDescriptions;
         private readonly HttpConfiguration _config;
-        private static readonly Regex _actionVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteKeys.ActionKey), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        private static readonly Regex _controllerVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteKeys.ControllerKey), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex _actionVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteValueKeys.Action), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex _controllerVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteValueKeys.Controller), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiExplorer"/> class.
@@ -76,7 +76,7 @@ namespace System.Web.Http.Description
 
             ApiExplorerSettingsAttribute setting = controllerDescriptor.GetCustomAttributes<ApiExplorerSettingsAttribute>().FirstOrDefault();
             return (setting == null || !setting.IgnoreApi) &&
-                MatchRegexConstraint(route, RouteKeys.ControllerKey, controllerVariableValue);
+                MatchRegexConstraint(route, RouteValueKeys.Controller, controllerVariableValue);
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace System.Web.Http.Description
 
             ApiExplorerSettingsAttribute setting = actionDescriptor.GetCustomAttributes<ApiExplorerSettingsAttribute>().FirstOrDefault();
             return (setting == null || !setting.IgnoreApi) &&
-                MatchRegexConstraint(route, RouteKeys.ActionKey, actionVariableValue);
+                MatchRegexConstraint(route, RouteValueKeys.Action, actionVariableValue);
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace System.Web.Http.Description
                     }
                 }
             }
-            else if (route.Defaults.TryGetValue(RouteKeys.ControllerKey, out controllerVariableValue))
+            else if (route.Defaults.TryGetValue(RouteValueKeys.Controller, out controllerVariableValue))
             {
                 // bound controller variable, {controller = "controllerName"}
                 HttpControllerDescriptor controllerDescriptor;
@@ -300,7 +300,7 @@ namespace System.Web.Http.Description
                             PopulateActionDescriptions(actionMapping, actionVariableValue, route, expandedLocalPath, apiDescriptions, controllerDescriptor);
                         }
                     }
-                    else if (route.Defaults.TryGetValue(RouteKeys.ActionKey, out actionVariableValue))
+                    else if (route.Defaults.TryGetValue(RouteValueKeys.Action, out actionVariableValue))
                     {
                         // bound action variable, { action = "actionName" }
                         PopulateActionDescriptions(actionMappings[actionVariableValue], actionVariableValue, route, localPath, apiDescriptions, controllerDescriptor);
@@ -339,7 +339,7 @@ namespace System.Web.Http.Description
         {
             string apiDocumentation = GetApiDocumentation(actionDescriptor);
 
-            HttpParsedRoute parsedRoute = HttpRouteParser.Parse(localPath);
+            HttpParsedRoute parsedRoute = RouteParser.Parse(localPath);
 
             // parameters
             IList<ApiParameterDescription> parameterDescriptions = CreateParameterDescriptions(actionDescriptor, parsedRoute, route.Defaults);

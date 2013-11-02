@@ -16,15 +16,8 @@ namespace System.Web.Mvc.Routing
     /// Corresponds to the Web API implementation of attribute routing in
     /// System.Web.Http.Routing.AttributeRoutingMapper.
     /// </remarks>
-    internal class AttributeRoutingMapper
+    internal static class AttributeRoutingMapper
     {
-        private readonly RouteBuilder2 _routeBuilder;
-
-        public AttributeRoutingMapper(RouteBuilder2 routeBuilder)
-        {
-            _routeBuilder = routeBuilder;
-        }
-
         /// <summary>
         /// Maps the attribute-defined routes for the application.
         /// </summary>
@@ -75,10 +68,8 @@ namespace System.Web.Mvc.Routing
         public static void MapAttributeRoutes(RouteCollection routes, IEnumerable<Type> controllerTypes,
             IInlineConstraintResolver constraintResolver)
         {
-            AttributeRoutingMapper mapper = new AttributeRoutingMapper(new RouteBuilder2(constraintResolver));
-
             SubRouteCollection subRoutes = new SubRouteCollection();
-            mapper.AddRouteEntries(subRoutes, controllerTypes);
+            AddRouteEntries(subRoutes, controllerTypes, constraintResolver);
             IReadOnlyCollection<RouteEntry> entries = subRoutes.Entries;
 
             if (entries.Count > 0)
@@ -123,7 +114,8 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-        internal void AddRouteEntries(SubRouteCollection collector, IEnumerable<Type> controllerTypes)
+        internal static void AddRouteEntries(SubRouteCollection collector, IEnumerable<Type> controllerTypes,
+            IInlineConstraintResolver constraintResolver)
         {
             ControllerDescriptorCache descriptorsCache = new AsyncControllerActionInvoker().DescriptorCache;
             IEnumerable<ReflectedAsyncControllerDescriptor> descriptors = controllerTypes
@@ -134,18 +126,20 @@ namespace System.Web.Mvc.Routing
 
             foreach (ReflectedAsyncControllerDescriptor controllerDescriptor in descriptors)
             {
-                AddRouteEntries(collector, controllerDescriptor);
+                AddRouteEntries(collector, controllerDescriptor, constraintResolver);
             }
         }
 
-        internal IReadOnlyCollection<RouteEntry> MapAttributeRoutes(ReflectedAsyncControllerDescriptor controller)
+        internal static IReadOnlyCollection<RouteEntry> MapAttributeRoutes(
+            ReflectedAsyncControllerDescriptor controller)
         {
             SubRouteCollection collector = new SubRouteCollection();
-            AddRouteEntries(collector, controller);
+            AddRouteEntries(collector, controller, new DefaultInlineConstraintResolver());
             return collector.Entries;
         }
 
-        internal void AddRouteEntries(SubRouteCollection collector, ReflectedAsyncControllerDescriptor controller)
+        internal static void AddRouteEntries(SubRouteCollection collector,
+            ReflectedAsyncControllerDescriptor controller, IInlineConstraintResolver constraintResolver)
         {
             string prefix = GetRoutePrefix(controller);
 
@@ -160,10 +154,10 @@ namespace System.Web.Mvc.Routing
             {
                 ActionDescriptor action = CreateActionDescriptor(controller, actionSelector, method);
 
-                IEnumerable<IRouteInfoProvider> providers = GetRouteProviders(method, controller.ControllerType);
+                IEnumerable<IDirectRouteProvider> providers = GetRouteProviders(method, controller.ControllerType);
 
-                AddRouteEntries(collector, areaPrefix, prefix, providers, controller,
-                    new ActionDescriptor[] { action }, routeIsForAction: true);
+                AddRouteEntries(collector, areaPrefix, prefix, providers, new ActionDescriptor[] { action },
+                    constraintResolver, targetIsAction: true);
             }
 
             // Check for controller-level routes. 
@@ -176,13 +170,13 @@ namespace System.Web.Mvc.Routing
                 actionsWithoutRoutes.Add(action);
             }
 
-            IReadOnlyCollection<IRouteInfoProvider> controllerProviders = GetRouteProviders(controller);
+            IReadOnlyCollection<IDirectRouteProvider> controllerProviders = GetRouteProviders(controller);
 
             // If they exist and have not been overridden, create routes for controller-level route providers.
             if (controllerProviders.Count > 0 && actionsWithoutRoutes.Count > 0)
             {
-                AddRouteEntries(collector, areaPrefix, prefix, controllerProviders, controller, actionsWithoutRoutes,
-                    routeIsForAction: false);
+                AddRouteEntries(collector, areaPrefix, prefix, controllerProviders, actionsWithoutRoutes,
+                    constraintResolver, targetIsAction: false);
             }
         }
 
@@ -196,31 +190,32 @@ namespace System.Web.Mvc.Routing
             return creator(actionName, controller);
         }
 
-        private void AddRouteEntries(SubRouteCollection collector, string areaPrefix, string prefix,
-            IEnumerable<IRouteInfoProvider> providers, ControllerDescriptor controller,
-            IList<ActionDescriptor> actions, bool routeIsForAction)
+        private static void AddRouteEntries(SubRouteCollection collector, string areaPrefix, string prefix,
+            IEnumerable<IDirectRouteProvider> providers, IList<ActionDescriptor> actions,
+            IInlineConstraintResolver constraintResolver, bool targetIsAction)
         {
-            foreach (IRouteInfoProvider provider in providers)
+            foreach (IDirectRouteProvider provider in providers)
             {
-                RouteEntry entry = CreateRouteEntry(areaPrefix, prefix, provider, controller, actions,
-                    routeIsForAction);
+                RouteEntry entry = CreateRouteEntry(areaPrefix, prefix, provider, actions, constraintResolver,
+                    targetIsAction);
                 collector.Add(entry);
             }
         }
 
-        private RouteEntry CreateRouteEntry(string areaPrefix, string prefix, IRouteInfoProvider provider,
-            ControllerDescriptor controller, IList<ActionDescriptor> actions, bool routeIsForAction)
+        private static RouteEntry CreateRouteEntry(string areaPrefix, string prefix, IDirectRouteProvider provider,
+            IList<ActionDescriptor> actions, IInlineConstraintResolver constraintResolver, bool targetIsAction)
         {
-            ValidateTemplate(provider.Template, actions[0].ActionName, controller);
-            string template = CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, provider.Template);
-            Route route = _routeBuilder.BuildDirectRoute(template, provider, controller, actions, routeIsForAction);
+            Contract.Assert(provider != null);
 
-            RouteEntry entry = new RouteEntry
+            DirectRouteProviderContext context = new DirectRouteProviderContext(areaPrefix, prefix, actions,
+                constraintResolver, targetIsAction);
+            RouteEntry entry = provider.CreateRoute(context);
+
+            if (entry == null)
             {
-                Name = provider.Name,
-                Route = route,
-                Template = template,
-            };
+                throw new InvalidOperationException(Error.Format(MvcResources.TypeMethodMustNotReturnNull,
+                    typeof(IDirectRouteProvider).Name, "CreateRoute"));
+            }
 
             return entry;
         }
@@ -259,68 +254,61 @@ namespace System.Web.Mvc.Routing
             return null;
         }
 
-        public static IReadOnlyCollection<IRouteInfoProvider> GetRouteProviders(ControllerDescriptor controller)
+        public static IReadOnlyCollection<IDirectRouteProvider> GetRouteProviders(ControllerDescriptor controller)
         {
-            return controller.GetCustomAttributes(inherit: false).OfType<IRouteInfoProvider>().AsArray();
+            object[] attributes = controller.GetCustomAttributes(inherit: false);
+            IEnumerable<IDirectRouteProvider> newProviders = attributes.OfType<IDirectRouteProvider>();
+            IEnumerable<IRouteInfoProvider> oldProviders = attributes.OfType<IRouteInfoProvider>();
+
+            List<IDirectRouteProvider> combined = new List<IDirectRouteProvider>();
+            combined.AddRange(newProviders);
+
+            foreach (IRouteInfoProvider oldProvider in oldProviders)
+            {
+                if (oldProvider is IDirectRouteProvider)
+                {
+                    continue;
+                }
+
+                combined.Add(new RouteInfoDirectRouteProvider(oldProvider));
+            }
+
+            return combined;
         }
 
-        private static IEnumerable<IRouteInfoProvider> GetRouteProviders(MethodInfo methodInfo, Type controllerType)
+        private static IEnumerable<IDirectRouteProvider> GetRouteProviders(MethodInfo methodInfo, Type controllerType)
         {
             // Skip Route attributes on inherited actions.
             if (methodInfo.DeclaringType != controllerType)
             {
-                return Enumerable.Empty<IRouteInfoProvider>();
+                return Enumerable.Empty<IDirectRouteProvider>();
             }
 
             // We do not want to cache this as these attributes are only being looked up during
             // application's init time, so there will be no perf gain, and we will end up
             // storing that cache for no reason
-            return methodInfo.GetCustomAttributes(inherit: false)
-              .OfType<IRouteInfoProvider>()
-              .Where(attr => attr.Template != null);
-        }
+            object[] attributes = methodInfo.GetCustomAttributes(inherit: false);
 
-        internal static string CombinePrefixAndAreaWithTemplate(string areaPrefix, string prefix, string template)
-        {
-            Contract.Assert(template != null);
+            IEnumerable<IDirectRouteProvider> newProviders = attributes.OfType<IDirectRouteProvider>();
 
-            // If the attribute's template starts with '~/', ignore the area and controller prefixes
-            if (template.StartsWith("~/", StringComparison.Ordinal))
+            IEnumerable<IRouteInfoProvider> oldProviders = attributes
+                .OfType<IRouteInfoProvider>()
+                .Where(attr => attr.Template != null);
+
+            List<IDirectRouteProvider> combined = new List<IDirectRouteProvider>();
+            combined.AddRange(newProviders);
+
+            foreach (IRouteInfoProvider oldProvider in oldProviders)
             {
-                return template.Substring(2);
-            }
-
-            if (prefix == null && areaPrefix == null)
-            {
-                return template;
-            }
-
-            StringBuilder templateBuilder = new StringBuilder();
-
-            if (areaPrefix != null)
-            {
-                templateBuilder.Append(areaPrefix);
-            }
-
-            if (!String.IsNullOrEmpty(prefix))
-            {
-                if (templateBuilder.Length > 0)
+                if (oldProvider is IDirectRouteProvider)
                 {
-                    templateBuilder.Append('/');
+                    continue;
                 }
-                templateBuilder.Append(prefix);
+
+                combined.Add(new RouteInfoDirectRouteProvider(oldProvider));
             }
 
-            if (!String.IsNullOrEmpty(template))
-            {
-                if (templateBuilder.Length > 0)
-                {
-                    templateBuilder.Append('/');
-                }
-                templateBuilder.Append(template);
-            }
-
-            return templateBuilder.ToString();
+            return combined;
         }
 
         private static void ValidateAreaPrefixTemplate(string areaPrefix, string areaName, ControllerDescriptor controllerDescriptor)
@@ -329,16 +317,6 @@ namespace System.Web.Mvc.Routing
             {
                 string errorMessage = Error.Format(MvcResources.RouteAreaPrefix_CannotEnd_WithForwardSlash,
                                                    areaPrefix, areaName, controllerDescriptor.ControllerName);
-                throw new InvalidOperationException(errorMessage);
-            }
-        }
-
-        private static void ValidateTemplate(string routeTemplate, string actionName, ControllerDescriptor controllerDescriptor)
-        {
-            if (routeTemplate.StartsWith("/", StringComparison.Ordinal))
-            {
-                string errorMessage = Error.Format(MvcResources.RouteTemplate_CannotStart_WithForwardSlash,
-                                                   routeTemplate, actionName, controllerDescriptor.ControllerName);
                 throw new InvalidOperationException(errorMessage);
             }
         }

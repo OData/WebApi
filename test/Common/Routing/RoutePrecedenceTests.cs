@@ -1,5 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+#if !ASPNETWEBAPI
+using System.Web.Routing;
+#endif
 using Microsoft.TestCommon;
 
 #if ASPNETWEBAPI
@@ -55,55 +58,20 @@ namespace System.Web.Mvc.Routing
             Assert.True(xPrededence < yPrededence);
         }
 
-#if ASPNETWEBAPI
         private static decimal Compute(string template)
         {
             DefaultInlineConstraintResolver resolver = new DefaultInlineConstraintResolver();
+#if ASPNETWEBAPI
             HttpRouteValueDictionary defaults = new HttpRouteValueDictionary();
             HttpRouteValueDictionary constraints = new HttpRouteValueDictionary();
+#else
+            RouteValueDictionary defaults = new RouteValueDictionary();
+            RouteValueDictionary constraints = new RouteValueDictionary();
+#endif
             string standardRouteTemplate = InlineRouteTemplateParser.ParseRouteTemplate(template,
                 defaults, constraints, new DefaultInlineConstraintResolver());
-            HttpParsedRoute parsedRoute = HttpRouteParser.Parse(standardRouteTemplate);
+            var parsedRoute = RouteParser.Parse(standardRouteTemplate);
             return RoutePrecedence.Compute(parsedRoute, constraints);
         }
-#else
-        private static decimal Compute(string template)
-        {
-            var entry = CreateRouteEntry(template);
-            return entry.Route.GetPrecedence();
-        }
-
-        private static RouteEntry CreateRouteEntry(string routeTemplate)
-        {
-            var methodInfo = typeof(TestController).GetMethod("Action");
-            var controllerDescriptor = new ReflectedControllerDescriptor(typeof(TestController));
-            var actionDescriptor = new ReflectedActionDescriptor(
-                methodInfo,
-                "Action",
-                controllerDescriptor);
-
-            var route = new RouteBuilder2().BuildDirectRoute(
-                routeTemplate,
-                new RouteAttribute(),
-                controllerDescriptor,
-                new ActionDescriptor[] { actionDescriptor },
-                routeIsForAction: true);
-
-            var entry = new RouteEntry()
-            {
-                Route = route,
-                Template = routeTemplate,
-            };
-
-            return entry;
-        }
-
-        private class TestController : Controller
-        {
-            public void Action()
-            {
-            }
-        }
-#endif
     }
 }

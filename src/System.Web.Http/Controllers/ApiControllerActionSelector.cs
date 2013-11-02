@@ -313,7 +313,7 @@ namespace System.Web.Http.Controllers
                     CandidateAction[] candidates = subRouteData.Route.GetDirectRouteCandidates();
 
                     string actionName;
-                    subRouteData.Values.TryGetValue(RouteKeys.ActionKey, out actionName);
+                    subRouteData.Values.TryGetValue(RouteValueKeys.Action, out actionName);
 
                     foreach (var candidate in candidates)
                     {
@@ -350,7 +350,7 @@ namespace System.Web.Http.Controllers
                 Contract.Assert(routeData.GetSubRoutes() == null, "Should not be called on a direct route");
                 CandidateAction[] candidates;
 
-                if (routeData.Values.TryGetValue(RouteKeys.ActionKey, out actionName))
+                if (routeData.Values.TryGetValue(RouteValueKeys.Action, out actionName))
                 {
                     // We have an explicit {action} value, do traditional binding. Just lookup by actionName
                     HttpActionDescriptor[] actionsFoundByName = _standardActionNameMapping[actionName].ToArray();
@@ -410,8 +410,8 @@ namespace System.Web.Http.Controllers
             private static ISet<string> GetCombinedParameterNames(IEnumerable<KeyValuePair<string, string>> queryNameValuePairs, IDictionary<string, object> routeValues)
             {
                 HashSet<string> routeParameterNames = new HashSet<string>(routeValues.Keys, StringComparer.OrdinalIgnoreCase);
-                routeParameterNames.Remove(RouteKeys.ControllerKey);
-                routeParameterNames.Remove(RouteKeys.ActionKey);
+                routeParameterNames.Remove(RouteValueKeys.Controller);
+                routeParameterNames.Remove(RouteValueKeys.Action);
 
                 var combinedParameterNames = new HashSet<string>(routeParameterNames, StringComparer.OrdinalIgnoreCase);
                 if (queryNameValuePairs != null)

@@ -500,7 +500,7 @@ namespace System.Web.Http.Routing
 
         public HttpRouteValueDictionary Match(string virtualPath, HttpRouteValueDictionary defaultValues)
         {
-            IList<string> requestPathSegments = HttpRouteParser.SplitUriToPathSegmentStrings(virtualPath);
+            IList<string> requestPathSegments = RouteParser.SplitUriToPathSegmentStrings(virtualPath);
 
             if (defaultValues == null)
             {
@@ -579,7 +579,7 @@ namespace System.Web.Http.Routing
                     // still contains more content, check that the remaining content is all separators.
                     for (int i = PathSegments.Count; i < requestPathSegments.Count; i++)
                     {
-                        if (!HttpRouteParser.IsSeparator(requestPathSegments[i]))
+                        if (!RouteParser.IsSeparator(requestPathSegments[i]))
                         {
                             return null;
                         }

@@ -70,7 +70,7 @@ namespace System.Web.Http.Routing
             if (parsedRoute == null)
             {
                 // The parser will throw for invalid routes.
-                ParsedRoute = HttpRouteParser.Parse(routeTemplate);
+                ParsedRoute = RouteParser.Parse(routeTemplate);
             }
             else
             {

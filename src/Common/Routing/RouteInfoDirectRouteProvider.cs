@@ -2,7 +2,18 @@
 
 using System.Diagnostics.Contracts;
 
+#if ASPNETWEBAPI
+using TRouteInfoProvider = System.Web.Http.Routing.IHttpRouteInfoProvider;
+#else
+using System.Web.Mvc.Properties;
+using TRouteInfoProvider = System.Web.Mvc.Routing.IRouteInfoProvider;
+#endif
+
+#if ASPNETWEBAPI
 namespace System.Web.Http.Routing
+#else
+namespace System.Web.Mvc.Routing
+#endif
 {
     /// <remarks>
     /// This class is an adapter that turns an IHttpRouteInfoProvider into an IDirectRouteProvider. We need it because
@@ -12,9 +23,9 @@ namespace System.Web.Http.Routing
     /// </remarks>
     internal class RouteInfoDirectRouteProvider : IDirectRouteProvider
     {
-        private readonly IHttpRouteInfoProvider _infoProvider;
+        private readonly TRouteInfoProvider _infoProvider;
 
-        public RouteInfoDirectRouteProvider(IHttpRouteInfoProvider infoProvider)
+        public RouteInfoDirectRouteProvider(TRouteInfoProvider infoProvider)
         {
             if (infoProvider == null)
             {
@@ -24,7 +35,7 @@ namespace System.Web.Http.Routing
             _infoProvider = infoProvider;
         }
 
-        public HttpRouteEntry CreateRoute(DirectRouteProviderContext context)
+        public RouteEntry CreateRoute(DirectRouteProviderContext context)
         {
             Contract.Assert(context != null);
 
@@ -32,7 +43,10 @@ namespace System.Web.Http.Routing
             Contract.Assert(builder != null);
 
             builder.Name = _infoProvider.Name;
+
+#if ASPNETWEBAPI
             builder.Order = _infoProvider.Order;
+#endif
 
             return builder.Build();
         }

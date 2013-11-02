@@ -42,13 +42,13 @@ namespace System.Web.Http.Routing
                     // initialization may make last minute changes to the configuration.
                     previousInitializer(config);
 
-                    HttpSubRouteCollection subRoutes = null;
+                    SubRouteCollection subRoutes = null;
 
                     // Add a single placeholder route that handles all of attribute routing.
                     // Add an initialize hook that initializes these routes after the config has been initialized.
-                    Func<HttpSubRouteCollection> initializer = () =>
+                    Func<SubRouteCollection> initializer = () =>
                     {
-                        subRoutes = new HttpSubRouteCollection();
+                        subRoutes = new SubRouteCollection();
                         AddRouteEntries(subRoutes, configuration, constraintResolver);
                         return subRoutes;
                     };
@@ -66,10 +66,10 @@ namespace System.Web.Http.Routing
         // Add generation hooks for the Attribute-routing subroutes. 
         // This lets us generate urls for routes supplied by attr-based routing.
         private static void AddGenerationHooksForSubRoutes(HttpRouteCollection routeTable,
-            IEnumerable<HttpRouteEntry> entries)
+            IEnumerable<RouteEntry> entries)
         {
             Contract.Assert(entries != null);
-            foreach (HttpRouteEntry entry in entries)
+            foreach (RouteEntry entry in entries)
             {
                 Contract.Assert(entry != null);
                 string name = entry.Name;
@@ -84,7 +84,7 @@ namespace System.Web.Http.Routing
             }
         }
 
-        private static void AddRouteEntries(HttpSubRouteCollection collector, HttpConfiguration configuration,
+        private static void AddRouteEntries(SubRouteCollection collector, HttpConfiguration configuration,
             IInlineConstraintResolver constraintResolver)
         {
             Contract.Assert(configuration != null);
@@ -100,7 +100,7 @@ namespace System.Web.Http.Routing
             }
         }
 
-        private static void AddRouteEntries(HttpSubRouteCollection collector, HttpControllerDescriptor controller,
+        private static void AddRouteEntries(SubRouteCollection collector, HttpControllerDescriptor controller,
             IInlineConstraintResolver constraintResolver)
         {
             IHttpActionSelector actionSelector = controller.Configuration.Services.GetActionSelector();
@@ -149,26 +149,26 @@ namespace System.Web.Http.Routing
             }
         }
 
-        private static void AddRouteEntries(HttpSubRouteCollection collector, string prefix,
+        private static void AddRouteEntries(SubRouteCollection collector, string prefix,
             IReadOnlyCollection<IDirectRouteProvider> providers, IEnumerable<ReflectedHttpActionDescriptor> actions,
             IInlineConstraintResolver constraintResolver)
         {
             foreach (IDirectRouteProvider routeProvider in providers)
             {
-                HttpRouteEntry entry = CreateRouteEntry(prefix, routeProvider, actions,
+                RouteEntry entry = CreateRouteEntry(prefix, routeProvider, actions,
                     constraintResolver);
                 collector.Add(entry);
             }
         }
 
-        private static HttpRouteEntry CreateRouteEntry(string routePrefix, IDirectRouteProvider provider,
+        private static RouteEntry CreateRouteEntry(string prefix, IDirectRouteProvider provider,
             IEnumerable<ReflectedHttpActionDescriptor> actions, IInlineConstraintResolver constraintResolver)
         {
             Contract.Assert(provider != null);
 
-            DirectRouteProviderContext context = new DirectRouteProviderContext(routePrefix, actions,
+            DirectRouteProviderContext context = new DirectRouteProviderContext(prefix, actions,
                 constraintResolver);
-            HttpRouteEntry entry = provider.CreateRoute(context);
+            RouteEntry entry = provider.CreateRoute(context);
 
             if (entry == null)
             {
@@ -218,7 +218,6 @@ namespace System.Web.Http.Routing
                 controller.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
 
             List<IDirectRouteProvider> combined = new List<IDirectRouteProvider>();
-
             combined.AddRange(newProviders);
 
             foreach (IHttpRouteInfoProvider oldProvider in oldProviders)
@@ -243,7 +242,6 @@ namespace System.Web.Http.Routing
                 action.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false);
 
             List<IDirectRouteProvider> combined = new List<IDirectRouteProvider>();
-
             combined.AddRange(newProviders);
 
             foreach (IHttpRouteInfoProvider oldProvider in oldProviders)

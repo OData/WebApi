@@ -17,7 +17,7 @@ namespace System.Web.Http.Routing
 
             var route = BuildWithoutResolver("route", actions);
 
-            var actualActions = route.DataTokens[RouteKeys.ActionsDataTokenKey];
+            var actualActions = route.DataTokens[RouteDataTokenKeys.Actions];
             Assert.Equal(actions, actualActions);
         }
 

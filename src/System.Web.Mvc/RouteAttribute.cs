@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Web.Mvc.Routing;
 
 namespace System.Web.Mvc
@@ -10,7 +11,7 @@ namespace System.Web.Mvc
     /// When placed on a controller, it applies to actions that do not have any <see cref="RouteAttribute"/>s on them.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-    public sealed class RouteAttribute : Attribute, IOrderedRouteInfoProvider
+    public sealed class RouteAttribute : Attribute, IDirectRouteProvider, IRouteInfoProvider
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RouteAttribute" /> class.
@@ -40,5 +41,17 @@ namespace System.Web.Mvc
         
         /// <inheritdoc />
         public string Template { get; private set; }
+
+        RouteEntry IDirectRouteProvider.CreateRoute(DirectRouteProviderContext context)
+        {
+            Contract.Assert(context != null);
+
+            DirectRouteBuilder builder = context.CreateBuilder(Template);
+            Contract.Assert(builder != null);
+
+            builder.Name = Name;
+            builder.Order = Order;
+            return builder.Build();
+        }
     }
 }

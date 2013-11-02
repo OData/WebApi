@@ -5,9 +5,9 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 
 #if ASPNETWEBAPI
-using ParsedRouteType = System.Web.Http.Routing.HttpParsedRoute;
+using TParsedRoute = System.Web.Http.Routing.HttpParsedRoute;
 #else
-using ParsedRouteType = System.Web.Mvc.Routing.ParsedRoute;
+using TParsedRoute = System.Web.Mvc.Routing.ParsedRoute;
 #endif
 
 #if ASPNETWEBAPI
@@ -55,7 +55,7 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-        public static decimal Compute(ParsedRouteType parsedRoute, IDictionary<string, object> constraints)
+        public static decimal Compute(TParsedRoute parsedRoute, IDictionary<string, object> constraints)
         {
             // Each precedence digit corresponds to one decimal place. For example, 3 segments with precedences 2, 1,
             // and 4 results in a combined precedence of 2.14 (decimal).

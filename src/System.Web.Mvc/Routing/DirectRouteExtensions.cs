@@ -15,7 +15,7 @@ namespace System.Web.Mvc.Routing
         /// </summary>
         public static decimal GetPrecedence(this RouteData routeData)
         {
-            return GetRouteDataTokenValue<decimal>(routeData, RouteDataTokenKeys.DirectRoutePrecedence);
+            return GetRouteDataTokenValue<decimal>(routeData, RouteDataTokenKeys.Precedence);
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace System.Web.Mvc.Routing
         /// </summary>
         public static decimal GetPrecedence(this Route route)
         {
-            return GetRouteDataTokenValue<decimal>(route, RouteDataTokenKeys.DirectRoutePrecedence);
+            return GetRouteDataTokenValue<decimal>(route, RouteDataTokenKeys.Precedence);
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace System.Web.Mvc.Routing
         /// </summary>
         public static void SetPrecedence(this Route route, decimal precedence)
         {
-            SetRouteDataTokenValue(route, RouteDataTokenKeys.DirectRoutePrecedence, precedence);
+            SetRouteDataTokenValue(route, RouteDataTokenKeys.Precedence, precedence);
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace System.Web.Mvc.Routing
         /// </summary>
         public static int GetOrder(this RouteData routeData)
         {
-            return GetRouteDataTokenValue<int>(routeData, RouteDataTokenKeys.DirectRouteOrder);
+            return GetRouteDataTokenValue<int>(routeData, RouteDataTokenKeys.Order);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace System.Web.Mvc.Routing
         /// </summary>
         public static int GetOrder(this Route route)
         {
-            return GetRouteDataTokenValue<int>(route, RouteDataTokenKeys.DirectRouteOrder);
+            return GetRouteDataTokenValue<int>(route, RouteDataTokenKeys.Order);
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace System.Web.Mvc.Routing
         /// </summary>
         public static void SetOrder(this Route route, int order)
         {
-            SetRouteDataTokenValue(route, RouteDataTokenKeys.DirectRouteOrder, order);
+            SetRouteDataTokenValue(route, RouteDataTokenKeys.Order, order);
         }
 
         /// <summary>
@@ -63,7 +63,23 @@ namespace System.Web.Mvc.Routing
         /// </summary>
         public static ControllerDescriptor GetTargetControllerDescriptor(this Route route)
         {
-            return GetRouteDataTokenValue<ControllerDescriptor>(route, RouteDataTokenKeys.DirectRouteController);
+            var actions = GetTargetActionDescriptors(route);
+            ControllerDescriptor controller = null;
+
+            foreach (var action in actions)
+            {
+                if (controller == null)
+                {
+                    controller = action.ControllerDescriptor;
+                }
+                else if (controller != action.ControllerDescriptor)
+                {
+                    // Don't provide a single controller descriptor if multiple controllers match.
+                    return null;
+                }
+            }
+
+            return controller;
         }
 
         /// <summary>
@@ -71,63 +87,58 @@ namespace System.Web.Mvc.Routing
         /// </summary>
         public static ControllerDescriptor GetTargetControllerDescriptor(this RouteData routeData)
         {
-            return GetRouteDataTokenValue<ControllerDescriptor>(routeData, RouteDataTokenKeys.DirectRouteController);
-        }
+            var actions = GetTargetActionDescriptors(routeData);
+            ControllerDescriptor controller = null;
 
-        public static Type GetTargetControllerType(this Route route)
-        {
-            ControllerDescriptor controllerDescriptor = GetRouteDataTokenValue<ControllerDescriptor>(route, RouteDataTokenKeys.DirectRouteController);
-            return controllerDescriptor == null ? null : controllerDescriptor.ControllerType;
+            foreach (var action in actions)
+            {
+                if (controller == null)
+                {
+                    controller = action.ControllerDescriptor;
+                }
+                else if (controller != action.ControllerDescriptor)
+                {
+                    // Don't provide a single controller descriptor if multiple controllers match.
+                    return null;
+                }
+            }
+
+            return controller;
         }
 
         public static Type GetTargetControllerType(this RouteData routeData)
         {
-            ControllerDescriptor controllerDescriptor = GetRouteDataTokenValue<ControllerDescriptor>(routeData, RouteDataTokenKeys.DirectRouteController);
+            ControllerDescriptor controllerDescriptor = routeData.GetTargetControllerDescriptor();
             return controllerDescriptor == null ? null : controllerDescriptor.ControllerType;
         }
 
         /// <summary>
-        /// Sets the ControllerDescriptor that matches this Route.
+        /// Gets the target actions that can be matched if this route is matched.
         /// </summary>
-        public static void SetTargetControllerDescriptor(this Route route, ControllerDescriptor controllerDescriptor)
+        public static ActionDescriptor[] GetTargetActionDescriptors(this RouteData routeData)
         {
-            if (controllerDescriptor == null)
-            {
-                throw Error.ArgumentNull("controllerDescriptor");
-            }
-
-            SetRouteDataTokenValue(route, RouteDataTokenKeys.DirectRouteController, controllerDescriptor);
+            return GetRouteDataTokenValue<ActionDescriptor[]>(routeData, RouteDataTokenKeys.Actions);
         }
 
         /// <summary>
         /// Gets the target actions that can be matched if this route is matched.
         /// </summary>
-        public static IEnumerable<ActionDescriptor> GetTargetActionDescriptors(this RouteData routeData)
+        public static ActionDescriptor[] GetTargetActionDescriptors(this Route route)
         {
-            return GetRouteDataTokenValue<IEnumerable<ActionDescriptor>>(routeData, RouteDataTokenKeys.DirectRouteActions)
-                ?? Enumerable.Empty<ActionDescriptor>();
-        }
-
-        /// <summary>
-        /// Gets the target actions that can be matched if this route is matched.
-        /// </summary>
-        public static IEnumerable<ActionDescriptor> GetTargetActionDescriptors(this Route route)
-        {
-            return GetRouteDataTokenValue<IEnumerable<ActionDescriptor>>(route, RouteDataTokenKeys.DirectRouteActions)
-                ?? Enumerable.Empty<ActionDescriptor>();
+            return GetRouteDataTokenValue<ActionDescriptor[]>(route, RouteDataTokenKeys.Actions);
         }
 
         /// <summary>
         /// Sets the target actions that can be matched if this route is matched.
         /// </summary>
-        public static void SetTargetActionDescriptors(this Route route, IEnumerable<ActionDescriptor> actionDescriptors)
+        public static void SetTargetActionDescriptors(this Route route, ActionDescriptor[] actionDescriptors)
         {
-            if (actionDescriptors == null || !actionDescriptors.Any())
+            if (actionDescriptors == null || actionDescriptors.Length == 0)
             {
                 throw Error.ParameterCannotBeNullOrEmpty("actionDescriptors");
             }
 
-            SetRouteDataTokenValue(route, RouteDataTokenKeys.DirectRouteActions, actionDescriptors);
+            SetRouteDataTokenValue(route, RouteDataTokenKeys.Actions, actionDescriptors);
         }
 
         public static bool HasDirectRouteMatch(this RouteData routeData)
@@ -164,8 +175,8 @@ namespace System.Web.Mvc.Routing
             }
             else
             {
-                // All direct routes need to have a controller associated.
-                return route.GetTargetControllerDescriptor() != null;
+                // All direct routes need to have actions associated.
+                return route.GetTargetActionDescriptors() != null;
             }
         }
 

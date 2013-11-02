@@ -185,9 +185,9 @@ namespace System.Web.Routing
         [InlineData("puget-sound", "pref", "~/whatever", "whatever")]
         [InlineData("puget-sound", null, "~/whatever", "whatever")]
         [InlineData(null, "pref", "~/whatever", "whatever")]
-        public void CombinePrefixAndAreaWithTemplate(string areaPrefix, string prefix, string template, string expected)
+        public void BuildRouteTemplate(string areaPrefix, string prefix, string template, string expected)
         {
-            var result = AttributeRoutingMapper.CombinePrefixAndAreaWithTemplate(areaPrefix, prefix, template);
+            var result = DirectRouteProviderContext.BuildRouteTemplate(areaPrefix, prefix, template);
 
             Assert.Equal(expected, result);
         }

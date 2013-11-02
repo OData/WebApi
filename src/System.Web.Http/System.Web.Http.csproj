@@ -55,8 +55,26 @@
     <Compile Include="..\Common\PropertyHelper.cs">
       <Link>Routing\PropertyHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\DirectRouteBuilder.cs">
+      <Link>Routing\DirectRouteBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\DirectRouteProviderContext.cs">
+      <Link>Routing\DirectRouteProviderContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\IDirectRouteProvider.cs">
+      <Link>Routing\IDirectRouteProvider.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Routing\IInlineConstraintResolver.cs">
       <Link>Routing\IInlineConstraintResolver.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\RouteEntry.cs">
+      <Link>Routing\RouteEntry.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\RouteInfoDirectRouteProvider.cs">
+      <Link>Routing\RouteInfoDirectRouteProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\RouteParser.cs">
+      <Link>Routing\RouteParser.cs</Link>
     </Compile>
     <Compile Include="..\Common\Routing\RoutePrecedence.cs">
       <Link>Routing\RoutePrecedence.cs</Link>
@@ -146,17 +164,13 @@
     <Compile Include="RouteAttribute.cs" />
     <Compile Include="Controllers\CandidateAction.cs" />
     <Compile Include="Routing\AttributeRoutingMapper.cs" />
-    <Compile Include="Routing\DirectRouteBuilder.cs" />
+    <Compile Include="Routing\RouteValueKeys.cs" />
     <Compile Include="Routing\RouteProviderAttribute.cs" />
-    <Compile Include="Routing\DirectRouteProviderContext.cs" />
-    <Compile Include="Routing\HttpRouteEntry.cs" />
-    <Compile Include="Routing\IDirectRouteProvider.cs" />
     <Compile Include="Routing\RouteCollectionRoute.cs" />
     <Compile Include="Routing\GenerationRoute.cs" />
     <Compile Include="Routing\HttpRouteDataExtensions.cs" />
     <Compile Include="Routing\HttpRouteExtensions.cs" />
-    <Compile Include="Routing\RouteInfoDirectRouteProvider.cs" />
-    <Compile Include="Routing\RouteKeys.cs" />
+    <Compile Include="Routing\RouteDataTokenKeys.cs" />
     <Compile Include="..\Common\Routing\Constraints\AlphaRouteConstraint.cs">
       <Link>Routing\Constraints\AlphaRouteConstraint.cs</Link>
     </Compile>
@@ -317,9 +331,6 @@
     <Compile Include="Routing\HttpRoute.cs" />
     <Compile Include="Routing\HttpRouteData.cs" />
     <Compile Include="Routing\HttpRouteDirection.cs" />
-    <Compile Include="..\Common\Routing\HttpRouteParser.cs">
-      <Link>Routing\HttpRouteParser.cs</Link>
-    </Compile>
     <Compile Include="Routing\HttpRouteValueDictionary.cs" />
     <Compile Include="Routing\HttpVirtualPathData.cs" />
     <Compile Include="Routing\IHttpRouteConstraint.cs" />

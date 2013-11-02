@@ -6,8 +6,10 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 #if ASPNETWEBAPI
 using ErrorResources = System.Web.Http.Properties.SRResources;
+using TParsedRoute = System.Web.Http.Routing.HttpParsedRoute;
 #else
 using ErrorResources = System.Web.Mvc.Properties.MvcResources;
+using TParsedRoute = System.Web.Mvc.Routing.ParsedRoute;
 #endif
 
 #if ASPNETWEBAPI
@@ -16,14 +18,10 @@ namespace System.Web.Http.Routing
 namespace System.Web.Mvc.Routing
 #endif
 {
-#if ASPNETWEBAPI
-    internal static class HttpRouteParser
-#else
     // in the MVC case, route parsing is done for AttributeRouting's sake, so that
     // it could order the discovered routes before pushing them into the routeCollection,
-    // where, sadly, they would be parsed again.
+    // where, unfortunately, they would be parsed again.
     internal static class RouteParser
-#endif
     {
         private static string GetLiteral(string segmentLiteral)
         {
@@ -98,11 +96,7 @@ namespace System.Web.Mvc.Routing
                    (routeTemplate.IndexOf('?') != -1);
         }
 
-#if ASPNETWEBAPI
-        public static HttpParsedRoute Parse(string routeTemplate)
-#else
-        public static ParsedRoute Parse(string routeTemplate)
-#endif
+        public static TParsedRoute Parse(string routeTemplate)
         {
             if (routeTemplate == null)
             {
@@ -125,11 +119,7 @@ namespace System.Web.Mvc.Routing
 
             Contract.Assert(uriParts.Count == pathSegments.Count, "The number of string segments should be the same as the number of path segments");
 
-#if ASPNETWEBAPI
-            return new HttpParsedRoute(pathSegments);
-#else
-            return new ParsedRoute(pathSegments);
-#endif
+            return new TParsedRoute(pathSegments);
         }
 
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly",

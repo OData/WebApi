@@ -24,7 +24,7 @@ namespace System.Web.Http.Routing
 
             HttpActionDescriptor[] directRouteActions = null;
             HttpActionDescriptor[] possibleDirectRouteActions;
-            if (dataTokens.TryGetValue<HttpActionDescriptor[]>(RouteKeys.ActionsDataTokenKey, out possibleDirectRouteActions))
+            if (dataTokens.TryGetValue<HttpActionDescriptor[]>(RouteDataTokenKeys.Actions, out possibleDirectRouteActions))
             {
                 if (possibleDirectRouteActions != null && possibleDirectRouteActions.Length > 0)
                 {
@@ -39,7 +39,7 @@ namespace System.Web.Http.Routing
 
             int order = 0;
             int possibleOrder;
-            if (dataTokens.TryGetValue<int>(RouteKeys.OrderDataTokenKey, out possibleOrder))
+            if (dataTokens.TryGetValue<int>(RouteDataTokenKeys.Order, out possibleOrder))
             {
                 order = possibleOrder;
             }
@@ -47,7 +47,7 @@ namespace System.Web.Http.Routing
             decimal precedence = 0M;
             decimal possiblePrecedence;
 
-            if (dataTokens.TryGetValue<decimal>(RouteKeys.PrecedenceDataTokenKey, out possiblePrecedence))
+            if (dataTokens.TryGetValue<decimal>(RouteDataTokenKeys.Precedence, out possiblePrecedence))
             {
                 precedence = possiblePrecedence;
             }

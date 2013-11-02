@@ -532,4 +532,7 @@ Duplicates:
 {1}
 {2}</value>
   </data>
+  <data name="TypeMethodMustNotReturnNull" xml:space="preserve">
+    <value>{0}.{1} must not return null.</value>
+  </data>
 </root>

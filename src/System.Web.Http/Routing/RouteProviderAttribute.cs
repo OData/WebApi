@@ -35,12 +35,12 @@ namespace System.Web.Http.Routing
             get { return null; }
         }
 
-        internal HttpRouteEntry CreateRoute(DirectRouteProviderContext context)
+        internal RouteEntry CreateRoute(DirectRouteProviderContext context)
         {
             return ((IDirectRouteProvider)this).CreateRoute(context);
         }
 
-        HttpRouteEntry IDirectRouteProvider.CreateRoute(DirectRouteProviderContext context)
+        RouteEntry IDirectRouteProvider.CreateRoute(DirectRouteProviderContext context)
         {
             Contract.Assert(context != null);
             DirectRouteBuilder builder = context.CreateBuilder(Template);

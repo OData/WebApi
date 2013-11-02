@@ -12,9 +12,8 @@ namespace System.Web.Mvc.Routing
         public void MapMvcAttributeRoutes_DoesNotTryToInferRouteNames()
         {
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(MyController));
-            var mapper = new AttributeRoutingMapper(new RouteBuilder2());
-
-            var routeEntries = mapper.MapAttributeRoutes(controllerDescriptor);
+            
+            var routeEntries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
 
             var routeEntry = Assert.Single(routeEntries);
             Assert.Null(routeEntry.Name);
@@ -25,10 +24,9 @@ namespace System.Web.Mvc.Routing
         {
             // Arrange
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(MyController));
-            var mapper = new AttributeRoutingMapper(new RouteBuilder2());
 
             // Act
-            var routeEntries = mapper.MapAttributeRoutes(controllerDescriptor);
+            var routeEntries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
 
             // Assert
             var routeEntry = Assert.Single(routeEntries);
@@ -40,10 +38,9 @@ namespace System.Web.Mvc.Routing
         {
             // Arrange
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(AnotherController));
-            var mapper = new AttributeRoutingMapper(new RouteBuilder2());
 
             // Act
-            var entries = mapper.MapAttributeRoutes(controllerDescriptor);
+            var entries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
 
             // Assert
             var controllerEntry = Assert.Single(entries.Where(r => !r.Route.Defaults.ContainsKey("action")));
@@ -60,10 +57,9 @@ namespace System.Web.Mvc.Routing
         {
             // Arrange
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(NoActionsController));
-            var mapper = new AttributeRoutingMapper(new RouteBuilder2());
 
             // Act
-            var entries = mapper.MapAttributeRoutes(controllerDescriptor);
+            var entries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
 
             // Assert
             Assert.Empty(entries);
@@ -74,10 +70,9 @@ namespace System.Web.Mvc.Routing
         {
             // Arrange
             var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(MixedRoutingController));
-            var mapper = new AttributeRoutingMapper(new RouteBuilder2());
 
             // Act
-            var entries = mapper.MapAttributeRoutes(controllerDescriptor);
+            var entries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
 
             // Assert
             var controllerEntry = Assert.Single(entries.Where(r => !r.Route.Defaults.ContainsKey("action")));

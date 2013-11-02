@@ -8,12 +8,12 @@ using System.Linq;
 
 #if ASPNETWEBAPI
 using System.Web.Http.Properties;
-using SubRouteEntryType = System.Web.Http.Routing.HttpRouteEntry;
-using SubRouteType = System.Web.Http.Routing.IHttpRoute;
+using TRoute = System.Web.Http.Routing.IHttpRoute;
+using TRouteEntry = System.Web.Http.Routing.RouteEntry;
 #else
 using System.Web.Mvc.Properties;
-using SubRouteEntryType = System.Web.Mvc.Routing.RouteEntry;
-using SubRouteType = System.Web.Routing.Route;
+using TRoute = System.Web.Routing.Route;
+using TRouteEntry = System.Web.Mvc.Routing.RouteEntry;
 #endif
 
 #if ASPNETWEBAPI
@@ -27,26 +27,22 @@ namespace System.Web.Mvc.Routing
     /// This is used in attribute routing, where we want to match multiple routes, and then later
     /// disambiguate which one is best.
     /// </remarks>
-#if ASPNETWEBAPI
-    internal class HttpSubRouteCollection : IReadOnlyCollection<SubRouteType>
-#else
-    internal class SubRouteCollection : IReadOnlyCollection<SubRouteType>
-#endif
+    internal class SubRouteCollection : IReadOnlyCollection<TRoute>
     {
-        private readonly List<SubRouteType> _routes = new List<SubRouteType>();
-        private readonly List<SubRouteEntryType> _entries = new List<SubRouteEntryType>();
+        private readonly List<TRoute> _routes = new List<TRoute>();
+        private readonly List<TRouteEntry> _entries = new List<TRouteEntry>();
 
-        public void Add(SubRouteEntryType entry)
+        public void Add(TRouteEntry entry)
         {
             Contract.Assert(entry != null);
-            SubRouteType route = entry.Route;
+            TRoute route = entry.Route;
             Contract.Assert(route != null);
 
             string name = entry.Name;
 
             if (name != null)
             {
-                SubRouteEntryType duplicateEntry = _entries.SingleOrDefault((e) => e.Name == name);
+                TRouteEntry duplicateEntry = _entries.SingleOrDefault((e) => e.Name == name);
 
                 if (duplicateEntry != null)
                 {
@@ -63,7 +59,7 @@ namespace System.Web.Mvc.Routing
             get { return _entries.Count; }
         }
 
-        public IEnumerator<SubRouteType> GetEnumerator()
+        public IEnumerator<TRoute> GetEnumerator()
         {
             return _routes.GetEnumerator();
         }
@@ -73,12 +69,12 @@ namespace System.Web.Mvc.Routing
             return ((IEnumerable)_routes).GetEnumerator();
         }
 
-        public IReadOnlyCollection<SubRouteEntryType> Entries
+        public IReadOnlyCollection<TRouteEntry> Entries
         {
             get { return _entries; }
         }
 
-        private static void ThrowExceptionForDuplicateRouteNames(string name, SubRouteType route1, SubRouteType route2)
+        private static void ThrowExceptionForDuplicateRouteNames(string name, TRoute route1, TRoute route2)
         {
 #if ASPNETWEBAPI
             throw new InvalidOperationException(String.Format(

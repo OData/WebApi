@@ -8,10 +8,16 @@ namespace System.Web.Mvc.Routing
         public const string Namespaces = "Namespaces";
         public const string Area = "area";
         public const string Controller = "controller";
-        public const string DirectRouteActions = "MS_DirectRouteActions";
-        public const string DirectRouteController = "MS_DirectRouteController";
+
+        // Used to provide the action descriptors to consider for attribute routing
+        public const string Actions = "MS_DirectRouteActions";
+
+        // Used to allow customer-provided disambiguation between multiple matching attribute routes
+        public const string Order = "MS_DirectRouteOrder";
+
+        // Used to allow URI constraint-based disambiguation between multiple matching attribute routes
+        public const string Precedence = "MS_DirectRoutePrecedence";
+
         public const string DirectRouteMatches = "MS_DirectRouteMatches";
-        public const string DirectRoutePrecedence = "MS_DirectRoutePrecedence";
-        public const string DirectRouteOrder = "MS_DirectRouteOrder";
     }
 }

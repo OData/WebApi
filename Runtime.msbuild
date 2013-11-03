@@ -59,7 +59,7 @@
   </Target>
 
   <Target Name="RestoreSkipStrongNames" DependsOnTargets="DownloadNuGet">
-    <Exec Command="&quot;$(NuGetExe)&quot; restore .nuget\packages.config -PackagesDirectory packages -NonInteractive -Verbosity quiet" />
+    <Exec Command="&quot;$(NuGetExe)&quot; restore .nuget\packages.config -PackagesDirectory packages -NonInteractive -Verbosity quiet -ConfigFile .nuget\NuGet.Config" />
   </Target>
 
   <Target Name="RestorePackages" DependsOnTargets="DownloadNuGet">
@@ -79,7 +79,7 @@
                    test\System.Web.Http.Owin.Test\packages.config" />
     </ItemGroup>
     <Message Text="Restoring NuGet packages..." Importance="High" />
-    <Exec Command="&quot;$(NuGetExe)&quot; restore &quot;%(RestorePackages.Identity)&quot; -PackagesDirectory packages -NonInteractive -Verbosity quiet" />
+    <Exec Command="&quot;$(NuGetExe)&quot; restore &quot;%(RestorePackages.Identity)&quot; -PackagesDirectory packages -NonInteractive -Verbosity quiet -ConfigFile .nuget\NuGet.Config" />
   </Target>
 
   <Target Name="Build" DependsOnTargets="RestorePackages">

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
+using System.Web.Http.Routing;
 
 namespace System.Web.Http.Batch
 {
@@ -54,7 +55,12 @@ namespace System.Web.Http.Batch
 
             if (originalContext != null)
             {
-                subRequest.SetRequestContext(new BatchHttpRequestContext(originalContext));
+                BatchHttpRequestContext subRequestContext = new BatchHttpRequestContext(originalContext)
+                {
+                    Url = new UrlHelper(subRequest)
+                };
+
+                subRequest.SetRequestContext(subRequestContext);
             }
         }
     }

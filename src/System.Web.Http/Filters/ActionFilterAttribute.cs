@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
@@ -83,36 +84,61 @@ namespace System.Web.Http.Filters
             cancellationToken.ThrowIfCancellationRequested();
 
             HttpResponseMessage response = null;
-            Exception exception = null;
+            ExceptionDispatchInfo exceptionInfo = null;
             try
             {
                 response = await continuation();
             }
             catch (Exception e)
             {
-                exception = e;
+                exceptionInfo = ExceptionDispatchInfo.Capture(e);
             }
+
+            Exception exception;
+
+            if (exceptionInfo == null)
+            {
+                exception = null;
+            }
+            else
+            {
+                exception = exceptionInfo.SourceException;
+            }
+
+            HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, exception)
+            {
+                Response = response
+            };
 
             try
             {
-                HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, exception) { Response = response };
                 await OnActionExecutedAsync(executedContext, cancellationToken);
-
-                if (executedContext.Response != null)
-                {
-                    return executedContext.Response;
-                }
-                if (executedContext.Exception != null)
-                {
-                    throw executedContext.Exception;
-                }
             }
             catch
             {
-                // Catch is running because OnActionExecuted threw an exception, so we just want to re-throw the exception.
+                // Catch is running because OnActionExecuted threw an exception, so we just want to re-throw.
                 // We also need to reset the response to forget about it since a filter threw an exception.
                 actionContext.Response = null;
                 throw;
+            }
+
+            if (executedContext.Response != null)
+            {
+                return executedContext.Response;
+            }
+
+            Exception newException = executedContext.Exception;
+
+            if (newException != null)
+            {
+                if (newException == exception)
+                {
+                    exceptionInfo.Throw();
+                }
+                else
+                {
+                    throw newException;
+                }
             }
 
             throw Error.InvalidOperation(SRResources.ActionFilterAttribute_MustSupplyResponseOrException, GetType().Name);

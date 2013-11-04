@@ -472,6 +472,98 @@ namespace System.Web.Http.Filters
             );
         }
 
+        [Fact]
+        public void ExecuteActionFilterAsync_IfOnActionExecutedReplacesException_ThrowsNewException()
+        {
+            // Arrange
+            Exception expectedReplacementException = CreateException();
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            {
+                Mock<ActionFilterAttribute> mock = new Mock<ActionFilterAttribute>();
+                mock.CallBase = true;
+                mock
+                    .Setup(f => f.OnActionExecuted(It.IsAny<HttpActionExecutedContext>()))
+                    .Callback<HttpActionExecutedContext>((c) => c.Exception = expectedReplacementException);
+                IActionFilter product = mock.Object;
+
+                HttpActionContext context = ContextUtil.CreateActionContext();
+                Func<Task<HttpResponseMessage>> continuation = () =>
+                    CreateFaultedTask<HttpResponseMessage>(CreateException());
+
+                // Act
+                Task<HttpResponseMessage> task = product.ExecuteActionFilterAsync(context, CancellationToken.None,
+                    continuation);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.Faulted, task.Status);
+                Assert.NotNull(task.Exception);
+                Exception exception = task.Exception.GetBaseException();
+                Assert.Same(expectedReplacementException, exception);
+            }
+        }
+
+        [Fact]
+        public void ExecuteActionFilterAsync_IfFaultedTaskExceptionIsUnhandled_PreservesExceptionStackTrace()
+        {
+            // Arrange
+            Exception originalException = CreateExceptionWithStackTrace();
+            string expectedStackTrace = originalException.StackTrace;
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            {
+                IActionFilter product = new TestableActionFilter();
+                HttpActionContext context = ContextUtil.CreateActionContext();
+                Func<Task<HttpResponseMessage>> continuation = () => CreateFaultedTask<HttpResponseMessage>(
+                    originalException);
+
+                // Act
+                Task<HttpResponseMessage> task = product.ExecuteActionFilterAsync(context, CancellationToken.None,
+                    continuation);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.Faulted, task.Status);
+                Assert.NotNull(task.Exception);
+                Exception exception = task.Exception.GetBaseException();
+                Assert.NotNull(expectedStackTrace);
+                Assert.NotNull(exception);
+                Assert.NotNull(exception.StackTrace);
+                Assert.True(exception.StackTrace.StartsWith(expectedStackTrace));
+            }
+        }
+
+        private static Exception CreateException()
+        {
+            return new InvalidOperationException();
+        }
+
+        private static Exception CreateExceptionWithStackTrace()
+        {
+            Exception exception;
+
+            try
+            {
+                throw CreateException();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            return exception;
+        }
+
+        private static Task<T> CreateFaultedTask<T>(Exception exception)
+        {
+            TaskCompletionSource<T> source = new TaskCompletionSource<T>();
+            source.SetException(exception);
+            return source.Task;
+        }
+
         public class TestableActionFilter : ActionFilterAttribute
         {
         }

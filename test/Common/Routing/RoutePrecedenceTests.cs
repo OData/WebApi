@@ -17,8 +17,8 @@ namespace System.Web.Mvc.Routing
         public void Compute_IsEqual(string xTemplate, string yTemplate)
         {
             // Arrange & Act
-            var xPrededence = Compute("Employees/{id}");
-            var yPrededence = Compute("Employees/{id}");
+            var xPrededence = Compute(xTemplate);
+            var yPrededence = Compute(yTemplate);
 
             // Assert
             Assert.Equal(xPrededence, yPrededence);

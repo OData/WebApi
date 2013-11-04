@@ -217,8 +217,8 @@ namespace System.Web.Http.Validation
 
             // When the are no validators we bail quickly. This saves a GetEnumerator allocation.
             // In a large array (tens of thousands or more) scenario it's very significant.
-            IList validatorsAsList = validators as IList;
-            if (validatorsAsList != null && validatorsAsList.Count == 0)
+            ICollection validatorsAsCollection = validators as ICollection;
+            if (validatorsAsCollection != null && validatorsAsCollection.Count == 0)
             {
                 return isValid;
             }

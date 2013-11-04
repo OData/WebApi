@@ -106,7 +106,7 @@ namespace System.Web.Http.OData.Builder
         /// Sets the return type to a single EntityType instance.
         /// </summary>
         /// <typeparam name="TEntityType">The type that is an EntityType</typeparam>
-        /// <param name="entitySetName">The entitySetName which contains the return EntityType instance</param>
+        /// <param name="entitySetName">The name of the entity set which contains the returned entity.</param>
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
         public ActionConfiguration ReturnsFromEntitySet<TEntityType>(string entitySetName) where TEntityType : class
         {
@@ -118,16 +118,55 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Sets the return type to a collection of EntityType instances.
+        /// Sets the return type to a single EntityType instance.
         /// </summary>
-        /// <typeparam name="TElementEntityType">The type that is an EntityType</typeparam>
-        /// <param name="entitySetName">The entitySetName which contains the returned EntityType instances</param>
+        /// <typeparam name="TEntityType">The type that is an EntityType</typeparam>
+        /// <param name="entitySetConfiguration">The entity set which contains the returned entity.</param>
+        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
+        public ActionConfiguration ReturnsFromEntitySet<TEntityType>(EntitySetConfiguration<TEntityType> entitySetConfiguration) where TEntityType : class
+        {
+            if (entitySetConfiguration == null)
+            {
+                throw Error.ArgumentNull("entitySetConfiguration");
+            }
+
+            EntitySet = entitySetConfiguration.EntitySet;
+            ReturnType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TEntityType));
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the return type to a collection of entities.
+        /// </summary>
+        /// <typeparam name="TElementEntityType">The entity type.</typeparam>
+        /// <param name="entitySetName">The name of the entity set which contains the returned entities.</param>
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
         public ActionConfiguration ReturnsCollectionFromEntitySet<TElementEntityType>(string entitySetName) where TElementEntityType : class
         {
             Type clrCollectionType = typeof(IEnumerable<TElementEntityType>);
             ModelBuilder.EntitySet<TElementEntityType>(entitySetName);
             EntitySet = ModelBuilder.EntitySets.Single(s => s.Name == entitySetName);
+            IEdmTypeConfiguration elementType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TElementEntityType));
+            ReturnType = new CollectionTypeConfiguration(elementType, clrCollectionType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the return type to a collection of entities.
+        /// </summary>
+        /// <typeparam name="TElementEntityType">The entity type.</typeparam>
+        /// <param name="entitySetConfiguration">The entity set which contains the returned entities.</param>
+        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
+        public ActionConfiguration ReturnsCollectionFromEntitySet<TElementEntityType>(
+            EntitySetConfiguration<TElementEntityType> entitySetConfiguration) where TElementEntityType : class
+        {
+            if (entitySetConfiguration == null)
+            {
+                throw Error.ArgumentNull("entitySetConfiguration");
+            }
+
+            Type clrCollectionType = typeof(IEnumerable<TElementEntityType>);
+            EntitySet = entitySetConfiguration.EntitySet;
             IEdmTypeConfiguration elementType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TElementEntityType));
             ReturnType = new CollectionTypeConfiguration(elementType, clrCollectionType);
             return this;

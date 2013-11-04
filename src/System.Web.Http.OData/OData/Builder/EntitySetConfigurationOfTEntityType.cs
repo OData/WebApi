@@ -39,6 +39,11 @@ namespace System.Web.Http.OData.Builder
             _entityType = new EntityTypeConfiguration<TEntityType>(modelBuilder, _configuration.EntityType);
         }
 
+        internal EntitySetConfiguration EntitySet
+        {
+            get { return _configuration; }
+        }
+
         /// <summary>
         /// Gets the entity type contained in this entity set.
         /// </summary>

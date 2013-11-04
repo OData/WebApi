@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder.TestModels;
@@ -407,6 +408,64 @@ namespace System.Web.Http.OData.Builder
 
             // Assert
             Assert.Equal(value, action.FollowsConventions);
+        }
+
+        [Fact]
+        public void ReturnsFromEntitySet_Sets_EntitySetAndReturnType()
+        {
+            // Arrange
+            string entitySetName = "movies";
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var movies = builder.EntitySet<Movie>(entitySetName);
+            var action = builder.Action("Action");
+
+            // Act
+            action.ReturnsFromEntitySet(movies);
+
+            // Assert
+            Assert.Equal(entitySetName, action.EntitySet.Name);
+            Assert.Equal(typeof(Movie), action.ReturnType.ClrType);
+        }
+
+        [Fact]
+        public void ReturnsFromEntitySet_ThrowsArgumentNull_EntitySetConfiguration()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var action = builder.Action("action");
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => action.ReturnsFromEntitySet<Movie>(entitySetConfiguration: null),
+                "entitySetConfiguration");
+        }
+
+        [Fact]
+        public void ReturnsCollectionFromEntitySet_Sets_EntitySetAndReturnType()
+        {
+            // Arrange
+            string entitySetName = "movies";
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var movies = builder.EntitySet<Movie>(entitySetName);
+            var action = builder.Action("Action");
+
+            // Act
+            action.ReturnsCollectionFromEntitySet(movies);
+
+            // Assert
+            Assert.Equal(entitySetName, action.EntitySet.Name);
+            Assert.Equal(typeof(IEnumerable<Movie>), action.ReturnType.ClrType);
+        }
+
+        [Fact]
+        public void ReturnsCollectionFromEntitySet_ThrowsArgumentNull_EntitySetConfiguration()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var action = builder.Action("action");
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => action.ReturnsCollectionFromEntitySet<Movie>(entitySetConfiguration: null),
+                "entitySetConfiguration");
         }
 
         [Fact]

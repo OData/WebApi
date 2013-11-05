@@ -8,7 +8,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' and '$(Configuration)' != 'Release' ">true</CodeAnalysis>
     <StyleCopEnabled Condition=" '$(StyleCopEnabled)' == '' ">true</StyleCopEnabled>
-    <BuildPortable Condition=" '$(BuildPortable)' == '' ">false</BuildPortable>
+    <BuildPortable Condition=" '$(BuildPortable)' == '' ">true</BuildPortable>
     <BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
     <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
     <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\test\TestResults\</TestResultsDirectory>

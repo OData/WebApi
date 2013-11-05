@@ -74,7 +74,9 @@
       <Link>Routing\InlineRouteTemplateParserTests.cs</Link>
     </Compile>
     <Compile Include="Routing\RouteCollectionAttributeRoutingExtensionsTests.cs" />
-    <Compile Include="Routing\SubRouteCollectionTest.cs" />
+    <Compile Include="..\Common\Routing\SubRouteCollectionTest.cs">
+      <Link>Routing\SubRouteCollectionTest.cs</Link>
+    </Compile>
     <Compile Include="Test\AjaxHelperOfTModelTest.cs" />
     <Compile Include="Test\CancellationTokenModelBinderTest.cs" />
     <Compile Include="Test\CachedAssociatedMetadataProviderTest.cs" />

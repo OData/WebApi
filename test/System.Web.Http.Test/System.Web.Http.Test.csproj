@@ -190,9 +190,11 @@
     <Compile Include="Routing\DirectRouteProviderContextTests.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />
-    <Compile Include="Routing\SubRouteCollectionTest.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />
     <Compile Include="Routing\RouteAttributeTests.cs" />
+    <Compile Include="..\Common\Routing\SubRouteCollectionTest.cs">
+      <Link>Routing\SubRouteCollectionTest.cs</Link>
+    </Compile>
     <Compile Include="Routing\UriPathExtensionMappingTests.cs" />
     <Compile Include="Routing\UrlHelperTest.cs" />
     <Compile Include="Services\ControllerServicesTests.cs" />

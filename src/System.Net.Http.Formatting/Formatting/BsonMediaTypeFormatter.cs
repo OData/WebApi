@@ -147,13 +147,14 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("effectiveEncoding");
             }
 
-            return new BsonReader(new BinaryReader(readStream, effectiveEncoding))
-            {
-                // Special case discussed at http://stackoverflow.com/questions/16910369/bson-array-deserialization-with-json-net
-                // Dispensed with string (aka IEnumerable<char>) case above in ReadFromStream()
-                ReadRootValueAsArray =
-                    typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type),
-            };
+            BsonReader reader = new BsonReader(new BinaryReader(readStream, effectiveEncoding));
+
+            // Special case discussed at http://stackoverflow.com/questions/16910369/bson-array-deserialization-with-json-net
+            // Dispensed with string (aka IEnumerable<char>) case above in ReadFromStream()
+            reader.ReadRootValueAsArray =
+                    typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type);
+
+            return reader;
         }
 
         /// <inheritdoc />
@@ -218,7 +219,7 @@ namespace System.Net.Http.Formatting
             return new BsonWriter(new BinaryWriter(writeStream, effectiveEncoding));
         }
 
-        private bool IsSimpleType(Type type)
+        private static bool IsSimpleType(Type type)
         {
             bool isSimpleType;
 #if NETFX_CORE // TypeDescriptor is not supported in portable library

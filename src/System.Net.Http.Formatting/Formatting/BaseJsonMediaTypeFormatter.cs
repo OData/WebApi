@@ -31,7 +31,7 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseJsonMediaTypeFormatter"/> class.
         /// </summary>
-        public BaseJsonMediaTypeFormatter()
+        protected BaseJsonMediaTypeFormatter()
         {
             // Initialize serializer settings
 #if !NETFX_CORE // DataContractResolver is not supported in portable library
@@ -54,8 +54,8 @@ namespace System.Net.Http.Formatting
             Contract.Assert(formatter != null);
             SerializerSettings = formatter.SerializerSettings;
 
-#if !NETFX_CORE // MaxDepth is not supported in portable library
-            MaxDepth = formatter.MaxDepth;
+#if !NETFX_CORE // MaxDepth is not supported in portable library and so _maxDepth never changes there
+            _maxDepth = formatter._maxDepth;
 #endif
         }
 

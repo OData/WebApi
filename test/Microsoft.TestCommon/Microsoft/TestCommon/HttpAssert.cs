@@ -191,7 +191,7 @@ namespace Microsoft.TestCommon
 
         public bool CanRoundTrip(Type type)
         {
-            if (typeof(TimeSpan).IsAssignableFrom(type))
+            if (typeof(DateTime).IsAssignableFrom(type))
             {
                 return false;
             }

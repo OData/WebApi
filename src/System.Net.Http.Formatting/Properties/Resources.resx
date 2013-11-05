@@ -319,9 +319,21 @@
     <value>The object returned by {0} must not be a null value.</value>
   </data>
   <data name="JsonSerializerFactoryReturnedNull" xml:space="preserve">
-    <value>The '{0}' method did not return a JSON serializer.</value>
+    <value>The '{0}' method returned null. It must return a JSON serializer instance.</value>
   </data>
   <data name="JsonSerializerFactoryThrew" xml:space="preserve">
     <value>The '{0}' method threw an exception when attempting to create a JSON serializer.</value>
+  </data>
+  <data name="MediaTypeFormatter_JsonReaderFactoryReturnedNull" xml:space="preserve">
+    <value>The '{0}' method returned null. It must return a JSON reader instance.</value>
+  </data>
+  <data name="MediaTypeFormatter_JsonWriterFactoryReturnedNull" xml:space="preserve">
+    <value>The '{0}' method returned null. It must return a JSON writer instance.</value>
+  </data>
+  <data name="MediaTypeFormatter_BsonParseError_MissingData" xml:space="preserve">
+    <value>Error parsing BSON data; unable to read content as a {0}.</value>
+  </data>
+  <data name="MediaTypeFormatter_BsonParseError_UnexpectedData" xml:space="preserve">
+    <value>Error parsing BSON data; unexpected dictionary content: {0} entries, first key '{1}'.</value>
   </data>
 </root>

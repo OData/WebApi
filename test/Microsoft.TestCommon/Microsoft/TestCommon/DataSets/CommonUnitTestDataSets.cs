@@ -34,7 +34,7 @@ namespace Microsoft.TestCommon
         public static RefTypeTestData<ISerializableType> ISerializableTypes { get { return TestData.ISerializableTypeTestData; } }
         public static ReadOnlyCollection<TestData> ValueTypeTestDataCollection { get { return TestData.ValueTypeTestDataCollection; } }
         public static ReadOnlyCollection<TestData> RefTypeTestDataCollection { get { return TestData.RefTypeTestDataCollection; } }
-        public static ReadOnlyCollection<TestData> ValueAndRefTypeTestDataCollection { get { return TestData.ValueTypeTestDataCollection; } }
+        public static ReadOnlyCollection<TestData> ValueAndRefTypeTestDataCollection { get { return TestData.ValueAndRefTypeTestDataCollection; } }
         public static ReadOnlyCollection<TestData> RepresentativeValueAndRefTypeTestDataCollection { get { return TestData.RepresentativeValueAndRefTypeTestDataCollection; } }
     }
 }

@@ -35,7 +35,9 @@ namespace System.Net.Http.Formatting
         {
             get
             {
-                return CommonUnitTestDataSets.ValueAndRefTypeTestDataCollection.Except(new[] { CommonUnitTestDataSets.Ulongs });
+                // Include neither ISerializable data set nor unsigned longs
+                return CommonUnitTestDataSets.ValueAndRefTypeTestDataCollection.Except(
+                    new TestData[] { CommonUnitTestDataSets.Ulongs, CommonUnitTestDataSets.ISerializableTypes });
             }
         }
 
@@ -159,7 +161,7 @@ namespace System.Net.Http.Formatting
 
             // Act & Assert
             Action action = () => formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null).Wait();
-            Assert.Throws<InvalidOperationException>(action, "The 'CreateJsonSerializer' method did not return a JSON serializer.");
+            Assert.Throws<InvalidOperationException>(action, "The 'CreateJsonSerializer' method returned null. It must return a JSON serializer instance.");
 
             Assert.Null(formatter.InnerDataContractSerializer);
             Assert.NotNull(formatter.InnerJsonSerializer);
@@ -202,7 +204,7 @@ namespace System.Net.Http.Formatting
             // Act & Assert
             Action action = () => formatter.ReadFromStreamAsync(typeof(SampleType), memoryStream, content, null).Wait();
 
-            Assert.Throws<InvalidOperationException>(action, "The 'CreateJsonSerializer' method did not return a JSON serializer.");
+            Assert.Throws<InvalidOperationException>(action, "The 'CreateJsonSerializer' method returned null. It must return a JSON serializer instance.");
 
             Assert.Null(formatter.InnerDataContractSerializer);
             Assert.NotNull(formatter.InnerJsonSerializer);
@@ -335,8 +337,8 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "ValueAndRefTypeTestDataCollectionExceptULong")]
+        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "ValueAndRefTypeTestDataCollectionExceptULong",
+            TestDataVariations.All | TestDataVariations.WithNull)]
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync(Type variationType, object testData)
         {
             TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();

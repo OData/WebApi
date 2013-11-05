@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http.Headers;
-using System.Text;
 
 namespace System.Net.Http.Formatting
 {
@@ -16,6 +15,7 @@ namespace System.Net.Http.Formatting
         private static readonly MediaTypeHeaderValue _defaultTextJsonMediaType = new MediaTypeHeaderValue("text/json");
         private static readonly MediaTypeHeaderValue _defaultApplicationOctetStreamMediaType = new MediaTypeHeaderValue("application/octet-stream");
         private static readonly MediaTypeHeaderValue _defaultApplicationFormUrlEncodedMediaType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+        private static readonly MediaTypeHeaderValue _defaultApplicationBsonMediaType = new MediaTypeHeaderValue("application/bson");
 
         /// <summary>
         /// Gets a <see cref="MediaTypeHeaderValue"/> instance representing <c>application/octet-stream</c>.
@@ -81,6 +81,21 @@ namespace System.Net.Http.Formatting
         public static MediaTypeHeaderValue ApplicationFormUrlEncodedMediaType
         {
             get { return _defaultApplicationFormUrlEncodedMediaType.Clone(); }
+        }
+
+        /// <summary>
+        /// Gets a <see cref="MediaTypeHeaderValue"/> instance representing <c>application/bson</c>.
+        /// </summary>
+        /// <value>
+        /// A new <see cref="MediaTypeHeaderValue"/> instance representing <c>application/bson</c>.
+        /// </value>
+        /// <remarks>
+        /// Not yet a standard. In particular this media type is not currently listed at
+        /// http://www.iana.org/assignments/media-types/application.
+        /// </remarks>
+        public static MediaTypeHeaderValue ApplicationBsonMediaType
+        {
+            get { return _defaultApplicationBsonMediaType.Clone(); }
         }
     }
 }

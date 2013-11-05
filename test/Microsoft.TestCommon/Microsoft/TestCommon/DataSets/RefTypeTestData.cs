@@ -20,6 +20,7 @@ namespace Microsoft.TestCommon
             }
 
             this.testDataProvider = testDataProvider;
+            this.RegisterTestDataVariation(TestDataVariations.WithNull, this.Type, GetNullTestData);
         }
 
         public RefTypeTestData(
@@ -39,6 +40,11 @@ namespace Microsoft.TestCommon
             {
                 this.RegisterTestDataVariation(TestDataVariations.AsKnownType, this.Type, this.GetTestDataAsDerivedKnownType);
             }
+        }
+
+        public T GetNullTestData()
+        {
+            return null;
         }
 
         public IEnumerable<T> GetTestDataAsDerivedType()

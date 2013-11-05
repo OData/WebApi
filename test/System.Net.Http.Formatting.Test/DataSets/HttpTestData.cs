@@ -175,6 +175,17 @@ namespace System.Net.Http.Formatting.DataSets
             }
         }
 
+        public static TestData<MediaTypeHeaderValue> StandardBsonMediaTypes
+        {
+            get
+            {
+                return new RefTypeTestData<MediaTypeHeaderValue>(() => new List<MediaTypeHeaderValue>() 
+                { 
+                    new MediaTypeHeaderValue("application/bson"),
+                });
+            }
+        }
+
         public static TestData<MediaTypeHeaderValue> StandardJsonMediaTypes
         {
             get

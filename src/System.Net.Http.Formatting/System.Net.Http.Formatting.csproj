@@ -52,6 +52,8 @@
     </Compile>
     <Compile Include="ByteRangeStreamContent.cs" />
     <Compile Include="CloneableExtensions.cs" />
+    <Compile Include="Formatting\BaseJsonMediaTypeFormatter.cs" />
+    <Compile Include="Formatting\BsonMediaTypeFormatter.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueRange.cs" />
     <Compile Include="HttpContentFormDataExtensions.cs" />
     <Compile Include="UnsupportedMediaTypeException.cs" />

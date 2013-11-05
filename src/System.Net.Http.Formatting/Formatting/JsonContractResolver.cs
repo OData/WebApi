@@ -1,9 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Web.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -11,7 +8,7 @@ using Newtonsoft.Json.Serialization;
 namespace System.Net.Http.Formatting
 {
     /// <summary>
-    /// Represents the default <see cref="IContractResolver"/> used by <see cref="JsonMediaTypeFormatter"/>.
+    /// Represents the default <see cref="IContractResolver"/> used by <see cref="BaseJsonMediaTypeFormatter"/>.
     /// It uses the formatter's <see cref="IRequiredMemberSelector"/> to select required members and recognizes
     /// the <see cref="SerializableAttribute"/> type annotation.
     /// </summary>

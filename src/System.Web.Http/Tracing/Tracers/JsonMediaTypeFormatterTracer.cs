@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http.Services;
 using Newtonsoft.Json;
@@ -75,9 +76,37 @@ namespace System.Web.Http.Tracing.Tracers
             return _innerTracer.ReadFromStreamAsync(type, readStream, content, formatterLogger);
         }
 
+        // Callback from ReadFromStreamAsync is not expected to be called; _innerTracer.ReadFromStreamAsync uses
+        // _inner.ReadFromStreamAsync
+        public override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding, IFormatterLogger formatterLogger)
+        {
+            return _inner.ReadFromStream(type, readStream, effectiveEncoding, formatterLogger);
+        }
+
+        // Callback from ReadFromStreamAsync is not expected to be called; _innerTracer.ReadFromStreamAsync uses
+        // _inner.ReadFromStreamAsync
+        public override JsonReader CreateJsonReader(Type type, Stream readStream, Encoding effectiveEncoding)
+        {
+            return _inner.CreateJsonReader(type, readStream, effectiveEncoding);
+        }
+
         public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             return _innerTracer.WriteToStreamAsync(type, value, writeStream, content, transportContext);
+        }
+
+        // Callback from WriteToStreamAsync is not expected to be called; _innerTracer.WriteToStreamAsync uses
+        // _inner.WriteToStreamAsync
+        public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
+        {
+            _inner.WriteToStream(type, value, writeStream, effectiveEncoding);
+        }
+
+        // Callback from WriteToStreamAsync is not expected to be called; _innerTracer.WriteToStreamAsync uses
+        // _inner.WriteToStreamAsync
+        public override JsonWriter CreateJsonWriter(Type type, Stream writeStream, Encoding effectiveEncoding)
+        {
+            return _inner.CreateJsonWriter(type, writeStream, effectiveEncoding);
         }
 
         public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, MediaTypeHeaderValue mediaType)
@@ -85,14 +114,16 @@ namespace System.Web.Http.Tracing.Tracers
             _innerTracer.SetDefaultContentHeaders(type, headers, mediaType);
         }
 
-        public override DataContractJsonSerializer CreateDataContractSerializer(Type type)
-        {
-            return _inner.CreateDataContractSerializer(type);
-        }
-
+        // Callback is not expected to be called; _innerTracer methods won't use our base methods
         public override JsonSerializer CreateJsonSerializer()
         {
             return _inner.CreateJsonSerializer();
+        }
+
+        // Callback is not expected to be called; _innerTracer methods won't use our base methods
+        public override DataContractJsonSerializer CreateDataContractSerializer(Type type)
+        {
+            return _inner.CreateDataContractSerializer(type);
         }
     }
 }

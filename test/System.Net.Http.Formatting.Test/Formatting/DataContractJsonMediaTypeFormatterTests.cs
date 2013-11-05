@@ -23,14 +23,6 @@ namespace System.Net.Http.Formatting
 
     public class DataContractJsonMediaTypeFormatterTests : MediaTypeFormatterTestBase<DataContractJsonMediaTypeFormatter>
     {
-        public static IEnumerable<TestData> ValueAndRefTypeTestDataCollectionExceptULong
-        {
-            get
-            {
-                return CommonUnitTestDataSets.ValueAndRefTypeTestDataCollection.Except(new[] { CommonUnitTestDataSets.Ulongs });
-            }
-        }
-
         public override IEnumerable<MediaTypeHeaderValue> ExpectedSupportedMediaTypes
         {
             get { return HttpTestData.StandardJsonMediaTypes; }
@@ -131,8 +123,8 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "ValueAndRefTypeTestDataCollectionExceptULong")]
+        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "ValueAndRefTypeTestDataCollectionExceptULong",
+            TestDataVariations.All | TestDataVariations.WithNull)]
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync(Type variationType, object testData)
         {
             TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();

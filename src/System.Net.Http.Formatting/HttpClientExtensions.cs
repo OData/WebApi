@@ -21,7 +21,7 @@ namespace System.Net.Http
         /// as JSON.
         /// </summary>
         /// <remarks>
-        /// This method uses the default instance of <see cref="JsonMediaTypeFormatter"/>.
+        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
         /// </remarks>
         /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>
@@ -39,7 +39,7 @@ namespace System.Net.Http
         /// as JSON.
         /// </summary>
         /// <remarks>
-        /// This method uses the default instance of <see cref="JsonMediaTypeFormatter"/>.
+        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
         /// </remarks>
         /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>
@@ -58,7 +58,7 @@ namespace System.Net.Http
         /// as JSON.
         /// </summary>
         /// <remarks>
-        /// This method uses the default instance of <see cref="JsonMediaTypeFormatter"/>.
+        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
         /// </remarks>
         /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>
@@ -75,7 +75,7 @@ namespace System.Net.Http
         /// as JSON.
         /// </summary>
         /// <remarks>
-        /// This method uses the default instance of <see cref="JsonMediaTypeFormatter"/>.
+        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
         /// </remarks>
         /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>
@@ -361,7 +361,7 @@ namespace System.Net.Http
         /// as JSON.
         /// </summary>
         /// <remarks>
-        /// This method uses the default instance of <see cref="JsonMediaTypeFormatter"/>.
+        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
         /// </remarks>
         /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>
@@ -379,7 +379,7 @@ namespace System.Net.Http
         /// as JSON.
         /// </summary>
         /// <remarks>
-        /// This method uses the default instance of <see cref="JsonMediaTypeFormatter"/>.
+        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
         /// </remarks>
         /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>
@@ -398,7 +398,7 @@ namespace System.Net.Http
         /// as JSON.
         /// </summary>
         /// <remarks>
-        /// This method uses the default instance of <see cref="JsonMediaTypeFormatter"/>.
+        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
         /// </remarks>
         /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>
@@ -415,7 +415,7 @@ namespace System.Net.Http
         /// as JSON.
         /// </summary>
         /// <remarks>
-        /// This method uses the default instance of <see cref="JsonMediaTypeFormatter"/>.
+        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
         /// </remarks>
         /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>
@@ -433,7 +433,7 @@ namespace System.Net.Http
         /// as XML.
         /// </summary>
         /// <remarks>
-        /// This method uses the default instance of <see cref="XmlMediaTypeFormatter"/>.
+        /// This method uses a default instance of <see cref="XmlMediaTypeFormatter"/>.
         /// </remarks>
         /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>

@@ -8,9 +8,12 @@ using System.Web.Routing;
 namespace System.Web.Mvc.Routing
 {
     /// <summary>
-    /// Builds <see cref="Route"/> instances based on route information.
+    /// Obsolete, use <see cref="System.Web.Mvc.Routing.RouteProviderAttribute"/> to customize generated attribute
+    /// routes.
     /// </summary>
-    [Obsolete("For internal insfructure only, do not use.")]
+    [Obsolete(
+        "Obsolete, do not use. To create custom Routes with attribute routing, use " +
+        "System.Web.Mvc.Routing.RouteProviderAttribute")]
     public class RouteBuilder
     {
         /// <summary>

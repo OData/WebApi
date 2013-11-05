@@ -181,7 +181,7 @@ namespace System.Web.Mvc.Html
             Enum currentValue = null;
             if (!String.IsNullOrEmpty(expressionFullName))
             {
-                currentValue = htmlHelper.GetModelStateValue(expressionFullName, typeof(Enum)) as Enum;
+                currentValue = htmlHelper.GetModelStateValue(expressionFullName, metadata.ModelType) as Enum;
             }
 
             if (currentValue == null && !String.IsNullOrEmpty(expressionName))

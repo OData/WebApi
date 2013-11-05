@@ -1450,9 +1450,10 @@ namespace System.Web.Mvc.Html.Test
         {
             // Arrange
             ViewDataDictionary<EnumModel> viewData = new ViewDataDictionary<EnumModel>(_enumDropDownListViewData);
-            ModelState modelState = new ModelState();
-            modelState.Errors.Add(new ModelError("WithDisplay error 1"));
-            modelState.Errors.Add(new ModelError("WithDisplay error 2"));
+            ModelState modelState = new ModelState
+            {
+                Errors = { new ModelError("WithDisplay error 1"), new ModelError("WithDisplay error 2"), },
+            };
             viewData.ModelState["WithDisplay"] = modelState;
 
             HtmlHelper<EnumModel> helper = MvcHelper.GetHtmlHelper(viewData);
@@ -1467,6 +1468,35 @@ namespace System.Web.Mvc.Html.Test
                 "<option value=\"0\">First</option>" + Environment.NewLine +
                 "<option value=\"1\">Second</option>" + Environment.NewLine +
                 "<option selected=\"selected\" value=\"2\">Third</option>" + Environment.NewLine +
+                "<option value=\"3\">Fourth</option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void EnumDropDownListForWithErrorsAndValue()
+        {
+            // Arrange
+            ViewDataDictionary<EnumModel> viewData = new ViewDataDictionary<EnumModel>(_enumDropDownListViewData);
+            ModelState modelState = new ModelState
+            {
+                Errors = { new ModelError("WithDisplay error 1"), new ModelError("WithDisplay error 2"), },
+                Value = new ValueProviderResult(new string[] { "1", }, "1", null),
+            };
+            viewData.ModelState["WithDisplay"] = modelState;
+
+            HtmlHelper<EnumModel> helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            MvcHtmlString html = helper.EnumDropDownListFor(m => m.WithDisplay,
+                htmlAttributes: HtmlHelperTest.AttributesObjectDictionary);
+
+            // Assert
+            Assert.Equal(
+                "<select baz=\"BazObjValue\" class=\"input-validation-error\" id=\"WithDisplay\" name=\"WithDisplay\">" +
+                "<option value=\"0\">First</option>" + Environment.NewLine +
+                "<option selected=\"selected\" value=\"1\">Second</option>" + Environment.NewLine +
+                "<option value=\"2\">Third</option>" + Environment.NewLine +
                 "<option value=\"3\">Fourth</option>" + Environment.NewLine +
                 "</select>",
                 html.ToHtmlString());

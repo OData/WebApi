@@ -149,10 +149,19 @@ namespace System.Net.Http.Formatting
 
             BsonReader reader = new BsonReader(new BinaryReader(readStream, effectiveEncoding));
 
-            // Special case discussed at http://stackoverflow.com/questions/16910369/bson-array-deserialization-with-json-net
-            // Dispensed with string (aka IEnumerable<char>) case above in ReadFromStream()
-            reader.ReadRootValueAsArray =
+            try
+            {
+                // Special case discussed at http://stackoverflow.com/questions/16910369/bson-array-deserialization-with-json-net
+                // Dispensed with string (aka IEnumerable<char>) case above in ReadFromStream()
+                reader.ReadRootValueAsArray =
                     typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type);
+            }
+            catch
+            {
+                // Ensure instance is cleaned up in case of an issue
+                ((IDisposable)reader).Dispose();
+                throw;
+            }
 
             return reader;
         }

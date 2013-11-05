@@ -59,7 +59,7 @@ namespace System.Net.Http.Formatting
             Contract.Assert(formatter != null);
 
 #if !NETFX_CORE // MaxDepth and UseDataContractJsonSerializer are not supported in portable library
-            MaxDepth = formatter.MaxDepth;
+            _readerQuotas.MaxDepth = formatter._readerQuotas.MaxDepth;
             UseDataContractJsonSerializer = formatter.UseDataContractJsonSerializer;
 #endif
 

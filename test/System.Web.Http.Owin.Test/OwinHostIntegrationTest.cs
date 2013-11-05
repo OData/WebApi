@@ -12,14 +12,17 @@ namespace System.Web.Http.Owin
 {
     public class OwinHostIntegrationTest
     {
+        // Use a different port from 50231 and 50232 to avoid conflicts with System.Web.Http.SelfHost.Test.
+        private const int TestPort = 50233;
+
         [Fact]
         public void SimpleGet_Works()
         {
-            using (WebApp.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
+            using (WebApp.Start<OwinHostIntegrationTest>(url: CreateBaseUrl()))
             {
                 HttpClient client = new HttpClient();
 
-                var response = client.GetAsync("http://localhost:50232/vroot/HelloWorld").Result;
+                var response = client.GetAsync(CreateUrl("HelloWorld")).Result;
 
                 Assert.True(response.IsSuccessStatusCode);
                 Assert.Equal("\"Hello from OWIN\"", response.Content.ReadAsStringAsync().Result);
@@ -30,12 +33,12 @@ namespace System.Web.Http.Owin
         [Fact]
         public void SimplePost_Works()
         {
-            using (WebApp.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
+            using (WebApp.Start<OwinHostIntegrationTest>(url: CreateBaseUrl()))
             {
                 HttpClient client = new HttpClient();
                 var content = new StringContent("\"Echo this\"", Encoding.UTF8, "application/json");
 
-                var response = client.PostAsync("http://localhost:50232/vroot/Echo", content).Result;
+                var response = client.PostAsync(CreateUrl("Echo"), content).Result;
 
                 Assert.True(response.IsSuccessStatusCode);
                 Assert.Equal("\"Echo this\"", response.Content.ReadAsStringAsync().Result);
@@ -46,11 +49,11 @@ namespace System.Web.Http.Owin
         [Fact]
         public void GetThatThrowsDuringSerializations_RespondsWith500()
         {
-            using (WebApp.Start<OwinHostIntegrationTest>(url: "http://localhost:50232/vroot"))
+            using (WebApp.Start<OwinHostIntegrationTest>(url: CreateBaseUrl()))
             {
                 HttpClient client = new HttpClient();
 
-                var response = client.GetAsync("http://localhost:50232/vroot/Error").Result;
+                var response = client.GetAsync(CreateUrl("Error")).Result;
 
                 Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
                 JObject json = Assert.IsType<JObject>(JToken.Parse(response.Content.ReadAsStringAsync().Result));
@@ -65,6 +68,16 @@ namespace System.Web.Http.Owin
             var config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}");
             appBuilder.UseWebApi(config);
+        }
+
+        private static string CreateBaseUrl()
+        {
+            return "http://localhost:" + TestPort + "/vroot";
+        }
+
+        private static string CreateUrl(string localPath)
+        {
+            return CreateBaseUrl() + "/" + localPath;
         }
     }
 

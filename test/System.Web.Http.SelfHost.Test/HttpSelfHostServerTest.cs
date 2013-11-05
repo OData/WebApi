@@ -169,7 +169,7 @@ namespace System.Web.Http.SelfHost
         public void SendAsync_ServiceModel_AddsSelfHostHttpRequestContext()
         {
             // Arrange
-            // Use a different port from 50231 to prevent conflicts with concurrent tests.
+            // Use a different port from 50231 to prevent conflicts with concurrent tests in this assembly.
             string baseUri = "http://localhost:50232/";
 
             HttpRequestContext context = null;

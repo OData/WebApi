@@ -18,9 +18,10 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Results;
+using System.Web.Http.WebHost.Routing;
+using System.Web.Routing;
 using Microsoft.TestCommon;
 using Moq;
-using Moq.Protected;
 using Newtonsoft.Json.Linq;
 
 namespace System.Web.Http.WebHost
@@ -294,43 +295,109 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
-        public Task CopyResponseAsync_DisposesRequestAndResponse()
+        public Task ProcessRequestAsync_DisposesRequestAndResponse()
         {
             // Arrange
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
             contextMock.SetupGet((hcb) => hcb.Response.OutputStream).Returns(Stream.Null);
+            IDictionary items = new Dictionary<object, object>();
+            contextMock.SetupGet((hcb) => hcb.Items).Returns(items);
+            HttpContextBase context = contextMock.Object;
 
             HttpRequestMessage request = new HttpRequestMessage();
+            context.SetHttpRequestMessage(request);
+            SpyDisposable spy = new SpyDisposable();
+            request.RegisterForDispose(spy);
             HttpResponseMessage response = new HttpResponseMessage();
 
-            // Act
-            return HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None).ContinueWith(
-                _ =>
-                {
-                    // Assert
-                    Assert.ThrowsObjectDisposed(() => request.Method = HttpMethod.Get, typeof(HttpRequestMessage).FullName);
-                    Assert.ThrowsObjectDisposed(() => response.StatusCode = HttpStatusCode.OK, typeof(HttpResponseMessage).FullName);
-                });
+            Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync = (r, c) =>
+                Task.FromResult(response);
+
+            using (HttpMessageHandler handler = new LambdaHttpMessageHandler(sendAsync))
+            {
+                HttpControllerHandler product = new HttpControllerHandler(
+                    new Mock<RouteData>(MockBehavior.Strict).Object, handler);
+
+                // Act
+                return product.ProcessRequestAsyncCore(context).ContinueWith(
+                    _ =>
+                    {
+                        // Assert
+                        Assert.True(spy.Disposed);
+                        Assert.ThrowsObjectDisposed(() => request.Method = HttpMethod.Get, typeof(HttpRequestMessage).FullName);
+                        Assert.ThrowsObjectDisposed(() => response.StatusCode = HttpStatusCode.OK, typeof(HttpResponseMessage).FullName);
+                    });
+            }
         }
 
         [Fact]
-        public Task CopyResponseAsync_DisposesRequestAndResponseWithContent()
+        public Task ProcessRequestAsync_DisposesRequestAndResponseWithContent()
         {
             // Arrange
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
             contextMock.SetupGet((hcb) => hcb.Response.OutputStream).Returns(Stream.Null);
+            IDictionary items = new Dictionary<object, object>();
+            contextMock.SetupGet((hcb) => hcb.Items).Returns(items);
+            HttpContextBase context = contextMock.Object;
 
             HttpRequestMessage request = new HttpRequestMessage() { Content = new StringContent("request") };
+            context.SetHttpRequestMessage(request);
+            SpyDisposable spy = new SpyDisposable();
+            request.RegisterForDispose(spy);
             HttpResponseMessage response = new HttpResponseMessage() { Content = new StringContent("response") };
 
-            // Act
-            return HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None).ContinueWith(
-                _ =>
-                {
-                    // Assert
-                    Assert.ThrowsObjectDisposed(() => request.Method = HttpMethod.Get, typeof(HttpRequestMessage).FullName);
-                    Assert.ThrowsObjectDisposed(() => response.StatusCode = HttpStatusCode.OK, typeof(HttpResponseMessage).FullName);
-                });
+            Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync = (r, c) =>
+                Task.FromResult(response);
+
+            using (HttpMessageHandler handler = new LambdaHttpMessageHandler(sendAsync))
+            {
+                HttpControllerHandler product = new HttpControllerHandler(
+                    new Mock<RouteData>(MockBehavior.Strict).Object, handler);
+
+                // Act
+                return product.ProcessRequestAsyncCore(context).ContinueWith(
+                    _ =>
+                    {
+                        // Assert
+                        Assert.True(spy.Disposed);
+                        Assert.ThrowsObjectDisposed(() => request.Method = HttpMethod.Get, typeof(HttpRequestMessage).FullName);
+                        Assert.ThrowsObjectDisposed(() => response.StatusCode = HttpStatusCode.OK, typeof(HttpResponseMessage).FullName);
+                    });
+            }
+        }
+
+        [Fact]
+        public Task ProcessRequestAsync_IfHandlerFaults_DisposesRequest()
+        {
+            // Arrange
+            Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
+            contextMock.SetupGet((hcb) => hcb.Response.OutputStream).Returns(Stream.Null);
+            IDictionary items = new Dictionary<object, object>();
+            contextMock.SetupGet((hcb) => hcb.Items).Returns(items);
+            HttpContextBase context = contextMock.Object;
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            context.SetHttpRequestMessage(request);
+            SpyDisposable spy = new SpyDisposable();
+            request.RegisterForDispose(spy);
+
+            Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync = (r, c) =>
+                CreateFaultedTask<HttpResponseMessage>(CreateException());
+
+            using (HttpMessageHandler handler = new LambdaHttpMessageHandler(sendAsync))
+            {
+                HttpControllerHandler product = new HttpControllerHandler(
+                    new Mock<RouteData>(MockBehavior.Strict).Object, handler);
+
+                // Act
+                return product.ProcessRequestAsyncCore(context).ContinueWith(
+                    _ =>
+                    {
+                        // Assert
+                        Assert.True(spy.Disposed);
+                        Assert.ThrowsObjectDisposed(() => request.Method = HttpMethod.Get, typeof(HttpRequestMessage).FullName);
+                    });
+            }
         }
 
         [Fact]
@@ -1041,7 +1108,7 @@ namespace System.Web.Http.WebHost
                 Assert.NotNull(task);
                 task.WaitUntilCompleted();
                 Assert.Equal(TaskStatus.RanToCompletion, task.Status);
-                
+
                 loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
                     c.CanBeHandled == true
                     && c.ExceptionContext != null
@@ -1078,9 +1145,9 @@ namespace System.Web.Http.WebHost
             }
         }
 
-        private static Task CreateFaultedTask(Exception exception)
+        private static Task<T> CreateFaultedTask<T>(Exception exception)
         {
-            TaskCompletionSource<object> source = new TaskCompletionSource<object>();
+            TaskCompletionSource<T> source = new TaskCompletionSource<T>();
             source.SetException(exception);
             return source.Task;
         }
@@ -1227,13 +1294,40 @@ namespace System.Web.Http.WebHost
 
             protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
             {
-                return CreateFaultedTask(_exception);
+                return CreateFaultedTask<object>(_exception);
             }
 
             protected override bool TryComputeLength(out long length)
             {
                 length = 0;
                 return false;
+            }
+        }
+
+        private class LambdaHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _sendAsync;
+
+            public LambdaHttpMessageHandler(
+                Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync)
+            {
+                Contract.Assert(sendAsync != null);
+                _sendAsync = sendAsync;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                return _sendAsync.Invoke(request, cancellationToken);
+            }
+        }
+
+        private sealed class SpyDisposable : IDisposable
+        {
+            public bool Disposed { get; private set; }
+
+            public void Dispose()
+            {
+                Disposed = true;
             }
         }
     }

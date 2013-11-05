@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Net.Http;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,28 +59,46 @@ namespace System.Web.Http.WebHost.Routing
             Exception exception = _exceptionInfo.SourceException;
             Contract.Assert(exception != null);
 
+            HttpRequestMessage request = context.GetOrCreateHttpRequestMessage();
+            HttpResponseMessage response = null;
             CancellationToken cancellationToken = CancellationToken.None;
 
             HttpResponseException responseException = exception as HttpResponseException;
 
-            if (responseException != null)
+            try
             {
-                // This method call is hardend and designed not to throw exceptions (since they won't be caught and
-                // handled further by its callers).
-                await HttpControllerHandler.CopyResponseAsync(context, context.GetOrCreateHttpRequestMessage(),
-                    responseException.Response, cancellationToken);
-            }
-            else
-            {
-                // This method call is hardend and designed not to throw exceptions (since they won't be caught and
-                // handled further by its callers).
-                bool handled = await HttpControllerHandler.CopyErrorResponseAsync(
-                    WebHostExceptionCatchBlocks.HttpWebRoute, context, context.GetOrCreateHttpRequestMessage(),
-                    null, _exceptionInfo.SourceException, cancellationToken, _exceptionLogger, _exceptionHandler);
-
-                if (!handled)
+                if (responseException != null)
                 {
-                    _exceptionInfo.Throw();
+                    response = responseException.Response;
+                    Contract.Assert(response != null);
+
+                    // This method call is hardened and designed not to throw exceptions (since they won't be caught
+                    // and handled further by its callers).
+                    await HttpControllerHandler.CopyResponseAsync(context, request, response, cancellationToken);
+                }
+                else
+                {
+                    // This method call is hardened and designed not to throw exceptions (since they won't be caught and
+                    // handled further by its callers).
+                    bool handled = await HttpControllerHandler.CopyErrorResponseAsync(
+                        WebHostExceptionCatchBlocks.HttpWebRoute, context, request, null,
+                        _exceptionInfo.SourceException, cancellationToken, _exceptionLogger, _exceptionHandler);
+
+                    if (!handled)
+                    {
+                        _exceptionInfo.Throw();
+                    }
+                }
+            }
+            finally
+            {
+                // The other HttpTaskAsyncHandler is HttpControllerHandler; it has similar cleanup logic.
+                request.DisposeRequestResources();
+                request.Dispose();
+
+                if (response != null)
+                {
+                    response.Dispose();
                 }
             }
         }

@@ -326,6 +326,79 @@ namespace System.Web.Http.WebHost.Routing
             }
         }
 
+        [Fact]
+        public void ProcessRequestAsync_IfExceptionIsHttpResponseException_DisposesRequestAndResponse()
+        {
+            // Arrange
+            using (HttpResponseMessage response = CreateResponse())
+            using (HttpRequestMessage request = CreateRequest())
+            using (SpyDisposable spy = new SpyDisposable())
+            {
+                request.RegisterForDispose(spy);
+
+                ExceptionDispatchInfo exceptionInfo = CreateExceptionInfo(new HttpResponseException(response));
+                IExceptionLogger logger = CreateDummyLogger();
+                IExceptionHandler handler = CreateDummyHandler();
+
+                HttpRouteExceptionHandler product = CreateProductUnderTest(exceptionInfo, logger, handler);
+
+                Mock<HttpResponseBase> responseBaseMock = new Mock<HttpResponseBase>();
+                responseBaseMock.SetupGet(r => r.Cache).Returns(() => new Mock<HttpCachePolicyBase>().Object);
+                HttpResponseBase responseBase = responseBaseMock.Object;
+                HttpContextBase contextBase = CreateStubContextBase(responseBase);
+                contextBase.SetHttpRequestMessage(request);
+
+                // Act
+                Task task = product.ProcessRequestAsync(contextBase);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                Assert.True(spy.Disposed);
+                Assert.ThrowsObjectDisposed(() => request.Method = HttpMethod.Get,
+                    typeof(HttpRequestMessage).FullName);
+                Assert.ThrowsObjectDisposed(() => response.StatusCode = HttpStatusCode.OK,
+                    typeof(HttpResponseMessage).FullName);
+            }
+        }
+
+        [Fact]
+        public void ProcessRequestAsync_IfExceptionIsNotHttpResponseException_DisposesRequest()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            using (SpyDisposable spy = new SpyDisposable())
+            {
+                request.RegisterForDispose(spy);
+
+                ExceptionDispatchInfo exceptionInfo = CreateExceptionInfo(CreateException());
+                IExceptionLogger logger = CreateDummyLogger();
+                IExceptionHandler handler = CreateDummyHandler();
+
+                HttpRouteExceptionHandler product = CreateProductUnderTest(exceptionInfo, logger, handler);
+
+                Mock<HttpResponseBase> responseBaseMock = new Mock<HttpResponseBase>();
+                responseBaseMock.SetupGet(r => r.Cache).Returns(() => new Mock<HttpCachePolicyBase>().Object);
+                HttpResponseBase responseBase = responseBaseMock.Object;
+                HttpContextBase contextBase = CreateStubContextBase(responseBase);
+                contextBase.SetHttpRequestMessage(request);
+
+                // Act
+                Task task = product.ProcessRequestAsync(contextBase);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.Faulted, task.Status);
+
+                Assert.True(spy.Disposed);
+                Assert.ThrowsObjectDisposed(() => request.Method = HttpMethod.Get,
+                    typeof(HttpRequestMessage).FullName);
+            }
+        }
+
         private static IExceptionHandler CreateDummyHandler()
         {
             return new Mock<IExceptionHandler>(MockBehavior.Strict).Object;
@@ -382,6 +455,11 @@ namespace System.Web.Http.WebHost.Routing
         private static HttpRequestMessage CreateRequest()
         {
             return new HttpRequestMessage();
+        }
+
+        private static HttpResponseMessage CreateResponse()
+        {
+            return new HttpResponseMessage();
         }
 
         private static HttpResponseMessage CreateResponse(HttpStatusCode statusCode)
@@ -464,6 +542,16 @@ namespace System.Web.Http.WebHost.Routing
                 TaskCompletionSource<object> source = new TaskCompletionSource<object>();
                 source.SetException(exception);
                 return source.Task;
+            }
+        }
+
+        private sealed class SpyDisposable : IDisposable
+        {
+            public bool Disposed { get; private set; }
+
+            public void Dispose()
+            {
+                Disposed = true;
             }
         }
     }

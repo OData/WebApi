@@ -111,9 +111,24 @@ namespace System.Web.Http.WebHost
             // Add route data
             request.SetRouteData(_routeData);
             CancellationToken cancellationToken = CancellationToken.None;
+            HttpResponseMessage response = null;
 
-            HttpResponseMessage response = await _server.SendAsync(request, cancellationToken);
-            await CopyResponseAsync(contextBase, request, response, cancellationToken);
+            try
+            {
+                response = await _server.SendAsync(request, cancellationToken);
+                await CopyResponseAsync(contextBase, request, response, cancellationToken);
+            }
+            finally
+            {
+                // The other HttpTaskAsyncHandler is HttpRouteExceptionHandler; it has similar cleanup logic.
+                request.DisposeRequestResources();
+                request.Dispose();
+
+                if (response != null)
+                {
+                    response.Dispose();
+                }
+            }
         }
 
         private static void CopyHeaders(HttpHeaders from, HttpContextBase to)
@@ -184,18 +199,9 @@ namespace System.Web.Http.WebHost
             // Asynchronously write the response body.  If there is no body, we use
             // a completed task to share the Finally() below.
             // The response-writing task will not fault -- it handles errors internally.
-            try
+            if (response.Content != null)
             {
-                if (response.Content != null)
-                {
-                    await WriteResponseContentAsync(httpContextBase, request, response, cancellationToken);
-                }
-            }
-            finally
-            {
-                request.DisposeRequestResources();
-                request.Dispose();
-                response.Dispose();
+                await WriteResponseContentAsync(httpContextBase, request, response, cancellationToken);
             }
         }
 

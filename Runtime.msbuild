@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <Target Name="EnableSkipStrongNames" DependsOnTargets="RestoreSkipStrongNames">
-    <Exec Command="$(SkipStrongNamesExe) -e $(SkipStrongNamesXml)" />
+    <Exec Command='"$(SkipStrongNamesExe)" -e "$(SkipStrongNamesXml)"' />
     <CheckSkipStrongNamesStatus AssembliesFile="$(SkipStrongNamesXml)">
       <Output TaskParameter="Status" PropertyName="Status" />
     </CheckSkipStrongNamesStatus>
@@ -36,7 +36,7 @@
   </Target>
 
   <Target Name="DisableSkipStrongNames" DependsOnTargets="RestoreSkipStrongNames">
-    <Exec Command="$(SkipStrongNamesExe) -d $(SkipStrongNamesXml)" />
+    <Exec Command='"$(SkipStrongNamesExe)" -d "$(SkipStrongNamesXml)"' />
     <CheckSkipStrongNamesStatus AssembliesFile="$(SkipStrongNamesXml)">
       <Output TaskParameter="Status" PropertyName="Status" />
     </CheckSkipStrongNamesStatus>

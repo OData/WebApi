@@ -44,6 +44,12 @@
     <Compile Include="..\System.Net.Http.Formatting\FormattingUtilities.cs">
       <Link>FormattingUtilities.cs</Link>
     </Compile>
+    <Compile Include="..\System.Net.Http.Formatting\Formatting\BaseJsonMediaTypeFormatter.cs">
+      <Link>Formatting\BaseJsonMediaTypeFormatter.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Net.Http.Formatting\Formatting\BsonMediaTypeFormatter.cs">
+      <Link>Formatting\BsonMediaTypeFormatter.cs</Link>
+    </Compile>
     <Compile Include="..\System.Net.Http.Formatting\Formatting\DelegatingEnumerable.cs">
       <Link>Formatting\DelegatingEnumerable.cs</Link>
     </Compile>

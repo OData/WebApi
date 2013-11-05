@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Text;
 using System.Web.Http;
 using Newtonsoft.Json;
@@ -81,12 +80,12 @@ namespace System.Net.Http.Formatting
             // Serialization created this Dictionary<string, object> to work around BSON restrictions: BSON cannot
             // handle a top-level simple type.  NewtonSoft.Json throws a JsonWriterException with message "Error
             // writing Binary value. BSON must start with an Object or Array. Path ''." when WriteToStream() is given
-            // such a value.  CanConvertFrom() check is similar to MVC / Web API ModelMetadata.IsComplexType getters.
+            // such a value.
             //
             // Added clause for typeof(byte[]) needed because NewtonSoft.Json sometimes throws above Exception when
             // WriteToStream() is given a byte[] value.  (Not clear where the bug lies and, worse, it doesn't reproduce
             // reliably.)
-            if (TypeDescriptor.GetConverter(type).CanConvertFrom(typeof(string)) || type == typeof(byte[]))
+            if (IsSimpleType(type) || type == typeof(byte[]))
             {
                 // Read as exact expected Dictionary<string, T> to ensure NewtonSoft.Json does correct top-level conversion.
                 Type dictionaryType = OpenDictionaryType.MakeGenericType(new Type[] { typeof(string), type });
@@ -182,7 +181,7 @@ namespace System.Net.Http.Formatting
             }
 
             // See comments in ReadFromStream() above about this special case and the need to include byte[] in it.
-            if (TypeDescriptor.GetConverter(type).CanConvertFrom(typeof(string)) || type == typeof(byte[]))
+            if (IsSimpleType(type) || type == typeof(byte[]))
             {
                 // Wrap value in a Dictionary with a single property named "Value" to provide BSON with an Object.  Is
                 // written out as binary equivalent of { "Value": value } JSON.
@@ -217,6 +216,20 @@ namespace System.Net.Http.Formatting
             }
 
             return new BsonWriter(new BinaryWriter(writeStream, effectiveEncoding));
+        }
+
+        private bool IsSimpleType(Type type)
+        {
+            bool isSimpleType;
+#if NETFX_CORE // TypeDescriptor is not supported in portable library
+            // TODO: This could likely be improved
+            isSimpleType = type.IsValueType() || type == typeof(string);
+#else
+            // CanConvertFrom() check is similar to MVC / Web API ModelMetadata.IsComplexType getters.
+            isSimpleType = TypeDescriptor.GetConverter(type).CanConvertFrom(typeof(string));
+#endif
+
+            return isSimpleType;
         }
     }
 }

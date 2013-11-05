@@ -49,6 +49,9 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\BsonMediaTypeFormatterTests.cs">
+      <Link>Formatting\BsonMediaTypeFormatterTests.cs</Link>
+    </Compile>
     <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\JsonNetSerializationTest.cs">
       <Link>Formatting\JsonNetSerializationTest.cs</Link>
     </Compile>

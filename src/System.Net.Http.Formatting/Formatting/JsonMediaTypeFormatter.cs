@@ -3,8 +3,8 @@
 #if !NETFX_CORE
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 #endif
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
 #if !NETFX_CORE
@@ -14,7 +14,9 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 #if !NETFX_CORE
 using System.Threading.Tasks;
+#endif
 using System.Web.Http;
+#if !NETFX_CORE
 using System.Xml;
 #endif
 using Newtonsoft.Json;

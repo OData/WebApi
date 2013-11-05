@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -14,10 +15,12 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Filters;
+using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 using System.Web.Http.Results;
 using System.Web.Http.Routing;
+using System.Web.Http.Validation;
 using Newtonsoft.Json;
 
 namespace System.Web.Http
@@ -231,6 +234,42 @@ namespace System.Web.Http
             }
 
             return result.ExecuteAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Validates the given entity and adds the validation errors to the <see cref="ApiController.ModelState"/>
+        /// under the empty prefix, if any.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be validated.</typeparam>
+        /// <param name="entity">The entity being validated.</param>
+        public void Validate<TEntity>(TEntity entity)
+        {
+            Validate(entity, keyPrefix: String.Empty);
+        }
+
+        /// <summary>
+        /// Validates the given entity and adds the validation errors to the <see cref="ApiController.ModelState"/>, if any.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be validated.</typeparam>
+        /// <param name="entity">The entity being validated.</param>
+        /// <param name="keyPrefix">
+        /// The key prefix under which the model state errors would be added in the <see cref="ApiController.ModelState"/>.
+        /// </param>
+        public void Validate<TEntity>(TEntity entity, string keyPrefix)
+        {
+            if (Configuration == null)
+            {
+                throw Error.InvalidOperation(SRResources.TypePropertyMustNotBeNull, typeof(ApiController).Name, "Configuration");
+            }
+
+            IBodyModelValidator validator = Configuration.Services.GetBodyModelValidator();
+            if (validator != null)
+            {
+                ModelMetadataProvider metadataProvider = Configuration.Services.GetModelMetadataProvider();
+                Contract.Assert(metadataProvider != null, "GetModelMetadataProvider throws on null.");
+
+                validator.Validate(entity, typeof(TEntity), metadataProvider, ActionContext, keyPrefix);
+            }
         }
 
         /// <summary>Creates a <see cref="BadRequestResult"/> (400 Bad Request).</summary>

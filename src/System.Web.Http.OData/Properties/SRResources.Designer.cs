@@ -1573,15 +1573,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}.{1} must not be null..
-        /// </summary>
-        internal static string TypePropertyMustNotBeNull {
-            get {
-                return ResourceManager.GetString("TypePropertyMustNotBeNull", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The ODataMediaTypeFormatter was unable to determine the base URI for the request. The request must be processed by an OData route for the OData formatter to serialize the response..
         /// </summary>
         internal static string UnableToDetermineBaseUrl {

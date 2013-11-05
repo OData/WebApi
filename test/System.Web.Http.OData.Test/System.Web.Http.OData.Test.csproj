@@ -110,7 +110,6 @@
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerTest.cs" />
     <Compile Include="OData\NullEdmComplexObjectTest.cs" />
-    <Compile Include="OData\ODataControllerTest.cs" />
     <Compile Include="OData\ODataNullValueAttributeTests.cs" />
     <Compile Include="OData\Formatter\Serialization\SelectExpandNodeTest.cs" />
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />

@@ -74,6 +74,8 @@ namespace WebMatrix.WebData
         // REVIEW: we could get this from the primary key of UserTable in the future
         public string UserIdColumn { get; set; }
 
+        public SimpleMembershipProviderCasingBehavior CasingBehavior { get; set; }
+
         internal DatabaseConnectionInfo ConnectionInfo { get; set; }
         internal bool InitializeCalled { get; set; }
 
@@ -142,7 +144,7 @@ namespace WebMatrix.WebData
             List<int> userIds = new List<int>(usernames.Length);
             foreach (string username in usernames)
             {
-                int id = SimpleMembershipProvider.GetUserId(db, SafeUserTableName, SafeUserNameColumn, SafeUserIdColumn, username);
+                int id = SimpleMembershipProvider.GetUserId(db, SafeUserTableName, SafeUserNameColumn, SafeUserIdColumn, CasingBehavior, username);
                 if (id == -1)
                 {
                     throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, WebDataResources.Security_NoUserFound, username));
@@ -307,7 +309,7 @@ namespace WebMatrix.WebData
             }
             using (var db = ConnectToDatabase())
             {
-                int userId = SimpleMembershipProvider.GetUserId(db, SafeUserTableName, SafeUserNameColumn, SafeUserIdColumn, username);
+                int userId = SimpleMembershipProvider.GetUserId(db, SafeUserTableName, SafeUserNameColumn, SafeUserIdColumn, CasingBehavior, username);
                 if (userId == -1)
                 {
                     throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, WebDataResources.Security_NoUserFound, username));

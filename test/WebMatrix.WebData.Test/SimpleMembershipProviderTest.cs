@@ -170,6 +170,48 @@ namespace WebMatrix.WebData.Test
             Assert.Equal("fGH_eKcjvW__P-5BOEW1AA2", result);
         }
 
+        [Fact]
+        public void GetUserId_WithCaseNormalization()
+        {
+            // Arrange
+            var database = new Mock<MockDatabase>(MockBehavior.Strict);
+            var expectedQuery = @"SELECT userId FROM users WHERE (UPPER(userName) = UPPER(@0))";
+            database.Setup(d => d.QueryValue(expectedQuery, "zeke")).Returns(999);
+
+            // Act
+            var result = SimpleMembershipProvider.GetUserId(
+                database.Object, 
+                "users", 
+                "userName", 
+                "userId", 
+                SimpleMembershipProviderCasingBehavior.NormalizeCasing, 
+                "zeke");
+
+            // Assert
+            Assert.Equal<int>(999, result);
+        }
+
+        [Fact]
+        public void GetUserId_WithoutCaseNormalization()
+        {
+            // Arrange
+            var database = new Mock<MockDatabase>(MockBehavior.Strict);
+            var expectedQuery = @"SELECT userId FROM users WHERE (userName = @0)";
+            database.Setup(d => d.QueryValue(expectedQuery, "zeke")).Returns(999);
+
+            // Act
+            var result = SimpleMembershipProvider.GetUserId(
+                database.Object,
+                "users",
+                "userName",
+                "userId",
+                SimpleMembershipProviderCasingBehavior.RelyOnDatabaseCollation,
+                "zeke");
+
+            // Assert
+            Assert.Equal<int>(999, result);
+        }
+
         private static DynamicRecord GetRecord(int userId, string confirmationToken)
         {
             var data = new Mock<IDataRecord>(MockBehavior.Strict);

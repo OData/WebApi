@@ -102,42 +102,99 @@ namespace WebMatrix.WebData
 
         public static void InitializeDatabaseConnection(string connectionStringName, string userTableName, string userIdColumn, string userNameColumn, bool autoCreateTables)
         {
-            DatabaseConnectionInfo connect = new DatabaseConnectionInfo();
-            connect.ConnectionStringName = connectionStringName;
-            InitializeProviders(connect, userTableName, userIdColumn, userNameColumn, autoCreateTables);
+            InitializeDatabaseConnection(
+                connectionStringName, 
+                userTableName, 
+                userIdColumn, 
+                userNameColumn, 
+                autoCreateTables, 
+                SimpleMembershipProviderCasingBehavior.NormalizeCasing);
         }
 
-        public static void InitializeDatabaseConnection(string connectionString, string providerName, string userTableName, string userIdColumn, string userNameColumn, bool autoCreateTables)
+        public static void InitializeDatabaseConnection(
+            string connectionStringName, 
+            string userTableName, 
+            string userIdColumn, 
+            string userNameColumn, 
+            bool autoCreateTables,
+            SimpleMembershipProviderCasingBehavior casingBehavior)
+        {
+            DatabaseConnectionInfo connect = new DatabaseConnectionInfo();
+            connect.ConnectionStringName = connectionStringName;
+            InitializeProviders(connect, userTableName, userIdColumn, userNameColumn, autoCreateTables, casingBehavior);
+        }
+
+        public static void InitializeDatabaseConnection(
+            string connectionString, 
+            string providerName, 
+            string userTableName, 
+            string userIdColumn, 
+            string userNameColumn, 
+            bool autoCreateTables)
+        {
+            InitializeDatabaseConnection(
+                connectionString, 
+                providerName, 
+                userTableName, 
+                userIdColumn, 
+                userNameColumn, 
+                autoCreateTables, 
+                SimpleMembershipProviderCasingBehavior.NormalizeCasing);
+        }
+
+        public static void InitializeDatabaseConnection(
+            string connectionString, 
+            string providerName, 
+            string userTableName, 
+            string userIdColumn, 
+            string userNameColumn,
+            bool autoCreateTables,
+            SimpleMembershipProviderCasingBehavior casingBehavior)
         {
             DatabaseConnectionInfo connect = new DatabaseConnectionInfo();
             connect.ConnectionString = connectionString;
             connect.ProviderName = providerName;
-            InitializeProviders(connect, userTableName, userIdColumn, userNameColumn, autoCreateTables);
+            InitializeProviders(connect, userTableName, userIdColumn, userNameColumn, autoCreateTables, casingBehavior);
         }
 
-        private static void InitializeProviders(DatabaseConnectionInfo connect, string userTableName, string userIdColumn, string userNameColumn, bool autoCreateTables)
+        private static void InitializeProviders(
+            DatabaseConnectionInfo connect, 
+            string userTableName, 
+            string userIdColumn, 
+            string userNameColumn, 
+            bool autoCreateTables, 
+            SimpleMembershipProviderCasingBehavior casingBehavior)
         {
             SimpleMembershipProvider simpleMembership = Membership.Provider as SimpleMembershipProvider;
             if (simpleMembership != null)
             {
-                InitializeMembershipProvider(simpleMembership, connect, userTableName, userIdColumn, userNameColumn, autoCreateTables);
+                InitializeMembershipProvider(simpleMembership, connect, userTableName, userIdColumn, userNameColumn, autoCreateTables, casingBehavior);
             }
 
             SimpleRoleProvider simpleRoles = Roles.Provider as SimpleRoleProvider;
             if (simpleRoles != null)
             {
-                InitializeRoleProvider(simpleRoles, connect, userTableName, userIdColumn, userNameColumn, autoCreateTables);
+                InitializeRoleProvider(simpleRoles, connect, userTableName, userIdColumn, userNameColumn, autoCreateTables, casingBehavior);
             }
 
             Initialized = true;
         }
 
-        internal static void InitializeMembershipProvider(SimpleMembershipProvider simpleMembership, DatabaseConnectionInfo connect, string userTableName, string userIdColumn, string userNameColumn, bool createTables)
+        internal static void InitializeMembershipProvider(
+            SimpleMembershipProvider simpleMembership, 
+            DatabaseConnectionInfo connect, 
+            string userTableName, 
+            string userIdColumn, 
+            string userNameColumn, 
+            bool createTables,
+            SimpleMembershipProviderCasingBehavior casingBehavior)
         {
             if (simpleMembership.InitializeCalled)
             {
                 throw new InvalidOperationException(WebDataResources.Security_InitializeAlreadyCalled);
             }
+
+            simpleMembership.CasingBehavior = casingBehavior;
             simpleMembership.ConnectionInfo = connect;
             simpleMembership.UserIdColumn = userIdColumn;
             simpleMembership.UserNameColumn = userNameColumn;
@@ -154,16 +211,26 @@ namespace WebMatrix.WebData
             simpleMembership.InitializeCalled = true;
         }
 
-        internal static void InitializeRoleProvider(SimpleRoleProvider simpleRoles, DatabaseConnectionInfo connect, string userTableName, string userIdColumn, string userNameColumn, bool createTables)
+        internal static void InitializeRoleProvider(
+            SimpleRoleProvider simpleRoles, 
+            DatabaseConnectionInfo connect, 
+            string userTableName, 
+            string userIdColumn, 
+            string userNameColumn, 
+            bool createTables,
+            SimpleMembershipProviderCasingBehavior casingBehavior)
         {
             if (simpleRoles.InitializeCalled)
             {
                 throw new InvalidOperationException(WebDataResources.Security_InitializeAlreadyCalled);
             }
+
+            simpleRoles.CasingBehavior = casingBehavior;
             simpleRoles.ConnectionInfo = connect;
             simpleRoles.UserTableName = userTableName;
             simpleRoles.UserIdColumn = userIdColumn;
             simpleRoles.UserNameColumn = userNameColumn;
+
             if (createTables)
             {
                 simpleRoles.CreateTablesIfNeeded();

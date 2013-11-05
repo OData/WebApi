@@ -50,6 +50,7 @@
       <DependentUpon>WebDataResources.resx</DependentUpon>
     </Compile>
     <Compile Include="SimpleMembershipProvider.cs" />
+    <Compile Include="SimpleMembershipProviderCasingBehavior.cs" />
     <Compile Include="SimpleRoleProvider.cs" />
     <Compile Include="WebSecurity.cs" />
   </ItemGroup>

@@ -409,6 +409,34 @@ namespace System.Web.Http.OData.Builder
             Assert.Equal(value, action.FollowsConventions);
         }
 
+        [Fact]
+        public void Returns_ThrowsInvalidOperationException_IfReturnTypeIsEntity()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.Entity<Movie>();
+            var action = builder.Action("action");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => action.Returns<Movie>(),
+                "The EDM type 'System.Web.Http.OData.Builder.Movie' is already declared as an entity type. Use the " +
+                "method 'ReturnsFromEntitySet' if the return type is an entity.");
+        }
+
+        [Fact]
+        public void ReturnsCollection_ThrowsInvalidOperationException_IfReturnTypeIsEntity()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.Entity<Movie>();
+            var action = builder.Action("action");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => action.ReturnsCollection<Movie>(),
+                "The EDM type 'System.Web.Http.OData.Builder.Movie' is already declared as an entity type. Use the " +
+                "method 'ReturnsCollectionFromEntitySet' if the return type is an entity collection.");
+        }
+
         public class Movie
         {
             public int ID { get; set; }

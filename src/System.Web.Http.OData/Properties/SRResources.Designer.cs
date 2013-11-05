@@ -1420,6 +1420,24 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The EDM type &apos;{0}&apos; is already declared as an entity type. Use the method &apos;ReturnsCollectionFromEntitySet&apos; if the return type is an entity collection..
+        /// </summary>
+        internal static string ReturnEntityCollectionWithoutEntitySet {
+            get {
+                return ResourceManager.GetString("ReturnEntityCollectionWithoutEntitySet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The EDM type &apos;{0}&apos; is already declared as an entity type. Use the method &apos;ReturnsFromEntitySet&apos; if the return type is an entity..
+        /// </summary>
+        internal static string ReturnEntityWithoutEntitySet {
+            get {
+                return ResourceManager.GetString("ReturnEntityWithoutEntitySet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The &apos;RootElementName&apos; property is required on &apos;{0}&apos;..
         /// </summary>
         internal static string RootElementNameMissing {

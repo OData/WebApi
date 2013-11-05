@@ -142,6 +142,12 @@ namespace System.Web.Http.OData.Builder
         {
             Type returnType = typeof(TReturnType);
             IEdmTypeConfiguration configuration = ModelBuilder.GetTypeConfigurationOrNull(returnType);
+
+            if (configuration is EntityTypeConfiguration)
+            {
+                throw Error.InvalidOperation(SRResources.ReturnEntityWithoutEntitySet, configuration.FullName);
+            }
+
             if (configuration == null)
             {
                 ModelBuilder.AddComplexType(returnType);
@@ -165,6 +171,12 @@ namespace System.Web.Http.OData.Builder
             Type clrCollectionType = typeof(IEnumerable<TReturnElementType>);
             Type clrElementType = typeof(TReturnElementType);
             IEdmTypeConfiguration edmElementType = ModelBuilder.GetTypeConfigurationOrNull(clrElementType);
+
+            if (edmElementType is EntityTypeConfiguration)
+            {
+                throw Error.InvalidOperation(SRResources.ReturnEntityCollectionWithoutEntitySet, edmElementType.FullName);
+            }
+
             if (edmElementType == null)
             {
                 ModelBuilder.AddComplexType(clrElementType);

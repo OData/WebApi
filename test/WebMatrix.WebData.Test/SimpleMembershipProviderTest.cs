@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Security.Cryptography;
@@ -210,6 +211,46 @@ namespace WebMatrix.WebData.Test
 
             // Assert
             Assert.Equal<int>(999, result);
+        }
+
+        [Theory]
+        [InlineData(-1, false)]
+        [InlineData(0, true)]
+        [InlineData(1, true)]
+        [InlineData(2, false)]
+        public void SimpleMembershipProvider_CasingBehavior_ValidatesRange(int value, bool isValid)
+        {
+            // Arrange
+            var provider = new SimpleMembershipProvider();
+
+            var message = 
+                "The value of argument 'CasingBehavior' (" + value + ") is invalid for Enum type " +
+                "'SimpleMembershipProviderCasingBehavior'." + Environment.NewLine +
+                "Parameter name: CasingBehavior";
+            
+            // Act
+            Exception exception = null;
+
+            try
+            {
+                provider.CasingBehavior = (SimpleMembershipProviderCasingBehavior)value;
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            // Assert
+            if (isValid)
+            {
+                Assert.Equal((SimpleMembershipProviderCasingBehavior)value, provider.CasingBehavior);
+            }
+            else 
+            {
+                Assert.NotNull(exception);
+                Assert.IsAssignableFrom<InvalidEnumArgumentException>(exception);
+                Assert.Equal(message, exception.Message);
+            }
         }
 
         private static DynamicRecord GetRecord(int userId, string confirmationToken)

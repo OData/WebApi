@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Configuration.Provider;
 using System.Diagnostics;
 using System.Globalization;
@@ -23,6 +24,7 @@ namespace WebMatrix.WebData
     {
         private const int TokenSizeInBytes = 16;
         private readonly MembershipProvider _previousProvider;
+        private SimpleMembershipProviderCasingBehavior _casingBehavior;
 
         public SimpleMembershipProvider()
             : this(null)
@@ -187,7 +189,29 @@ namespace WebMatrix.WebData
         // REVIEW: we could get this from the primary key of UserTable in the future
         public string UserIdColumn { get; set; }
 
-        public SimpleMembershipProviderCasingBehavior CasingBehavior { get; set; }
+        /// <summary>
+        /// Gets or sets the <see cref="WebMatrix.WebData.SimpleMembershipProviderCasingBehavior"/> for this provider.
+        /// </summary>
+        /// <remarks>
+        /// This value configures whether or not queries for user names normalize the user name to uppercase. See
+        /// <see cref="WebMatrix.WebData.SimpleMembershipProviderCasingBehavior"/> for a full description.
+        /// </remarks>
+        public SimpleMembershipProviderCasingBehavior CasingBehavior
+        {
+            get
+            {
+                return _casingBehavior;
+            }
+            set
+            {
+                if (value < SimpleMembershipProviderCasingBehavior.NormalizeCasing || value > SimpleMembershipProviderCasingBehavior.RelyOnDatabaseCollation)
+                {
+                    throw new InvalidEnumArgumentException("CasingBehavior", (int)value, typeof(SimpleMembershipProviderCasingBehavior));
+                }
+
+                _casingBehavior = value;
+            }
+        }
 
         internal DatabaseConnectionInfo ConnectionInfo { get; set; }
         internal bool InitializeCalled { get; set; }

@@ -36,6 +36,7 @@
     <Compile Include="MockDatabase.cs" />
     <Compile Include="PreApplicationStartCodeTest.cs" />
     <Compile Include="SimpleMembershipProviderTest.cs" />
+    <Compile Include="SimpleRoleProviderTest.cs" />
     <Compile Include="WebSecurityTest.cs" />
   </ItemGroup>
   <ItemGroup>

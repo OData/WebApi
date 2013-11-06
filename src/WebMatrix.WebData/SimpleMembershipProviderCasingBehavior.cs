@@ -8,7 +8,7 @@ namespace WebMatrix.WebData
     public enum SimpleMembershipProviderCasingBehavior
     {
         /// <summary>
-        /// Uses the SQL Upper function to normalize the casing of user names for a case-insensitive comparion. 
+        /// Uses the SQL Upper function to normalize the casing of user names for a case-insensitive comparison. 
         /// This is the default value.
         /// </summary>
         /// <remarks>

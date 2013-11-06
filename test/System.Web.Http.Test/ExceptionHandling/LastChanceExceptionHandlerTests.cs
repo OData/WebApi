@@ -392,7 +392,7 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionContextCatchBlock CreateNonTopLevelCatchBlock()
         {
-            return new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevel: false);
+            return new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevel: false, callsHandler: false);
         }
 
         private static LastChanceExceptionHandler CreateProductUnderTest(IExceptionHandler innerHandler)
@@ -407,7 +407,7 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionContextCatchBlock CreateTopLevelCatchBlock()
         {
-            return new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevel: true);
+            return new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevel: true, callsHandler: false);
         }
     }
 }

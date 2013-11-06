@@ -124,8 +124,7 @@ namespace System.Web.Http.Dispatcher
 
             ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException,
                 ExceptionCatchBlocks.HttpControllerDispatcher, request);
-            await ExceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
-                cancellationToken: cancellationToken);
+            await ExceptionLogger.LogAsync(exceptionContext, cancellationToken);
             HttpResponseMessage response = await ExceptionHandler.HandleAsync(exceptionContext, cancellationToken);
 
             if (response == null)

@@ -13,9 +13,10 @@ namespace System.Web.Http.ExceptionHandling
             // Arrange
             string name = null;
             bool isTopLevel = false;
+            bool callsHandler = false;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => CreateProductUnderTest(name, isTopLevel), "name");
+            Assert.ThrowsArgumentNull(() => CreateProductUnderTest(name, isTopLevel, callsHandler), "name");
         }
 
         [Fact]
@@ -24,7 +25,8 @@ namespace System.Web.Http.ExceptionHandling
             // Arrange
             string expectedName = "TheName";
             bool isTopLevel = true;
-            ExceptionContextCatchBlock product = CreateProductUnderTest(expectedName, isTopLevel);
+            bool callsHandler = false;
+            ExceptionContextCatchBlock product = CreateProductUnderTest(expectedName, isTopLevel, callsHandler);
 
             // Act
             string name = product.Name;
@@ -40,7 +42,8 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             string name = "IgnoreName";
-            ExceptionContextCatchBlock product = CreateProductUnderTest(name, expectedIsTopLevel);
+            bool callsHandler = false;
+            ExceptionContextCatchBlock product = CreateProductUnderTest(name, expectedIsTopLevel, callsHandler);
 
             // Act
             bool isTopLevel = product.IsTopLevel;
@@ -49,13 +52,31 @@ namespace System.Web.Http.ExceptionHandling
             Assert.Equal(expectedIsTopLevel, isTopLevel);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CallsHandler_IsSpecifiedValue(bool expectedCallsHandler)
+        {
+            // Arrange
+            string name = "IgnoreName";
+            bool isTopLevel = true;
+            ExceptionContextCatchBlock product = CreateProductUnderTest(name, isTopLevel, expectedCallsHandler);
+
+            // Act
+            bool callsHandler = product.CallsHandler;
+
+            // Assert
+            Assert.Equal(expectedCallsHandler, callsHandler);
+        }
+
         [Fact]
         public void ToString_ReturnsName()
         {
             // Arrange
             string expectedName = "TheName";
             bool isTopLevel = false;
-            object product = CreateProductUnderTest(expectedName, isTopLevel);
+            bool callsHandler= false;
+            object product = CreateProductUnderTest(expectedName, isTopLevel, callsHandler);
 
             // Act
             string value = product.ToString();
@@ -77,9 +98,9 @@ namespace System.Web.Http.ExceptionHandling
             Assert.Equal("Name: {Name}, IsTopLevel: {IsTopLevel}", value);
         }
 
-        private static ExceptionContextCatchBlock CreateProductUnderTest(string name, bool isTopLevel)
+        private static ExceptionContextCatchBlock CreateProductUnderTest(string name, bool isTopLevel, bool callsHandler)
         {
-            return new ExceptionContextCatchBlock(name, isTopLevel);
+            return new ExceptionContextCatchBlock(name, isTopLevel, callsHandler);
         }
     }
 }

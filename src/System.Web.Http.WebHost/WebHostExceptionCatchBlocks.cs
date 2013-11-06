@@ -9,13 +9,16 @@ namespace System.Web.Http.WebHost
     public static class WebHostExceptionCatchBlocks
     {
         private static readonly ExceptionContextCatchBlock _httpControllerHandlerBufferContent =
-            new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".BufferContent", isTopLevel: true);
+            new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".BufferContent", isTopLevel: true,
+                callsHandler: true);
         private static readonly ExceptionContextCatchBlock _httpControllerHandlerBufferError =
-            new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".BufferError", isTopLevel: true);
+            new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".BufferError", isTopLevel: true,
+                callsHandler: false);
         private static readonly ExceptionContextCatchBlock _httpControllerHandlerStreamContent =
-            new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".StreamContent", isTopLevel: true);
+            new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".StreamContent", isTopLevel: true,
+                callsHandler: false);
         private static readonly ExceptionContextCatchBlock _httpWebRoute =
-            new ExceptionContextCatchBlock(typeof(HttpWebRoute).Name, isTopLevel: true);
+            new ExceptionContextCatchBlock(typeof(HttpWebRoute).Name, isTopLevel: true, callsHandler: true);
 
         /// <summary>
         /// Gets the label for the catch block in

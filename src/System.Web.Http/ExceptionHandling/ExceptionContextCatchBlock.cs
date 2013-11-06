@@ -10,6 +10,7 @@ namespace System.Web.Http.ExceptionHandling
     {
         private readonly string _name;
         private readonly bool _isTopLevel;
+        private readonly bool _callsHandler;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ExceptionContextCatchBlock"/> with the values provided.
@@ -18,12 +19,15 @@ namespace System.Web.Http.ExceptionHandling
         /// <param name="isTopLevel">
         /// A value indicating whether the catch block where the exception was caught is the last one before the host.
         /// </param>
+        /// <param name="callsHandler">
+        /// A value indicating whether exceptions in the catch block can be handled after they are logged.
+        /// </param>
         /// <remarks>
         /// To compare an exception catch block with a well-known value, see classes like
         /// <see cref="ExceptionCatchBlocks"/> for the specific objects to use.
         /// This constructor is only intended for use within static classes that define such well-known catch blocks.
         /// </remarks>
-        public ExceptionContextCatchBlock(string name, bool isTopLevel)
+        public ExceptionContextCatchBlock(string name, bool isTopLevel, bool callsHandler)
         {
             if (name == null)
             {
@@ -32,6 +36,7 @@ namespace System.Web.Http.ExceptionHandling
 
             _name = name;
             _isTopLevel = isTopLevel;
+            _callsHandler = callsHandler;
         }
 
         /// <summary>Gets a label for the catch block in which the exception was caught.</summary>
@@ -47,6 +52,27 @@ namespace System.Web.Http.ExceptionHandling
         public bool IsTopLevel
         {
             get { return _isTopLevel; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether exceptions in the catch block can be handled after they are logged.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Some exceptions are caught after a response is already partially sent, which prevents sending a new
+        /// response to handle the exception. In such cases, <see cref="IExceptionLogger"/> will be called to log the
+        /// exception, but the <see cref="IExceptionHandler"/> will not be called.
+        /// </para>
+        /// <para>
+        /// If this value is <see langword="true"/>, exceptions from this catch block will be provided to both
+        /// <see cref="IExceptionLogger"/> and <see cref="IExceptionHandler"/>. If this value is
+        /// see langword="false"/>, exceptions from this catch block cannot be handled and will only be provided to
+        /// <see cref="IExceptionLogger"/>.
+        /// </para>
+        /// </remarks>
+        public bool CallsHandler
+        {
+            get { return _callsHandler; }
         }
 
         /// <inheritdoc/>

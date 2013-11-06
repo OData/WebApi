@@ -9,10 +9,8 @@ namespace System.Web.Http.ExceptionHandling
 {
     public class ExceptionLoggerExtensionsTests
     {
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void LogAsync_DelegatesToInterfaceLogAsync(bool expectedCanBeHandled)
+        [Fact]
+        public void LogAsync_DelegatesToInterfaceLogAsync()
         {
             // Arrange
             Task expectedTask = CreateCompletedTask();
@@ -29,15 +27,13 @@ namespace System.Web.Http.ExceptionHandling
                 CancellationToken expectedCancellationToken = tokenSource.Token;
 
                 // Act
-                Task task = ExceptionLoggerExtensions.LogAsync(logger, expectedContext, expectedCanBeHandled,
-                    expectedCancellationToken);
+                Task task = ExceptionLoggerExtensions.LogAsync(logger, expectedContext, expectedCancellationToken);
 
                 // Assert
                 Assert.Same(expectedTask, task);
                 task.WaitUntilCompleted();
 
-                mock.Verify(h => h.LogAsync(It.Is<ExceptionLoggerContext>(
-                    c => c.ExceptionContext == expectedContext && c.CanBeHandled == expectedCanBeHandled),
+                mock.Verify(h => h.LogAsync(It.Is<ExceptionLoggerContext>(c => c.ExceptionContext == expectedContext),
                     expectedCancellationToken), Times.Once());
             }
         }
@@ -48,12 +44,11 @@ namespace System.Web.Http.ExceptionHandling
             // Arrange
             IExceptionLogger logger = null;
             ExceptionContext context = CreateContext();
-            bool canBeHandled = true;
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() =>
-                ExceptionLoggerExtensions.LogAsync(logger, context, canBeHandled, cancellationToken), "logger");
+                ExceptionLoggerExtensions.LogAsync(logger, context, cancellationToken), "logger");
         }
 
         [Fact]
@@ -62,12 +57,11 @@ namespace System.Web.Http.ExceptionHandling
             // Arrange
             IExceptionLogger logger = CreateDummyLogger();
             ExceptionContext context = null;
-            bool canBeHandled = true;
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() =>
-                ExceptionLoggerExtensions.LogAsync(logger, context, canBeHandled, cancellationToken), "context");
+                ExceptionLoggerExtensions.LogAsync(logger, context, cancellationToken), "context");
         }
 
         private static CancellationTokenSource CreateCancellationTokenSource()

@@ -101,7 +101,7 @@ namespace System.Web.Http.Batch
 
             ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException,
                 ExceptionCatchBlocks.HttpBatchHandler, request);
-            await ExceptionLogger.LogAsync(exceptionContext, canBeHandled: true, cancellationToken: cancellationToken);
+            await ExceptionLogger.LogAsync(exceptionContext, cancellationToken);
             HttpResponseMessage response = await ExceptionHandler.HandleAsync(exceptionContext, cancellationToken);
 
             if (response == null)

@@ -228,8 +228,7 @@ namespace System.Web.Http.Dispatcher
                     && c.Request == expectedRequest;
 
                 exceptionLoggerMock.Verify(l => l.LogAsync(
-                    It.Is<ExceptionLoggerContext>(c => c.CanBeHandled == true
-                        && exceptionContextMatches(c.ExceptionContext)),
+                    It.Is<ExceptionLoggerContext>(c => exceptionContextMatches(c.ExceptionContext)),
                     cancellationToken), Times.Once());
 
                 exceptionHandlerMock.Verify(h => h.HandleAsync(

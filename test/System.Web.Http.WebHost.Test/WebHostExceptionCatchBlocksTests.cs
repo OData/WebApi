@@ -15,7 +15,8 @@ namespace System.Web.Http.WebHost
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("HttpControllerHandler.BufferContent", isTopLevel: true);
+                new ExceptionContextCatchBlock("HttpControllerHandler.BufferContent", isTopLevel: true,
+                    callsHandler: true);
             AssertEqual(expected, catchBlock);
         }
 
@@ -40,7 +41,8 @@ namespace System.Web.Http.WebHost
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("HttpControllerHandler.BufferError", isTopLevel: true);
+                new ExceptionContextCatchBlock("HttpControllerHandler.BufferError", isTopLevel: true,
+                    callsHandler: false);
             AssertEqual(expected, catchBlock);
         }
 
@@ -65,7 +67,8 @@ namespace System.Web.Http.WebHost
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("HttpControllerHandler.StreamContent", isTopLevel: true);
+                new ExceptionContextCatchBlock("HttpControllerHandler.StreamContent", isTopLevel: true,
+                    callsHandler: false);
             AssertEqual(expected, catchBlock);
         }
 
@@ -90,7 +93,7 @@ namespace System.Web.Http.WebHost
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("HttpWebRoute", isTopLevel: true);
+                new ExceptionContextCatchBlock("HttpWebRoute", isTopLevel: true, callsHandler: true);
             AssertEqual(expected, catchBlock);
         }
 
@@ -118,6 +121,7 @@ namespace System.Web.Http.WebHost
             Assert.NotNull(actual);
             Assert.Equal(expected.Name, actual.Name);
             Assert.Equal(expected.IsTopLevel, actual.IsTopLevel);
+            Assert.Equal(expected.CallsHandler, actual.CallsHandler);
         }
     }
 }

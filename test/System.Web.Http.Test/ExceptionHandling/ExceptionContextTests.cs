@@ -472,7 +472,7 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionContextCatchBlock CreateCatchBlock()
         {
-            return new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevel: false);
+            return new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevel: false, callsHandler: false);
         }
 
         private static HttpControllerContext CreateControllerContext()

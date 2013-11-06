@@ -316,7 +316,7 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionLoggerContext CreateContext(ExceptionContext exceptionContext)
         {
-            return new ExceptionLoggerContext(exceptionContext, canBeHandled: false);
+            return new ExceptionLoggerContext(exceptionContext);
         }
 
         private static Exception CreateException(IDictionary data)

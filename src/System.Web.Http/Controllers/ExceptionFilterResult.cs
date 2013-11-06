@@ -56,8 +56,7 @@ namespace System.Web.Http.Controllers
             ExceptionContext exceptionContext = new ExceptionContext(exception, ExceptionCatchBlocks.IExceptionFilter,
                 _context);
 
-            await _exceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
-                cancellationToken: cancellationToken);
+            await _exceptionLogger.LogAsync(exceptionContext, cancellationToken);
 
             HttpActionExecutedContext executedContext = new HttpActionExecutedContext(_context, exception);
 

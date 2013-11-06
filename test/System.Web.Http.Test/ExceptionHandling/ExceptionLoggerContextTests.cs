@@ -11,10 +11,9 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             ExceptionContext context = null;
-            bool canBeHandled = true;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => CreateProductUnderTest(context, canBeHandled), "exceptionContext");
+            Assert.ThrowsArgumentNull(() => CreateProductUnderTest(context), "exceptionContext");
         }
 
         [Fact]
@@ -22,8 +21,7 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             ExceptionContext expectedContext = CreateContext();
-            bool canBeHandled = false;
-            ExceptionLoggerContext product = CreateProductUnderTest(expectedContext, canBeHandled);
+            ExceptionLoggerContext product = CreateProductUnderTest(expectedContext);
 
             // Act
             ExceptionContext context = product.ExceptionContext;
@@ -32,31 +30,14 @@ namespace System.Web.Http.ExceptionHandling
             Assert.Same(expectedContext, context);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void CanBeHandledGet_ReturnsSpecifiedValue(bool expectedCanBeHandled)
-        {
-            // Arrange
-            ExceptionContext context = CreateContext();
-            ExceptionLoggerContext product = CreateProductUnderTest(context, expectedCanBeHandled);
-
-            // Act
-            bool canBeHandled = product.CanBeHandled;
-
-            // Assert
-            Assert.Equal(expectedCanBeHandled, canBeHandled);
-        }
-
         private static ExceptionContext CreateContext()
         {
             return new ExceptionContext();
         }
 
-        private static ExceptionLoggerContext CreateProductUnderTest(ExceptionContext exceptionContext,
-            bool canBeHandled)
+        private static ExceptionLoggerContext CreateProductUnderTest(ExceptionContext exceptionContext)
         {
-            return new ExceptionLoggerContext(exceptionContext, canBeHandled);
+            return new ExceptionLoggerContext(exceptionContext);
         }
     }
 }

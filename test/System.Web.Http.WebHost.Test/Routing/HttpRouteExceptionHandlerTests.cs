@@ -181,8 +181,7 @@ namespace System.Web.Http.WebHost.Routing
                     && c.Request == expectedRequest;
 
                 loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
-                    c.CanBeHandled == true && exceptionContextMatches(c.ExceptionContext)),
-                    CancellationToken.None), Times.Once());
+                    exceptionContextMatches(c.ExceptionContext)), CancellationToken.None), Times.Once());
                 handlerMock.Verify(l => l.HandleAsync(It.Is<ExceptionHandlerContext>(c =>
                     exceptionContextMatches(c.ExceptionContext)), CancellationToken.None), Times.Once());
             }
@@ -309,15 +308,13 @@ namespace System.Web.Http.WebHost.Routing
                 Assert.Equal(TaskStatus.RanToCompletion, task.Status);
 
                 loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
-                    c.CanBeHandled == true
-                    && c.ExceptionContext != null
+                    c.ExceptionContext != null
                     && c.ExceptionContext.Exception == expectedOriginalException
                     && c.ExceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpWebRoute
                     && c.ExceptionContext.Request == expectedRequest),
                     CancellationToken.None), Times.Once());
                 loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
-                    c.CanBeHandled == false
-                    && c.ExceptionContext != null
+                    c.ExceptionContext != null
                     && c.ExceptionContext.Exception == expectedErrorException
                     && c.ExceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpControllerHandlerBufferError
                     && c.ExceptionContext.Request == expectedRequest

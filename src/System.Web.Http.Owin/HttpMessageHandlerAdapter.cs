@@ -337,8 +337,7 @@ namespace System.Web.Http.Owin
             ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException,
                 OwinExceptionCatchBlocks.HttpMessageHandlerAdapterBufferContent, request, response);
 
-            await _exceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
-                cancellationToken: cancellationToken);
+            await _exceptionLogger.LogAsync(exceptionContext, cancellationToken);
             HttpResponseMessage errorResponse = await _exceptionHandler.HandleAsync(exceptionContext,
                 cancellationToken);
 
@@ -373,8 +372,7 @@ namespace System.Web.Http.Owin
 
             ExceptionContext errorExceptionContext = new ExceptionContext(errorException,
                 OwinExceptionCatchBlocks.HttpMessageHandlerAdapterBufferError, request, response);
-            await _exceptionLogger.LogAsync(errorExceptionContext, canBeHandled: false,
-                cancellationToken: cancellationToken);
+            await _exceptionLogger.LogAsync(errorExceptionContext, cancellationToken);
 
             response.Dispose();
             return request.CreateResponse(HttpStatusCode.InternalServerError);
@@ -463,8 +461,7 @@ namespace System.Web.Http.Owin
             // status code and headers across the wire. Log the exception, but then just abort.
             ExceptionContext exceptionContext = new ExceptionContext(exception,
                 OwinExceptionCatchBlocks.HttpMessageHandlerAdapterStreamContent, request, response);
-            await _exceptionLogger.LogAsync(exceptionContext, canBeHandled: false,
-                cancellationToken: cancellationToken);
+            await _exceptionLogger.LogAsync(exceptionContext, cancellationToken);
             AbortResponseStream(body);
         }
 

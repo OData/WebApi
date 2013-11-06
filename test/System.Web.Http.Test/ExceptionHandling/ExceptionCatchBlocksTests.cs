@@ -14,7 +14,7 @@ namespace System.Web.Http.ExceptionHandling
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("HttpBatchHandler", isTopLevel: false);
+                new ExceptionContextCatchBlock("HttpBatchHandler", isTopLevel: false, callsHandler: true);
             AssertEqual(expected, catchBlock);
         }
 
@@ -39,7 +39,7 @@ namespace System.Web.Http.ExceptionHandling
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("HttpControllerDispatcher", isTopLevel: false);
+                new ExceptionContextCatchBlock("HttpControllerDispatcher", isTopLevel: false, callsHandler: true);
             AssertEqual(expected, catchBlock);
         }
 
@@ -64,7 +64,7 @@ namespace System.Web.Http.ExceptionHandling
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("HttpServer", isTopLevel: true);
+                new ExceptionContextCatchBlock("HttpServer", isTopLevel: true, callsHandler: true);
             AssertEqual(expected, catchBlock);
         }
 
@@ -89,7 +89,7 @@ namespace System.Web.Http.ExceptionHandling
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("IExceptionFilter", isTopLevel: false);
+                new ExceptionContextCatchBlock("IExceptionFilter", isTopLevel: false, callsHandler: true);
             AssertEqual(expected, catchBlock);
         }
 
@@ -117,6 +117,7 @@ namespace System.Web.Http.ExceptionHandling
             Assert.NotNull(actual);
             Assert.Equal(expected.Name, actual.Name);
             Assert.Equal(expected.IsTopLevel, actual.IsTopLevel);
+            Assert.Equal(expected.CallsHandler, actual.CallsHandler);
         }
     }
 }

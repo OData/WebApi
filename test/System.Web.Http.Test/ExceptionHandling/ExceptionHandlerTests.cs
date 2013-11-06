@@ -171,7 +171,7 @@ namespace System.Web.Http.ExceptionHandling
 
             ExceptionHandlerContext context = CreateContext(new ExceptionContext
             {
-                CatchBlock = new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevelCatchBlock)
+                CatchBlock = new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevelCatchBlock, callsHandler: false)
             });
 
             // Act

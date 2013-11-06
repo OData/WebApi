@@ -20,7 +20,8 @@ namespace System.Web.Http.Owin
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("HttpMessageHandlerAdapter.BufferContent", isTopLevel: true);
+                new ExceptionContextCatchBlock("HttpMessageHandlerAdapter.BufferContent", isTopLevel: true,
+                    callsHandler: true);
             AssertEqual(expected, catchBlock);
         }
 
@@ -45,7 +46,8 @@ namespace System.Web.Http.Owin
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("HttpMessageHandlerAdapter.BufferError", isTopLevel: true);
+                new ExceptionContextCatchBlock("HttpMessageHandlerAdapter.BufferError", isTopLevel: true,
+                    callsHandler: false);
             AssertEqual(expected, catchBlock);
         }
 
@@ -70,7 +72,8 @@ namespace System.Web.Http.Owin
 
             // Assert
             ExceptionContextCatchBlock expected =
-                new ExceptionContextCatchBlock("HttpMessageHandlerAdapter.StreamContent", isTopLevel: true);
+                new ExceptionContextCatchBlock("HttpMessageHandlerAdapter.StreamContent", isTopLevel: true,
+                    callsHandler: false);
             AssertEqual(expected, catchBlock);
         }
 
@@ -98,6 +101,7 @@ namespace System.Web.Http.Owin
             Assert.NotNull(actual);
             Assert.Equal(expected.Name, actual.Name);
             Assert.Equal(expected.IsTopLevel, actual.IsTopLevel);
+            Assert.Equal(expected.CallsHandler, actual.CallsHandler);
         }
     }
 }

@@ -355,8 +355,7 @@ namespace System.Web.Http.WebHost
 
             ExceptionContextCatchBlock catchBlock = WebHostExceptionCatchBlocks.HttpControllerHandlerStreamContent;
             ExceptionContext exceptionContext = new ExceptionContext(exception, catchBlock, request, response);
-            await exceptionLogger.LogAsync(exceptionContext, canBeHandled: false,
-                cancellationToken: cancellationToken);
+            await exceptionLogger.LogAsync(exceptionContext, cancellationToken);
 
             // Streamed content may have been written and cannot be recalled.
             // Our only choice is to abort the connection.
@@ -461,6 +460,8 @@ namespace System.Web.Http.WebHost
             Contract.Assert(httpContextBase.Response != null);
             Contract.Assert(request != null);
             Contract.Assert(exception != null);
+            Contract.Assert(catchBlock != null);
+            Contract.Assert(catchBlock.CallsHandler);
 
             HttpResponseBase httpResponseBase = httpContextBase.Response;
             HttpResponseMessage errorResponse = null;
@@ -481,8 +482,7 @@ namespace System.Web.Http.WebHost
                 {
                     Response = response
                 };
-                await exceptionLogger.LogAsync(exceptionContext, canBeHandled: true,
-                    cancellationToken: cancellationToken);
+                await exceptionLogger.LogAsync(exceptionContext, cancellationToken);
                 errorResponse = await exceptionHandler.HandleAsync(exceptionContext, cancellationToken);
 
                 if (errorResponse == null)
@@ -541,8 +541,7 @@ namespace System.Web.Http.WebHost
 
                 ExceptionContext exceptionContext = new ExceptionContext(exception,
                     WebHostExceptionCatchBlocks.HttpControllerHandlerBufferError, request, errorResponse);
-                await exceptionLogger.LogAsync(exceptionContext, canBeHandled: false,
-                    cancellationToken: cancellationToken);
+                await exceptionLogger.LogAsync(exceptionContext, cancellationToken);
 
                 // Failure writing the error response.  Likely cause is a formatter
                 // serialization exception.  Create empty error response and

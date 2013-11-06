@@ -205,7 +205,7 @@ namespace System.Web.Http.Owin
             ExceptionLoggerContext context = new ExceptionLoggerContext(new ExceptionContext()
             {
                 Exception = new Exception()
-            }, canBeHandled: false);
+            });
             CancellationToken cancellationToken = CancellationToken.None;
 
             expected

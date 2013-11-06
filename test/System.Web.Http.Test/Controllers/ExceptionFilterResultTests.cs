@@ -149,8 +149,7 @@ namespace System.Web.Http.Controllers
                     && c.ActionContext == expectedActionContext;
 
                 exceptionLoggerMock.Verify(l => l.LogAsync(
-                    It.Is<ExceptionLoggerContext>(c => c.CanBeHandled == true
-                        && exceptionContextMatches(c.ExceptionContext)),
+                    It.Is<ExceptionLoggerContext>(c => exceptionContextMatches(c.ExceptionContext)),
                     cancellationToken), Times.Once());
             }
         }

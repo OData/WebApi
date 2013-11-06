@@ -9,12 +9,13 @@ namespace System.Web.Http.Owin
     {
         private static readonly ExceptionContextCatchBlock _httpMessageHandlerAdapterBufferContent =
             new ExceptionContextCatchBlock(typeof(HttpMessageHandlerAdapter).Name + ".BufferContent",
-                isTopLevel: true);
+                isTopLevel: true, callsHandler: true);
         private static readonly ExceptionContextCatchBlock _httpMessageHandlerAdapterBufferError =
-            new ExceptionContextCatchBlock(typeof(HttpMessageHandlerAdapter).Name + ".BufferError", isTopLevel: true);
+            new ExceptionContextCatchBlock(typeof(HttpMessageHandlerAdapter).Name + ".BufferError", isTopLevel: true,
+                callsHandler: false);
         private static readonly ExceptionContextCatchBlock _httpMessageHandlerAdapterStreamContent =
             new ExceptionContextCatchBlock(typeof(HttpMessageHandlerAdapter).Name + ".StreamContent",
-                isTopLevel: true);
+                isTopLevel: true, callsHandler: false);
 
         /// <summary>Gets the catch block in <see cref="HttpMessageHandlerAdapter"/>.BufferContent.</summary>
         public static ExceptionContextCatchBlock HttpMessageHandlerAdapterBufferContent

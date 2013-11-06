@@ -849,10 +849,8 @@ namespace System.Web.Http.Owin
                         && c.Response == expectedResponse;
 
                     exceptionLoggerMock.Verify(l => l.LogAsync(
-                        It.Is<ExceptionLoggerContext>(c => c.CanBeHandled == true
-                            && exceptionContextMatches(c.ExceptionContext)),
+                        It.Is<ExceptionLoggerContext>(c => exceptionContextMatches(c.ExceptionContext)),
                         expectedCancellationToken), Times.Once());
-
                     exceptionHandlerMock.Verify(h => h.HandleAsync(
                         It.Is<ExceptionHandlerContext>((c) => exceptionContextMatches(c.ExceptionContext)),
                         expectedCancellationToken), Times.Once());
@@ -1082,8 +1080,7 @@ namespace System.Web.Http.Owin
                     Assert.Equal(TaskStatus.RanToCompletion, task.Status);
 
                     mock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
-                        c.CanBeHandled == true
-                        && c.ExceptionContext != null
+                        c.ExceptionContext != null
                         && c.ExceptionContext.Exception == expectedOriginalException
                         && c.ExceptionContext.CatchBlock ==
                             OwinExceptionCatchBlocks.HttpMessageHandlerAdapterBufferContent
@@ -1091,8 +1088,7 @@ namespace System.Web.Http.Owin
                         && c.ExceptionContext.Response == expectedOriginalResponse),
                         expectedCancellationToken), Times.Once());
                     mock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
-                        c.CanBeHandled == false
-                        && c.ExceptionContext != null
+                        c.ExceptionContext != null
                         && c.ExceptionContext.Exception == expectedErrorException
                         && c.ExceptionContext.CatchBlock ==
                             OwinExceptionCatchBlocks.HttpMessageHandlerAdapterBufferError
@@ -1221,7 +1217,6 @@ namespace System.Web.Http.Owin
 
                     mock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>((c) =>
                         c != null
-                        && c.CanBeHandled == false
                         && c.ExceptionContext != null
                         && c.ExceptionContext.Exception == expectedException
                         && c.ExceptionContext.CatchBlock ==

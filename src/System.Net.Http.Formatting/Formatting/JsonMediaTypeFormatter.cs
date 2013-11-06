@@ -58,8 +58,7 @@ namespace System.Net.Http.Formatting
         {
             Contract.Assert(formatter != null);
 
-#if !NETFX_CORE // MaxDepth and UseDataContractJsonSerializer are not supported in portable library
-            _readerQuotas.MaxDepth = formatter._readerQuotas.MaxDepth;
+#if !NETFX_CORE // UseDataContractJsonSerializer is not supported in portable library
             UseDataContractJsonSerializer = formatter.UseDataContractJsonSerializer;
 #endif
 
@@ -100,7 +99,7 @@ namespace System.Net.Http.Formatting
 
 #if !NETFX_CORE // MaxDepth not supported in portable library; no need to override there
         /// <inheritdoc/>
-        public override int MaxDepth
+        public sealed override int MaxDepth
         {
             get
             {

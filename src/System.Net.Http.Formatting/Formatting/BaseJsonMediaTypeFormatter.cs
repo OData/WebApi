@@ -48,6 +48,10 @@ namespace System.Net.Http.Formatting
         /// Initializes a new instance of the <see cref="BaseJsonMediaTypeFormatter"/> class.
         /// </summary>
         /// <param name="formatter">The <see cref="BaseJsonMediaTypeFormatter"/> instance to copy settings from.</param>
+#if !NETFX_CORE
+        [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors",
+            Justification = "MaxDepth is sealed in existing subclasses and its documentation carries warnings.")]
+#endif
         protected BaseJsonMediaTypeFormatter(BaseJsonMediaTypeFormatter formatter)
             : base(formatter)
         {
@@ -55,7 +59,7 @@ namespace System.Net.Http.Formatting
             SerializerSettings = formatter.SerializerSettings;
 
 #if !NETFX_CORE // MaxDepth is not supported in portable library and so _maxDepth never changes there
-            _maxDepth = formatter._maxDepth;
+            MaxDepth = formatter._maxDepth;
 #endif
         }
 
@@ -80,6 +84,10 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Gets or sets the maximum depth allowed by this formatter.
         /// </summary>
+        /// <remarks>
+        /// Any override must call the base getter and setter. The setter may be called before a derived class
+        /// constructor runs, so any override should be very careful about using derived class state.
+        /// </remarks>
         public virtual int MaxDepth
         {
             get
@@ -184,6 +192,8 @@ namespace System.Net.Http.Formatting
             }
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification = "Caller's formatterLogger is notified of problem in all cases where Exception is not rethrown.")]
         private object ReadFromStream(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             Contract.Assert(type != null);
@@ -283,7 +293,6 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "This is a public extensibility point, we can't predict what exceptions will come through")]
         private JsonReader CreateJsonReaderInternal(Type type, Stream readStream, Encoding effectiveEncoding)
         {
             Contract.Assert(type != null);
@@ -429,7 +438,6 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "This is a public extensibility point, we can't predict what exceptions will come through")]
         private JsonWriter CreateJsonWriterInternal(Type type, Stream writeStream, Encoding effectiveEncoding)
         {
             Contract.Assert(type != null);

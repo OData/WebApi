@@ -57,6 +57,21 @@ namespace System.Net.Http.Formatting
             }
         }
 
+#if !NETFX_CORE // MaxDepth not supported in portable library; no need to override there
+        /// <inheritdoc />
+        public sealed override int MaxDepth
+        {
+            get
+            {
+                return base.MaxDepth;
+            }
+            set
+            {
+                base.MaxDepth = value;
+            }
+        }
+#endif
+
         /// <inheritdoc />
         public override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding,
             IFormatterLogger formatterLogger)

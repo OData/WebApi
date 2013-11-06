@@ -73,5 +73,40 @@ namespace System.Web.Http
                 allowNull: false,
                 roundTripTestValue: new Mock<HttpActionDescriptor>().Object);
         }
+
+        [Fact]
+        public void RequestContextGet_ReturnsControllerContextRequestContext()
+        {
+            // Arrange
+            HttpRequestContext expectedRequestContext = new HttpRequestContext();
+
+            HttpActionContext product = new HttpActionContext();
+            product.ControllerContext = new HttpControllerContext
+            {
+                RequestContext = expectedRequestContext
+            };
+
+            // Act
+            HttpRequestContext requestContext = product.RequestContext;
+
+            // Assert
+            Assert.Same(expectedRequestContext, requestContext);
+        }
+
+        [Fact]
+        public void RequestContextGet_IfControllerContextIsNull_ReturnsNull()
+        {
+            // Arrange
+            HttpRequestContext expectedRequestContext = new HttpRequestContext();
+
+            HttpActionContext product = new HttpActionContext();
+            Assert.Null(product.ControllerContext); // Guard
+
+            // Act
+            HttpRequestContext requestContext = product.RequestContext;
+
+            // Assert
+            Assert.Null(requestContext);
+        }
     }
 }

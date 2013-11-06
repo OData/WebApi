@@ -87,5 +87,13 @@ namespace System.Web.Http.Controllers
         {
             get { return _controllerContext != null ? _controllerContext.Request : null; }
         }
+
+        /// <summary>
+        /// Gets the current <see cref="HttpRequestContext"/>.
+        /// </summary>
+        public HttpRequestContext RequestContext
+        {
+            get { return _controllerContext != null ? _controllerContext.RequestContext : null; }
+        }
     }
 }

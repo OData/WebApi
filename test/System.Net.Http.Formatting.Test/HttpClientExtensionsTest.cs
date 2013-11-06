@@ -22,7 +22,7 @@ namespace System.Net.Http
             Mock<TestableHttpMessageHandler> handlerMock = new Mock<TestableHttpMessageHandler> { CallBase = true };
             handlerMock
                 .Setup(h => h.SendAsyncPublic(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
-                .Returns((HttpRequestMessage request, CancellationToken _) => TaskHelpers.FromResult(new HttpResponseMessage() { RequestMessage = request }));
+                .Returns((HttpRequestMessage request, CancellationToken _) => Task.FromResult(new HttpResponseMessage() { RequestMessage = request }));
 
             _client = new HttpClient(handlerMock.Object);
         }

@@ -54,7 +54,7 @@ namespace System.Web.Http.Filters
             Func<Task<HttpResponseMessage>> continuation = () =>
             {
                 flagWhenContinuationInvoked = onActionExecutingInvoked;
-                return TaskHelpers.FromResult(new HttpResponseMessage());
+                return Task.FromResult(new HttpResponseMessage());
             };
             var filter = (IActionFilter)filterMock.Object;
 
@@ -75,7 +75,7 @@ namespace System.Web.Http.Filters
             // Act
             filter.ExecuteActionFilterAsync(context, CancellationToken.None, () =>
             {
-                return TaskHelpers.FromResult(new HttpResponseMessage());
+                return Task.FromResult(new HttpResponseMessage());
             }).Wait();
 
             // Assert
@@ -175,7 +175,7 @@ namespace System.Web.Http.Filters
             HttpResponseMessage response = new HttpResponseMessage();
 
             // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => TaskHelpers.FromResult(response));
+            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(response));
 
             // Assert
             result.WaitUntilCompleted();
@@ -236,7 +236,7 @@ namespace System.Web.Http.Filters
                 };
 
                 var filter = (IActionFilter)filterMock.Object;
-                Func<Task<HttpResponseMessage>> continuation = () => TaskHelpers.FromResult<HttpResponseMessage>(new HttpResponseMessage());
+                Func<Task<HttpResponseMessage>> continuation = () => Task.FromResult<HttpResponseMessage>(new HttpResponseMessage());
 
                 // Act
                 var result = filter.ExecuteActionFilterAsync(context, token, continuation);
@@ -262,7 +262,7 @@ namespace System.Web.Http.Filters
                 CallBase = true,
             };
 
-            Func<Task<HttpResponseMessage>> continuation = () => TaskHelpers.FromResult(new HttpResponseMessage());
+            Func<Task<HttpResponseMessage>> continuation = () => Task.FromResult(new HttpResponseMessage());
 
             filterMock.Setup(f => f.OnActionExecutedAsync(It.IsAny<HttpActionExecutedContext>(), It.IsAny<CancellationToken>())).Returns(TaskHelpers.Completed());
             filterMock.Setup(f => f.OnActionExecuted(It.IsAny<HttpActionExecutedContext>())).Callback(
@@ -293,7 +293,7 @@ namespace System.Web.Http.Filters
                 CallBase = true,
             };
 
-            Func<Task<HttpResponseMessage>> continuation = () => TaskHelpers.FromResult(new HttpResponseMessage());
+            Func<Task<HttpResponseMessage>> continuation = () => Task.FromResult(new HttpResponseMessage());
 
             filterMock.Setup(f => f.OnActionExecutingAsync(It.IsAny<HttpActionContext>(), CancellationToken.None)).Returns(TaskHelpers.Completed());
             filterMock.Setup(f => f.OnActionExecuting(It.IsAny<HttpActionContext>())).Callback(
@@ -383,7 +383,7 @@ namespace System.Web.Http.Filters
             });
 
             // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => TaskHelpers.FromResult(new HttpResponseMessage()));
+            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(new HttpResponseMessage()));
 
             // Assert
             result.WaitUntilCompleted();
@@ -409,7 +409,7 @@ namespace System.Web.Http.Filters
             });
 
             // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => TaskHelpers.FromResult(new HttpResponseMessage()));
+            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(new HttpResponseMessage()));
 
             // Assert
             result.WaitUntilCompleted();
@@ -435,7 +435,7 @@ namespace System.Web.Http.Filters
             });
 
             // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => TaskHelpers.FromResult(response));
+            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(response));
 
             // Assert
             result.WaitUntilCompleted();
@@ -461,7 +461,7 @@ namespace System.Web.Http.Filters
             });
 
             // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => TaskHelpers.FromResult(response));
+            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(response));
 
             // Assert
             result.WaitUntilCompleted();

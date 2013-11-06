@@ -24,7 +24,7 @@ namespace System.Web.Http.Tracing.Tracers
                 f =>
                 f.ExecuteActionFilterAsync(It.IsAny<HttpActionContext>(), It.IsAny<CancellationToken>(),
                                            It.IsAny<Func<Task<HttpResponseMessage>>>())).Returns(
-                                               TaskHelpers.FromResult<HttpResponseMessage>(response));
+                                               Task.FromResult<HttpResponseMessage>(response));
             Mock<HttpActionDescriptor> mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
             mockActionDescriptor.Setup(a => a.ActionName).Returns("test");
             mockActionDescriptor.Setup(a => a.GetParameters()).Returns(new Collection<HttpParameterDescriptor>(new HttpParameterDescriptor[0]));
@@ -32,7 +32,7 @@ namespace System.Web.Http.Tracing.Tracers
             TestTraceWriter traceWriter = new TestTraceWriter();
             ActionFilterTracer tracer = new ActionFilterTracer(mockFilter.Object, traceWriter);
             Func<Task<HttpResponseMessage>> continuation =
-                () => TaskHelpers.FromResult<HttpResponseMessage>(new HttpResponseMessage());
+                () => Task.FromResult<HttpResponseMessage>(new HttpResponseMessage());
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "ExecuteActionFilterAsync" },
@@ -64,7 +64,7 @@ namespace System.Web.Http.Tracing.Tracers
             TestTraceWriter traceWriter = new TestTraceWriter();
             ActionFilterTracer tracer = new ActionFilterTracer(mockFilter.Object, traceWriter);
             Func<Task<HttpResponseMessage>> continuation =
-                () => TaskHelpers.FromResult<HttpResponseMessage>(new HttpResponseMessage());
+                () => Task.FromResult<HttpResponseMessage>(new HttpResponseMessage());
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "ExecuteActionFilterAsync" },

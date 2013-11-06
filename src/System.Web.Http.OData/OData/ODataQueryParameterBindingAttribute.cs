@@ -83,7 +83,7 @@ namespace System.Web.Http.OData
                 ODataQueryOptions parameterValue = createODataQueryOptions(entitySetContext, request);
                 SetValue(actionContext, parameterValue);
 
-                return TaskHelpers.FromResult(0);
+                return TaskHelpers.Completed();
             }
 
             public static ODataQueryOptions<T> CreateODataQueryOptions<T>(ODataQueryContext context, HttpRequestMessage request)

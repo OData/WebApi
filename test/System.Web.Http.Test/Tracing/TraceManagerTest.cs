@@ -232,7 +232,7 @@ namespace System.Web.Http.Tracing
             HttpRequestMessage request = new HttpRequestMessage();
             Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>(config);
             dispatcherMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None)
-                .Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
+                .Returns(Task.FromResult<HttpResponseMessage>(request.CreateResponse()));
 
             HttpServer server = new HttpServer(config, dispatcherMock.Object);
             HttpMessageInvoker invoker = new HttpMessageInvoker(server);
@@ -259,7 +259,7 @@ namespace System.Web.Http.Tracing
             HttpRequestMessage request = new HttpRequestMessage();
             Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>(config);
             dispatcherMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None)
-                .Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
+                .Returns(Task.FromResult<HttpResponseMessage>(request.CreateResponse()));
 
             HttpServer server = new HttpServer(config, dispatcherMock.Object);
             HttpMessageInvoker invoker = new HttpMessageInvoker(server);
@@ -298,7 +298,7 @@ namespace System.Web.Http.Tracing
             config.MessageHandlers.Add(messageHandler4);
             Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>(config);
             dispatcherMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None)
-                .Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
+                .Returns(Task.FromResult<HttpResponseMessage>(request.CreateResponse()));
             HttpServer server = new HttpServer(config, dispatcherMock.Object);
             HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 

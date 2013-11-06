@@ -125,7 +125,7 @@ namespace System.Web.Http.Tracing.Tracers
             TestTraceWriter traceWriter = new TestTraceWriter();
             IActionFilter tracer = new ActionFilterAttributeTracer(mockAttr.Object, traceWriter) as IActionFilter;
             Func<Task<HttpResponseMessage>> continuation =
-                () => TaskHelpers.FromResult<HttpResponseMessage>(new HttpResponseMessage());
+                () => Task.FromResult<HttpResponseMessage>(new HttpResponseMessage());
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "OnActionExecutingAsync" },
@@ -155,7 +155,7 @@ namespace System.Web.Http.Tracing.Tracers
             TestTraceWriter traceWriter = new TestTraceWriter();
             IActionFilter tracer = new ActionFilterAttributeTracer(mockAttr.Object, traceWriter) as IActionFilter;
             Func<Task<HttpResponseMessage>> continuation =
-                () => TaskHelpers.FromResult<HttpResponseMessage>(new HttpResponseMessage());
+                () => Task.FromResult<HttpResponseMessage>(new HttpResponseMessage());
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "OnActionExecutingAsync" },
@@ -187,7 +187,7 @@ namespace System.Web.Http.Tracing.Tracers
             IActionFilter tracer = new ActionFilterAttributeTracer(mockAttr.Object, traceWriter) as IActionFilter;
 
             Func<Task<HttpResponseMessage>> continuation =
-                () => TaskHelpers.FromResult<HttpResponseMessage>(new HttpResponseMessage());
+                () => Task.FromResult<HttpResponseMessage>(new HttpResponseMessage());
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(actionContext.Request, TraceCategories.FiltersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "OnActionExecutingAsync" },

@@ -163,7 +163,7 @@ namespace System.Web.Http.Dispatcher
         {
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
-                return TaskHelpers.FromResult(request.CreateResponse(HttpStatusCode.OK));
+                return Task.FromResult(request.CreateResponse(HttpStatusCode.OK));
             }
         }
 

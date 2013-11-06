@@ -444,7 +444,7 @@ namespace System.Web.Http.Controllers
                                 throw Error.InvalidOperation(SRResources.ActionExecutor_UnexpectedTaskInstance,
                                     methodInfo.Name, methodInfo.DeclaringType.Name);
                             }
-                            return TaskHelpers.FromResult(result);
+                            return Task.FromResult(result);
                         };
                     }
                 }

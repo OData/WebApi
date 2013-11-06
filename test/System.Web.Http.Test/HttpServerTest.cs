@@ -213,7 +213,7 @@ namespace System.Web.Http
             HttpConfiguration config = new HttpConfiguration();
             Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>(config);
             dispatcherMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None)
-                .Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
+                .Returns(Task.FromResult<HttpResponseMessage>(request.CreateResponse()));
 
             HttpServer server = new HttpServer(config, dispatcherMock.Object);
             HttpMessageInvoker invoker = new HttpMessageInvoker(server);
@@ -239,7 +239,7 @@ namespace System.Web.Http
             HttpConfiguration config = new HttpConfiguration();
             Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>(config);
             dispatcherMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None)
-                .Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
+                .Returns(Task.FromResult<HttpResponseMessage>(request.CreateResponse()));
 
             HttpServer server = new HttpServer(config, dispatcherMock.Object);
             HttpMessageInvoker invoker = new HttpMessageInvoker(server);
@@ -273,7 +273,7 @@ namespace System.Web.Http
             dispatcherMock.Protected()
                           .Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None)
                           .Callback(() => callbackPrincipal = Thread.CurrentPrincipal)
-                          .Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
+                          .Returns(Task.FromResult<HttpResponseMessage>(request.CreateResponse()));
 
             // Act
             return invoker.SendAsync(request, CancellationToken.None)
@@ -302,7 +302,7 @@ namespace System.Web.Http
             dispatcherMock.Protected()
                           .Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None)
                           .Callback(() => callbackPrincipal = Thread.CurrentPrincipal)
-                          .Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
+                          .Returns(Task.FromResult<HttpResponseMessage>(request.CreateResponse()));
 
             // Act
             return invoker.SendAsync(request, CancellationToken.None)

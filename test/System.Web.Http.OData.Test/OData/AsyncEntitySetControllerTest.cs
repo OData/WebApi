@@ -82,7 +82,7 @@ namespace System.Web.Http.OData
         public void GetByKey_ReturnsNotFound_IfGetEntityByKeyReturnsNull()
         {
             var controllerMock = new Mock<AsyncEntitySetController<FormatterPerson, int>>();
-            controllerMock.Setup(c => c.GetEntityByKeyAsync(It.IsAny<int>())).Returns(TaskHelpers.FromResult<FormatterPerson>(null));
+            controllerMock.Setup(c => c.GetEntityByKeyAsync(It.IsAny<int>())).Returns(Task.FromResult<FormatterPerson>(null));
             controllerMock.CallBase = true;
             var controller = controllerMock.Object;
             controller.Request = new HttpRequestMessage();
@@ -98,7 +98,7 @@ namespace System.Web.Http.OData
         {
             var entity = new FormatterPerson();
             var controllerMock = new Mock<AsyncEntitySetController<FormatterPerson, int>>();
-            controllerMock.Setup(c => c.GetEntityByKeyAsync(It.IsAny<int>())).Returns(TaskHelpers.FromResult(entity));
+            controllerMock.Setup(c => c.GetEntityByKeyAsync(It.IsAny<int>())).Returns(Task.FromResult(entity));
             controllerMock.CallBase = true;
             var controller = controllerMock.Object;
             SetupController(controller);
@@ -114,7 +114,7 @@ namespace System.Web.Http.OData
         {
             var entity = new FormatterPerson();
             var controllerMock = new Mock<AsyncEntitySetController<FormatterPerson, int>>();
-            controllerMock.Setup(c => c.CreateEntityAsync(It.IsAny<FormatterPerson>())).Returns(TaskHelpers.FromResult(entity));
+            controllerMock.Setup(c => c.CreateEntityAsync(It.IsAny<FormatterPerson>())).Returns(Task.FromResult(entity));
             controllerMock.Setup(c => c.GetKey(It.IsAny<FormatterPerson>())).Returns(5);
             controllerMock.CallBase = true;
             var controller = controllerMock.Object;
@@ -132,7 +132,7 @@ namespace System.Web.Http.OData
         {
             var entity = new FormatterPerson();
             var controllerMock = new Mock<AsyncEntitySetController<FormatterPerson, int>>();
-            controllerMock.Setup(c => c.CreateEntityAsync(It.IsAny<FormatterPerson>())).Returns(TaskHelpers.FromResult(entity));
+            controllerMock.Setup(c => c.CreateEntityAsync(It.IsAny<FormatterPerson>())).Returns(Task.FromResult(entity));
             controllerMock.Setup(c => c.GetKey(It.IsAny<FormatterPerson>())).Returns(5);
             controllerMock.CallBase = true;
             var controller = controllerMock.Object;
@@ -151,7 +151,7 @@ namespace System.Web.Http.OData
         {
             var entity = new FormatterPerson();
             var controllerMock = new Mock<AsyncEntitySetController<FormatterPerson, int>>();
-            controllerMock.Setup(c => c.UpdateEntityAsync(It.IsAny<int>(), It.IsAny<FormatterPerson>())).Returns(TaskHelpers.FromResult(entity));
+            controllerMock.Setup(c => c.UpdateEntityAsync(It.IsAny<int>(), It.IsAny<FormatterPerson>())).Returns(Task.FromResult(entity));
             controllerMock.CallBase = true;
             var controller = controllerMock.Object;
             SetupController(controller);
@@ -166,7 +166,7 @@ namespace System.Web.Http.OData
         {
             var entity = new FormatterPerson();
             var controllerMock = new Mock<AsyncEntitySetController<FormatterPerson, int>>();
-            controllerMock.Setup(c => c.UpdateEntityAsync(It.IsAny<int>(), It.IsAny<FormatterPerson>())).Returns(TaskHelpers.FromResult(entity));
+            controllerMock.Setup(c => c.UpdateEntityAsync(It.IsAny<int>(), It.IsAny<FormatterPerson>())).Returns(Task.FromResult(entity));
             controllerMock.CallBase = true;
             var controller = controllerMock.Object;
             SetupController(controller);
@@ -184,7 +184,7 @@ namespace System.Web.Http.OData
         {
             var entity = new FormatterPerson();
             var controllerMock = new Mock<AsyncEntitySetController<FormatterPerson, int>>();
-            controllerMock.Setup(c => c.PatchEntityAsync(It.IsAny<int>(), It.IsAny<Delta<FormatterPerson>>())).Returns(TaskHelpers.FromResult(entity));
+            controllerMock.Setup(c => c.PatchEntityAsync(It.IsAny<int>(), It.IsAny<Delta<FormatterPerson>>())).Returns(Task.FromResult(entity));
             controllerMock.CallBase = true;
             var controller = controllerMock.Object;
             SetupController(controller);
@@ -199,7 +199,7 @@ namespace System.Web.Http.OData
         {
             var entity = new FormatterPerson();
             var controllerMock = new Mock<AsyncEntitySetController<FormatterPerson, int>>();
-            controllerMock.Setup(c => c.PatchEntityAsync(It.IsAny<int>(), It.IsAny<Delta<FormatterPerson>>())).Returns(TaskHelpers.FromResult(entity));
+            controllerMock.Setup(c => c.PatchEntityAsync(It.IsAny<int>(), It.IsAny<Delta<FormatterPerson>>())).Returns(Task.FromResult(entity));
             controllerMock.CallBase = true;
             var controller = controllerMock.Object;
             SetupController(controller);
@@ -258,7 +258,7 @@ namespace System.Web.Http.OData
     {
         protected internal override Task<EmployeesController.Employee> GetEntityByKeyAsync(Guid key)
         {
-            return TaskHelpers.FromResult(new EmployeesController.Employee() { EmployeeID = key, EmployeeName = "Bob" });
+            return Task.FromResult(new EmployeesController.Employee() { EmployeeID = key, EmployeeName = "Bob" });
         }
     }
 }

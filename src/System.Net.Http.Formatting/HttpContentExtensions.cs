@@ -222,7 +222,7 @@ namespace System.Net.Http
             ObjectContent objectContent = content as ObjectContent;
             if (objectContent != null && objectContent.Value != null && type.IsAssignableFrom(objectContent.Value.GetType()))
             {
-                return TaskHelpers.FromResult((T)objectContent.Value);
+                return Task.FromResult((T)objectContent.Value);
             }
 
             MediaTypeFormatter formatter = null;
@@ -236,7 +236,7 @@ namespace System.Net.Http
                 if (content.Headers.ContentLength == 0)
                 {
                     T defaultValue = (T)MediaTypeFormatter.GetDefaultValueForType(type);
-                    return TaskHelpers.FromResult<T>(defaultValue);
+                    return Task.FromResult<T>(defaultValue);
                 }
 
                 throw new UnsupportedMediaTypeException(

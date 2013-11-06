@@ -18,12 +18,12 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             HttpResponseMessage response = new HttpResponseMessage();
             MockDelegatingHandler mockHandler = new MockDelegatingHandler((rqst, cancellation) =>
-                                                 TaskHelpers.FromResult<HttpResponseMessage>(response));
+                                                 Task.FromResult<HttpResponseMessage>(response));
 
             TestTraceWriter traceWriter = new TestTraceWriter();
             MessageHandlerTracer tracer = new MessageHandlerTracer(mockHandler, traceWriter);
             MockHttpMessageHandler mockInnerHandler = new MockHttpMessageHandler((rqst, cancellation) =>
-                                     TaskHelpers.FromResult<HttpResponseMessage>(response));
+                                     Task.FromResult<HttpResponseMessage>(response));
             tracer.InnerHandler = mockInnerHandler;
 
             HttpRequestMessage request = new HttpRequestMessage();

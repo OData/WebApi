@@ -86,7 +86,7 @@ namespace System.Web.Http.OData.Query
         [Queryable]
         public Task<IEnumerable<QueryCompositionCustomer>> Get()
         {
-            return TaskHelpers.FromResult(QueryCompositionCustomerController.CustomerList as IEnumerable<QueryCompositionCustomer>);
+            return Task.FromResult(QueryCompositionCustomerController.CustomerList as IEnumerable<QueryCompositionCustomer>);
         }
     }
 

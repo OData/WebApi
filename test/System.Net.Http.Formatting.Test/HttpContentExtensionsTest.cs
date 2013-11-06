@@ -114,7 +114,7 @@ namespace System.Net.Http
             content.Headers.ContentType = _mediaType;
             _formatterMock
                 .Setup(f => f.ReadFromStreamAsync(typeof(string), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>()))
-                .Returns(TaskHelpers.FromResult<object>(value));
+                .Returns(Task.FromResult<object>(value));
             _formatterMock.Setup(f => f.CanReadType(typeof(string))).Returns(true);
 
             var result = content.ReadAsAsync<string>(_formatters);
@@ -214,7 +214,7 @@ namespace System.Net.Http
                     {
                         MultipartMemoryStreamProvider provider = content.ReadAsMultipartAsync().Result;
                         Assert.Equal(1, provider.Contents.Count);
-                        return TaskHelpers.FromResult<object>(provider.Contents[0].ReadAsStringAsync().Result);
+                        return Task.FromResult<object>(provider.Contents[0].ReadAsStringAsync().Result);
                     });
             MediaTypeFormatter formatter = _formatterMock.Object;
             formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("multipart/mixed"));
@@ -344,7 +344,7 @@ namespace System.Net.Http
             _formatterMock.Setup(f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<object>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<TransportContext>()))
                 .Returns(TaskHelpers.Completed());
             _formatterMock.Setup(f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>()))
-                .Returns<Type, Stream, HttpContent, IFormatterLogger>((type, stream, content, logger) => TaskHelpers.FromResult<object>(factory(type)));
+                .Returns<Type, Stream, HttpContent, IFormatterLogger>((type, stream, content, logger) => Task.FromResult<object>(factory(type)));
         }
 
         public class TestClass { }

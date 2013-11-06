@@ -96,7 +96,7 @@ namespace System.Web.Http.ModelBinding
                 }
                 else
                 {
-                    return TaskHelpers.FromResult(defaultValue);
+                    return Task.FromResult(defaultValue);
                 }
             }
 

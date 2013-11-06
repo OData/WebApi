@@ -571,7 +571,7 @@ namespace System.Web.Http.Dispatcher
             {
                 // Empty. Skip all the logic of execcuting a controller.
                 HttpResponseMessage response = new HttpResponseMessage();
-                return TaskHelpers.FromResult(response);
+                return Task.FromResult(response);
             }
         }
 

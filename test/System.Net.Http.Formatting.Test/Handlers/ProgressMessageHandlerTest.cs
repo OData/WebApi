@@ -143,7 +143,7 @@ namespace System.Net.Http.Handlers
                     response.Content = new StringContent("Response Entity");
                     response.Content.Headers.Add(TestHeader, TestValue);
                 }
-                return TaskHelpers.FromResult(response);
+                return Task.FromResult(response);
             }
         }
     }

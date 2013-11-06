@@ -54,7 +54,7 @@ namespace System.Web.Http.Filters
             Func<Task<HttpResponseMessage>> continuation = () =>
             {
                 flagWhenContinuationInvoked = onActionExecutingInvoked;
-                return TaskHelpers.FromResult(new HttpResponseMessage());
+                return Task.FromResult(new HttpResponseMessage());
             };
             var filter = (IAuthorizationFilter)filterMock.Object;
 
@@ -130,7 +130,7 @@ namespace System.Web.Http.Filters
             // Act
             filter.ExecuteAuthorizationFilterAsync(context, CancellationToken.None, () =>
             {
-                return TaskHelpers.FromResult(new HttpResponseMessage());
+                return Task.FromResult(new HttpResponseMessage());
             }).Wait();
 
             // Assert
@@ -171,7 +171,7 @@ namespace System.Web.Http.Filters
             HttpResponseMessage response = new HttpResponseMessage();
 
             // Act
-            var result = filter.ExecuteAuthorizationFilterAsync(context, CancellationToken.None, () => TaskHelpers.FromResult(response));
+            var result = filter.ExecuteAuthorizationFilterAsync(context, CancellationToken.None, () => Task.FromResult(response));
 
             // Assert
             result.WaitUntilCompleted();

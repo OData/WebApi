@@ -30,7 +30,7 @@ namespace System.Web.Http.Controllers
             IExceptionLogger exceptionLogger = CreateDummyExceptionLogger();
             IExceptionHandler exceptionHandler = CreateDummyExceptionHandler();
             var response = new HttpResponseMessage();
-            var actionResult = CreateStubActionResult(TaskHelpers.FromResult(response));
+            var actionResult = CreateStubActionResult(Task.FromResult(response));
 
             IHttpActionResult product = CreateProductUnderTest(actionContext, filters, exceptionLogger,
                 exceptionHandler, actionResult);

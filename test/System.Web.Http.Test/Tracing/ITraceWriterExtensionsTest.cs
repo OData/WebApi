@@ -1073,7 +1073,7 @@ namespace System.Web.Http.Tracing
                                              "",
                                              "",
                                              beginTrace: null,
-                                             execute: () => TaskHelpers.FromResult<int>(1),
+                                             execute: () => Task.FromResult<int>(1),
                                              endTrace: null,
                                              errorTrace: null),
                                        "traceWriter");
@@ -1113,7 +1113,7 @@ namespace System.Web.Http.Tracing
                      "",
                      "",
                      beginTrace: null,
-                     execute: () => TaskHelpers.FromResult<int>(1),
+                     execute: () => Task.FromResult<int>(1),
                      endTrace: null,
                      errorTrace: null);
             t.Wait();
@@ -1134,7 +1134,7 @@ namespace System.Web.Http.Tracing
                                  "",
                                  "",
                                  beginTrace: (tr) => { invoked = true; },
-                                 execute: () => TaskHelpers.FromResult<int>(1),
+                                 execute: () => Task.FromResult<int>(1),
                                  endTrace: (tr, value) => { },
                                  errorTrace: (tr) => { }).Wait();
 
@@ -1158,7 +1158,7 @@ namespace System.Web.Http.Tracing
                                  "",
                                  "",
                                  beginTrace: (tr) => { invoked = true; },
-                                 execute: () => TaskHelpers.FromResult<int>(1),
+                                 execute: () => Task.FromResult<int>(1),
                                  endTrace: (tr, value) => { },
                                  errorTrace: (tr) => { }).Wait();
 
@@ -1184,7 +1184,7 @@ namespace System.Web.Http.Tracing
                                  execute: () =>
                                  {
                                      invoked = true;
-                                     return TaskHelpers.FromResult<int>(1);
+                                     return Task.FromResult<int>(1);
                                  },
                                  endTrace: (tr, value) => { },
                                  errorTrace: (tr) => { }).Result;
@@ -1210,7 +1210,7 @@ namespace System.Web.Http.Tracing
                                  "",
                                  "",
                                  beginTrace: (tr) => { },
-                                 execute: () => TaskHelpers.FromResult<int>(1),
+                                 execute: () => Task.FromResult<int>(1),
                                  endTrace: (tr, value) => { invoked = true; invokedValue = value; },
                                  errorTrace: (tr) => { }).Wait();
 
@@ -1263,7 +1263,7 @@ namespace System.Web.Http.Tracing
                                  "",
                                  "",
                                  beginTrace: (tr) => { },
-                                 execute: () => TaskHelpers.FromResult<int>(1),
+                                 execute: () => Task.FromResult<int>(1),
                                  endTrace: (tr, value) => { invoked = true; },
                                  errorTrace: (tr) => { }).Wait();
 
@@ -1402,7 +1402,7 @@ namespace System.Web.Http.Tracing
                                  "tester",
                                  "testOp",
                                  beginTrace: (tr) => { tr.Message = "beginMessage"; },
-                                 execute: () => TaskHelpers.FromResult<int>(1),
+                                 execute: () => Task.FromResult<int>(1),
                                  endTrace: (tr, value) => { tr.Message = "endMessage" + value; },
                                  errorTrace: (tr) => { tr.Message = "won't happen"; }).Wait();
 

@@ -150,7 +150,7 @@ namespace System.Web.Http.Dispatcher
             HttpControllerDescriptor httpControllerDescriptor = ControllerSelector.SelectController(request);
             if (httpControllerDescriptor == null)
             {
-                return TaskHelpers.FromResult(request.CreateErrorResponse(
+                return Task.FromResult(request.CreateErrorResponse(
                     HttpStatusCode.NotFound,
                     Error.Format(SRResources.ResourceNotFound, request.RequestUri),
                     SRResources.NoControllerSelected));
@@ -159,7 +159,7 @@ namespace System.Web.Http.Dispatcher
             IHttpController httpController = httpControllerDescriptor.CreateController(request);
             if (httpController == null)
             {
-                return TaskHelpers.FromResult(request.CreateErrorResponse(
+                return Task.FromResult(request.CreateErrorResponse(
                     HttpStatusCode.NotFound,
                     Error.Format(SRResources.ResourceNotFound, request.RequestUri),
                     SRResources.NoControllerCreated));

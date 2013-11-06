@@ -9,49 +9,39 @@ namespace System.Web.Http.Util
 {
     internal class ConvertToStreamMessageHandler : DelegatingHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            return
-                ToStreamContent(request.Content)
-                .Then(content =>
-                {
-                    request.Content = content;
-                    return base.SendAsync(request, cancellationToken);
-                })
-                .Then(response =>
-                {
-                    return
-                        ToStreamContent(response.Content)
-                        .Then(content =>
-                        {
-                            response.Content = content;
-                            return response;
-                        });
-                });
+            HttpContent requestContent = await ToStreamContent(request.Content);
+            request.Content = requestContent;
+            HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+            HttpContent responseContent = await ToStreamContent(response.Content);
+            response.Content = responseContent;
+            return response;
         }
 
-        private Task<HttpContent> ToStreamContent(HttpContent content)
+        private static Task<HttpContent> ToStreamContent(HttpContent content)
         {
             ObjectContent objectContent = content as ObjectContent;
             if (objectContent != null)
             {
-                return objectContent
-                    .ReadAsStreamAsync()
-                    .Then<Stream, HttpContent>(stream =>
-                    {
-                        StreamContent streamContent = new StreamContent(stream);
-                        foreach (var header in objectContent.Headers)
-                        {
-                            streamContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
-                        }
-
-                        return streamContent;
-                    });
+                return ToStreamContent(objectContent);
             }
             else
             {
-                return TaskHelpers.FromResult(content);
+                return Task.FromResult(content);
             }
+        }
+
+        private static async Task<HttpContent> ToStreamContent(ObjectContent content)
+        {
+            Stream stream = await content.ReadAsStreamAsync();
+            StreamContent streamContent = new StreamContent(stream);
+            foreach (var header in content.Headers)
+            {
+                streamContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+
+            return streamContent;
         }
     }
 }

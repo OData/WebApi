@@ -18,7 +18,7 @@ namespace System.Web.Http.Tracing.Tracers
             TestTraceWriter traceWriter = new TestTraceWriter();
             RequestMessageHandlerTracer tracer = new RequestMessageHandlerTracer(traceWriter);
             MockHttpMessageHandler mockInnerHandler = new MockHttpMessageHandler((rqst, cancellation) =>
-                                     TaskHelpers.FromResult<HttpResponseMessage>(response));
+                                     Task.FromResult<HttpResponseMessage>(response));
             tracer.InnerHandler = mockInnerHandler;
 
             HttpRequestMessage request = new HttpRequestMessage();

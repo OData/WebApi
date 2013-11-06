@@ -76,7 +76,7 @@ namespace System.Web.Http.Tracing.Tracers
             var mockDisposable = mockController.As<IDisposable>();
             mockController.Setup(c => c.ExecuteAsync(context, CancellationToken.None))
                           .Callback<HttpControllerContext, CancellationToken>((cc, ct) => cc.Request.RegisterForDispose(mockDisposable.Object))
-                          .Returns(() => TaskHelpers.FromResult(new HttpResponseMessage()))
+                          .Returns(() => Task.FromResult(new HttpResponseMessage()))
                           .Verifiable();
             context.ControllerDescriptor = _controllerDescriptor;
             context.Controller = mockController.Object;
@@ -98,7 +98,7 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             HttpResponseMessage response = new HttpResponseMessage();
             Mock<ApiController> mockController = new Mock<ApiController>() { CallBase = true };
-            mockController.Setup(b => b.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<CancellationToken>())).Returns(TaskHelpers.FromResult<HttpResponseMessage>(response));
+            mockController.Setup(b => b.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<HttpResponseMessage>(response));
 
             HttpRequestMessage request = new HttpRequestMessage();
             HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(request: request);

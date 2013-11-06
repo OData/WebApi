@@ -1536,7 +1536,7 @@ namespace System.Web.Http.Owin
                     request.Properties[HttpPropertyKeys.NoRouteMatched] = true;
                 }
 
-                return TaskHelpers.FromResult<HttpResponseMessage>(Response);
+                return Task.FromResult<HttpResponseMessage>(Response);
             }
         }
 

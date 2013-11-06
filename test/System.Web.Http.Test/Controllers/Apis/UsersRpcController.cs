@@ -17,7 +17,7 @@ namespace System.Web.Http
 
         public Task<User> EchoUserAsync(string firstName, string lastName)
         {
-            return TaskHelpers.FromResult(new User()
+            return Task.FromResult(new User()
             {
                 FirstName = firstName,
                 LastName = lastName,
@@ -73,7 +73,7 @@ namespace System.Web.Http
 
         public Task WrappedTaskReturningMethod()
         {
-            return TaskHelpers.FromResult(TaskHelpers.Completed());
+            return Task.FromResult(TaskHelpers.Completed());
         }
 
         public object TaskAsObjectReturningMethod()

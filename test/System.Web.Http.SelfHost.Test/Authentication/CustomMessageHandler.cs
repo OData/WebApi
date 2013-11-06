@@ -11,7 +11,7 @@ namespace System.Web.Http
 {
     public class CustomMessageHandler : DelegatingHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             IPrincipal originalPrincipal = Thread.CurrentPrincipal;
 
@@ -29,8 +29,14 @@ namespace System.Web.Http
                 }
             }
 
-            return base.SendAsync(request, cancellationToken)
-                       .Finally(() => Thread.CurrentPrincipal = originalPrincipal);
+            try
+            {
+                return await base.SendAsync(request, cancellationToken);
+            }
+            finally
+            {
+                Thread.CurrentPrincipal = originalPrincipal;
+            }
         }
     }
 }

@@ -54,7 +54,7 @@ namespace System.Web.Http
         {
             var value = new object();
             _actionDescriptorMock.Setup(ad => ad.ExecuteAsync(_actionContext.ControllerContext, _actionContext.ActionArguments, CancellationToken.None))
-                .Returns(TaskHelpers.FromResult(value));
+                .Returns(Task.FromResult(value));
 
             var result = _actionInvoker.InvokeActionAsync(_actionContext, CancellationToken.None);
 
@@ -67,7 +67,7 @@ namespace System.Web.Http
         {
             var response = new HttpResponseMessage();
             _actionDescriptorMock.Setup(ad => ad.ExecuteAsync(_actionContext.ControllerContext, _actionContext.ActionArguments, CancellationToken.None))
-                .Returns(TaskHelpers.FromResult(new object()));
+                .Returns(Task.FromResult(new object()));
             _converterMock.Setup(c => c.Convert(_actionContext.ControllerContext, It.IsAny<object>()))
                 .Returns(response);
 

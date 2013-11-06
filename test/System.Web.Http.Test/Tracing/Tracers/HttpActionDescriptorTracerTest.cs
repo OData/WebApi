@@ -325,7 +325,7 @@ namespace System.Web.Http.Tracing.Tracers
             Mock<HttpActionDescriptor> mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
             mockActionDescriptor.Setup(a => a.ActionName).Returns("test");
             mockActionDescriptor.Setup(a => a.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>(), CancellationToken.None))
-                .Returns(TaskHelpers.FromResult<object>(null));
+                .Returns(Task.FromResult<object>(null));
             HttpControllerContext controllerContext = ContextUtil.CreateControllerContext();
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, "test", typeof(ApiController));
             IDictionary<string, object> arguments = new Dictionary<string, object>();

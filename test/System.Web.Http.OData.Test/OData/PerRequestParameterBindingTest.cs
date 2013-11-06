@@ -75,7 +75,7 @@ namespace System.Web.Http.OData
 
             public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
             {
-                return TaskHelpers.FromResult(42);
+                return Task.FromResult(42);
             }
         }
 

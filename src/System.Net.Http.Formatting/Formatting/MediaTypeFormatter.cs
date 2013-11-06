@@ -204,6 +204,11 @@ namespace System.Net.Http.Formatting
         public virtual Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content,
             IFormatterLogger formatterLogger, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return TaskHelpers.Canceled<object>();
+            }
+
             return ReadFromStreamAsync(type, readStream, content, formatterLogger);
         }
 

@@ -59,6 +59,7 @@
     <Compile Include="HttpMessageHandlerAdapter.cs" />
     <Compile Include="OwinHttpRequestContext.cs" />
     <Compile Include="OwinHttpRequestMessageExtensions.cs" />
+    <Compile Include="OwinRequestExtensions.cs" />
     <Compile Include="PassiveAuthenticationMessageHandler.cs" />
     <Compile Include="WebApiAppBuilderExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1456,11 +1456,6 @@ namespace System.Web.Http.Owin
             };
         }
 
-        //private static IExceptionHandler CreateStubExceptionHandler()
-        //{
-        //    return CreateStubExceptionHandlerMock().Object;
-        //}
-
         private static Mock<IExceptionHandler> CreateStubExceptionHandlerMock()
         {
             Mock<IExceptionHandler> mock = new Mock<IExceptionHandler>(MockBehavior.Strict);

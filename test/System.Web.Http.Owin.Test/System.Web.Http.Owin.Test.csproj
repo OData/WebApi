@@ -56,6 +56,7 @@
     <Compile Include="OwinHttpConfigurationExtensionsTest.cs" />
     <Compile Include="HttpMessageHandlerExtensions.cs" />
     <Compile Include="OwinHttpRequestMessageExtensionsTest.cs" />
+    <Compile Include="OwinRequestExtensionsTests.cs" />
     <Compile Include="PassiveAuthenticationMessageHandlerTest.cs" />
     <Compile Include="WebApiAppBuilderExtensionsTest.cs" />
     <Compile Include="OwinBufferPolicySelectorTest.cs" />

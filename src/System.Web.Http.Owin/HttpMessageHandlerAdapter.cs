@@ -223,7 +223,17 @@ namespace System.Web.Http.Owin
             // We need to replace the request body with a buffered stream so that other components can read the stream.
             // For this stream to be useful, it must NOT be diposed along with the request. Streams created by
             // StreamContent do get disposed along with the request, so use MemoryStream to buffer separately.
-            MemoryStream buffer = new MemoryStream();
+            MemoryStream buffer;
+            int? contentLength = owinRequest.GetContentLength();
+
+            if (!contentLength.HasValue)
+            {
+                buffer = new MemoryStream();
+            }
+            else
+            {
+                buffer = new MemoryStream(contentLength.Value);
+            }
 
             cancellationToken.ThrowIfCancellationRequested();
 

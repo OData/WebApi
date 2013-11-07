@@ -1,7 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
+using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http.Services;
 using Microsoft.TestCommon;
 using Moq;
@@ -46,9 +53,9 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
             MediaTypeFormatter formatterTracer = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
-            
+
             // Act
-            MediaTypeFormatter innerFormatter = (formatterTracer as IDecorator<MediaTypeFormatter>).Inner;      
+            MediaTypeFormatter innerFormatter = (formatterTracer as IDecorator<MediaTypeFormatter>).Inner;
 
             // Assert
             Assert.Same(formatter, innerFormatter);
@@ -67,6 +74,89 @@ namespace System.Web.Http.Tracing.Tracers
 
             // Assert
             Assert.Same(formatter, innerFormatter);
+        }
+
+        [Fact]
+        public async Task ReadFromStream_Traces()
+        {
+            // Arrange
+            string contentType = "text/plain";
+            object value = new object();
+            CustomMediaTypeFormatter formatter = new CustomMediaTypeFormatter(value);
+            formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(contentType));
+
+            TestTraceWriter traceWriter = new TestTraceWriter();
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Content = new StringContent("42", Encoding.Default, contentType);
+            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(formatter, traceWriter, request);
+            TraceRecord[] expectedTraces = new TraceRecord[]
+            {
+                new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "ReadFromStreamAsync" },
+                new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.End, Operation = "ReadFromStreamAsync" }
+            };
+
+            // Act
+            object valueReturned = await request.Content.ReadAsAsync<object>(new[] { tracer });
+
+            // Assert
+            Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+            Assert.Equal(value, valueReturned);
+        }
+
+        [Fact]
+        public async Task WriteToStream_Traces()
+        {
+            // Arrange
+            object value = new object();
+            CustomMediaTypeFormatter formatter = new CustomMediaTypeFormatter(value);
+            TestTraceWriter traceWriter = new TestTraceWriter();
+            HttpRequestMessage request = new HttpRequestMessage();
+            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(formatter, traceWriter, request);
+            request.Content = new ObjectContent<object>(value, tracer);
+            TraceRecord[] expectedTraces = new TraceRecord[]
+            {
+                new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "WriteToStreamAsync" },
+                new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.End, Operation = "WriteToStreamAsync" }
+            };
+
+            // Act
+            await request.Content.CopyToAsync(new MemoryStream());
+
+            // Assert
+            Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+        }
+
+        private class CustomMediaTypeFormatter : MediaTypeFormatter
+        {
+            private object _result;
+
+            public CustomMediaTypeFormatter(object result)
+            {
+                Contract.Assert(result != null);
+                _result = result;
+            }
+
+            public override bool CanReadType(Type type)
+            {
+                return true;
+            }
+
+            public override bool CanWriteType(Type type)
+            {
+                return true;
+            }
+
+            public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content,
+                IFormatterLogger formatterLogger, CancellationToken cancellationToken)
+            {
+                return Task.FromResult(_result);
+            }
+
+            public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content,
+                TransportContext transportContext, CancellationToken cancellationToken)
+            {
+                return Task.FromResult(_result);
+            }
         }
     }
 }

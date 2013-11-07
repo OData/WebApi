@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Web.Http.Properties;
 using System.Web.Http.Services;
 
@@ -72,7 +73,20 @@ namespace System.Web.Http.Tracing.Tracers
             _innerTracer.SetDefaultContentHeaders(type, headers, mediaType);
         }
 
-        public override object ReadFromStream(Type type, Stream stream, HttpContent content, IFormatterLogger formatterLogger)
+        public override object ReadFromStream(Type type, Stream readStream, HttpContent content,
+            IFormatterLogger formatterLogger)
+        {
+            return ReadFromStreamCore(type, readStream, content, formatterLogger);
+        }
+
+        public override object ReadFromStream(Type type, Stream stream, HttpContent content,
+            IFormatterLogger formatterLogger, CancellationToken cancellationToken)
+        {
+            return ReadFromStreamCore(type, stream, content, formatterLogger, cancellationToken);
+        }
+
+        private object ReadFromStreamCore(Type type, Stream stream, HttpContent content,
+            IFormatterLogger formatterLogger, CancellationToken? cancellationToken = null)
         {
             BufferedMediaTypeFormatter innerFormatter = InnerFormatter as BufferedMediaTypeFormatter;
             HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
@@ -94,7 +108,9 @@ namespace System.Web.Http.Tracing.Tracers
                 },
                 execute: () =>
                 {
-                    value = innerFormatter.ReadFromStream(type, stream, content, formatterLogger);
+                    value = cancellationToken == null
+                        ? innerFormatter.ReadFromStream(type, stream, content, formatterLogger)
+                        : innerFormatter.ReadFromStream(type, stream, content, formatterLogger, cancellationToken.Value);
                 },
                 endTrace: (tr) =>
                 {
@@ -107,7 +123,19 @@ namespace System.Web.Http.Tracing.Tracers
             return value;
         }
 
-        public override void WriteToStream(Type type, object value, Stream stream, HttpContent content)
+        public override void WriteToStream(Type type, object value, Stream writeStream, HttpContent content)
+        {
+            WriteToStreamImpl(type, value, writeStream, content);
+        }
+
+        public override void WriteToStream(Type type, object value, Stream writeStream, HttpContent content,
+            CancellationToken cancellationToken)
+        {
+            WriteToStreamImpl(type, value, writeStream, content, cancellationToken);
+        }
+
+        private void WriteToStreamImpl(Type type, object value, Stream writeStream, HttpContent content,
+            CancellationToken? cancellationToken = null)
         {
             BufferedMediaTypeFormatter innerFormatter = InnerFormatter as BufferedMediaTypeFormatter;
 
@@ -132,7 +160,14 @@ namespace System.Web.Http.Tracing.Tracers
                 },
                 execute: () =>
                 {
-                    innerFormatter.WriteToStream(type, value, stream, content);
+                    if (cancellationToken == null)
+                    {
+                        innerFormatter.WriteToStream(type, value, writeStream, content);
+                    }
+                    else
+                    {
+                        innerFormatter.WriteToStream(type, value, writeStream, content, cancellationToken.Value);
+                    }
                 },
                 endTrace: null,
                 errorTrace: null);

@@ -52,6 +52,11 @@ namespace System.Web.Http.Tracing.Tracers
             return _innerDescriptor.GetCustomAttributes<T>();
         }
 
+        public override Collection<T> GetCustomAttributes<T>(bool inherit)
+        {
+            return _innerDescriptor.GetCustomAttributes<T>(inherit);
+        }
+
         public override Collection<Filters.IFilter> GetFilters()
         {
             return _innerDescriptor.GetFilters();

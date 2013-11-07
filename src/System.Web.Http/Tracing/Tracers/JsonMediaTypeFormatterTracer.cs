@@ -7,6 +7,7 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Services;
 using Newtonsoft.Json;
@@ -71,9 +72,16 @@ namespace System.Web.Http.Tracing.Tracers
             return _innerTracer.GetPerRequestFormatterInstance(type, request, mediaType);
         }
 
-        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content,
+            IFormatterLogger formatterLogger)
         {
             return _innerTracer.ReadFromStreamAsync(type, readStream, content, formatterLogger);
+        }
+
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content,
+            IFormatterLogger formatterLogger, CancellationToken cancellationToken)
+        {
+            return _innerTracer.ReadFromStreamAsync(type, readStream, content, formatterLogger, cancellationToken);
         }
 
         // Callback from ReadFromStreamAsync is not expected to be called; _innerTracer.ReadFromStreamAsync uses
@@ -90,7 +98,14 @@ namespace System.Web.Http.Tracing.Tracers
             return _inner.CreateJsonReader(type, readStream, effectiveEncoding);
         }
 
-        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content,
+            TransportContext transportContext)
+        {
+            return _innerTracer.WriteToStreamAsync(type, value, writeStream, content, transportContext);
+        }
+
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content,
+            TransportContext transportContext, CancellationToken cancellationToken)
         {
             return _innerTracer.WriteToStreamAsync(type, value, writeStream, content, transportContext);
         }

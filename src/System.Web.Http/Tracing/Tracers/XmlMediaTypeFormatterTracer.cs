@@ -6,8 +6,10 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Services;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace System.Web.Http.Tracing.Tracers
@@ -70,9 +72,21 @@ namespace System.Web.Http.Tracing.Tracers
             return _innerTracer.GetPerRequestFormatterInstance(type, request, mediaType);
         }
 
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content,
+            IFormatterLogger formatterLogger, CancellationToken cancellationToken)
+        {
+            return _innerTracer.ReadFromStreamAsync(type, readStream, content, formatterLogger, cancellationToken);
+        }
+
         public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             return _innerTracer.ReadFromStreamAsync(type, readStream, content, formatterLogger);
+        }
+
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content,
+            TransportContext transportContext, CancellationToken cancellationToken)
+        {
+            return _innerTracer.WriteToStreamAsync(type, value, writeStream, content, transportContext, cancellationToken);
         }
 
         public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
@@ -93,6 +107,26 @@ namespace System.Web.Http.Tracing.Tracers
         public override DataContractSerializer CreateDataContractSerializer(Type type)
         {
             return _inner.CreateDataContractSerializer(type);
+        }
+
+        public override XmlReader CreateXmlReader(Stream readStream, HttpContent content)
+        {
+            return _inner.CreateXmlReader(readStream, content);
+        }
+
+        public override XmlWriter CreateXmlWriter(Stream writeStream, HttpContent content)
+        {
+            return _inner.CreateXmlWriter(writeStream, content);
+        }
+
+        public override object GetDeserializer(Type type, HttpContent content)
+        {
+            return _inner.GetDeserializer(type, content);
+        }
+
+        public override object GetSerializer(Type type, object value, HttpContent content)
+        {
+            return _inner.GetSerializer(type, value, content);
         }
     }
 }

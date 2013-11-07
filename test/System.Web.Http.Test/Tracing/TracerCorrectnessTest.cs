@@ -177,8 +177,6 @@ namespace System.Web.Http.Tracing
                             // Tracer does not need to see them,
                             // and inner will uses its copies in read or write
                             "SetSerializer", "RemoveSerializer",
-                            "GetSerializer", "GetDeserializer",
-                            "CreateXmlWriter", "CreateXmlReader"
                         }
                     },
                 };
@@ -292,7 +290,7 @@ namespace System.Web.Http.Tracing
             }
 
             // Allow exclusion list to be short name or long name, because some members are up the inheritance chain
-            string visibleMemberName = String.Format("{0}.{1}", methodInfo.DeclaringType.Name, methodInfo.Name);
+            string visibleMemberName = String.Format("{0}.{1}", methodInfo.DeclaringType.Name, GetSignature(methodInfo));
             if (!DoesTracerDeclare(tracerType, methodInfo) && !excludedMembers.Contains(visibleMemberName) && !excludedMembers.Contains(methodInfo.Name))
             {
                 bool isOverrideable = IsOverrideable(methodInfo);
@@ -317,12 +315,19 @@ namespace System.Web.Http.Tracing
 
         static bool DoMethodsMatch(MethodInfo originalMethodInfo, MethodInfo candidateMethodInfo)
         {
-            if (!candidateMethodInfo.Name.Substring(candidateMethodInfo.Name.LastIndexOf('.') + 1).Equals(originalMethodInfo.Name))
+            if (!GetSignature(candidateMethodInfo).Equals(GetSignature(originalMethodInfo)))
             {
                 return false;
             }
 
             return true;
+        }
+
+        static string GetSignature(MethodInfo methodInfo)
+        {
+            return
+                String.Format("{0}({1})", methodInfo.Name.Substring(methodInfo.Name.LastIndexOf(".") + 1),
+                    String.Join(",", methodInfo.GetParameters().Select(p => p.ParameterType.Name)));
         }
 
         static bool DoesTracerDeclare(Type tracerType, MethodInfo methodInfo)

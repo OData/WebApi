@@ -16,6 +16,7 @@ namespace System.Web.Mvc.Routing
 #endif
 {
     /// <summary>Represents an attribute route that may contain custom constraints.</summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
     public abstract class RouteProviderAttribute : Attribute, IDirectRouteProvider
     {
         private readonly string _template;

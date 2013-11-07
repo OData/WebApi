@@ -253,6 +253,20 @@ namespace System.Web.Mvc.Routing
             Assert.Same(existingConstraints, constraints);
         }
 
+        [Fact]
+        public void AttributeUsage_IsAsSpecified()
+        {
+            // Act
+            AttributeUsageAttribute usage = (AttributeUsageAttribute)Attribute.GetCustomAttribute(
+                typeof(RouteProviderAttribute), typeof(AttributeUsageAttribute));
+
+            // Assert
+            Assert.NotNull(usage);
+            Assert.Equal(AttributeTargets.Class | AttributeTargets.Method, usage.ValidOn);
+            Assert.Equal(false, usage.Inherited);
+            Assert.Equal(true, usage.AllowMultiple);
+        }
+
         private static DirectRouteBuilder CreateBuilder(Func<RouteEntry> build)
         {
             return new LambdaDirectRouteBuilder(build);

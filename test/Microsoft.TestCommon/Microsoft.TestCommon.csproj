@@ -35,6 +35,7 @@
     <Compile Include="MatrixTheoryDataSet.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="PlatformInfo.cs" />
+    <Compile Include="PortReserver.cs" />
     <Compile Include="PropertyDataAttribute.cs" />
     <Compile Include="ReplaceCultureAttribute.cs" />
     <Compile Include="RestoreThreadPrincipalAttribute.cs" />

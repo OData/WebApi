@@ -10,8 +10,6 @@ namespace System.Web.Http
 {
     public class BasicOverHttpTest
     {
-        private static readonly string BaseAddress = "http://localhost:50231";
-
         [Fact]
         public void AuthenticateWithUsernameTokenSucceed()
         {
@@ -38,40 +36,43 @@ namespace System.Web.Http
 
         private static void RunBasicAuthTest(string controllerName, string routeSuffix, NetworkCredential credential, Action<HttpResponseMessage> assert)
         {
-            // Arrange
-            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(BaseAddress);
-            config.HostNameComparisonMode = HostNameComparisonMode.Exact;
-            config.Routes.MapHttpRoute("Default", "{controller}" + routeSuffix, new { controller = controllerName });
-            config.UserNamePasswordValidator = new CustomUsernamePasswordValidator();
-            config.MessageHandlers.Add(new CustomMessageHandler());
-            HttpSelfHostServer server = new HttpSelfHostServer(config);
-
-            server.OpenAsync().Wait();
-
-            // Create a GET request with correct username and password
-            HttpClientHandler handler = new HttpClientHandler();
-            handler.Credentials = credential;
-            HttpClient client = new HttpClient(handler);
-
-            HttpResponseMessage response = null;
-            try
+            using (var port = new PortReserver())
             {
-                // Act
-                response = client.GetAsync(BaseAddress).Result;
+                // Arrange
+                HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(port.BaseUri);
+                config.HostNameComparisonMode = HostNameComparisonMode.Exact;
+                config.Routes.MapHttpRoute("Default", "{controller}" + routeSuffix, new { controller = controllerName });
+                config.UserNamePasswordValidator = new CustomUsernamePasswordValidator();
+                config.MessageHandlers.Add(new CustomMessageHandler());
+                HttpSelfHostServer server = new HttpSelfHostServer(config);
 
-                // Assert
-                assert(response);
-            }
-            finally
-            {
-                if (response != null)
+                server.OpenAsync().Wait();
+
+                // Create a GET request with correct username and password
+                HttpClientHandler handler = new HttpClientHandler();
+                handler.Credentials = credential;
+                HttpClient client = new HttpClient(handler);
+
+                HttpResponseMessage response = null;
+                try
                 {
-                    response.Dispose();
-                }
-                client.Dispose();
-            }
+                    // Act
+                    response = client.GetAsync(port.BaseUri).Result;
 
-            server.CloseAsync().Wait();
+                    // Assert
+                    assert(response);
+                }
+                finally
+                {
+                    if (response != null)
+                    {
+                        response.Dispose();
+                    }
+                    client.Dispose();
+                }
+
+                server.CloseAsync().Wait();
+            }
         }
 
     }

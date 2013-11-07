@@ -13,51 +13,49 @@ namespace System.Web.Http.SelfHost
 {
     public class HttpSelfHostResponseTest : IDisposable
     {
-        private HttpSelfHostServer server = null;
-        private string baseAddress = null;
-        private HttpClient httpClient = null;
-        private NullResponseMessageHandler messageHandler = null;
+        private HttpSelfHostServer _server;
+        private string _baseAddress;
+        private HttpClient _httpClient;
+        private NullResponseMessageHandler _messageHandler;
+
+        private PortReserver _testPort = new PortReserver();
 
         public HttpSelfHostResponseTest()
         {
-            this.SetupHost();
-        }
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(_testPort.BaseUri);
+            _baseAddress = _testPort.BaseUri;
 
-        public void SetupHost()
-        {
-            baseAddress = String.Format("http://localhost:{0}/", HttpSelfHostServerTest.TestPort);
-
-            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(baseAddress);
             config.HostNameComparisonMode = HostNameComparisonMode.Exact;
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "NullResponse" });
 
-            messageHandler = new NullResponseMessageHandler();
-            config.MessageHandlers.Add(messageHandler);
+            _messageHandler = new NullResponseMessageHandler();
+            config.MessageHandlers.Add(_messageHandler);
 
-            server = new HttpSelfHostServer(config);
-            server.OpenAsync().Wait();
+            _server = new HttpSelfHostServer(config);
+            _server.OpenAsync().Wait();
 
-            httpClient = new HttpClient();
+            _httpClient = new HttpClient();
         }
 
         public void Dispose()
         {
-            httpClient.Dispose();
-            server.CloseAsync().Wait();
+            _testPort.Dispose();
+            _httpClient.Dispose();
+            _server.CloseAsync().Wait();
         }
 
         [Fact]
         public void Get_Returns_500_And_No_Content_For_Null_HttpResponseMessage_From_MessageHandler()
         {
             // Arrange
-            messageHandler.ReturnNull = true;
+            _messageHandler.ReturnNull = true;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.RequestUri = new Uri(Path.Combine(baseAddress, "NullResponse/GetNormalResponse"));
+            request.RequestUri = new Uri(Path.Combine(_baseAddress, "NullResponse/GetNormalResponse"));
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Method = HttpMethod.Get;
 
             // Action
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = _httpClient.SendAsync(request).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -68,15 +66,15 @@ namespace System.Web.Http.SelfHost
         public void Post_Returns_500_And_No_Content_For_Null_HttpResponseMessage_From_MessageHandler()
         {
             // Arrange
-            messageHandler.ReturnNull = true;
+            _messageHandler.ReturnNull = true;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.RequestUri = new Uri(Path.Combine(baseAddress, "NullResponse/PostNormalResponse"));
+            request.RequestUri = new Uri(Path.Combine(_baseAddress, "NullResponse/PostNormalResponse"));
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Method = HttpMethod.Post;
             request.Content = new ObjectContent<NullResponseCustomer>(new NullResponseCustomer() { Name = "Sue", Age = 39 }, new JsonMediaTypeFormatter());
 
             // Action
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = _httpClient.SendAsync(request).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -87,14 +85,14 @@ namespace System.Web.Http.SelfHost
         public void Get_Returns_500_And_Error_Content_For_Null_HttpResponseMessage_From_Action()
         {
             // Arrange
-            messageHandler.ReturnNull = false;
+            _messageHandler.ReturnNull = false;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.RequestUri = new Uri(Path.Combine(baseAddress, "NullResponse/GetNullResponseFromAction"));
+            request.RequestUri = new Uri(Path.Combine(_baseAddress, "NullResponse/GetNullResponseFromAction"));
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Method = HttpMethod.Get;
 
             // Action
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = _httpClient.SendAsync(request).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -105,15 +103,15 @@ namespace System.Web.Http.SelfHost
         public void Post_Returns_500_And_Error_Content_For_Null_HttpResponseMessage_From_Action()
         {
             // Arrange
-            messageHandler.ReturnNull = false;
+            _messageHandler.ReturnNull = false;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.RequestUri = new Uri(Path.Combine(baseAddress, "NullResponse/PostNullResponseFromAction"));
+            request.RequestUri = new Uri(Path.Combine(_baseAddress, "NullResponse/PostNullResponseFromAction"));
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Method = HttpMethod.Post;
             request.Content = new ObjectContent<NullResponseCustomer>(new NullResponseCustomer() { Name = "Sue", Age = 39 }, new JsonMediaTypeFormatter());
 
             // Action
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = _httpClient.SendAsync(request).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -124,14 +122,14 @@ namespace System.Web.Http.SelfHost
         public void Get_Returns_500_And_Error_Content_For_Null_Task_From_Action()
         {
             // Arrange
-            messageHandler.ReturnNull = false;
+            _messageHandler.ReturnNull = false;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.RequestUri = new Uri(Path.Combine(baseAddress, "NullResponse/GetNullTaskFromAction"));
+            request.RequestUri = new Uri(Path.Combine(_baseAddress, "NullResponse/GetNullTaskFromAction"));
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Method = HttpMethod.Get;
 
             // Action
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = _httpClient.SendAsync(request).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -142,15 +140,15 @@ namespace System.Web.Http.SelfHost
         public void Post_Returns_500_And_Error_Content_For_Null_Task_From_Action()
         {
             // Arrange
-            messageHandler.ReturnNull = false;
+            _messageHandler.ReturnNull = false;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.RequestUri = new Uri(Path.Combine(baseAddress, "NullResponse/PostNullTaskFromAction"));
+            request.RequestUri = new Uri(Path.Combine(_baseAddress, "NullResponse/PostNullTaskFromAction"));
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Method = HttpMethod.Post;
             request.Content = new ObjectContent<NullResponseCustomer>(new NullResponseCustomer() { Name = "Sue", Age = 39 }, new JsonMediaTypeFormatter());
 
             // Action
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = _httpClient.SendAsync(request).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);

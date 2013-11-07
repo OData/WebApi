@@ -17,15 +17,7 @@ namespace System.Web.Http.SelfHost
 {
     public class HttpSelfHostServerTest : IDisposable
     {
-        private const int testPort = 50231;
-        private const string machineName = "localhost";
-
         private HttpSelfHostServer server = null;
-
-        public static int TestPort
-        {
-            get { return testPort; }
-        }
 
         public void Dispose()
         {
@@ -40,14 +32,17 @@ namespace System.Web.Http.SelfHost
         [InlineData("/SelfHostServerTest/EchoString", TransferMode.Streamed)]
         public void SendAsync_Direct_Returns_OK_For_Successful_ObjectContent_Write(string uri, TransferMode transferMode)
         {
-            // Arrange & Act
-            server = CreateServer(transferMode);
-            HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(transferMode) + uri).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            using (var port = new PortReserver())
+            {
+                // Arrange & Act
+                server = CreateServer(port, transferMode);
+                HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri).Result;
+                string responseString = response.Content.ReadAsStringAsync().Result;
 
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal("\"echoString\"", responseString);
+                // Assert
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal("\"echoString\"", responseString);
+            }
         }
 
         [Theory]
@@ -55,21 +50,24 @@ namespace System.Web.Http.SelfHost
         [InlineData("/SelfHostServerTest/EchoString", TransferMode.Streamed)]
         public void SendAsync_ServiceModel_Returns_OK_For_Successful_ObjectContent_Write(string uri, TransferMode transferMode)
         {
-            // Arrange
-            server = CreateServer(transferMode);
-            bool shouldChunk = transferMode == TransferMode.Streamed;
+            using (var port = new PortReserver())
+            {
+                // Arrange
+                server = CreateServer(port, transferMode);
+                bool shouldChunk = transferMode == TransferMode.Streamed;
 
-            // Act
-            HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(transferMode) + uri).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
-            IEnumerable<string> headerValues = null;
-            bool isChunked = response.Headers.TryGetValues("Transfer-Encoding", out headerValues) && headerValues != null &&
-                             headerValues.Any((v) => String.Equals(v, "chunked", StringComparison.OrdinalIgnoreCase));
+                // Act
+                HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri).Result;
+                string responseString = response.Content.ReadAsStringAsync().Result;
+                IEnumerable<string> headerValues = null;
+                bool isChunked = response.Headers.TryGetValues("Transfer-Encoding", out headerValues) && headerValues != null &&
+                                 headerValues.Any((v) => String.Equals(v, "chunked", StringComparison.OrdinalIgnoreCase));
 
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal("\"echoString\"", responseString);
-            Assert.Equal(shouldChunk, isChunked);
+                // Assert
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal("\"echoString\"", responseString);
+                Assert.Equal(shouldChunk, isChunked);
+            }
         }
 
         [Theory]
@@ -77,17 +75,20 @@ namespace System.Web.Http.SelfHost
         [InlineData("/SelfHostServerTest/EchoStream", TransferMode.Streamed)]
         public void SendAsync_Direct_Returns_OK_For_Successful_Stream_Write(string uri, TransferMode transferMode)
         {
-            // Arrange & Act
-            server = CreateServer(transferMode);
-            HttpResponseMessage response = new HttpClient(server).GetAsync(BaseUri(transferMode) + uri).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
-            IEnumerable<string> headerValues = null;
-            bool isChunked = response.Headers.TryGetValues("Transfer-Encoding", out headerValues) && headerValues != null &&
-                             headerValues.Any((v) => String.Equals(v, "chunked", StringComparison.OrdinalIgnoreCase));
+            using (var port = new PortReserver())
+            {
+                // Arrange & Act
+                server = CreateServer(port, transferMode);
+                HttpResponseMessage response = new HttpClient(server).GetAsync(BaseUri(port, transferMode) + uri).Result;
+                string responseString = response.Content.ReadAsStringAsync().Result;
+                IEnumerable<string> headerValues = null;
+                bool isChunked = response.Headers.TryGetValues("Transfer-Encoding", out headerValues) && headerValues != null &&
+                                 headerValues.Any((v) => String.Equals(v, "chunked", StringComparison.OrdinalIgnoreCase));
 
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal("echoStream", responseString);
-            Assert.False(isChunked);    // stream never chunk, buffered or streamed
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal("echoStream", responseString);
+                Assert.False(isChunked);    // stream never chunk, buffered or streamed
+            }
         }
 
         [Theory]
@@ -95,14 +96,17 @@ namespace System.Web.Http.SelfHost
         [InlineData("/SelfHostServerTest/EchoStream", TransferMode.Streamed)]
         public void SendAsync_ServiceModel_Returns_OK_For_Successful_Stream_Write(string uri, TransferMode transferMode)
         {
-            // Arrange & Act
-            server = CreateServer(transferMode);
-            HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(transferMode) + uri).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            using (var port = new PortReserver())
+            {
+                // Arrange & Act
+                server = CreateServer(port, transferMode);
+                HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri).Result;
+                string responseString = response.Content.ReadAsStringAsync().Result;
 
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal("echoStream", responseString);
+                // Assert
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal("echoStream", responseString);
+            }
         }
 
         [Theory]
@@ -114,10 +118,13 @@ namespace System.Web.Http.SelfHost
         [InlineData("/SelfHostServerTest/ThrowAfterWrite", TransferMode.Streamed)]
         public void SendAsync_Direct_Throws_When_ObjectContent_CopyToAsync_Throws(string uri, TransferMode transferMode)
         {
-            // Arrange & Act & Assert
-            server = CreateServer(transferMode);
-            Assert.Throws<InvalidOperationException>(
-                () => new HttpClient(server).GetAsync(BaseUri(transferMode) + uri).Wait());
+            using (var port = new PortReserver())
+            {
+                // Arrange & Act & Assert
+                server = CreateServer(port, transferMode);
+                Assert.Throws<InvalidOperationException>(
+                    () => new HttpClient(server).GetAsync(BaseUri(port, transferMode) + uri).Wait());
+            }
         }
 
         [Theory]
@@ -129,12 +136,15 @@ namespace System.Web.Http.SelfHost
         [InlineData("/SelfHostServerTest/ThrowAfterWrite", TransferMode.Streamed)]
         public void SendAsync_ServiceModel_Closes_Connection_When_ObjectContent_CopyToAsync_Throws(string uri, TransferMode transferMode)
         {
-            // Arrange
-            server = CreateServer(transferMode);
-            Task<HttpResponseMessage> task = new HttpClient().GetAsync(BaseUri(transferMode) + uri);
+            using (var port = new PortReserver())
+            {
+                // Arrange
+                server = CreateServer(port, transferMode);
+                Task<HttpResponseMessage> task = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri);
 
-            // Act & Assert
-            Assert.Throws<HttpRequestException>(() => task.Wait());
+                // Act & Assert
+                Assert.Throws<HttpRequestException>(() => task.Wait());
+            }
         }
 
         [Theory]
@@ -144,10 +154,13 @@ namespace System.Web.Http.SelfHost
         [InlineData("/SelfHostServerTest/ThrowAfterWriteStream", TransferMode.Streamed)]
         public void SendAsync_Direct_Throws_When_StreamContent_Throws(string uri, TransferMode transferMode)
         {
-            // Arrange & Act & Assert
-            server = CreateServer(transferMode);
-            Assert.Throws<InvalidOperationException>(
-                () => new HttpClient(server).GetAsync(BaseUri(transferMode) + uri).Wait());
+            using (var port = new PortReserver())
+            {
+                // Arrange & Act & Assert
+                server = CreateServer(port, transferMode);
+                Assert.Throws<InvalidOperationException>(
+                    () => new HttpClient(server).GetAsync(BaseUri(port, transferMode) + uri).Wait());
+            }
         }
 
         [Theory]
@@ -157,62 +170,67 @@ namespace System.Web.Http.SelfHost
         [InlineData("/SelfHostServerTest/ThrowAfterWriteStream", TransferMode.Streamed)]
         public void SendAsync_ServiceModel_Throws_When_StreamContent_Throws(string uri, TransferMode transferMode)
         {
-            // Arrange
-            server = CreateServer(transferMode);
-            Task task = new HttpClient().GetAsync(BaseUri(transferMode) + uri);
+            using (var port = new PortReserver())
+            {
+                // Arrange
+                server = CreateServer(port, transferMode);
+                Task task = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri);
 
-            // Act & Assert
-            Assert.Throws<HttpRequestException>(() => task.Wait());
+                // Act & Assert
+                Assert.Throws<HttpRequestException>(() => task.Wait());
+            }
         }
 
         [Fact]
         public void SendAsync_ServiceModel_AddsSelfHostHttpRequestContext()
         {
             // Arrange
-            // Use a different port from 50231 to prevent conflicts with concurrent tests in this assembly.
-            string baseUri = "http://localhost:50232/";
-
-            HttpRequestContext context = null;
-            Uri via = null;
-
-            Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync = (r, c) =>
+            using (PortReserver port = new PortReserver())
             {
-                if (r != null)
+                string baseUri = port.BaseUri;
+
+                HttpRequestContext context = null;
+                Uri via = null;
+
+                Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync = (r, c) =>
                 {
-                    context = r.GetRequestContext();
-                }
-
-                SelfHostHttpRequestContext typedContext = context as SelfHostHttpRequestContext;
-
-                if (typedContext != null)
-                {
-                    via = typedContext.RequestContext.RequestMessage.Properties.Via;
-                }
-
-                return Task.FromResult(new HttpResponseMessage());
-            };
-
-            using (HttpSelfHostConfiguration expectedConfiguration = new HttpSelfHostConfiguration(baseUri))
-            {
-                expectedConfiguration.HostNameComparisonMode = HostNameComparisonMode.Exact;
-
-                using (HttpMessageHandler dispatcher = new LambdaHttpMessageHandler(sendAsync))
-                using (HttpSelfHostServer server = new HttpSelfHostServer(expectedConfiguration, dispatcher))
-                using (HttpClient client = new HttpClient())
-                using (HttpRequestMessage expectedRequest = new HttpRequestMessage(HttpMethod.Get, baseUri))
-                {
-                    server.OpenAsync().Wait();
-
-                    // Act
-                    using (HttpResponseMessage ignore = client.SendAsync(expectedRequest).Result)
+                    if (r != null)
                     {
-                        // Assert
-                        SelfHostHttpRequestContext typedContext = (SelfHostHttpRequestContext)context;
-                        Assert.Equal(expectedRequest.RequestUri, via);
-                        Assert.Same(expectedConfiguration, context.Configuration);
-                        Assert.Equal(expectedRequest.RequestUri, typedContext.Request.RequestUri);
+                        context = r.GetRequestContext();
+                    }
 
-                        server.CloseAsync().Wait();
+                    SelfHostHttpRequestContext typedContext = context as SelfHostHttpRequestContext;
+
+                    if (typedContext != null)
+                    {
+                        via = typedContext.RequestContext.RequestMessage.Properties.Via;
+                    }
+
+                    return Task.FromResult(new HttpResponseMessage());
+                };
+
+                using (HttpSelfHostConfiguration expectedConfiguration = new HttpSelfHostConfiguration(baseUri))
+                {
+                    expectedConfiguration.HostNameComparisonMode = HostNameComparisonMode.Exact;
+
+                    using (HttpMessageHandler dispatcher = new LambdaHttpMessageHandler(sendAsync))
+                    using (HttpSelfHostServer server = new HttpSelfHostServer(expectedConfiguration, dispatcher))
+                    using (HttpClient client = new HttpClient())
+                    using (HttpRequestMessage expectedRequest = new HttpRequestMessage(HttpMethod.Get, baseUri))
+                    {
+                        server.OpenAsync().Wait();
+
+                        // Act
+                        using (HttpResponseMessage ignore = client.SendAsync(expectedRequest).Result)
+                        {
+                            // Assert
+                            SelfHostHttpRequestContext typedContext = (SelfHostHttpRequestContext)context;
+                            Assert.Equal(expectedRequest.RequestUri, via);
+                            Assert.Same(expectedConfiguration, context.Configuration);
+                            Assert.Equal(expectedRequest.RequestUri, typedContext.Request.RequestUri);
+
+                            server.CloseAsync().Wait();
+                        }
                     }
                 }
             }
@@ -294,9 +312,9 @@ namespace System.Web.Http.SelfHost
             }
         }
 
-        private static HttpSelfHostServer CreateServer(TransferMode transferMode)
+        private static HttpSelfHostServer CreateServer(PortReserver port, TransferMode transferMode)
         {
-            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(BaseUri(transferMode));
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(BaseUri(port, transferMode));
             config.HostNameComparisonMode = HostNameComparisonMode.Exact;
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
             config.TransferMode = transferMode;
@@ -306,11 +324,11 @@ namespace System.Web.Http.SelfHost
             return server;
         }
 
-        private static string BaseUri(TransferMode transferMode)
+        private static string BaseUri(PortReserver port, TransferMode transferMode)
         {
             return transferMode == TransferMode.Streamed
-                ? String.Format("http://{0}:{1}/stream", machineName, TestPort)
-                : String.Format("http://{0}:{1}", machineName, TestPort);
+                ? port.BaseUri + "stream"
+                : port.BaseUri;
         }
 
         private class LambdaHttpMessageHandler : HttpMessageHandler

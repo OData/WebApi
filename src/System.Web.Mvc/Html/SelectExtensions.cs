@@ -169,8 +169,17 @@ namespace System.Web.Mvc.Html
 
             if (!EnumHelper.IsValidForEnumHelper(metadata.ModelType))
             {
-                throw Error.Argument("expression", MvcResources.SelectExtensions_InvalidExpressionParameterType,
-                    metadata.ModelType.FullName);
+                string formatString;
+                if (EnumHelper.HasFlags(metadata.ModelType))
+                {
+                    formatString = MvcResources.SelectExtensions_InvalidExpressionParameterTypeHasFlags;
+                }
+                else
+                {
+                    formatString = MvcResources.SelectExtensions_InvalidExpressionParameterType;
+                }
+
+                throw Error.Argument("expression", formatString, metadata.ModelType.FullName, "Flags");
             }
 
             // Run through same processing as SelectInternal() to determine selected value and ensure it is included

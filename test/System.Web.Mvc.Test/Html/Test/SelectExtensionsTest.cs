@@ -1137,7 +1137,7 @@ namespace System.Web.Mvc.Html.Test
             // Act & Assert
             Assert.ThrowsArgument(() => helper.EnumDropDownListFor(model => model), paramName: "expression",
                 exceptionMessage: "Return type 'System.Web.Mvc.Html.Test.SelectExtensionsTest+EnumWithFlags' is not " +
-                "supported." + Environment.NewLine +
+                "supported. Type must not have a 'Flags' attribute." + Environment.NewLine +
                 "Parameter name: expression");
         }
 
@@ -1151,7 +1151,7 @@ namespace System.Web.Mvc.Html.Test
             // Act & Assert
             Assert.ThrowsArgument(() => helper.EnumDropDownListFor(m => m.WithFlags), paramName: "expression",
                 exceptionMessage: "Return type 'System.Web.Mvc.Html.Test.SelectExtensionsTest+EnumWithFlags' is not " +
-                "supported." + Environment.NewLine +
+                "supported. Type must not have a 'Flags' attribute." + Environment.NewLine +
                 "Parameter name: expression");
         }
 

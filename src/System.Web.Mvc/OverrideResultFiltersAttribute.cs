@@ -5,6 +5,7 @@ using System.Web.Mvc.Filters;
 namespace System.Web.Mvc
 {
     /// <summary>Represents a filter attribute that overrides result filters defined at a higher level.</summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
     public sealed class OverrideResultFiltersAttribute : FilterAttribute, IOverrideFilter
     {
         /// <inheritdoc />

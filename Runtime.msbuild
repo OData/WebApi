@@ -70,6 +70,7 @@
            RestorePackages against every project. -->
       <RestorePackages
           Include=".nuget\packages.config;
+                   .nuget\vs2013\packages.config;
                    src\Microsoft.AspNet.Mvc.Facebook\packages.config;
                    src\Microsoft.Web.WebPages.OAuth\packages.config;
                    src\System.Net.Http.Formatting.NetCore\packages.config;
@@ -80,6 +81,15 @@
     </ItemGroup>
     <Message Text="Restoring NuGet packages..." Importance="High" />
     <Exec Command='"$(NuGetExe)" restore "%(RestorePackages.Identity)" -PackagesDirectory packages -NonInteractive -Verbosity quiet -ConfigFile .nuget\NuGet.Config' />
+    <!-- Pick the right Microsoft.Web.FxCop package to use and copy it to a standard location. -->
+    <PropertyGroup>
+      <CustomFxCopRulesPath>packages\CustomFxCopRules</CustomFxCopRulesPath>
+      <MicrosoftWebFxCopVersion Condition=" '$(MicrosoftWebFxCopVersion)' == '' and '$(MSBuildToolsVersion)' == '12.0' ">2.0.0</MicrosoftWebFxCopVersion>
+      <MicrosoftWebFxCopVersion Condition=" '$(MicrosoftWebFxCopVersion)' == '' ">1.0.1</MicrosoftWebFxCopVersion>
+    </PropertyGroup>
+    <Copy Condition="!Exists('$(CustomFxCopRulesPath)\Microsoft.Web.FxCop.dll')"
+          SourceFiles="packages\Microsoft.Web.FxCop.$(MicrosoftWebFxCopVersion)\Microsoft.Web.FxCop.dll"
+          DestinationFolder="$(CustomFxCopRulesPath)" />
   </Target>
 
   <Target Name="Build" DependsOnTargets="RestorePackages">

@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Mvc.Properties;
@@ -38,8 +39,7 @@ namespace System.Web.Mvc.Html
                 Type checkedType = Nullable.GetUnderlyingType(type) ?? type;
                 if (checkedType.IsEnum)
                 {
-                    FlagsAttribute attribute = checkedType.GetCustomAttribute<FlagsAttribute>(inherit: false);
-                    isValid = attribute == null;
+                    isValid = !HasFlagsInternal(checkedType);
                 }
             }
 
@@ -255,6 +255,22 @@ namespace System.Web.Mvc.Html
             }
 
             return GetSelectList(metadata.ModelType, value);
+        }
+
+        internal static bool HasFlags(Type type)
+        {
+            Contract.Assert(type != null);
+
+            Type checkedType = Nullable.GetUnderlyingType(type) ?? type;
+            return HasFlagsInternal(checkedType);
+        }
+
+        private static bool HasFlagsInternal(Type type)
+        {
+            Contract.Assert(type != null);
+
+            FlagsAttribute attribute = type.GetCustomAttribute<FlagsAttribute>(inherit: false);
+            return attribute != null;
         }
 
         // Return non-empty name specified in a [Display] attribute for the given field, if any; field's name otherwise

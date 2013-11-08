@@ -28,6 +28,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [InlineData(typeof(IEdmEntityObject), true)]
         [InlineData(typeof(EdmComplexObject), true)]
         [InlineData(typeof(EdmEntityObject), true)]
+        [InlineData(typeof(ODataUntypedActionParameters), true)]
         public void Property_IsUntyped_HasRightValue(Type resourceType, bool expectedResult)
         {
             ODataDeserializerContext context = new ODataDeserializerContext { ResourceType = resourceType };

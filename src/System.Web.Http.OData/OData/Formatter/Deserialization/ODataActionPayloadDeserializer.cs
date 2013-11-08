@@ -46,10 +46,19 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("messageReader");
             }
 
-            // Create the correct resource type;
-            ODataActionParameters payload = new ODataActionParameters();
-
             IEdmFunctionImport action = GetFunctionImport(readContext);
+
+            // Create the correct resource type;
+            Dictionary<string, object> payload;
+            if (type == typeof(ODataActionParameters))
+            {
+                payload = new ODataActionParameters();
+            }
+            else
+            {
+                payload = new ODataUntypedActionParameters(action);
+            }
+
             ODataParameterReader reader = messageReader.CreateODataParameterReader(action);
 
             while (reader.Read())

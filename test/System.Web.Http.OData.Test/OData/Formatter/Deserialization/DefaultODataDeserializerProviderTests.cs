@@ -91,14 +91,16 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Assert.Same(firstCallDeserializer, secondCallDeserializer);
         }
 
-        [Fact]
-        public void GetODataDeserializer_ActionPayload()
+        [Theory]
+        [InlineData(typeof(ODataActionParameters))]
+        [InlineData(typeof(ODataUntypedActionParameters))]
+        public void GetODataDeserializer_ActionPayload(Type resourceType)
         {
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             ODataActionPayloadDeserializer basicActionPayload = deserializerProvider.GetODataDeserializer(_edmModel,
-                typeof(ODataActionParameters), request) as ODataActionPayloadDeserializer;
+                resourceType, request) as ODataActionPayloadDeserializer;
 
             Assert.NotNull(basicActionPayload);
         }

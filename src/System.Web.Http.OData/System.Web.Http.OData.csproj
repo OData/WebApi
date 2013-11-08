@@ -106,6 +106,7 @@
     <Compile Include="OData\IEdmObject.cs" />
     <Compile Include="OData\IEdmStructuredObject.cs" />
     <Compile Include="OData\ODataRoutingAttribute.cs" />
+    <Compile Include="OData\ODataUntypedActionParameters.cs" />
     <Compile Include="OData\PerRequestContentNegotiator.cs" />
     <Compile Include="OData\Query\Expressions\IDictionaryConvertible.cs" />
     <Compile Include="OData\Query\Expressions\NamedPropertyExpression.cs" />

@@ -54,6 +54,7 @@
             <Word>Realtime</Word>
             <Word>ModelName</Word>
             <Word>BSON</Word>
+            <Word>Untyped</Word>
         </Recognized>
         <Compound>
             <Term CompoundAlternate="WebPage">WebPage</Term>

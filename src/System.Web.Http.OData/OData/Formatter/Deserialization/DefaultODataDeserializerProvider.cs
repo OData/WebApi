@@ -97,7 +97,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return _entityReferenceLinkDeserializer;
             }
 
-            if (type == typeof(ODataActionParameters))
+            if (type == typeof(ODataActionParameters) || type == typeof(ODataUntypedActionParameters))
             {
                 return _actionPayloadDeserializer;
             }

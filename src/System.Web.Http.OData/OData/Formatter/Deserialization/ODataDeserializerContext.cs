@@ -63,7 +63,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 if (!_isUntyped.HasValue)
                 {
-                    _isUntyped = typeof(IEdmObject).IsAssignableFrom(ResourceType);
+                    _isUntyped = typeof(IEdmObject).IsAssignableFrom(ResourceType) ||
+                        typeof(ODataUntypedActionParameters) == ResourceType;
                 }
 
                 return _isUntyped.Value;

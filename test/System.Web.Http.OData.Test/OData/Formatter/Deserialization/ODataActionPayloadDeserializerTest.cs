@@ -123,6 +123,39 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
+        public void Can_DeserializePayload_InUntypedMode()
+        {
+            // Arrange
+            IEdmModel model = GetModel();
+            IEdmFunctionImport action = model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "Complex");
+            string body = @"{ ""Quantity"": 1 , ""Address"": { ""StreetAddress"":""1 Microsoft Way"", ""City"": ""Redmond"", ""State"": ""WA"", ""ZipCode"": 98052 } }";
+            ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(body));
+            message.SetHeader("Content-Type", "application/json;odata=verbose");
+            ODataMessageReaderSettings settings = new ODataMessageReaderSettings();
+            ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, settings, model);
+
+            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(new DefaultODataDeserializerProvider());
+            ODataPath path = CreatePath(model, action.Name);
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model, ResourceType = typeof(ODataUntypedActionParameters) };
+
+            // Act
+            ODataUntypedActionParameters payload = deserializer.Read(reader, typeof(ODataUntypedActionParameters), context) as ODataUntypedActionParameters;
+
+            // Assert
+            Assert.NotNull(payload);
+            Assert.Same(action, payload.Action);
+            Assert.True(payload.ContainsKey("Quantity"));
+            Assert.Equal(1, payload["Quantity"]);
+            Assert.True(payload.ContainsKey("Address"));
+            dynamic address = payload["Address"] as EdmComplexObject;
+            Assert.IsType<EdmComplexObject>(address);
+            Assert.Equal("1 Microsoft Way", address.StreetAddress);
+            Assert.Equal("Redmond", address.City);
+            Assert.Equal("WA", address.State);
+            Assert.Equal(98052, address.ZipCode);
+        }
+
+        [Fact]
         public void Can_deserialize_payload_with_primitive_collection_parameters()
         {
             string actionName = "PrimitiveCollection";

@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
@@ -202,7 +203,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
                 if (readContext.IsDeltaOfT)
                 {
-                    return Activator.CreateInstance(readContext.ResourceType, clrType);
+                    IEnumerable<string> structuralProperties = entityType.StructuralProperties().Select(p => p.Name);
+                    return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties);
                 }
                 else
                 {

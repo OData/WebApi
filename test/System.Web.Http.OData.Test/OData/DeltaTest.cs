@@ -253,6 +253,25 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
+        public void Put_DoesNotClear_NonUpdatableProperties()
+        {
+            // Arrange
+            string expectedString = "hello, world";
+            int expectedInt = 24;
+            var delta = new Delta<Base>(typeof(Base), new[] { "BaseInt" });
+            delta.TrySetPropertyValue("BaseInt", expectedInt);
+
+            Base entity = new Base { BaseInt = 42, BaseString = expectedString };
+
+            // Act
+            delta.Put(entity);
+
+            // Assert
+            Assert.Equal(expectedInt, entity.BaseInt);
+            Assert.Equal(expectedString, entity.BaseString);
+        }
+
+        [Fact]
         public void Patch_ClearsAndAddsTo_CollectionPropertiesWithNoSetter()
         {
             // Arrange

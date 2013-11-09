@@ -329,6 +329,26 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
+        public void CreateEntityResource_CreatesDeltaWith_ExpectedUpdatableProperties()
+        {
+            // Arrange
+            var deserializer = new ODataEntityDeserializer(_deserializerProvider);
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = _readContext.Model,
+                ResourceType = typeof(Delta<Product>)
+            };
+            var structuralProperties = _productEdmType.StructuralProperties().Select(p => p.Name);
+
+            // Act
+            Delta<Product> resource = deserializer.CreateEntityResource(_productEdmType, readContext) as Delta<Product>;
+
+            // Assert
+            Assert.NotNull(resource);
+            Assert.Equal(structuralProperties, resource.GetUnchangedPropertyNames());
+        }
+
+        [Fact]
         public void CreateEntityResource_CreatesEdmEntityObject_IfTypeLessMode()
         {
             // Arrange

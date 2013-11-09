@@ -18,9 +18,12 @@ namespace System.Web.Http.OData
     public class Delta<TEntityType> : TypedDelta, IDelta where TEntityType : class
     {
         // cache property accessors for this type and all its derived types.
-        private static ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TEntityType>>> _propertyCache = new ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TEntityType>>>();
+        private static ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TEntityType>>> _propertyCache
+            = new ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TEntityType>>>();
 
-        private Dictionary<string, PropertyAccessor<TEntityType>> _propertiesThatExist;
+        private Dictionary<string, PropertyAccessor<TEntityType>> _allProperties;
+        private HashSet<string> _updatableProperties;
+
         private HashSet<string> _changedProperties;
         private TEntityType _entity;
         private Type _entityType;
@@ -39,8 +42,20 @@ namespace System.Web.Http.OData
         /// <param name="entityType">The derived entity type for which the changes would be tracked.
         /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.</param>
         public Delta(Type entityType)
+            : this(entityType, updatableProperties: null)
         {
-            Initialize(entityType);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
+        /// </summary>
+        /// <param name="entityType">The derived entity type for which the changes would be tracked.
+        /// <param name="updatableProperties">The set of properties that can be updated or reset.</param>
+        /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.</param>
+        public Delta(Type entityType, IEnumerable<string> updatableProperties)
+        {
+            Reset(entityType);
+            InitializeProperties(updatableProperties);
         }
 
         /// <inheritdoc/>
@@ -61,7 +76,7 @@ namespace System.Web.Http.OData
         /// <inheritdoc/>
         public override void Clear()
         {
-            Initialize(_entityType);
+            Reset(_entityType);
         }
 
         /// <inheritdoc/>
@@ -72,12 +87,12 @@ namespace System.Web.Http.OData
                 throw Error.ArgumentNull("name");
             }
 
-            if (!_propertiesThatExist.ContainsKey(name))
+            if (!_updatableProperties.Contains(name))
             {
                 return false;
             }
 
-            PropertyAccessor<TEntityType> cacheHit = _propertiesThatExist[name];
+            PropertyAccessor<TEntityType> cacheHit = _allProperties[name];
 
             if (value == null && !EdmLibHelpers.IsNullable(cacheHit.Property.PropertyType))
             {
@@ -104,9 +119,9 @@ namespace System.Web.Http.OData
                 throw Error.ArgumentNull("name");
             }
 
-            if (_propertiesThatExist.ContainsKey(name))
+            PropertyAccessor<TEntityType> cacheHit;
+            if (_allProperties.TryGetValue(name, out cacheHit))
             {
-                PropertyAccessor<TEntityType> cacheHit = _propertiesThatExist[name];
                 value = cacheHit.GetValue(_entity);
                 return true;
             }
@@ -126,7 +141,7 @@ namespace System.Web.Http.OData
             }
 
             PropertyAccessor<TEntityType> value;
-            if (_propertiesThatExist.TryGetValue(name, out value))
+            if (_allProperties.TryGetValue(name, out value))
             {
                 type = value.Property.PropertyType;
                 return true;
@@ -157,7 +172,7 @@ namespace System.Web.Http.OData
         /// <inheritdoc/>
         public override IEnumerable<string> GetUnchangedPropertyNames()
         {
-            return _propertiesThatExist.Keys.Except(GetChangedPropertyNames());
+            return _updatableProperties.Except(GetChangedPropertyNames());
         }
 
         /// <summary>
@@ -177,7 +192,7 @@ namespace System.Web.Http.OData
                 throw Error.Argument("original", SRResources.DeltaTypeMismatch, _entityType, original.GetType());
             }
 
-            PropertyAccessor<TEntityType>[] propertiesToCopy = GetChangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
+            PropertyAccessor<TEntityType>[] propertiesToCopy = GetChangedPropertyNames().Select(s => _allProperties[s]).ToArray();
             foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy)
             {
                 propertyToCopy.Copy(_entity, original);
@@ -201,7 +216,7 @@ namespace System.Web.Http.OData
                 throw Error.Argument("original", SRResources.DeltaTypeMismatch, _entityType, original.GetType());
             }
 
-            PropertyAccessor<TEntityType>[] propertiesToCopy = GetUnchangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
+            IEnumerable<PropertyAccessor<TEntityType>> propertiesToCopy = GetUnchangedPropertyNames().Select(s => _allProperties[s]);
             foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy)
             {
                 propertyToCopy.Copy(_entity, original);
@@ -229,7 +244,7 @@ namespace System.Web.Http.OData
             CopyUnchangedValues(original);
         }
 
-        private void Initialize(Type entityType)
+        private void Reset(Type entityType)
         {
             if (entityType == null)
             {
@@ -244,18 +259,27 @@ namespace System.Web.Http.OData
             _entity = Activator.CreateInstance(entityType) as TEntityType;
             _changedProperties = new HashSet<string>();
             _entityType = entityType;
-            _propertiesThatExist = InitializePropertiesThatExist();
         }
 
-        private Dictionary<string, PropertyAccessor<TEntityType>> InitializePropertiesThatExist()
+        private void InitializeProperties(IEnumerable<string> updatableProperties)
         {
-            return _propertyCache.GetOrAdd(
+            _allProperties = _propertyCache.GetOrAdd(
                 _entityType,
                 (backingType) => backingType
                     .GetProperties()
                     .Where(p => (p.GetSetMethod() != null || p.PropertyType.IsCollection()) && p.GetGetMethod() != null)
                     .Select<PropertyInfo, PropertyAccessor<TEntityType>>(p => new FastPropertyAccessor<TEntityType>(p))
                     .ToDictionary(p => p.Property.Name));
+
+            if (updatableProperties != null)
+            {
+                _updatableProperties = new HashSet<string>(updatableProperties);
+                _updatableProperties.IntersectWith(_allProperties.Keys);
+            }
+            else
+            {
+                _updatableProperties = new HashSet<string>(_allProperties.Keys);
+            }
         }
     }
 }

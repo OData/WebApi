@@ -134,12 +134,14 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         {
             object sample;
 
-            // First, try get sample provided for a specific mediaType, controllerName, actionName and parameterNames.
-            // If not found, try get the sample provided for a specific mediaType, controllerName and actionName regardless of the parameterNames
-            // If still not found, try get the sample provided for a specific type and mediaType 
+            // First, try to get the sample provided for the specified mediaType, sampleDirection, controllerName, actionName and parameterNames.
+            // If not found, try to get the sample provided for the specified mediaType, sampleDirection, controllerName and actionName regardless of the parameterNames.
+            // If still not found, try to get the sample provided for the specified mediaType and type.
+            // Finally, try to get the sample provided for the specified mediaType.
             if (ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, parameterNames), out sample) ||
                 ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, new[] { "*" }), out sample) ||
-                ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, type), out sample))
+                ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, type), out sample) ||
+                ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType), out sample))
             {
                 return sample;
             }

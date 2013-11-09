@@ -112,7 +112,7 @@ Namespace Areas.HelpPage
 
             ' Do the sample generation based on formatters only if an action doesn't return an HttpResponseMessage.
             ' Here we cannot rely on formatters because we don't know what's in the HttpResponseMessage, it might not even use formatters.
-            If (Not type Is Nothing And Not GetType(HttpResponseMessage).IsAssignableFrom(type)) Then
+            If (Not type Is Nothing AndAlso Not GetType(HttpResponseMessage).IsAssignableFrom(type)) Then
                 Dim sampleObject As Object = GetSampleObject(type)
                 For Each formatter In formatters
                     For Each mediaType As MediaTypeHeaderValue In formatter.SupportedMediaTypes
@@ -145,12 +145,14 @@ Namespace Areas.HelpPage
         Public Overridable Function GetActionSample(controllerName As String, actionName As String, parameterNames As IEnumerable(Of String), type As Type, formatter As MediaTypeFormatter, mediaType As MediaTypeHeaderValue, sampleDirection As SampleDirection) As Object
             Dim sample As New Object
 
-            ' First, try get sample provided for a specific mediaType, controllerName, actionName and parameterNames.
-            ' If not found, try get the sample provided for a specific mediaType, controllerName and actionName regardless of the parameterNames
-            ' If still not found, try get the sample provided for a specific type and mediaType 
-            If (ActionSamples.TryGetValue(New HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, parameterNames), sample) Or
-                ActionSamples.TryGetValue(New HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, New String() {"*"}), sample) Or
-                ActionSamples.TryGetValue(New HelpPageSampleKey(mediaType, type), sample)) Then
+            ' First, try to get the sample provided for the specified mediaType, sampleDirection, controllerName, actionName and parameterNames.
+            ' If not found, try to get the sample provided for the specified mediaType, sampleDirection, controllerName and actionName regardless of the parameterNames.
+            ' If still not found, try to get the sample provided for the specified mediaType and type.
+            ' Finally, try to get the sample provided for the specified mediaType.
+            If (ActionSamples.TryGetValue(New HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, parameterNames), sample) OrElse
+                ActionSamples.TryGetValue(New HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, New String() {"*"}), sample) OrElse
+                ActionSamples.TryGetValue(New HelpPageSampleKey(mediaType, type), sample) OrElse
+                ActionSamples.TryGetValue(New HelpPageSampleKey(mediaType), sample)) Then
                 Return sample
             End If
             Return Nothing

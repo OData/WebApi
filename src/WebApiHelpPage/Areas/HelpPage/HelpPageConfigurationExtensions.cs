@@ -92,6 +92,17 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         }
 
         /// <summary>
+        /// Sets the sample directly for all actions with the specified media type.
+        /// </summary>
+        /// <param name="config">The <see cref="HttpConfiguration"/>.</param>
+        /// <param name="sample">The sample.</param>
+        /// <param name="mediaType">The media type.</param>
+        public static void SetSampleForMediaType(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType)
+        {
+            config.GetHelpPageSampleGenerator().ActionSamples.Add(new HelpPageSampleKey(mediaType), sample);
+        }
+
+        /// <summary>
         /// Sets the sample directly for all actions with the specified type and media type.
         /// </summary>
         /// <param name="config">The <see cref="HttpConfiguration"/>.</param>

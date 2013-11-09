@@ -26,7 +26,7 @@ Namespace Areas.HelpPage
 
         Public Overrides Function Equals(obj As Object) As Boolean
             Dim other As InvalidSample = TryCast(obj, InvalidSample)
-            Return Not other Is Nothing And ErrorMessage = other.ErrorMessage
+            Return Not other Is Nothing AndAlso ErrorMessage = other.ErrorMessage
         End Function
 
         Public Overrides Function GetHashCode() As Integer

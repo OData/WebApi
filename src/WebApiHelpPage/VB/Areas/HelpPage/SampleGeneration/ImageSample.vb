@@ -30,7 +30,7 @@ Namespace Areas.HelpPage
         Public Overrides Function Equals(obj As Object) As Boolean
             Dim other As ImageSample = TryCast(obj, ImageSample)
 
-            Return Not other Is Nothing And Src = other.Src
+            Return Not other Is Nothing AndAlso Src = other.Src
         End Function
 
         Public Overrides Function GetHashCode() As Integer

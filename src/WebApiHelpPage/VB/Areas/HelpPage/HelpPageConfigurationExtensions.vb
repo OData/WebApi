@@ -91,6 +91,17 @@ Namespace Areas.HelpPage
         End Sub
 
         ''' <summary>
+        ''' Sets the sample directly for all actions with the specified type.
+        ''' </summary>
+        ''' <param name="config">The <see cref="HttpConfiguration"/>.</param>
+        ''' <param name="sample">The sample.</param>
+        ''' <param name="mediaType">The media type.</param>
+        <Extension()>
+        Public Sub SetSampleForMediaType(ByVal config As HttpConfiguration, sample As Object, mediaType As MediaTypeHeaderValue)
+            config.GetHelpPageSampleGenerator().ActionSamples.Add(New HelpPageSampleKey(mediaType), sample)
+        End Sub
+
+        ''' <summary>
         ''' Sets the sample directly for all actions with the specified type and media type.
         ''' </summary>
         ''' <param name="config">The <see cref="HttpConfiguration"/>.</param>

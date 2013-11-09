@@ -16,23 +16,33 @@ Namespace Areas.HelpPage
         Private _sampleDirection As Nullable(Of SampleDirection)
 
         ''' <summary>
+        ''' Creates a new <see cref="HelpPageSampleKey"/> based on media type.
+        ''' </summary>
+        ''' <param name="mediaType">The media type.</param>
+        Public Sub New(mediaType As MediaTypeHeaderValue)
+            If (mediaType Is Nothing) Then
+                Throw New ArgumentNullException("mediaType")
+            End If
+
+            _actionName = String.Empty
+            _controllerName = String.Empty
+            _parameterNames = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+            _mediaType = mediaType
+        End Sub
+
+        ''' <summary>
         ''' Creates a new <see cref="HelpPageSampleKey"/> based on media type and CLR type.
         ''' </summary>
         ''' <param name="mediaType">The media type.</param>
         ''' <param name="type">The CLR type.</param>
         Public Sub New(mediaType As MediaTypeHeaderValue, type As Type)
-            If (mediaType Is Nothing) Then
-                Throw New ArgumentNullException("mediaType")
-            End If
+            MyClass.New(mediaType)
+
             If (type Is Nothing) Then
                 Throw New ArgumentNullException("type")
             End If
 
-            _controllerName = String.Empty
-            _actionName = String.Empty
-            _parameterNames = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
             _parameterType = type
-            _mediaType = mediaType
         End Sub
 
         ''' <summary>
@@ -55,6 +65,7 @@ Namespace Areas.HelpPage
             If (parameterNames Is Nothing) Then
                 Throw New ArgumentNullException("parameterNames")
             End If
+
             _controllerName = controllerName
             _actionName = actionName
             _parameterNames = New HashSet(Of String)(parameterNames, StringComparer.OrdinalIgnoreCase)
@@ -70,27 +81,13 @@ Namespace Areas.HelpPage
         ''' <param name="actionName">Name of the action.</param>
         ''' <param name="parameterNames">The parameter names.</param>
         Public Sub New(mediaType As MediaTypeHeaderValue, sampleDirection As SampleDirection, controllerName As String, actionName As String, parameterNames As IEnumerable(Of String))
+            MyClass.New(sampleDirection, controllerName, actionName, parameterNames)
+
             If (mediaType Is Nothing) Then
                 Throw New ArgumentNullException("mediaType")
             End If
-            If (Not [Enum].IsDefined(GetType(SampleDirection), sampleDirection)) Then
-                Throw New InvalidEnumArgumentException("sampleDirection", DirectCast(sampleDirection, Integer), GetType(SampleDirection))
-            End If
-            If (controllerName Is Nothing) Then
-                Throw New ArgumentNullException("controllerName")
-            End If
-            If (actionName Is Nothing) Then
-                Throw New ArgumentNullException("actionName")
-            End If
-            If (parameterNames Is Nothing) Then
-                Throw New ArgumentNullException("parameterNames")
-            End If
 
-            _controllerName = controllerName
-            _actionName = actionName
             _mediaType = mediaType
-            _parameterNames = New HashSet(Of String)(parameterNames, StringComparer.OrdinalIgnoreCase)
-            _sampleDirection = sampleDirection
         End Sub
 
         ''' <summary>

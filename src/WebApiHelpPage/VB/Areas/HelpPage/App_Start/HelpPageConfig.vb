@@ -1,4 +1,5 @@
 Imports System
+Imports System.Diagnostics.CodeAnalysis
 Imports System.Collections.Generic
 Imports System.Net.Http.Headers
 Imports System.Web
@@ -11,6 +12,12 @@ Namespace Areas.HelpPage
     ''' or you can provide the samples for the requests/responses.
     ''' </summary>
     Public Module HelpPageConfig
+        <SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters",
+            MessageId:="TextSample.New(string)",
+            Justification:="End users may choose to merge this string with existing localized resources.")>
+        <SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly",
+            MessageId:="text",
+            Justification:="Part of a URI.")>
         Public Sub Register(config As HttpConfiguration)
             '' Uncomment the following to use the documentation from XML documentation file.
             'config.SetDocumentationProvider(New XmlDocumentationProvider(HttpContext.Current.Server.MapPath("~/App_Data/XmlDocument.xml")))
@@ -23,6 +30,13 @@ Namespace Areas.HelpPage
             '     {GetType(String), "sample string"},
             '     {GetType(IEnumerable(Of String)), New String() {"sample 1", "sample 2"}}
             '})
+
+            ' Extend the following to use a preset object directly as the sample for all actions that support a media
+            ' type, regardless of the body parameter or return type. The lines below avoid display of binary content.
+            ' The BsonMediaTypeFormatter (if available) is not used to serialize the TextSample object.
+            config.SetSampleForMediaType(
+                New TextSample("Binary JSON content. See http://bsonspec.org for details."),
+                New MediaTypeHeaderValue("application/bson"))
 
             '' Uncomment the following to use "[0]=foo&[1]=bar" directly as the sample for all actions that support form URL encoded format
             '' and have IEnumerable(Of String) as the body parameter or return type.

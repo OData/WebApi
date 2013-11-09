@@ -13,10 +13,10 @@ Namespace Areas.HelpPage
     ''' </summary>
     Public Module HelpPageConfig
         <SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters",
-            MessageId:="TextSample.New(string)",
+            MessageId:="ROOT_PROJECT_NAMESPACE.Areas.HelpPage.TextSample.#ctor(System.String)",
             Justification:="End users may choose to merge this string with existing localized resources.")>
         <SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly",
-            MessageId:="text",
+            MessageId:="bsonspec",
             Justification:="Part of a URI.")>
         Public Sub Register(config As HttpConfiguration)
             '' Uncomment the following to use the documentation from XML documentation file.

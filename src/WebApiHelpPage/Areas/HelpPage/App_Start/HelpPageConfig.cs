@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
@@ -15,9 +15,10 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
     public static class HelpPageConfig
     {
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters",
-            MessageId = "TextSample.TextSample(string)",
+            MessageId = "ROOT_PROJECT_NAMESPACE.Areas.HelpPage.TextSample.#ctor(System.String)",
             Justification = "End users may choose to merge this string with existing localized resources.")]
-        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "text",
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly",
+            MessageId = "bsonspec",
             Justification = "Part of a URI.")]
         public static void Register(HttpConfiguration config)
         {

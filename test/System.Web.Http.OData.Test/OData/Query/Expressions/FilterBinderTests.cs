@@ -603,6 +603,24 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Fact]
+        public void MultipleAnys_WithSameRangeVariableName()
+        {
+            VerifyQueryDeserialization(
+               "AlternateIDs/any(n: n eq 42) and AlternateAddresses/any(n : n/City eq 'Redmond')",
+               "$it => ($it.AlternateIDs.Any(n => (n == 42)) AndAlso $it.AlternateAddresses.Any(n => (n.City == \"Redmond\")))",
+               NotTesting);
+        }
+
+        [Fact]
+        public void MultipleAlls_WithSameRangeVariableName()
+        {
+            VerifyQueryDeserialization(
+               "AlternateIDs/all(n: n eq 42) and AlternateAddresses/all(n : n/City eq 'Redmond')",
+               "$it => ($it.AlternateIDs.All(n => (n == 42)) AndAlso $it.AlternateAddresses.All(n => (n.City == \"Redmond\")))",
+               NotTesting);
+        }
+
+        [Fact]
         public void AnyOnNavigationEnumerableCollections_EmptyFilter()
         {
             VerifyQueryDeserialization(
@@ -1340,7 +1358,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         [Theory]
         [InlineData("Edm.Int32 eq 123", "The child type 'Edm.Int32' in a cast was not an entity type. Casts can only be performed on entity types.")]
-        [InlineData("ProductName/Edm.String eq 123", "Can only bind segments that are Navigation, Structural, Complex, or Collections. We found a segment "+ 
+        [InlineData("ProductName/Edm.String eq 123", "Can only bind segments that are Navigation, Structural, Complex, or Collections. We found a segment " +
             "'ProductName' that isn't any of those. Please revise the query.")]
         public void CastToNonEntityType_Throws(string filter, string error)
         {

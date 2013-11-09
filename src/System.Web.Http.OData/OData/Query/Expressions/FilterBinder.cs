@@ -399,18 +399,7 @@ namespace System.Web.Http.OData.Query.Expressions
             _lambdaParameters.Add(rangeVariable.Name, filterParameter);
 
             Expression body = Bind(expression);
-            LambdaExpression lambdaExpression = Expression.Lambda(body, filterParameter);
-
-            if (_parametersStack.Count != 0)
-            {
-                _lambdaParameters = _parametersStack.Pop();
-            }
-            else
-            {
-                _lambdaParameters = null;
-            }
-
-            return lambdaExpression;
+            return Expression.Lambda(body, filterParameter);
         }
 
         private Expression ApplyNullPropagationForFilterBody(Expression body)
@@ -912,6 +901,8 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Expression all = All(source, body);
 
+            ExitLamdbaScope();
+
             if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
             {
                 // IFF(source == null) null; else Any(body);
@@ -946,6 +937,8 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Expression any = Any(source, body);
 
+            ExitLamdbaScope();
+
             if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
             {
                 // IFF(source == null) null; else Any(body);
@@ -965,8 +958,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             ParameterExpression lambdaIt = null;
 
-            Contract.Assert(_lambdaParameters != null);
-            _parametersStack.Push(_lambdaParameters);
+            EnterLambdaScope();
 
             Dictionary<string, ParameterExpression> newParameters = new Dictionary<string, ParameterExpression>();
             foreach (RangeVariable rangeVariable in rangeVariables)
@@ -1071,6 +1063,24 @@ namespace System.Web.Http.OData.Query.Expressions
             }
 
             return source;
+        }
+
+        private void EnterLambdaScope()
+        {
+            Contract.Assert(_lambdaParameters != null);
+            _parametersStack.Push(_lambdaParameters);
+        }
+
+        private void ExitLamdbaScope()
+        {
+            if (_parametersStack.Count != 0)
+            {
+                _lambdaParameters = _parametersStack.Pop();
+            }
+            else
+            {
+                _lambdaParameters = null;
+            }
         }
 
         private static Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull)

@@ -1,9 +1,9 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\tools\WebStack.tasks.targets"/>
   <PropertyGroup>
-    <CodeTaskFactoryAssemblyFile Condition=" '$(CodeTaskFactoryAssemblyFile)' == '' And '$(BuildingInsideVisualStudio)' == 'true' And '$(VisualStudioVersion)' == '12.0' ">$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll</CodeTaskFactoryAssemblyFile>
+    <CodeTaskFactoryAssemblyFile Condition=" '$(CodeTaskFactoryAssemblyFile)' == '' And '$(MSBuildToolsVersion)' == '12.0' ">$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll</CodeTaskFactoryAssemblyFile>
     <CodeTaskFactoryAssemblyFile Condition=" '$(CodeTaskFactoryAssemblyFile)' == '' ">$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll</CodeTaskFactoryAssemblyFile>
-    <BuildTaskAssemblyReference Condition=" '$(BuildTaskAssemblyReference)' == '' And '$(BuildingInsideVisualStudio)' == 'true' And '$(VisualStudioVersion)' == '12.0' ">Microsoft.Build.Tasks.v12.0</BuildTaskAssemblyReference>
+    <BuildTaskAssemblyReference Condition=" '$(BuildTaskAssemblyReference)' == '' And '$(MSBuildToolsVersion)' == '12.0' ">Microsoft.Build.Tasks.v12.0</BuildTaskAssemblyReference>
     <BuildTaskAssemblyReference Condition=" '$(BuildTaskAssemblyReference)' == '' ">Microsoft.Build.Tasks.v4.0</BuildTaskAssemblyReference>
   </PropertyGroup>
   <UsingTask TaskName="NuGetPack" TaskFactory="CodeTaskFactory" AssemblyFile="$(CodeTaskFactoryAssemblyFile)">

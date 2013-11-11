@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Web.Http.Controllers;
 using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.Routing.Conventions;
+using System.Web.Http.ValueProviders;
 
 namespace System.Web.Http.OData
 {
@@ -36,11 +35,13 @@ namespace System.Web.Http.OData
 
             ServicesContainer services = controllerSettings.Services;
             Contract.Assert(services != null);
-            
+
             // Replace the action selector with one that is based on the OData routing conventions
             IHttpActionSelector originalActionSelector = services.GetActionSelector();
             IHttpActionSelector actionSelector = new ODataActionSelector(originalActionSelector);
-            controllerSettings.Services.Replace(typeof(IHttpActionSelector), actionSelector);
+            services.Replace(typeof(IHttpActionSelector), actionSelector);
+
+            services.Insert(typeof(ValueProviderFactory), 0, new ODataValueProviderFactory());
         }
     }
 }

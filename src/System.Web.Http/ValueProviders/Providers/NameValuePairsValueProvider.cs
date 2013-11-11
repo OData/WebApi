@@ -32,22 +32,6 @@ namespace System.Web.Http.ValueProviders.Providers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NameValuePairsValueProvider"/> class.
-        /// </summary>
-        /// <param name="values">The name value pairs.</param>
-        /// <param name="culture">The culture to return with ValueProviderResult instances.</param>
-        public NameValuePairsValueProvider(IDictionary<string, object> values, CultureInfo culture)
-        {
-            if (values == null)
-            {
-                throw Error.ArgumentNull("values");
-            }
-
-            _values = InitializeValues(values);
-            _culture = culture;
-        }
-
-        /// <summary>
         /// Creates a NameValuePairsProvider wrapping a lazily evaluated set of key value pairs.
         /// </summary>
         /// <param name="valuesFactory">A function returning the key value pairs to wrap.</param>
@@ -60,6 +44,22 @@ namespace System.Web.Http.ValueProviders.Providers
                 throw Error.ArgumentNull("valuesFactory");
             }
             _lazyValues = new Lazy<Dictionary<string, object>>(() => InitializeValues(valuesFactory()), isThreadSafe: true);
+            _culture = culture;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NameValuePairsValueProvider"/> class.
+        /// </summary>
+        /// <param name="values">The name value pairs.</param>
+        /// <param name="culture">The culture to return with ValueProviderResult instances.</param>
+        public NameValuePairsValueProvider(IDictionary<string, object> values, CultureInfo culture)
+        {
+            if (values == null)
+            {
+                throw Error.ArgumentNull("values");
+            }
+
+            _values = InitializeValues(values);
             _culture = culture;
         }
 
@@ -98,7 +98,6 @@ namespace System.Web.Http.ValueProviders.Providers
             }
         }
 
-        // This method turns a collection of name/value pairs into a Dictionary<string, object> for fast lookups
         [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily", Justification = "One of the casts is conditionally compiled")]
         private static Dictionary<string, object> InitializeValues<T>(IEnumerable<KeyValuePair<string, T>> nameValuePairs)
             where T : class

@@ -10,7 +10,7 @@ namespace System.Web.Http.ValueProviders
     /// an incoming <see cref="T:System.Net.Http.HttpRequestMessage"/>.
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1040:AvoidEmptyInterfaces", Justification = "Tagging interface is intentional to allow Linq TypeOf")]
-    internal interface IUriValueProviderFactory
+    public interface IUriValueProviderFactory
     {
     }
 }

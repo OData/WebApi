@@ -182,6 +182,7 @@
     <Compile Include="OData\Routing\ODataSegmentKinds.cs" />
     <Compile Include="OData\Routing\KeyValuePathSegment.cs" />
     <Compile Include="OData\Routing\LinksPathSegment.cs" />
+    <Compile Include="OData\Routing\ODataValueProviderFactory.cs" />
     <Compile Include="OData\Routing\UnresolvedPathSegment.cs" />
     <Compile Include="OData\Routing\ValuePathSegment.cs" />
     <Compile Include="OData\Routing\PropertyAccessPathSegment.cs" />

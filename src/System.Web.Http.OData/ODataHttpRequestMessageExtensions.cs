@@ -30,6 +30,7 @@ namespace System.Net.Http
         private const string NextPageLinkPropertyKey = "MS_NextPageLink";
         private const string MessageDetailKey = "MessageDetail";
         private const string SelectExpandClauseKey = "MS_SelectExpandClause";
+        private const string RoutingConventionDataStoreKey = "MS_RoutingConventionDataStore";
 
         private const string ODataMaxServiceVersion = "MaxDataServiceVersion";
 
@@ -402,6 +403,31 @@ namespace System.Net.Http
             }
 
             request.Properties[SelectExpandClauseKey] = selectExpandClause;
+        }
+
+        /// <summary>
+        /// Gets the data store used by <see cref="IODataRoutingConvention"/>s to store any custom route data.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The data store used by <see cref="IODataRoutingConvention"/>s to store any custom route data.</returns>
+        public static IDictionary<string, object> GetRoutingConventionsDataStore(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            object dataStore;
+            if (request.Properties.TryGetValue(RoutingConventionDataStoreKey, out dataStore))
+            {
+                return (IDictionary<string, object>)dataStore;
+            }
+            else
+            {
+                IDictionary<string, object> dataStoreDictionary = new Dictionary<string, object>();
+                request.Properties[RoutingConventionDataStoreKey] = dataStoreDictionary;
+                return dataStoreDictionary;
+            }
         }
     }
 }

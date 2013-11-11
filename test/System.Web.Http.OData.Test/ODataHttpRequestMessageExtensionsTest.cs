@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Linq;
+using System.Collections.Generic;
 using System.Web.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Routing;
@@ -175,6 +175,43 @@ namespace System.Net.Http
 
             // Assert
             Assert.Same(selectExpandCaluse, result);
+        }
+
+        [Fact]
+        public void GetRoutingConventionsDataStore_ThrowsArgumentNull_Request()
+        {
+            HttpRequestMessage request = null;
+            Assert.ThrowsArgumentNull(() => request.GetRoutingConventionsDataStore(), "request");
+        }
+
+        [Fact]
+        public void GetRoutingConventionsDataStore_ReturnsEmptyNonNullDictionary()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            // Act
+            IDictionary<string, object> result = request.GetRoutingConventionsDataStore();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRoutingConventionsDataStore_ReturnsSameInstance_IfCalledMultipleTimes()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            // Act
+            IDictionary<string, object> instance1 = request.GetRoutingConventionsDataStore();
+            IDictionary<string, object> instance2 = request.GetRoutingConventionsDataStore();
+
+            // Assert
+            Assert.NotNull(instance1);
+            Assert.NotNull(instance2);
+            Assert.Same(instance1, instance2);
         }
 
         private SelectExpandClause GetMockSelectExpandClause()

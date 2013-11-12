@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -304,10 +305,6 @@ namespace System.Web.Http.WebHost
             HttpResponseBase httpResponseBase = httpContextBase.Response;
             HttpContent responseContent = response.Content;
 
-            // Copy the response content headers only after ensuring they are complete.
-            // We ask for Content-Length first because HttpContent lazily computes this
-            // and only afterwards writes the value into the content headers.
-            var unused = responseContent.Headers.ContentLength;
             CopyHeaders(responseContent.Headers, httpContextBase);
 
             // Select output buffering based on the user-controlled buffering policy
@@ -504,10 +501,6 @@ namespace System.Web.Http.WebHost
                 return true;
             }
 
-            // Copy the headers from the newly generated HttpResponseMessage.
-            // We must ask the content for its content length because Content-Length
-            // is lazily computed and added to the headers.
-            var unused = errorResponse.Content.Headers.ContentLength;
             CopyHeaders(errorResponse.Content.Headers, httpContextBase);
 
             await WriteErrorResponseContentAsync(httpResponseBase, request, errorResponse, cancellationToken,
@@ -563,7 +556,52 @@ namespace System.Web.Http.WebHost
             httpResponseBase.StatusDescription = response.ReasonPhrase;
             httpResponseBase.TrySkipIisCustomErrors = true;
             EnsureSuppressFormsAuthenticationRedirect(httpContextBase);
+            PrepareHeaders(response);
             CopyHeaders(response.Headers, httpContextBase);
+        }
+
+        // Prepares Content-Length and Transfer-Encoding headers.
+        private static void PrepareHeaders(HttpResponseMessage response)
+        {
+            Contract.Assert(response != null);
+            HttpResponseHeaders responseHeaders = response.Headers;
+            Contract.Assert(responseHeaders != null);
+            HttpContent content = response.Content;
+            bool isTransferEncodingChunked = responseHeaders.TransferEncodingChunked == true;
+            HttpHeaderValueCollection<TransferCodingHeaderValue> transferEncoding = responseHeaders.TransferEncoding;
+
+            if (content != null)
+            {
+                HttpContentHeaders contentHeaders = content.Headers;
+                Contract.Assert(contentHeaders != null);
+
+                if (isTransferEncodingChunked)
+                {
+                    // According to section 4.4 of the HTTP 1.1 spec, HTTP responses that use chunked transfer
+                    // encoding must not have a content length set. Chunked should take precedence over content
+                    // length in this case because chunked is always set explicitly by users while the Content-Length
+                    // header can be added implicitly by System.Net.Http.
+                    contentHeaders.ContentLength = null;
+                }
+                else
+                {
+                    // Copy the response content headers only after ensuring they are complete.
+                    // We ask for Content-Length first because HttpContent lazily computes this
+                    // and only afterwards writes the value into the content headers.
+                    var unused = contentHeaders.ContentLength;
+                }
+            }
+
+            // Ignore the Transfer-Encoding header if it is just "chunked"; the host will provide it when no
+            // Content-Length is present (and we guarantee no Content-Length is present for chunked content above).
+            // HttpClient sets this header when it receives chunked content, but HttpContent does not include the
+            // frames. The ASP.NET contract is to set this header only when writing chunked frames to the stream.
+            // A Web API caller who desires custom framing would need to do a different Transfer-Encoding (such as
+            // "identity, chunked").
+            if (isTransferEncodingChunked && transferEncoding.Count == 1)
+            {
+                transferEncoding.Clear();
+            }
         }
 
         private static void ClearContentAndHeaders(HttpResponseBase httpResponseBase)

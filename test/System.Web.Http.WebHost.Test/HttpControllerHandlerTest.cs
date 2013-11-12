@@ -462,6 +462,109 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
+        public void CopyResponseAsync_IfTransferEncodingChunkedAndContentLengthAreBothSet_IgnoresContentLength()
+        {
+            // Arrange
+            HttpResponseBase responseBase = CreateMockHttpResponseBaseForResponse(Stream.Null).Object;
+            HttpContextBase contextBase = CreateStubContextBase(responseBase);
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            using (HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request })
+            {
+                response.Headers.TransferEncodingChunked = true;
+                response.Content = new StringContent("SomeContent");
+                Assert.NotNull(response.Content.Headers.ContentLength); // Guard; added by System.Net.Http.
+
+                // Act
+                Task task = HttpControllerHandler.CopyResponseAsync(contextBase, request, response, CancellationToken.None);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                task.ThrowIfFaulted();
+
+                Assert.DoesNotContain("Content-Length", responseBase.Headers.OfType<string>());
+            }
+        }
+
+        [Fact]
+        public void CopyResponseAsync_IfTransferEncodingIsJustChunked_DoesNotCopyHeaderToHost()
+        {
+            // Arrange
+            HttpResponseBase responseBase = CreateMockHttpResponseBaseForResponse(Stream.Null).Object;
+            HttpContextBase contextBase = CreateStubContextBase(responseBase);
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            using (HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request })
+            {
+                response.Headers.TransferEncodingChunked = true;
+
+                // Act
+                Task task = HttpControllerHandler.CopyResponseAsync(contextBase, request, response, CancellationToken.None);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                task.ThrowIfFaulted();
+
+                Assert.DoesNotContain("Transfer-Encoding", responseBase.Headers.OfType<string>());
+            }
+        }
+
+        [Fact]
+        public void CopyResponseAsync_IfTransferEncodingIsIdentity_CopiesHeaderToHost()
+        {
+            // Arrange
+            HttpResponseBase responseBase = CreateMockHttpResponseBaseForResponse(Stream.Null).Object;
+            HttpContextBase contextBase = CreateStubContextBase(responseBase);
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            using (HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request })
+            {
+                response.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("identity"));
+
+                // Act
+                Task task = HttpControllerHandler.CopyResponseAsync(contextBase, request, response, CancellationToken.None);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                task.ThrowIfFaulted();
+
+                Assert.Contains("Transfer-Encoding", responseBase.Headers.OfType<string>());
+                Assert.Equal(new string[] { "identity" }, responseBase.Headers.GetValues("Transfer-Encoding"));
+            }
+        }
+
+        [Fact]
+        public void CopyResponseAsync_IfTransferEncodingIsIdentityChunked_CopiesHeaderToHost()
+        {
+            // Arrange
+            HttpResponseBase responseBase = CreateMockHttpResponseBaseForResponse(Stream.Null).Object;
+            HttpContextBase contextBase = CreateStubContextBase(responseBase);
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            using (HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request })
+            {
+                response.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("identity"));
+                response.Headers.TransferEncodingChunked = true;
+                Assert.Equal("identity, chunked", response.Headers.TransferEncoding.ToString()); // Guard
+
+                // Act
+                Task task = HttpControllerHandler.CopyResponseAsync(contextBase, request, response, CancellationToken.None);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                task.ThrowIfFaulted();
+
+                Assert.Contains("Transfer-Encoding", responseBase.Headers.OfType<string>());
+                Assert.Equal(new string[] { "identity", "chunked" },
+                    responseBase.Headers.GetValues("Transfer-Encoding"));
+            }
+        }
+
+        [Fact]
         public void CopyResponseAsync_IfHandlerIsDefault_Returns_Error_Response_When_Formatter_Write_Task_Faults()
         {
             // Arrange
@@ -1175,6 +1278,13 @@ namespace System.Web.Http.WebHost
             contextMock.SetupGet(m => m.Request).Returns(request);
             contextMock.SetupGet(m => m.Response).Returns(response);
             return contextMock.Object;
+        }
+
+        private static HttpContextBase CreateStubContextBase(HttpResponseBase response)
+        {
+            Mock<HttpContextBase> mock = new Mock<HttpContextBase>(MockBehavior.Strict);
+            mock.SetupGet(m => m.Response).Returns(response);
+            return mock.Object;
         }
 
         private static IExceptionHandler CreateStubExceptionHandler()

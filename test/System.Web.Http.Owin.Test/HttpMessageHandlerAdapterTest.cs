@@ -735,7 +735,7 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
-        public void Invoke_AddsTransferEncodingChunkedHeaderOverContentLength()
+        public void Invoke_IfTransferEncodingChunkedAndContentLengthAreBothSet_IgnoresContentLength()
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
             response.Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("Hello world")));
@@ -748,25 +748,95 @@ namespace System.Web.Http.Owin
             adapter.Invoke(new OwinContext(environment)).Wait();
 
             var responseHeaders = environment["owin.ResponseHeaders"] as IDictionary<string, string[]>;
-            Assert.Equal("chunked", responseHeaders["Transfer-Encoding"][0]);
             Assert.False(responseHeaders.ContainsKey("Content-Length"));
         }
 
         [Fact]
-        public void Invoke_AddsTransferEncodingChunkedHeaderIfThereIsNoContentLength()
+        public void Invoke_IfTransferEncodingIsJustChunked_DoesNotCopyHeader()
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            response.Content = new ObjectContent<string>("blue", new JsonMediaTypeFormatter());
-            var handler = new HandlerStub() { Response = response };
-            var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
-            var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            // Arrange
+            IHostBufferPolicySelector bufferPolicy = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
 
-            adapter.Invoke(new OwinContext(environment)).Wait();
+            using (HttpResponseMessage response = CreateResponse())
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicy))
+            {
+                response.Headers.TransferEncodingChunked = true;
 
-            var responseHeaders = environment["owin.ResponseHeaders"] as IDictionary<string, string[]>;
-            Assert.Equal("chunked", responseHeaders["Transfer-Encoding"][0]);
-            Assert.False(responseHeaders.ContainsKey("Content-Length"));
+                IOwinRequest owinRequest = CreateFakeOwinRequest();
+                IOwinResponse owinResponse = CreateFakeOwinResponseWithHeaders();
+                IOwinContext context = CreateStubOwinContext(owinRequest, owinResponse);
+
+                // Act
+                Task task = product.Invoke(context);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                task.ThrowIfFaulted();
+
+                Assert.DoesNotContain("Transfer-Encoding", owinResponse.Headers.Keys);
+            }
+        }
+
+        [Fact]
+        public void Invoke_IfTransferEncodingIsIdentity_DoesCopyHeader()
+        {
+            // Arrange
+            IHostBufferPolicySelector bufferPolicy = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
+
+            using (HttpResponseMessage response = CreateResponse())
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicy))
+            {
+                response.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("identity"));
+
+                IOwinRequest owinRequest = CreateFakeOwinRequest();
+                IOwinResponse owinResponse = CreateFakeOwinResponseWithHeaders();
+                IOwinContext context = CreateStubOwinContext(owinRequest, owinResponse);
+
+                // Act
+                Task task = product.Invoke(context);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                task.ThrowIfFaulted();
+
+                Assert.Contains("Transfer-Encoding", owinResponse.Headers.Keys);
+                Assert.Equal("identity", owinResponse.Headers["Transfer-Encoding"]);
+            }
+        }
+
+        [Fact]
+        public void Invoke_IfTransferEncodingIsIdentityChunked_DoesCopyHeader()
+        {
+            // Arrange
+            IHostBufferPolicySelector bufferPolicy = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
+
+            using (HttpResponseMessage response = CreateResponse())
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicy))
+            {
+                response.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("identity"));
+                response.Headers.TransferEncodingChunked = true;
+                Assert.Equal("identity, chunked", response.Headers.TransferEncoding.ToString()); // Guard
+
+                IOwinRequest owinRequest = CreateFakeOwinRequest();
+                IOwinResponse owinResponse = CreateFakeOwinResponseWithHeaders();
+                IOwinContext context = CreateStubOwinContext(owinRequest, owinResponse);
+
+                // Act
+                Task task = product.Invoke(context);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                task.ThrowIfFaulted();
+
+                Assert.Contains("Transfer-Encoding", owinResponse.Headers.Keys);
+                Assert.Equal("identity,chunked", owinResponse.Headers["Transfer-Encoding"]);
+            }
         }
 
         [Fact]
@@ -1306,6 +1376,11 @@ namespace System.Web.Http.Owin
             }
         }
 
+        private static IHeaderDictionary CreateFakeHeaders()
+        {
+            return new HeaderDictionary(new Dictionary<string, string[]>());
+        }
+
         private static IOwinRequest CreateFakeOwinRequest()
         {
             Mock<IHeaderDictionary> headersMock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
@@ -1350,6 +1425,14 @@ namespace System.Web.Http.Owin
             Mock<IOwinResponse> mock = new Mock<IOwinResponse>();
             mock.Setup(r => r.Headers).Returns(new Mock<IHeaderDictionary>().Object);
             mock.SetupGet(r => r.Body).Returns(body);
+            return mock.Object;
+        }
+
+        private static IOwinResponse CreateFakeOwinResponseWithHeaders()
+        {
+            Mock<IOwinResponse> mock = new Mock<IOwinResponse>();
+            IHeaderDictionary headers = CreateFakeHeaders();
+            mock.Setup(r => r.Headers).Returns(headers);
             return mock.Object;
         }
 

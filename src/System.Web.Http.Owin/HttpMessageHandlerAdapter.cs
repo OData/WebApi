@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.ExceptionServices;
 using System.Security.Principal;
 using System.Threading;
@@ -187,7 +188,7 @@ namespace System.Web.Http.Owin
                         response = await BufferResponseContentAsync(request, response, cancellationToken);
                     }
 
-                    FixUpContentLengthHeaders(response);
+                    PrepareHeaders(response);
                     await SendResponseMessageAsync(request, response, owinResponse, cancellationToken);
                 }
             }
@@ -378,30 +379,49 @@ namespace System.Web.Http.Owin
             return request.CreateResponse(HttpStatusCode.InternalServerError);
         }
 
-        // Responsible for setting Content-Length and Transfer-Encoding if needed
-        private static void FixUpContentLengthHeaders(HttpResponseMessage response)
+        // Prepares Content-Length and Transfer-Encoding headers.
+        private static void PrepareHeaders(HttpResponseMessage response)
         {
-            HttpContent responseContent = response.Content;
-            if (responseContent != null)
+            Contract.Assert(response != null);
+            HttpResponseHeaders responseHeaders = response.Headers;
+            Contract.Assert(responseHeaders != null);
+            HttpContent content = response.Content;
+            bool isTransferEncodingChunked = responseHeaders.TransferEncodingChunked == true;
+            HttpHeaderValueCollection<TransferCodingHeaderValue> transferEncoding = responseHeaders.TransferEncoding;
+
+            if (content != null)
             {
-                if (response.Headers.TransferEncodingChunked == true)
+                HttpContentHeaders contentHeaders = content.Headers;
+                Contract.Assert(contentHeaders != null);
+
+                if (isTransferEncodingChunked)
                 {
                     // According to section 4.4 of the HTTP 1.1 spec, HTTP responses that use chunked transfer
                     // encoding must not have a content length set. Chunked should take precedence over content
                     // length in this case because chunked is always set explicitly by users while the Content-Length
                     // header can be added implicitly by System.Net.Http.
-                    responseContent.Headers.ContentLength = null;
+                    contentHeaders.ContentLength = null;
                 }
                 else
                 {
-                    // Triggers delayed content-length calculations.
-                    if (responseContent.Headers.ContentLength == null)
-                    {
-                        // If there is no content-length we can compute, then the response should use
-                        // chunked transfer encoding to prevent the server from buffering the content
-                        response.Headers.TransferEncodingChunked = true;
-                    }
+                    // Copy the response content headers only after ensuring they are complete.
+                    // We ask for Content-Length first because HttpContent lazily computes this
+                    // and only afterwards writes the value into the content headers.
+                    var unused = contentHeaders.ContentLength;
                 }
+            }
+
+            // Ignore the Transfer-Encoding header if it is just "chunked"; the host will likely provide it when no
+            // Content-Length is present (and if the host does not, there's not much better this code could do to
+            // transmit the current response, since HttpContent is assumed to be unframed; in that case, silently drop
+            // the Transfer-Encoding: chunked header).
+            // HttpClient sets this header when it receives chunked content, but HttpContent does not include the
+            // frames. The OWIN contract is to set this header only when writing chunked frames to the stream.
+            // A Web API caller who desires custom framing would need to do a different Transfer-Encoding (such as
+            // "identity, chunked").
+            if (isTransferEncodingChunked && transferEncoding.Count == 1)
+            {
+                transferEncoding.Clear();
             }
         }
 

@@ -26,6 +26,7 @@ namespace System.Web.Mvc.Html.Test
                     { typeof(EnumHelperTest), false },
                     { typeof(Enum), false },
                     { typeof(EnumWithDisplay), true },
+                    { typeof(EnumWithoutAnything), true },
                     { typeof(EnumWithoutZero?), true },
                     { typeof(EnumWithFlags), false },
                     { typeof(EnumWithFlags?), false },
@@ -94,6 +95,7 @@ namespace System.Web.Mvc.Html.Test
                         "{\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
                         "{\"Selected\":false,\"Text\":\"Third\",\"Value\":\"4\"}," +
                         "{\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"6\"}]" },
+                    { typeof(EnumWithoutAnything), "[]" },
                     { typeof(EnumWithoutZero),
                         "[{\"Selected\":false,\"Text\":\"First\",\"Value\":\"12\"}," +
                         "{\"Selected\":false,\"Text\":\"Second\",\"Value\":\"13\"}," +
@@ -168,6 +170,8 @@ namespace System.Web.Mvc.Html.Test
                         "{\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
                         "{\"Selected\":true,\"Text\":\"Third\",\"Value\":\"4\"}," +
                         "{\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"6\"}]" },
+                    { typeof(EnumWithoutAnything), (EnumWithoutAnything)0,
+                        "[{\"Selected\":true,\"Text\":\"\",\"Value\":\"0\"}]" },
                     { typeof(EnumWithoutZero), EnumWithoutZero.Fourth,
                         "[{\"Selected\":false,\"Text\":\"First\",\"Value\":\"12\"}," +
                         "{\"Selected\":false,\"Text\":\"Second\",\"Value\":\"13\"}," +
@@ -364,6 +368,10 @@ namespace System.Web.Mvc.Html.Test
             Two,
             [Display(Name = "Fourth")]
             Three,
+        }
+
+        private enum EnumWithoutAnything : byte
+        {
         }
 
         private enum EnumWithoutZero : byte

@@ -204,8 +204,17 @@ namespace System.Web.Mvc.Html
                 currentValue = metadata.Model as Enum;
             }
 
-            return DropDownListHelper(htmlHelper, metadata, expressionName,
-                EnumHelper.GetSelectList(metadata.ModelType, currentValue), optionLabel, htmlAttributes);
+            IList<SelectListItem> selectList = EnumHelper.GetSelectList(metadata.ModelType, currentValue);
+            if (!String.IsNullOrEmpty(optionLabel) && selectList.Count != 0 && String.IsNullOrEmpty(selectList[0].Text))
+            {
+                // Were given an optionLabel and the select list has a blank initial slot.  Combine.
+                selectList[0].Text = optionLabel;
+
+                // Use the option label just once; don't pass it down the lower-level helpers.
+                optionLabel = null;
+            }
+
+            return DropDownListHelper(htmlHelper, metadata, expressionName, selectList, optionLabel, htmlAttributes);
         }
 
         private static MvcHtmlString DropDownListHelper(HtmlHelper htmlHelper, ModelMetadata metadata, string expression, IEnumerable<SelectListItem> selectList, string optionLabel, IDictionary<string, object> htmlAttributes)

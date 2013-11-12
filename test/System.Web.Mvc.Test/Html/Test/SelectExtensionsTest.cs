@@ -1180,6 +1180,27 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        public void EnumDropDownListForIsSuccessfulIfNoValueProvidedAndEnumEmpty()
+        {
+            // Arrange
+            ViewDataDictionary<EnumWithoutAnything> viewData = new ViewDataDictionary<EnumWithoutAnything>
+            {
+                TemplateInfo = new TemplateInfo { HtmlFieldPrefix = "MyExpression", },
+            };
+            HtmlHelper<EnumWithoutAnything> helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            MvcHtmlString html = helper.EnumDropDownListFor(model => model, optionLabel: null);
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"MyExpression\" name=\"MyExpression\">" +
+                "<option selected=\"selected\" value=\"0\"></option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
         public void EnumDropDownListForUsesModelValueIfNotProvidedInViewData()
         {
             // Arrange
@@ -1221,6 +1242,25 @@ namespace System.Web.Mvc.Html.Test
                 "<option value=\"1\">Second</option>" + Environment.NewLine +
                 "<option selected=\"selected\" value=\"2\">Third</option>" + Environment.NewLine +
                 "<option value=\"3\">Fourth</option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void EnumDropDownListForUsesModelValueIfNotProvidedInViewData_EnumWithoutAnything()
+        {
+            // Arrange
+            EnumModel model = new EnumModel { WithoutAnything = (EnumWithoutAnything)23, };
+            HtmlHelper<EnumModel> helper =
+                MvcHelper.GetHtmlHelper(new ViewDataDictionary<EnumModel>(model));
+
+            // Act
+            MvcHtmlString html = helper.EnumDropDownListFor(m => m.WithoutAnything, optionLabel: "My Label");
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"WithoutAnything\" name=\"WithoutAnything\">" +
+                "<option selected=\"selected\" value=\"23\">My Label</option>" + Environment.NewLine +
                 "</select>",
                 html.ToHtmlString());
         }
@@ -1397,6 +1437,117 @@ namespace System.Web.Mvc.Html.Test
                 "<option value=\"0\">First</option>" + Environment.NewLine +
                 "<option value=\"1\">Second</option>" + Environment.NewLine +
                 "<option selected=\"selected\" value=\"2\">Third</option>" + Environment.NewLine +
+                "<option value=\"3\">Fourth</option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void EnumDropDownListForWithTitle()
+        {
+            // Arrange
+            HtmlHelper<EnumModel> helper = MvcHelper.GetHtmlHelper(_enumDropDownListViewData);
+
+            // Act
+            MvcHtmlString html = helper.EnumDropDownListFor(m => m.WithDisplay, optionLabel: "[Select Something]");
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"WithDisplay\" name=\"WithDisplay\">" +
+                "<option value=\"\">[Select Something]</option>" + Environment.NewLine +
+                "<option value=\"0\">First</option>" + Environment.NewLine +
+                "<option value=\"1\">Second</option>" + Environment.NewLine +
+                "<option selected=\"selected\" value=\"2\">Third</option>" + Environment.NewLine +
+                "<option value=\"3\">Fourth</option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void EnumDropDownListForWithTitle_Unrecognized()
+        {
+            // Arrange
+            ViewDataDictionary<EnumModel> viewData = new ViewDataDictionary<EnumModel>(_enumDropDownListViewData);
+            viewData["WithDisplay"] = (EnumWithDisplay)34;
+            HtmlHelper<EnumModel> helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            MvcHtmlString html = helper.EnumDropDownListFor(m => m.WithDisplay, optionLabel: "[Select Something]");
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"WithDisplay\" name=\"WithDisplay\">" +
+                "<option selected=\"selected\" value=\"34\">[Select Something]</option>" + Environment.NewLine +
+                "<option value=\"0\">First</option>" + Environment.NewLine +
+                "<option value=\"1\">Second</option>" + Environment.NewLine +
+                "<option value=\"2\">Third</option>" + Environment.NewLine +
+                "<option value=\"3\">Fourth</option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void EnumDropDownListForWithTitle_NullableNull()
+        {
+            // Arrange
+            HtmlHelper<EnumModel> helper = MvcHelper.GetHtmlHelper(_enumDropDownListViewData);
+
+            // Act
+            MvcHtmlString html = helper.EnumDropDownListFor(m => m.WithNullable, optionLabel: "[Select Something]");
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"WithNullable\" name=\"WithNullable\">" +
+                "<option selected=\"selected\" value=\"\">[Select Something]</option>" + Environment.NewLine +
+                "<option value=\"0\">First</option>" + Environment.NewLine +
+                "<option value=\"1\">Second</option>" + Environment.NewLine +
+                "<option value=\"2\">Third</option>" + Environment.NewLine +
+                "<option value=\"3\">Fourth</option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void EnumDropDownListForWithTitle_NullableNotNull()
+        {
+            // Arrange
+            ViewDataDictionary<EnumModel> viewData = new ViewDataDictionary<EnumModel>(_enumDropDownListViewData);
+            viewData["WithNullable"] = EnumWithDisplay.Three;
+            HtmlHelper<EnumModel> helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            MvcHtmlString html = helper.EnumDropDownListFor(m => m.WithNullable, optionLabel: "[Select Something]");
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"WithNullable\" name=\"WithNullable\">" +
+                "<option value=\"\">[Select Something]</option>" + Environment.NewLine +
+                "<option value=\"0\">First</option>" + Environment.NewLine +
+                "<option value=\"1\">Second</option>" + Environment.NewLine +
+                "<option value=\"2\">Third</option>" + Environment.NewLine +
+                "<option selected=\"selected\" value=\"3\">Fourth</option>" + Environment.NewLine +
+                "</select>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void EnumDropDownListForWithTitle_NullableUnrecognized()
+        {
+            // Arrange
+            ViewDataDictionary<EnumModel> viewData = new ViewDataDictionary<EnumModel>(_enumDropDownListViewData);
+            viewData["WithNullable"] = (EnumWithDisplay)34;
+            HtmlHelper<EnumModel> helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            MvcHtmlString html = helper.EnumDropDownListFor(m => m.WithNullable, optionLabel: "[Select Something]");
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"WithNullable\" name=\"WithNullable\">" +
+                "<option selected=\"selected\" value=\"34\">[Select Something]</option>" + Environment.NewLine +
+                "<option value=\"0\">First</option>" + Environment.NewLine +
+                "<option value=\"1\">Second</option>" + Environment.NewLine +
+                "<option value=\"2\">Third</option>" + Environment.NewLine +
                 "<option value=\"3\">Fourth</option>" + Environment.NewLine +
                 "</select>",
                 html.ToHtmlString());
@@ -2663,6 +2814,7 @@ namespace System.Web.Mvc.Html.Test
             public EnumWithDuplicates WithDuplicates { get; set; }
             public EnumWithFlags WithFlags { get; set; }
             public EnumWithDisplay? WithNullable { get; set; }
+            public EnumWithoutAnything WithoutAnything { get; set; }
         }
 
         // enum definitions
@@ -2685,6 +2837,10 @@ namespace System.Web.Mvc.Html.Test
             Second,
             Third = 1,
             Fourth,
+        }
+
+        private enum EnumWithoutAnything : byte
+        {
         }
 
         [Flags]

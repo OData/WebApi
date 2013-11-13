@@ -25,7 +25,8 @@ namespace System.Web.Http.Routing
 namespace System.Web.Mvc.Routing
 #endif
 {
-    internal class DirectRouteProviderContext
+    /// <summary>Represents a context that supports creating a direct route.</summary>
+    public class DirectRouteProviderContext
     {
         private readonly string _actionName;
 
@@ -40,7 +41,7 @@ namespace System.Web.Mvc.Routing
         private readonly string _controllerPrefix;
 #endif
 
-        private readonly IEnumerable<TActionDescriptor> _actions;
+        private readonly IReadOnlyCollection<TActionDescriptor> _actions;
         private readonly IInlineConstraintResolver _inlineConstraintResolver;
 
 #if !ASPNETWEBAPI
@@ -48,11 +49,23 @@ namespace System.Web.Mvc.Routing
 #endif
 
 #if ASPNETWEBAPI
-        public DirectRouteProviderContext(string prefix, IEnumerable<HttpActionDescriptor> actions,
+        /// <summary>Initializes a new instance of the <see cref="DirectRouteProviderContext"/></summary>
+        /// <param name="prefix">The route prefix, if any, defined by the controller.</param>
+        /// <param name="actions">The action descriptors to which to create a route.</param>
+        /// <param name="inlineConstraintResolver">The inline constraint resolver.</param>
+        public DirectRouteProviderContext(string prefix, IReadOnlyCollection<HttpActionDescriptor> actions,
             IInlineConstraintResolver inlineConstraintResolver)
 #else
+        /// <summary>Initializes a new instance of the <see cref="DirectRouteProviderContext"/></summary>
+        /// <param name="areaPrefix">The route prefix, if any, defined by the area.</param>
+        /// <param name="controllerPrefix">The route prefix, if any, defined by the controller.</param>
+        /// <param name="actions">The action descriptors to which to create a route.</param>
+        /// <param name="inlineConstraintResolver">The inline constraint resolver.</param>
+        /// <param name="targetIsAction">
+        /// A value indicating whether the route is configured at the action or controller level.
+        /// </param>
         public DirectRouteProviderContext(string areaPrefix, string controllerPrefix,
-            IEnumerable<ActionDescriptor> actions, IInlineConstraintResolver inlineConstraintResolver,
+            IReadOnlyCollection<ActionDescriptor> actions, IInlineConstraintResolver inlineConstraintResolver,
             bool targetIsAction)
 #endif
         {
@@ -76,59 +89,89 @@ namespace System.Web.Mvc.Routing
             _inlineConstraintResolver = inlineConstraintResolver;
 
             TActionDescriptor firstDescriptor = actions.FirstOrDefault();
-            Contract.Assert(firstDescriptor != null);
-            _actionName = firstDescriptor.ActionName;
 
+            if (firstDescriptor != null)
+            {
+                _actionName = firstDescriptor.ActionName;
 #if !ASPNETWEBAPI
-            ControllerDescriptor controllerDescriptor = firstDescriptor.ControllerDescriptor;
-            Contract.Assert(controllerDescriptor != null);
-            _controllerName = controllerDescriptor.ControllerName;
+                ControllerDescriptor controllerDescriptor = firstDescriptor.ControllerDescriptor;
 
-            _targetIsAction = targetIsAction;
+                if (controllerDescriptor != null)
+                {
+                    _controllerName = controllerDescriptor.ControllerName;
+                }
+
+                _targetIsAction = targetIsAction;
 #endif
+            }
         }
 
 #if ASPNETWEBAPI
+        /// <summary>Gets the route prefix, if any, defined by the controller.</summary>
         public string Prefix
         {
             get { return _prefix; }
         }
 #else
+        /// <summary>Gets the route prefix, if any, defined by the area.</summary>
         public string AreaPrefix
         {
             get { return _areaPrefix; }
         }
 
+        /// <summary>Gets the route prefix, if any, defined by the controller.</summary>
         public string ControllerPrefix
         {
             get { return _controllerPrefix; }
         }
 #endif
 
-        public IEnumerable<TActionDescriptor> Actions
+        /// <summary>Gets the action descriptors to which to create a route.</summary>
+        public IReadOnlyCollection<TActionDescriptor> Actions
         {
             get { return _actions; }
         }
 
+        /// <summary>Gets the inline constraint resolver.</summary>
         public IInlineConstraintResolver InlineConstraintResolver
         {
             get { return _inlineConstraintResolver; }
         }
 
 #if !ASPNETWEBAPI
+        /// <summary>
+        /// Gets a value indicating whether the route is configured at the action or controller level.
+        /// </summary>
+        /// <remarks>
+        /// <see langword="true"/> when the route is configured at the action level; otherwise <see langword="false"/>
+        /// (if the route is configured at the controller level).
+        /// </remarks>
         public bool TargetIsAction
         {
             get { return _targetIsAction; }
         }
 #endif
 
-        public virtual DirectRouteBuilder CreateBuilder(string template)
+        /// <summary>Creates a route builder that can build a route matching this context.</summary>
+        /// <param name="template">The route template.</param>
+        /// <returns>A route builder that can build a route matching this context.</returns>
+        public DirectRouteBuilder CreateBuilder(string template)
+        {
+            return CreateBuilderInternal(template);
+        }
+
+        internal virtual DirectRouteBuilder CreateBuilderInternal(string template)
         {
             return CreateBuilder(template, _inlineConstraintResolver);
         }
 
-        internal virtual DirectRouteBuilder CreateBuilder(string template,
-            IInlineConstraintResolver constraintResolver)
+        /// <summary>Creates a route builder that can build a route matching this context.</summary>
+        /// <param name="template">The route template.</param>
+        /// <param name="constraintResolver">
+        /// The inline constraint resolver to use, if any; otherwise, <see langword="null"/>.
+        /// </param>
+        /// <returns>A route builder that can build a route matching this context.</returns>
+        public DirectRouteBuilder CreateBuilder(string template, IInlineConstraintResolver constraintResolver)
         {
 #if ASPNETWEBAPI
             DirectRouteBuilder builder = new DirectRouteBuilder(_actions);
@@ -141,8 +184,6 @@ namespace System.Web.Mvc.Routing
 #else
             string prefixedTemplate = BuildRouteTemplate(_areaPrefix, _controllerPrefix, template ?? String.Empty);
 #endif
-            Contract.Assert(prefixedTemplate != null);
-
             ValidateTemplate(prefixedTemplate);
 
             if (constraintResolver != null)
@@ -197,10 +238,8 @@ namespace System.Web.Mvc.Routing
 #else
         internal static string BuildRouteTemplate(string areaPrefix, string prefix, string template)
         {
-            Contract.Assert(template != null);
-
             // If the attribute's template starts with '~/', ignore the area and controller prefixes
-            if (template.StartsWith("~/", StringComparison.Ordinal))
+            if (template != null && template.StartsWith("~/", StringComparison.Ordinal))
             {
                 return template.Substring(2);
             }
@@ -241,7 +280,7 @@ namespace System.Web.Mvc.Routing
 
         private void ValidateTemplate(string template)
         {
-            if (template.StartsWith("/", StringComparison.Ordinal))
+            if (template != null && template.StartsWith("/", StringComparison.Ordinal))
             {
 #if ASPNETWEBAPI
                 string errorMessage = Error.Format(SRResources.AttributeRoutes_InvalidTemplate, template, _actionName);

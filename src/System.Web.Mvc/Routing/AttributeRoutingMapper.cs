@@ -191,7 +191,7 @@ namespace System.Web.Mvc.Routing
         }
 
         private static void AddRouteEntries(SubRouteCollection collector, string areaPrefix, string prefix,
-            IEnumerable<IDirectRouteProvider> providers, IList<ActionDescriptor> actions,
+            IEnumerable<IDirectRouteProvider> providers, IReadOnlyCollection<ActionDescriptor> actions,
             IInlineConstraintResolver constraintResolver, bool targetIsAction)
         {
             foreach (IDirectRouteProvider provider in providers)
@@ -202,8 +202,8 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-        private static RouteEntry CreateRouteEntry(string areaPrefix, string prefix, IDirectRouteProvider provider,
-            IList<ActionDescriptor> actions, IInlineConstraintResolver constraintResolver, bool targetIsAction)
+        internal static RouteEntry CreateRouteEntry(string areaPrefix, string prefix, IDirectRouteProvider provider,
+            IReadOnlyCollection<ActionDescriptor> actions, IInlineConstraintResolver constraintResolver, bool targetIsAction)
         {
             Contract.Assert(provider != null);
 
@@ -215,6 +215,16 @@ namespace System.Web.Mvc.Routing
             {
                 throw new InvalidOperationException(Error.Format(MvcResources.TypeMethodMustNotReturnNull,
                     typeof(IDirectRouteProvider).Name, "CreateRoute"));
+            }
+
+            Route route = entry.Route;
+            Contract.Assert(route != null);
+
+            ActionDescriptor[] targetActions = route.GetTargetActionDescriptors();
+
+            if (targetActions == null || targetActions.Length == 0)
+            {
+                throw new InvalidOperationException(MvcResources.DirectRoute_MissingActionDescriptors);
             }
 
             return entry;

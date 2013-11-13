@@ -150,8 +150,8 @@ namespace System.Web.Http.Routing
         }
 
         private static void AddRouteEntries(SubRouteCollection collector, string prefix,
-            IReadOnlyCollection<IDirectRouteProvider> providers, IEnumerable<ReflectedHttpActionDescriptor> actions,
-            IInlineConstraintResolver constraintResolver)
+            IReadOnlyCollection<IDirectRouteProvider> providers,
+            IReadOnlyCollection<HttpActionDescriptor> actions, IInlineConstraintResolver constraintResolver)
         {
             foreach (IDirectRouteProvider routeProvider in providers)
             {
@@ -161,8 +161,8 @@ namespace System.Web.Http.Routing
             }
         }
 
-        private static RouteEntry CreateRouteEntry(string prefix, IDirectRouteProvider provider,
-            IEnumerable<ReflectedHttpActionDescriptor> actions, IInlineConstraintResolver constraintResolver)
+        internal static RouteEntry CreateRouteEntry(string prefix, IDirectRouteProvider provider,
+            IReadOnlyCollection<HttpActionDescriptor> actions, IInlineConstraintResolver constraintResolver)
         {
             Contract.Assert(provider != null);
 
@@ -176,7 +176,37 @@ namespace System.Web.Http.Routing
                     typeof(IDirectRouteProvider).Name, "CreateRoute");
             }
 
+            IHttpRoute route = entry.Route;
+            Contract.Assert(route != null);
+
+            HttpActionDescriptor[] targetActions = GetTargetActionDescriptors(route);
+
+            if (targetActions == null || targetActions.Length == 0)
+            {
+                throw new InvalidOperationException(SRResources.DirectRoute_MissingActionDescriptors);
+            }
+
             return entry;
+        }
+
+        private static HttpActionDescriptor[] GetTargetActionDescriptors(IHttpRoute route)
+        {
+            Contract.Assert(route != null);
+            IDictionary<string, object> dataTokens = route.DataTokens;
+
+            if (dataTokens == null)
+            {
+                return null;
+            }
+
+            HttpActionDescriptor[] actions;
+
+            if (!dataTokens.TryGetValue<HttpActionDescriptor[]>(RouteDataTokenKeys.Actions, out actions))
+            {
+                return null;
+            }
+
+            return actions;
         }
 
         private static string GetRoutePrefix(HttpControllerDescriptor controller)

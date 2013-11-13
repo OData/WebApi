@@ -115,7 +115,7 @@ namespace System.Web.Http.Description
         }
 
         private static IHttpRoute CreateDirectRoute(string template,
-            IEnumerable<ReflectedHttpActionDescriptor> actions)
+            IReadOnlyCollection<ReflectedHttpActionDescriptor> actions)
         {
             DirectRouteBuilder builder = new DirectRouteBuilder(actions);
             builder.Template = template;

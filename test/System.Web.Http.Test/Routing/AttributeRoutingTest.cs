@@ -603,7 +603,7 @@ namespace System.Web.Http.Routing
 
             public bool ConstraintMatches { get; set; }
 
-            public override HttpRouteValueDictionary Constraints
+            public override IDictionary<string, object> Constraints
             {
                 get
                 {

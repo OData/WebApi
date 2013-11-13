@@ -487,4 +487,7 @@ Duplicates:
 {1}
 {2}</value>
   </data>
+  <data name="DirectRoute_MissingActionDescriptors" xml:space="preserve">
+    <value>The route does not have any associated action descriptors. Routing requires that each direct route map to a non-empty set of actions.</value>
+  </data>
 </root>

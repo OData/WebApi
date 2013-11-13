@@ -58,7 +58,7 @@ namespace System.Web.Http.Routing
         }
 
         private static IHttpRoute BuildWithoutResolver(string template,
-            IEnumerable<HttpActionDescriptor> actions)
+            IReadOnlyCollection<HttpActionDescriptor> actions)
         {
             DirectRouteProviderContext context = new DirectRouteProviderContext(null, actions,
                 new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object);

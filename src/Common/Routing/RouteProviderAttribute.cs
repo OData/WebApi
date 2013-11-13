@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
 #if ASPNETWEBAPI
-using TRouteDictionary = System.Web.Http.Routing.HttpRouteValueDictionary;
+using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
 #else
 using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
 #endif
@@ -46,12 +46,8 @@ namespace System.Web.Mvc.Routing
             get { return null; }
         }
 
-        internal RouteEntry CreateRoute(DirectRouteProviderContext context)
-        {
-            return ((IDirectRouteProvider)this).CreateRoute(context);
-        }
-
-        RouteEntry IDirectRouteProvider.CreateRoute(DirectRouteProviderContext context)
+        /// <inheritdoc />
+        public RouteEntry CreateRoute(DirectRouteProviderContext context)
         {
             Contract.Assert(context != null);
             DirectRouteBuilder builder = context.CreateBuilder(Template);

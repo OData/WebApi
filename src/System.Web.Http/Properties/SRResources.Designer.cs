@@ -349,6 +349,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The route does not have any associated action descriptors. Routing requires that each direct route map to a non-empty set of actions..
+        /// </summary>
+        internal static string DirectRoute_MissingActionDescriptors {
+            get {
+                return ResourceManager.GetString("DirectRoute_MissingActionDescriptors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An error has occurred..
         /// </summary>
         internal static string ErrorOccurred {

@@ -10,11 +10,13 @@ using Moq;
 #if ASPNETWEBAPI
 using TActionDescriptor = System.Web.Http.Controllers.HttpActionDescriptor;
 using TRoute = System.Web.Http.Routing.IHttpRoute;
-using TRouteDictionary = System.Web.Http.Routing.HttpRouteValueDictionary;
+using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
+using TRouteDictionaryConcrete = System.Web.Http.Routing.HttpRouteValueDictionary;
 #else
 using TActionDescriptor = System.Web.Mvc.ActionDescriptor;
 using TRoute = System.Web.Routing.Route;
 using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
+using TRouteDictionaryConcrete = System.Web.Routing.RouteValueDictionary;
 #endif
 
 #if ASPNETWEBAPI
@@ -154,7 +156,7 @@ namespace System.Web.Mvc.Routing
         public void CreateRoute_IfBuilderContraintsIsNull_UsesConstraintsPropertyWhenBuilding()
         {
             // Arrange
-            TRouteDictionary expectedConstraints = new TRouteDictionary();
+            TRouteDictionary expectedConstraints = new TRouteDictionaryConcrete();
             Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.Constraints).Returns(expectedConstraints);
             IDirectRouteProvider product = productMock.Object;
@@ -182,12 +184,12 @@ namespace System.Web.Mvc.Routing
         public void CreateRoute_IfBuilderContraintsIsNotNull_AddsConstraintsFromPropertyWhenBuilding()
         {
             // Arrange
-            TRouteDictionary existingConstraints = new TRouteDictionary();
+            TRouteDictionary existingConstraints = new TRouteDictionaryConcrete();
             string existingConstraintKey = "ExistingContraintKey";
             object existingConstraintValue = "ExistingContraint";
             existingConstraints.Add(existingConstraintKey, existingConstraintValue);
 
-            TRouteDictionary additionalConstraints = new TRouteDictionary();
+            TRouteDictionary additionalConstraints = new TRouteDictionaryConcrete();
             string additionalConstraintKey = "NewConstraintKey";
             string additionalConstraintValue = "NewConstraint";
             additionalConstraints.Add(additionalConstraintKey, additionalConstraintValue);
@@ -226,7 +228,7 @@ namespace System.Web.Mvc.Routing
         public void CreateRoute_IfBuilderContraintsIsNotNullAndConstraintsPropertyIsNull_UsesBuilderConstraints()
         {
             // Arrange
-            TRouteDictionary existingConstraints = new TRouteDictionary();
+            TRouteDictionary existingConstraints = new TRouteDictionaryConcrete();
 
             Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.Constraints).Returns((TRouteDictionary)null);
@@ -326,7 +328,7 @@ namespace System.Web.Mvc.Routing
                 _createBuilder = createBuilder;
             }
 
-            public override DirectRouteBuilder CreateBuilder(string template)
+            internal override DirectRouteBuilder CreateBuilderInternal(string template)
             {
                 return _createBuilder.Invoke(template);
             }

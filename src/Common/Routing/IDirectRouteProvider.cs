@@ -6,8 +6,14 @@ namespace System.Web.Http.Routing
 namespace System.Web.Mvc.Routing
 #endif
 {
-    internal interface IDirectRouteProvider
+    /// <summary>
+    /// Defines a provider that creates a route directly to a set of action descriptors (an attribute route).
+    /// </summary>
+    public interface IDirectRouteProvider
     {
+        /// <summary>Creates a direct route entry.</summary>
+        /// <param name="context">The context to use to create the route.</param>
+        /// <returns>The direct route entry.</returns>
         RouteEntry CreateRoute(DirectRouteProviderContext context);
     }
 }

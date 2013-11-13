@@ -67,47 +67,42 @@ namespace System.Web.Http.Owin
         [Fact]
         public void IgnoreRoute_Owin_SingleComponent_WithoutIgnoreRoute_ReturnSuccess()
         {
-            string url = "http://localhost:50232/";
-            string path = "api/HelloWorld";
-
-            HttpResponseMessage notIgnoredResponse;
-            using (WebApp.Start<OwinHostSingleComponent_NotIgnoreRoute>(url))
+            using (var port = new PortReserver())
+            using (WebApp.Start<OwinHostSingleComponent_NotIgnoreRoute>(url: CreateBaseUrl(port)))
             {
                 HttpClient client = new HttpClient();
 
-                notIgnoredResponse = client.GetAsync(url + path).Result;
-            }
+                var notIgnoredResponse = client.GetAsync(CreateUrl(port, "api/HelloWorld")).Result;
 
-            Assert.True(notIgnoredResponse.IsSuccessStatusCode);
-            Assert.Equal("\"Hello from OWIN\"", notIgnoredResponse.Content.ReadAsStringAsync().Result);
+                Assert.True(notIgnoredResponse.IsSuccessStatusCode);
+                Assert.Equal("\"Hello from OWIN\"", notIgnoredResponse.Content.ReadAsStringAsync().Result);
+            }
         }
 
         [Fact]
         public void IgnoreRoute_Owin_SingleComponent_WithIgnoreRoute_ReturnHard404()
         {
-            string url = "http://localhost:50232/";
-            string path = "api/HelloWorld";
-
-            HttpResponseMessage ignoredResponse;
-            using (WebApp.Start<OwinHostSingleComponent_IgnoreRoute>(url))
+            using (var port = new PortReserver())
+            using (WebApp.Start<OwinHostSingleComponent_IgnoreRoute>(url: CreateBaseUrl(port)))
             {
                 HttpClient client = new HttpClient();
 
-                ignoredResponse = client.GetAsync(url + path).Result;
-            }
+                var ignoredResponse = client.GetAsync(CreateUrl(port, "api/HelloWorld")).Result;
 
-            Assert.Equal(ignoredResponse.StatusCode, HttpStatusCode.NotFound);
-            Assert.False(ignoredResponse.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));
+                Assert.Equal(ignoredResponse.StatusCode, HttpStatusCode.NotFound);
+                Assert.False(ignoredResponse.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));
+            }
         }
 
         [Fact]
         public void IgnoreRoute_Owin_TwoComponents_OneWebAPIwithIgnoreRouteDoesNotAffectAnotherWebAPI()
         {
-            using (WebApp.Start<OwinHostTwoComponents>(url: "http://localhost:50232/"))
+            using (var port = new PortReserver())
+            using (WebApp.Start<OwinHostTwoComponents>(url: CreateBaseUrl(port)))
             {
                 HttpClient client = new HttpClient();
 
-                var response = client.GetAsync("http://localhost:50232/api/HelloWorld").Result;
+                var response = client.GetAsync(CreateUrl(port, "api/HelloWorld")).Result;
 
                 Assert.True(response.IsSuccessStatusCode);
                 Assert.Equal("\"Hello from OWIN\"", response.Content.ReadAsStringAsync().Result);
@@ -121,11 +116,12 @@ namespace System.Web.Http.Owin
         [InlineData("ignoredByBothComponents/people/name?id=20")]
         public void IgnoreRoute_Owin_TwoComponents_GetHard404IfRoutesAreIgnoredByBothComponents(string path)
         {
-            using (WebApp.Start<OwinHostTwoComponents>(url: "http://localhost:50232/"))
+            using (var port = new PortReserver())
+            using (WebApp.Start<OwinHostTwoComponents>(url: CreateBaseUrl(port)))
             {
                 HttpClient client = new HttpClient();
 
-                var response = client.GetAsync("http://localhost:50232/" + path).Result;
+                var response = client.GetAsync(CreateUrl(port, path)).Result;
 
                 Assert.Equal(response.StatusCode, HttpStatusCode.NotFound);
                 Assert.False(response.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));

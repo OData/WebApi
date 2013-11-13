@@ -86,7 +86,8 @@ namespace System.Web.Http.WebHost.Routing
             }
 
             RouteData routeData = _routeCollection.GetRouteData(httpContextBase);
-            if (routeData != null)
+            // If the match is from an IgnoreRoute, do not return a RouteData but return a null, which will be treated as a 404 NoRouteMatched.
+            if (routeData != null && !(routeData.RouteHandler is System.Web.Routing.StopRoutingHandler))
             {
                 return new HostedHttpRouteData(routeData);
             }

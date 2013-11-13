@@ -65,19 +65,19 @@ namespace System.Web.Http.Dispatcher
             if (routeData == null)
             {
                 routeData = _configuration.Routes.GetRouteData(request);
-
                 if (routeData != null)
                 {
                     request.SetRouteData(routeData);
                 }
-                else
-                {
-                    request.Properties.Add(HttpPropertyKeys.NoRouteMatched, true);
-                    return Task.FromResult(request.CreateErrorResponse(
-                        HttpStatusCode.NotFound,
-                        Error.Format(SRResources.ResourceNotFound, request.RequestUri),
-                        SRResources.NoRouteData));
-                }
+            }
+
+            if (routeData == null || (routeData.Route != null && routeData.Route.Handler is StopRoutingHandler))
+            {
+                request.Properties.Add(HttpPropertyKeys.NoRouteMatched, true);
+                return Task.FromResult(request.CreateErrorResponse(
+                    HttpStatusCode.NotFound,
+                    Error.Format(SRResources.ResourceNotFound, request.RequestUri),
+                    SRResources.NoRouteData));
             }
 
             routeData.RemoveOptionalRoutingParameters();

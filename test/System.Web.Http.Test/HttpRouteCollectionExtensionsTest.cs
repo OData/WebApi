@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
 using System.Web.Http.Batch;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
@@ -117,6 +120,90 @@ namespace System.Web.Http
             Assert.Equal("api/batch", route.RouteTemplate);
             Assert.Same(route, routes["batch"]);
             Assert.Same(mockBatchHandler, route.Handler);
+        }
+
+        [Fact]
+        public void IgnoreRouteWithNullRouteCollectionThrows()
+        {
+            Assert.ThrowsArgumentNull(
+                delegate { HttpRouteCollectionExtensions.IgnoreRoute(null, "bar", "foo"); },
+                "routes");
+        }
+
+        [Fact]
+        public void IgnoreRouteWithNullRouteNameThrows()
+        {
+            // Arrange
+            HttpRouteCollection routes = new HttpRouteCollection();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(
+                delegate { routes.IgnoreRoute(null, "foo"); },
+                "routeName");
+        }
+
+        [Fact]
+        public void IgnoreRouteWithNullUrlThrows()
+        {
+            // Arrange
+            HttpRouteCollection routes = new HttpRouteCollection();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(
+                delegate { routes.IgnoreRoute("foo", null); },
+                "routeTemplate");
+        }
+
+        [Fact]
+        public void IgnoreRouteWithoutConstraints()
+        {
+            // Arrange
+            HttpRouteCollection routes = new HttpRouteCollection();
+
+            // Act
+            routes.IgnoreRoute("SomeRouteName", "SomeRouteTemplate");
+
+            // Assert
+            HttpRoute route = Assert.Single(routes.Cast<HttpRoute>());
+            Assert.NotNull(route);
+            Assert.Equal("SomeRouteTemplate", route.RouteTemplate);
+            Assert.IsType<StopRoutingHandler>(route.Handler);
+            Assert.True(route.Defaults.Count == 0);
+            Assert.Empty(route.Constraints);
+        }
+
+        [Fact]
+        public void IgnoreRouteWithConstraints()
+        {
+            // Arrange
+            HttpRouteCollection routes = new HttpRouteCollection();
+            var constraints = new { Foo = "DefaultFoo" };
+
+            // Act
+            routes.IgnoreRoute("SomeRouteName", "SomeRouteTemplate", constraints);
+
+            // Assert
+            HttpRoute route = Assert.Single(routes.Cast<HttpRoute>());
+            Assert.NotNull(route);
+            Assert.Equal("SomeRouteTemplate", route.RouteTemplate);
+            Assert.IsType<StopRoutingHandler>(route.Handler);
+            Assert.True(route.Defaults.Count == 0);
+            Assert.Single(route.Constraints);
+            Assert.Equal("DefaultFoo", route.Constraints["Foo"]);
+        }
+
+        [Fact]
+        public void IgnoreRouteInternalNeverMatchesUrlGeneration()
+        {
+            // Arrange
+            HttpRouteCollection routes = new HttpRouteCollection();
+            IHttpRoute route = routes.IgnoreRoute("Foo", "SomeRouteTemplate");
+
+            // Act
+            IHttpVirtualPathData vpd = route.GetVirtualPath(new HttpRequestMessage(HttpMethod.Get, "SomeRouteTemplate"), null);
+
+            // Assert
+            Assert.Null(vpd);
         }
     }
 }

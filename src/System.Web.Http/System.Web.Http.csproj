@@ -237,6 +237,7 @@
       <Link>Routing\SubRouteCollection.cs</Link>
     </Compile>
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />
+    <Compile Include="Routing\StopRoutingHandler.cs" />
     <Compile Include="Services\Decorator.cs" />
     <Compile Include="Services\IDecorator.cs" />
     <Compile Include="Tracing\TraceLevelHelper.cs" />

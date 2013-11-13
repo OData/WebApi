@@ -140,6 +140,42 @@ namespace System.Web.Http.Dispatcher
             }
         }
 
+        [Fact]
+        public void SendAsync_IgnoreRoute_UsesRouteDataWithStopRoutingHandlerFromRequestContext()
+        {
+            // Arrange
+            Mock<HttpMessageHandler> doNotUseDefaultHandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            doNotUseDefaultHandlerMock.Protected().Setup("Dispose", true);
+
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            using (HttpMessageHandler doNoUseDefaultHandler = doNotUseDefaultHandlerMock.Object)
+            using (HttpRoutingDispatcher dispatcher = new HttpRoutingDispatcher(configuration, doNoUseDefaultHandler))
+            using (HttpMessageInvoker invoker = new HttpMessageInvoker(dispatcher))
+            using (HttpRequestMessage expectedRequest = new HttpRequestMessage())
+            using (HttpResponseMessage expectedResponse = new HttpResponseMessage())
+            {
+                HttpMessageHandler routeHandler = new StopRoutingHandler();
+
+                Mock<IHttpRoute> routeMock = new Mock<IHttpRoute>(MockBehavior.Strict);
+                routeMock.Setup(r => r.Handler).Returns(routeHandler);
+
+                Mock<IHttpRouteData> routeDataMock = new Mock<IHttpRouteData>(MockBehavior.Strict);
+                routeDataMock.Setup(d => d.Route).Returns(routeMock.Object);
+                routeDataMock.Setup(d => d.Values).Returns(new Dictionary<string, object>());
+
+                HttpRequestContext context = new HttpRequestContext();
+                context.RouteData = routeDataMock.Object;
+                expectedRequest.SetRequestContext(context);
+
+                // Act
+                HttpResponseMessage response = invoker.SendAsync(expectedRequest, CancellationToken.None).Result;
+
+                // Assert
+                Assert.Equal(response.StatusCode, HttpStatusCode.NotFound);
+                Assert.True(response.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));
+            }
+        }
+
         private static HttpRequestMessage CreateRequest(HttpConfiguration config, string requestUri)
         {
             return CreateRequest(config, requestUri, routeHandler: new EmptyResponseHandler());

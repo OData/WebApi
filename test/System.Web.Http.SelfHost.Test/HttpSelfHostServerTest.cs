@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.Hosting;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.SelfHost
@@ -236,6 +237,60 @@ namespace System.Web.Http.SelfHost
             }
         }
 
+        [Theory]
+        [InlineData("/SelfHostServerTest/EchoString", TransferMode.Buffered)]
+        [InlineData("/SelfHostServerTest/EchoString", TransferMode.Streamed)]
+        public void Get_Returns_Hard404_If_IgnoreRoute(string uri, TransferMode transferMode)
+        {
+            using (var port = new PortReserver())
+            {
+                // Arrange & Act
+                server = CreateServer(port, transferMode, ignoreRoute: true);
+                HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri).Result;
+                string responseString = response.Content.ReadAsStringAsync().Result;
+
+                // Assert
+                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+                Assert.False(response.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));
+            }
+        }
+
+        [Theory]
+        [InlineData("/a/b/c/d/e", TransferMode.Buffered)]
+        [InlineData("/EchoString?f=12", TransferMode.Streamed)]
+        public void Get_Returns_Hard404_If_IgnoreRouteDoesNotMatch(string uri, TransferMode transferMode)
+        {
+            using (var port = new PortReserver())
+            {
+                // Arrange & Act
+                server = CreateServer(port, transferMode, ignoreRoute: true);
+                HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri).Result;
+                string responseString = response.Content.ReadAsStringAsync().Result;
+
+                // Assert
+                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+                Assert.False(response.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));
+            }
+        }
+
+        [Theory]
+        [InlineData("/other/SelfHostServerTest/EchoString", TransferMode.Buffered)]
+        [InlineData("/other/SelfHostServerTest/EchoString", TransferMode.Streamed)]
+        public void Get_Returns_Success_If_OtherRouteMatched(string uri, TransferMode transferMode)
+        {
+            using (var port = new PortReserver())
+            {
+                // Arrange & Act
+                server = CreateServer(port, transferMode, ignoreRoute: true);
+                HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri).Result;
+                string responseString = response.Content.ReadAsStringAsync().Result;
+
+                // Assert
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal("\"echoString\"", responseString);
+            }
+        }
+
         internal class ThrowsBeforeTaskObjectContent : ObjectContent
         {
             public ThrowsBeforeTaskObjectContent()
@@ -312,11 +367,16 @@ namespace System.Web.Http.SelfHost
             }
         }
 
-        private static HttpSelfHostServer CreateServer(PortReserver port, TransferMode transferMode)
+        private static HttpSelfHostServer CreateServer(PortReserver port, TransferMode transferMode, bool ignoreRoute = false)
         {
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(BaseUri(port, transferMode));
             config.HostNameComparisonMode = HostNameComparisonMode.Exact;
+            if (ignoreRoute)
+            {
+                config.Routes.IgnoreRoute("Ignore", "{controller}/{action}");
+            }
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
+            config.Routes.MapHttpRoute("Other", "other/{controller}/{action}");
             config.TransferMode = transferMode;
 
             HttpSelfHostServer server = new HttpSelfHostServer(config);

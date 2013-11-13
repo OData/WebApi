@@ -6,6 +6,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Web.Hosting;
+using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
@@ -284,9 +285,71 @@ namespace System.Web.Http.WebHost.Routing
             Assert.Equal("/api/controllerName/actionNameFromDomain", httpvPathData.VirtualPath);
         }
 
-        private static HttpRequestMessage CreateHttpRequestMessageWithContext()
+        [Fact]
+        public void IgnoreRoute_GetVirtualPathReturnsNull()
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/api/controllerName/actionName");
+            // Arrange
+            DomainHttpRoute route = new DomainHttpRoute("myDomain", "api/{controller}/{action}", new { controller = "SomeValue", action = "SomeAction" });
+            HostedHttpRouteCollection collection = new HostedHttpRouteCollection(new RouteCollection());
+            collection.IgnoreRoute("domainRoute", route.RouteTemplate);
+            HttpRequestMessage request = CreateHttpRequestMessageWithContext();
+            HttpRouteValueDictionary routeValues = new HttpRouteValueDictionary()
+                {
+                    {"controller", "controllerName"},
+                    {"action", "actionName"},
+                    {"httproute", true}
+                };
+
+            request.SetRouteData(new HttpRouteData(route, routeValues));
+            
+            // Act
+            IHttpVirtualPathData httpvPathData = collection.GetVirtualPath(request, "domainRoute", routeValues);
+
+            // Assert
+            // Altough it contains the ignore route, GetVirtualPath from the ignored route will always return null.
+            Assert.Equal(collection.Count, 1);
+            Assert.Null(httpvPathData);
+        }
+
+        [Theory]
+        [InlineData("people/")]
+        [InlineData("people/1")]
+        [InlineData("people/literal")]
+        [InlineData("people/name?id=20")]
+        public void IgnoreRoute_GetSoft404IfRouteIgnored(string requestPath)
+        {
+            var request = CreateHttpRequestMessageWithContext(requestPath);
+
+            var response = SubmitRequest(request);
+
+            Assert.Equal(response.StatusCode, Net.HttpStatusCode.NotFound);
+            Assert.True(response.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));
+        }
+
+        private static HttpResponseMessage SubmitRequest(HttpRequestMessage request)
+        {
+            HttpConfiguration config = new HttpConfiguration(new HostedHttpRouteCollection(new RouteCollection()));
+            config.Routes.IgnoreRoute("Bar", "api/{*pathInfo}");
+            config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{action}");
+            config.MapHttpAttributeRoutes();
+
+            HttpServer server = new HttpServer(config);
+            using (HttpMessageInvoker client = new HttpMessageInvoker(server))
+            {
+                return client.SendAsync(request, CancellationToken.None).Result;
+            }
+        }
+
+        private static T GetContentValue<T>(HttpResponseMessage response)
+        {
+            T value;
+            response.TryGetContentValue<T>(out value);
+            return value;
+        }
+
+        private static HttpRequestMessage CreateHttpRequestMessageWithContext(string requestPath = "controllerName/actionName")
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/api/" + requestPath);
             request.SetConfiguration(new HttpConfiguration());
             request.SetHttpContext(CreateHttpContext("~/api"));
 

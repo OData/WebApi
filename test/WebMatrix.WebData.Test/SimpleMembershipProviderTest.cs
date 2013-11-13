@@ -224,9 +224,9 @@ namespace WebMatrix.WebData.Test
             var provider = new SimpleMembershipProvider();
 
             var message = 
-                "The value of argument 'CasingBehavior' (" + value + ") is invalid for Enum type " +
+                "The value of argument 'value' (" + value + ") is invalid for Enum type " +
                 "'SimpleMembershipProviderCasingBehavior'." + Environment.NewLine +
-                "Parameter name: CasingBehavior";
+                "Parameter name: value";
             
             // Act
             Exception exception = null;

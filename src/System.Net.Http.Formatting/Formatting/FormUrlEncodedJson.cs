@@ -560,7 +560,7 @@ namespace System.Net.Http.Formatting
             StringBuilder errorPath = new StringBuilder(path[0]);
             for (int p = 1; p <= i; p++)
             {
-                errorPath.AppendFormat("[{0}]", path[p]);
+                errorPath.AppendFormat(CultureInfo.InvariantCulture, "[{0}]", path[p]);
             }
 
             return errorPath.ToString();

@@ -52,11 +52,23 @@
     <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\BsonMediaTypeFormatterTests.cs">
       <Link>Formatting\BsonMediaTypeFormatterTests.cs</Link>
     </Compile>
+    <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\FormDataCollectionTests.cs">
+      <Link>Internal\FormDataCollectionTests.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\FormUrlEncodedJsonTests.cs">
+      <Link>Internal\FormUrlEncodedJsonTests.cs</Link>
+    </Compile>
     <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\JsonNetSerializationTest.cs">
       <Link>Formatting\JsonNetSerializationTest.cs</Link>
     </Compile>
     <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\JsonNetValidationTest.cs">
       <Link>Formatting\JsonNetValidationTest.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\Parsers\FormUrlEncodedParserTests.cs">
+      <Link>Internal\FormUrlEncodedParserTests.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Net.Http.Formatting.Test\Internal\HttpValueCollectionTest.cs">
+      <Link>HttpValueCollectionTest.cs</Link>
     </Compile>
     <Compile Include="..\System.Net.Http.Formatting.Test\Internal\ReadOnlyStreamWithEncodingPreambleTest.cs">
       <Link>Internal\ReadOnlyStreamWithEncodingPreambleTest.cs</Link>
@@ -165,6 +177,9 @@
     </Compile>
     <Compile Include="..\System.Net.Http.Formatting.Test\Mocks\TestableHttpMessageHandler.cs">
       <Link>Mocks\TestableHttpMessageHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Net.Http.Formatting.Test\UriExtensionsTests.cs">
+      <Link>UriExtensionsTests.cs</Link>
     </Compile>
     <Compile Include="..\System.Net.Http.Formatting.Test\UriQueryDataSet.cs">
       <Link>UriQueryDataSet.cs</Link>

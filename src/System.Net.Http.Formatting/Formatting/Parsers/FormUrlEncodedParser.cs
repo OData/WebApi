@@ -52,7 +52,7 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         /// <summary>
-        /// Parse a buffer of URL form-encoded name-value pairs and add them to the <see cref="NameValueCollection"/>.
+        /// Parse a buffer of URL form-encoded name-value pairs and add them to the collection.
         /// Bytes are parsed in a consuming manner from the beginning of the buffer meaning that the same bytes can not be 
         /// present in the buffer.
         /// </summary>

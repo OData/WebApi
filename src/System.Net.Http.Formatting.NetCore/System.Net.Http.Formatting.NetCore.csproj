@@ -53,6 +53,12 @@
     <Compile Include="..\System.Net.Http.Formatting\Formatting\DelegatingEnumerable.cs">
       <Link>Formatting\DelegatingEnumerable.cs</Link>
     </Compile>
+    <Compile Include="..\System.Net.Http.Formatting\Formatting\FormDataCollection.cs">
+      <Link>Formatting\FormDataCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Net.Http.Formatting\Formatting\FormUrlEncodedJson.cs">
+      <Link>Formatting\FormUrlEncodedJson.cs</Link>
+    </Compile>
     <Compile Include="..\System.Net.Http.Formatting\Formatting\IFormatterLogger.cs">
       <Link>Formatting\IFormatterLogger.cs</Link>
     </Compile>
@@ -76,6 +82,9 @@
     </Compile>
     <Compile Include="..\System.Net.Http.Formatting\Formatting\ParsedMediaTypeHeaderValue.cs">
       <Link>Formatting\ParsedMediaTypeHeaderValue.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Net.Http.Formatting\Formatting\Parsers\FormUrlEncodedParser.cs">
+      <Link>Formatting\Parsers\FormUrlEncodedParser.cs</Link>
     </Compile>
     <Compile Include="..\System.Net.Http.Formatting\Formatting\Parsers\HttpRequestHeaderParser.cs">
       <Link>Formatting\Parsers\HttpRequestHeaderParser.cs</Link>
@@ -107,7 +116,13 @@
     <Compile Include="..\System.Net.Http.Formatting\Formatting\XmlMediaTypeFormatter.cs">
       <Link>Formatting\XmlMediaTypeFormatter.cs</Link>
     </Compile>
-    <Compile Include="GlobalSuppressions.cs"/>
+    <Compile Include="..\System.Net.Http.Formatting\Internal\HttpValueCollection.cs">
+      <Link>HttpValueCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Net.Http.Formatting\UriExtensions.cs">
+      <Link>UriExtensions.cs</Link>
+    </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="..\System.Net.Http.Formatting\Handlers\HttpProgressEventArgs.cs">
       <Link>Handlers\HttpProgressEventArgs.cs</Link>
     </Compile>

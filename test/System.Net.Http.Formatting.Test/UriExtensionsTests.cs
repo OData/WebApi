@@ -28,7 +28,7 @@ namespace System.Net.Http
         [TestDataSet(typeof(HttpTestData), "UriTestData")]
         public void ParseQueryStringSucceeds(Uri address)
         {
-            NameValueCollection result = address.ParseQueryString();
+            var result = address.ParseQueryString();
             Assert.NotNull(result);
 
             bool addressContainsQuery = address.Query.Contains("?");

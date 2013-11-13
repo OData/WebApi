@@ -4,11 +4,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
+#if !NETFX_CORE
 using System.Net.Http.Formatting.Internal;
+#endif
 using System.Net.Http.Formatting.Parsers;
 using System.Text;
 using System.Threading;
 using System.Web.Http;
+
+#if NETFX_CORE
+using NameValueCollection = System.Net.Http.Formatting.HttpValueCollection;
+#endif
 
 namespace System.Net.Http.Formatting
 {
@@ -18,9 +24,15 @@ namespace System.Net.Http.Formatting
     /// - using interfaces allows us to optimize the implementation. E.g., we can avoid eagerly string-splitting a 10gb file. 
     /// - This also provides a convenient place to put extension methods. 
     /// </summary>
-    public class FormDataCollection : IEnumerable<KeyValuePair<string, string>>
+#if NETFX_CORE
+    internal
+#else
+    public
+#endif
+    class FormDataCollection : IEnumerable<KeyValuePair<string, string>>
     {
         private readonly IEnumerable<KeyValuePair<string, string>> _pairs;
+
         private NameValueCollection _nameValueCollection;
 
         /// <summary>
@@ -61,7 +73,7 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Initialize a form collection from a URL encoded query string. Any leading question
         /// mark (?) will be considered part of the query string and treated as any other value.
-        /// </summary>        
+        /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1057:StringUriOverloadsCallSystemUriOverloads", Justification = "string is a query string, not a URI")]
         public FormDataCollection(string query)
         {
@@ -95,15 +107,15 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Get the collection as a NameValueCollection.
         /// Beware this loses some ordering. Values are ordered within a key,
-        /// but keys are no longer ordered against each other.         
+        /// but keys are no longer ordered against each other.
         /// </summary>
         public NameValueCollection ReadAsNameValueCollection()
         {
             if (_nameValueCollection == null)
             {
                 // Initialize in a private collection to be thread-safe, and swap the finished object.
-                // Ok to double initialize this. 
-                NameValueCollection newCollection = HttpValueCollection.Create(this);
+                // Ok to double initialize this.
+                HttpValueCollection newCollection = HttpValueCollection.Create(this);
                 Interlocked.Exchange(ref _nameValueCollection, newCollection);
             }
             return _nameValueCollection;

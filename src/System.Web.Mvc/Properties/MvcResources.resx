@@ -538,4 +538,10 @@ Duplicates:
   <data name="TypeMethodMustNotReturnNull" xml:space="preserve">
     <value>{0}.{1} must not return null.</value>
   </data>
+  <data name="RoutePrefix_CannotSupportMultiRoutePrefix" xml:space="preserve">
+    <value>Only one route prefix attribute is supported. Remove extra attributes from the controller of type '{0}'.</value>
+  </data>
+  <data name="RoutePrefix_PrefixCannotBeNull" xml:space="preserve">
+    <value>The property 'prefix' from route prefix attribute on controller of type '{0}' cannot be null.</value>
+  </data>
 </root>

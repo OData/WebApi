@@ -1,13 +1,24 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
+using System.Web.Http.Routing;
+
 namespace System.Web.Http
 {
     /// <summary>
     /// Annotates a controller with a route prefix that applies to actions that have any <see cref="RouteAttribute"/>s on them.
     /// </summary>
+    [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "This attribute is intended to be extended by the user.")]
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public sealed class RoutePrefixAttribute : Attribute
+    public class RoutePrefixAttribute : Attribute, IRoutePrefix
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoutePrefixAttribute" /> class without specifying any parameters.
+        /// </summary>
+        protected RoutePrefixAttribute()
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RoutePrefixAttribute" /> class.
         /// </summary>
@@ -25,6 +36,6 @@ namespace System.Web.Http
         /// <summary>
         /// Gets the route prefix.
         /// </summary>
-        public string Prefix { get; private set; }
+        public virtual string Prefix { get; private set; }
     }
 }

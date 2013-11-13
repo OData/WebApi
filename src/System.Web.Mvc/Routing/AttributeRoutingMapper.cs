@@ -234,30 +234,47 @@ namespace System.Web.Mvc.Routing
         {
             // this only happens once per controller type, for the lifetime of the application,
             // so we do not need to cache the results
-            object[] attributes = controllerDescriptor.GetCustomAttributes(typeof(RoutePrefixAttribute),
+            object[] attributes = controllerDescriptor.GetCustomAttributes(typeof(IRoutePrefix),
                 inherit: false);
 
-            if (attributes.Length > 0)
+            if (attributes == null)
             {
-                RoutePrefixAttribute attribute = attributes[0] as RoutePrefixAttribute;
+                return null;
+            }
+
+            if (attributes.Length > 1)
+            {
+                string errorMessage = Error.Format(
+                    MvcResources.RoutePrefix_CannotSupportMultiRoutePrefix,
+                    controllerDescriptor.ControllerType.FullName);
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            if (attributes.Length == 1)
+            {
+                IRoutePrefix attribute = attributes[0] as IRoutePrefix;
 
                 if (attribute != null)
                 {
                     string prefix = attribute.Prefix;
-
-                    if (prefix != null)
+                    if (prefix == null)
                     {
-                        if (prefix.StartsWith("/", StringComparison.Ordinal)
-                            || prefix.EndsWith("/", StringComparison.Ordinal))
-                        {
-                            string errorMessage = Error.Format(
-                                MvcResources.RoutePrefix_CannotStartOrEnd_WithForwardSlash, prefix,
-                                controllerDescriptor.ControllerName);
-                            throw new InvalidOperationException(errorMessage);
-                        }
-
-                        return prefix;
+                        string errorMessage = Error.Format(
+                            MvcResources.RoutePrefix_PrefixCannotBeNull,
+                            controllerDescriptor.ControllerType.FullName);
+                        throw new InvalidOperationException(errorMessage);
                     }
+
+                    if (prefix.StartsWith("/", StringComparison.Ordinal)
+                        || prefix.EndsWith("/", StringComparison.Ordinal))
+                    {
+                        string errorMessage = Error.Format(
+                            MvcResources.RoutePrefix_CannotStartOrEnd_WithForwardSlash, prefix,
+                            controllerDescriptor.ControllerName);
+                        throw new InvalidOperationException(errorMessage);
+                    }
+
+                    return prefix;
                 }
             }
 

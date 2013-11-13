@@ -295,6 +295,69 @@ namespace System.Web.Routing
             Assert.Equal(expectedAction, result.Content);
         }
 
+        [Theory]
+        [InlineData("~/NS1Home/Introduction", "Home.Index()")]
+        [InlineData("~/NS2Account/PeopleList", "Account.Index()")]
+        [InlineData("~/Default/Unknown", "Default.Index()")]
+        public void AttributeRouting_WithCustomizedRoutePrefixAttribute(string path, string expectedAction)
+        {
+            // Arrange
+            var controllerTypes = new[] 
+            { 
+                typeof(ControllersWithCustomizedRoutePrefixAttribute.NS1.HomeController), 
+                typeof(ControllersWithCustomizedRoutePrefixAttribute.NS2.AccountController), 
+                typeof(ControllersWithCustomizedRoutePrefixAttribute.NS3.OtherController), 
+            };
+
+            var routes = new RouteCollection();
+            AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes);
+
+            HttpContextBase context = GetContext(path);
+            RouteData routeData = routes.GetRouteData(context);
+            RequestContext requestContext = new RequestContext(context, routeData);
+            MvcHandler handler = new MvcHandler(requestContext);
+            handler.ControllerBuilder.SetControllerFactory(GetControllerFactory(controllerTypes));
+
+            // Act
+            handler.ProcessRequest(context);
+
+            // Assert
+            ContentResult result = Assert.IsType<ContentResult>(context.Items[ResultKey]);
+            Assert.Equal(expectedAction, result.Content);
+        }
+
+        [Fact]
+        public void AttributeRouting_WithMultipleCustomizedRoutePrefixAttribute_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var controllerTypes = new[] 
+            { 
+                typeof(ControllersWithCustomizedRoutePrefixAttribute.Invalid.HomeController)
+            };
+
+            var routes = new RouteCollection();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes),
+                "Only one route prefix attribute is supported. Remove extra attributes from the controller of type 'System.Web.Routing.ControllersWithCustomizedRoutePrefixAttribute.Invalid.HomeController'.");
+        }
+
+        [Fact]
+        public void AttributeRouting_WithNullPrefix_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var controllerTypes = new[] 
+            { 
+                typeof(ControllersWithCustomizedRoutePrefixAttribute.Invalid.AccountController)
+            };
+
+            var routes = new RouteCollection();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.MapAttributeRoutes(routes, controllerTypes),
+                "The property 'prefix' from route prefix attribute on controller of type 'System.Web.Routing.ControllersWithCustomizedRoutePrefixAttribute.Invalid.AccountController' cannot be null.");
+        }
+
         private IControllerFactory GetControllerFactory(Type[] controllerTypes)
         {
             return new DefaultControllerFactory
@@ -821,6 +884,103 @@ namespace System.Web.Routing
                 public ActionResult Index()
                 {
                     return Content("Home2.Index()");
+                }
+            }
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public class CustomizedRoutePrefixAttribute : Attribute, IRoutePrefix
+    {
+        public CustomizedRoutePrefixAttribute(Type controller)
+        {
+            if (controller == null)
+            {
+                throw Error.ArgumentNull("prefix");
+            }
+
+            if (controller.Equals(typeof(ControllersWithCustomizedRoutePrefixAttribute.NS1.HomeController)))
+            {
+                Prefix = "NS1Home";
+            }
+            else if (controller.Equals(typeof(ControllersWithCustomizedRoutePrefixAttribute.NS2.AccountController)))
+            {
+                Prefix = "NS2Account";
+            }
+            else
+            {
+                Prefix = "Default";
+            }
+        }
+
+        public string Prefix { get; private set; }
+    }
+
+    public class ExtendedRoutePrefixAttribute : RoutePrefixAttribute
+    {
+    }
+
+    namespace ControllersWithCustomizedRoutePrefixAttribute
+    {
+        namespace NS1
+        {
+            [CustomizedRoutePrefix(typeof(HomeController))]
+            public class HomeController : ResponseStoringController
+            {
+                [Route("Introduction")]
+                public ActionResult Index()
+                {
+                    return Content("Home.Index()");
+                }
+            }
+        }
+
+        namespace NS2
+        {
+            [CustomizedRoutePrefix(typeof(AccountController))]
+            public class AccountController : ResponseStoringController
+            {
+                [Route("PeopleList")]
+                public ActionResult Index()
+                {
+                    return Content("Account.Index()");
+                }
+            }
+        }
+
+        namespace NS3
+        {
+            [CustomizedRoutePrefix(typeof(OtherController))]
+            public class OtherController : ResponseStoringController
+            {
+                [Route("Unknown")]
+                public ActionResult Index()
+                {
+                    return Content("Default.Index()");
+                }
+            }
+        }
+
+        namespace Invalid
+        {
+            [CustomizedRoutePrefix(typeof(HomeController))]
+            [RoutePrefix("InvalidExtraPrefix")]
+            public class HomeController : ResponseStoringController
+            {
+                [Route("Introduction")]
+                public ActionResult Index()
+                {
+                    return Content("Home.Index()");
+                }
+            }
+
+            [ExtendedRoutePrefixAttribute]
+            public class AccountController : ResponseStoringController
+            {
+                [Route("AnyRoute")]
+                public ActionResult Index()
+                {
+                    return Content("Account.Index()");
                 }
             }
         }

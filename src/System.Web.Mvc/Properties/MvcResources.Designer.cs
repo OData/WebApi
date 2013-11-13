@@ -1060,6 +1060,24 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only one route prefix attribute is supported. Remove extra attributes from the controller of type &apos;{0}&apos;..
+        /// </summary>
+        internal static string RoutePrefix_CannotSupportMultiRoutePrefix {
+            get {
+                return ResourceManager.GetString("RoutePrefix_CannotSupportMultiRoutePrefix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;prefix&apos; from route prefix attribute on controller of type &apos;{0}&apos; cannot be null..
+        /// </summary>
+        internal static string RoutePrefix_PrefixCannotBeNull {
+            get {
+                return ResourceManager.GetString("RoutePrefix_PrefixCannotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The route template &apos;{0}&apos; on the action named &apos;{1}&apos; on the controller named &apos;{2}&apos; cannot begin with a forward slash..
         /// </summary>
         internal static string RouteTemplate_CannotStart_WithForwardSlash {

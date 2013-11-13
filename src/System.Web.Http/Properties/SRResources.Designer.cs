@@ -808,6 +808,24 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only one route prefix attribute is supported. Remove extra attributes from the controller of type &apos;{0}&apos;..
+        /// </summary>
+        internal static string RoutePrefix_CannotSupportMultiRoutePrefix {
+            get {
+                return ResourceManager.GetString("RoutePrefix_CannotSupportMultiRoutePrefix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;prefix&apos; from route prefix attribute on controller of type &apos;{0}&apos; cannot be null..
+        /// </summary>
+        internal static string RoutePrefix_PrefixCannotBeNull {
+            get {
+                return ResourceManager.GetString("RoutePrefix_PrefixCannotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A route named &apos;{0}&apos; is already in the route collection. Route names must be unique.
         ///
         ///Duplicates:

@@ -152,6 +152,20 @@ namespace System.Web.Http.Routing
             Assert.False(usage.Inherited); // RoutePrefix is not inherited. 
         }
 
+        [Theory]
+        [InlineData("GET", "NS1Home/Introduction", "Home.Index()")]
+        [InlineData("GET", "NS2Account/PeopleList", "Account.Index()")]
+        [InlineData("GET", "CustomizedDefaultPrefix/Unknown", "Default.Index()")]
+        public void AttributeRouting_RoutesToAction_WithCustomizedRoutePrefix(string httpMethod, string uri, string responseBody)
+        {
+            var request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri);
+
+            var response = SubmitRequest(request);
+
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(responseBody, GetContentValue<string>(response));
+        }
+
         private static HttpResponseMessage SubmitRequest(HttpRequestMessage request)
         {
             HttpConfiguration config = new HttpConfiguration();
@@ -629,6 +643,63 @@ namespace System.Web.Http.Routing
                     return _matches;
                 }
             }
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public class CustomizedRoutePrefixAttribute : Attribute, IRoutePrefix
+    {
+        public CustomizedRoutePrefixAttribute(Type controller)
+        {
+            if (controller == null)
+            {
+                throw Error.ArgumentNull("prefix");
+            }
+
+            if (controller.Equals(typeof(HomeWithCustomizedRoutePrefixController)))
+            {
+                Prefix = "NS1Home";
+            }
+            else if (controller.Equals(typeof(AccountWithCustomizedRoutePrefixController)))
+            {
+                Prefix = "NS2Account";
+            }
+            else
+            {
+                Prefix = "CustomizedDefaultPrefix";
+            }
+        }
+
+        public string Prefix { get; private set; }
+    }
+
+    [CustomizedRoutePrefix(typeof(HomeWithCustomizedRoutePrefixController))]
+    public class HomeWithCustomizedRoutePrefixController : ApiController
+    {
+        [Route("Introduction")]
+        public string Get()
+        {
+            return "Home.Index()";
+        }
+    }
+
+    [CustomizedRoutePrefix(typeof(AccountWithCustomizedRoutePrefixController))]
+    public class AccountWithCustomizedRoutePrefixController : ApiController
+    {
+        [Route("PeopleList")]
+        public string Get()
+        {
+            return "Account.Index()";
+        }
+    }
+
+    [CustomizedRoutePrefix(typeof(OtherWithCustomizedRoutePrefixController))]
+    public class OtherWithCustomizedRoutePrefixController : ApiController
+    {
+        [Route("Unknown")]
+        public String Get()
+        {
+            return "Default.Index()";
         }
     }
 }

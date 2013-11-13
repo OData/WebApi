@@ -236,6 +236,9 @@
     <Compile Include="..\Common\Routing\SubRouteCollection.cs">
       <Link>Routing\SubRouteCollection.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\IRoutePrefix.cs">
+      <Link>Routing\IRoutePrefix.cs</Link>
+    </Compile>
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />
     <Compile Include="Routing\StopRoutingHandler.cs" />
     <Compile Include="Services\Decorator.cs" />

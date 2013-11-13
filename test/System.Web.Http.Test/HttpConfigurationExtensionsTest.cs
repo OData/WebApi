@@ -50,7 +50,7 @@ namespace System.Net.Http
         {
             // Arrange
             var config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix") };
+            var routePrefixes = new Collection<IRoutePrefix>() { new RoutePrefixAttribute("prefix") };
             var routeProviders = new Collection<RouteAttribute>() { };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
@@ -67,7 +67,7 @@ namespace System.Net.Http
         {
             // Arrange
             var config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix") };
+            var routePrefixes = new Collection<IRoutePrefix>() { new RoutePrefixAttribute("prefix") };
             var routeProviders = new Collection<RouteAttribute>() { };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
@@ -99,7 +99,7 @@ namespace System.Net.Http
         {
             // Arrange
             var config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>();
+            var routePrefixes = new Collection<IRoutePrefix>();
             if (prefix != null)
             {
                 routePrefixes.Add(new RoutePrefixAttribute(prefix));
@@ -123,7 +123,7 @@ namespace System.Net.Http
         {
             // Arrange
             var config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>() { new RoutePrefixAttribute("prefix/") };
+            var routePrefixes = new Collection<IRoutePrefix>() { new RoutePrefixAttribute("prefix/") };
             var routeProviders = new Collection<RouteAttribute>() { new RouteAttribute("") };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
@@ -138,7 +138,7 @@ namespace System.Net.Http
         {
             // Arrange
             var config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>() { };
+            var routePrefixes = new Collection<IRoutePrefix>() { };
             var routeProviders = new Collection<RouteAttribute>() { new RouteAttribute("/get") };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
@@ -153,7 +153,7 @@ namespace System.Net.Http
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>();
+            var routePrefixes = new Collection<IRoutePrefix>();
             var routeProviders = new Collection<RouteAttribute>() { new RouteAttribute("controller/get1"), new RouteAttribute("controller/get2") };
             SetUpConfiguration(config, routePrefixes, routeProviders);
 
@@ -191,7 +191,7 @@ namespace System.Net.Http
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
-            var routePrefixes = new Collection<RoutePrefixAttribute>() { };
+            var routePrefixes = new Collection<IRoutePrefix>() { };
             var routeProviders = new Collection<RouteAttribute>()
                 {
                     new RouteAttribute("get1") { Name = "one" },
@@ -281,7 +281,7 @@ namespace System.Net.Http
                 "configuration");
         }
 
-        private static void SetUpConfiguration(HttpConfiguration config, Collection<RoutePrefixAttribute> routePrefixes, IEnumerable<RouteAttribute> routeAttributes)
+        private static void SetUpConfiguration(HttpConfiguration config, Collection<IRoutePrefix> routePrefixes, IEnumerable<RouteAttribute> routeAttributes)
         {
             HttpControllerDescriptor controllerDescriptor = CreateControllerDescriptor(config, "Controller", routePrefixes);
             HttpActionDescriptor actionDescriptor = CreateActionDescriptor("Action", routeAttributes);
@@ -297,12 +297,12 @@ namespace System.Net.Http
         }
 
         private static HttpControllerDescriptor CreateControllerDescriptor(HttpConfiguration configuration, string controllerName,
-            Collection<RoutePrefixAttribute> routePrefixes)
+            Collection<IRoutePrefix> routePrefixes)
         {
             Mock<HttpControllerDescriptor> controllerDescriptor = new Mock<HttpControllerDescriptor>();
             controllerDescriptor.Object.Configuration = configuration;
             controllerDescriptor.Object.ControllerName = controllerName;
-            controllerDescriptor.Setup(cd => cd.GetCustomAttributes<RoutePrefixAttribute>(false)).Returns(routePrefixes);
+            controllerDescriptor.Setup(cd => cd.GetCustomAttributes<IRoutePrefix>(false)).Returns(routePrefixes);
             controllerDescriptor.Setup(cd => cd.GetCustomAttributes<IHttpRouteInfoProvider>(false)).Returns(new Collection<IHttpRouteInfoProvider>());
             controllerDescriptor.Setup(cd => cd.GetCustomAttributes<IDirectRouteProvider>(false)).Returns(new Collection<IDirectRouteProvider>());
             return controllerDescriptor.Object;

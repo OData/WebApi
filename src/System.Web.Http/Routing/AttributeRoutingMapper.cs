@@ -209,29 +209,45 @@ namespace System.Web.Http.Routing
             return actions;
         }
 
-        private static string GetRoutePrefix(HttpControllerDescriptor controller)
+        // Use `internal` instead of `private` here for unit tests.
+        internal static string GetRoutePrefix(HttpControllerDescriptor controller)
         {
-            Collection<RoutePrefixAttribute> attributes =
-                controller.GetCustomAttributes<RoutePrefixAttribute>(inherit: false);
+            Collection<IRoutePrefix> attributes =
+                controller.GetCustomAttributes<IRoutePrefix>(inherit: false);
 
-            if (attributes.Count > 0)
+            if (attributes == null)
             {
-                RoutePrefixAttribute attribute = attributes[0];
+                return null;
+            }
+
+            if (attributes.Count > 1)
+            {
+                string errorMessage = Error.Format(SRResources.RoutePrefix_CannotSupportMultiRoutePrefix, controller.ControllerType.FullName);
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            if (attributes.Count == 1)
+            {
+                IRoutePrefix attribute = attributes[0];
 
                 if (attribute != null)
                 {
                     string prefix = attribute.Prefix;
-
-                    if (prefix != null)
+                    if (prefix == null)
                     {
-                        if (prefix.EndsWith("/", StringComparison.Ordinal))
-                        {
-                            throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidPrefix, prefix,
-                                controller.ControllerName);
-                        }
-
-                        return prefix;
+                        string errorMessage = Error.Format(
+                            SRResources.RoutePrefix_PrefixCannotBeNull,
+                            controller.ControllerType.FullName);
+                        throw new InvalidOperationException(errorMessage);
                     }
+
+                    if (prefix.EndsWith("/", StringComparison.Ordinal))
+                    {
+                        throw Error.InvalidOperation(SRResources.AttributeRoutes_InvalidPrefix, prefix,
+                            controller.ControllerName);
+                    }
+
+                    return prefix;
                 }
             }
 

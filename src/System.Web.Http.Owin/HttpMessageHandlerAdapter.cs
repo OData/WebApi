@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net;
@@ -380,6 +381,7 @@ namespace System.Web.Http.Owin
         }
 
         // Prepares Content-Length and Transfer-Encoding headers.
+        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "unused variable necessary to call getter")]
         private static void PrepareHeaders(HttpResponseMessage response)
         {
             Contract.Assert(response != null);
@@ -476,7 +478,7 @@ namespace System.Web.Http.Owin
             {
                 exception = ex;
             }
-            
+
             // We're streaming content, so we can only call loggers, not handlers, as we've already (possibly) send the
             // status code and headers across the wire. Log the exception, but then just abort.
             ExceptionContext exceptionContext = new ExceptionContext(exception,

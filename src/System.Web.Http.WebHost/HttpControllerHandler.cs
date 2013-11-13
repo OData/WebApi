@@ -445,7 +445,6 @@ namespace System.Web.Http.WebHost
                 ExceptionLogger, ExceptionHandler);
         }
 
-        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "unused variable necessary to call getter")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "All exceptions caught here become error responses")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "errorResponse gets disposed in the async continuation")]
         internal static async Task<bool> CopyErrorResponseAsync(ExceptionContextCatchBlock catchBlock,
@@ -561,6 +560,7 @@ namespace System.Web.Http.WebHost
         }
 
         // Prepares Content-Length and Transfer-Encoding headers.
+        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "unused variable necessary to call getter")]
         private static void PrepareHeaders(HttpResponseMessage response)
         {
             Contract.Assert(response != null);

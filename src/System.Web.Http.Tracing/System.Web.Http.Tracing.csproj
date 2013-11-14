@@ -29,6 +29,9 @@
     <Compile Include="..\Common\Error.cs">
       <Link>Common\Error.cs</Link>
     </Compile>
+    <Compile Include="..\Common\TraceWriterExceptionMapper.cs">
+      <Link>Common\TraceWriterExceptionMapper.cs</Link>
+    </Compile>
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="SystemDiagnosticsTraceWriter.cs" />

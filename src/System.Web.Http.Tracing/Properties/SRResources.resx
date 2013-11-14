@@ -123,27 +123,6 @@
   <data name="ExceptionFormat" xml:space="preserve">
     <value>Exception={0}</value>
   </data>
-  <data name="HttpErrorExceptionMessageFormat" xml:space="preserve">
-    <value>ExceptionMessage{0}='{1}'</value>
-  </data>
-  <data name="HttpErrorExceptionTypeFormat" xml:space="preserve">
-    <value>ExceptionType{0}='{1}'</value>
-  </data>
-  <data name="HttpErrorMessageDetailFormat" xml:space="preserve">
-    <value>MessageDetail='{0}'</value>
-  </data>
-  <data name="HttpErrorModelStateErrorFormat" xml:space="preserve">
-    <value>ModelStateError=[{0}]</value>
-  </data>
-  <data name="HttpErrorModelStatePairFormat" xml:space="preserve">
-    <value>{0}=[{1}]</value>
-  </data>
-  <data name="HttpErrorStackTraceFormat" xml:space="preserve">
-    <value>StackTrace{0}={1}</value>
-  </data>
-  <data name="HttpErrorUserMessageFormat" xml:space="preserve">
-    <value>UserMessage='{0}'</value>
-  </data>
   <data name="HttpMethodFormat" xml:space="preserve">
     <value>Method={0}</value>
   </data>

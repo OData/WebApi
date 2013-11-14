@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Web.Http.Tracing.Properties;
 
@@ -18,15 +16,6 @@ namespace System.Web.Http.Tracing
     {
         // Duplicate of internal category name traced by WebApi for start/end of request
         private const string SystemWebHttpRequestCategory = "System.Web.Http.Request";
-
-        // Duplicates of internal constants in HttpError
-        private const string MessageKey = "Message";
-        private const string MessageDetailKey = "MessageDetail";
-        private const string ModelStateKey = "ModelState";
-        private const string ExceptionMessageKey = "ExceptionMessage";
-        private const string ExceptionTypeKey = "ExceptionType";
-        private const string StackTraceKey = "StackTrace";
-        private const string InnerExceptionKey = "InnerException";
 
         private static readonly TraceEventType[] TraceLevelToTraceEventType = new TraceEventType[]
         {
@@ -301,8 +290,7 @@ namespace System.Web.Http.Tracing
                 throw Error.ArgumentNull("traceRecord");
             }
 
-            var httpResponseException = ExtractHttpResponseException(traceRecord);
-
+            var httpResponseException = TraceWriterExceptionMapper.ExtractHttpResponseException(traceRecord);
             if (httpResponseException == null)
             {
                 return;
@@ -310,72 +298,13 @@ namespace System.Web.Http.Tracing
 
             HttpResponseMessage response = httpResponseException.Response;
             Contract.Assert(response != null);
-
-            // If the status has been set already, do not overwrite it,
-            // otherwise propagate the status into the record.
-            if (traceRecord.Status == 0)
+            TraceLevel? mappedTraceLevel = TraceWriterExceptionMapper.GetTraceLevel(httpResponseException);
+            if (mappedTraceLevel.HasValue)
             {
-                traceRecord.Status = response.StatusCode;
+                traceRecord.Level = mappedTraceLevel.Value;
             }
 
-            // Client level errors are downgraded to TraceLevel.Warn
-            if ((int)response.StatusCode < (int)HttpStatusCode.InternalServerError)
-            {
-                traceRecord.Level = TraceLevel.Warn;
-            }
-
-            // Non errors are downgraded to TraceLevel.Info
-            if ((int)response.StatusCode < (int)HttpStatusCode.BadRequest)
-            {
-                traceRecord.Level = TraceLevel.Info;
-            }
-
-            // HttpResponseExceptions often contain HttpError instances that carry
-            // detailed information that may be filtered out by IncludeErrorDetailPolicy
-            // before reaching the client. Capture it here for the trace.
-            ObjectContent objectContent = response.Content as ObjectContent;
-            if (objectContent == null)
-            {
-                return;
-            }
-
-            HttpError httpError = objectContent.Value as HttpError;
-            if (httpError == null)
-            {
-                return;
-            }
-
-            object messageObject = null;
-            object messageDetailsObject = null;
-
-            List<string> messages = new List<string>();
-
-            if (httpError.TryGetValue(MessageKey, out messageObject))
-            {
-                messages.Add(Error.Format(SRResources.HttpErrorUserMessageFormat, messageObject));
-            }
-
-            if (httpError.TryGetValue(MessageDetailKey, out messageDetailsObject))
-            {
-                messages.Add(Error.Format(SRResources.HttpErrorMessageDetailFormat, messageDetailsObject));
-            }
-
-            // Extract the exception from this HttpError and then incrementally
-            // walk down all inner exceptions.
-            AddExceptions(httpError, messages);
-
-            // ModelState errors are handled with a nested HttpError
-            object modelStateErrorObject = null;
-            if (httpError.TryGetValue(ModelStateKey, out modelStateErrorObject))
-            {
-                HttpError modelStateError = modelStateErrorObject as HttpError;
-                if (modelStateError != null)
-                {
-                    messages.Add(FormatModelStateErrors(modelStateError));
-                }
-            }
-
-            traceRecord.Message = String.Join(", ", messages);
+            TraceWriterExceptionMapper.TranslateHttpResponseException(traceRecord);
         }
 
         /// <summary>
@@ -392,107 +321,6 @@ namespace System.Web.Http.Tracing
             // The 'o' format is ISO 8601 for a round-trippable DateTime.
             // It is culture-invariant and can be parsed.
             return dateTime.ToString("o", CultureInfo.InvariantCulture);
-        }
-
-        /// <summary>
-        /// Unpacks any exceptions in the given <see cref="HttpError"/> and adds
-        /// them into a collection of name-value pairs that can be composed into a single string.
-        /// </summary>
-        /// <remarks>
-        /// This helper also iterates over all inner exceptions and unpacks them too.
-        /// </remarks>
-        /// <param name="httpError">The <see cref="HttpError"/> to unpack.</param>
-        /// <param name="messages">A collection of messages to which the new information should be added.</param>
-        private static void AddExceptions(HttpError httpError, List<string> messages)
-        {
-            Contract.Assert(httpError != null);
-            Contract.Assert(messages != null);
-
-            object exceptionMessageObject = null;
-            object exceptionTypeObject = null;
-            object stackTraceObject = null;
-            object innerExceptionObject = null;
-
-            for (int i = 0; httpError != null; i++)
-            {
-                // For uniqueness, key names append the depth of inner exception
-                string indexText = i == 0 ? String.Empty : Error.Format("[{0}]", i);
-
-                if (httpError.TryGetValue(ExceptionTypeKey, out exceptionTypeObject))
-                {
-                    messages.Add(Error.Format(SRResources.HttpErrorExceptionTypeFormat, indexText, exceptionTypeObject));
-                }
-
-                if (httpError.TryGetValue(ExceptionMessageKey, out exceptionMessageObject))
-                {
-                    messages.Add(Error.Format(SRResources.HttpErrorExceptionMessageFormat, indexText, exceptionMessageObject));
-                }
-
-                if (httpError.TryGetValue(StackTraceKey, out stackTraceObject))
-                {
-                    messages.Add(Error.Format(SRResources.HttpErrorStackTraceFormat, indexText, stackTraceObject));
-                }
-
-                if (!httpError.TryGetValue(InnerExceptionKey, out innerExceptionObject))
-                {
-                    break;
-                }
-
-                Contract.Assert(!Object.ReferenceEquals(httpError, innerExceptionObject));
-
-                httpError = innerExceptionObject as HttpError;
-            }
-        }
-
-        private static HttpResponseException ExtractHttpResponseException(TraceRecord traceRecord)
-        {
-            return ExtractHttpResponseException(traceRecord.Exception);
-        }
-
-        private static HttpResponseException ExtractHttpResponseException(Exception exception)
-        {
-            if (exception == null)
-            {
-                return null;
-            }
-
-            var httpResponseException = exception as HttpResponseException;
-            if (httpResponseException != null)
-            {
-                return httpResponseException;
-            }
-
-            var aggregateException = exception as AggregateException;
-            if (aggregateException != null)
-            {
-                httpResponseException = aggregateException
-                    .Flatten()
-                    .InnerExceptions
-                    .Select(ExtractHttpResponseException)
-                    .Where(ex => ex != null && ex.Response != null)
-                    .OrderByDescending(ex => ex.Response.StatusCode)
-                    .FirstOrDefault();
-                return httpResponseException;
-            }
-
-            return ExtractHttpResponseException(exception.InnerException);
-        }
-
-        private static string FormatModelStateErrors(HttpError modelStateError)
-        {
-            Contract.Assert(modelStateError != null);
-
-            List<string> messages = new List<string>();
-            foreach (var pair in modelStateError)
-            {
-                IEnumerable<string> errorList = pair.Value as IEnumerable<string>;
-                if (errorList != null)
-                {
-                    messages.Add(Error.Format(SRResources.HttpErrorModelStatePairFormat, pair.Key, String.Join(", ", errorList)));
-                }
-            }
-
-            return Error.Format(SRResources.HttpErrorModelStateErrorFormat, String.Join(", ", messages));
         }
 
         private void TraceMessage(TraceLevel level, string message)

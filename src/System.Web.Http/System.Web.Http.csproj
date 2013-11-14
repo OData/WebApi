@@ -88,6 +88,9 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Common\TraceWriterExceptionMapper.cs">
+      <Link>Tracing\TraceWriterExceptionMapper.cs</Link>
+    </Compile>
     <Compile Include="..\Common\TypeExtensions.cs">
       <Link>Common\TypeExtensions.cs</Link>
     </Compile>

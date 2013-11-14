@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Text;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
@@ -318,7 +317,7 @@ namespace System.Web.Http.OData.Routing
             if (castType != null)
             {
                 IEdmType previousElementType = collectionType.ElementType.Definition;
-                if (!castType.IsOrInheritsFrom(previousElementType))
+                if (!castType.IsOrInheritsFrom(previousElementType) && !previousElementType.IsOrInheritsFrom(castType))
                 {
                     throw new ODataException(Error.Format(SRResources.InvalidCastInPath, castType, previousElementType));
                 }
@@ -410,7 +409,7 @@ namespace System.Web.Http.OData.Routing
             IEdmEntityType castType = model.FindDeclaredType(segment) as IEdmEntityType;
             if (castType != null)
             {
-                if (!castType.IsOrInheritsFrom(previousType))
+                if (!castType.IsOrInheritsFrom(previousType) && !previousType.IsOrInheritsFrom(castType))
                 {
                     throw new ODataException(Error.Format(SRResources.InvalidCastInPath, castType, previousType));
                 }
@@ -450,6 +449,6 @@ namespace System.Web.Http.OData.Routing
         public virtual string Link(ODataPath path)
         {
             return path.ToString();
-       }
+        }
     }
 }

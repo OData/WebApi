@@ -199,7 +199,7 @@ namespace System.Web.Http.OData.Formatter
             return new EdmCollectionType(new EdmEntityTypeReference(entityType, isNullable: false));
         }
 
-        public static bool CanBindTo(this IEdmFunctionImport function, IEdmEntityType entity)
+        private static bool CanBindTo(this IEdmFunctionImport function, IEdmEntityType entity)
         {
             if (function == null)
             {
@@ -230,7 +230,7 @@ namespace System.Web.Http.OData.Formatter
             return entity.IsOrInheritsFrom(bindingParameterType);
         }
 
-        public static bool CanBindTo(this IEdmFunctionImport function, IEdmCollectionType collection)
+        private static bool CanBindTo(this IEdmFunctionImport function, IEdmCollectionType collection)
         {
             if (function == null)
             {
@@ -305,7 +305,8 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
-        public static IEdmFunctionImport FindBindableAction(this IEnumerable<IEdmFunctionImport> functions, IEdmEntityType entityType, string actionIdentifier)
+        public static IEdmFunctionImport FindBindableAction(this IEnumerable<IEdmFunctionImport> functions,
+            IEdmEntityType entityType, string actionIdentifier)
         {
             if (functions == null)
             {
@@ -320,27 +321,58 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("actionIdentifier");
             }
 
-            IEdmFunctionImport[] matches = functions.GetMatchingActions(actionIdentifier).Where(fi => fi.CanBindTo(entityType)).ToArray();
+            IEnumerable<IEdmFunctionImport> matches =
+                functions.GetMatchingActions(actionIdentifier).Where(fi => fi.CanBindTo(entityType));
+            return FindBest(actionIdentifier, matches, entityType, isCollection: false);
+        }
 
-            if (matches.Length > 1)
+        // Performs overload resolution between a set of matching bindable actions. OData protocol ensures that there 
+        // cannot be multiple bindable actions with same name and different sets of non-bindable paramters. 
+        // The resolution logic is simple and is dependant only on the binding parameter and chooses the action that is defined
+        // closest to the binding parameter in the inheritance hierarchy.
+        private static IEdmFunctionImport FindBest(string actionIdentifier, IEnumerable<IEdmFunctionImport> bindableActions,
+            IEdmEntityType bindingParameterType, bool isCollection)
+        {
+            if (bindingParameterType == null)
+            {
+                return null;
+            }
+
+            List<IEdmFunctionImport> actionsBoundToThisType = new List<IEdmFunctionImport>();
+            foreach (IEdmFunctionImport action in bindableActions)
+            {
+                IEdmType actionParameterType = action.Parameters.First().Type.Definition;
+                if (isCollection)
+                {
+                    actionParameterType = ((IEdmCollectionType)actionParameterType).ElementType.Definition;
+                }
+
+                if (actionParameterType == bindingParameterType)
+                {
+                    actionsBoundToThisType.Add(action);
+                }
+            }
+
+            if (actionsBoundToThisType.Count > 1)
             {
                 throw Error.Argument(
                     "actionIdentifier",
                     SRResources.ActionResolutionFailed,
                     actionIdentifier,
-                    String.Join(", ", matches.Select(match => match.Container.FullName() + "." + match.Name)));
+                    String.Join(", ", actionsBoundToThisType.Select(match => match.Container.FullName() + "." + match.Name)));
             }
-            else if (matches.Length == 1)
+            else if (actionsBoundToThisType.Count == 1)
             {
-                return matches[0];
+                return actionsBoundToThisType[0];
             }
             else
             {
-                return null;
+                return FindBest(actionIdentifier, bindableActions, bindingParameterType.BaseEntityType(), isCollection);
             }
         }
 
-        public static IEdmFunctionImport FindBindableAction(this IEnumerable<IEdmFunctionImport> functions, IEdmCollectionType collectionType, string actionIdentifier)
+        public static IEdmFunctionImport FindBindableAction(this IEnumerable<IEdmFunctionImport> functions,
+            IEdmCollectionType collectionType, string actionIdentifier)
         {
             if (functions == null)
             {
@@ -355,26 +387,11 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("actionIdentifier");
             }
 
-            IEdmFunctionImport[] matches = functions.GetMatchingActions(actionIdentifier).Where(fi => fi.CanBindTo(collectionType)).ToArray();
+            IEnumerable<IEdmFunctionImport> matches =
+                functions.GetMatchingActions(actionIdentifier).Where(fi => fi.CanBindTo(collectionType));
 
-            if (matches.Length > 1)
-            {
-                IEdmEntityType elementType = collectionType.ElementType as IEdmEntityType;
-                Contract.Assert(elementType != null);
-                throw Error.Argument(
-                    "actionIdentifier",
-                    SRResources.ActionResolutionFailed,
-                    actionIdentifier,
-                    String.Join(", ", matches.Select(match => match.Container.FullName() + "." + match.Name)));
-            }
-            else if (matches.Length == 1)
-            {
-                return matches[0];
-            }
-            else
-            {
-                return null;
-            }
+            IEdmEntityType elementType = (IEdmEntityType)collectionType.ElementType.Definition;
+            return FindBest(actionIdentifier, matches, elementType, isCollection: true);
         }
 
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel)

@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Web.Http.OData.Builder;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
@@ -540,6 +539,120 @@ namespace System.Web.Http.OData.Routing
         public void CanResolveSetAndTypeViaCollectionActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
+        }
+
+        [Theory]
+        [InlineData("Vehicles/NS.Car", "Collection([NS.Car Nullable=False])")]
+        [InlineData("Vehicles/NS.Motorcycle", "Collection([NS.Motorcycle Nullable=False])")]
+        [InlineData("Vehicles/NS.Vehicle", "Collection([NS.Vehicle Nullable=False])")]
+        [InlineData("Cars/NS.Vehicle", "Collection([NS.Vehicle Nullable=False])")]
+        [InlineData("Motorcycles/NS.Vehicle", "Collection([NS.Vehicle Nullable=False])")]
+        [InlineData("Vehicles(42)/NS.Car", "NS.Car")]
+        [InlineData("Vehicles(42)/NS.Motorcycle", "NS.Motorcycle")]
+        [InlineData("Vehicles(42)/NS.Vehicle", "NS.Vehicle")]
+        [InlineData("Cars(42)/NS.Vehicle", "NS.Vehicle")]
+        [InlineData("Motorcycles(42)/NS.Vehicle", "NS.Vehicle")]
+        public void CastTests(string path, string expectedEdmType)
+        {
+            // Arrange
+            EdmModel model = new EdmModel();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            var vehicle = new EdmEntityType("NS", "Vehicle");
+            var car = new EdmEntityType("NS", "Car", vehicle);
+            var motorcycle = new EdmEntityType("NS", "Motorcycle", vehicle);
+            model.AddElements(new IEdmSchemaElement[] { vehicle, car, motorcycle, container });
+
+            container.AddEntitySet("Vehicles", vehicle);
+            container.AddEntitySet("Cars", car);
+            container.AddEntitySet("Motorcycles", motorcycle);
+
+            // Act
+            ODataPath odataPath = _parser.Parse(model, path);
+
+            // Assert
+            Assert.NotNull(odataPath);
+            Assert.Equal(expectedEdmType, odataPath.EdmType.ToTraceString());
+        }
+
+        [Theory]
+        [InlineData("Vehicles/NS.Car/NS.Motorcycle")]
+        [InlineData("Vehicles/NS.Motorcycle/NS.Car")]
+        [InlineData("Cars/NS.Motorcycle")]
+        [InlineData("Motorcycles/NS.Car")]
+        [InlineData("Vehicles(42)/NS.Car/NS.Motorcycle")]
+        [InlineData("Vehicles(42)/NS.Motorcycle/NS.Car")]
+        [InlineData("Cars(42)/NS.Motorcycle")]
+        [InlineData("Motorcycles(42)/NS.Car")]
+        public void Invalid_CastTests(string path)
+        {
+            // Arrange
+            EdmModel model = new EdmModel();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            var vehicle = new EdmEntityType("NS", "Vehicle");
+            var car = new EdmEntityType("NS", "Car", vehicle);
+            var motorcycle = new EdmEntityType("NS", "Motorcycle", vehicle);
+            model.AddElements(new IEdmSchemaElement[] { vehicle, car, motorcycle, container });
+
+            container.AddEntitySet("Vehicles", vehicle);
+            container.AddEntitySet("Cars", car);
+            container.AddEntitySet("Motorcycles", motorcycle);
+
+            // Act
+            var exception = Assert.Throws<ODataException>(() => _parser.Parse(model, path));
+            Assert.Contains("Invalid cast encountered.", exception.Message);
+        }
+
+        [Theory]
+        [InlineData("Vehicles(42)/Wash", "Wash", "NS.Vehicle")]
+        [InlineData("Vehicles(42)/NS.Car/Wash", "Wash", "NS.Car")] // upcast
+        [InlineData("Vehicles(42)/NS.Motorcycle/Wash", "Wash", "NS.Vehicle")]
+        [InlineData("Cars(42)/NS.Vehicle/Wash", "Wash", "NS.Vehicle")] // downcast
+        [InlineData("Vehicles/WashMultiple", "WashMultiple", "Collection([NS.Vehicle Nullable=False])")]
+        [InlineData("Vehicles/NS.Car/WashMultiple", "WashMultiple", "Collection([NS.Car Nullable=False])")] // upcast
+        [InlineData("Vehicles/NS.Motorcycle/WashMultiple", "WashMultiple", "Collection([NS.Vehicle Nullable=False])")]
+        [InlineData("Cars/NS.Vehicle/WashMultiple", "WashMultiple", "Collection([NS.Vehicle Nullable=False])")] // downcast
+        public void ActionOverloadResoultionTests(string path, string actionName, string expectedEntityBound)
+        {
+            // Arrange
+            EdmModel model = new EdmModel();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            var vehicle = new EdmEntityType("NS", "Vehicle");
+            var car = new EdmEntityType("NS", "Car", vehicle);
+            var motorcycle = new EdmEntityType("NS", "Motorcycle", vehicle);
+            model.AddElements(new IEdmSchemaElement[] { vehicle, car, motorcycle, container });
+
+            var washVehicle = AddBindableAction(container, "Wash", vehicle, isCollection: false);
+            var washCar = AddBindableAction(container, "Wash", car, isCollection: false);
+            var washVehicles = AddBindableAction(container, "WashMultiple", vehicle, isCollection: true);
+            var washCars = AddBindableAction(container, "WashMultiple", car, isCollection: true);
+
+            container.AddEntitySet("Vehicles", vehicle);
+            container.AddEntitySet("Cars", car);
+            container.AddEntitySet("Motorcycles", motorcycle);
+
+            // Act
+            ODataPath odataPath = _parser.Parse(model, path);
+
+            // Assert
+            Assert.NotNull(odataPath);
+            ActionPathSegment actionSegment = Assert.IsType<ActionPathSegment>(odataPath.Segments.Last());
+            Assert.Equal("NS.Container." + actionName, actionSegment.ActionName);
+            Assert.Equal(expectedEntityBound, actionSegment.Action.Parameters.First().Type.Definition.ToTraceString());
+        }
+
+        private static IEdmFunctionImport AddBindableAction(EdmEntityContainer container, string name, IEdmEntityType bindingType, bool isCollection)
+        {
+            var action = container.AddFunctionImport(name, returnType: null, entitySet: null, sideEffecting: true, composable: false, bindable: true);
+
+            IEdmTypeReference bindingParamterType = new EdmEntityTypeReference(bindingType, isNullable: false);
+            if (isCollection)
+            {
+                bindingParamterType = new EdmCollectionTypeReference(
+                    new EdmCollectionType(bindingParamterType), isNullable: false);
+            }
+
+            action.AddParameter("bindingParameter", bindingParamterType);
+            return action;
         }
 
         private static void AssertTypeMatchesExpectedType(string odataPath, string expectedSetName, string expectedTypeName, bool isCollection)

@@ -287,6 +287,24 @@ namespace System.Web.Http
         {
             if (!_disposed)
             {
+                if (disposing)
+                {
+                    // Creating a collection to avoid double-disposing any handlers that are shared between routes
+                    HashSet<IDisposable> handlers = new HashSet<IDisposable>();
+                    foreach (var route in this)
+                    {
+                        if (route.Handler != null)
+                        {
+                            handlers.Add(route.Handler);
+                        }
+                    }
+
+                    foreach (var handler in handlers)
+                    {
+                        handler.Dispose();
+                    }
+                }
+
                 _disposed = true;
             }
         }

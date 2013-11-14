@@ -118,6 +118,7 @@
     <Compile Include="Hosting\HttpMessageHandlerExtensions.cs" />
     <Compile Include="Hosting\SuppressHostPrincipalMessageHandlerTest.cs" />
     <Compile Include="HttpMessageHandlerExtensions.cs" />
+    <Compile Include="HttpRouteCollectionTest.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

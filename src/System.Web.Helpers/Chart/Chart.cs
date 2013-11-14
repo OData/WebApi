@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -33,7 +34,7 @@ namespace System.Web.Helpers
         private readonly List<TitleData> _titles = new List<TitleData>();
 
         private HttpContextBase _httpContext;
-        private VirtualPathProvider _virtualPathProvider;
+        private Func<VirtualPathProvider> _virtualPathProviderFunc;
 
         private string _path;
 
@@ -66,14 +67,25 @@ namespace System.Web.Helpers
             int height,
             string theme = null,
             string themePath = null)
-            : this(GetDefaultContext(), HostingEnvironment.VirtualPathProvider, width, height, theme, themePath)
+            : this(GetDefaultContext(), () => HostingEnvironment.VirtualPathProvider, width, height, theme, themePath)
         {
         }
 
+        // Overload used only for testing
         internal Chart(HttpContextBase httpContext, VirtualPathProvider virtualPathProvider, int width, int height,
                        string theme = null, string themePath = null)
+            : this(httpContext, () => virtualPathProvider, width, height, theme, themePath)
         {
-            Debug.Assert(httpContext != null);
+        }
+
+        internal Chart(HttpContextBase httpContext, Func<VirtualPathProvider> virtualPathProviderFunc,
+            int width, int height, string theme = null, string themePath = null)
+        {
+            Contract.Assert(httpContext != null);
+            Contract.Assert(virtualPathProviderFunc != null);
+
+            // HostingEnvironment.VirtualPathProvider never null in running host but may change at any time.
+            Contract.Assert(virtualPathProviderFunc() != null);
 
             if (width < 0)
             {
@@ -91,7 +103,7 @@ namespace System.Web.Helpers
             }
 
             _httpContext = httpContext;
-            _virtualPathProvider = virtualPathProvider;
+            _virtualPathProviderFunc = virtualPathProviderFunc;
             _width = width;
             _height = height;
             _theme = theme;
@@ -100,7 +112,7 @@ namespace System.Web.Helpers
             if (!String.IsNullOrEmpty(themePath))
             {
                 _themePath = VirtualPathUtil.ResolvePath(TemplateStack.GetCurrentTemplate(httpContext), httpContext, themePath);
-                if (!_virtualPathProvider.FileExists(_themePath))
+                if (!virtualPathProviderFunc().FileExists(_themePath))
                 {
                     throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, HelpersResources.Chart_ThemeFileNotFound, _themePath), "themePath");
                 }
@@ -481,7 +493,7 @@ namespace System.Web.Helpers
 
             if (!String.IsNullOrEmpty(_themePath))
             {
-                using (Stream stream = _virtualPathProvider.GetFile(_themePath).Open())
+                using (Stream stream = _virtualPathProviderFunc().GetFile(_themePath).Open())
                 {
                     LoadChartThemeFromFile(chart, stream);
                 }
@@ -507,7 +519,7 @@ namespace System.Web.Helpers
 
         internal static Chart GetFromCache(HttpContextBase context, string key)
         {
-            Debug.Assert(context != null);
+            Contract.Assert(context != null);
 
             if (String.IsNullOrEmpty(key))
             {

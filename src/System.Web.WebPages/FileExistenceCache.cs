@@ -20,17 +20,25 @@ namespace System.Web.WebPages
     internal class FileExistenceCache
     {
         private const int TicksPerMillisecond = 10000;
-        private readonly VirtualPathProvider _virtualPathProvider;
+        private readonly Func<VirtualPathProvider> _virtualPathProviderFunc;
         private readonly Func<string, bool> _virtualPathFileExists;
         private ConcurrentDictionary<string, bool> _cache;
         private long _creationTick;
         private int _ticksBeforeReset;
 
+        // Overload used mainly for testing
         public FileExistenceCache(VirtualPathProvider virtualPathProvider, int milliSecondsBeforeReset = 1000)
+            : this(() => virtualPathProvider, milliSecondsBeforeReset)
         {
             Contract.Assert(virtualPathProvider != null);
-            _virtualPathProvider = virtualPathProvider;
-            _virtualPathFileExists = virtualPathProvider.FileExists;
+        }
+
+        public FileExistenceCache(Func<VirtualPathProvider> virtualPathProviderFunc, int milliSecondsBeforeReset = 1000)
+        {
+            Contract.Assert(virtualPathProviderFunc != null);
+
+            _virtualPathProviderFunc = virtualPathProviderFunc;
+            _virtualPathFileExists = path => _virtualPathProviderFunc().FileExists(path);
             _ticksBeforeReset = milliSecondsBeforeReset * TicksPerMillisecond;
             Reset();
         }
@@ -38,7 +46,7 @@ namespace System.Web.WebPages
         // Use the VPP returned by the HostingEnvironment unless a custom vpp is passed in (mainly for testing purposes)
         public VirtualPathProvider VirtualPathProvider
         {
-            get { return _virtualPathProvider; }
+            get { return _virtualPathProviderFunc(); }
         }
 
         public int MilliSecondsBeforeReset
@@ -73,6 +81,7 @@ namespace System.Web.WebPages
             {
                 Reset();
             }
+
             return _cache.GetOrAdd(virtualPath, _virtualPathFileExists);
         }
     }

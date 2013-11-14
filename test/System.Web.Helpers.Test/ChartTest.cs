@@ -133,6 +133,44 @@ namespace System.Web.Helpers.Test
         }
 
         [Fact]
+        public void ConstructorLoadsThemeAndTemplate_VPPRegistrationChanging()
+        {
+            // Arrange
+            // Vanilla theme, as in ConstructorLoadsThemeAndTemplate()
+            string template = WriteTemplate(@"<Chart BorderlineDashStyle=""DashDot""><Legends><Legend BackColor=""Red"" /></Legends></Chart>");
+            HttpContextBase context = GetContext();
+            string templatePath = VirtualPathUtility.Combine(context.Request.AppRelativeCurrentExecutionFilePath, template);
+
+            MockVirtualPathProvider provider1 = new MockVirtualPathProvider();
+            MockVirtualPathProvider provider2 = new MockVirtualPathProvider();
+            VirtualPathProvider provider = provider1;
+
+            // Act; use one provider in constructor and another in ExecuteChartAction()
+            Chart chart = new Chart(context, () => provider, 100, 100, theme: ChartTheme.Vanilla, themePath: template);
+
+            // The moral equivalent of HostingEnvironment.RegisterVirtualPathProvider(provider2)
+            provider = provider2;
+
+            // Assert
+            AssertBuiltChartAction(chart, c =>
+            {
+                Assert.Equal(c.Palette, ChartColorPalette.SemiTransparent);
+                Assert.Equal(c.BorderColor, Color.FromArgb(0, Color.Black));
+                Assert.Equal(c.BorderlineDashStyle, ChartDashStyle.DashDot);
+                Assert.Equal(1, c.ChartAreas.Count);
+                Assert.Equal(c.Legends.Count, 1);
+                Assert.Equal(c.Legends[0].BackColor, Color.Red);
+                Assert.False(c.ChartAreas[0].AxisX.MajorGrid.Enabled);
+                Assert.False(c.ChartAreas[0].AxisY.MinorGrid.Enabled);
+            });
+
+            Assert.Equal(1, provider1.FileExistsCalls);
+            Assert.Equal(0, provider1.GetFileCalls);
+            Assert.Equal(0, provider2.FileExistsCalls);
+            Assert.Equal(1, provider2.GetFileCalls);
+        }
+
+        [Fact]
         public void ConstructorSetsWidthAndHeight()
         {
             var chart = new Chart(GetContext(), GetVirtualPathProvider(), 101, 102);
@@ -576,7 +614,7 @@ namespace System.Web.Helpers.Test
             Assert.True((_writeData != null) && (_writeData.Length > 0));
         }
 
-        private void AssertBuiltChartAction(Chart chart, Action<UI.DataVisualization.Charting.Chart> action)
+        private static void AssertBuiltChartAction(Chart chart, Action<UI.DataVisualization.Charting.Chart> action)
         {
             bool actionCalled = false;
             chart.ExecuteChartAction(c =>
@@ -613,20 +651,24 @@ namespace System.Web.Helpers.Test
             return context.Object;
         }
 
-        private string WriteTemplate(string xml)
+        private static string WriteTemplate(string xml)
         {
             var path = Guid.NewGuid() + ".xml";
             File.WriteAllText(path, xml);
             return path;
         }
 
-        private MockVirtualPathProvider GetVirtualPathProvider()
+        private static MockVirtualPathProvider GetVirtualPathProvider()
         {
             return new MockVirtualPathProvider();
         }
 
         class MockVirtualPathProvider : VirtualPathProvider
         {
+            public int FileExistsCalls { get; private set; }
+
+            public int GetFileCalls { get; private set; }
+
             class MockVirtualFile : VirtualFile
             {
                 public MockVirtualFile(string virtualPath)
@@ -642,11 +684,13 @@ namespace System.Web.Helpers.Test
 
             public override bool FileExists(string virtualPath)
             {
+                ++FileExistsCalls;
                 return File.Exists(virtualPath);
             }
 
             public override VirtualFile GetFile(string virtualPath)
             {
+                ++GetFileCalls;
                 return new MockVirtualFile(virtualPath);
             }
         }

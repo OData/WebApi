@@ -3,6 +3,7 @@
 using System.Linq;
 using System.Threading;
 using System.Web.Hosting;
+using System.Web.WebPages.TestUtils;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -25,6 +26,60 @@ namespace System.Web.WebPages.Test
             cache = new FileExistenceCache(vpp, ms);
             Assert.Equal(vpp, cache.VirtualPathProvider);
             Assert.Equal(ms, cache.MilliSecondsBeforeReset);
+        }
+
+        // Not a valid production scenario -- no HostingEnvironment
+        [Fact]
+        public void ConstructorTestWithNull()
+        {
+            // Arrange & Act
+            FileExistenceCache cache = new FileExistenceCache(() => null);
+
+            // Assert
+            Assert.Null(cache.VirtualPathProvider);
+        }
+
+        [Fact]
+        public void ConstructorTest_VPPRegistrationChanging()
+        {
+            // Arrange
+            Mock<VirtualPathProvider> mockProvider = new Mock<VirtualPathProvider>(MockBehavior.Strict);
+            VirtualPathProvider provider = null;
+
+            // Act
+            FileExistenceCache cache = new FileExistenceCache(() => provider);
+
+            // The moral equivalent of HostingEnvironment.RegisterVirtualPathProvider(mockProvider.Object)
+            provider = mockProvider.Object;
+
+            // Assert
+            Assert.Equal(provider, cache.VirtualPathProvider);
+            mockProvider.Verify();
+        }
+
+        [Fact]
+        public void FileExistsTest_VPPRegistrationChanging()
+        {
+            // Arrange
+            string path = "~/Index.cshtml";
+            Mock<VirtualPathProvider> mockProvider = new Mock<VirtualPathProvider>(MockBehavior.Strict);
+            mockProvider.Setup(c => c.FileExists(It.IsAny<string>())).Returns<string>(p => p.Equals(path)).Verifiable();
+            VirtualPathProvider provider = null;
+
+            // Act
+            FileExistenceCache cache = new FileExistenceCache(() => provider);
+
+            // The moral equivalent of HostingEnvironment.RegisterVirtualPathProvider(mockProvider.Object)
+            provider = mockProvider.Object;
+
+            bool createExists = cache.FileExists("~/Create.cshtml");
+            bool indexExists = cache.FileExists(path);
+
+            // Assert
+            Assert.False(createExists);
+            Assert.True(indexExists);
+            mockProvider.Verify();
+            mockProvider.Verify(vpp => vpp.FileExists(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [Fact]
@@ -74,16 +129,19 @@ namespace System.Web.WebPages.Test
         [Fact]
         public void FileExistsTimeExceededTest()
         {
-            var path = "~/index.cshtml";
-            Utils.SetupVirtualPathInAppDomain(path, "");
+            AppDomainUtils.RunInSeparateAppDomain(() =>
+            {
+                var path = "~/index.cshtml";
+                Utils.SetupVirtualPathInAppDomain(path, "");
 
-            var cache = new FileExistenceCache(GetVpp(path));
-            var cacheInternal = cache.CacheInternal;
-            cache.MilliSecondsBeforeReset = 5;
-            Thread.Sleep(300);
-            Assert.True(cache.FileExists(path));
-            Assert.False(cache.FileExists("~/test.cshtml"));
-            Assert.NotEqual(cacheInternal, cache.CacheInternal);
+                var cache = new FileExistenceCache(GetVpp(path));
+                var cacheInternal = cache.CacheInternal;
+                cache.MilliSecondsBeforeReset = 5;
+                Thread.Sleep(300);
+                Assert.True(cache.FileExists(path));
+                Assert.False(cache.FileExists("~/test.cshtml"));
+                Assert.NotEqual(cacheInternal, cache.CacheInternal);
+            });
         }
 
         private static VirtualPathProvider GetVpp(params string[] files)

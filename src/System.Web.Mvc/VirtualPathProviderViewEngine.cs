@@ -20,20 +20,9 @@ namespace System.Web.Mvc
         private static readonly string[] _emptyLocations = new string[0];
         private DisplayModeProvider _displayModeProvider;
 
-        private VirtualPathProvider _vpp;
+        private Func<VirtualPathProvider> _vppFunc = () => HostingEnvironment.VirtualPathProvider;
         internal Func<string, string> GetExtensionThunk = VirtualPathUtility.GetExtension;
-
-        protected VirtualPathProviderViewEngine()
-        {
-            if (HttpContext.Current == null || HttpContext.Current.IsDebuggingEnabled)
-            {
-                ViewLocationCache = DefaultViewLocationCache.Null;
-            }
-            else
-            {
-                ViewLocationCache = new DefaultViewLocationCache();
-            }
-        }
+        private IViewLocationCache _viewLocationCache;
 
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "This is a shipped API")]
         public string[] AreaMasterLocationFormats { get; set; }
@@ -53,22 +42,68 @@ namespace System.Web.Mvc
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "This is a shipped API")]
         public string[] PartialViewLocationFormats { get; set; }
 
-        public IViewLocationCache ViewLocationCache { get; set; }
+        // Neither DefaultViewLocationCache.Null nor a DefaultViewLocationCache instance maintain internal state. Fine
+        // if multiple threads race to initialize _viewLocationCache.
+        public IViewLocationCache ViewLocationCache
+        {
+            get
+            {
+                if (_viewLocationCache == null)
+                {
+                    if (HttpContext.Current == null || HttpContext.Current.IsDebuggingEnabled)
+                    {
+                        _viewLocationCache = DefaultViewLocationCache.Null;
+                    }
+                    else
+                    {
+                        _viewLocationCache = new DefaultViewLocationCache();
+                    }
+                }
+
+                return _viewLocationCache;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.ArgumentNull("value");
+                }
+
+                _viewLocationCache = value;
+            }
+        }
 
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "This is a shipped API")]
         public string[] ViewLocationFormats { get; set; }
 
+        // Likely exists for testing only
         protected VirtualPathProvider VirtualPathProvider
         {
-            get
+            get { return _vppFunc(); }
+            set
             {
-                if (_vpp == null)
+                if (value == null)
                 {
-                    _vpp = HostingEnvironment.VirtualPathProvider;
+                    throw Error.ArgumentNull("value");
                 }
-                return _vpp;
+
+                _vppFunc = () => value;
             }
-            set { _vpp = value; }
+        }
+
+        // Provided for testing only; setter used in BuildManagerViewEngine but only for test scenarios
+        internal Func<VirtualPathProvider> VirtualPathProviderFunc
+        {
+            get { return _vppFunc; }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.ArgumentNull("value");
+                }
+
+                _vppFunc = value;
+            }
         }
 
         protected internal DisplayModeProvider DisplayModeProvider

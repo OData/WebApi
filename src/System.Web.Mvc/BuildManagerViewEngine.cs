@@ -25,7 +25,8 @@ namespace System.Web.Mvc
         {
         }
 
-        internal BuildManagerViewEngine(IViewPageActivator viewPageActivator, IResolver<IViewPageActivator> activatorResolver, IDependencyResolver dependencyResolver, VirtualPathProvider pathProvider)
+        internal BuildManagerViewEngine(IViewPageActivator viewPageActivator, IResolver<IViewPageActivator> activatorResolver,
+            IDependencyResolver dependencyResolver, VirtualPathProvider pathProvider)
         {
             if (viewPageActivator != null)
             {
@@ -38,22 +39,21 @@ namespace System.Web.Mvc
                                                               new DefaultViewPageActivator(dependencyResolver),
                                                               "BuildManagerViewEngine constructor");
             }
+
             if (pathProvider != null)
             {
-                _fileExistsCache = new FileExistenceCache(pathProvider);
+                Func<VirtualPathProvider> providerFunc = () => pathProvider;
+                _fileExistsCache = new FileExistenceCache(providerFunc);
+                VirtualPathProviderFunc = providerFunc;
             }
             else
             {
                 if (_sharedFileExistsCache == null)
                 {
-                    VirtualPathProvider defaultPathProvider = HostingEnvironment.VirtualPathProvider;
-                    // Path provider may not be present in test context.
-                    if (defaultPathProvider != null)
-                    {
-                        // Startup initialization race is OK providing service remains read-only
-                        _sharedFileExistsCache = new FileExistenceCache(HostingEnvironment.VirtualPathProvider);
-                    }
+                    // Startup initialization race is OK providing service remains read-only
+                    _sharedFileExistsCache = new FileExistenceCache(() => HostingEnvironment.VirtualPathProvider);
                 }
+
                 _fileExistsCache = _sharedFileExistsCache;
             }
         }

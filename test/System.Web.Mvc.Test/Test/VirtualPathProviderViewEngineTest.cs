@@ -823,6 +823,138 @@ namespace System.Web.Mvc.Test
             Assert.True(((TestView)view).Disposed);
         }
 
+        [Fact]
+        public void ViewLocationCache_RoundTrips()
+        {
+            // Arrange & Act
+            IViewLocationCache locationCache = _engine.ViewLocationCache;
+
+            // Assert
+            Assert.NotNull(locationCache);
+            Assert.Equal(_engine.MockCache.Object, _engine.ViewLocationCache);
+        }
+
+        [Fact]
+        public void ViewLocationCache_DefaultNullCache()
+        {
+            // Arrange
+            Mock<VirtualPathProviderViewEngine> engineMock = new Mock<VirtualPathProviderViewEngine>();
+            VirtualPathProviderViewEngine engine = engineMock.Object;
+
+            // Act
+            IViewLocationCache cache = engine.ViewLocationCache;
+
+            // Assert
+            Assert.NotNull(cache);
+            Assert.Equal(DefaultViewLocationCache.Null, cache);
+            Assert.IsNotType<DefaultViewLocationCache>(cache);
+        }
+
+        [Fact]
+        public void ViewLocationCache_DefaultRealCache()
+        {
+            // Arrange
+            Mock<VirtualPathProviderViewEngine> engineMock = new Mock<VirtualPathProviderViewEngine>();
+            VirtualPathProviderViewEngine engine = engineMock.Object;
+
+            HttpRequest request = new HttpRequest("foo.txt", "http://localhost", String.Empty);
+            HttpResponse response = new HttpResponse(TextWriter.Null);
+            HttpContext context = new HttpContext(request, response);
+            HttpContext savedContext = HttpContext.Current;
+
+            // Act
+            IViewLocationCache cache;
+            try
+            {
+                HttpContext.Current = context;
+                cache = engine.ViewLocationCache;
+            }
+            finally
+            {
+                HttpContext.Current = savedContext;
+            }
+
+            // Assert
+            Assert.NotNull(cache);
+            Assert.IsType<DefaultViewLocationCache>(cache);
+        }
+
+        [Fact]
+        public void VirtualPathProvider_RoundTrips()
+        {
+            // Arrange & Act & Assert
+            Assert.Equal(_engine.MockPathProvider.Object, _engine.VirtualPathProvider);
+        }
+
+        // Not a valid production scenario -- no HostingEnvironment
+        [Fact]
+        public void VirtualPathProvider_Null()
+        {
+            // Arrange
+            TestableVirtualPathProviderViewEngine viewEngine =
+                new TestableVirtualPathProviderViewEngine(skipVPPInitialization: true);
+
+            // Act & Assert
+            Assert.Null(viewEngine.VirtualPathProvider);
+        }
+
+        [Fact]
+        public void VirtualPathProvider_VPPRegistrationChanging()
+        {
+            // Arrange
+            Mock<VirtualPathProvider> provider1 = new Mock<VirtualPathProvider>(MockBehavior.Strict);
+            Mock<VirtualPathProvider> provider2 = new Mock<VirtualPathProvider>(MockBehavior.Strict);
+            VirtualPathProvider provider = provider1.Object;
+
+            // Act
+            TestableVirtualPathProviderViewEngine viewEngine =
+                new TestableVirtualPathProviderViewEngine(skipVPPInitialization: true)
+            {
+                VirtualPathProviderFunc = () => provider,
+            };
+
+            // The moral equivalent of HostingEnvironment.RegisterVirtualPathProvider(provider2.Object)
+            provider = provider2.Object;
+
+            // Assert
+            Assert.Equal(provider2.Object, viewEngine.VirtualPathProvider);
+            provider1.Verify();
+            provider2.Verify();
+        }
+
+        [Fact]
+        public void FileExists_VPPRegistrationChanging()
+        {
+            // Arrange
+            Mock<VirtualPathProvider> provider1 = new Mock<VirtualPathProvider>(MockBehavior.Strict);
+            provider1.Setup(vpp => vpp.FileExists(It.IsAny<string>())).Returns(true);
+            Mock<VirtualPathProvider> provider2 = new Mock<VirtualPathProvider>(MockBehavior.Strict);
+            provider2.Setup(vpp => vpp.FileExists(It.IsAny<string>())).Returns(true);
+            VirtualPathProvider provider = provider1.Object;
+
+            string path = "~/Index.cshtml";
+            ControllerContext context = CreateContext();
+            TestableVirtualPathProviderViewEngine viewEngine =
+                new TestableVirtualPathProviderViewEngine(skipVPPInitialization: true)
+            {
+                VirtualPathProviderFunc = () => provider,
+            };
+
+            // Act
+            bool fileExists1 = viewEngine.FileExists(context, path);
+
+            // The moral equivalent of HostingEnvironment.RegisterVirtualPathProvider(provider2.Object)
+            provider = provider2.Object;
+
+            bool fileExists2 = viewEngine.FileExists(context, path);
+
+            // Assert
+            Assert.True(fileExists1);
+            provider1.Verify(vpp => vpp.FileExists(path), Times.Once());
+            Assert.True(fileExists2);
+            provider2.Verify(vpp => vpp.FileExists(path), Times.Once());
+        }
+
         private static string CreateCacheBaseKey(string prefix, string name, string controllerName, string area)
         {
             var r = String.Join(":", prefix, name, controllerName, area) + ":";
@@ -930,6 +1062,11 @@ namespace System.Web.Mvc.Test
             public Mock<VirtualPathProvider> MockPathProvider = new Mock<VirtualPathProvider>(MockBehavior.Strict);
 
             public TestableVirtualPathProviderViewEngine()
+                : this(skipVPPInitialization: false)
+            {
+            }
+
+            public TestableVirtualPathProviderViewEngine(bool skipVPPInitialization)
             {
                 MasterLocationFormats = new[] { "~/vpath/{1}/{0}.master" };
                 ViewLocationFormats = new[] { "~/vpath/{1}/{0}.view" };
@@ -940,13 +1077,28 @@ namespace System.Web.Mvc.Test
                 FileExtensions = new[] { "view", "partial", "master" };
 
                 ViewLocationCache = MockCache.Object;
-                VirtualPathProvider = MockPathProvider.Object;
-
                 MockCache
                     .Setup(c => c.GetViewLocation(It.IsAny<HttpContextBase>(), It.IsAny<string>()))
                     .Returns((string)null);
 
+                if (!skipVPPInitialization)
+                {
+                    VirtualPathProvider = MockPathProvider.Object;
+                }
+
                 GetExtensionThunk = GetExtension;
+            }
+
+            public new VirtualPathProvider VirtualPathProvider
+            {
+                get
+                {
+                    return base.VirtualPathProvider;
+                }
+                private set
+                {
+                    base.VirtualPathProvider = value;
+                }
             }
 
             public void ClearViewLocations()
@@ -962,6 +1114,11 @@ namespace System.Web.Mvc.Test
             public void ClearPartialViewLocations()
             {
                 PartialViewLocationFormats = new string[0];
+            }
+
+            public new bool FileExists(ControllerContext controllerContext, string virtualPath)
+            {
+                return base.FileExists(controllerContext, virtualPath);
             }
 
             protected override IView CreatePartialView(ControllerContext controllerContext, string partialPath)

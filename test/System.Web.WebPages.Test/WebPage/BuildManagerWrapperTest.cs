@@ -243,6 +243,41 @@ namespace System.Web.WebPages.Test
             Assert.False((bool)cachedValue.GetType().GetProperty("Exists").GetValue(cachedValue, null));
         }
 
+        [Fact]
+        public void IsNonPrecompiledAppReturnsTrue_VPPRegistrationChanging()
+        {
+            // Arrange
+            string fileContent = @"<precompiledApp version=""2"" updatable=""false""/>";
+            IVirtualPathUtility pathUtility = GetVirtualPathUtility();
+
+            Mock<VirtualPathProvider> mockProvider1 = new Mock<VirtualPathProvider>();
+            mockProvider1.Setup(c => c.FileExists(It.Is<string>(p => p.Equals(_precompileConfigFileName)))).Returns(true).Verifiable();
+            mockProvider1.Setup(c => c.GetFile(It.Is<string>(p => p.Equals(_precompileConfigFileName)))).Returns(GetFile(fileContent)).Verifiable();
+
+            Mock<VirtualPathProvider> mockProvider2 = new Mock<VirtualPathProvider>();
+            mockProvider2.Setup(c => c.FileExists(It.Is<string>(p => p.Equals(_precompileConfigFileName)))).Returns(true).Verifiable();
+            mockProvider2.Setup(c => c.GetFile(It.Is<string>(p => p.Equals(_precompileConfigFileName)))).Returns(GetFile(fileContent)).Verifiable();
+
+            VirtualPathProvider provider = mockProvider1.Object;
+
+            // Act; uses one VirtualPathProvider in constructor and the other when IsNonUpdatablePrecompiledApp() is called directly
+            BuildManagerWrapper buildManagerWrapper = new BuildManagerWrapper(() => provider, pathUtility);
+
+            // The moral equivalent of HostingEnvironment.RegisterVirtualPathProvider(provider2.Object)
+            provider = mockProvider2.Object;
+
+            bool isPrecompiled = buildManagerWrapper.IsNonUpdatablePrecompiledApp();
+
+            // Assert
+            Assert.True(isPrecompiled);
+            mockProvider1.Verify();
+            mockProvider1.Verify(vpp => vpp.FileExists(It.IsAny<string>()), Times.Once());
+            mockProvider1.Verify(vpp => vpp.GetFile(It.IsAny<string>()), Times.Once());
+            mockProvider2.Verify();
+            mockProvider2.Verify(vpp => vpp.FileExists(It.IsAny<string>()), Times.Once());
+            mockProvider2.Verify(vpp => vpp.GetFile(It.IsAny<string>()), Times.Once());
+        }
+
         private static BuildManagerWrapper CreateWrapperInstance(IEnumerable<string> supportedExtensions = null)
         {
             return new BuildManagerWrapper(new Mock<VirtualPathProvider>().Object, GetVirtualPathUtility()) { SupportedExtensions = supportedExtensions ?? new[] { "cshtml", "vbhtml" } };

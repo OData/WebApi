@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Web.Hosting;
+using System.Web.WebPages.TestUtils;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -35,6 +36,40 @@ namespace System.Web.Mvc.Test
 
             // Assert
             Assert.True(result);
+        }
+
+        [Fact]
+        public void FileExistsReturnsTrueForExistingPath_VPPRegistrationChanging()
+        {
+            AppDomainUtils.RunInSeparateAppDomain(() =>
+            {
+                // Arrange
+                AppDomainUtils.SetAppData();
+                new HostingEnvironment();
+
+                // Expect null beforeProvider since hosting environment hasn't been initialized
+                VirtualPathProvider beforeProvider = HostingEnvironment.VirtualPathProvider;
+                string testPath = "/Path.txt";
+                VirtualPathProvider afterProvider = CreatePathProvider(testPath);
+                Mock<VirtualPathProvider> mockProvider = Mock.Get(afterProvider);
+
+                TestableBuildManagerViewEngine engine = new TestableBuildManagerViewEngine();
+
+                // Act
+                VirtualPathProvider beforeEngineProvider = engine.VirtualPathProvider;
+                HostingEnvironment.RegisterVirtualPathProvider(afterProvider);
+
+                bool result = engine.FileExists(testPath);
+                VirtualPathProvider afterEngineProvider = engine.VirtualPathProvider;
+
+                // Assert
+                Assert.True(result);
+                Assert.Equal(beforeProvider, beforeEngineProvider);
+                Assert.Equal(afterProvider, afterEngineProvider);
+
+                mockProvider.Verify();
+                mockProvider.Verify(c => c.FileExists(It.IsAny<String>()), Times.Once());
+            });
         }
 
         [Fact]
@@ -170,6 +205,11 @@ namespace System.Web.Mvc.Test
             public new IViewPageActivator ViewPageActivator
             {
                 get { return base.ViewPageActivator; }
+            }
+
+            public new VirtualPathProvider VirtualPathProvider
+            {
+                get { return base.VirtualPathProvider; }
             }
 
             protected override IView CreatePartialView(ControllerContext controllerContext, string partialPath)

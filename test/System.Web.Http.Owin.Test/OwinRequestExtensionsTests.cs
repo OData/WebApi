@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using Microsoft.Owin;
 using Microsoft.TestCommon;
 using Moq;
@@ -8,6 +9,67 @@ namespace System.Web.Http.Owin
 {
     public class OwinRequestExtensionsTests
     {
+        [Fact]
+        public void DisableBuffering_IfActionIsAvailable_CallsAction()
+        {
+            // Arrange
+            bool bufferingDisabled = false;
+            Action disableBufferingAction = () => bufferingDisabled = true;
+            IDictionary<string, object> environment = CreateStubEnvironment(disableBufferingAction);
+            IOwinRequest request = CreateStubRequest(environment);
+
+            // Act
+            OwinRequestExtensions.DisableBuffering(request);
+
+            // Assert
+            Assert.True(bufferingDisabled);
+        }
+
+        [Fact]
+        public void DisableBuffering_IfRequestIsNull_Throws()
+        {
+            // Arrange
+            IOwinRequest request = null;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => OwinRequestExtensions.DisableBuffering(request), "request");
+        }
+
+        [Fact]
+        public void DisableBuffering_IfEnvironmentIsNull_DoesNotThrow()
+        {
+            // Arrange
+            IDictionary<string, object> environment = null;
+            IOwinRequest request = CreateStubRequest(environment);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => request.DisableBuffering());
+        }
+
+        [Fact]
+        public void DisableBuffering_IfServerDisableResponseBufferingIsAbsent_DoesNotThrow()
+        {
+            // Arrange
+            Mock<IDictionary<string, object>> environmentMock = new Mock<IDictionary<string, object>>(MockBehavior.Strict);
+            IDictionary<string, object> environment = CreateStubEnvironment(null, hasDisableBufferingAction: false);
+            IOwinRequest request = CreateStubRequest(environment);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => request.DisableBuffering());
+        }
+
+        [Fact]
+        public void DisableBuffering_IfServerDisableResponseBufferingIsNotAction_DoesNotThrow()
+        {
+            // Arrange
+            object nonAction = new object();
+            IDictionary<string, object> environment = CreateStubEnvironment(nonAction);
+            IOwinRequest request = CreateStubRequest(environment);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => request.DisableBuffering());
+        }
+
         [Fact]
         public void GetContentLength_IfHeadersIsNull_ReturnsNull()
         {
@@ -135,6 +197,18 @@ namespace System.Web.Http.Owin
             Assert.Equal(expected, length.Value);
         }
 
+        private static IDictionary<string, object> CreateStubEnvironment(object disableBufferingAction)
+        {
+            return CreateStubEnvironment(disableBufferingAction, hasDisableBufferingAction: true);
+        }
+
+        private static IDictionary<string, object> CreateStubEnvironment(object disableBufferingAction, bool hasDisableBufferingAction)
+        {
+            Mock<IDictionary<string, object>> mock = new Mock<IDictionary<string, object>>(MockBehavior.Strict);
+            mock.Setup(d => d.TryGetValue("server.DisableRequestBuffering", out disableBufferingAction)).Returns(hasDisableBufferingAction);
+            return mock.Object;
+        }
+
         private static IHeaderDictionary CreateStubHeaders(string key, string[] value)
         {
             Mock<IHeaderDictionary> mock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
@@ -154,6 +228,13 @@ namespace System.Web.Http.Owin
         {
             Mock<IOwinRequest> mock = new Mock<IOwinRequest>(MockBehavior.Strict);
             mock.SetupGet(r => r.Headers).Returns(headers);
+            return mock.Object;
+        }
+
+        private static IOwinRequest CreateStubRequest(IDictionary<string, object> environment)
+        {
+            Mock<IOwinRequest> mock = new Mock<IOwinRequest>(MockBehavior.Strict);
+            mock.SetupGet(r => r.Environment).Returns(environment);
             return mock.Object;
         }
     }

@@ -455,6 +455,64 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
+        public void Invoke_IfBufferPolicyDisablesInputBuffering_DisablesRequestBuffering()
+        {
+            // Arrange
+            IHostBufferPolicySelector bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false,
+                bufferOutput: false);
+
+            using (HttpResponseMessage response = CreateResponse())
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicySelector))
+            {
+                bool bufferingDisabled = false;
+                Action disableBuffering = () => bufferingDisabled = true;
+                IOwinRequest owinRequest = CreateFakeOwinRequest(disableBuffering);
+                IOwinResponse owinResponse = CreateFakeOwinResponse();
+                IOwinContext expectedContext = CreateStubOwinContext(owinRequest, owinResponse);
+
+                // Act
+                Task task = product.Invoke(expectedContext);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                Assert.True(bufferingDisabled);
+            }
+        }
+
+        [Fact]
+        public void Invoke_IfBufferPolicyEnablesInputBuffering_DoesNotDisableRequestBuffering()
+        {
+            // Arrange
+            IHostBufferPolicySelector bufferPolicySelector = CreateBufferPolicySelector(bufferInput: true,
+                bufferOutput: false);
+
+            using (HttpResponseMessage response = CreateResponse())
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicySelector))
+            {
+                bool bufferingDisabled = false;
+                Action disableBuffering = () => bufferingDisabled = true;
+                IOwinRequest owinRequest = CreateFakeOwinRequest(disableBuffering);
+                IOwinResponse owinResponse = CreateFakeOwinResponse();
+                IOwinContext expectedContext = CreateStubOwinContext(owinRequest, owinResponse);
+
+                // Act
+                Task task = product.Invoke(expectedContext);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                Assert.False(bufferingDisabled);
+            }
+        }
+
+        [Fact]
         public void Invoke_SetsOwinEnvironment()
         {
             var handler = CreateOKHandlerStub();
@@ -716,6 +774,64 @@ namespace System.Web.Http.Owin
             else
             {
                 Assert.False(responseHeaders.ContainsKey("Content-Length"));
+            }
+        }
+
+        [Fact]
+        public void Invoke_IfBufferPolicyDisablesOutputBuffering_DisablesResponseBuffering()
+        {
+            // Arrange
+            IHostBufferPolicySelector bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false,
+                bufferOutput: false);
+
+            using (HttpResponseMessage response = CreateResponse())
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicySelector))
+            {
+                IOwinRequest owinRequest = CreateFakeOwinRequest();
+                bool bufferingDisabled = false;
+                Action disableBuffering = () => bufferingDisabled = true;
+                IOwinResponse owinResponse = CreateFakeOwinResponse(disableBuffering);
+                IOwinContext expectedContext = CreateStubOwinContext(owinRequest, owinResponse);
+
+                // Act
+                Task task = product.Invoke(expectedContext);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                Assert.True(bufferingDisabled);
+            }
+        }
+
+        [Fact]
+        public void Invoke_IfBufferPolicyEnablesOutputBuffering_DoesNotDisableResponseBuffering()
+        {
+            // Arrange
+            IHostBufferPolicySelector bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false,
+                bufferOutput: true);
+
+            using (HttpResponseMessage response = CreateResponse())
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicySelector))
+            {
+                IOwinRequest owinRequest = CreateFakeOwinRequest();
+                bool bufferingDisabled = false;
+                Action disableBuffering = () => bufferingDisabled = true;
+                IOwinResponse owinResponse = CreateFakeOwinResponse(disableBuffering);
+                IOwinContext expectedContext = CreateStubOwinContext(owinRequest, owinResponse);
+
+                // Act
+                Task task = product.Invoke(expectedContext);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                Assert.False(bufferingDisabled);
             }
         }
 
@@ -1359,6 +1475,7 @@ namespace System.Web.Http.Owin
 
                     Mock<IOwinResponse> owinResponseMock = new Mock<IOwinResponse>(MockBehavior.Strict);
                     int statusCode = 0;
+                    owinResponseMock.SetupGet(r => r.Environment).Returns((IDictionary<string, object>)null);
                     owinResponseMock.SetupSet(r => r.StatusCode = It.IsAny<int>()).Callback<int>(s => statusCode = s);
                     int? contentLength = null;
                     Mock<IHeaderDictionary> headersMock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
@@ -1471,49 +1588,72 @@ namespace System.Web.Http.Owin
 
         private static IOwinRequest CreateFakeOwinRequest()
         {
-            Mock<IHeaderDictionary> headersMock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
-            headersMock.Setup(h => h.GetEnumerator()).Returns(
-                new Mock<IEnumerator<KeyValuePair<string, string[]>>>().Object);
-
-            Mock<IOwinRequest> mock = new Mock<IOwinRequest>(MockBehavior.Strict);
-            mock.Setup(r => r.Method).Returns("GET");
-            mock.Setup(r => r.Uri).Returns(new Uri("http://ignore"));
-            mock.Setup(r => r.Body).Returns(Stream.Null);
-            mock.Setup(r => r.Headers).Returns(headersMock.Object);
-            mock.Setup(r => r.User).Returns((IPrincipal)null);
-            mock.Setup(r => r.CallCancelled).Returns(CancellationToken.None);
-            return mock.Object;
+            return CreateFakeOwinRequest(CancellationToken.None);
         }
 
         private static IOwinRequest CreateFakeOwinRequest(CancellationToken cancellationToken)
         {
+            return CreateFakeOwinRequestMock(cancellationToken).Object;
+        }
+
+        private static IOwinRequest CreateFakeOwinRequest(Action disableBuffering)
+        {
+            Mock<IDictionary<string, object>> environmentMock = new Mock<IDictionary<string,object>>(MockBehavior.Strict);
+            object disableBufferingValue = disableBuffering;
+            environmentMock.Setup(d => d.TryGetValue("server.DisableRequestBuffering", out disableBufferingValue)).Returns(true);
+            IDictionary<string, object> environment = environmentMock.Object;
+
+            Mock<IOwinRequest> mock = CreateFakeOwinRequestMock(CancellationToken.None);
+            mock.SetupGet(r => r.Environment).Returns(environment);
+            return mock.Object;
+        }
+
+        private static Mock<IOwinRequest> CreateFakeOwinRequestMock(CancellationToken cancellationToken)
+        {
             Mock<IHeaderDictionary> headersMock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
             headersMock.Setup(h => h.GetEnumerator()).Returns(
                 new Mock<IEnumerator<KeyValuePair<string, string[]>>>().Object);
 
             Mock<IOwinRequest> mock = new Mock<IOwinRequest>(MockBehavior.Strict);
-            mock.Setup(r => r.Method).Returns("GET");
-            mock.Setup(r => r.Uri).Returns(new Uri("http://ignore"));
-            mock.Setup(r => r.Body).Returns(Stream.Null);
-            mock.Setup(r => r.Headers).Returns(headersMock.Object);
-            mock.Setup(r => r.User).Returns((IPrincipal)null);
-            mock.Setup(r => r.CallCancelled).Returns(cancellationToken);
-            return mock.Object;
+            mock.SetupGet(r => r.Method).Returns("GET");
+            mock.SetupGet(r => r.Uri).Returns(new Uri("http://ignore"));
+            mock.SetupGet(r => r.Body).Returns(Stream.Null);
+            mock.SetupGet(r => r.Headers).Returns(headersMock.Object);
+            mock.SetupGet(r => r.User).Returns((IPrincipal)null);
+            mock.SetupGet(r => r.CallCancelled).Returns(cancellationToken);
+            mock.SetupGet(r => r.Environment).Returns((IDictionary<string, object>)null);
+            return mock;
         }
 
         private static IOwinResponse CreateFakeOwinResponse()
         {
-            Mock<IOwinResponse> mock = new Mock<IOwinResponse>();
-            mock.Setup(r => r.Headers).Returns(new Mock<IHeaderDictionary>().Object);
-            return mock.Object;
+            return CreateFakeOwinResponseMock().Object;
         }
 
         private static IOwinResponse CreateFakeOwinResponse(Stream body)
         {
-            Mock<IOwinResponse> mock = new Mock<IOwinResponse>();
-            mock.Setup(r => r.Headers).Returns(new Mock<IHeaderDictionary>().Object);
+            Mock<IOwinResponse> mock = CreateFakeOwinResponseMock();
             mock.SetupGet(r => r.Body).Returns(body);
             return mock.Object;
+        }
+
+        private static IOwinResponse CreateFakeOwinResponse(Action disableBuffering)
+        {
+            Mock<IDictionary<string, object>> environmentMock = new Mock<IDictionary<string, object>>(MockBehavior.Strict);
+            object disableBufferingValue = disableBuffering;
+            environmentMock.Setup(d => d.TryGetValue("server.DisableResponseBuffering", out disableBufferingValue)).Returns(true);
+            IDictionary<string, object> environment = environmentMock.Object;
+
+            Mock<IOwinResponse> mock = CreateFakeOwinResponseMock();
+            mock.SetupGet(r => r.Environment).Returns(environment);
+            return mock.Object;
+        }
+
+        private static Mock<IOwinResponse> CreateFakeOwinResponseMock()
+        {
+            Mock<IOwinResponse> mock = new Mock<IOwinResponse>();
+            mock.Setup(r => r.Headers).Returns(new Mock<IHeaderDictionary>().Object);
+            return mock;
         }
 
         private static IOwinResponse CreateFakeOwinResponseWithHeaders()

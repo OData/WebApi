@@ -1310,8 +1310,8 @@ namespace System.Web.Http.WebHost
                 responseBaseMock.Verify(r => r.Clear(), Times.Once());
                 responseBaseMock.Verify(r => r.ClearHeaders(), Times.Once());
                 Assert.Equal(500, statusCode);
-                Assert.Equal(true, suppressContent);
-                Assert.Equal(false, task.Result);
+                Assert.True(suppressContent);
+                Assert.False(task.Result);
             }
         }
 

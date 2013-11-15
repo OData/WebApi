@@ -147,7 +147,14 @@ namespace System.Web.Http.Owin
             CancellationToken cancellationToken = owinRequest.CallCancelled;
             HttpContent requestContent;
 
-            if (!owinRequest.Body.CanSeek && _bufferPolicySelector.UseBufferedInputStream(hostContext: context))
+            bool bufferInput = _bufferPolicySelector.UseBufferedInputStream(hostContext: context);
+
+            if (!bufferInput)
+            {
+                owinRequest.DisableBuffering();
+            }
+            
+            if (!owinRequest.Body.CanSeek && bufferInput)
             {
                 requestContent = await CreateBufferedRequestContentAsync(owinRequest, cancellationToken);
             }
@@ -183,7 +190,13 @@ namespace System.Web.Http.Owin
                 {
                     callNext = false;
 
-                    if (response.Content != null && _bufferPolicySelector.UseBufferedOutputStream(response))
+                    bool bufferOutput = _bufferPolicySelector.UseBufferedOutputStream(response);
+
+                    if (!bufferOutput)
+                    {
+                        owinResponse.DisableBuffering();
+                    }
+                    else if (response.Content != null)
                     {
                         response = await BufferResponseContentAsync(request, response, cancellationToken);
                     }

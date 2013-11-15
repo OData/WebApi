@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using Microsoft.Owin;
 
@@ -8,6 +9,32 @@ namespace System.Web.Http.Owin
     internal static class OwinRequestExtensions
     {
         private const string ContentLengthHeaderName = "Content-Length";
+        private const string DisableRequestBufferingKey = "server.DisableRequestBuffering";
+
+        public static void DisableBuffering(this IOwinRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+
+            IDictionary<string, object> environment = request.Environment;
+
+            if (environment == null)
+            {
+                return;
+            }
+
+            Action action;
+
+            if (!environment.TryGetValue(DisableRequestBufferingKey, out action))
+            {
+                return;
+            }
+
+            Contract.Assert(action != null);
+            action.Invoke();
+        }
 
         public static int? GetContentLength(this IOwinRequest request)
         {

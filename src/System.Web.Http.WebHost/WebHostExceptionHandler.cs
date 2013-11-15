@@ -50,16 +50,6 @@ namespace System.Web.Http.WebHost
                 return TaskHelpers.Completed();
             }
 
-            if (exceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpWebRoute)
-            {
-                // LastChanceExceptionHandler will initialize Result so that top level exceptions return 500 by
-                // default. The HttpWebRoute catch block is new, so for back-compat we shouldn't handle exceptions
-                // there in the default handler. Override LastChanceExceptionHandler so that exceptions from
-                // HttpWebRoute will propagate.
-                context.Result = null;
-                return TaskHelpers.Completed();
-            }
-
             return _innerHandler.HandleAsync(context, cancellationToken);
         }
 

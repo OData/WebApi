@@ -113,30 +113,6 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
-        public void HandleAsync_IfCatchBlockIsHttpWebRoute_ResetsExceptionUnhandled()
-        {
-            IExceptionHandler innerHandler = CreateDummyHandler();
-            IExceptionHandler product = CreateProductUnderTest(innerHandler);
-
-            // Arrange
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                ExceptionHandlerContext context = CreateValidContext(request,
-                    WebHostExceptionCatchBlocks.HttpWebRoute);
-                context.Result = CreateDummyResult();
-                CancellationToken cancellationToken = CancellationToken.None;
-
-                // Act
-                Task task = product.HandleAsync(context, cancellationToken);
-                task.WaitUntilCompleted();
-
-                // Assert
-                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
-                Assert.Null(context.Result);
-            }
-        }
-
-        [Fact]
         public void HandleAsync_IfCatchBlockIsWebHostBufferedContent_WithoutContentType_HandlesWithCustomException()
         {
             IExceptionHandler innerHandler = CreateDummyHandler();

@@ -349,6 +349,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Multiple controller types were found that match the URL. This can happen if attribute routes on multiple controllers match the requested URL.{1}{1}The request has found the following matching controller types: {0}.
+        /// </summary>
+        internal static string DirectRoute_AmbiguousController {
+            get {
+                return ResourceManager.GetString("DirectRoute_AmbiguousController", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The route does not have any associated action descriptors. Routing requires that each direct route map to a non-empty set of actions..
         /// </summary>
         internal static string DirectRoute_MissingActionDescriptors {

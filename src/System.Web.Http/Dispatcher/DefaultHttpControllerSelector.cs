@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -56,7 +57,7 @@ namespace System.Web.Http.Dispatcher
             HttpControllerDescriptor controllerDescriptor;
             if (routeData != null)
             {   
-                controllerDescriptor = routeData.GetDirectRouteController();
+                controllerDescriptor = GetDirectRouteController(routeData);
                 if (controllerDescriptor != null)
                 {
                     return controllerDescriptor;
@@ -119,6 +120,58 @@ namespace System.Web.Http.Dispatcher
             string controllerName = null;
             routeData.Values.TryGetValue(ControllerKey, out controllerName);
             return controllerName;
+        }
+
+        // If routeData is from an attribute route, get the controller that can handle it. 
+        // Else return null. Throws an exception if multiple controllers match
+        private static HttpControllerDescriptor GetDirectRouteController(IHttpRouteData routeData)
+        {
+            CandidateAction[] candidates = routeData.GetDirectRouteCandidates();
+            if (candidates != null)
+            {
+                // Set the controller descriptor for the first action descriptor
+                Contract.Assert(candidates.Length > 0);
+                Contract.Assert(candidates[0].ActionDescriptor != null);
+
+                HttpControllerDescriptor controllerDescriptor = candidates[0].ActionDescriptor.ControllerDescriptor;
+
+                // Check that all other candidate action descriptors share the same controller descriptor
+                for (int i = 1; i < candidates.Length; i++)
+                {
+                    CandidateAction candidate = candidates[i];
+                    if (candidate.ActionDescriptor.ControllerDescriptor != controllerDescriptor)
+                    {
+                        // We've found an ambiguity (multiple controllers matched)
+                        throw CreateDirectRouteAmbiguousControllerException(candidates);
+                    }
+                }
+
+                return controllerDescriptor;
+            }
+
+            return null;
+        }
+
+        private static Exception CreateDirectRouteAmbiguousControllerException(CandidateAction[] candidates)
+        {
+            Contract.Assert(candidates != null);
+            Contract.Assert(candidates.Length > 1);
+
+            HashSet<Type> matchingTypes = new HashSet<Type>();
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                matchingTypes.Add(candidates[i].ActionDescriptor.ControllerDescriptor.ControllerType);
+            }
+
+            // we need to generate an exception containing all the controller types
+            StringBuilder typeList = new StringBuilder();
+            foreach (Type matchedType in matchingTypes)
+            {
+                typeList.AppendLine();
+                typeList.Append(matchedType.FullName);
+            }
+
+            return Error.InvalidOperation(SRResources.DirectRoute_AmbiguousController, typeList, Environment.NewLine);
         }
 
         private static Exception CreateAmbiguousControllerException(IHttpRoute route, string controllerName, ICollection<Type> matchingTypes)

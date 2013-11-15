@@ -2,8 +2,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Net.Http;
-using System.Web.Http.Controllers;
 
 namespace System.Web.Http.Routing
 {
@@ -50,33 +48,6 @@ namespace System.Web.Http.Routing
                 string key = matching[j];
                 routeValueDictionary.Remove(key);
             }
-        }
-
-        // If routeData is from an attribute route, get the controller that can handle it. 
-        // Else return null.
-        internal static HttpControllerDescriptor GetDirectRouteController(this IHttpRouteData routeData)
-        {
-            CandidateAction[] candidates = routeData.GetDirectRouteCandidates();
-            if (candidates != null)
-            {
-                // Set the controller descriptor for the first action descriptor
-                Contract.Assert(candidates.Length > 0);
-                Contract.Assert(candidates[0].ActionDescriptor != null);
-                HttpControllerDescriptor controllerDescriptor = candidates[0].ActionDescriptor.ControllerDescriptor;
-
-                // Check that all other candidate action descriptors share the same controller descriptor
-                for (int i = 1; i < candidates.Length; i++)
-                {
-                    if (candidates[i].ActionDescriptor.ControllerDescriptor != controllerDescriptor)
-                    {
-                        return null;
-                    }
-                }                
-
-                return controllerDescriptor;
-            }
-
-            return null;
         }
 
         /// <summary>

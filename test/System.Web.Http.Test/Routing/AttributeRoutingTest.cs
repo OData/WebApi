@@ -141,6 +141,17 @@ namespace System.Web.Http.Routing
         }
 
         [Fact]
+        public void AttributeRouting_MultipleControllerMatches()
+        {
+            var request = new HttpRequestMessage(new HttpMethod("GET"), "http://localhost/ambiguousmatch");
+
+            var response = SubmitRequest(request);
+
+            Assert.False(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Fact]
         public void RoutePrefixAttribute_IsSingleInstance()
         {
             var attr = typeof(RoutePrefixAttribute);
@@ -700,6 +711,24 @@ namespace System.Web.Http.Routing
         public String Get()
         {
             return "Default.Index()";
+    }
+    }
+
+    [Route("ambiguousmatch")]
+    public class AmbiguousMatch1Controller : ApiController
+    {
+        public string Get()
+        {
+            return "Get()";
+        }
+    }
+
+    [Route("ambiguousmatch")]
+    public class AmbiguousMatch2Controller : ApiController
+    {
+        public string Get()
+        {
+            return "Get()";
         }
     }
 }

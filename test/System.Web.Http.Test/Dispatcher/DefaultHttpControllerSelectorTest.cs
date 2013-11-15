@@ -235,24 +235,43 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
-        public void SelectController_DoesNotRecognizeDirectRoutesWithDifferentControllers()
+        public void SelectController_ThrowsOnDirectRoutesWithDifferentControllers()
         {
-            HttpConfiguration configuration = new HttpConfiguration();
-            HttpRequestMessage request = new HttpRequestMessage();
-            var action1Descriptor = new ReflectedHttpActionDescriptor() { ControllerDescriptor = new HttpControllerDescriptor() };
-            var action2Descriptor = new ReflectedHttpActionDescriptor() { ControllerDescriptor = new HttpControllerDescriptor() };
+            var action1Descriptor = new ReflectedHttpActionDescriptor() 
+            {
+                ControllerDescriptor = new HttpControllerDescriptor()
+                {
+                    ControllerType = GetMockControllerType("Controller1"),
+                }
+            };
+
+            var action2Descriptor = new ReflectedHttpActionDescriptor() 
+            {
+                ControllerDescriptor = new HttpControllerDescriptor()
+                {
+                    ControllerType = GetMockControllerType("Controller2"),
+                }
+            };
+
             IHttpRouteData routeData = GetRouteData();
             routeData.Route.DataTokens.Add("actions", new ReflectedHttpActionDescriptor[] { action1Descriptor, action2Descriptor });
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            HttpRequestMessage request = new HttpRequestMessage();
             request.SetRouteData(routeData);
 
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
 
-            // Act 
-            var ex = Assert.Throws<HttpResponseException>(
-                () => selector.SelectController(request));
+            string expectedMessage =
+                "Multiple controller types were found that match the URL. This can happen if attribute routes on multiple " +
+                "controllers match the requested URL." + Environment.NewLine +
+                Environment.NewLine +
+                "The request has found the following matching controller types: " + Environment.NewLine +
+                "FullController1Controller" + Environment.NewLine +
+                "FullController2Controller";
 
-            // Assert
-            Assert.Equal(HttpStatusCode.NotFound, ex.Response.StatusCode);
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => selector.SelectController(request), expectedMessage);
         }
 
         [Fact]

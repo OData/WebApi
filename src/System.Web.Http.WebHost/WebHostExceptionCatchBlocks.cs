@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Net.Http;
 using System.Web.Http.ExceptionHandling;
+using System.Web.Http.Hosting;
 using System.Web.Http.WebHost.Routing;
 
 namespace System.Web.Http.WebHost
@@ -14,6 +16,9 @@ namespace System.Web.Http.WebHost
         private static readonly ExceptionContextCatchBlock _httpControllerHandlerBufferError =
             new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".BufferError", isTopLevel: true,
                 callsHandler: false);
+        private static readonly ExceptionContextCatchBlock _httpControllerHandlerComputeContentLength =
+            new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".ComputeContentLength",
+                isTopLevel: true, callsHandler: false);
         private static readonly ExceptionContextCatchBlock _httpControllerHandlerStreamContent =
             new ExceptionContextCatchBlock(typeof(HttpControllerHandler).Name + ".StreamContent", isTopLevel: true,
                 callsHandler: false);
@@ -25,8 +30,8 @@ namespace System.Web.Http.WebHost
         /// <see cref="HttpControllerHandler"/>.WriteBufferedResponseContentAsync.
         /// </summary>
         /// <remarks>
-        /// This catch block handles exceptions when writing the HttpContent under an IHostBufferPolicySelector that
-        /// buffers.
+        /// This catch block handles exceptions when writing the <see cref="HttpContent"/> under an
+        /// <see cref="IHostBufferPolicySelector"/> that buffers.
         /// </remarks>
         public static ExceptionContextCatchBlock HttpControllerHandlerBufferContent
         {
@@ -37,8 +42,8 @@ namespace System.Web.Http.WebHost
         /// Gets the label for the catch block in <see cref="HttpControllerHandler"/>.WriteErrorResponseContentAsync.
         /// </summary>
         /// <remarks>
-        /// This catch block handles exceptions when writing the HttpContent of the error response itself (after
-        /// <see cref="HttpControllerHandlerBufferContent"/> or <see cref="HttpWebRoute"/>).
+        /// This catch block handles exceptions when writing the <see cref="HttpContent"/> of the error response itself
+        /// (after <see cref="HttpControllerHandlerBufferContent"/> or <see cref="HttpWebRoute"/>).
         /// </remarks>
         public static ExceptionContextCatchBlock HttpControllerHandlerBufferError
         {
@@ -46,12 +51,23 @@ namespace System.Web.Http.WebHost
         }
 
         /// <summary>
+        /// Gets the label for the catch block in <see cref="HttpControllerHandler"/>.ComputeContentLength.
+        /// </summary>
+        /// <remarks>
+        /// This catch block handles exceptions when calling <see cref="HttpContent.TryComputeLength"/>.
+        /// </remarks>
+        public static ExceptionContextCatchBlock HttpControllerHandlerComputeContentLength
+        {
+            get { return _httpControllerHandlerComputeContentLength; }
+        }
+
+        /// <summary>
         /// Gets the label for the catch block in
         /// <see cref="HttpControllerHandler"/>.WriteStreamedResponseContentAsync.
         /// </summary>
         /// <remarks>
-        /// This catch block handles exceptions when writing the HttpContent under an IHostBufferPolicySelector that
-        /// does not buffer.
+        /// This catch block handles exceptions when writing the <see cref="HttpContent"/> under an
+        /// <see cref="IHostBufferPolicySelector"/> that does not buffer.
         /// </remarks>
         public static ExceptionContextCatchBlock HttpControllerHandlerStreamContent
         {

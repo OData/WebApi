@@ -65,6 +65,33 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
+        public void HttpMessageHandlerAdapterComputeContentLength_IsSpecifiedValue()
+        {
+            // Act
+            ExceptionContextCatchBlock catchBlock =
+                OwinExceptionCatchBlocks.HttpMessageHandlerAdapterComputeContentLength;
+
+            // Assert
+            ExceptionContextCatchBlock expected =
+                new ExceptionContextCatchBlock("HttpMessageHandlerAdapter.ComputeContentLength", isTopLevel: true,
+                    callsHandler: false);
+            AssertEqual(expected, catchBlock);
+        }
+
+        [Fact]
+        public void HttpMessageHandlerAdapterComputeContentLength_IsSameInstance()
+        {
+            // Arrange
+            ExceptionContextCatchBlock first = OwinExceptionCatchBlocks.HttpMessageHandlerAdapterComputeContentLength;
+
+            // Act
+            ExceptionContextCatchBlock second = OwinExceptionCatchBlocks.HttpMessageHandlerAdapterComputeContentLength;
+
+            // Assert
+            Assert.Same(first, second);
+        }
+
+        [Fact]
         public void HttpMessageHandlerAdapterStreamContent_IsSpecifiedValue()
         {
             // Act

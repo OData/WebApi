@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -90,16 +89,6 @@ namespace System.Web.Http.WebHost
             _server = new HttpMessageInvoker(handler);
         }
 
-        internal static IExceptionHandler ExceptionHandler
-        {
-            get { return _exceptionHandler.Value; }
-        }
-
-        internal static IExceptionLogger ExceptionLogger
-        {
-            get { return _exceptionLogger.Value; }
-        }
-
         public override Task ProcessRequestAsync(HttpContext context)
         {
             return ProcessRequestAsyncCore(new HttpContextWrapper(context));
@@ -117,7 +106,8 @@ namespace System.Web.Http.WebHost
             try
             {
                 response = await _server.SendAsync(request, cancellationToken);
-                await CopyResponseAsync(contextBase, request, response, cancellationToken);
+                await CopyResponseAsync(contextBase, request, response, _exceptionLogger.Value, _exceptionHandler.Value,
+                    cancellationToken);
             }
             finally
             {
@@ -159,18 +149,9 @@ namespace System.Web.Http.WebHost
             }
         }
 
-        /// <summary>
-        /// Converts a <see cref="HttpResponseMessage"/> to an <see cref="HttpResponseBase"/> and disposes the
-        /// <see cref="HttpResponseMessage"/> and <see cref="HttpRequestMessage"/> upon completion.
-        /// </summary>
-        /// <param name="httpContextBase">The HTTP context base.</param>
-        /// <param name="response">The response to convert.</param>
-        /// <param name="request">The request (which will be disposed).</param>
-        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>A <see cref="Task"/> representing the conversion of an <see cref="HttpResponseMessage"/> to an <see cref="HttpResponseBase"/>
-        /// including writing out any entity body.</returns>
         internal static async Task CopyResponseAsync(HttpContextBase httpContextBase, HttpRequestMessage request,
-            HttpResponseMessage response, CancellationToken cancellationToken)
+            HttpResponseMessage response, IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler,
+            CancellationToken cancellationToken)
         {
             Contract.Assert(httpContextBase != null);
             Contract.Assert(request != null);
@@ -182,7 +163,11 @@ namespace System.Web.Http.WebHost
                 return;
             }
 
-            CopyResponseStatusAndHeaders(httpContextBase, response);
+            if (!await CopyResponseStatusAndHeadersAsync(httpContextBase, request, response, exceptionLogger,
+                cancellationToken))
+            {
+                return;
+            }
 
             // TODO 335085: Consider this when coming up with our caching story
             if (response.Headers.CacheControl == null)
@@ -202,7 +187,7 @@ namespace System.Web.Http.WebHost
             // The response-writing task will not fault -- it handles errors internally.
             if (response.Content != null)
             {
-                await WriteResponseContentAsync(httpContextBase, request, response, cancellationToken);
+                await WriteResponseContentAsync(httpContextBase, request, response, exceptionLogger, exceptionHandler, cancellationToken);
             }
         }
 
@@ -280,22 +265,10 @@ namespace System.Web.Http.WebHost
             }
         }
 
-        /// <summary>
-        /// Asynchronously writes the response content to the ASP.NET output stream
-        /// and sets the content headers.
-        /// </summary>
-        /// <remarks>
-        /// This method returns only non-faulted tasks.  Any error encountered
-        /// writing the response will be handled within the task returned by this method.
-        /// </remarks>
-        /// <param name="httpContextBase">The context base.</param>
-        /// <param name="response">The response being written.</param>
-        /// <param name="request">The original request.</param>
-        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>The task that will write the response content.</returns>
         [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "unused variable necessary to call getter")]
-        internal static Task WriteResponseContentAsync(HttpContextBase httpContextBase, HttpRequestMessage request,
-            HttpResponseMessage response, CancellationToken cancellationToken)
+        private static Task WriteResponseContentAsync(HttpContextBase httpContextBase, HttpRequestMessage request,
+            HttpResponseMessage response, IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler,
+            CancellationToken cancellationToken)
         {
             Contract.Assert(httpContextBase != null);
             Contract.Assert(response != null);
@@ -312,21 +285,14 @@ namespace System.Web.Http.WebHost
             httpResponseBase.BufferOutput = isBuffered;
 
             return isBuffered
-                    ? WriteBufferedResponseContentAsync(httpContextBase, request, response, cancellationToken)
-                    : WriteStreamedResponseContentAsync(httpContextBase, request, response, cancellationToken);
-        }
-
-        internal static Task WriteStreamedResponseContentAsync(HttpContextBase httpContextBase,
-            HttpRequestMessage request, HttpResponseMessage response, CancellationToken cancellationToken)
-        {
-            return WriteStreamedResponseContentAsync(httpContextBase, request, response, cancellationToken,
-                ExceptionLogger);
+                    ? WriteBufferedResponseContentAsync(httpContextBase, request, response, exceptionLogger, exceptionHandler, cancellationToken)
+                    : WriteStreamedResponseContentAsync(httpContextBase, request, response, exceptionLogger, cancellationToken);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "All exceptions caught here become error responses")]
         internal static async Task WriteStreamedResponseContentAsync(HttpContextBase httpContextBase,
-            HttpRequestMessage request, HttpResponseMessage response, CancellationToken cancellationToken,
-            IExceptionLogger exceptionLogger)
+            HttpRequestMessage request, HttpResponseMessage response, IExceptionLogger exceptionLogger,
+            CancellationToken cancellationToken)
         {
             Contract.Assert(httpContextBase != null);
             Contract.Assert(httpContextBase.Response != null);
@@ -359,18 +325,11 @@ namespace System.Web.Http.WebHost
             httpContextBase.Request.Abort();
         }
 
-        internal static Task WriteBufferedResponseContentAsync(HttpContextBase httpContextBase,
-            HttpRequestMessage request, HttpResponseMessage response, CancellationToken cancellationToken)
-        {
-            return WriteBufferedResponseContentAsync(httpContextBase, request, response, cancellationToken,
-                ExceptionLogger, ExceptionHandler);
-        }
-
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "continuation task owned by caller")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "All exceptions caught here become error responses")]
         internal static async Task WriteBufferedResponseContentAsync(HttpContextBase httpContextBase,
-            HttpRequestMessage request, HttpResponseMessage response, CancellationToken cancellationToken,
-            IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler)
+            HttpRequestMessage request, HttpResponseMessage response, IExceptionLogger exceptionLogger,
+            IExceptionHandler exceptionHandler, CancellationToken cancellationToken)
         {
             Contract.Assert(httpContextBase != null);
             Contract.Assert(httpContextBase.Response != null);
@@ -410,47 +369,18 @@ namespace System.Web.Http.WebHost
             ExceptionContextCatchBlock catchBlock = WebHostExceptionCatchBlocks.HttpControllerHandlerBufferContent;
 
             if (!await CopyErrorResponseAsync(catchBlock, httpContextBase, request, response,
-                exceptionInfo.SourceException, cancellationToken, exceptionLogger, exceptionHandler))
+                exceptionInfo.SourceException, exceptionLogger, exceptionHandler, cancellationToken))
             {
                 exceptionInfo.Throw();
             }
-        }
-
-        /// <summary>
-        /// Asynchronously creates an error response.
-        /// </summary>
-        /// <remarks>
-        /// This method returns a task that will set the headers and status code appropriately
-        /// for an error response.  If possible, it will also write the exception as an
-        /// <see cref="HttpError"/> into the response body.
-        /// <para>
-        /// Any errors during the creation of the error response itself will be handled
-        /// internally.  The task returned from this method will not show as faulted.
-        /// </para>
-        /// </remarks>
-        /// <param name="catchBlock">The catch block that caught the exception.</param>
-        /// <param name="httpContextBase">The HTTP context.</param>
-        /// <param name="request">The original request.</param>
-        /// <param name="response">The original response whose content we could not write.</param>
-        /// <param name="exception">
-        /// The exception caught attempting to write <paramref name="response"/>'s content.
-        /// </param>
-        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>A task that will create the error response.</returns>
-        internal static Task<bool> CopyErrorResponseAsync(ExceptionContextCatchBlock catchBlock,
-            HttpContextBase httpContextBase, HttpRequestMessage request, HttpResponseMessage response,
-            Exception exception, CancellationToken cancellationToken)
-        {
-            return CopyErrorResponseAsync(catchBlock, httpContextBase, request, response, exception, cancellationToken,
-                ExceptionLogger, ExceptionHandler);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "All exceptions caught here become error responses")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "errorResponse gets disposed in the async continuation")]
         internal static async Task<bool> CopyErrorResponseAsync(ExceptionContextCatchBlock catchBlock,
             HttpContextBase httpContextBase, HttpRequestMessage request, HttpResponseMessage response,
-            Exception exception, CancellationToken cancellationToken, IExceptionLogger exceptionLogger,
-            IExceptionHandler exceptionHandler)
+            Exception exception, IExceptionLogger exceptionLogger, IExceptionHandler exceptionHandler,
+            CancellationToken cancellationToken)
         {
             Contract.Assert(httpContextBase != null);
             Contract.Assert(httpContextBase.Response != null);
@@ -488,7 +418,14 @@ namespace System.Web.Http.WebHost
             }
 
             Contract.Assert(errorResponse != null);
-            CopyResponseStatusAndHeaders(httpContextBase, errorResponse);
+            if (!await CopyResponseStatusAndHeadersAsync(httpContextBase, request, errorResponse, exceptionLogger,
+                cancellationToken))
+            {
+                // Don't rethrow the original exception unless explicitly requested to do so. In this case, the
+                // exception handler indicated it wanted to handle the exception; it simply failed create a stable
+                // response to send.
+                return true;
+            }
 
             // The error response may return a null content if content negotiation
             // fails to find a formatter, or this may be an HttpResponseException without
@@ -547,7 +484,9 @@ namespace System.Web.Http.WebHost
             }
         }
 
-        private static void CopyResponseStatusAndHeaders(HttpContextBase httpContextBase, HttpResponseMessage response)
+        private static async Task<bool> CopyResponseStatusAndHeadersAsync(HttpContextBase httpContextBase,
+            HttpRequestMessage request, HttpResponseMessage response, IExceptionLogger exceptionLogger,
+            CancellationToken cancellationToken)
         {
             Contract.Assert(httpContextBase != null);
             HttpResponseBase httpResponseBase = httpContextBase.Response;
@@ -555,13 +494,20 @@ namespace System.Web.Http.WebHost
             httpResponseBase.StatusDescription = response.ReasonPhrase;
             httpResponseBase.TrySkipIisCustomErrors = true;
             EnsureSuppressFormsAuthenticationRedirect(httpContextBase);
-            PrepareHeaders(response);
+
+            if (!await PrepareHeadersAsync(httpResponseBase, request, response, exceptionLogger, cancellationToken))
+            {
+                return false;
+            }
+
             CopyHeaders(response.Headers, httpContextBase);
+            return true;
         }
 
         // Prepares Content-Length and Transfer-Encoding headers.
         [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "unused variable necessary to call getter")]
-        private static void PrepareHeaders(HttpResponseMessage response)
+        internal static async Task<bool> PrepareHeadersAsync(HttpResponseBase responseBase, HttpRequestMessage request,
+            HttpResponseMessage response, IExceptionLogger exceptionLogger, CancellationToken cancellationToken)
         {
             Contract.Assert(response != null);
             HttpResponseHeaders responseHeaders = response.Headers;
@@ -585,10 +531,29 @@ namespace System.Web.Http.WebHost
                 }
                 else
                 {
+                    Exception exception = null;
+
                     // Copy the response content headers only after ensuring they are complete.
                     // We ask for Content-Length first because HttpContent lazily computes this
                     // and only afterwards writes the value into the content headers.
-                    var unused = contentHeaders.ContentLength;
+                    try
+                    {
+                        var unused = contentHeaders.ContentLength;
+                    }
+                    catch (Exception ex)
+                    {
+                        exception = ex;
+                    }
+
+                    if (exception != null)
+                    {
+                        ExceptionContext exceptionContext = new ExceptionContext(exception,
+                            WebHostExceptionCatchBlocks.HttpControllerHandlerComputeContentLength, request, response);
+                        await exceptionLogger.LogAsync(exceptionContext, cancellationToken);
+
+                        SetEmptyErrorResponse(responseBase);
+                        return false;
+                    }
                 }
             }
 
@@ -602,11 +567,15 @@ namespace System.Web.Http.WebHost
             {
                 transferEncoding.Clear();
             }
+
+            return true;
         }
 
         private static void ClearContentAndHeaders(HttpResponseBase httpResponseBase)
         {
             httpResponseBase.Clear();
+
+            // Despite what the documentation indicates, calling Clear on its own doesn't fully clear the headers.
             httpResponseBase.ClearHeaders();
         }
 

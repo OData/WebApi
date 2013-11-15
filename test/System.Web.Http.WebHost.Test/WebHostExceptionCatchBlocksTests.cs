@@ -60,6 +60,32 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
+        public void HttpControllerHandlerComputeContentLength_IsSpecifiedValue()
+        {
+            // Act
+            ExceptionContextCatchBlock catchBlock = WebHostExceptionCatchBlocks.HttpControllerHandlerComputeContentLength;
+
+            // Assert
+            ExceptionContextCatchBlock expected =
+                new ExceptionContextCatchBlock("HttpControllerHandler.ComputeContentLength", isTopLevel: true,
+                    callsHandler: false);
+            AssertEqual(expected, catchBlock);
+        }
+
+        [Fact]
+        public void HttpControllerHandlerComputeContentLength_IsSameInstance()
+        {
+            // Arrange
+            ExceptionContextCatchBlock first = WebHostExceptionCatchBlocks.HttpControllerHandlerComputeContentLength;
+
+            // Act
+            ExceptionContextCatchBlock second = WebHostExceptionCatchBlocks.HttpControllerHandlerComputeContentLength;
+
+            // Assert
+            Assert.Same(first, second);
+        }
+
+        [Fact]
         public void HttpControllerHandlerStreamContent_IsSpecifiedValue()
         {
             // Act

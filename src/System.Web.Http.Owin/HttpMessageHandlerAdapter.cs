@@ -142,8 +142,7 @@ namespace System.Web.Http.Owin
             return InvokeCore(context, owinRequest, owinResponse);
         }
 
-        private async Task InvokeCore(IOwinContext context, IOwinRequest owinRequest,
-            IOwinResponse owinResponse)
+        private async Task InvokeCore(IOwinContext context, IOwinRequest owinRequest, IOwinResponse owinResponse)
         {
             CancellationToken cancellationToken = owinRequest.CallCancelled;
             HttpContent requestContent;
@@ -189,8 +188,10 @@ namespace System.Web.Http.Owin
                         response = await BufferResponseContentAsync(request, response, cancellationToken);
                     }
 
-                    PrepareHeaders(response);
-                    await SendResponseMessageAsync(request, response, owinResponse, cancellationToken);
+                    if (await PrepareHeadersAsync(request, response, owinResponse, cancellationToken))
+                    {
+                        await SendResponseMessageAsync(request, response, owinResponse, cancellationToken);
+                    }
                 }
             }
             finally
@@ -382,7 +383,8 @@ namespace System.Web.Http.Owin
 
         // Prepares Content-Length and Transfer-Encoding headers.
         [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "unused variable necessary to call getter")]
-        private static void PrepareHeaders(HttpResponseMessage response)
+        private async Task<bool> PrepareHeadersAsync(HttpRequestMessage request, HttpResponseMessage response,
+            IOwinResponse owinResponse, CancellationToken cancellationToken)
         {
             Contract.Assert(response != null);
             HttpResponseHeaders responseHeaders = response.Headers;
@@ -406,10 +408,33 @@ namespace System.Web.Http.Owin
                 }
                 else
                 {
-                    // Copy the response content headers only after ensuring they are complete.
-                    // We ask for Content-Length first because HttpContent lazily computes this
-                    // and only afterwards writes the value into the content headers.
-                    var unused = contentHeaders.ContentLength;
+                    Exception exception;
+
+                    try
+                    {
+                        // Copy the response content headers only after ensuring they are complete.
+                        // We ask for Content-Length first because HttpContent lazily computes this
+                        // and only afterwards writes the value into the content headers.
+                        var unused = contentHeaders.ContentLength;
+
+                        exception = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        exception = ex;
+                    }
+
+                    if (exception != null)
+                    {
+                        ExceptionContext exceptionContext = new ExceptionContext(exception,
+                            OwinExceptionCatchBlocks.HttpMessageHandlerAdapterComputeContentLength, request, response);
+                        await _exceptionLogger.LogAsync(exceptionContext, cancellationToken);
+
+                        // Send back an empty error response if TryComputeLength throws.
+                        owinResponse.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        SetHeadersForEmptyResponse(owinResponse.Headers);
+                        return false;
+                    }
                 }
             }
 
@@ -425,6 +450,8 @@ namespace System.Web.Http.Owin
             {
                 transferEncoding.Clear();
             }
+
+            return true;
         }
 
         private Task SendResponseMessageAsync(HttpRequestMessage request, HttpResponseMessage response,
@@ -443,8 +470,7 @@ namespace System.Web.Http.Owin
             HttpContent responseContent = response.Content;
             if (responseContent == null)
             {
-                // Set the content-length to 0 to prevent the server from sending back the response chunked
-                responseHeaders["Content-Length"] = new string[] { "0" };
+                SetHeadersForEmptyResponse(responseHeaders);
                 return TaskHelpers.Completed();
             }
             else
@@ -456,12 +482,18 @@ namespace System.Web.Http.Owin
                 }
 
                 // Copy body
-                return SendResponseContentAsync(request, response, owinResponse.Body, cancellationToken);
+                return SendResponseContentAsync(request, response, owinResponse, cancellationToken);
             }
         }
 
+        private static void SetHeadersForEmptyResponse(IDictionary<string, string[]> headers)
+        {
+            // Set the content-length to 0 to prevent the server from sending back the response chunked
+            headers["Content-Length"] = new string[] { "0" };
+        }
+
         private async Task SendResponseContentAsync(HttpRequestMessage request, HttpResponseMessage response,
-            Stream body, CancellationToken cancellationToken)
+            IOwinResponse owinResponse, CancellationToken cancellationToken)
         {
             Contract.Assert(response != null);
             Contract.Assert(response.Content != null);
@@ -471,7 +503,7 @@ namespace System.Web.Http.Owin
 
             try
             {
-                await response.Content.CopyToAsync(body);
+                await response.Content.CopyToAsync(owinResponse.Body);
                 return;
             }
             catch (Exception ex)
@@ -484,14 +516,14 @@ namespace System.Web.Http.Owin
             ExceptionContext exceptionContext = new ExceptionContext(exception,
                 OwinExceptionCatchBlocks.HttpMessageHandlerAdapterStreamContent, request, response);
             await _exceptionLogger.LogAsync(exceptionContext, cancellationToken);
-            AbortResponseStream(body);
+            AbortResponse(owinResponse);
         }
 
-        private static void AbortResponseStream(Stream body)
+        private static void AbortResponse(IOwinResponse owinResponse)
         {
-            // OWIN doesn't yet support an explicit Abort even. Calling Dispose on the body seems like the best we can
-            // do for nowe.
-            body.Dispose();
+            // OWIN doesn't yet support an explicit Abort event. Calling Dispose on the body seems like the best we can
+            // do for now.
+            owinResponse.Body.Dispose();
         }
 
         private static HttpMessageHandlerOptions CreateOptions(HttpMessageHandler messageHandler,

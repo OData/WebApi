@@ -1122,10 +1122,7 @@ namespace System.Web.Http.Owin
             using (HttpResponseMessage expectedErrorResponse = CreateResponse(errorContent))
             using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
             {
-                Mock<IExceptionLogger> mock = new Mock<IExceptionLogger>(MockBehavior.Strict);
-                mock
-                    .Setup(l => l.LogAsync(It.IsAny<ExceptionLoggerContext>(), It.IsAny<CancellationToken>()))
-                    .Returns(Task.FromResult(0));
+                Mock<IExceptionLogger> mock = CreateStubExceptionLoggerMock();
                 IExceptionLogger exceptionLogger = mock.Object;
 
                 HttpMessageHandlerOptions options = CreateValidOptions(messageHandler);
@@ -1257,10 +1254,7 @@ namespace System.Web.Http.Owin
             using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(expectedResponse))
             {
-                Mock<IExceptionLogger> mock = new Mock<IExceptionLogger>(MockBehavior.Strict);
-                mock
-                    .Setup(l => l.LogAsync(It.IsAny<ExceptionLoggerContext>(), It.IsAny<CancellationToken>()))
-                    .Returns(Task.FromResult(0));
+                Mock<IExceptionLogger> mock = CreateStubExceptionLoggerMock();
                 IExceptionLogger exceptionLogger = mock.Object;
 
                 HttpMessageHandlerOptions options = CreateValidOptions(messageHandler);
@@ -1294,6 +1288,100 @@ namespace System.Web.Http.Owin
                         && c.ExceptionContext.Request != null
                         && c.ExceptionContext.Response == expectedResponse),
                         expectedCancellationToken), Times.Once());
+                }
+            }
+        }
+
+        [Fact]
+        public void Invoke_IfTryComputeLengthThrows_CallsExceptionLogger()
+        {
+            // Arrange
+            Exception expectedException = CreateException();
+
+            using (HttpContent content = CreateThrowingContent(expectedException))
+            using (HttpResponseMessage expectedResponse = CreateResponse(content))
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(expectedResponse))
+            {
+                Mock<IExceptionLogger> mock = CreateStubExceptionLoggerMock();
+                IExceptionLogger exceptionLogger = mock.Object;
+
+                HttpMessageHandlerOptions options = CreateValidOptions(messageHandler);
+                options.ExceptionLogger = exceptionLogger;
+
+                using (HttpMessageHandlerAdapter product = CreateProductUnderTest(options))
+                using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
+                {
+                    CancellationToken expectedCancellationToken = tokenSource.Token;
+                    IOwinRequest owinRequest = CreateFakeOwinRequest(expectedCancellationToken);
+
+                    IOwinResponse owinResponse = CreateFakeOwinResponse(Stream.Null);
+
+                    IOwinContext context = CreateStubOwinContext(owinRequest, owinResponse);
+
+                    // Act
+                    Task task = product.Invoke(context);
+
+                    // Assert
+                    Assert.NotNull(task);
+                    task.WaitUntilCompleted();
+                    Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                    mock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>((c) =>
+                        c != null
+                        && c.ExceptionContext != null
+                        && c.ExceptionContext.Exception == expectedException
+                        && c.ExceptionContext.CatchBlock ==
+                            OwinExceptionCatchBlocks.HttpMessageHandlerAdapterComputeContentLength
+                        && c.ExceptionContext.Request != null
+                        && c.ExceptionContext.Response == expectedResponse),
+                        expectedCancellationToken), Times.Once());
+                }
+            }
+        }
+
+        [Fact]
+        public void Invoke_IfTryComputeLengthThrows_SendsEmptyErrorResponse()
+        {
+            // Arrange
+            Exception expectedException = CreateException();
+
+            using (HttpContent content = CreateThrowingContent(expectedException))
+            using (HttpResponseMessage response = CreateResponse(content))
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
+            {
+                HttpMessageHandlerOptions options = CreateValidOptions(messageHandler);
+
+                using (HttpMessageHandlerAdapter product = CreateProductUnderTest(options))
+                {
+                    IOwinRequest owinRequest = CreateFakeOwinRequest(CancellationToken.None);
+
+                    Mock<IOwinResponse> owinResponseMock = new Mock<IOwinResponse>(MockBehavior.Strict);
+                    int statusCode = 0;
+                    owinResponseMock.SetupSet(r => r.StatusCode = It.IsAny<int>()).Callback<int>(s => statusCode = s);
+                    int? contentLength = null;
+                    Mock<IHeaderDictionary> headersMock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
+                    headersMock
+                        .As<IDictionary<string, string[]>>()
+                        .SetupSet(h => h["Content-Length"] = It.IsAny<string[]>())
+                        .Callback<string, string[]>((i, v) => contentLength = int.Parse(v[0]));
+                    IHeaderDictionary headers = headersMock.Object;
+                    owinResponseMock.SetupGet(r => r.Headers).Returns(headers);
+                    IOwinResponse owinResponse = owinResponseMock.Object;
+
+                    IOwinContext context = CreateStubOwinContext(owinRequest, owinResponse);
+
+                    // Act
+                    Task task = product.Invoke(context);
+
+                    // Assert
+                    Assert.NotNull(task);
+                    task.WaitUntilCompleted();
+                    Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                    Assert.Equal(500, statusCode);
+                    Assert.Equal(0, contentLength);
                 }
             }
         }
@@ -1579,6 +1667,11 @@ namespace System.Web.Http.Owin
             return mock.Object;
         }
 
+        private static ThrowingHttpContent CreateThrowingContent(Exception exception)
+        {
+            return new ThrowingHttpContent(exception);
+        }
+
         private static HttpMessageHandlerOptions CreateValidOptions(HttpMessageHandler messageHandler)
         {
             return new HttpMessageHandlerOptions
@@ -1757,6 +1850,26 @@ namespace System.Web.Http.Owin
             {
                 Disposed = true;
                 base.Dispose(disposing);
+            }
+        }
+
+        private class ThrowingHttpContent : HttpContent
+        {
+            private readonly Exception _exception;
+
+            public ThrowingHttpContent(Exception exception)
+            {
+                _exception = exception;
+            }
+
+            protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+            {
+                throw _exception;
+            }
+
+            protected override bool TryComputeLength(out long length)
+            {
+                throw _exception;
             }
         }
     }

@@ -268,11 +268,11 @@ namespace System.Web.Http.WebHost
         {
             // Arrange
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
-            HttpResponseMessage response = new HttpResponseMessage();
             HttpRequestMessage request = new HttpRequestMessage();
+            HttpResponseMessage response = new HttpResponseMessage();
 
             // Act
-            HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None).Wait();
+            CopyResponseAsync(contextMock.Object, request, response).Wait();
 
             // Assert
             contextMock.Verify(c => c.Response.Cache.SetCacheability(HttpCacheability.NoCache));
@@ -283,12 +283,12 @@ namespace System.Web.Http.WebHost
         {
             // Arrange
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
-            HttpResponseMessage response = new HttpResponseMessage();
             HttpRequestMessage request = new HttpRequestMessage();
+            HttpResponseMessage response = new HttpResponseMessage();
             response.Headers.CacheControl = new CacheControlHeaderValue { Public = true };
 
             // Act
-            HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None).Wait();
+            CopyResponseAsync(contextMock.Object, request, response).Wait();
 
             // Assert
             contextMock.Verify(c => c.Response.Cache.SetCacheability(HttpCacheability.NoCache), Times.Never());
@@ -444,7 +444,7 @@ namespace System.Web.Http.WebHost
             response.Content = new ObjectContent<string>("hello", new JsonMediaTypeFormatter());
 
             // Act
-            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None);
+            Task task = CopyResponseAsync(contextMock.Object, request, response);
             task.Wait();
 
             // Assert preparation -- deserialize the response
@@ -476,7 +476,7 @@ namespace System.Web.Http.WebHost
                 Assert.NotNull(response.Content.Headers.ContentLength); // Guard; added by System.Net.Http.
 
                 // Act
-                Task task = HttpControllerHandler.CopyResponseAsync(contextBase, request, response, CancellationToken.None);
+                Task task = CopyResponseAsync(contextBase, request, response);
 
                 // Assert
                 Assert.NotNull(task);
@@ -500,7 +500,7 @@ namespace System.Web.Http.WebHost
                 response.Headers.TransferEncodingChunked = true;
 
                 // Act
-                Task task = HttpControllerHandler.CopyResponseAsync(contextBase, request, response, CancellationToken.None);
+                Task task = CopyResponseAsync(contextBase, request, response);
 
                 // Assert
                 Assert.NotNull(task);
@@ -524,7 +524,7 @@ namespace System.Web.Http.WebHost
                 response.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("identity"));
 
                 // Act
-                Task task = HttpControllerHandler.CopyResponseAsync(contextBase, request, response, CancellationToken.None);
+                Task task = CopyResponseAsync(contextBase, request, response);
 
                 // Assert
                 Assert.NotNull(task);
@@ -551,7 +551,7 @@ namespace System.Web.Http.WebHost
                 Assert.Equal("identity, chunked", response.Headers.TransferEncoding.ToString()); // Guard
 
                 // Act
-                Task task = HttpControllerHandler.CopyResponseAsync(contextBase, request, response, CancellationToken.None);
+                Task task = CopyResponseAsync(contextBase, request, response);
 
                 // Assert
                 Assert.NotNull(task);
@@ -593,9 +593,12 @@ namespace System.Web.Http.WebHost
             request.SetIsLocal(new Lazy<bool>(() => true));
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+            IExceptionHandler exceptionHandler = ExceptionServices.GetHandler(GlobalConfiguration.Configuration);
 
             // Act
-            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None);
+            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, exceptionLogger,
+                exceptionHandler, CancellationToken.None);
             task.Wait();
 
             // Assert preparation -- deserialize the HttpError response
@@ -640,9 +643,11 @@ namespace System.Web.Http.WebHost
             request.SetIsLocal(new Lazy<bool>(() => true));
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+            IExceptionHandler exceptionHandler = ExceptionServices.GetHandler(GlobalConfiguration.Configuration);
 
             // Act
-            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None);
+            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, exceptionLogger, exceptionHandler, CancellationToken.None);
             task.Wait();
 
             // Assert preparation -- deserialize the HttpError response
@@ -692,7 +697,7 @@ namespace System.Web.Http.WebHost
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
             // Act
-            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None);
+            Task task = CopyResponseAsync(contextMock.Object, request, response);
             task.Wait();
             memoryStream.Seek(0L, SeekOrigin.Begin);
 
@@ -727,7 +732,7 @@ namespace System.Web.Http.WebHost
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
             // Act
-            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None);
+            Task task = CopyResponseAsync(contextMock.Object, request, response);
             task.Wait();
 
             // Assert preparation -- deserialize the response
@@ -775,9 +780,12 @@ namespace System.Web.Http.WebHost
             request.SetConfiguration(config);
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+            IExceptionHandler exceptionHandler = ExceptionServices.GetHandler(GlobalConfiguration.Configuration);
 
             // Act
-            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None);
+            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, exceptionLogger,
+                exceptionHandler, CancellationToken.None);
             task.Wait();
 
             // Assert
@@ -813,9 +821,12 @@ namespace System.Web.Http.WebHost
             request.SetConfiguration(config);
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+            IExceptionHandler exceptionHandler = ExceptionServices.GetHandler(GlobalConfiguration.Configuration);
 
             // Act
-            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None);
+            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, exceptionLogger,
+                exceptionHandler, CancellationToken.None);
             task.Wait();
 
             // Assert
@@ -863,9 +874,12 @@ namespace System.Web.Http.WebHost
             request.SetConfiguration(config);
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+            IExceptionHandler exceptionHandler = ExceptionServices.GetHandler(GlobalConfiguration.Configuration);
 
             // Act
-            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None);
+            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, exceptionLogger,
+                exceptionHandler, CancellationToken.None);
             task.Wait();
 
             // Assert
@@ -902,9 +916,12 @@ namespace System.Web.Http.WebHost
             request.SetConfiguration(config);
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+            IExceptionHandler exceptionHandler = ExceptionServices.GetHandler(GlobalConfiguration.Configuration);
 
             // Act
-            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, CancellationToken.None);
+            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object, request, response, exceptionLogger,
+                exceptionHandler, CancellationToken.None);
             task.Wait();
 
             // Assert
@@ -923,8 +940,7 @@ namespace System.Web.Http.WebHost
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            Task task = HttpControllerHandler.CopyResponseAsync(contextMock.Object,
-                request: new HttpRequestMessage(), response: null, cancellationToken: CancellationToken.None);
+            Task task = CopyResponseAsync(contextMock.Object, request: new HttpRequestMessage(), response: null);
             task.Wait();
 
             // Assert
@@ -960,8 +976,7 @@ namespace System.Web.Http.WebHost
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
             // Act
-            Task task = HttpControllerHandler.WriteStreamedResponseContentAsync(contextBase, request, response,
-                CancellationToken.None);
+            Task task = WriteStreamedResponseContentAsync(contextBase, request, response);
             task.Wait();
 
             // Assert
@@ -996,8 +1011,7 @@ namespace System.Web.Http.WebHost
             response.Content = new ObjectContent<string>("hello", formatterMock.Object);
 
             // Act
-            Task task = HttpControllerHandler.WriteStreamedResponseContentAsync(contextBase, request, response,
-                CancellationToken.None);
+            Task task = WriteStreamedResponseContentAsync(contextBase, request, response);
             task.Wait();
 
             // Assert
@@ -1029,7 +1043,7 @@ namespace System.Web.Http.WebHost
 
                 // Act
                 Task task = HttpControllerHandler.WriteStreamedResponseContentAsync(contextBase, expectedRequest,
-                    expectedResponse, expectedCancellationToken, logger);
+                    expectedResponse, logger, expectedCancellationToken);
 
                 // Assert
                 Assert.NotNull(task);
@@ -1069,7 +1083,7 @@ namespace System.Web.Http.WebHost
 
                 // Act
                 Task task = HttpControllerHandler.WriteBufferedResponseContentAsync(contextBase, expectedRequest,
-                    expectedResponse, expectedCancellationToken, logger, handler);
+                    expectedResponse, logger, handler, expectedCancellationToken);
 
                 // Assert
                 Assert.NotNull(task);
@@ -1123,7 +1137,7 @@ namespace System.Web.Http.WebHost
 
                 // Act
                 Task task = HttpControllerHandler.WriteBufferedResponseContentAsync(contextBase, request,
-                    response, expectedCancellationToken, logger, handler);
+                    response, logger, handler, expectedCancellationToken);
 
                 // Assert
                 Assert.NotNull(task);
@@ -1155,7 +1169,7 @@ namespace System.Web.Http.WebHost
 
                 // Act
                 Task task = HttpControllerHandler.WriteBufferedResponseContentAsync(contextBase, request,
-                    response, expectedCancellationToken, logger, handler);
+                    response, logger, handler, expectedCancellationToken);
 
                 // Assert
                 Assert.NotNull(task);
@@ -1203,7 +1217,7 @@ namespace System.Web.Http.WebHost
 
                 // Act
                 Task task = HttpControllerHandler.WriteBufferedResponseContentAsync(contextBase, expectedRequest,
-                    expectedOriginalResponse, expectedCancellationToken, logger, handler);
+                    expectedOriginalResponse, logger, handler, expectedCancellationToken);
 
                 // Assert
                 Assert.NotNull(task);
@@ -1225,6 +1239,100 @@ namespace System.Web.Http.WebHost
                     && c.ExceptionContext.Response == expectedErrorResponse),
                     expectedCancellationToken), Times.Once());
             }
+        }
+
+        [Fact]
+        public void PrepareHeadersAsync_IfTryComputeLengthThrows_CallsExceptionLogger()
+        {
+            // Arrange
+            HttpResponseBase responseBase = CreateStubResponseBase();
+            Exception expectedException = CreateException();
+
+            using (HttpRequestMessage expectedRequest = new HttpRequestMessage())
+            using (HttpResponseMessage expectedResponse = new HttpResponseMessage())
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource())
+            {
+                expectedResponse.Content = CreateThrowingContent(expectedException);
+
+                Mock<IExceptionLogger> loggerMock = CreateStubExceptionLoggerMock();
+                IExceptionLogger logger = loggerMock.Object;
+
+                CancellationToken expectedCancellationToken = tokenSource.Token;
+
+                // Act
+                Task task = HttpControllerHandler.PrepareHeadersAsync(responseBase, expectedRequest, expectedResponse,
+                    logger, expectedCancellationToken);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
+                    c.ExceptionContext != null
+                    && c.ExceptionContext.Exception == expectedException
+                    && c.ExceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpControllerHandlerComputeContentLength
+                    && c.ExceptionContext.Request == expectedRequest
+                    && c.ExceptionContext.Response == expectedResponse),
+                    expectedCancellationToken), Times.Once());
+            }
+        }
+
+        [Fact]
+        public void PrepareHeadersAsync_IfTryComputeLengthThrows_SetsEmptyErrorResponseAndReturnsFalse()
+        {
+            // Arrange
+            Mock<HttpResponseBase> responseBaseMock = new Mock<HttpResponseBase>(MockBehavior.Strict);
+            responseBaseMock.Setup(r => r.Clear());
+            responseBaseMock.Setup(r => r.ClearHeaders());
+            int statusCode = 0;
+            responseBaseMock.SetupSet((r) => r.StatusCode = It.IsAny<int>()).Callback<int>((s) => statusCode = s);
+            bool suppressContent = false;
+            responseBaseMock.SetupSet((r) => r.SuppressContent = It.IsAny<bool>()).Callback<bool>((s) => suppressContent = s);
+            HttpResponseBase responseBase = responseBaseMock.Object;
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            using (HttpResponseMessage response = new HttpResponseMessage())
+            {
+                response.Content = CreateThrowingContent(CreateException());
+                IExceptionLogger logger = CreateStubExceptionLogger();
+                CancellationToken cancellationToken = CancellationToken.None;
+
+                // Act
+                Task<bool> task = HttpControllerHandler.PrepareHeadersAsync(responseBase, request, response, logger,
+                    cancellationToken);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                responseBaseMock.Verify(r => r.Clear(), Times.Once());
+                responseBaseMock.Verify(r => r.ClearHeaders(), Times.Once());
+                Assert.Equal(500, statusCode);
+                Assert.Equal(true, suppressContent);
+                Assert.Equal(false, task.Result);
+            }
+        }
+
+        private static Task CopyResponseAsync(HttpContextBase contextBase, HttpRequestMessage request, HttpResponseMessage response)
+        {
+            IExceptionLogger exceptionLogger = CreateDummyExceptionLogger();
+            IExceptionHandler exceptionHandler = CreateDummyExceptionHandler();
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            return HttpControllerHandler.CopyResponseAsync(contextBase, request, response, exceptionLogger,
+                exceptionHandler, cancellationToken);
+        }
+
+        private static IExceptionHandler CreateDummyExceptionHandler()
+        {
+            return new Mock<IExceptionHandler>(MockBehavior.Strict).Object;
+        }
+
+        private static IExceptionLogger CreateDummyExceptionLogger()
+        {
+            return new Mock<IExceptionLogger>(MockBehavior.Strict).Object;
         }
 
         private static Exception CreateException()
@@ -1347,6 +1455,11 @@ namespace System.Web.Http.WebHost
             return requestBaseMock.Object;
         }
 
+        private static HttpResponseBase CreateStubResponseBase()
+        {
+            return new Mock<HttpResponseBase>().Object;
+        }
+
         private static HttpResponseBase CreateStubResponseBase(CancellationToken clientDisconnectedToken)
         {
             Mock<HttpResponseBase> mock = new Mock<HttpResponseBase>();
@@ -1386,6 +1499,21 @@ namespace System.Web.Http.WebHost
             contextMock.SetupGet(m => m.Response).Returns(responseBase);
 
             return contextMock;
+        }
+
+        private static HttpContent CreateThrowingContent(Exception exception)
+        {
+            return new ThrowingHttpContent(exception);
+        }
+
+        private static Task WriteStreamedResponseContentAsync(HttpContextBase contextBase, HttpRequestMessage request,
+            HttpResponseMessage response)
+        {
+            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            return HttpControllerHandler.WriteStreamedResponseContentAsync(contextBase, request, response,
+                exceptionLogger, cancellationToken);
         }
 
         private class FaultingHttpContent : HttpContent
@@ -1434,6 +1562,27 @@ namespace System.Web.Http.WebHost
             public void Dispose()
             {
                 Disposed = true;
+            }
+        }
+
+        private class ThrowingHttpContent : HttpContent
+        {
+            private readonly Exception _exception;
+
+            public ThrowingHttpContent(Exception exception)
+            {
+                Contract.Assert(exception != null);
+                _exception = exception;
+
+            }
+            protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+            {
+                throw _exception;
+            }
+
+            protected override bool TryComputeLength(out long length)
+            {
+                throw _exception;
             }
         }
     }

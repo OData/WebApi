@@ -74,7 +74,8 @@ namespace System.Web.Http.WebHost.Routing
 
                     // This method call is hardened and designed not to throw exceptions (since they won't be caught
                     // and handled further by its callers).
-                    await HttpControllerHandler.CopyResponseAsync(context, request, response, cancellationToken);
+                    await HttpControllerHandler.CopyResponseAsync(context, request, response, _exceptionLogger,
+                        _exceptionHandler, cancellationToken);
                 }
                 else
                 {
@@ -82,7 +83,7 @@ namespace System.Web.Http.WebHost.Routing
                     // handled further by its callers).
                     bool handled = await HttpControllerHandler.CopyErrorResponseAsync(
                         WebHostExceptionCatchBlocks.HttpWebRoute, context, request, null,
-                        _exceptionInfo.SourceException, cancellationToken, _exceptionLogger, _exceptionHandler);
+                        _exceptionInfo.SourceException, _exceptionLogger, _exceptionHandler, cancellationToken);
 
                     if (!handled)
                     {

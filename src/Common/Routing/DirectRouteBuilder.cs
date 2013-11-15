@@ -169,6 +169,14 @@ namespace System.Web.Mvc.Routing
             }
 
 #if ASPNETWEBAPI
+            if (constraints != null)
+            {
+                foreach (var constraint in constraints)
+                {
+                    HttpRoute.ValidateConstraint(Template, constraint.Key, constraint.Value);
+                }
+            }
+
             IHttpRoute route = new HttpRoute(Template, defaults, constraints, dataTokens, Handler, ParsedRoute);
 #else
             ControllerDescriptor controllerDescriptor = GetControllerDescriptor();

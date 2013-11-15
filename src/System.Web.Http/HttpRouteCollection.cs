@@ -153,7 +153,39 @@ namespace System.Web.Http
             HttpRouteValueDictionary routeDefaults = new HttpRouteValueDictionary(defaults);
             HttpRouteValueDictionary routeConstraints = new HttpRouteValueDictionary(constraints);
             HttpRouteValueDictionary routeDataTokens = new HttpRouteValueDictionary(dataTokens);
+
+            foreach (var constraint in routeConstraints)
+            {
+                ValidateConstraint(routeTemplate, constraint.Key, constraint.Value);
+            }
+
             return new HttpRoute(routeTemplate, routeDefaults, routeConstraints, routeDataTokens, handler);
+        }
+
+        /// <summary>
+        /// Validates that a constraint is valid for an <see cref="IHttpRoute"/> created by a call
+        /// to the <see cref="HttpRouteCollection.CreateRoute(string, IDictionary&lt;string, object&gt;, IDictionary&lt;string, object&gt;, IDictionary&lt;string, object&gt;, HttpMessageHandler)"/> method.
+        /// </summary>
+        /// <param name="routeTemplate">The route template.</param>
+        /// <param name="name">The constraint name.</param>
+        /// <param name="constraint">The constraint object.</param>
+        /// <remarks>
+        /// Implement this method when deriving from <see cref="HttpRouteCollection"/> to allow contraints of
+        /// types other than <see cref="string"/> and <see cref="IHttpRouteConstraint"/>.
+        /// </remarks>
+        protected virtual void ValidateConstraint(string routeTemplate, string name, object constraint)
+        {
+            if (name == null)
+            {
+                throw Error.ArgumentNull("name");
+            }
+
+            if (constraint == null)
+            {
+                throw Error.ArgumentNull("constraint");
+            }
+
+            HttpRoute.ValidateConstraint(routeTemplate, name, constraint);
         }
 
         void ICollection<IHttpRoute>.Add(IHttpRoute route)

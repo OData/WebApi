@@ -244,5 +244,32 @@ namespace System.Web.Http.Routing
 
             return true;
         }
+
+        // Validates that a constraint is of a type that HttpRoute can process. This is not valid to
+        // call when a route implements IHttpRoute or inherits from HttpRoute - as the derived class can handle
+        // any types of constraints it wants to support.
+        internal static void ValidateConstraint(string routeTemplate, string name, object constraint)
+        {
+            if (constraint is IHttpRouteConstraint)
+            {
+                return;
+            }
+
+            if (constraint is string)
+            {
+                return;
+            }
+
+            throw CreateInvalidConstraintTypeException(routeTemplate, name);
+        }
+
+        private static Exception CreateInvalidConstraintTypeException(string routeTemplate, string name)
+        {
+            throw Error.InvalidOperation(
+                SRResources.Route_ValidationMustBeStringOrCustomConstraint,
+                name,
+                routeTemplate,
+                typeof(IHttpRouteConstraint).Name);
+        }
     }
 }

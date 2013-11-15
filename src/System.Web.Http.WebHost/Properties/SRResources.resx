@@ -126,6 +126,9 @@
   <data name="RouteCollectionUseDirectly" xml:space="preserve">
     <value>This operation is only supported by directly calling it on '{0}'.</value>
   </data>
+  <data name="Route_ValidationMustBeStringOrCustomConstraint" xml:space="preserve">
+    <value>The constraint entry '{0}' on the route with route template '{1}' must have a string value or be of a type which implements '{2}' or '{3}'.</value>
+  </data>
   <data name="Serialize_Response_Failed" xml:space="preserve">
     <value>The '{0}' type failed to serialize the response body.</value>
   </data>

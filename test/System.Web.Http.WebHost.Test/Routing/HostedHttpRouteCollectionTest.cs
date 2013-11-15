@@ -5,8 +5,6 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
-using System.Web.Hosting;
-using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
@@ -326,6 +324,79 @@ namespace System.Web.Http.WebHost.Routing
             Assert.True(response.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));
         }
 
+        [Fact]
+        public void CreateRoute_ValidatesConstraintType_IHttpRouteConstraint()
+        {
+            // Arrange
+            var routes = new MockHostedHttpRouteCollection(new RouteCollection());
+
+            var constraint = new CustomHttpConstraint();
+            var constraints = new HttpRouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            // Act
+            var route = routes.CreateRoute("{controller}/{id}", null, constraints);
+
+            // Assert
+            Assert.NotNull(route.Constraints["custom"]);
+
+            Assert.Equal(1, routes.TimesValidateConstraintCalled);
+        }
+
+        [Fact]
+        public void CreateRoute_ValidatesConstraintType_IRouteConstraint()
+        {
+            // Arrange
+            var routes = new MockHostedHttpRouteCollection(new RouteCollection());
+
+            var constraint = new CustomConstraint();
+            var constraints = new HttpRouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            // Act
+            var route = routes.CreateRoute("{controller}/{id}", null, constraints);
+
+            // Assert
+            Assert.NotNull(route.Constraints["custom"]);
+            Assert.Equal(1, routes.TimesValidateConstraintCalled);
+        }
+
+        [Fact]
+        public void CreateRoute_ValidatesConstraintType_StringRegex()
+        {
+            // Arrange
+            var routes = new MockHostedHttpRouteCollection(new RouteCollection());
+
+            var constraint = "product|products";
+            var constraints = new HttpRouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            // Act
+            var route = routes.CreateRoute("{controller}/{id}", null, constraints);
+
+            // Assert
+            Assert.NotNull(route.Constraints["custom"]);
+            Assert.Equal(1, routes.TimesValidateConstraintCalled);
+        }
+
+        [Fact]
+        public void CreateRoute_ValidatesConstraintType_InvalidType()
+        {
+            // Arrange
+            var routes = new HostedHttpRouteCollection(new RouteCollection());
+
+            var constraint = new Uri("http://localhost/");
+            var constraints = new HttpRouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            string expectedMessage =
+                "The constraint entry 'custom' on the route with route template '{controller}/{id}' " +
+                "must have a string value or be of a type which implements 'IHttpRouteConstraint' or 'IRouteConstraint'.";
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => routes.CreateRoute("{controller}/{id}", null, constraints), expectedMessage);
+        }
+
         private static HttpResponseMessage SubmitRequest(HttpRequestMessage request)
         {
             HttpConfiguration config = new HttpConfiguration(new HostedHttpRouteCollection(new RouteCollection()));
@@ -430,5 +501,40 @@ namespace System.Web.Http.WebHost.Routing
             }
         }
 
+        private class CustomHttpConstraint : IHttpRouteConstraint
+        {
+            public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class CustomConstraint : IRouteConstraint
+        {
+            public bool Match(HttpContextBase httpContext, Route route, string parameterName, RouteValueDictionary values, RouteDirection routeDirection)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class MockHostedHttpRouteCollection : HostedHttpRouteCollection
+        {
+            public MockHostedHttpRouteCollection(RouteCollection routes)
+                : base(routes)
+            {
+            }
+
+            public int TimesValidateConstraintCalled
+            {
+                get;
+                private set;
+            }
+
+            protected override void ValidateConstraint(string routeTemplate, string name, object constraint)
+            {
+                TimesValidateConstraintCalled++;
+                base.ValidateConstraint(routeTemplate, name, constraint);
+            }
+        }
     }
 }

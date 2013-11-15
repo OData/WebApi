@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
@@ -41,6 +42,83 @@ namespace System.Web.Http
             // Assert
             handler1.Protected().Verify("Dispose", Times.Once(), true);
             handler2.Protected().Verify("Dispose", Times.Once(), true);
+        }
+
+        [Fact]
+        public void CreateRoute_ValidatesConstraintType_IHttpRouteConstraint()
+        {
+            // Arrange
+            var routes = new MockHttpRouteCollection();
+
+            var constraint = new CustomConstraint();
+            var constraints = new HttpRouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            // Act
+            var route = routes.CreateRoute("{controller}/{id}", null, constraints);
+
+            // Assert
+            Assert.NotNull(route.Constraints["custom"]);
+            Assert.Equal(1, routes.TimesValidateConstraintCalled);
+        }
+
+        [Fact]
+        public void CreateRoute_ValidatesConstraintType_StringRegex()
+        {
+            // Arrange
+            var routes = new MockHttpRouteCollection();
+
+            var constraint = "product|products";
+            var constraints = new HttpRouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            // Act
+            var route = routes.CreateRoute("{controller}/{id}", null, constraints);
+
+            // Assert
+            Assert.NotNull(route.Constraints["custom"]);
+            Assert.Equal(1, routes.TimesValidateConstraintCalled);
+        }
+
+        [Fact]
+        public void CreateRoute_ValidatesConstraintType_InvalidType()
+        {
+            // Arrange
+            var routes = new HttpRouteCollection();
+
+            var constraint = new Uri("http://localhost/");
+            var constraints = new HttpRouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            string expectedMessage =
+                "The constraint entry 'custom' on the route with route template '{controller}/{id}' " +
+                "must have a string value or be of a type which implements 'IHttpRouteConstraint'.";
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => routes.CreateRoute("{controller}/{id}", null, constraints), expectedMessage);
+        }
+
+        private class CustomConstraint : IHttpRouteConstraint
+        {
+            public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class MockHttpRouteCollection : HttpRouteCollection
+        {
+            public int TimesValidateConstraintCalled
+            {
+                get;
+                private set;
+            }
+
+            protected override void ValidateConstraint(string routeTemplate, string name, object constraint)
+            {
+                TimesValidateConstraintCalled++;
+                base.ValidateConstraint(routeTemplate, name, constraint);
+            }
         }
     }
 }

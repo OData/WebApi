@@ -149,7 +149,22 @@ namespace System.Web.Http.WebHost.Routing
         /// <inheritdoc/>
         public override IHttpRoute CreateRoute(string uriTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, HttpMessageHandler handler)
         {
+            if (constraints != null)
+            {
+                foreach (var constraint in constraints)
+                {
+                    ValidateConstraint(uriTemplate, constraint.Key, constraint.Value);
+                }
+            }
+
             return new HostedHttpRoute(uriTemplate, defaults, constraints, dataTokens, handler);
+        }
+
+        /// <inheritdoc/>
+        protected override void ValidateConstraint(string routeTemplate, string name, object constraint)
+        {
+            // In WebHost the constraint might be IHttpRouteConstraint or IRouteConstraint (System.Web) or a string
+            HttpWebRoute.ValidateConstraint(routeTemplate, name, constraint);
         }
 
         /// <inheritdoc/>

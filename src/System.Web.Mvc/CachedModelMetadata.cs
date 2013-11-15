@@ -18,6 +18,7 @@ namespace System.Web.Mvc
         private string _displayFormatString;
         private string _displayName;
         private string _editFormatString;
+        private bool _hasNonDefaultEditFormat;
         private bool _hideSurroundingHtml;
         private bool _isReadOnly;
         private bool _isRequired;
@@ -35,6 +36,7 @@ namespace System.Web.Mvc
         private bool _displayFormatStringComputed;
         private bool _displayNameComputed;
         private bool _editFormatStringComputed;
+        private bool _hasNonDefaultEditFormatComputed;
         private bool _hideSurroundingHtmlComputed;
         private bool _isReadOnlyComputed;
         private bool _isRequiredComputed;
@@ -165,6 +167,25 @@ namespace System.Web.Mvc
             {
                 _editFormatString = value;
                 _editFormatStringComputed = true;
+            }
+        }
+
+        internal sealed override bool HasNonDefaultEditFormat
+        {
+            get
+            {
+                if (!_hasNonDefaultEditFormatComputed)
+                {
+                    _hasNonDefaultEditFormat = ComputeHasNonDefaultEditFormat();
+                    _hasNonDefaultEditFormatComputed = true;
+                }
+
+                return _hasNonDefaultEditFormat;
+            }
+            set
+            {
+                _hasNonDefaultEditFormat = value;
+                _hasNonDefaultEditFormatComputed = true;
             }
         }
 
@@ -388,6 +409,11 @@ namespace System.Web.Mvc
         protected virtual string ComputeEditFormatString()
         {
             return base.EditFormatString;
+        }
+
+        protected virtual bool ComputeHasNonDefaultEditFormat()
+        {
+            return base.HasNonDefaultEditFormat;
         }
 
         protected virtual bool ComputeHideSurroundingHtml()

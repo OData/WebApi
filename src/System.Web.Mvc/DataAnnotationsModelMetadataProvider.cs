@@ -32,12 +32,6 @@ namespace System.Web.Mvc
                 result.TemplateHint = uiHintAttribute.UIHint;
             }
 
-            DataTypeAttribute dataTypeAttribute = attributeList.OfType<DataTypeAttribute>().FirstOrDefault();
-            if (dataTypeAttribute != null)
-            {
-                result.DataTypeName = dataTypeAttribute.ToDataTypeName();
-            }
-
             EditableAttribute editable = attributes.OfType<EditableAttribute>().FirstOrDefault();
             if (editable != null)
             {
@@ -52,27 +46,9 @@ namespace System.Web.Mvc
                 }
             }
 
+            DataTypeAttribute dataTypeAttribute = attributeList.OfType<DataTypeAttribute>().FirstOrDefault();
             DisplayFormatAttribute displayFormatAttribute = attributeList.OfType<DisplayFormatAttribute>().FirstOrDefault();
-            if (displayFormatAttribute == null && dataTypeAttribute != null)
-            {
-                displayFormatAttribute = dataTypeAttribute.DisplayFormat;
-            }
-            if (displayFormatAttribute != null)
-            {
-                result.NullDisplayText = displayFormatAttribute.NullDisplayText;
-                result.DisplayFormatString = displayFormatAttribute.DataFormatString;
-                result.ConvertEmptyStringToNull = displayFormatAttribute.ConvertEmptyStringToNull;
-
-                if (displayFormatAttribute.ApplyFormatInEditMode)
-                {
-                    result.EditFormatString = displayFormatAttribute.DataFormatString;
-                }
-
-                if (!displayFormatAttribute.HtmlEncode && String.IsNullOrWhiteSpace(result.DataTypeName))
-                {
-                    result.DataTypeName = DataTypeUtil.HtmlTypeName;
-                }
-            }
+            SetFromDataTypeAndDisplayAttributes(result, dataTypeAttribute, displayFormatAttribute);
 
             ScaffoldColumnAttribute scaffoldColumnAttribute = attributeList.OfType<ScaffoldColumnAttribute>().FirstOrDefault();
             if (scaffoldColumnAttribute != null)
@@ -112,6 +88,59 @@ namespace System.Web.Mvc
             }
 
             return result;
+        }
+
+        private static void SetFromDataTypeAndDisplayAttributes(DataAnnotationsModelMetadata result,
+            DataTypeAttribute dataTypeAttribute, DisplayFormatAttribute displayFormatAttribute)
+        {
+            if (dataTypeAttribute != null)
+            {
+                result.DataTypeName = dataTypeAttribute.ToDataTypeName();
+            }
+
+            if (displayFormatAttribute == null && dataTypeAttribute != null)
+            {
+                displayFormatAttribute = dataTypeAttribute.DisplayFormat;
+
+                // If DisplayFormat value was non-null and this [DataType] is of a subclass, assume the [DataType]
+                // constructor used the protected DisplayFormat setter to override its default. Note deriving from
+                // [DataType] but preserving DataFormatString and ApplyFormatInEditMode results in
+                // HasNonDefaultEditFormat==true.
+                if (displayFormatAttribute != null && dataTypeAttribute.GetType() != typeof(DataTypeAttribute))
+                {
+                    result.HasNonDefaultEditFormat = true;
+                }
+            }
+            else if (displayFormatAttribute != null)
+            {
+                result.HasNonDefaultEditFormat = true;
+            }
+
+            if (displayFormatAttribute != null)
+            {
+                result.NullDisplayText = displayFormatAttribute.NullDisplayText;
+                result.DisplayFormatString = displayFormatAttribute.DataFormatString;
+                result.ConvertEmptyStringToNull = displayFormatAttribute.ConvertEmptyStringToNull;
+
+                if (displayFormatAttribute.ApplyFormatInEditMode)
+                {
+                    result.EditFormatString = displayFormatAttribute.DataFormatString;
+                }
+
+                if (!displayFormatAttribute.HtmlEncode && String.IsNullOrWhiteSpace(result.DataTypeName))
+                {
+                    result.DataTypeName = DataTypeUtil.HtmlTypeName;
+                }
+
+                // Regardless of HasNonDefaultEditFormat calculation above, treat missing EditFormatString as the
+                // default.  Note the corner case of a [DataType] subclass overriding a non-empty default to apply a
+                // [DisplayFormat] lacking DataFormatString or with ApplyFormatInEditMode==false results in
+                // HasNonDefaultEditFormat==false.
+                if (String.IsNullOrEmpty(result.EditFormatString))
+                {
+                    result.HasNonDefaultEditFormat = false;
+                }
+            }
         }
     }
 }

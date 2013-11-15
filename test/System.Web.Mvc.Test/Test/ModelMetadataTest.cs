@@ -53,6 +53,7 @@ namespace System.Web.Mvc.Test
             Assert.Null(metadata.DisplayFormatString);
             Assert.Null(metadata.DisplayName);
             Assert.Null(metadata.EditFormatString);
+            Assert.False(metadata.HasNonDefaultEditFormat);
             Assert.False(metadata.HideSurroundingHtml);
             Assert.Equal("model", metadata.Model);
             Assert.Equal(typeof(string), metadata.ModelType);

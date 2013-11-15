@@ -133,6 +133,21 @@ namespace System.Web.Mvc.Test
 
         // [DataType] tests
 
+        const string DerivedDataTypeAttributeFormatString = "Time is {0:HH:mm}";
+
+        class DerivedDataTypeAttribute : DataTypeAttribute
+        {
+            public DerivedDataTypeAttribute()
+                : base(DataType.Time)
+            {
+                DisplayFormat = new DisplayFormatAttribute
+                {
+                    ApplyFormatInEditMode = true,
+                    DataFormatString = DerivedDataTypeAttributeFormatString,
+                };
+            }
+        }
+
         class DataTypeModel
         {
             public int NoAttribute { get; set; }
@@ -142,6 +157,12 @@ namespace System.Web.Mvc.Test
 
             [DataType("CustomDataType")]
             public int CustomDataTypeProperty { get; set; }
+
+            [DataType(DataType.Date)]
+            public DateTime DateProperty { get; set; }
+
+            [DerivedDataType]
+            public DateTime TimeProperty { get; set; }
         }
 
         [Fact]
@@ -154,6 +175,46 @@ namespace System.Web.Mvc.Test
             Assert.Null(provider.GetMetadataForProperty(null, typeof(DataTypeModel), "NoAttribute").DataTypeName);
             Assert.Equal("EmailAddress", provider.GetMetadataForProperty(null, typeof(DataTypeModel), "EmailAddressProperty").DataTypeName);
             Assert.Equal("CustomDataType", provider.GetMetadataForProperty(null, typeof(DataTypeModel), "CustomDataTypeProperty").DataTypeName);
+            Assert.Equal("Date", provider.GetMetadataForProperty(null, typeof(DataTypeModel), "DateProperty").DataTypeName);
+            Assert.Equal("Time", provider.GetMetadataForProperty(null, typeof(DataTypeModel), "TimeProperty").DataTypeName);
+        }
+
+        [Theory]
+        [InlineData("NoAttribute", null)]
+        [InlineData("EmailAddressProperty", null)]
+        [InlineData("CustomDataTypeProperty", null)]
+        [InlineData("DateProperty", "{0:d}")] // DataType.Date default format
+        [InlineData("TimeProperty", DerivedDataTypeAttributeFormatString)]
+        public void DataTypeAttributeSetsDisplayFormats(string propertyName, string formatString)
+        {
+            // Arrange
+            var provider = MakeProvider();
+
+            // Act
+            string displayFormat = provider.GetMetadataForProperty(null, typeof(DataTypeModel), propertyName).DisplayFormatString;
+            string editFormat = provider.GetMetadataForProperty(null, typeof(DataTypeModel), propertyName).EditFormatString;
+
+            // Assert
+            Assert.Equal(formatString, displayFormat);
+            Assert.Equal(formatString, editFormat);
+        }
+
+        [Theory]
+        [InlineData("NoAttribute", false)]
+        [InlineData("EmailAddressProperty", false)]
+        [InlineData("CustomDataTypeProperty", false)]
+        [InlineData("DateProperty", false)] // Uses DataType.Date default format
+        [InlineData("TimeProperty", true)]
+        public void DataTypeAttributeSetsHasNonDefaultEditFormat(string propertyName, bool expectedNonDefaultEditFormat)
+        {
+            // Arrange
+            var provider = MakeProvider();
+
+            // Act
+            bool hasNonDefaultEditFormat = provider.GetMetadataForProperty(null, typeof(DataTypeModel), propertyName).HasNonDefaultEditFormat;
+
+            // Assert
+            Assert.Equal(expectedNonDefaultEditFormat, hasNonDefaultEditFormat);
         }
 
         // [ReadOnly] & [Editable] tests
@@ -213,7 +274,7 @@ namespace System.Web.Mvc.Test
             public int DataTypeWithoutDisplayFormatOverride { get; set; }
 
             [DataType(DataType.Currency)]
-            [DisplayFormat(DataFormatString = "format override")]
+            [DisplayFormat(DataFormatString = "format override", ApplyFormatInEditMode = true)]
             public int DataTypeWithDisplayFormatOverride { get; set; }
 
             [DisplayFormat(HtmlEncode = true)]
@@ -313,6 +374,30 @@ namespace System.Web.Mvc.Test
             Assert.Null(provider.GetMetadataForProperty(null, typeof(DisplayFormatModel), "HtmlEncodeTrue").DataTypeName);
             Assert.Equal("Html", provider.GetMetadataForProperty(null, typeof(DisplayFormatModel), "HtmlEncodeFalse").DataTypeName);
             Assert.Equal("Currency", provider.GetMetadataForProperty(null, typeof(DisplayFormatModel), "HtmlEncodeFalseWithDataType").DataTypeName);
+        }
+
+        [Theory]
+        [InlineData("NoAttribute", false)]
+        [InlineData("NullDisplayText", false)]
+        [InlineData("DisplayFormatString", false)]
+        [InlineData("DisplayAndEditFormatString", true)]
+        [InlineData("ConvertEmptyStringToNullTrue", false)]
+        [InlineData("ConvertEmptyStringToNullFalse", false)]
+        [InlineData("DataTypeWithoutDisplayFormatOverride", false)]
+        [InlineData("DataTypeWithDisplayFormatOverride", true)]
+        [InlineData("HtmlEncodeTrue", false)]
+        [InlineData("HtmlEncodeFalse", false)]
+        [InlineData("HtmlEncodeFalseWithDataType", false)]
+        public void DisplayFormatSetsHasNonDefaultEditFormat(string propertyName, bool expectedHasNonDefaultEditFormat)
+        {
+            // Arrange
+            AssociatedMetadataProvider provider = MakeProvider();
+
+            // Act
+            bool hasNonDefaultEditFormat = provider.GetMetadataForProperty(null, typeof(DisplayFormatModel), propertyName).HasNonDefaultEditFormat;
+
+            // Assert
+            Assert.Equal(expectedHasNonDefaultEditFormat, hasNonDefaultEditFormat);
         }
 
         // [ScaffoldColumn] tests

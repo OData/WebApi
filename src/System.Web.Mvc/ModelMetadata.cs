@@ -87,6 +87,8 @@ namespace System.Web.Mvc
 
         public virtual string EditFormatString { get; set; }
 
+        internal virtual bool HasNonDefaultEditFormat { get; set; }
+
         public virtual bool HideSurroundingHtml { get; set; }
 
         public virtual bool IsComplexType

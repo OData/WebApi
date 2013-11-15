@@ -949,6 +949,21 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(
                 GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-ddTHH:mm:ss.fffK")),
                 DefaultEditorTemplates.DateTimeInputTemplate(helper));
+
+            // Override FormattedModelValue and let helper think this string came from a default [DataType] attribute.
+            helper.ViewData.TemplateInfo.FormattedModelValue = "Another string";
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-ddTHH:mm:ss.fffK")),
+                DefaultEditorTemplates.DateTimeInputTemplate(helper));
+
+            // Override again but tell helper this string was explicitly user-provided.
+            helper.ViewData.ModelMetadata.HasNonDefaultEditFormat = true;
+            helper.ViewData.TemplateInfo.FormattedModelValue = "Another string";
+
+            Assert.Equal(
+                GetExpectedInputTag(type, "Another string"),
+                DefaultEditorTemplates.DateTimeInputTemplate(helper));
         }
 
         public static TheoryDataSet<object, string> DateTimeInputTemplateHtmlAttributeData
@@ -1003,6 +1018,21 @@ namespace System.Web.Mvc.Html.Test
 
             Assert.Equal(
                 GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-ddTHH:mm:ss.fff")),
+                DefaultEditorTemplates.DateTimeLocalInputTemplate(helper));
+
+            // Override FormattedModelValue and let helper think this string came from a default [DataType] attribute.
+            helper.ViewData.TemplateInfo.FormattedModelValue = "Another string";
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-ddTHH:mm:ss.fff")),
+                DefaultEditorTemplates.DateTimeLocalInputTemplate(helper));
+
+            // Override again but tell helper this string was explicitly user-provided.
+            helper.ViewData.ModelMetadata.HasNonDefaultEditFormat = true;
+            helper.ViewData.TemplateInfo.FormattedModelValue = "Another string";
+
+            Assert.Equal(
+                GetExpectedInputTag(type, "Another string"),
                 DefaultEditorTemplates.DateTimeLocalInputTemplate(helper));
         }
 
@@ -1059,6 +1089,21 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(
                 GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-dd")),
                 DefaultEditorTemplates.DateInputTemplate(helper));
+
+            // Override FormattedModelValue and let helper think this string came from a default [DataType] attribute.
+            helper.ViewData.TemplateInfo.FormattedModelValue = "Another string";
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString("yyyy-MM-dd")),
+                DefaultEditorTemplates.DateInputTemplate(helper));
+
+            // Override again but tell helper this string was explicitly user-provided.
+            helper.ViewData.ModelMetadata.HasNonDefaultEditFormat = true;
+            helper.ViewData.TemplateInfo.FormattedModelValue = "Another string";
+
+            Assert.Equal(
+                GetExpectedInputTag(type, "Another string"),
+                DefaultEditorTemplates.DateInputTemplate(helper));
         }
 
         public static TheoryDataSet<object, string> DateInputTemplateHtmlAttributeData
@@ -1113,6 +1158,21 @@ namespace System.Web.Mvc.Html.Test
 
             Assert.Equal(
                 GetExpectedInputTag(type, epocInLocalTime.ToString("HH:mm:ss.fff")),
+                DefaultEditorTemplates.TimeInputTemplate(helper));
+
+            // Override FormattedModelValue and let helper think this string came from a default [DataType] attribute.
+            helper.ViewData.TemplateInfo.FormattedModelValue = "Another string";
+
+            Assert.Equal(
+                GetExpectedInputTag(type, epocInLocalTime.ToString("HH:mm:ss.fff")),
+                DefaultEditorTemplates.TimeInputTemplate(helper));
+
+            // Override again but tell helper this string was explicitly user-provided.
+            helper.ViewData.ModelMetadata.HasNonDefaultEditFormat = true;
+            helper.ViewData.TemplateInfo.FormattedModelValue = "Another string";
+
+            Assert.Equal(
+                GetExpectedInputTag(type, "Another string"),
                 DefaultEditorTemplates.TimeInputTemplate(helper));
         }
 

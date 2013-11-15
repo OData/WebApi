@@ -349,12 +349,13 @@ namespace System.Web.Mvc.Html
                 return;
             }
 
-            if (html.ViewContext.ViewData.TemplateInfo.FormattedModelValue != html.ViewContext.ViewData.ModelMetadata.Model)
+            ModelMetadata metadata = html.ViewContext.ViewData.ModelMetadata;
+            object value = metadata.Model;
+            if (html.ViewContext.ViewData.TemplateInfo.FormattedModelValue != value && metadata.HasNonDefaultEditFormat)
             {
                 return;
             }
 
-            object value = html.ViewContext.ViewData.ModelMetadata.Model;
             if (value is DateTime || value is DateTimeOffset)
             {
                 html.ViewContext.ViewData.TemplateInfo.FormattedModelValue = String.Format(CultureInfo.InvariantCulture, format, value);

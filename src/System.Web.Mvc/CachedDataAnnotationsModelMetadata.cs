@@ -11,6 +11,8 @@ namespace System.Web.Mvc
 {
     public class CachedDataAnnotationsModelMetadata : CachedModelMetadata<CachedDataAnnotationsMetadataAttributes>
     {
+        private bool _isEditFormatStringFromCache;
+
         public CachedDataAnnotationsModelMetadata(CachedDataAnnotationsModelMetadata prototype, Func<object> modelAccessor)
             : base(prototype, modelAccessor)
         {
@@ -78,10 +80,40 @@ namespace System.Web.Mvc
         {
             if (PrototypeCache.DisplayFormat != null && PrototypeCache.DisplayFormat.ApplyFormatInEditMode)
             {
+                _isEditFormatStringFromCache = true;
                 return PrototypeCache.DisplayFormat.DataFormatString;
             }
 
             return base.ComputeEditFormatString();
+        }
+
+        protected override bool ComputeHasNonDefaultEditFormat()
+        {
+            if (!String.IsNullOrEmpty(EditFormatString) && _isEditFormatStringFromCache)
+            {
+                // Have a non-empty EditFormatString based on [DisplayFormat] from our cache
+                if (PrototypeCache.DataType == null)
+                {
+                    // Attributes include no [DataType]; [DisplayFormat] was applied directly
+                    return true;
+                }
+
+                if (PrototypeCache.DataType.DisplayFormat != PrototypeCache.DisplayFormat)
+                {
+                    // Attributes include separate [DataType] and [DisplayFormat]; [DisplayFormat] provided override
+                    return true;
+                }
+
+                if (PrototypeCache.DataType.GetType() != typeof(DataTypeAttribute))
+                {
+                    // Attributes include [DisplayFormat] copied from [DataType] and [DataType] was of a subclass.
+                    // Assume the [DataType] constructor used the protected DisplayFormat setter to override its
+                    // default.  That is derived [DataType] provided override.
+                    return true;
+                }
+            }
+
+            return base.ComputeHasNonDefaultEditFormat();
         }
 
         protected override bool ComputeHideSurroundingHtml()

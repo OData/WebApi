@@ -114,7 +114,7 @@ namespace System.Web.Mvc.Routing
         /// <summary>Gets or sets the route precedence.</summary>
         /// <remarks>
         /// The route order disambiguates multiple matching routes with the same order.
-        /// The intended use of precedence is for deafult, automatically computed disambiguation based on inline
+        /// The intended use of precedence is for default, automatically computed disambiguation based on inline
         /// constraint types.
         /// </remarks>
         public decimal Precedence { get; set; }

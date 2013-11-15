@@ -100,10 +100,12 @@ namespace System.Web.Mvc.Routing
                 {
                     _controllerName = controllerDescriptor.ControllerName;
                 }
-
-                _targetIsAction = targetIsAction;
 #endif
             }
+
+#if !ASPNETWEBAPI
+            _targetIsAction = targetIsAction;
+#endif
         }
 
 #if ASPNETWEBAPI

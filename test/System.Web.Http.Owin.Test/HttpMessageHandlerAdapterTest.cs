@@ -1328,7 +1328,7 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
-        public void Invoke_IfStreamingFaults_DisposesResponseBodyAndReturnsCompletedTask()
+        public void Invoke_IfStreamingFaults_ReturnsCanceledTask()
         {
             // Arrange
             IHostBufferPolicySelector bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false,
@@ -1336,14 +1336,11 @@ namespace System.Web.Http.Owin
 
             using (HttpContent content = CreateFaultingContent())
             using (HttpResponseMessage response = CreateResponse(content))
-            using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
             using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicySelector))
-            using (SpyDisposeStream spy = new SpyDisposeStream())
             {
                 IOwinRequest owinRequest = CreateFakeOwinRequest();
-
-                IOwinResponse owinResponse = CreateFakeOwinResponse(spy);
+                IOwinResponse owinResponse = CreateFakeOwinResponse();
 
                 IOwinContext context = CreateStubOwinContext(owinRequest, owinResponse);
 
@@ -1353,9 +1350,7 @@ namespace System.Web.Http.Owin
                 // Assert
                 Assert.NotNull(task);
                 task.WaitUntilCompleted();
-                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
-
-                Assert.True(spy.Disposed);
+                Assert.Equal(TaskStatus.Canceled, task.Status);
             }
         }
 
@@ -1393,7 +1388,7 @@ namespace System.Web.Http.Owin
                     // Assert
                     Assert.NotNull(task);
                     task.WaitUntilCompleted();
-                    Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+                    Assert.Equal(TaskStatus.Canceled, task.Status);
 
                     mock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>((c) =>
                         c != null

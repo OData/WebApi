@@ -529,14 +529,14 @@ namespace System.Web.Http.Owin
             ExceptionContext exceptionContext = new ExceptionContext(exception,
                 OwinExceptionCatchBlocks.HttpMessageHandlerAdapterStreamContent, request, response);
             await _exceptionLogger.LogAsync(exceptionContext, cancellationToken);
-            AbortResponse(owinResponse);
+            await AbortResponseAsync();
         }
 
-        private static void AbortResponse(IOwinResponse owinResponse)
+        private static Task AbortResponseAsync()
         {
-            // OWIN doesn't yet support an explicit Abort event. Calling Dispose on the body seems like the best we can
-            // do for now.
-            owinResponse.Body.Dispose();
+            // OWIN doesn't yet support an explicit Abort event. Returning a canceled task is the best contract at the
+            // moment.
+            return TaskHelpers.Canceled();
         }
 
         private static HttpMessageHandlerOptions CreateOptions(HttpMessageHandler messageHandler,

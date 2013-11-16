@@ -280,9 +280,8 @@ namespace System.Web.Http.WebHost
 
             CopyHeaders(responseContent.Headers, httpContextBase);
 
-            // Select output buffering based on the user-controlled buffering policy
-            bool isBuffered = _bufferPolicySelector.Value != null ? _bufferPolicySelector.Value.UseBufferedOutputStream(response) : true;
-            httpResponseBase.BufferOutput = isBuffered;
+            // PrepareHeadersAsync already evaluated the buffer policy.
+            bool isBuffered = httpResponseBase.BufferOutput;
 
             return isBuffered
                     ? WriteBufferedResponseContentAsync(httpContextBase, request, response, exceptionLogger, exceptionHandler, cancellationToken)
@@ -555,10 +554,15 @@ namespace System.Web.Http.WebHost
                         return false;
                     }
                 }
+
+                // Select output buffering based on the user-controlled buffering policy
+                bool isBuffered = _bufferPolicySelector.Value != null ?
+                    _bufferPolicySelector.Value.UseBufferedOutputStream(response) : true;
+                responseBase.BufferOutput = isBuffered;
             }
 
             // Ignore the Transfer-Encoding header if it is just "chunked"; the host will provide it when no
-            // Content-Length is present (and we guarantee no Content-Length is present for chunked content above).
+            // Content-Length is present and BufferOutput is disabled (and this method guarantees those conditions).
             // HttpClient sets this header when it receives chunked content, but HttpContent does not include the
             // frames. The ASP.NET contract is to set this header only when writing chunked frames to the stream.
             // A Web API caller who desires custom framing would need to do a different Transfer-Encoding (such as
@@ -566,6 +570,9 @@ namespace System.Web.Http.WebHost
             if (isTransferEncodingChunked && transferEncoding.Count == 1)
             {
                 transferEncoding.Clear();
+
+                // If output buffering is not disabled, ASP.NET will not write the TransferEncoding: chunked header.
+                responseBase.BufferOutput = false;
             }
 
             return true;

@@ -565,6 +565,31 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
+        public void CopyResponseAsync_IfTransferEncodingIsChunked_DisablesResponseBuffering()
+        {
+            // Arrange
+            HttpResponseBase responseBase = CreateMockHttpResponseBaseForResponse(Stream.Null).Object;
+            HttpContextBase contextBase = CreateStubContextBase(responseBase);
+
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            using (HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request })
+            {
+                response.Headers.TransferEncodingChunked = true;
+                response.Content = new ObjectContent(typeof(string), String.Empty, new JsonMediaTypeFormatter());
+
+                // Act
+                Task task = CopyResponseAsync(contextBase, request, response);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                task.ThrowIfFaulted();
+
+                Assert.False(responseBase.BufferOutput);
+            }
+        }
+
+        [Fact]
         public void CopyResponseAsync_IfHandlerIsDefault_Returns_Error_Response_When_Formatter_Write_Task_Faults()
         {
             // Arrange
@@ -1485,6 +1510,7 @@ namespace System.Web.Http.WebHost
             responseBaseMock.Setup(m => m.ClearHeaders()).Callback(() => testHeaders.Clear());
             responseBaseMock.Setup(m => m.Clear()).Callback(() => testHeaders.Clear());
             responseBaseMock.SetupProperty(m => m.StatusCode);
+            responseBaseMock.SetupProperty(m => m.BufferOutput);
 
             return responseBaseMock;
         }

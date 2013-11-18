@@ -12,11 +12,13 @@ using TActionDescriptor = System.Web.Http.Controllers.HttpActionDescriptor;
 using TRoute = System.Web.Http.Routing.IHttpRoute;
 using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
 using TRouteDictionaryConcrete = System.Web.Http.Routing.HttpRouteValueDictionary;
+using TRouteHandler = System.Net.Http.HttpMessageHandler;
 #else
 using TActionDescriptor = System.Web.Mvc.ActionDescriptor;
 using TRoute = System.Web.Routing.Route;
 using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
 using TRouteDictionaryConcrete = System.Web.Routing.RouteValueDictionary;
+using TRouteHandler = System.Web.Routing.IRouteHandler;
 #endif
 
 #if ASPNETWEBAPI
@@ -153,7 +155,117 @@ namespace System.Web.Mvc.Routing
         }
 
         [Fact]
-        public void CreateRoute_IfBuilderContraintsIsNull_UsesConstraintsPropertyWhenBuilding()
+        public void CreateRoute_IfBuilderDefaultsIsNull_UsesDefaultsPropertyWhenBuilding()
+        {
+            // Arrange
+            TRouteDictionary expectedDefaults = new TRouteDictionaryConcrete();
+            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            productMock.SetupGet(p => p.Defaults).Returns(expectedDefaults);
+            IDirectRouteProvider product = productMock.Object;
+
+            RouteEntry expectedEntry = CreateEntry();
+
+            TRouteDictionary defaults = null;
+            DirectRouteBuilder builder = null;
+            builder = CreateBuilder(() =>
+            {
+                defaults = builder.Defaults;
+                return null;
+            });
+            Assert.Null(builder.Defaults); // Guard
+            DirectRouteProviderContext context = CreateContext((i) => builder);
+
+            // Act
+            RouteEntry ignore = product.CreateRoute(context);
+
+            // Assert
+            Assert.Same(expectedDefaults, defaults);
+        }
+
+        [Fact]
+        public void CreateRoute_IfBuilderDefaultsIsNotNull_UpdatesDefaultsFromPropertyWhenBuilding()
+        {
+            // Arrange
+            TRouteDictionary existingDefaults = new TRouteDictionaryConcrete();
+            string existingDefaultKey = "ExistingDefaultKey";
+            object existingDefaultValue = "ExistingDefault";
+            existingDefaults.Add(existingDefaultKey, existingDefaultValue);
+            string conflictingDefaultKey = "ConflictingDefaultKey";
+            object oldConflictingDefaultValue = "OldConflictingDefault";
+            existingDefaults.Add(conflictingDefaultKey, oldConflictingDefaultValue);
+
+            TRouteDictionary additionalDefaults = new TRouteDictionaryConcrete();
+            string additionalDefaultKey = "NewDefaultKey";
+            string additionalDefaultValue = "NewDefault";
+            additionalDefaults.Add(additionalDefaultKey, additionalDefaultValue);
+            string newConflictingDefaultValue = "NewConflictingDefault";
+            additionalDefaults.Add(conflictingDefaultKey, newConflictingDefaultValue);
+
+            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            productMock.SetupGet(p => p.Defaults).Returns(additionalDefaults);
+            IDirectRouteProvider product = productMock.Object;
+
+            RouteEntry expectedEntry = CreateEntry();
+
+            TRouteDictionary defaults = null;
+            DirectRouteBuilder builder = null;
+            builder = CreateBuilder(() =>
+            {
+                defaults = builder.Defaults;
+                return null;
+            });
+
+            builder.Defaults = existingDefaults;
+
+            DirectRouteProviderContext context = CreateContext((i) => builder);
+
+            // Act
+            RouteEntry ignore = product.CreateRoute(context);
+
+            // Assert
+            Assert.Same(existingDefaults, defaults);
+            Assert.Equal(3, defaults.Count);
+            Assert.True(defaults.ContainsKey(existingDefaultKey));
+            Assert.Same(existingDefaultValue, defaults[existingDefaultKey]);
+            Assert.True(defaults.ContainsKey(conflictingDefaultKey));
+            Assert.Same(newConflictingDefaultValue, defaults[conflictingDefaultKey]);
+            Assert.True(defaults.ContainsKey(additionalDefaultKey));
+            Assert.Same(additionalDefaultValue, defaults[additionalDefaultKey]);
+        }
+
+        [Fact]
+        public void CreateRoute_IfBuilderConstraintsIsNotNullAndDefaultsPropertyIsNull_UsesBuilderDefaults()
+        {
+            // Arrange
+            TRouteDictionary existingDefaults = new TRouteDictionaryConcrete();
+
+            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            productMock.SetupGet(p => p.Defaults).Returns((TRouteDictionary)null);
+            IDirectRouteProvider product = productMock.Object;
+
+            RouteEntry expectedEntry = CreateEntry();
+
+            TRouteDictionary defaults = null;
+            DirectRouteBuilder builder = null;
+            builder = CreateBuilder(() =>
+            {
+                defaults = builder.Defaults;
+                return null;
+            });
+
+            builder.Defaults = existingDefaults;
+
+            DirectRouteProviderContext context = CreateContext((i) => builder);
+
+            // Act
+            RouteEntry ignore = product.CreateRoute(context);
+
+            // Assert
+            Assert.Same(existingDefaults, defaults);
+        }
+
+        [Fact]
+        public void CreateRoute_IfBuilderConstraintsIsNull_UsesConstraintsPropertyWhenBuilding()
         {
             // Arrange
             TRouteDictionary expectedConstraints = new TRouteDictionaryConcrete();
@@ -181,18 +293,23 @@ namespace System.Web.Mvc.Routing
         }
 
         [Fact]
-        public void CreateRoute_IfBuilderContraintsIsNotNull_AddsConstraintsFromPropertyWhenBuilding()
+        public void CreateRoute_IfBuilderConstraintsIsNotNull_UpdatesConstraintsFromPropertyWhenBuilding()
         {
             // Arrange
             TRouteDictionary existingConstraints = new TRouteDictionaryConcrete();
-            string existingConstraintKey = "ExistingContraintKey";
-            object existingConstraintValue = "ExistingContraint";
+            string existingConstraintKey = "ExistingConstraintKey";
+            object existingConstraintValue = "ExistingConstraint";
             existingConstraints.Add(existingConstraintKey, existingConstraintValue);
+            string conflictingConstraintKey = "ConflictingConstraintKey";
+            object oldConflictingConstraintValue = "OldConflictingConstraint";
+            existingConstraints.Add(conflictingConstraintKey, oldConflictingConstraintValue);
 
             TRouteDictionary additionalConstraints = new TRouteDictionaryConcrete();
             string additionalConstraintKey = "NewConstraintKey";
             string additionalConstraintValue = "NewConstraint";
             additionalConstraints.Add(additionalConstraintKey, additionalConstraintValue);
+            string newConflictingConstraintValue = "NewConflictingConstraint";
+            additionalConstraints.Add(conflictingConstraintKey, newConflictingConstraintValue);
 
             Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.Constraints).Returns(additionalConstraints);
@@ -217,15 +334,17 @@ namespace System.Web.Mvc.Routing
 
             // Assert
             Assert.Same(existingConstraints, constraints);
-            Assert.Equal(2, constraints.Count);
+            Assert.Equal(3, constraints.Count);
             Assert.True(constraints.ContainsKey(existingConstraintKey));
             Assert.Same(existingConstraintValue, constraints[existingConstraintKey]);
+            Assert.True(constraints.ContainsKey(conflictingConstraintKey));
+            Assert.Same(newConflictingConstraintValue, constraints[conflictingConstraintKey]);
             Assert.True(constraints.ContainsKey(additionalConstraintKey));
             Assert.Same(additionalConstraintValue, constraints[additionalConstraintKey]);
         }
 
         [Fact]
-        public void CreateRoute_IfBuilderContraintsIsNotNullAndConstraintsPropertyIsNull_UsesBuilderConstraints()
+        public void CreateRoute_IfBuilderConstraintsIsNotNullAndConstraintsPropertyIsNull_UsesBuilderConstraints()
         {
             // Arrange
             TRouteDictionary existingConstraints = new TRouteDictionaryConcrete();
@@ -253,6 +372,145 @@ namespace System.Web.Mvc.Routing
 
             // Assert
             Assert.Same(existingConstraints, constraints);
+        }
+        
+        [Fact]
+        public void CreateRoute_IfBuilderDataTokensIsNull_UsesDataTokensPropertyWhenBuilding()
+        {
+            // Arrange
+            TRouteDictionary expectedDataTokens = new TRouteDictionaryConcrete();
+            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            productMock.SetupGet(p => p.DataTokens).Returns(expectedDataTokens);
+            IDirectRouteProvider product = productMock.Object;
+
+            RouteEntry expectedEntry = CreateEntry();
+
+            TRouteDictionary dataTokens = null;
+            DirectRouteBuilder builder = null;
+            builder = CreateBuilder(() =>
+            {
+                dataTokens = builder.DataTokens;
+                return null;
+            });
+            Assert.Null(builder.DataTokens); // Guard
+            DirectRouteProviderContext context = CreateContext((i) => builder);
+
+            // Act
+            RouteEntry ignore = product.CreateRoute(context);
+
+            // Assert
+            Assert.Same(expectedDataTokens, dataTokens);
+        }
+
+        [Fact]
+        public void CreateRoute_IfBuilderDataTokensIsNotNull_UpdatesDataTokensFromPropertyWhenBuilding()
+        {
+            // Arrange
+            TRouteDictionary existingDataTokens = new TRouteDictionaryConcrete();
+            string existingDataTokenKey = "ExistingDataTokenKey";
+            object existingDataTokenValue = "ExistingDataToken";
+            existingDataTokens.Add(existingDataTokenKey, existingDataTokenValue);
+            string conflictingDataTokenKey = "ConflictingDataTokenKey";
+            object oldConflictingDataTokenValue = "OldConflictingDataToken";
+            existingDataTokens.Add(conflictingDataTokenKey, oldConflictingDataTokenValue);
+
+            TRouteDictionary additionalDataTokens = new TRouteDictionaryConcrete();
+            string additionalDataTokenKey = "NewDataTokenKey";
+            string additionalDataTokenValue = "NewDataToken";
+            additionalDataTokens.Add(additionalDataTokenKey, additionalDataTokenValue);
+            string newConflictingDataTokenValue = "NewConflictingDataToken";
+            additionalDataTokens.Add(conflictingDataTokenKey, newConflictingDataTokenValue);
+
+            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            productMock.SetupGet(p => p.DataTokens).Returns(additionalDataTokens);
+            IDirectRouteProvider product = productMock.Object;
+
+            RouteEntry expectedEntry = CreateEntry();
+
+            TRouteDictionary dataTokens = null;
+            DirectRouteBuilder builder = null;
+            builder = CreateBuilder(() =>
+            {
+                dataTokens = builder.DataTokens;
+                return null;
+            });
+
+            builder.DataTokens = existingDataTokens;
+
+            DirectRouteProviderContext context = CreateContext((i) => builder);
+
+            // Act
+            RouteEntry ignore = product.CreateRoute(context);
+
+            // Assert
+            Assert.Same(existingDataTokens, dataTokens);
+            Assert.Equal(3, dataTokens.Count);
+            Assert.True(dataTokens.ContainsKey(existingDataTokenKey));
+            Assert.Same(existingDataTokenValue, dataTokens[existingDataTokenKey]);
+            Assert.True(dataTokens.ContainsKey(conflictingDataTokenKey));
+            Assert.Same(newConflictingDataTokenValue, dataTokens[conflictingDataTokenKey]);
+            Assert.True(dataTokens.ContainsKey(additionalDataTokenKey));
+            Assert.Same(additionalDataTokenValue, dataTokens[additionalDataTokenKey]);
+        }
+
+        [Fact]
+        public void CreateRoute_IfBuilderDataTokensIsNotNullAndDataTokensPropertyIsNull_UsesBuilderDataTokens()
+        {
+            // Arrange
+            TRouteDictionary existingDataTokens = new TRouteDictionaryConcrete();
+
+            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            productMock.SetupGet(p => p.DataTokens).Returns((TRouteDictionary)null);
+            IDirectRouteProvider product = productMock.Object;
+
+            RouteEntry expectedEntry = CreateEntry();
+
+            TRouteDictionary dataTokens = null;
+            DirectRouteBuilder builder = null;
+            builder = CreateBuilder(() =>
+            {
+                dataTokens = builder.DataTokens;
+                return null;
+            });
+
+            builder.DataTokens = existingDataTokens;
+
+            DirectRouteProviderContext context = CreateContext((i) => builder);
+
+            // Act
+            RouteEntry ignore = product.CreateRoute(context);
+
+            // Assert
+            Assert.Same(existingDataTokens, dataTokens);
+        }
+
+        [Fact]
+        public void CreateRoute_UsesHandler()
+        {
+            // Arrange
+            TRouteHandler expectedHandler = new Mock<TRouteHandler>(MockBehavior.Strict).Object;
+
+            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            productMock.SetupGet(p => p.Handler).Returns(expectedHandler);
+            IDirectRouteProvider product = productMock.Object;
+
+            RouteEntry expectedEntry = CreateEntry();
+
+            TRouteHandler handler = null;
+            DirectRouteBuilder builder = null;
+            builder = CreateBuilder(() =>
+            {
+                handler = builder.Handler;
+                return null;
+            });
+
+            DirectRouteProviderContext context = CreateContext((i) => builder);
+
+            // Act
+            RouteEntry ignore = product.CreateRoute(context);
+
+            // Assert
+            Assert.Same(handler, expectedHandler);
         }
 
         [Fact]

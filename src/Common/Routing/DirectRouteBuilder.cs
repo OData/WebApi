@@ -197,13 +197,14 @@ namespace System.Web.Mvc.Routing
 
             if (areaName != null)
             {
-                dataTokens.Add(RouteDataTokenKeys.Area, areaName);
-                dataTokens.Add(RouteDataTokenKeys.UseNamespaceFallback, value: false);
+                dataTokens[RouteDataTokenKeys.Area] = areaName;
+                dataTokens[RouteDataTokenKeys.UseNamespaceFallback] = false;
 
                 Type controllerType = controllerDescriptor.ControllerType;
+
                 if (controllerType != null)
                 {
-                    dataTokens.Add(RouteDataTokenKeys.Namespaces, new[] { controllerType.Namespace });
+                    dataTokens[RouteDataTokenKeys.Namespaces] = new[] { controllerType.Namespace };
                 }
             }
 

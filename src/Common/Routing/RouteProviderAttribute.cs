@@ -5,8 +5,10 @@ using System.Diagnostics.Contracts;
 
 #if ASPNETWEBAPI
 using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
+using TRouteHandler = System.Net.Http.HttpMessageHandler;
 #else
 using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
+using TRouteHandler = System.Web.Routing.IRouteHandler;
 #endif
 
 #if ASPNETWEBAPI
@@ -40,8 +42,26 @@ namespace System.Web.Mvc.Routing
         /// <summary>Gets or sets the route order.</summary>
         public int Order { get; set; }
 
+        /// <summary>Gets the route defaults, if any; otherwise <see langword="null"/>.</summary>
+        public virtual TRouteDictionary Defaults
+        {
+            get { return null; }
+        }
+
         /// <summary>Gets the route constraints, if any; otherwise <see langword="null"/>.</summary>
         public virtual TRouteDictionary Constraints
+        {
+            get { return null; }
+        }
+
+        /// <summary>Gets the route data tokens, if any; otherwise <see langword="null"/>.</summary>
+        public virtual TRouteDictionary DataTokens
+        {
+            get { return null; }
+        }
+
+        /// <summary>Gets the route handler, if any; otherwise <see langword="null"/>.</summary>
+        public virtual TRouteHandler Handler
         {
             get { return null; }
         }
@@ -54,6 +74,25 @@ namespace System.Web.Mvc.Routing
             Contract.Assert(builder != null);
             builder.Name = Name;
             builder.Order = Order;
+
+            TRouteDictionary builderDefaults = builder.Defaults;
+
+            if (builderDefaults == null)
+            {
+                builder.Defaults = Defaults;
+            }
+            else
+            {
+                TRouteDictionary defaults = Defaults;
+
+                if (defaults != null)
+                {
+                    foreach (KeyValuePair<string, object> defaultItem in defaults)
+                    {
+                        builderDefaults[defaultItem.Key] = defaultItem.Value;
+                    }
+                }
+            }
 
             TRouteDictionary builderConstraints = builder.Constraints;
 
@@ -69,10 +108,31 @@ namespace System.Web.Mvc.Routing
                 {
                     foreach (KeyValuePair<string, object> constraint in constraints)
                     {
-                        builderConstraints.Add(constraint.Key, constraint.Value);
+                        builderConstraints[constraint.Key] = constraint.Value;
                     }
                 }
             }
+
+            TRouteDictionary builderDataTokens = builder.DataTokens;
+
+            if (builderDataTokens == null)
+            {
+                builder.DataTokens = DataTokens;
+            }
+            else
+            {
+                TRouteDictionary dataTokens = DataTokens;
+
+                if (dataTokens != null)
+                {
+                    foreach (KeyValuePair<string, object> dataToken in dataTokens)
+                    {
+                        builderDataTokens[dataToken.Key] = dataToken.Value;
+                    }
+                }
+            }
+
+            builder.Handler = Handler;
 
             return builder.Build();
         }

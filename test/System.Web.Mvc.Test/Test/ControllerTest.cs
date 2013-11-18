@@ -1848,6 +1848,23 @@ namespace System.Web.Mvc.Test
             Assert.Same(tempMock.Object, temp);
         }
 
+        [Fact]
+        public void CanMock_UrlHelper()
+        {
+            // Arrange
+            var controller = new UrlHelperController();
+            RequestContext context = new RequestContext();
+            Mock<UrlHelper> urlHelper = new Mock<UrlHelper>(context);
+            urlHelper.Setup(u => u.Action("SimpleAction", new { ID = 42 })).Verifiable();
+            controller.Url = urlHelper.Object;
+
+            // Act
+            controller.SimpleAction();
+
+            // Assert
+            urlHelper.Verify();
+        }
+
         private class TryValidateModelModel
         {
             [Range(10, 20, ErrorMessage = "Out of range!")]
@@ -1855,6 +1872,14 @@ namespace System.Web.Mvc.Test
         }
 
         // Helpers
+
+        private class UrlHelperController : Controller
+        {
+            public string SimpleAction()
+            {
+                return Url.Action("SimpleAction", new { ID = 42 });
+            }
+        }
 
         private class SimpleController : Controller
         {

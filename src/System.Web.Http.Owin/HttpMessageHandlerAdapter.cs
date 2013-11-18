@@ -153,7 +153,7 @@ namespace System.Web.Http.Owin
             {
                 owinRequest.DisableBuffering();
             }
-            
+
             if (!owinRequest.Body.CanSeek && bufferInput)
             {
                 requestContent = await CreateBufferedRequestContentAsync(owinRequest, cancellationToken);
@@ -190,20 +190,27 @@ namespace System.Web.Http.Owin
                 {
                     callNext = false;
 
-                    bool bufferOutput = _bufferPolicySelector.UseBufferedOutputStream(response);
+                    // Compute Content-Length before calling UseBufferedOutputStream because the default implementation
+                    // accesses that header and we want to catch any exceptions calling TryComputeLength here.
 
-                    if (!bufferOutput)
+                    if (response.Content == null
+                        || await ComputeContentLengthAsync(request, response, owinResponse, cancellationToken))
                     {
-                        owinResponse.DisableBuffering();
-                    }
-                    else if (response.Content != null)
-                    {
-                        response = await BufferResponseContentAsync(request, response, cancellationToken);
-                    }
+                        bool bufferOutput = _bufferPolicySelector.UseBufferedOutputStream(response);
 
-                    if (await PrepareHeadersAsync(request, response, owinResponse, cancellationToken))
-                    {
-                        await SendResponseMessageAsync(request, response, owinResponse, cancellationToken);
+                        if (!bufferOutput)
+                        {
+                            owinResponse.DisableBuffering();
+                        }
+                        else if (response.Content != null)
+                        {
+                            response = await BufferResponseContentAsync(request, response, cancellationToken);
+                        }
+
+                        if (await PrepareHeadersAsync(request, response, owinResponse, cancellationToken))
+                        {
+                            await SendResponseMessageAsync(request, response, owinResponse, cancellationToken);
+                        }
                     }
                 }
             }
@@ -395,8 +402,7 @@ namespace System.Web.Http.Owin
         }
 
         // Prepares Content-Length and Transfer-Encoding headers.
-        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "unused variable necessary to call getter")]
-        private async Task<bool> PrepareHeadersAsync(HttpRequestMessage request, HttpResponseMessage response,
+        private Task<bool> PrepareHeadersAsync(HttpRequestMessage request, HttpResponseMessage response,
             IOwinResponse owinResponse, CancellationToken cancellationToken)
         {
             Contract.Assert(response != null);
@@ -421,33 +427,10 @@ namespace System.Web.Http.Owin
                 }
                 else
                 {
-                    Exception exception;
-
-                    try
-                    {
-                        // Copy the response content headers only after ensuring they are complete.
-                        // We ask for Content-Length first because HttpContent lazily computes this
-                        // and only afterwards writes the value into the content headers.
-                        var unused = contentHeaders.ContentLength;
-
-                        exception = null;
-                    }
-                    catch (Exception ex)
-                    {
-                        exception = ex;
-                    }
-
-                    if (exception != null)
-                    {
-                        ExceptionContext exceptionContext = new ExceptionContext(exception,
-                            OwinExceptionCatchBlocks.HttpMessageHandlerAdapterComputeContentLength, request, response);
-                        await _exceptionLogger.LogAsync(exceptionContext, cancellationToken);
-
-                        // Send back an empty error response if TryComputeLength throws.
-                        owinResponse.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        SetHeadersForEmptyResponse(owinResponse.Headers);
-                        return false;
-                    }
+                    // Copy the response content headers only after ensuring they are complete.
+                    // We ask for Content-Length first because HttpContent lazily computes this header and only
+                    // afterwards writes the value into the content headers.
+                    return ComputeContentLengthAsync(request, response, owinResponse, cancellationToken);
                 }
             }
 
@@ -464,7 +447,48 @@ namespace System.Web.Http.Owin
                 transferEncoding.Clear();
             }
 
-            return true;
+            return Task.FromResult(true);
+        }
+
+        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused",
+            Justification = "unused variable necessary to call getter")]
+        private async Task<bool> ComputeContentLengthAsync(HttpRequestMessage request, HttpResponseMessage response,
+            IOwinResponse owinResponse, CancellationToken cancellationToken)
+        {
+            Contract.Assert(response != null);
+            HttpResponseHeaders responseHeaders = response.Headers;
+            Contract.Assert(responseHeaders != null);
+            HttpContent content = response.Content;
+            Contract.Assert(content != null);
+            HttpContentHeaders contentHeaders = content.Headers;
+            Contract.Assert(contentHeaders != null);
+
+            Exception exception;
+
+            try
+            {
+                var unused = contentHeaders.ContentLength;
+
+                exception = null;
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            if (exception == null)
+            {
+                return true;
+            }
+
+            ExceptionContext exceptionContext = new ExceptionContext(exception,
+                OwinExceptionCatchBlocks.HttpMessageHandlerAdapterComputeContentLength, request, response);
+            await _exceptionLogger.LogAsync(exceptionContext, cancellationToken);
+
+            // Send back an empty error response if TryComputeLength throws.
+            owinResponse.StatusCode = (int)HttpStatusCode.InternalServerError;
+            SetHeadersForEmptyResponse(owinResponse.Headers);
+            return false;
         }
 
         private Task SendResponseMessageAsync(HttpRequestMessage request, HttpResponseMessage response,

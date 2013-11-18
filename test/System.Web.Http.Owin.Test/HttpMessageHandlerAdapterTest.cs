@@ -1362,7 +1362,6 @@ namespace System.Web.Http.Owin
 
             using (HttpContent content = CreateFaultingContent(expectedException))
             using (HttpResponseMessage expectedResponse = CreateResponse(content))
-            using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(expectedResponse))
             {
                 Mock<IExceptionLogger> mock = CreateStubExceptionLoggerMock();
@@ -1411,7 +1410,6 @@ namespace System.Web.Http.Owin
 
             using (HttpContent content = CreateThrowingContent(expectedException))
             using (HttpResponseMessage expectedResponse = CreateResponse(content))
-            using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(expectedResponse))
             {
                 Mock<IExceptionLogger> mock = CreateStubExceptionLoggerMock();
@@ -1459,14 +1457,13 @@ namespace System.Web.Http.Owin
 
             using (HttpContent content = CreateThrowingContent(expectedException))
             using (HttpResponseMessage response = CreateResponse(content))
-            using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
             {
                 HttpMessageHandlerOptions options = CreateValidOptions(messageHandler);
 
                 using (HttpMessageHandlerAdapter product = CreateProductUnderTest(options))
                 {
-                    IOwinRequest owinRequest = CreateFakeOwinRequest(CancellationToken.None);
+                    IOwinRequest owinRequest = CreateFakeOwinRequest();
 
                     Mock<IOwinResponse> owinResponseMock = new Mock<IOwinResponse>(MockBehavior.Strict);
                     int statusCode = 0;
@@ -1498,6 +1495,47 @@ namespace System.Web.Http.Owin
             }
         }
 
+        [Fact]
+        public void Invoke_IfTryComputeLengthThrows_DoesNotEvaluateOutputBufferPolicy()
+        {
+            // Arrange
+            using (HttpContent content = CreateThrowingContent(CreateException()))
+            using (HttpResponseMessage response = CreateResponse(content))
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
+            {
+                HttpMessageHandlerOptions options = CreateValidOptions(messageHandler);
+
+                Mock<IHostBufferPolicySelector> bufferPolicyMock =
+                    new Mock<IHostBufferPolicySelector>(MockBehavior.Strict);
+                bufferPolicyMock
+                    .Setup(p => p.UseBufferedInputStream(It.IsAny<object>()))
+                    .Returns(false);
+                bool calledUseBufferedOutputStream = false;
+                bufferPolicyMock
+                    .Setup(p => p.UseBufferedOutputStream(It.IsAny<HttpResponseMessage>()))
+                    .Callback(() => calledUseBufferedOutputStream = true)
+                    .Returns(false);
+                options.BufferPolicySelector = bufferPolicyMock.Object;
+
+                using (HttpMessageHandlerAdapter product = CreateProductUnderTest(options))
+                {
+                    IOwinRequest owinRequest = CreateFakeOwinRequest();
+                    IOwinResponse owinResponse = CreateFakeOwinResponse(Stream.Null);
+                    IOwinContext context = CreateStubOwinContext(owinRequest, owinResponse);
+
+                    // Act
+                    Task task = product.Invoke(context);
+
+                    // Assert
+                    Assert.NotNull(task);
+                    task.WaitUntilCompleted();
+                    Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                    Assert.False(calledUseBufferedOutputStream);
+                }
+            }
+        }
+
         private static IHostBufferPolicySelector CreateBufferPolicySelector(bool bufferInput, bool bufferOutput)
         {
             var mock = new Mock<IHostBufferPolicySelector>();
@@ -1509,11 +1547,6 @@ namespace System.Web.Http.Owin
         private static CancellationTokenSource CreateCancellationTokenSource()
         {
             return new CancellationTokenSource();
-        }
-
-        private static HttpConfiguration CreateConfiguration()
-        {
-            return new HttpConfiguration();
         }
 
         private static IHostBufferPolicySelector CreateDummyBufferPolicy()
@@ -1593,7 +1626,7 @@ namespace System.Web.Http.Owin
 
         private static IOwinRequest CreateFakeOwinRequest(Action disableBuffering)
         {
-            Mock<IDictionary<string, object>> environmentMock = new Mock<IDictionary<string,object>>(MockBehavior.Strict);
+            Mock<IDictionary<string, object>> environmentMock = new Mock<IDictionary<string, object>>(MockBehavior.Strict);
             object disableBufferingValue = disableBuffering;
             environmentMock.Setup(d => d.TryGetValue("server.DisableRequestBuffering", out disableBufferingValue)).Returns(true);
             IDictionary<string, object> environment = environmentMock.Object;

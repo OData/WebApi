@@ -388,6 +388,80 @@ namespace System.Web.Mvc.Test
             Assert.Null(vpd);
         }
 
+        [Fact]
+        public void MapRoute_ValidatesConstraintType_IRouteConstraint()
+        {
+            // Arrange
+            var routes = new RouteCollection();
+
+            var constraint = new CustomConstraint();
+            var constraints = new RouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            // Act
+            var route = routes.MapRoute("default", "{controller}/{id}", null, constraints);
+
+            // Assert
+            Assert.NotNull(route.Constraints["custom"]);
+        }
+
+        [Fact]
+        public void MapRoute_ValidatesConstraintType_StringRegex()
+        {
+            // Arrange
+            var routes = new RouteCollection();
+
+            // We can't easily mock the ValidateConstraint method because all of this logic is in extension methods,
+            // so we're just assuming here that it was called.
+            var constraint = "product|products";
+            var constraints = new RouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            // Act
+            var route = routes.MapRoute("default", "{controller}/{id}", null, constraints);
+
+            // Assert
+            Assert.NotNull(route.Constraints["custom"]);
+        }
+
+        [Fact]
+        public void MapRoute_ValidatesConstraintType_InvalidType()
+        {
+            // Arrange
+            var routes = new RouteCollection();
+
+            // We can't easily mock the ValidateConstraint method because all of this logic is in extension methods,
+            // so we're just assuming here that it was called.
+            var constraint = new Uri("http://localhost/");
+            var constraints = new RouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            string expectedMessage =
+                "The constraint entry 'custom' on the route with route template '{controller}/{id}' " +
+                "must have a string value or be of a type which implements 'IRouteConstraint'.";
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => routes.MapRoute("default", "{controller}/{id}", null, constraints), expectedMessage);
+        }
+
+        [Fact]
+        public void IgnoreRoute_ValidatesConstraintType_InvalidType()
+        {
+            // Arrange
+            var routes = new RouteCollection();
+
+            var constraint = new Uri("http://localhost/");
+            var constraints = new RouteValueDictionary();
+            constraints.Add("custom", constraint);
+
+            string expectedMessage =
+                "The constraint entry 'custom' on the route with route template '{controller}/{id}' " +
+                "must have a string value or be of a type which implements 'IRouteConstraint'.";
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => routes.IgnoreRoute("{controller}/{id}", constraints), expectedMessage);
+        }
+
         private static RequestContext GetRequestContext(string currentAreaName)
         {
             Mock<HttpContextBase> mockHttpContext = new Mock<HttpContextBase>();
@@ -428,6 +502,14 @@ namespace System.Web.Mvc.Test
                 );
 
             return routes;
+        }
+
+        private class CustomConstraint : IRouteConstraint
+        {
+            public bool Match(HttpContextBase httpContext, Route route, string parameterName, RouteValueDictionary values, RouteDirection routeDirection)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

@@ -1006,6 +1006,15 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The constraint entry &apos;{0}&apos; on the route with route template &apos;{1}&apos; must have a string value or be of a type which implements &apos;{2}&apos;..
+        /// </summary>
+        internal static string Route_InvalidConstraint {
+            get {
+                return ResourceManager.GetString("Route_InvalidConstraint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The route parameter name &apos;{0}&apos; is invalid. Route parameter names must be non-empty and cannot contain these characters: &quot;{{&quot;, &quot;}}&quot;, &quot;/&quot;, &quot;?&quot;.
         /// </summary>
         internal static string Route_InvalidParameterName {

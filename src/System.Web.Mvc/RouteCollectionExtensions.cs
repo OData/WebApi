@@ -2,6 +2,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
+using System.Web.Mvc.Properties;
 using System.Web.Mvc.Routing;
 using System.Web.Routing;
 using System.Web.WebPages;
@@ -126,6 +128,8 @@ namespace System.Web.Mvc
                 Constraints = CreateRouteValueDictionaryUncached(constraints)
             };
 
+            ValidateConstraints(route);
+
             routes.Add(route);
         }
 
@@ -178,6 +182,8 @@ namespace System.Web.Mvc
                 DataTokens = new RouteValueDictionary()
             };
 
+            ValidateConstraints(route);
+
             if ((namespaces != null) && (namespaces.Length > 0))
             {
                 route.DataTokens[RouteDataTokenKeys.Namespaces] = namespaces;
@@ -186,6 +192,31 @@ namespace System.Web.Mvc
             routes.Add(name, route);
 
             return route;
+        }
+
+        private static void ValidateConstraints(Route route)
+        {
+            Contract.Assert(route != null);
+            Contract.Assert(route.Constraints != null);
+
+            foreach (var kvp in route.Constraints)
+            {
+                if (kvp.Value is string)
+                {
+                    continue;
+                }
+
+                if (kvp.Value is IRouteConstraint)
+                {
+                    continue;
+                }
+
+                throw Error.InvalidOperation(
+                    MvcResources.Route_InvalidConstraint,
+                    kvp.Key,
+                    route.Url,
+                    typeof(IRouteConstraint).Name);
+            }
         }
 
         /// <summary>

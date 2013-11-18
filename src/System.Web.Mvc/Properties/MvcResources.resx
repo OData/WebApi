@@ -544,4 +544,7 @@ Duplicates:
   <data name="RoutePrefix_PrefixCannotBeNull" xml:space="preserve">
     <value>The property 'prefix' from route prefix attribute on controller of type '{0}' cannot be null.</value>
   </data>
+  <data name="Route_InvalidConstraint" xml:space="preserve">
+    <value>The constraint entry '{0}' on the route with route template '{1}' must have a string value or be of a type which implements '{2}'.</value>
+  </data>
 </root>

@@ -397,10 +397,60 @@ namespace System.Web.Http.WebHost.Routing
             Assert.Throws<InvalidOperationException>(() => routes.CreateRoute("{controller}/{id}", null, constraints), expectedMessage);
         }
 
+        [Theory]
+        [InlineData("values/10")]
+        [InlineData("values/15")]
+        [InlineData("values/20")]
+        public void IgnoreRoute_WithConstraints_GetSoft404IfRouteIgnored(string requestPath)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/constraint/" + requestPath);
+            request.SetConfiguration(new HttpConfiguration());
+            request.SetHttpContext(CreateHttpContext("~/constraint"));
+
+            var response = SubmitRequest(request);
+
+            Assert.Equal(response.StatusCode, Net.HttpStatusCode.NotFound);
+            Assert.True(response.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));
+        }
+
+        [Theory]
+        [InlineData("values/1")]
+        [InlineData("values/25")]
+        [InlineData("values/40")]
+        public void IgnoreRoute_WithConstraints_GetValueIfNotIgnored(string requestPath)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/constraint/" + requestPath);
+            request.SetConfiguration(new HttpConfiguration());
+            request.SetHttpContext(CreateHttpContext("~/constraint"));
+
+            var response = SubmitRequest(request);
+
+            Assert.Equal(response.StatusCode, Net.HttpStatusCode.OK);
+            Assert.Equal(String.Concat("values/", response.Content.ReadAsStringAsync().Result), requestPath);
+        }
+
+        public class CustomIgnoreRouteConstraint : IHttpRouteConstraint
+        {
+            public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName,
+                IDictionary<string, object> values, HttpRouteDirection routeDirection)
+            {
+                long id;
+                if (values.ContainsKey("id")
+                    && Int64.TryParse(values["id"].ToString(), out id)
+                    && (id == 10 || id == 15 || id == 20))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
         private static HttpResponseMessage SubmitRequest(HttpRequestMessage request)
         {
             HttpConfiguration config = new HttpConfiguration(new HostedHttpRouteCollection(new RouteCollection()));
             config.Routes.IgnoreRoute("Bar", "api/{*pathInfo}");
+            config.Routes.IgnoreRoute("Constraints", "constraint/values/{id}", constraints: new { constraint = new CustomIgnoreRouteConstraint() });
             config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{action}");
             config.MapHttpAttributeRoutes();
 
@@ -408,6 +458,16 @@ namespace System.Web.Http.WebHost.Routing
             using (HttpMessageInvoker client = new HttpMessageInvoker(server))
             {
                 return client.SendAsync(request, CancellationToken.None).Result;
+            }
+        }
+
+        [RoutePrefix("constraint")]
+        public class IgnoreRouteWithConstraintsTestController : ApiController
+        {
+            [Route("values/{id:int}")]
+            public int Get(int id)
+            {
+               return id;
             }
         }
 

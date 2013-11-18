@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
+using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.SelfHost
@@ -247,7 +248,6 @@ namespace System.Web.Http.SelfHost
                 // Arrange & Act
                 server = CreateServer(port, transferMode, ignoreRoute: true);
                 HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri).Result;
-                string responseString = response.Content.ReadAsStringAsync().Result;
 
                 // Assert
                 Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -265,11 +265,47 @@ namespace System.Web.Http.SelfHost
                 // Arrange & Act
                 server = CreateServer(port, transferMode, ignoreRoute: true);
                 HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri).Result;
-                string responseString = response.Content.ReadAsStringAsync().Result;
 
                 // Assert
                 Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
                 Assert.False(response.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));
+            }
+        }
+
+        [Theory]
+        [InlineData("/constraint/values/10", TransferMode.Buffered)]
+        [InlineData("/constraint/values/15", TransferMode.Buffered)]
+        [InlineData("/constraint/values/20", TransferMode.Buffered)]
+        public void Get_Returns_Hard404_If_IgnoreRoute_WithConstraints_ConstraintsMatched(string uri, TransferMode transferMode)
+        {
+            using (var port = new PortReserver())
+            {
+                // Arrange & Act
+                server = CreateServer(port, transferMode, ignoreRoute: true);
+                HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri).Result;
+
+                // Assert
+                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+                Assert.False(response.RequestMessage.Properties.ContainsKey(HttpPropertyKeys.NoRouteMatched));
+            }
+        }
+
+        [Theory]
+        [InlineData("/constraint/values/40", TransferMode.Buffered)]
+        [InlineData("/constraint/values/50", TransferMode.Buffered)]
+        [InlineData("/constraint/values/65", TransferMode.Buffered)]
+        public void Get_Returns_Value_If_IgnoreRoute_WithConstraints_ConstraintsNotMatched(string uri, TransferMode transferMode)
+        {
+            using (var port = new PortReserver())
+            {
+                // Arrange & Act
+                server = CreateServer(port, transferMode, ignoreRoute: true);
+                HttpResponseMessage response = new HttpClient().GetAsync(BaseUri(port, transferMode) + uri).Result;
+                string responseString = response.Content.ReadAsStringAsync().Result;
+
+                // Assert
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal(String.Concat("/constraint/values/", responseString), uri);
             }
         }
 
@@ -374,14 +410,33 @@ namespace System.Web.Http.SelfHost
             if (ignoreRoute)
             {
                 config.Routes.IgnoreRoute("Ignore", "{controller}/{action}");
+                config.Routes.IgnoreRoute("IgnoreWithConstraints", "constraint/values/{id}", constraints: new { constraint = new CustomConstraint() });
             }
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
             config.Routes.MapHttpRoute("Other", "other/{controller}/{action}");
             config.TransferMode = transferMode;
+            config.MapHttpAttributeRoutes();
 
             HttpSelfHostServer server = new HttpSelfHostServer(config);
             server.OpenAsync().Wait();
             return server;
+        }
+
+        public class CustomConstraint : IHttpRouteConstraint
+        {
+            public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName,
+                IDictionary<string, object> values, HttpRouteDirection routeDirection)
+            {
+                long id;
+                if (values.ContainsKey("id")
+                    && Int64.TryParse(values["id"].ToString(), out id)
+                    && (id == 10 || id == 15 || id == 20))
+                {
+                    return true;
+                }
+
+                return false;
+            }
         }
 
         private static string BaseUri(PortReserver port, TransferMode transferMode)
@@ -474,6 +529,16 @@ namespace System.Web.Http.SelfHost
                 RequestMessage = Request,
                 Content = new HttpSelfHostServerTest.ThrowAfterWriteStream()
             };
+        }
+    }
+
+    [RoutePrefix("constraint")]
+    public class IgnoreRouteWithConstraintsTestController : ApiController
+    {
+        [Route("values/{id:int}")]
+        public int Get(int id)
+        {
+            return id;
         }
     }
 }

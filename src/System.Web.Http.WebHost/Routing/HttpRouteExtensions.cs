@@ -21,24 +21,15 @@ namespace System.Web.Http.WebHost.Routing
                 return hostedHttpRoute.OriginalRoute;
             }
 
-            // If the httpRoute is an IgnoreRoute, replace the HttpRoute with an IgnoreRouteInternal,
-            // which is a Route instead of a HttpWebRoute.
-            if (httpRoute.Handler is System.Web.Http.Routing.StopRoutingHandler)
-            {
-                return new IgnoreRouteInternal(
-                    httpRoute.RouteTemplate,
-                    MakeRouteValueDictionary(httpRoute.Defaults),
-                    MakeRouteValueDictionary(httpRoute.Constraints),
-                    MakeRouteValueDictionary(httpRoute.DataTokens),
-                    new System.Web.Routing.StopRoutingHandler());
-            }
+            IRouteHandler handler =
+                (httpRoute.Handler is System.Web.Http.Routing.StopRoutingHandler) ? (new System.Web.Routing.StopRoutingHandler() as IRouteHandler) : HttpControllerRouteHandler.Instance;
 
             return new HttpWebRoute(
                 httpRoute.RouteTemplate,
                 MakeRouteValueDictionary(httpRoute.Defaults),
                 MakeRouteValueDictionary(httpRoute.Constraints),
                 MakeRouteValueDictionary(httpRoute.DataTokens),
-                HttpControllerRouteHandler.Instance,
+                handler,
                 httpRoute);
         }
 
@@ -47,21 +38,6 @@ namespace System.Web.Http.WebHost.Routing
             return dictionary == null
                 ? new RouteValueDictionary()
                 : new RouteValueDictionary(dictionary);
-        }
-
-        private sealed class IgnoreRouteInternal : Route
-        {
-            public IgnoreRouteInternal(string url, RouteValueDictionary defaults, RouteValueDictionary constraints, RouteValueDictionary dataTokens, IRouteHandler routeHandler)
-                : base(url, defaults, constraints, dataTokens, routeHandler)
-            {
-            }
-
-            public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary routeValues)
-            {
-                // Never match during route generation. This avoids the scenario where an IgnoreRoute with
-                // fairly relaxed constraints ends up eagerly matching all generated URLs.
-                return null;
-            }
         }
     }
 }

@@ -129,7 +129,7 @@ namespace System.Web.Http.Routing
                     if (providers != null && providers.Count > 0)
                     {
                         AddRouteEntries(collector, prefix, providers,
-                            new ReflectedHttpActionDescriptor[] { action }, constraintResolver);
+                            new ReflectedHttpActionDescriptor[] { action }, constraintResolver, targetIsAction: true);
                     }
                     else
                     {
@@ -145,29 +145,32 @@ namespace System.Web.Http.Routing
             if (controllerProviders.Count > 0 && actionsWithoutRoutes.Count > 0)
             {
                 AddRouteEntries(collector, prefix, controllerProviders, actionsWithoutRoutes,
-                    constraintResolver);
+                    constraintResolver, targetIsAction: false);
             }
         }
 
         private static void AddRouteEntries(SubRouteCollection collector, string prefix,
             IReadOnlyCollection<IDirectRouteProvider> providers,
-            IReadOnlyCollection<HttpActionDescriptor> actions, IInlineConstraintResolver constraintResolver)
+            IReadOnlyCollection<HttpActionDescriptor> actions, IInlineConstraintResolver constraintResolver, bool targetIsAction)
         {
             foreach (IDirectRouteProvider routeProvider in providers)
             {
                 RouteEntry entry = CreateRouteEntry(prefix, routeProvider, actions,
-                    constraintResolver);
+                    constraintResolver,  targetIsAction);
                 collector.Add(entry);
             }
         }
 
-        internal static RouteEntry CreateRouteEntry(string prefix, IDirectRouteProvider provider,
-            IReadOnlyCollection<HttpActionDescriptor> actions, IInlineConstraintResolver constraintResolver)
+        internal static RouteEntry CreateRouteEntry(
+            string prefix, 
+            IDirectRouteProvider provider,
+            IReadOnlyCollection<HttpActionDescriptor> actions, 
+            IInlineConstraintResolver constraintResolver,
+            bool targetIsAction)
         {
             Contract.Assert(provider != null);
 
-            DirectRouteProviderContext context = new DirectRouteProviderContext(prefix, actions,
-                constraintResolver);
+            DirectRouteProviderContext context = new DirectRouteProviderContext(prefix, actions, constraintResolver, targetIsAction);
             RouteEntry entry = provider.CreateRoute(context);
 
             if (entry == null)

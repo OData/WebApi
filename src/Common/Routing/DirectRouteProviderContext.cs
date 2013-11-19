@@ -43,18 +43,18 @@ namespace System.Web.Mvc.Routing
 
         private readonly IReadOnlyCollection<TActionDescriptor> _actions;
         private readonly IInlineConstraintResolver _inlineConstraintResolver;
-
-#if !ASPNETWEBAPI
         private readonly bool _targetIsAction;
-#endif
 
 #if ASPNETWEBAPI
         /// <summary>Initializes a new instance of the <see cref="DirectRouteProviderContext"/></summary>
         /// <param name="prefix">The route prefix, if any, defined by the controller.</param>
         /// <param name="actions">The action descriptors to which to create a route.</param>
         /// <param name="inlineConstraintResolver">The inline constraint resolver.</param>
+        /// <param name="targetIsAction">
+        /// A value indicating whether the route is configured at the action or controller level.
+        /// </param>
         public DirectRouteProviderContext(string prefix, IReadOnlyCollection<HttpActionDescriptor> actions,
-            IInlineConstraintResolver inlineConstraintResolver)
+            IInlineConstraintResolver inlineConstraintResolver, bool targetIsAction)
 #else
         /// <summary>Initializes a new instance of the <see cref="DirectRouteProviderContext"/></summary>
         /// <param name="areaPrefix">The route prefix, if any, defined by the area.</param>
@@ -103,9 +103,7 @@ namespace System.Web.Mvc.Routing
 #endif
             }
 
-#if !ASPNETWEBAPI
             _targetIsAction = targetIsAction;
-#endif
         }
 
 #if ASPNETWEBAPI
@@ -140,7 +138,6 @@ namespace System.Web.Mvc.Routing
             get { return _inlineConstraintResolver; }
         }
 
-#if !ASPNETWEBAPI
         /// <summary>
         /// Gets a value indicating whether the route is configured at the action or controller level.
         /// </summary>
@@ -152,7 +149,6 @@ namespace System.Web.Mvc.Routing
         {
             get { return _targetIsAction; }
         }
-#endif
 
         /// <summary>Creates a route builder that can build a route matching this context.</summary>
         /// <param name="template">The route template.</param>
@@ -175,11 +171,7 @@ namespace System.Web.Mvc.Routing
         /// <returns>A route builder that can build a route matching this context.</returns>
         public DirectRouteBuilder CreateBuilder(string template, IInlineConstraintResolver constraintResolver)
         {
-#if ASPNETWEBAPI
-            DirectRouteBuilder builder = new DirectRouteBuilder(_actions);
-#else
             DirectRouteBuilder builder = new DirectRouteBuilder(_actions, _targetIsAction);
-#endif
 
 #if ASPNETWEBAPI
             string prefixedTemplate = BuildRouteTemplate(_prefix, template);
@@ -202,9 +194,7 @@ namespace System.Web.Mvc.Routing
                 builder.Constraints = constraints;
                 builder.Template = detokenizedTemplate;
                 builder.Precedence = precedence;
-#if ASPNETWEBAPI
                 builder.ParsedRoute = parsedRoute;
-#endif
             }
             else
             {

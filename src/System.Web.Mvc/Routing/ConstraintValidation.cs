@@ -22,7 +22,11 @@ namespace System.Web.Mvc.Routing
         {
             Contract.Assert(route != null);
             Contract.Assert(route.Url != null);
-            Contract.Assert(route.Constraints != null);
+
+            if (route.Constraints == null)
+            {
+                return;
+            }
 
             foreach (var kvp in route.Constraints)
             {

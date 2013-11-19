@@ -29,7 +29,6 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
     <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Web.Routing" />
     <Reference Include="xunit, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\xunit.1.9.1\lib\net20\xunit.dll</HintPath>
@@ -66,6 +65,9 @@
     <Compile Include="Routing\AttributeRoutingLinkGenerationTest.cs" />
     <Compile Include="Routing\AttributeRoutingMapperTest.cs" />
     <Compile Include="Routing\AttributeRoutingTest.cs" />
+    <Compile Include="..\Common\Routing\DirectRouteBuilderTests.cs">
+      <Link>Routing\DirectRouteBuilderTests.cs</Link>
+    </Compile>
     <Compile Include="Routing\DirectRouteCandidateTest.cs" />
     <Compile Include="Routing\DirectRouteTestHelpers.cs" />
     <Compile Include="Routing\RouteAttributeTests.cs" />

@@ -210,7 +210,7 @@ namespace System.Web.Routing
 
         [Theory]
         [InlineData(typeof(ActionNameSelectorsController), "~/SpecialName", "Action2()")]
-        [InlineData(typeof(ActionNameSelectorsController), "~/cool/AnotherSpecialName", "Action3()")]
+        [InlineData(typeof(ActionNameSelectorsController), "~/AnotherSpecialName", "Action3()")]
         public void AttributeRouting_WithActionNameSelectors(Type controllerType, string path, string expectedAction)
         {
             // Arrange
@@ -822,7 +822,6 @@ namespace System.Web.Routing
             return "Action2()";
         }
 
-        [Route("cool/{action}")]
         [StringActionNameSelector("AnotherSpecialName")]
         public string Action3()
         {

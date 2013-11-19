@@ -24,8 +24,9 @@ namespace System.Web.Http.Routing
                 new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object;
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(prefix, provider,
-                actions, constraintResolver), "IDirectRouteProvider.CreateRoute must not return null.");
+            Assert.Throws<InvalidOperationException>(
+                () => AttributeRoutingMapper.CreateRouteEntry(prefix, provider, actions, constraintResolver, targetIsAction: true), 
+                "IDirectRouteProvider.CreateRoute must not return null.");
         }
 
         [Fact]
@@ -44,8 +45,9 @@ namespace System.Web.Http.Routing
             // Act & Assert
             string expectedMessage = "The route does not have any associated action descriptors. Routing requires " +
                 "that each direct route map to a non-empty set of actions.";
-            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(prefix, provider,
-                actions, constraintResolver), expectedMessage);
+            Assert.Throws<InvalidOperationException>(
+                () => AttributeRoutingMapper.CreateRouteEntry(prefix, provider, actions, constraintResolver, targetIsAction: true), 
+                expectedMessage);
         }
 
         [Fact]
@@ -68,8 +70,9 @@ namespace System.Web.Http.Routing
             // Act & Assert
             string expectedMessage = "The route does not have any associated action descriptors. Routing requires " +
                 "that each direct route map to a non-empty set of actions.";
-            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(prefix, provider,
-                actions, constraintResolver), expectedMessage);
+            Assert.Throws<InvalidOperationException>(
+                () => AttributeRoutingMapper.CreateRouteEntry(prefix, provider, actions, constraintResolver, targetIsAction: true), 
+                expectedMessage);
         }
 
         [Fact]
@@ -93,7 +96,7 @@ namespace System.Web.Http.Routing
             // Act & Assert
             string expectedMessage = "Direct routing does not support per-route message handlers.";
             Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(prefix, provider,
-                actions, constraintResolver), expectedMessage);
+                actions, constraintResolver, targetIsAction: true), expectedMessage);
         }
 
         [Fact]

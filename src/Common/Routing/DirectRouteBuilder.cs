@@ -2,9 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-#if !ASPNETWEBAPI
 using System.Diagnostics.Contracts;
-#endif
 using System.Linq;
 #if ASPNETWEBAPI
 using System.Net.Http;
@@ -12,11 +10,15 @@ using System.Net.Http;
 
 #if ASPNETWEBAPI
 using TActionDescriptor = System.Web.Http.Controllers.HttpActionDescriptor;
+using TParsedRoute = System.Web.Http.Routing.HttpParsedRoute;
+using TResources = System.Web.Http.Properties.SRResources;
 using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
 using TRouteDictionaryConcrete = System.Web.Http.Routing.HttpRouteValueDictionary;
 #else
 using System.Web.Routing;
 using TActionDescriptor = System.Web.Mvc.ActionDescriptor;
+using TParsedRoute = System.Web.Mvc.Routing.ParsedRoute;
+using TResources = System.Web.Mvc.Properties.MvcResources;
 using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
 using TRouteDictionaryConcrete = System.Web.Routing.RouteValueDictionary;
 #endif
@@ -31,25 +33,16 @@ namespace System.Web.Mvc.Routing
     public class DirectRouteBuilder
     {
         private readonly TActionDescriptor[] _actions;
-
-#if !ASPNETWEBAPI
         private readonly bool _targetIsAction;
-#endif
 
         private string _template;
 
-#if ASPNETWEBAPI
-        /// <summary>Initializes a new instance of the <see cref="DirectRouteBuilder"/> class.</summary>
-        /// <param name="actions">The action descriptors to which to create a route.</param>
-        public DirectRouteBuilder(IReadOnlyCollection<TActionDescriptor> actions)
-#else
         /// <summary>Initializes a new instance of the <see cref="DirectRouteBuilder"/> class.</summary>
         /// <param name="actions">The action descriptors to which to create a route.</param>
         /// <param name="targetIsAction">
         /// A value indicating whether the route is configured at the action or controller level.
         /// </param>
         public DirectRouteBuilder(IReadOnlyCollection<TActionDescriptor> actions, bool targetIsAction)
-#endif
         {
             if (actions == null)
             {
@@ -58,9 +51,7 @@ namespace System.Web.Mvc.Routing
 
             _actions = actions.ToArray();
 
-#if !ASPNETWEBAPI
             _targetIsAction = targetIsAction;
-#endif
         }
 
         /// <summary>Gets or sets the route name, if any; otherwise <see langword="null"/>.</summary>
@@ -76,9 +67,7 @@ namespace System.Web.Mvc.Routing
             }
             set
             {
-#if ASPNETWEBAPI
                 ParsedRoute = null;
-#endif
                 _template = value;
             }
         }
@@ -98,9 +87,7 @@ namespace System.Web.Mvc.Routing
             Justification = "Null and empty values are legitimate, separate options when constructing a route.")]
         public TRouteDictionary DataTokens { get; set; }
 
-#if ASPNETWEBAPI
-        internal HttpParsedRoute ParsedRoute { get; set; }
-#endif
+        internal TParsedRoute ParsedRoute { get; set; }
 
         /// <summary>Gets or sets the route order.</summary>
         /// <remarks>
@@ -123,7 +110,6 @@ namespace System.Web.Mvc.Routing
             get { return _actions; }
         }
 
-#if !ASPNETWEBAPI
         /// <summary>
         /// Gets a value indicating whether the route is configured at the action or controller level.
         /// </summary>
@@ -135,12 +121,18 @@ namespace System.Web.Mvc.Routing
         {
             get { return _targetIsAction; }
         }
-#endif
 
         /// <summary>Creates a route entry based on the current property values.</summary>
         /// <returns>The route entry created.</returns>
         public virtual RouteEntry Build()
         {
+            if (ParsedRoute == null)
+            {
+                ParsedRoute = RouteParser.Parse(Template);
+            }
+
+            ValidateParameters(ParsedRoute);
+
             TRouteDictionaryConcrete defaults;
 #if ASPNETWEBAPI
             defaults = Copy(Defaults);
@@ -215,6 +207,36 @@ namespace System.Web.Mvc.Routing
 #endif
 
             return new RouteEntry(Name, route);
+        }
+
+        // Accessible for tests
+        internal virtual void ValidateParameters(TParsedRoute parsedRoute)
+        {
+            Contract.Assert(parsedRoute != null);
+
+            if (parsedRoute.PathSegments != null)
+            {
+                foreach (var contentSegment in parsedRoute.PathSegments.OfType<PathContentSegment>())
+                {
+                    if (contentSegment != null && contentSegment.Subsegments != null)
+                    {
+                        foreach (var parameterSegment in contentSegment.Subsegments.OfType<PathParameterSubsegment>())
+                        {
+                            if (parameterSegment != null)
+                            {
+                                if (String.Equals(parameterSegment.ParameterName, "controller", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    throw Error.InvalidOperation(TResources.DirectRoute_InvalidParameter_Controller);
+                                }
+                                else if (TargetIsAction && String.Equals(parameterSegment.ParameterName, "action", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    throw Error.InvalidOperation(TResources.DirectRoute_InvalidParameter_Action);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private static TRouteDictionaryConcrete Copy(TRouteDictionary routeDictionary)

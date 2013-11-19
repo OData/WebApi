@@ -574,6 +574,24 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A direct route for an action method cannot use the parameter &apos;action&apos;. Specify a literal path in place of this parameter to create a route to the action..
+        /// </summary>
+        internal static string DirectRoute_InvalidParameter_Action {
+            get {
+                return ResourceManager.GetString("DirectRoute_InvalidParameter_Action", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A direct route cannot use the parameter &apos;controller&apos;. Specify a literal path in place of this parameter to create a route to a controller..
+        /// </summary>
+        internal static string DirectRoute_InvalidParameter_Controller {
+            get {
+                return ResourceManager.GetString("DirectRoute_InvalidParameter_Controller", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The route does not have any associated action descriptors. Routing requires that each direct route map to a non-empty set of actions..
         /// </summary>
         internal static string DirectRoute_MissingActionDescriptors {

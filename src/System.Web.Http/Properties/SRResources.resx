@@ -505,4 +505,10 @@ Duplicates:
   <data name="TraceHttpControllerTypeResolverError" xml:space="preserve">
     <value>Exception thrown while getting types from '{0}'.</value>
   </data>
+  <data name="DirectRoute_InvalidParameter_Action" xml:space="preserve">
+    <value>A direct route for an action method cannot use the parameter 'action'. Specify a literal path in place of this parameter to create a route to the action.</value>
+  </data>
+  <data name="DirectRoute_InvalidParameter_Controller" xml:space="preserve">
+    <value>A direct route cannot use the parameter 'controller'. Specify a literal path in place of this parameter to create a route to a controller.</value>
+  </data>
 </root>

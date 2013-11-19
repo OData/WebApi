@@ -91,11 +91,7 @@ namespace System.Web.Mvc.Routing
 
             DirectRouteBuilder builder = CreateBuilder(() => expectedEntry);
             DirectRouteProviderContext context = CreateContext((template) => template == expectedTemplate ? builder :
-#if ASPNETWEBAPI
-                new DirectRouteBuilder(new TActionDescriptor[0]));
-#else
                 new DirectRouteBuilder(new TActionDescriptor[0], targetIsAction: true));
-#endif
 
             // Act
             RouteEntry entry = product.CreateRoute(context);
@@ -545,7 +541,8 @@ namespace System.Web.Mvc.Routing
             public LambdaDirectRouteProviderContext(Func<string, DirectRouteBuilder> createBuilder)
 #if ASPNETWEBAPI
                 : base(null, new TActionDescriptor[] { new Mock<TActionDescriptor>().Object },
-                new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object)
+                new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object,
+                targetIsAction: true)
 #else
                 : base(null, null, new TActionDescriptor[] { CreateStubActionDescriptor() },
                 new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object, targetIsAction: true)
@@ -575,11 +572,7 @@ namespace System.Web.Mvc.Routing
             private readonly Func<RouteEntry> _build;
 
             public LambdaDirectRouteBuilder(Func<RouteEntry> build)
-#if ASPNETWEBAPI
-                : base(new TActionDescriptor[0])
-#else
                 : base(new TActionDescriptor[0], targetIsAction: true)
-#endif
             {
                 Contract.Assert(build != null);
                 _build = build;

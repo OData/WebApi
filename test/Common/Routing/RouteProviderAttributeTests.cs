@@ -12,13 +12,11 @@ using TActionDescriptor = System.Web.Http.Controllers.HttpActionDescriptor;
 using TRoute = System.Web.Http.Routing.IHttpRoute;
 using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
 using TRouteDictionaryConcrete = System.Web.Http.Routing.HttpRouteValueDictionary;
-using TRouteHandler = System.Net.Http.HttpMessageHandler;
 #else
 using TActionDescriptor = System.Web.Mvc.ActionDescriptor;
 using TRoute = System.Web.Routing.Route;
 using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
 using TRouteDictionaryConcrete = System.Web.Routing.RouteValueDictionary;
-using TRouteHandler = System.Web.Routing.IRouteHandler;
 #endif
 
 #if ASPNETWEBAPI
@@ -482,35 +480,6 @@ namespace System.Web.Mvc.Routing
 
             // Assert
             Assert.Same(existingDataTokens, dataTokens);
-        }
-
-        [Fact]
-        public void CreateRoute_UsesHandler()
-        {
-            // Arrange
-            TRouteHandler expectedHandler = new Mock<TRouteHandler>(MockBehavior.Strict).Object;
-
-            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
-            productMock.SetupGet(p => p.Handler).Returns(expectedHandler);
-            IDirectRouteProvider product = productMock.Object;
-
-            RouteEntry expectedEntry = CreateEntry();
-
-            TRouteHandler handler = null;
-            DirectRouteBuilder builder = null;
-            builder = CreateBuilder(() =>
-            {
-                handler = builder.Handler;
-                return null;
-            });
-
-            DirectRouteProviderContext context = CreateContext((i) => builder);
-
-            // Act
-            RouteEntry ignore = product.CreateRoute(context);
-
-            // Assert
-            Assert.Same(handler, expectedHandler);
         }
 
         [Fact]

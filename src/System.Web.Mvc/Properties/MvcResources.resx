@@ -547,4 +547,7 @@ Duplicates:
   <data name="Route_InvalidConstraint" xml:space="preserve">
     <value>The constraint entry '{0}' on the route with route template '{1}' must have a string value or be of a type which implements '{2}'.</value>
   </data>
+  <data name="DirectRoute_RouteHandlerNotSupported" xml:space="preserve">
+    <value>Direct routing does not support per-route route handlers.</value>
+  </data>
 </root>

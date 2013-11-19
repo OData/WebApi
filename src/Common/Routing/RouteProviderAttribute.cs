@@ -5,10 +5,8 @@ using System.Diagnostics.Contracts;
 
 #if ASPNETWEBAPI
 using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
-using TRouteHandler = System.Net.Http.HttpMessageHandler;
 #else
 using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
-using TRouteHandler = System.Web.Routing.IRouteHandler;
 #endif
 
 #if ASPNETWEBAPI
@@ -56,12 +54,6 @@ namespace System.Web.Mvc.Routing
 
         /// <summary>Gets the route data tokens, if any; otherwise <see langword="null"/>.</summary>
         public virtual TRouteDictionary DataTokens
-        {
-            get { return null; }
-        }
-
-        /// <summary>Gets the route handler, if any; otherwise <see langword="null"/>.</summary>
-        public virtual TRouteHandler Handler
         {
             get { return null; }
         }
@@ -131,8 +123,6 @@ namespace System.Web.Mvc.Routing
                     }
                 }
             }
-
-            builder.Handler = Handler;
 
             return builder.Build();
         }

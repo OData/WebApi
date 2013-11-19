@@ -227,6 +227,11 @@ namespace System.Web.Mvc.Routing
                 throw new InvalidOperationException(MvcResources.DirectRoute_MissingActionDescriptors);
             }
 
+            if (route.RouteHandler != null)
+            {
+                throw new InvalidOperationException(MvcResources.DirectRoute_RouteHandlerNotSupported);
+            }
+
             return entry;
         }
 

@@ -358,6 +358,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Direct routing does not support per-route message handlers..
+        /// </summary>
+        internal static string DirectRoute_HandlerNotSupported {
+            get {
+                return ResourceManager.GetString("DirectRoute_HandlerNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The route does not have any associated action descriptors. Routing requires that each direct route map to a non-empty set of actions..
         /// </summary>
         internal static string DirectRoute_MissingActionDescriptors {

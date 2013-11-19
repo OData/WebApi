@@ -6,18 +6,19 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 #endif
 using System.Linq;
+#if ASPNETWEBAPI
+using System.Net.Http;
+#endif
 
 #if ASPNETWEBAPI
 using TActionDescriptor = System.Web.Http.Controllers.HttpActionDescriptor;
 using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
 using TRouteDictionaryConcrete = System.Web.Http.Routing.HttpRouteValueDictionary;
-using TRouteHandler = System.Net.Http.HttpMessageHandler;
 #else
 using System.Web.Routing;
 using TActionDescriptor = System.Web.Mvc.ActionDescriptor;
 using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
 using TRouteDictionaryConcrete = System.Web.Routing.RouteValueDictionary;
-using TRouteHandler = System.Web.Routing.IRouteHandler;
 #endif
 
 #if ASPNETWEBAPI
@@ -97,9 +98,6 @@ namespace System.Web.Mvc.Routing
             Justification = "Null and empty values are legitimate, separate options when constructing a route.")]
         public TRouteDictionary DataTokens { get; set; }
 
-        /// <summary>Gets or sets the route handler.</summary>
-        public TRouteHandler Handler { get; set; }
-
 #if ASPNETWEBAPI
         internal HttpParsedRoute ParsedRoute { get; set; }
 #endif
@@ -177,7 +175,8 @@ namespace System.Web.Mvc.Routing
                 }
             }
 
-            IHttpRoute route = new HttpRoute(Template, defaults, constraints, dataTokens, Handler, ParsedRoute);
+            HttpMessageHandler handler = null;
+            IHttpRoute route = new HttpRoute(Template, defaults, constraints, dataTokens, handler, ParsedRoute);
 #else
             ControllerDescriptor controllerDescriptor = GetControllerDescriptor();
 
@@ -208,7 +207,7 @@ namespace System.Web.Mvc.Routing
                 }
             }
 
-            Route route = new Route(Template, defaults, constraints, dataTokens, Handler ?? new MvcRouteHandler());
+            Route route = new Route(Template, defaults, constraints, dataTokens, routeHandler: null);
 
             ConstraintValidation.Validate(route);
 #endif

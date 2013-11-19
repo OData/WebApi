@@ -188,7 +188,6 @@
     <Compile Include="..\Common\Routing\InlineRouteTemplateParserTests.cs">
       <Link>Routing\InlineRouteTemplateParserTests.cs</Link>
     </Compile>
-    <Compile Include="Routing\AttributeRoutingMapperTest.cs" />
     <Compile Include="Routing\DirectRouteBuilderTests.cs" />
     <Compile Include="Routing\GenerateRouteTest.cs" />
     <Compile Include="Routing\DirectRouteProviderContextTests.cs" />

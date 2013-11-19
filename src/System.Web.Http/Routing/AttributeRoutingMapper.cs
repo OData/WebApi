@@ -186,6 +186,11 @@ namespace System.Web.Http.Routing
                 throw new InvalidOperationException(SRResources.DirectRoute_MissingActionDescriptors);
             }
 
+            if (route.Handler != null)
+            {
+                throw new InvalidOperationException(SRResources.DirectRoute_HandlerNotSupported);
+            }
+
             return entry;
         }
 

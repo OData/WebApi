@@ -601,6 +601,15 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Direct routing does not support per-route route handlers..
+        /// </summary>
+        internal static string DirectRoute_RouteHandlerNotSupported {
+            get {
+                return ResourceManager.GetString("DirectRoute_RouteHandlerNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ModelType property must not be null..
         /// </summary>
         internal static string EnumHelper_InvalidMetadataParameter {

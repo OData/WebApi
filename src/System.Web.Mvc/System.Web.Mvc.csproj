@@ -158,6 +158,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>MvcResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Routing\ConstraintValidation.cs" />
     <Compile Include="Routing\DirectRouteCandidate.cs" />
     <Compile Include="Routing\GenerationRoute.cs" />
     <Compile Include="Routing\RouteCollectionRoute.cs" />

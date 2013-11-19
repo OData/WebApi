@@ -209,6 +209,8 @@ namespace System.Web.Mvc.Routing
             }
 
             Route route = new Route(Template, defaults, constraints, dataTokens, Handler ?? new MvcRouteHandler());
+
+            ConstraintValidation.Validate(route);
 #endif
 
             return new RouteEntry(Name, route);

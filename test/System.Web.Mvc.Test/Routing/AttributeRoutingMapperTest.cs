@@ -90,6 +90,21 @@ namespace System.Web.Mvc.Routing
         }
 
         [Fact]
+        public void MapMvcAttributeRoutes_ValidatesConstraints()
+        {
+            // Arrange
+            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(InvalidConstraintController));
+
+            string expectedMessage =
+                "The constraint entry 'custom' on the route with route template 'invalidconstraint/{action}' " +
+                "must have a string value or be of a type which implements 'IRouteConstraint'.";
+
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor), expectedMessage);
+        }
+
+        [Fact]
         public void CreateRouteEntry_IfDirectRouteProviderReturnsNull_Throws()
         {
             // Arrange
@@ -217,6 +232,32 @@ namespace System.Web.Mvc.Routing
 
             public void GoodAction()
             {
+            }
+        }
+
+        [InvalidConstraintRoute("invalidconstraint/{action}")]
+        public class InvalidConstraintController : Controller
+        {
+            public void A1()
+            {
+            }
+        }
+
+        public class InvalidConstraintRouteAttribute : RouteProviderAttribute
+        {
+            public InvalidConstraintRouteAttribute(string template)
+                : base(template)
+            { 
+            }
+
+            public override RouteValueDictionary Constraints
+            {
+                get
+                {
+                    var result = new RouteValueDictionary();
+                    result.Add("custom", new Uri("http://localhost"));
+                    return result;
+                }
             }
         }
     }

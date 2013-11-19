@@ -128,7 +128,7 @@ namespace System.Web.Mvc
                 Constraints = CreateRouteValueDictionaryUncached(constraints)
             };
 
-            ValidateConstraints(route);
+            ConstraintValidation.Validate(route);
 
             routes.Add(route);
         }
@@ -182,7 +182,7 @@ namespace System.Web.Mvc
                 DataTokens = new RouteValueDictionary()
             };
 
-            ValidateConstraints(route);
+            ConstraintValidation.Validate(route);
 
             if ((namespaces != null) && (namespaces.Length > 0))
             {
@@ -192,31 +192,6 @@ namespace System.Web.Mvc
             routes.Add(name, route);
 
             return route;
-        }
-
-        private static void ValidateConstraints(Route route)
-        {
-            Contract.Assert(route != null);
-            Contract.Assert(route.Constraints != null);
-
-            foreach (var kvp in route.Constraints)
-            {
-                if (kvp.Value is string)
-                {
-                    continue;
-                }
-
-                if (kvp.Value is IRouteConstraint)
-                {
-                    continue;
-                }
-
-                throw Error.InvalidOperation(
-                    MvcResources.Route_InvalidConstraint,
-                    kvp.Key,
-                    route.Url,
-                    typeof(IRouteConstraint).Name);
-            }
         }
 
         /// <summary>

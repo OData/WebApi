@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.ExceptionHandling;
@@ -43,7 +45,7 @@ namespace Owin
 
             try
             {
-                HttpMessageHandlerOptions options = CreateOptions(server, configuration);
+                HttpMessageHandlerOptions options = CreateOptions(builder, server, configuration);
                 return UseMessageHandler(builder, options);
             }
             catch
@@ -72,7 +74,7 @@ namespace Owin
             HttpConfiguration configuration = httpServer.Configuration;
             Contract.Assert(configuration != null);
 
-            HttpMessageHandlerOptions options = CreateOptions(httpServer, configuration);
+            HttpMessageHandlerOptions options = CreateOptions(builder, httpServer, configuration);
             return UseMessageHandler(builder, options);
         }
 
@@ -84,8 +86,10 @@ namespace Owin
             return builder.Use(typeof(HttpMessageHandlerAdapter), options);
         }
 
-        private static HttpMessageHandlerOptions CreateOptions(HttpServer server, HttpConfiguration configuration)
+        private static HttpMessageHandlerOptions CreateOptions(IAppBuilder builder, HttpServer server,
+            HttpConfiguration configuration)
         {
+            Contract.Assert(builder != null);
             Contract.Assert(server != null);
             Contract.Assert(configuration != null);
 
@@ -102,8 +106,35 @@ namespace Owin
                 MessageHandler = server,
                 BufferPolicySelector = bufferPolicySelector,
                 ExceptionLogger = exceptionLogger,
-                ExceptionHandler = exceptionHandler
+                ExceptionHandler = exceptionHandler,
+                AppDisposing = builder.GetOnAppDisposingProperty()
             };
+        }
+
+        internal static CancellationToken GetOnAppDisposingProperty(this IAppBuilder builder)
+        {
+            Contract.Assert(builder != null);
+
+            IDictionary<string, object> properties = builder.Properties;
+
+            if (properties == null)
+            {
+                return CancellationToken.None;
+            }
+
+            object value;
+
+            if (!properties.TryGetValue("host.OnAppDisposing", out value))
+            {
+                return CancellationToken.None;
+            }
+
+            if (!(value is CancellationToken))
+            {
+                return CancellationToken.None;
+            }
+
+            return (CancellationToken)value;
         }
     }
 }

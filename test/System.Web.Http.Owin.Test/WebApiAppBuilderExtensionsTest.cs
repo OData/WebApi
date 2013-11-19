@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.ExceptionHandling;
@@ -83,36 +84,46 @@ namespace System.Web.Http.Owin
         [Fact]
         public void UseWebApi_UsesAdapterAndConfigServices()
         {
-            var config = new HttpConfiguration();
-            var bufferPolicySelector = new Mock<IHostBufferPolicySelector>().Object;
-            Mock<IExceptionLogger> loggerMock = new Mock<IExceptionLogger>();
-            Mock<IExceptionHandler> handlerMock = new Mock<IExceptionHandler>();
-            config.Services.Replace(typeof(IHostBufferPolicySelector), bufferPolicySelector);
-            config.Services.Replace(typeof(IExceptionLogger), loggerMock.Object);
-            config.Services.Replace(typeof(IExceptionHandler), handlerMock.Object);
-            IExceptionLogger exceptionLogger = null;
-            IExceptionHandler exceptionHandler = null;
-            var appBuilder = new Mock<IAppBuilder>();
-            appBuilder
-                .Setup(ab => ab.Use(
-                    typeof(HttpMessageHandlerAdapter),
-                    It.Is<HttpMessageHandlerOptions>((o) => ((HttpServer)o.MessageHandler).Configuration == config
-                        && o.BufferPolicySelector == bufferPolicySelector)))
-                .Callback<object, object[]>((i, args) =>
+            using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
+            {
+                var config = new HttpConfiguration();
+                var bufferPolicySelector = new Mock<IHostBufferPolicySelector>().Object;
+                Mock<IExceptionLogger> loggerMock = new Mock<IExceptionLogger>();
+                Mock<IExceptionHandler> handlerMock = new Mock<IExceptionHandler>();
+                config.Services.Replace(typeof(IHostBufferPolicySelector), bufferPolicySelector);
+                config.Services.Replace(typeof(IExceptionLogger), loggerMock.Object);
+                config.Services.Replace(typeof(IExceptionHandler), handlerMock.Object);
+                IExceptionLogger exceptionLogger = null;
+                IExceptionHandler exceptionHandler = null;
+                var appBuilder = new Mock<IAppBuilder>();
+                CancellationToken expectedAppDisposing = tokenSource.Token;
+                IDictionary<string, object> properties = new Dictionary<string, object>
                 {
-                    HttpMessageHandlerOptions options = (HttpMessageHandlerOptions)args[0];
-                    exceptionLogger = options.ExceptionLogger;
-                    exceptionHandler = options.ExceptionHandler;
-                })
-                .Returns(appBuilder.Object)
-                .Verifiable();
+                    { "host.OnAppDisposing", expectedAppDisposing }
+                };
+                appBuilder.SetupGet(b => b.Properties).Returns(properties);
+                appBuilder
+                    .Setup(ab => ab.Use(
+                        typeof(HttpMessageHandlerAdapter),
+                        It.Is<HttpMessageHandlerOptions>((o) => ((HttpServer)o.MessageHandler).Configuration == config
+                            && o.BufferPolicySelector == bufferPolicySelector
+                            && o.AppDisposing == expectedAppDisposing)))
+                    .Callback<object, object[]>((i, args) =>
+                    {
+                        HttpMessageHandlerOptions options = (HttpMessageHandlerOptions)args[0];
+                        exceptionLogger = options.ExceptionLogger;
+                        exceptionHandler = options.ExceptionHandler;
+                    })
+                    .Returns(appBuilder.Object)
+                    .Verifiable();
 
-            IAppBuilder returnedAppBuilder = appBuilder.Object.UseWebApi(config);
+                IAppBuilder returnedAppBuilder = appBuilder.Object.UseWebApi(config);
 
-            Assert.Equal(appBuilder.Object, returnedAppBuilder);
-            appBuilder.Verify();
-            AssertDelegatesTo(loggerMock, exceptionLogger);
-            AssertDelegatesTo(handlerMock, exceptionHandler);
+                Assert.Equal(appBuilder.Object, returnedAppBuilder);
+                appBuilder.Verify();
+                AssertDelegatesTo(loggerMock, exceptionLogger);
+                AssertDelegatesTo(handlerMock, exceptionHandler);
+            }
         }
 
         [Fact]
@@ -140,39 +151,110 @@ namespace System.Web.Http.Owin
         public void UseWebApiWithHttpServer_UsesAdapterAndConfigServices()
         {
             // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-            IHostBufferPolicySelector bufferPolicySelector = new Mock<IHostBufferPolicySelector>().Object;
-            Mock<IExceptionLogger> loggerMock = new Mock<IExceptionLogger>();
-            Mock<IExceptionHandler> handlerMock = new Mock<IExceptionHandler>();
-            config.Services.Replace(typeof(IHostBufferPolicySelector), bufferPolicySelector);
-            config.Services.Replace(typeof(IExceptionLogger), loggerMock.Object);
-            config.Services.Replace(typeof(IExceptionHandler), handlerMock.Object);
-            HttpServer httpServer = new Mock<HttpServer>(config).Object;
-            IExceptionLogger exceptionLogger = null;
-            IExceptionHandler exceptionHandler = null;
-            Mock<IAppBuilder> appBuilderMock = new Mock<IAppBuilder>();
-            appBuilderMock
-                .Setup(ab => ab.Use(
-                    typeof(HttpMessageHandlerAdapter),
-                    It.Is<HttpMessageHandlerOptions>((o) => o.MessageHandler == httpServer
-                        && o.BufferPolicySelector == bufferPolicySelector)))
-                .Callback<object, object[]>((i, args) =>
+            using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
+            {
+                HttpConfiguration config = new HttpConfiguration();
+                IHostBufferPolicySelector bufferPolicySelector = new Mock<IHostBufferPolicySelector>().Object;
+                Mock<IExceptionLogger> loggerMock = new Mock<IExceptionLogger>();
+                Mock<IExceptionHandler> handlerMock = new Mock<IExceptionHandler>();
+                config.Services.Replace(typeof(IHostBufferPolicySelector), bufferPolicySelector);
+                config.Services.Replace(typeof(IExceptionLogger), loggerMock.Object);
+                config.Services.Replace(typeof(IExceptionHandler), handlerMock.Object);
+                HttpServer httpServer = new Mock<HttpServer>(config).Object;
+                IExceptionLogger exceptionLogger = null;
+                IExceptionHandler exceptionHandler = null;
+                Mock<IAppBuilder> appBuilderMock = new Mock<IAppBuilder>();
+                CancellationToken expectedAppDisposing = tokenSource.Token;
+                IDictionary<string, object> properties = new Dictionary<string, object>
                 {
-                    HttpMessageHandlerOptions options = (HttpMessageHandlerOptions)args[0];
-                    exceptionLogger = options.ExceptionLogger;
-                    exceptionHandler = options.ExceptionHandler;
-                })
-                .Returns(appBuilderMock.Object)
-                .Verifiable();
+                    { "host.OnAppDisposing", expectedAppDisposing }
+                };
+                appBuilderMock.SetupGet(b => b.Properties).Returns(properties);
+                appBuilderMock
+                    .Setup(ab => ab.Use(
+                        typeof(HttpMessageHandlerAdapter),
+                        It.Is<HttpMessageHandlerOptions>((o) => o.MessageHandler == httpServer
+                            && o.BufferPolicySelector == bufferPolicySelector
+                            && o.AppDisposing == expectedAppDisposing)))
+                    .Callback<object, object[]>((i, args) =>
+                    {
+                        HttpMessageHandlerOptions options = (HttpMessageHandlerOptions)args[0];
+                        exceptionLogger = options.ExceptionLogger;
+                        exceptionHandler = options.ExceptionHandler;
+                    })
+                    .Returns(appBuilderMock.Object)
+                    .Verifiable();
+
+                // Act
+                IAppBuilder returnedAppBuilder = appBuilderMock.Object.UseWebApi(httpServer);
+
+                // Assert
+                Assert.Equal(appBuilderMock.Object, returnedAppBuilder);
+                appBuilderMock.Verify();
+                AssertDelegatesTo(loggerMock, exceptionLogger);
+                AssertDelegatesTo(handlerMock, exceptionHandler);
+            }
+        }
+
+        [Fact]
+        public void GetOnAppDisposingProperty_IfPropertiesIsPresent_ReturnsSpecifiedValue()
+        {
+            // Arrange
+            using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
+            {
+                CancellationToken expectedOnAppDisposing = tokenSource.Token;
+                IDictionary<string, object> properties = CreateStubOnAppDisposingDictionary(expectedOnAppDisposing);
+                IAppBuilder builder = CreateStubAppBuilder(properties);
+
+                // Act
+                CancellationToken onAppDisposing = builder.GetOnAppDisposingProperty();
+
+                // Assert
+                Assert.Equal(expectedOnAppDisposing, onAppDisposing);
+            }
+        }
+
+        [Fact]
+        public void GetOnAppDisposingProperty_IfPropertiesIsNull_ReturnsCancellationTokenNone()
+        {
+            // Arrange
+            IDictionary<string, object> properties = null;
+            IAppBuilder builder = CreateStubAppBuilder(properties);
 
             // Act
-            IAppBuilder returnedAppBuilder = appBuilderMock.Object.UseWebApi(httpServer);
+            CancellationToken onAppDisposing = WebApiAppBuilderExtensions.GetOnAppDisposingProperty(builder);
 
             // Assert
-            Assert.Equal(appBuilderMock.Object, returnedAppBuilder);
-            appBuilderMock.Verify();
-            AssertDelegatesTo(loggerMock, exceptionLogger);
-            AssertDelegatesTo(handlerMock, exceptionHandler);
+            Assert.Equal(CancellationToken.None, onAppDisposing);
+        }
+
+        [Fact]
+        public void GetOnAppDisposingProperty_IfPropertyIsAbsent_ReturnsCancellationTokenNone()
+        {
+            // Arrange
+            IDictionary<string, object> properties = CreateStubOnAppDisposingDictionary(onAppDisposing: null, hasOnAppDisposing: false);
+            IAppBuilder builder = CreateStubAppBuilder(properties);
+
+            // Act
+            CancellationToken onAppDisposing = WebApiAppBuilderExtensions.GetOnAppDisposingProperty(builder);
+
+            // Assert
+            Assert.Equal(CancellationToken.None, onAppDisposing);
+        }
+
+        [Fact]
+        public void GetOnAppDisposingProperty_IfPropertyIsNonCancellationToken_ReturnsCancellationTokenNone()
+        {
+            // Arrange
+            object nonCancellationToken = new object();
+            IDictionary<string, object> properties = CreateStubOnAppDisposingDictionary(nonCancellationToken);
+            IAppBuilder builder = CreateStubAppBuilder(properties);
+
+            // Act
+            CancellationToken onAppDisposing = WebApiAppBuilderExtensions.GetOnAppDisposingProperty(builder);
+
+            // Assert
+            Assert.Equal(CancellationToken.None, onAppDisposing);
         }
 
         private static void AssertDelegatesTo(Mock<IExceptionHandler> expected, IExceptionHandler actual)
@@ -228,6 +310,11 @@ namespace System.Web.Http.Owin
             return source.Task;
         }
 
+        private static CancellationTokenSource CreateCancellationTokenSource()
+        {
+            return new CancellationTokenSource();
+        }
+
         private static HttpConfiguration CreateConfiguration()
         {
             return new HttpConfiguration();
@@ -241,6 +328,25 @@ namespace System.Web.Http.Owin
         private static HttpServer CreateServer()
         {
             return new HttpServer();
+        }
+
+        private static IAppBuilder CreateStubAppBuilder(IDictionary<string, object> properties)
+        {
+            Mock<IAppBuilder> mock = new Mock<IAppBuilder>(MockBehavior.Strict);
+            mock.SetupGet(b => b.Properties).Returns(properties);
+            return mock.Object;
+        }
+
+        private static IDictionary<string, object> CreateStubOnAppDisposingDictionary(object onAppDisposing)
+        {
+            return CreateStubOnAppDisposingDictionary(onAppDisposing, hasOnAppDisposing: true);
+        }
+
+        private static IDictionary<string, object> CreateStubOnAppDisposingDictionary(object onAppDisposing, bool hasOnAppDisposing)
+        {
+            Mock<IDictionary<string, object>> mock = new Mock<IDictionary<string, object>>();
+            mock.Setup(d => d.TryGetValue("host.OnAppDisposing", out onAppDisposing)).Returns(hasOnAppDisposing);
+            return mock.Object;
         }
     }
 }

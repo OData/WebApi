@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Threading;
 using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Hosting;
 
@@ -25,5 +26,11 @@ namespace System.Web.Http.Owin
 
         /// <summary>Gets or sets the <see cref="IExceptionHandler"/> to use to process unhandled exceptions.</summary>
         public IExceptionHandler ExceptionHandler { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="CancellationToken"/> that triggers cleanup of the
+        /// <see cref="HttpMessageHandlerAdapter"/>.
+        /// </summary>
+        public CancellationToken AppDisposing { get; set; }
     }
 }

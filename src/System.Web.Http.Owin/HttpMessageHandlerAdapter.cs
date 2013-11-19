@@ -31,6 +31,7 @@ namespace System.Web.Http.Owin
         private readonly IHostBufferPolicySelector _bufferPolicySelector;
         private readonly IExceptionLogger _exceptionLogger;
         private readonly IExceptionHandler _exceptionHandler;
+        private readonly CancellationToken _appDisposing;
 
         private bool _disposed;
 
@@ -77,6 +78,13 @@ namespace System.Web.Http.Owin
                 throw new ArgumentException(Error.Format(OwinResources.TypePropertyMustNotBeNull,
                     typeof(HttpMessageHandlerOptions).Name, "ExceptionHandler"), "options");
             }
+
+            _appDisposing = options.AppDisposing;
+
+            if (_appDisposing.CanBeCanceled)
+            {
+                _appDisposing.Register(OnAppDisposing);
+            }
         }
 
         /// <summary>Initializes a new instance of the <see cref="HttpMessageHandlerAdapter"/> class.</summary>
@@ -86,6 +94,10 @@ namespace System.Web.Http.Owin
         /// The <see cref="IHostBufferPolicySelector"/> that determines whether or not to buffer requests and
         /// responses.
         /// </param>
+        /// <remarks>
+        /// This constructor is retained for backwards compatibility. The constructor taking
+        /// <see cref="HttpMessageHandlerOptions"/> should be used instead.
+        /// </remarks>
         public HttpMessageHandlerAdapter(OwinMiddleware next, HttpMessageHandler messageHandler,
             IHostBufferPolicySelector bufferPolicySelector)
             : this(next, CreateOptions(messageHandler, bufferPolicySelector))
@@ -117,6 +129,12 @@ namespace System.Web.Http.Owin
         public IExceptionHandler ExceptionHandler
         {
             get { return _exceptionHandler; }
+        }
+
+        /// <summary>Gets the <see cref="CancellationToken"/> that triggers cleanup of this component.</summary>
+        public CancellationToken AppDisposing
+        {
+            get { return _appDisposing; }
         }
 
         /// <inheritdoc />
@@ -568,6 +586,7 @@ namespace System.Web.Http.Owin
             return TaskHelpers.Canceled();
         }
 
+        // Provides HttpMessageHandlerOptions for callers using the old constructor.
         private static HttpMessageHandlerOptions CreateOptions(HttpMessageHandler messageHandler,
             IHostBufferPolicySelector bufferPolicySelector)
         {
@@ -581,12 +600,16 @@ namespace System.Web.Http.Owin
                 throw new ArgumentNullException("bufferPolicySelector");
             }
 
+            // Callers using the old constructor get the default exception handler, no exception logging support, and no
+            // app cleanup support.
+
             return new HttpMessageHandlerOptions
             {
                 MessageHandler = messageHandler,
                 BufferPolicySelector = bufferPolicySelector,
                 ExceptionLogger = new EmptyExceptionLogger(),
-                ExceptionHandler = new DefaultExceptionHandler()
+                ExceptionHandler = new DefaultExceptionHandler(),
+                AppDisposing = CancellationToken.None
             };
         }
 
@@ -597,20 +620,36 @@ namespace System.Web.Http.Owin
         /// <see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release
         /// only unmanaged resources.
         /// </param>
+        /// <remarks>
+        /// This class implements <see cref="IDisposable"/> for legacy reasons. New callers should use
+        /// <see cref="AppDisposing"/> instead.
+        /// </remarks>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (disposing)
             {
-                _disposed = true;
-                _messageInvoker.Dispose();
+                OnAppDisposing();
             }
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        /// This class implements <see cref="IDisposable"/> for legacy reasons. New callers should use
+        /// <see cref="AppDisposing"/> instead.
+        /// </remarks>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        private void OnAppDisposing()
+        {
+            if (!_disposed)
+            {
+                _messageInvoker.Dispose();
+                _disposed = true;
+            }
         }
     }
 }

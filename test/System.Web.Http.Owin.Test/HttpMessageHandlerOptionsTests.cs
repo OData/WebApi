@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Threading;
 using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Hosting;
 using Microsoft.TestCommon;
@@ -72,6 +73,29 @@ namespace System.Web.Http.Owin
 
             // Assert
             Assert.Same(expectedExceptionHandler, exceptionHandler);
+        }
+
+        [Fact]
+        public void AppDisposingGet_ReturnsSpecifiedValue()
+        {
+            // Arrange
+            using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
+            {
+                HttpMessageHandlerOptions product = CreateProductUnderTest();
+                CancellationToken expectedAppDisposing = tokenSource.Token;
+                product.AppDisposing = expectedAppDisposing;
+
+                // Act
+                CancellationToken appDisposing = product.AppDisposing;
+
+                // Assert
+                Assert.Equal(expectedAppDisposing, appDisposing);
+            }
+        }
+
+        private static CancellationTokenSource CreateCancellationTokenSource()
+        {
+            return new CancellationTokenSource();
         }
 
         private static IHostBufferPolicySelector CreateDummyBufferPolicy()

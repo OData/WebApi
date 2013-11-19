@@ -266,6 +266,64 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
+        public void AppDisposing_IfUsingOptionsConstructor_ReturnsSpecifiedValue()
+        {
+            // Arrange
+            using (HttpMessageHandler messageHandler = CreateDummyMessageHandler())
+            using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
+            {
+                CancellationToken expectedAppDisposing = tokenSource.Token;
+                HttpMessageHandlerOptions options = CreateDummyOptions(messageHandler);
+                options.AppDisposing = expectedAppDisposing;
+                HttpMessageHandlerAdapter product = CreateProductUnderTest(options);
+
+                // Act
+                CancellationToken appDisposing = product.AppDisposing;
+
+                // Assert
+                Assert.Equal(expectedAppDisposing, appDisposing);
+            }
+        }
+
+        [Fact]
+        public void AppDisposing_IfUsingListConstructor_ReturnsDefaultExceptionHandler()
+        {
+            // Arrange
+            using (HttpMessageHandler messageHandler = CreateDummyMessageHandler())
+            {
+                IHostBufferPolicySelector bufferPolicySelector = CreateDummyBufferPolicy();
+                HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler,
+                    bufferPolicySelector);
+
+                // Act
+                CancellationToken appDisposing = product.AppDisposing;
+
+                // Assert
+                Assert.Equal(CancellationToken.None, appDisposing);
+            }
+        }
+
+        [Fact]
+        public void TriggeringHostOnAppDisposing_DisposesMessageHandler()
+        {
+            // Arrange
+            using (SpyDisposeHttpMessageHandler spy = new SpyDisposeHttpMessageHandler())
+            using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
+            {
+                HttpMessageHandlerOptions options = CreateDummyOptions(spy);
+                options.AppDisposing = tokenSource.Token;
+                HttpMessageHandlerAdapter product = CreateProductUnderTest(options);
+
+                // Act
+                tokenSource.Cancel(throwOnFirstException: true);
+                CancellationToken appDisposing = product.AppDisposing;
+
+                // Assert
+                Assert.True(spy.Disposed);
+            }
+        }
+
+        [Fact]
         public void Invoke_ThrowsOnNullRequest()
         {
             var handler = CreateOKHandlerStub();
@@ -1938,6 +1996,22 @@ namespace System.Web.Http.Owin
             {
                 Disposed = true;
                 base.Dispose(disposing);
+            }
+        }
+
+        private class SpyDisposeHttpMessageHandler : HttpMessageHandler
+        {
+            public bool Disposed { get; private set; }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+                CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                Disposed = true;
             }
         }
 

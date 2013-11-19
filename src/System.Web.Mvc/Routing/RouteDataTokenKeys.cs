@@ -15,6 +15,9 @@ namespace System.Web.Mvc.Routing
         // Used to allow customer-provided disambiguation between multiple matching attribute routes
         public const string Order = "MS_DirectRouteOrder";
 
+        // Used to prioritize routes to actions for link generation
+        public const string TargetIsAction = "MS_DirectRouteTargetIsAction";
+
         // Used to allow URI constraint-based disambiguation between multiple matching attribute routes
         public const string Precedence = "MS_DirectRoutePrecedence";
 

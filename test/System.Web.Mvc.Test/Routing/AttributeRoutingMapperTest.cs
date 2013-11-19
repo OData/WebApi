@@ -90,6 +90,23 @@ namespace System.Web.Mvc.Routing
         }
 
         [Fact]
+        public void MapMvcAttributeRoutes_SetsTargetIsAction()
+        {
+            // Arrange
+            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(MixedRoutingController));
+
+            // Act
+            var entries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
+
+            // Assert
+            var controllerEntry = Assert.Single(entries.Where(r => !r.Route.Defaults.ContainsKey("action")));
+            Assert.False(controllerEntry.Route.GetTargetIsAction());
+
+            var actionEntry = Assert.Single(entries.Where(r => r.Route.Defaults.ContainsKey("action")));
+            Assert.True(actionEntry.Route.GetTargetIsAction());
+        }
+
+        [Fact]
         public void MapMvcAttributeRoutes_ValidatesConstraints()
         {
             // Arrange
@@ -103,6 +120,7 @@ namespace System.Web.Mvc.Routing
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor), expectedMessage);
         }
+
 
         [Fact]
         public void CreateRouteEntry_IfDirectRouteProviderReturnsNull_Throws()
@@ -247,19 +265,6 @@ namespace System.Web.Mvc.Routing
         {
         }
 
-        [Route("controller/{action}")]
-        public class MixedRoutingController : Controller
-        {
-            [Route("Yep")]
-            public void DirectRouteAction()
-            {
-            }
-
-            public void GoodAction()
-            {
-            }
-        }
-
         [InvalidConstraintRoute("invalidconstraint/{action}")]
         public class InvalidConstraintController : Controller
         {
@@ -272,7 +277,7 @@ namespace System.Web.Mvc.Routing
         {
             public InvalidConstraintRouteAttribute(string template)
                 : base(template)
-            { 
+            {
             }
 
             public override RouteValueDictionary Constraints
@@ -283,6 +288,19 @@ namespace System.Web.Mvc.Routing
                     result.Add("custom", new Uri("http://localhost"));
                     return result;
                 }
+            }
+        }
+
+        [Route("controller/{action}")]
+        public class MixedRoutingController : Controller
+        {
+            [Route("Yep")]
+            public void DirectRouteAction()
+            {
+            }
+
+            public void GoodAction()
+            {
             }
         }
     }

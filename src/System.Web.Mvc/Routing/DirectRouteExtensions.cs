@@ -59,6 +59,30 @@ namespace System.Web.Mvc.Routing
         }
 
         /// <summary>
+        /// Gets a value indicating whether or not the route is a direct route to an action.
+        /// </summary>
+        public static bool GetTargetIsAction(this RouteData routeData)
+        {
+            return GetRouteDataTokenValue<bool>(routeData, RouteDataTokenKeys.TargetIsAction);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether or not the route is a direct route to an action.
+        /// </summary>
+        public static bool GetTargetIsAction(this Route route)
+        {
+            return GetRouteDataTokenValue<bool>(route, RouteDataTokenKeys.TargetIsAction);
+        }
+
+        /// <summary>
+        /// Sets a value indicating whether or not the route is a direct route to an action.
+        /// </summary>
+        public static void SetTargetIsAction(this Route route, bool targetIsAction)
+        {
+            SetRouteDataTokenValue(route, RouteDataTokenKeys.TargetIsAction, targetIsAction);
+        }
+
+        /// <summary>
         /// Gets the ControllerDescriptor that matches this Route.
         /// </summary>
         public static ControllerDescriptor GetTargetControllerDescriptor(this Route route)

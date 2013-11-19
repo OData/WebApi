@@ -80,8 +80,14 @@ namespace System.Web.Mvc.Routing
                 // This sort is here to enforce a static ordering for link generation using these routes. 
                 // We don't apply dynamic criteria like ActionSelectors on link generation, but we can use the static
                 // ones.
+                //
+                // Routes to actions are placed first because they are considered more specific. A route to an action
+                // will only match for link generation if the action name was supplied, so this is essential for
+                // correctness. Without this a controller-level route could be 'greedy' and generate a link when
+                // the action-level route was intended.
                 RouteEntry[] sorted = entries
                     .OrderBy(r => r.Route.GetOrder())
+                    .ThenBy(r => r.Route.GetTargetIsAction() ? 0 : 1)
                     .ThenBy(r => r.Route.GetPrecedence())
                     .ToArray();
 

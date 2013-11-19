@@ -189,6 +189,8 @@ namespace System.Web.Mvc.Routing
             {
                 ActionDescriptor actionDescriptor = _actions[0];
                 defaults["action"] = actionDescriptor.ActionName;
+
+                dataTokens[RouteDataTokenKeys.TargetIsAction] = true;
             }
 
             RouteAreaAttribute area = controllerDescriptor.GetAreaFrom();

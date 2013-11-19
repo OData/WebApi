@@ -78,6 +78,54 @@ namespace System.Web.Mvc.Routing.Test
             Assert.Equal("/Admin", vpd.VirtualPath);
         }
 
+        [Fact]
+        public void GenerateLink_ToController_PrefersActionRoute()
+        {
+            // Arrange
+            Type[] controllerTypes = new Type[] { typeof(MixedRoutingController) };
+            RouteCollection routes = MapControllers(controllerTypes);
+            RequestContext requestContext = GetRequestContext();
+
+            requestContext.RouteData.DataTokens.Add("controller", "MixedRouting");
+
+            RouteValueDictionary values = new RouteValueDictionary()
+            {
+                { "action", "A2" },
+            };
+
+            // Act
+            VirtualPathData vpd = routes.GetVirtualPathForArea(requestContext, values);
+
+            // Assert
+            Assert.NotNull(vpd);
+            Assert.Equal("/A2", vpd.VirtualPath);
+            Assert.True(((Route)vpd.Route).GetTargetIsAction());
+        }
+
+        [Fact]
+        public void GenerateLink_ToController_PrefersControllerRouteWithOrder()
+        {
+            // Arrange
+            Type[] controllerTypes = new Type[] { typeof(MixedRoutingWithOrderController) };
+            RouteCollection routes = MapControllers(controllerTypes);
+            RequestContext requestContext = GetRequestContext();
+
+            requestContext.RouteData.DataTokens.Add("controller", "MixedRoutingWithOrder");
+
+            RouteValueDictionary values = new RouteValueDictionary()
+            {
+                { "action", "A2" },
+            };
+
+            // Act
+            VirtualPathData vpd = routes.GetVirtualPathForArea(requestContext, values);
+
+            // Assert
+            Assert.NotNull(vpd);
+            Assert.Equal("/mixedroutingwithorder/A2", vpd.VirtualPath);
+            Assert.False(((Route)vpd.Route).GetTargetIsAction());
+        }
+
         /// <summary>
         /// This test validates that these routes aren't overly greedy. We don't want the route
         /// for C2 to match when we're looking for C1.
@@ -123,7 +171,7 @@ namespace System.Web.Mvc.Routing.Test
         }
 
         [Route("Home/{action}")]
-        [RouteArea("Administration", AreaPrefix="Admin")]
+        [RouteArea("Administration", AreaPrefix = "Admin")]
         private class AreaWithPrefixWithControllerRouteController : Controller
         {
             public void A1()
@@ -148,6 +196,36 @@ namespace System.Web.Mvc.Routing.Test
         private class Controller2Controller : Controller
         {
             public void A1()
+            {
+            }
+        }
+
+        [Route("mixedrouting/{action}")]
+        private class MixedRoutingController : Controller
+        {
+            public void A1()
+            {
+            }
+
+            // The catch-all parameter is here to make sure this route has a worse precedence
+            // than the controller-level route.
+            [Route("A2/{*params}")]
+            public void A2()
+            {
+            }
+        }
+
+        [Route("mixedroutingwithorder/{action}")]
+        private class MixedRoutingWithOrderController : Controller
+        {
+            public void A1()
+            {
+            }
+
+            // The order makes this 'worse' than the controller level route - if a user does this it's likely
+            // because they have two actions with the same name.
+            [Route("A2/{*params}", Order=55)]
+            public void A2()
             {
             }
         }

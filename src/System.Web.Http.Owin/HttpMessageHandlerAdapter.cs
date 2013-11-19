@@ -452,7 +452,9 @@ namespace System.Web.Http.Owin
 
         [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused",
             Justification = "unused variable necessary to call getter")]
-        private async Task<bool> ComputeContentLengthAsync(HttpRequestMessage request, HttpResponseMessage response,
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification = "Exception is turned into an error response.")]
+        private Task<bool> ComputeContentLengthAsync(HttpRequestMessage request, HttpResponseMessage response,
             IOwinResponse owinResponse, CancellationToken cancellationToken)
         {
             Contract.Assert(response != null);
@@ -469,17 +471,20 @@ namespace System.Web.Http.Owin
             {
                 var unused = contentHeaders.ContentLength;
 
-                exception = null;
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
                 exception = ex;
             }
 
-            if (exception == null)
-            {
-                return true;
-            }
+            return HandleTryComputeLengthExceptionAsync(exception, request, response, owinResponse, cancellationToken);
+        }
+
+        private async Task<bool> HandleTryComputeLengthExceptionAsync(Exception exception, HttpRequestMessage request,
+            HttpResponseMessage response, IOwinResponse owinResponse, CancellationToken cancellationToken)
+        {
+            Contract.Assert(owinResponse != null);
 
             ExceptionContext exceptionContext = new ExceptionContext(exception,
                 OwinExceptionCatchBlocks.HttpMessageHandlerAdapterComputeContentLength, request, response);

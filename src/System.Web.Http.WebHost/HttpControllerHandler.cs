@@ -571,6 +571,8 @@ namespace System.Web.Http.WebHost
             {
                 transferEncoding.Clear();
 
+                // In the case of a conflict between a Transfer-Encoding: chunked header and the output buffering
+                // policy, honor the Transnfer-Encoding: chunked header and ignore the buffer policy.
                 // If output buffering is not disabled, ASP.NET will not write the TransferEncoding: chunked header.
                 responseBase.BufferOutput = false;
             }

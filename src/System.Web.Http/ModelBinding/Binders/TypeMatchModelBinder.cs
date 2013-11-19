@@ -1,7 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Web.Http.Controllers;
 using System.Web.Http.Internal;
+using System.Web.Http.Metadata;
+using System.Web.Http.Properties;
+using System.Web.Http.Validation;
 using System.Web.Http.ValueProviders;
 
 namespace System.Web.Http.ModelBinding.Binders
@@ -20,6 +24,32 @@ namespace System.Web.Http.ModelBinding.Binders
             object model = valueProviderResult.RawValue;
             ModelBindingHelper.ReplaceEmptyStringWithNull(bindingContext.ModelMetadata, ref model);
             bindingContext.Model = model;
+            if (bindingContext.ModelMetadata.IsComplexType)
+            {
+                HttpControllerContext controllerContext = actionContext.ControllerContext;
+                if (controllerContext == null)
+                {
+                    throw Error.Argument("actionContext", SRResources.TypePropertyMustNotBeNull,
+                        typeof(HttpActionContext).Name, "ControllerContext");
+                }
+
+                HttpConfiguration configuration = controllerContext.Configuration;
+                if (configuration == null)
+                {
+                    throw Error.Argument("actionContext", SRResources.TypePropertyMustNotBeNull,
+                        typeof(HttpControllerContext).Name, "Configuration");
+                }
+
+                ServicesContainer services = configuration.Services;
+                Contract.Assert(services != null);
+
+                IBodyModelValidator validator = services.GetBodyModelValidator();
+                ModelMetadataProvider metadataProvider = services.GetModelMetadataProvider();
+                if (validator != null && metadataProvider != null)
+                {
+                    validator.Validate(model, bindingContext.ModelType, metadataProvider, actionContext, bindingContext.ModelName);
+                }
+            }
 
             return true;
         }

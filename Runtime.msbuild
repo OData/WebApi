@@ -64,23 +64,12 @@
 
   <Target Name="RestorePackages" DependsOnTargets="DownloadNuGet">
     <ItemGroup>
-      <!-- The list below is an optimization. Rather than running RestorePackages over every project, we
-           maintain a subset that references all used packages and run RestorePackages over just this subset.
-           Note that this list needs to be updated from time to time to ensure the outcome is the same as running
-           RestorePackages against every project. -->
       <RestorePackages
-          Include=".nuget\packages.config;
-                   .nuget\vs2013\packages.config;
-                   src\Microsoft.AspNet.Mvc.Facebook\packages.config;
-                   src\Microsoft.Web.WebPages.OAuth\packages.config;
-                   src\System.Net.Http.Formatting.NetCore\packages.config;
-                   src\System.Web.Http.SignalR\packages.config;
-                   src\System.Web.WebPages.Administration\packages.config;
-                   test\System.Web.Http.OData.Test\packages.config;
-                   test\System.Web.Http.Owin.Test\packages.config" />
+          Include=".nuget\vs2013\packages.config;
+                   @(SolutionsToBuild)" />
     </ItemGroup>
     <Message Text="Restoring NuGet packages..." Importance="High" />
-    <Exec Command='"$(NuGetExe)" restore "%(RestorePackages.Identity)" -PackagesDirectory packages -NonInteractive -Verbosity quiet -ConfigFile .nuget\NuGet.Config' />
+    <Exec Command='"$(NuGetExe)" restore "%(RestorePackages.Identity)" -PackagesDirectory packages -NonInteractive -Verbosity quiet -ConfigFile $(MsBuildThisFileDirectory)\.nuget\NuGet.Config' />
     <!-- Pick the right Microsoft.Web.FxCop package to use and copy it to a standard location. -->
     <PropertyGroup>
       <CustomFxCopRulesPath>packages\CustomFxCopRules</CustomFxCopRulesPath>

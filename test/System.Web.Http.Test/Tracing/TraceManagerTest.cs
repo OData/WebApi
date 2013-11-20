@@ -73,6 +73,7 @@ namespace System.Web.Http.Tracing
         [InlineData(typeof(IHttpActionInvoker))]
         [InlineData(typeof(IActionValueBinder))]
         [InlineData(typeof(IContentNegotiator))]
+        [InlineData(typeof(IHttpControllerTypeResolver))]
         public void Initialize_Does_Not_Alter_Configuration_When_No_TraceWriter_Present(Type serviceType)
         {
             // Arrange
@@ -93,6 +94,7 @@ namespace System.Web.Http.Tracing
         [InlineData(typeof(IHttpActionInvoker))]
         [InlineData(typeof(IActionValueBinder))]
         [InlineData(typeof(IContentNegotiator))]
+        [InlineData(typeof(IHttpControllerTypeResolver))]
         public void Initialize_Alters_Configuration_When_TraceWriter_Present(Type serviceType)
         {
             // Arrange

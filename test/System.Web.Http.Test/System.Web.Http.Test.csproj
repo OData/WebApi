@@ -214,6 +214,7 @@
     <Compile Include="Tracing\TracerCorrectnessTest.cs" />
     <Compile Include="Tracing\TraceRecordComparer.cs" />
     <Compile Include="Tracing\Tracers\BufferedMediaTypeFormatterTracerTest.cs" />
+    <Compile Include="Tracing\Tracers\DefaultHttpControllerTypeResolverTracerTest.cs" />
     <Compile Include="Tracing\Tracers\OverrideFilterTracerTests.cs" />
     <Compile Include="Tracing\Tracers\AuthenticationFilterTracerTests.cs" />
     <Compile Include="Tracing\Tracers\ReadWriteMediaTypeFormatterTracerTestBase.cs" />

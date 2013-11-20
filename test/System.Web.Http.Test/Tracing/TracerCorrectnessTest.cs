@@ -179,6 +179,7 @@ namespace System.Web.Http.Tracing
                             "SetSerializer", "RemoveSerializer",
                         }
                     },
+                    { typeof(DefaultHttpControllerTypeResolver), typeof(DefaultHttpControllerTypeResolverTracer), new string[0] },
                 };
             }
         }

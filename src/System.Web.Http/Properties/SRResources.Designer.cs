@@ -965,6 +965,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exception thrown while getting types from &apos;{0}&apos;..
+        /// </summary>
+        internal static string TraceHttpControllerTypeResolverError {
+            get {
+                return ResourceManager.GetString("TraceHttpControllerTypeResolverError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invoking action &apos;{0}&apos;.
         /// </summary>
         internal static string TraceInvokingAction {

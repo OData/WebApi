@@ -502,4 +502,7 @@ Duplicates:
   <data name="DirectRoute_HandlerNotSupported" xml:space="preserve">
     <value>Direct routing does not support per-route message handlers.</value>
   </data>
+  <data name="TraceHttpControllerTypeResolverError" xml:space="preserve">
+    <value>Exception thrown while getting types from '{0}'.</value>
+  </data>
 </root>

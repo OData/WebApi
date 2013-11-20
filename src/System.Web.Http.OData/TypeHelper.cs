@@ -171,7 +171,7 @@ namespace System.Web.Http
                 Type[] exportedTypes = null;
                 if (assembly == null || assembly.IsDynamic)
                 {
-                    // can't call GetExportedTypes on a dynamic assembly
+                    // can't call GetTypes on a null (or dynamic?) assembly
                     continue;
                 }
 

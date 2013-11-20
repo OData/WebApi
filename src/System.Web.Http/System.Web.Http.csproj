@@ -133,6 +133,11 @@
     <Compile Include="ExceptionHandling\EmptyExceptionHandler.cs" />
     <Compile Include="ExceptionHandling\LastChanceExceptionHandler.cs" />
     <Compile Include="Filters\HttpAuthenticationChallengeContext.cs" />
+    <Compile Include="Properties\SRResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SRResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Results\BadRequestResult.cs" />
     <Compile Include="Results\RedirectToRouteResult.cs" />
     <Compile Include="Results\RedirectResult.cs" />
@@ -246,6 +251,7 @@
     <Compile Include="Tracing\TraceLevelHelper.cs" />
     <Compile Include="Tracing\TraceKindHelper.cs" />
     <Compile Include="Tracing\Tracers\AuthenticationFilterTracer.cs" />
+    <Compile Include="Tracing\Tracers\DefaultHttpControllerTypeResolverTracer.cs" />
     <Compile Include="Tracing\Tracers\OverrideFilterTracer.cs" />
     <Compile Include="Validation\IModelValidatorCache.cs" />
     <Compile Include="Validation\ModelValidatorCache.cs" />
@@ -424,11 +430,6 @@
     <Compile Include="ModelBinding\ModelState.cs" />
     <Compile Include="ModelBinding\ModelStateDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\SRResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SRResources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Services\ServicesContainer.cs" />
     <Compile Include="Tracing\IFormatterTracer.cs" />
     <Compile Include="Tracing\ITraceManager.cs" />
@@ -539,8 +540,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Properties\SRResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>SRResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>SRResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

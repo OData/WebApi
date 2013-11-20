@@ -30,6 +30,7 @@ namespace System.Web.Http.Tracing
             CreateContentNegotiatorTracer(configuration, traceWriter);
             CreateControllerActivatorTracer(configuration, traceWriter);
             CreateControllerSelectorTracer(configuration, traceWriter);
+            CreateHttpControllerTypeResolverTracer(configuration, traceWriter);
             CreateMessageHandlerTracers(configuration, traceWriter);
             CreateMediaTypeFormatterTracers(configuration, traceWriter);
         }
@@ -97,6 +98,17 @@ namespace System.Web.Http.Tracing
             {
                 HttpControllerSelectorTracer tracer = new HttpControllerSelectorTracer(controllerSelector, traceWriter);
                 configuration.Services.Replace(typeof(IHttpControllerSelector), tracer);
+            }
+        }
+
+        private static void CreateHttpControllerTypeResolverTracer(HttpConfiguration configuration, ITraceWriter traceWriter)
+        {
+            DefaultHttpControllerTypeResolver resolver =
+                configuration.Services.GetHttpControllerTypeResolver() as DefaultHttpControllerTypeResolver;
+            if (resolver != null)
+            {
+                IHttpControllerTypeResolver tracer = new DefaultHttpControllerTypeResolverTracer(resolver, traceWriter);
+                configuration.Services.Replace(typeof(IHttpControllerTypeResolver), tracer);
             }
         }
 

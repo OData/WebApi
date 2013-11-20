@@ -186,10 +186,10 @@ namespace System.Web.Http.Dispatcher
             switch (_throwException)
             {
                 case ThrowException.Exception:
-                    throw new Exception("GetExportedTypes exception");
+                    throw new Exception("GetTypes exception");
 
                 case ThrowException.ReflectionTypeLoadException:
-                    throw new ReflectionTypeLoadException(_exportedTypes, null, "GetExportedTypes exception");
+                    throw new ReflectionTypeLoadException(_exportedTypes, null, "GetTypes exception");
             }
 
             return _exportedTypes;

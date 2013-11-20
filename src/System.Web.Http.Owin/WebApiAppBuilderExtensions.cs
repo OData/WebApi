@@ -129,12 +129,14 @@ namespace Owin
                 return CancellationToken.None;
             }
 
-            if (!(value is CancellationToken))
+            CancellationToken? token = value as CancellationToken?;
+
+            if (!token.HasValue)
             {
                 return CancellationToken.None;
             }
 
-            return (CancellationToken)value;
+            return token.Value;
         }
     }
 }

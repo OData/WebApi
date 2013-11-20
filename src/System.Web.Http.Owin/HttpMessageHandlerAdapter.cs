@@ -621,8 +621,9 @@ namespace System.Web.Http.Owin
         /// only unmanaged resources.
         /// </param>
         /// <remarks>
-        /// This class implements <see cref="IDisposable"/> for legacy reasons. New callers should use
-        /// <see cref="AppDisposing"/> instead.
+        /// This class implements <see cref="IDisposable"/> for legacy reasons. New callers should instead provide a
+        /// cancellation token via <see cref="AppDisposing"/> using the constructor that takes
+        /// <see cref="HttpMessageHandlerOptions"/>.
         /// </remarks>
         protected virtual void Dispose(bool disposing)
         {
@@ -634,8 +635,9 @@ namespace System.Web.Http.Owin
 
         /// <inheritdoc />
         /// <remarks>
-        /// This class implements <see cref="IDisposable"/> for legacy reasons. New callers should use
-        /// <see cref="AppDisposing"/> instead.
+        /// This class implements <see cref="IDisposable"/> for legacy reasons. New callers should instead provide a
+        /// cancellation token via <see cref="AppDisposing"/> using the constructor that takes
+        /// <see cref="HttpMessageHandlerOptions"/>.
         /// </remarks>
         public void Dispose()
         {

@@ -16,8 +16,7 @@ namespace System.Web.Mvc.Html
 {
     internal static class DefaultEditorTemplates
     {
-        private const string CompositeTemplateKey = "MS_MVC_CompositeTemplate";
-        private const string HtmlAttributeKey = "htmlAttribute";
+        private const string HtmlAttributeKey = "htmlAttributes";
 
         internal static string BooleanTemplate(HtmlHelper html)
         {
@@ -78,7 +77,6 @@ namespace System.Web.Mvc.Html
 
             try
             {
-                viewData[CompositeTemplateKey] = true;
                 viewData.TemplateInfo.HtmlFieldPrefix = String.Empty;
 
                 string fieldNameBase = oldPrefix;
@@ -103,7 +101,6 @@ namespace System.Web.Mvc.Html
             finally
             {
                 viewData.TemplateInfo.HtmlFieldPrefix = oldPrefix;
-                viewData.Remove(CompositeTemplateKey);
             }
         }
 
@@ -146,7 +143,7 @@ namespace System.Web.Mvc.Html
                 }
             }
 
-            object htmlAttributesObject = GetHtmlAttributeFromViewData(viewData);
+            object htmlAttributesObject = viewData[HtmlAttributeKey];
             result += html.Hidden(String.Empty, model, htmlAttributesObject).ToHtmlString();
             return result;
         }
@@ -161,7 +158,7 @@ namespace System.Web.Mvc.Html
 
         private static IDictionary<string, object> CreateHtmlAttributes(HtmlHelper html, string className, string inputType = null)
         {
-            object htmlAttributesObject = GetHtmlAttributeFromViewData(html.ViewContext.ViewData);
+            object htmlAttributesObject = html.ViewContext.ViewData[HtmlAttributeKey];
             if (htmlAttributesObject != null)
             {
                 return MergeHtmlAttributes(htmlAttributesObject, className, inputType);
@@ -176,17 +173,6 @@ namespace System.Web.Mvc.Html
                 htmlAttributes.Add("type", inputType);
             }
             return htmlAttributes;
-        }
-
-        private static object GetHtmlAttributeFromViewData(ViewDataDictionary viewData)
-        {
-            if (viewData[CompositeTemplateKey] == null)
-            {
-                // Get the HTML attribute for templates with single tag only.
-                return viewData[HtmlAttributeKey];
-            }
-
-            return null;
         }
 
         private static IDictionary<string, object> MergeHtmlAttributes(object htmlAttributesObject, string className, string inputType)
@@ -222,7 +208,6 @@ namespace System.Web.Mvc.Html
             ViewDataDictionary viewData = html.ViewContext.ViewData;
             TemplateInfo templateInfo = viewData.TemplateInfo;
             ModelMetadata modelMetadata = viewData.ModelMetadata;
-            viewData[CompositeTemplateKey] = true;
             StringBuilder builder = new StringBuilder();
 
             if (templateInfo.TemplateDepth > 1)
@@ -253,7 +238,6 @@ namespace System.Web.Mvc.Html
                     builder.Append("</div>\r\n");
                 }
             }
-            viewData.Remove(CompositeTemplateKey);
 
             return builder.ToString();
         }

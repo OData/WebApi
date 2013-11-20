@@ -80,10 +80,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("BooleanTemplateHtmlAttributeData")]
-        public void BooleanTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void BooleanTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<bool>(true);
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.BooleanTemplate(htmlHelper));
@@ -257,12 +257,12 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
-        public void CollectionTemplate_DoesNotAddHtmlAttributes()
+        public void CollectionTemplate_AddsHtmlAttributes()
         {
             // Arrange
             HtmlHelper html = MakeHtmlHelper<List<string>>(new List<string> { "foo", "bar", "baz" });
             html.ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = null;
-            html.ViewContext.ViewBag.htmlAttribute = new { @class = "form-control", foo = "bar" };
+            html.ViewContext.ViewBag.htmlAttributes = new { @class = "form-control", foo = "bar" };
 
             // Act
             string result = RunWithoutViewEngine(() =>
@@ -270,9 +270,9 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Equal(
-                "<input class=\"text-box single-line\" name=\"[0]\" type=\"text\" value=\"foo\" />"
-              + "<input class=\"text-box single-line\" name=\"[1]\" type=\"text\" value=\"bar\" />"
-              + "<input class=\"text-box single-line\" name=\"[2]\" type=\"text\" value=\"baz\" />",
+                "<input class=\"form-control text-box single-line\" foo=\"bar\" name=\"[0]\" type=\"text\" value=\"foo\" />"
+              + "<input class=\"form-control text-box single-line\" foo=\"bar\" name=\"[1]\" type=\"text\" value=\"bar\" />"
+              + "<input class=\"form-control text-box single-line\" foo=\"bar\" name=\"[2]\" type=\"text\" value=\"baz\" />",
                 result);
         }
 
@@ -317,10 +317,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("DecimalTemplateHtmlAttributeData")]
-        public void DecimalTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void DecimalTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<decimal>(12.30);
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.DecimalTemplate(htmlHelper));
@@ -376,10 +376,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("HiddenInputTemplateHtmlAttributeData")]
-        public void HiddenInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void HiddenInputTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<string>("Hidden Value");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.HiddenInputTemplate(htmlHelper));
@@ -429,10 +429,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("MultilineTextTemplateHtmlAttributeData")]
-        public void MultilineTextTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void MultilineTextTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<string>("", "Multiple" + Environment.NewLine + "Line" + Environment.NewLine + "Value!");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.MultilineTextTemplate(htmlHelper));
@@ -487,18 +487,18 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
-        public void ObjectTemplate_DoesNotAddHtmlAttributes()
+        public void ObjectTemplate_AddsHtmlAttributes()
         {
             string expected =
                 "<div class=\"editor-label\"><label for=\"FieldPrefix_Property1\">Property1</label></div>" + Environment.NewLine
-              + "<div class=\"editor-field\"><input class=\"text-box single-line\" id=\"FieldPrefix_Property1\" name=\"FieldPrefix.Property1\" type=\"text\" value=\"p1\" /> </div>" + Environment.NewLine
+              + "<div class=\"editor-field\"><input class=\"form-control text-box single-line\" foo=\"bar\" id=\"FieldPrefix_Property1\" name=\"FieldPrefix.Property1\" type=\"text\" value=\"p1\" /> </div>" + Environment.NewLine
               + "<div class=\"editor-label\"><label for=\"FieldPrefix_Property2\">Property2</label></div>" + Environment.NewLine
-              + "<div class=\"editor-field\"><input class=\"text-box single-line\" id=\"FieldPrefix_Property2\" name=\"FieldPrefix.Property2\" type=\"text\" value=\"\" /> </div>" + Environment.NewLine;
+              + "<div class=\"editor-field\"><input class=\"form-control text-box single-line\" foo=\"bar\" id=\"FieldPrefix_Property2\" name=\"FieldPrefix.Property2\" type=\"text\" value=\"\" /> </div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel { Property1 = "p1", Property2 = null };
             HtmlHelper html = MakeHtmlHelper<ObjectTemplateModel>(model);
-            html.ViewContext.ViewBag.htmlAttribute = new { @class = "form-control", foo = "bar" };
+            html.ViewContext.ViewBag.htmlAttributes = new { @class = "form-control", foo = "bar" };
 
             // Act
             string result = RunWithoutViewEngine(() =>
@@ -705,10 +705,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("PasswordTemplateHtmlAttributeData")]
-        public void PasswordTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void PasswordTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<string>("Value");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.PasswordTemplate(htmlHelper));
@@ -787,10 +787,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("StringTemplateHtmlAttributeData")]
-        public void StringTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void StringTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<string>("Value");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.StringTemplate(htmlHelper));
@@ -830,10 +830,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("PhoneNumberInputTemplateHtmlAttributeData")]
-        public void PhoneNumberInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void PhoneNumberInputTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<string>("Value");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.PhoneNumberInputTemplate(htmlHelper));
@@ -873,10 +873,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("UrlInputTemplateHtmlAttributeData")]
-        public void UrlInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void UrlInputTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<string>("Value");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.UrlInputTemplate(htmlHelper));
@@ -916,10 +916,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("EmailAddressInputTemplateHtmlAttributeData")]
-        public void EmailAddressInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void EmailAddressInputTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<string>("Value");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.EmailAddressInputTemplate(htmlHelper));
@@ -986,10 +986,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("DateTimeInputTemplateHtmlAttributeData")]
-        public void DateTimeInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void DateTimeInputTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<DateTime>("Value");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.DateTimeInputTemplate(htmlHelper));
@@ -1056,10 +1056,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("DateTimeLocalInputTemplateHtmlAttributeData")]
-        public void DateTimeLocalInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void DateTimeLocalInputTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<DateTime>("Value");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.DateTimeLocalInputTemplate(htmlHelper));
@@ -1126,10 +1126,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("DateInputTemplateHtmlAttributeData")]
-        public void DateInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void DateInputTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<DateTime>("Value");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.DateInputTemplate(htmlHelper));
@@ -1196,10 +1196,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("TimeInputTemplateHtmlAttributeData")]
-        public void TimeInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void TimeInputTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<DateTime>("Value");
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.TimeInputTemplate(htmlHelper));
@@ -1239,10 +1239,10 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("NumberInputTemplateHtmlAttributeData")]
-        public void NumberInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void NumberInputTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var htmlHelper = MakeHtmlHelper<int>(10);
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.NumberInputTemplate(htmlHelper));
@@ -1287,11 +1287,11 @@ namespace System.Web.Mvc.Html.Test
 
         [Theory]
         [PropertyData("ColorInputTemplateHtmlAttributeData")]
-        public void ColorInputTemplate_AddsHtmlAttributes(object htmlAttribute, string expectedHtml)
+        public void ColorInputTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {
             var color = Color.FromArgb(0x33, 0xf4, 0xcc);
             var htmlHelper = MakeHtmlHelper<Color>(color);
-            htmlHelper.ViewContext.ViewBag.htmlAttribute = htmlAttribute;
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.ColorInputTemplate(htmlHelper));

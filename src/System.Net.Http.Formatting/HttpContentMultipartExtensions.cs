@@ -169,20 +169,17 @@ namespace System.Net.Http
                 throw new IOException(Properties.Resources.ReadAsMimeMultipartErrorReading, e);
             }
 
-            using (stream)
+            using (var parser = new MimeMultipartBodyPartParser(content, streamProvider))
             {
-                using (var parser = new MimeMultipartBodyPartParser(content, streamProvider))
-                {
-                    byte[] data = new byte[bufferSize];
-                    MultipartAsyncContext context = new MultipartAsyncContext(stream, parser, data, streamProvider.Contents);
+                byte[] data = new byte[bufferSize];
+                MultipartAsyncContext context = new MultipartAsyncContext(stream, parser, data, streamProvider.Contents);
 
-                    // Start async read/write loop
-                    await MultipartReadAsync(context, cancellationToken);
+                // Start async read/write loop
+                await MultipartReadAsync(context, cancellationToken);
 
-                    // Let the stream provider post-process when everything is complete
-                    await streamProvider.ExecutePostProcessingAsync(cancellationToken);
-                    return streamProvider;
-                }
+                // Let the stream provider post-process when everything is complete
+                await streamProvider.ExecutePostProcessingAsync(cancellationToken);
+                return streamProvider;
             }
         }
 

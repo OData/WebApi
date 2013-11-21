@@ -664,4 +664,7 @@
   <data name="ReturnEntityWithoutEntitySet" xml:space="preserve">
     <value>The EDM type '{0}' is already declared as an entity type. Use the method 'ReturnsFromEntitySet' if the return type is an entity.</value>
   </data>
+  <data name="NullCollectionsCannotBeSerialized" xml:space="preserve">
+    <value>Null collections cannot be serialized.</value>
+  </data>
 </root>

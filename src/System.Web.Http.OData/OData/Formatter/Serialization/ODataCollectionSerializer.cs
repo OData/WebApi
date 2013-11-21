@@ -49,6 +49,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType,
             ODataSerializerContext writeContext)
         {
+            if (graph == null)
+            {
+                throw new SerializationException(Error.Format(SRResources.NullCollectionsCannotBeSerialized));
+            }
+
             IEnumerable enumerable = graph as IEnumerable;
             if (enumerable == null)
             {

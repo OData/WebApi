@@ -98,6 +98,7 @@ namespace System.Web.Http.Owin
         /// This constructor is retained for backwards compatibility. The constructor taking
         /// <see cref="HttpMessageHandlerOptions"/> should be used instead.
         /// </remarks>
+        [Obsolete("Use the HttpMessageHandlerAdapter(OwinMiddleware, HttpMessageHandlerOptions) constructor instead.")]
         public HttpMessageHandlerAdapter(OwinMiddleware next, HttpMessageHandler messageHandler,
             IHostBufferPolicySelector bufferPolicySelector)
             : this(next, CreateOptions(messageHandler, bufferPolicySelector))

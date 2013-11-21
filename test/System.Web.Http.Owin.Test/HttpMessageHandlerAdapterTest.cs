@@ -101,8 +101,10 @@ namespace System.Web.Http.Owin
             IHostBufferPolicySelector bufferPolicySelector = CreateDummyBufferPolicy();
 
             // Act & Assert.
-            Assert.ThrowsArgumentNull(() => CreateProductUnderTest(messageHandler, bufferPolicySelector),
+#pragma warning disable 0618
+            Assert.ThrowsArgumentNull(() => new HttpMessageHandlerAdapter(null, messageHandler, bufferPolicySelector),
                 "messageHandler");
+#pragma warning restore 0618
         }
 
         [Fact]
@@ -114,8 +116,10 @@ namespace System.Web.Http.Owin
                 IHostBufferPolicySelector bufferPolicySelector = null;
 
                 // Act & Assert.
-                Assert.ThrowsArgumentNull(() => CreateProductUnderTest(messageHandler, bufferPolicySelector),
-                    "bufferPolicySelector");
+#pragma warning disable 0618
+                Assert.ThrowsArgumentNull(() => new HttpMessageHandlerAdapter(null, messageHandler,
+                    bufferPolicySelector), "bufferPolicySelector");
+#pragma warning restore 0618
             }
         }
 
@@ -143,8 +147,10 @@ namespace System.Web.Http.Owin
             using (HttpMessageHandler expectedMessageHandler = CreateDummyMessageHandler())
             {
                 IHostBufferPolicySelector bufferPolicySelector = CreateDummyBufferPolicy();
-                HttpMessageHandlerAdapter product = CreateProductUnderTest(expectedMessageHandler,
+#pragma warning disable 0618
+                HttpMessageHandlerAdapter product = new HttpMessageHandlerAdapter(null, expectedMessageHandler,
                     bufferPolicySelector);
+#pragma warning restore 0618
 
                 // Act
                 HttpMessageHandler messageHandler = product.MessageHandler;
@@ -180,8 +186,10 @@ namespace System.Web.Http.Owin
             using (HttpMessageHandler messageHandler = CreateDummyMessageHandler())
             {
                 IHostBufferPolicySelector expectedBufferPolicySelector = CreateDummyBufferPolicy();
-                HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler,
+#pragma warning disable 0618
+                HttpMessageHandlerAdapter product = new HttpMessageHandlerAdapter(null, messageHandler,
                     expectedBufferPolicySelector);
+#pragma warning restore 0618
 
                 // Act
                 IHostBufferPolicySelector bufferPolicySelector = product.BufferPolicySelector;
@@ -217,8 +225,10 @@ namespace System.Web.Http.Owin
             using (HttpMessageHandler messageHandler = CreateDummyMessageHandler())
             {
                 IHostBufferPolicySelector bufferPolicySelector = CreateDummyBufferPolicy();
-                HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler,
+#pragma warning disable 0618
+                HttpMessageHandlerAdapter product = new HttpMessageHandlerAdapter(null, messageHandler,
                     bufferPolicySelector);
+#pragma warning restore 0618
 
                 // Act
                 IExceptionLogger exceptionLogger = product.ExceptionLogger;
@@ -254,8 +264,10 @@ namespace System.Web.Http.Owin
             using (HttpMessageHandler messageHandler = CreateDummyMessageHandler())
             {
                 IHostBufferPolicySelector bufferPolicySelector = CreateDummyBufferPolicy();
-                HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler,
+#pragma warning disable 0618
+                HttpMessageHandlerAdapter product = new HttpMessageHandlerAdapter(null, messageHandler,
                     bufferPolicySelector);
+#pragma warning restore 0618
 
                 // Act
                 IExceptionHandler exceptionHandler = product.ExceptionHandler;
@@ -292,8 +304,10 @@ namespace System.Web.Http.Owin
             using (HttpMessageHandler messageHandler = CreateDummyMessageHandler())
             {
                 IHostBufferPolicySelector bufferPolicySelector = CreateDummyBufferPolicy();
-                HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler,
+#pragma warning disable 0618
+                HttpMessageHandlerAdapter product = new HttpMessageHandlerAdapter(null, messageHandler,
                     bufferPolicySelector);
+#pragma warning restore 0618
 
                 // Act
                 CancellationToken appDisposing = product.AppDisposing;
@@ -328,7 +342,8 @@ namespace System.Web.Http.Owin
         {
             var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
             var mockContext = new Mock<IOwinContext>();
             mockContext.Setup(context => context.Response).Returns(new OwinResponse());
 
@@ -342,7 +357,8 @@ namespace System.Web.Http.Owin
         {
             var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
             var mockContext = new Mock<IOwinContext>();
             mockContext.Setup(context => context.Request).Returns(new OwinRequest());
 
@@ -357,7 +373,8 @@ namespace System.Web.Http.Owin
             var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -394,7 +411,8 @@ namespace System.Web.Http.Owin
             var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost:12345", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -418,7 +436,8 @@ namespace System.Web.Http.Owin
             var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers/" + decodedId);
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
             var route = new HttpRoute("api/customers/{id}");
 
             adapter.Invoke(new OwinContext(environment)).Wait();
@@ -437,7 +456,8 @@ namespace System.Web.Http.Owin
             var requestHeaders = environment["owin.RequestHeaders"] as IDictionary<string, string[]>;
             requestHeaders["Accept"] = new string[] { "application/json", "application/xml" };
             requestHeaders["Content-Length"] = new string[] { "45" };
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -463,7 +483,8 @@ namespace System.Web.Http.Owin
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var expectedBody = "This is the request body.";
             environment["owin.RequestBody"] = new MemoryStream(Encoding.UTF8.GetBytes(expectedBody));
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -493,7 +514,8 @@ namespace System.Web.Http.Owin
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: bufferInput, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             environment["owin.RequestBody"] = requestBody;
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -521,7 +543,8 @@ namespace System.Web.Http.Owin
 
             using (HttpResponseMessage response = CreateResponse())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
-            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicySelector))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(CreateValidOptions(messageHandler,
+                bufferPolicySelector)))
             {
                 bool bufferingDisabled = false;
                 Action disableBuffering = () => bufferingDisabled = true;
@@ -550,7 +573,8 @@ namespace System.Web.Http.Owin
 
             using (HttpResponseMessage response = CreateResponse())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
-            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicySelector))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(CreateValidOptions(messageHandler,
+                bufferPolicySelector)))
             {
                 bool bufferingDisabled = false;
                 Action disableBuffering = () => bufferingDisabled = true;
@@ -576,7 +600,8 @@ namespace System.Web.Http.Owin
             var handler = CreateOKHandlerStub();
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -601,8 +626,8 @@ namespace System.Web.Http.Owin
                 };
 
                 using (HttpMessageHandler messageHandler = CreateLambdaMessageHandler(sendAsync))
-                using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler,
-                    bufferPolicySelector))
+                using (HttpMessageHandlerAdapter product = CreateProductUnderTest(CreateValidOptions(messageHandler,
+                    bufferPolicySelector)))
                 {
                     IOwinRequest owinRequest = CreateFakeOwinRequest();
                     IOwinResponse owinResponse = CreateFakeOwinResponse();
@@ -638,7 +663,8 @@ namespace System.Web.Http.Owin
             {
                 environment["server.IsLocal"] = isLocal.Value;
             }
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -654,7 +680,8 @@ namespace System.Web.Http.Owin
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var clientCert = new Mock<X509Certificate2>().Object;
             environment["ssl.ClientCertificate"] = clientCert;
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -670,7 +697,8 @@ namespace System.Web.Http.Owin
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var cancellationToken = new CancellationToken();
             environment["owin.CallCancelled"] = cancellationToken;
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -685,7 +713,8 @@ namespace System.Web.Http.Owin
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var user = new Mock<IPrincipal>().Object;
             environment["server.User"] = user;
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -699,7 +728,8 @@ namespace System.Web.Http.Owin
             var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             Assert.Throws<InvalidOperationException>(
                 () => adapter.Invoke(new OwinContext(environment)).Wait(),
@@ -714,7 +744,8 @@ namespace System.Web.Http.Owin
             var handler = new HandlerStub() { Response = response, AddNoRouteMatchedKey = true };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(mockNext.Object, handler, bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(mockNext.Object, options);
 
             Assert.DoesNotThrow(
                 () => adapter.Invoke(new OwinContext(environment)).Wait());
@@ -728,7 +759,8 @@ namespace System.Web.Http.Owin
             var handler = new HandlerStub() { Response = response, AddNoRouteMatchedKey = false };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: mockNext.Object, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(mockNext.Object, options);
 
             Assert.DoesNotThrow(
                 () => adapter.Invoke(new OwinContext(environment)).Wait());
@@ -743,7 +775,8 @@ namespace System.Web.Http.Owin
             var handler = new HandlerStub() { Response = response, AddNoRouteMatchedKey = true };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: nextMock.Object, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(nextMock.Object, options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -758,7 +791,8 @@ namespace System.Web.Http.Owin
             var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -775,7 +809,8 @@ namespace System.Web.Http.Owin
             var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -797,7 +832,8 @@ namespace System.Web.Http.Owin
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
             var responseStream = new MemoryStream();
             environment["owin.ResponseBody"] = responseStream;
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -820,7 +856,8 @@ namespace System.Web.Http.Owin
             var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: bufferOutput);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -844,7 +881,8 @@ namespace System.Web.Http.Owin
 
             using (HttpResponseMessage response = CreateResponse())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
-            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicySelector))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(CreateValidOptions(messageHandler,
+                bufferPolicySelector)))
             {
                 IOwinRequest owinRequest = CreateFakeOwinRequest();
                 bool bufferingDisabled = false;
@@ -873,7 +911,8 @@ namespace System.Web.Http.Owin
 
             using (HttpResponseMessage response = CreateResponse())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
-            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicySelector))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(CreateValidOptions(messageHandler,
+                bufferPolicySelector)))
             {
                 IOwinRequest owinRequest = CreateFakeOwinRequest();
                 bool bufferingDisabled = false;
@@ -900,7 +939,8 @@ namespace System.Web.Http.Owin
             var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -917,7 +957,8 @@ namespace System.Web.Http.Owin
             var handler = new HandlerStub() { Response = response };
             var bufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
             var environment = CreateOwinEnvironment("GET", "http", "localhost", "/vroot", "/api/customers");
-            var adapter = new HttpMessageHandlerAdapter(next: null, messageHandler: handler, bufferPolicySelector: bufferPolicySelector);
+            var options = CreateValidOptions(handler, bufferPolicySelector);
+            var adapter = CreateProductUnderTest(options);
 
             adapter.Invoke(new OwinContext(environment)).Wait();
 
@@ -933,7 +974,8 @@ namespace System.Web.Http.Owin
 
             using (HttpResponseMessage response = CreateResponse())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
-            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicy))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(CreateValidOptions(messageHandler,
+                bufferPolicy)))
             {
                 response.Headers.TransferEncodingChunked = true;
 
@@ -961,7 +1003,8 @@ namespace System.Web.Http.Owin
 
             using (HttpResponseMessage response = CreateResponse())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
-            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicy))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(CreateValidOptions(messageHandler,
+                bufferPolicy)))
             {
                 response.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("identity"));
 
@@ -990,7 +1033,8 @@ namespace System.Web.Http.Owin
 
             using (HttpResponseMessage response = CreateResponse())
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
-            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicy))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(CreateValidOptions(messageHandler,
+                bufferPolicy)))
             {
                 response.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("identity"));
                 response.Headers.TransferEncodingChunked = true;
@@ -1209,8 +1253,8 @@ namespace System.Web.Http.Owin
             using (HttpContent content = CreateFaultingContent(expectedException))
             using (HttpResponseMessage response = CreateResponse(content))
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
-            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler,
-                bufferPolicySelector))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(CreateValidOptions(messageHandler,
+                bufferPolicySelector)))
             using (MemoryStream output = new MemoryStream())
             {
                 IOwinRequest owinRequest = CreateFakeOwinRequest();
@@ -1395,7 +1439,8 @@ namespace System.Web.Http.Owin
             using (HttpContent content = CreateFaultingContent())
             using (HttpResponseMessage response = CreateResponse(content))
             using (HttpMessageHandler messageHandler = CreateStubMessageHandler(response))
-            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(messageHandler, bufferPolicySelector))
+            using (HttpMessageHandlerAdapter product = CreateProductUnderTest(CreateValidOptions(messageHandler,
+                bufferPolicySelector)))
             {
                 IOwinRequest owinRequest = CreateFakeOwinRequest();
                 IOwinResponse owinResponse = CreateFakeOwinResponse();
@@ -1808,16 +1853,14 @@ namespace System.Web.Http.Owin
             return environment;
         }
 
-        private static HttpMessageHandlerAdapter CreateProductUnderTest(HttpMessageHandler messageHandler,
-            IHostBufferPolicySelector bufferPolicySelector)
-        {
-            return new HttpMessageHandlerAdapter(next: null, messageHandler: messageHandler,
-                bufferPolicySelector: bufferPolicySelector);
-        }
-
         private static HttpMessageHandlerAdapter CreateProductUnderTest(HttpMessageHandlerOptions options)
         {
-            return new HttpMessageHandlerAdapter(next: null, options: options);
+            return CreateProductUnderTest(next: null, options: options);
+        }
+
+        private static HttpMessageHandlerAdapter CreateProductUnderTest(OwinMiddleware next, HttpMessageHandlerOptions options)
+        {
+            return new HttpMessageHandlerAdapter(next, options);
         }
 
         private static HttpRequestMessage CreateRequest()
@@ -1900,10 +1943,18 @@ namespace System.Web.Http.Owin
 
         private static HttpMessageHandlerOptions CreateValidOptions(HttpMessageHandler messageHandler)
         {
+            IHostBufferPolicySelector bufferPolicy =
+                CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
+            return CreateValidOptions(messageHandler, bufferPolicy);
+        }
+
+        private static HttpMessageHandlerOptions CreateValidOptions(HttpMessageHandler messageHandler,
+            IHostBufferPolicySelector bufferPolicySelector)
+        {
             return new HttpMessageHandlerOptions
             {
                 MessageHandler = messageHandler,
-                BufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false),
+                BufferPolicySelector = bufferPolicySelector,
                 ExceptionLogger = new EmptyExceptionLogger(),
                 ExceptionHandler = new DefaultExceptionHandler()
             };

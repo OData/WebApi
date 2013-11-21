@@ -171,12 +171,12 @@ namespace System.Web.Http.WebHost.Routing
 
         private static Exception CreateInvalidConstraintTypeException(string routeTemplate, string name)
         {
-            throw Error.InvalidOperation(
+            return Error.InvalidOperation(
                 SRResources.Route_ValidationMustBeStringOrCustomConstraint,
                 name,
                 routeTemplate,
-                typeof(IHttpRouteConstraint).Name,
-                typeof(IRouteConstraint).Name);
+                typeof(IHttpRouteConstraint).FullName,
+                typeof(IRouteConstraint).FullName);
         }
     }
 }

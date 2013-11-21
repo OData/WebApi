@@ -114,7 +114,7 @@ namespace System.Web.Mvc.Routing
 
             string expectedMessage =
                 "The constraint entry 'custom' on the route with route template 'invalidconstraint/{action}' " +
-                "must have a string value or be of a type which implements 'IRouteConstraint'.";
+                "must have a string value or be of a type which implements 'System.Web.Routing.IRouteConstraint'.";
 
 
             // Act & Assert

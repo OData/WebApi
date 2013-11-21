@@ -92,7 +92,7 @@ namespace System.Web.Http
 
             string expectedMessage =
                 "The constraint entry 'custom' on the route with route template '{controller}/{id}' " +
-                "must have a string value or be of a type which implements 'IHttpRouteConstraint'.";
+                "must have a string value or be of a type which implements 'System.Web.Http.Routing.IHttpRouteConstraint'.";
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => routes.CreateRoute("{controller}/{id}", null, constraints), expectedMessage);

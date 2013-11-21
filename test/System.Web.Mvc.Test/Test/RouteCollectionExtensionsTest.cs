@@ -438,7 +438,7 @@ namespace System.Web.Mvc.Test
 
             string expectedMessage =
                 "The constraint entry 'custom' on the route with route template '{controller}/{id}' " +
-                "must have a string value or be of a type which implements 'IRouteConstraint'.";
+                "must have a string value or be of a type which implements 'System.Web.Routing.IRouteConstraint'.";
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => routes.MapRoute("default", "{controller}/{id}", null, constraints), expectedMessage);
@@ -456,7 +456,7 @@ namespace System.Web.Mvc.Test
 
             string expectedMessage =
                 "The constraint entry 'custom' on the route with route template '{controller}/{id}' " +
-                "must have a string value or be of a type which implements 'IRouteConstraint'.";
+                "must have a string value or be of a type which implements 'System.Web.Routing.IRouteConstraint'.";
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => routes.IgnoreRoute("{controller}/{id}", constraints), expectedMessage);

@@ -391,7 +391,7 @@ namespace System.Web.Http.WebHost.Routing
 
             string expectedMessage =
                 "The constraint entry 'custom' on the route with route template '{controller}/{id}' " +
-                "must have a string value or be of a type which implements 'IHttpRouteConstraint' or 'IRouteConstraint'.";
+                "must have a string value or be of a type which implements 'System.Web.Http.Routing.IHttpRouteConstraint' or 'System.Web.Routing.IRouteConstraint'.";
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => routes.CreateRoute("{controller}/{id}", null, constraints), expectedMessage);

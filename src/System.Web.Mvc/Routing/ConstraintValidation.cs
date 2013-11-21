@@ -44,7 +44,7 @@ namespace System.Web.Mvc.Routing
                     MvcResources.Route_InvalidConstraint,
                     kvp.Key,
                     route.Url,
-                    typeof(IRouteConstraint).Name);
+                    typeof(IRouteConstraint).FullName);
             }
         }
     }

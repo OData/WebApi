@@ -83,11 +83,11 @@ namespace System.Web.Mvc.Routing
 #if ASPNETWEBAPI
             string expectedMessage =
                 "The constraint entry 'custom' on the route with route template 'c/{id}' " +
-                "must have a string value or be of a type which implements 'IHttpRouteConstraint'.";
+                "must have a string value or be of a type which implements 'System.Web.Http.Routing.IHttpRouteConstraint'.";
 #else
             string expectedMessage =
                 "The constraint entry 'custom' on the route with route template 'c/{id}' " +
-                "must have a string value or be of a type which implements 'IRouteConstraint'.";
+                "must have a string value or be of a type which implements 'System.Web.Routing.IRouteConstraint'.";
 #endif
 
             // Act & Assert

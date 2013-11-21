@@ -10,7 +10,7 @@ namespace System.Web.Mvc
     /// Place on a controller or action to expose it directly via a route. 
     /// When placed on a controller, it applies to actions that do not have any <see cref="RouteAttribute"/>s on them.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
     public sealed class RouteAttribute : Attribute, IDirectRouteProvider, IRouteInfoProvider
     {
         /// <summary>

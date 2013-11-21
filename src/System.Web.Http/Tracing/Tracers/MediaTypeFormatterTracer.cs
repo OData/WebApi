@@ -225,9 +225,17 @@ namespace System.Web.Http.Tracing.Tracers
                                         contentType == null ? SRResources.TraceNoneObjectMessage : contentType.ToString());
                 },
 
-                execute: () => cancellationToken == null
-                    ? InnerFormatter.ReadFromStreamAsync(type, readStream, content, formatterLogger)
-                    : InnerFormatter.ReadFromStreamAsync(type, readStream, content, formatterLogger, cancellationToken.Value),
+                execute: () =>
+                {
+                    if (cancellationToken.HasValue)
+                    {
+                        return InnerFormatter.ReadFromStreamAsync(type, readStream, content, formatterLogger, cancellationToken.Value);
+                    }
+                    else
+                    {
+                        return InnerFormatter.ReadFromStreamAsync(type, readStream, content, formatterLogger);
+                    }
+                },
                 endTrace: (tr, value) =>
                 {
                     tr.Message = Error.Format(
@@ -272,9 +280,17 @@ namespace System.Web.Http.Tracing.Tracers
                                         type.Name,
                                         contentType == null ? SRResources.TraceNoneObjectMessage : contentType.ToString());
                 },
-                execute: () => cancellationToken == null
-                    ? InnerFormatter.WriteToStreamAsync(type, value, writeStream, content, transportContext)
-                    : InnerFormatter.WriteToStreamAsync(type, value, writeStream, content, transportContext, cancellationToken.Value),
+                execute: () =>
+                {
+                    if (cancellationToken.HasValue)
+                    {
+                        return InnerFormatter.WriteToStreamAsync(type, value, writeStream, content, transportContext, cancellationToken.Value);
+                    }
+                    else
+                    {
+                        return InnerFormatter.WriteToStreamAsync(type, value, writeStream, content, transportContext);
+                    }
+                },
                 endTrace: null,
                 errorTrace: null);
         }

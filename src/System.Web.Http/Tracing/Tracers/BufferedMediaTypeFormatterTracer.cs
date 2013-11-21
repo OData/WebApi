@@ -108,9 +108,14 @@ namespace System.Web.Http.Tracing.Tracers
                 },
                 execute: () =>
                 {
-                    value = cancellationToken == null
-                        ? innerFormatter.ReadFromStream(type, stream, content, formatterLogger)
-                        : innerFormatter.ReadFromStream(type, stream, content, formatterLogger, cancellationToken.Value);
+                    if (cancellationToken.HasValue)
+                    {
+                        value = innerFormatter.ReadFromStream(type, stream, content, formatterLogger, cancellationToken.Value);
+                    }
+                    else
+                    {
+                        value = innerFormatter.ReadFromStream(type, stream, content, formatterLogger);
+                    }
                 },
                 endTrace: (tr) =>
                 {
@@ -125,16 +130,16 @@ namespace System.Web.Http.Tracing.Tracers
 
         public override void WriteToStream(Type type, object value, Stream writeStream, HttpContent content)
         {
-            WriteToStreamImpl(type, value, writeStream, content);
+            WriteToStreamCore(type, value, writeStream, content);
         }
 
         public override void WriteToStream(Type type, object value, Stream writeStream, HttpContent content,
             CancellationToken cancellationToken)
         {
-            WriteToStreamImpl(type, value, writeStream, content, cancellationToken);
+            WriteToStreamCore(type, value, writeStream, content, cancellationToken);
         }
 
-        private void WriteToStreamImpl(Type type, object value, Stream writeStream, HttpContent content,
+        private void WriteToStreamCore(Type type, object value, Stream writeStream, HttpContent content,
             CancellationToken? cancellationToken = null)
         {
             BufferedMediaTypeFormatter innerFormatter = InnerFormatter as BufferedMediaTypeFormatter;
@@ -160,13 +165,13 @@ namespace System.Web.Http.Tracing.Tracers
                 },
                 execute: () =>
                 {
-                    if (cancellationToken == null)
+                    if (cancellationToken.HasValue)
                     {
-                        innerFormatter.WriteToStream(type, value, writeStream, content);
+                        innerFormatter.WriteToStream(type, value, writeStream, content, cancellationToken.Value);
                     }
                     else
                     {
-                        innerFormatter.WriteToStream(type, value, writeStream, content, cancellationToken.Value);
+                        innerFormatter.WriteToStream(type, value, writeStream, content);
                     }
                 },
                 endTrace: null,

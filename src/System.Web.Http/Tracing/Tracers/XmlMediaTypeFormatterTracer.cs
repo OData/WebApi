@@ -109,24 +109,24 @@ namespace System.Web.Http.Tracing.Tracers
             return _inner.CreateDataContractSerializer(type);
         }
 
-        public override XmlReader CreateXmlReader(Stream readStream, HttpContent content)
+        protected override XmlReader CreateXmlReader(Stream readStream, HttpContent content)
         {
-            return _inner.CreateXmlReader(readStream, content);
+            return _inner.InvokeCreateXmlReader(readStream, content);
         }
 
-        public override XmlWriter CreateXmlWriter(Stream writeStream, HttpContent content)
+        protected override XmlWriter CreateXmlWriter(Stream writeStream, HttpContent content)
         {
-            return _inner.CreateXmlWriter(writeStream, content);
+            return _inner.InvokeCreateXmlWriter(writeStream, content);
         }
 
-        public override object GetDeserializer(Type type, HttpContent content)
+        protected override object GetDeserializer(Type type, HttpContent content)
         {
-            return _inner.GetDeserializer(type, content);
+            return _inner.InvokeGetDeserializer(type, content);
         }
 
-        public override object GetSerializer(Type type, object value, HttpContent content)
+        protected override object GetSerializer(Type type, object value, HttpContent content)
         {
-            return _inner.GetSerializer(type, value, content);
+            return _inner.InvokeGetSerializer(type, value, content);
         }
     }
 }

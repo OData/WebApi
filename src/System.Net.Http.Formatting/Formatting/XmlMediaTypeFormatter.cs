@@ -327,7 +327,7 @@ namespace System.Net.Http.Formatting
         /// <param name="content">The <see cref="HttpContent"/> for the content being read.</param>
         /// <returns>An instance of <see cref="XmlObjectSerializer"/> or <see cref="XmlSerializer"/> to use for deserializing the object.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The term deserializer is spelled correctly.")]
-        public virtual object GetDeserializer(Type type, HttpContent content)
+        protected internal virtual object GetDeserializer(Type type, HttpContent content)
         {
             return GetSerializerForType(type);
         }
@@ -338,7 +338,7 @@ namespace System.Net.Http.Formatting
         /// <param name="readStream">The <see cref="Stream"/> to read from.</param>
         /// <param name="content">The <see cref="HttpContent"/> for the content being read.</param>
         /// <returns>The <see cref="XmlReader"/> to use for reading objects.</returns>
-        public virtual XmlReader CreateXmlReader(Stream readStream, HttpContent content)
+        protected internal virtual XmlReader CreateXmlReader(Stream readStream, HttpContent content)
         {
             // Get the character encoding for the content
             Encoding effectiveEncoding = SelectCharacterEncoding(content == null ? null : content.Headers);
@@ -424,7 +424,7 @@ namespace System.Net.Http.Formatting
         /// <param name="value">The object to serialize.</param>
         /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
         /// <returns>An instance of <see cref="XmlObjectSerializer"/> or <see cref="XmlSerializer"/> to use for serializing the object.</returns>
-        public virtual object GetSerializer(Type type, object value, HttpContent content)
+        protected internal virtual object GetSerializer(Type type, object value, HttpContent content)
         {
             return GetSerializerForType(type);
         }
@@ -435,7 +435,7 @@ namespace System.Net.Http.Formatting
         /// <param name="writeStream">The <see cref="Stream"/> to write to.</param>
         /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
         /// <returns>The <see cref="XmlWriter"/> to use for writing objects.</returns>
-        public virtual XmlWriter CreateXmlWriter(Stream writeStream, HttpContent content)
+        protected internal virtual XmlWriter CreateXmlWriter(Stream writeStream, HttpContent content)
         {
             Encoding effectiveEncoding = SelectCharacterEncoding(content != null ? content.Headers : null);
             XmlWriterSettings writerSettings = WriterSettings.Clone();
@@ -461,6 +461,42 @@ namespace System.Net.Http.Formatting
         public virtual DataContractSerializer CreateDataContractSerializer(Type type)
         {
             return new DataContractSerializer(type);
+        }
+
+        /// <summary>
+        /// This method is to support infrastructure and is not intended to be used directly from your code.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public XmlReader InvokeCreateXmlReader(Stream readStream, HttpContent content)
+        {
+            return CreateXmlReader(readStream, content);
+        }
+
+        /// <summary>
+        /// This method is to support infrastructure and is not intended to be used directly from your code.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public XmlWriter InvokeCreateXmlWriter(Stream writeStream, HttpContent content)
+        {
+            return CreateXmlWriter(writeStream, content);
+        }
+
+        /// <summary>
+        /// This method is to support infrastructure and is not intended to be used directly from your code.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public object InvokeGetDeserializer(Type type, HttpContent content)
+        {
+            return GetDeserializer(type, content);
+        }
+
+        /// <summary>
+        /// This method is to support infrastructure and is not intended to be used directly from your code.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public object InvokeGetSerializer(Type type, object value, HttpContent content)
+        {
+            return GetSerializer(type, value, content);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Since we use an extensible factory method we cannot control the exceptions being thrown")]

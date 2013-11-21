@@ -107,7 +107,7 @@ namespace System.Web.Http.Tracing.Tracers
         public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content,
             TransportContext transportContext, CancellationToken cancellationToken)
         {
-            return _innerTracer.WriteToStreamAsync(type, value, writeStream, content, transportContext);
+            return _innerTracer.WriteToStreamAsync(type, value, writeStream, content, transportContext, cancellationToken);
         }
 
         // Callback from WriteToStreamAsync is not expected to be called; _innerTracer.WriteToStreamAsync uses

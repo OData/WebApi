@@ -171,6 +171,8 @@ namespace System.Web.Http.Tracing
                             "get_Indent", "set_Indent",
                             "get_WriterSettings",
                             "get_MaxDepth", "set_MaxDepth",
+                            "InvokeCreateXmlReader", "InvokeCreateXmlWriter", 
+                            "InvokeGetDeserializer", "InvokeGetSerializer",
                             // Cannot override, base handles correctly
                             "SelectCharacterEncoding",
                             // Assume these are called before starting app.
@@ -281,7 +283,7 @@ namespace System.Web.Http.Tracing
             return issues;
         }
 
-        static void AddIssues(Type tracerType, IList<string> issues, MethodInfo methodInfo, string[] excludedMembers)
+        private static void AddIssues(Type tracerType, IList<string> issues, MethodInfo methodInfo, string[] excludedMembers)
         {
             if (methodInfo == null ||
                 !(methodInfo.IsPublic || methodInfo.IsFamily) ||
@@ -309,12 +311,12 @@ namespace System.Web.Http.Tracing
             }
         }
 
-        static bool IsOverrideable(MethodInfo methodInfo)
+        private static bool IsOverrideable(MethodInfo methodInfo)
         {
             return !methodInfo.IsFinal && (methodInfo.IsVirtual || methodInfo.IsAbstract);
         }
 
-        static bool DoMethodsMatch(MethodInfo originalMethodInfo, MethodInfo candidateMethodInfo)
+        private static bool DoMethodsMatch(MethodInfo originalMethodInfo, MethodInfo candidateMethodInfo)
         {
             if (!GetSignature(candidateMethodInfo).Equals(GetSignature(originalMethodInfo)))
             {
@@ -324,14 +326,14 @@ namespace System.Web.Http.Tracing
             return true;
         }
 
-        static string GetSignature(MethodInfo methodInfo)
+        private static string GetSignature(MethodInfo methodInfo)
         {
             return
                 String.Format("{0}({1})", methodInfo.Name.Substring(methodInfo.Name.LastIndexOf(".") + 1),
                     String.Join(",", methodInfo.GetParameters().Select(p => p.ParameterType.Name)));
         }
 
-        static bool DoesTracerDeclare(Type tracerType, MethodInfo methodInfo)
+        private static bool DoesTracerDeclare(Type tracerType, MethodInfo methodInfo)
         {
             if (methodInfo == null)
             {

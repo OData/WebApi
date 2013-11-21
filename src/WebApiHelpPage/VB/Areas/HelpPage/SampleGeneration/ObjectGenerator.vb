@@ -12,7 +12,7 @@ Namespace Areas.HelpPage
     ''' This class will create an object of a given type and populate it with sample data.
     ''' </summary>
     Public Class ObjectGenerator
-        Private Const DefaultCollectionSize As Integer = 3
+        Private Const DefaultCollectionSize As Integer = 2
         Private ReadOnly SimpleObjectGenerator As New SimpleTypeObjectGenerator()
 
         ''' <summary>

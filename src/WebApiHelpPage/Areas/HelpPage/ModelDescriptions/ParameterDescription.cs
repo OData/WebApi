@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 {
-    public class PropertyDescription
+    public class ParameterDescription
     {
-        public PropertyDescription()
+        public ParameterDescription()
         {
-            Annotations = new List<PropertyAnnotation>();
+            Annotations = new Collection<ParameterAnnotation>();
         }
 
-        public IList<PropertyAnnotation> Annotations { get; private set; }
+        public Collection<ParameterAnnotation> Annotations { get; private set; }
 
         public string Documentation { get; set; }
 

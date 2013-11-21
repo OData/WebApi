@@ -1,19 +1,24 @@
 @using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 @model EnumTypeModelDescription
 
-<div>
-    @if (Model.Documentation != null)
-    {
-        <p>@Model.Documentation</p>
-    }
-    <p>Possible enumeration values:</p>
-    <ul>
-        @foreach (var value in Model.Values)
+<p>Possible enumeration values:</p>
+
+<table class="help-page-table">
+    <thead>
+        <tr><th>Name</th><th>Value</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+        @foreach (EnumValueDescription value in Model.Values)
         {
-            <li>
-                @value.Name: @value.Value
-                <p>@value.Documentation</p>
-            </li>
+            <tr>
+                <td class="enum-name"><b>@value.Name</b></td>
+                <td class="enum-value">
+                    <p>@value.Value</p>
+                </td>
+                <td class="enum-description">
+                    <p>@value.Documentation</p>
+                </td>
+            </tr>
         }
-    </ul>
-</div>
+    </tbody>
+</table>

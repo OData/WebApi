@@ -8,6 +8,7 @@ Imports System.Net.Http
 Imports System.Net.Http.Headers
 Imports System.Runtime.CompilerServices
 Imports System.Web.Http
+Imports System.Web.Http.Controllers
 Imports System.Web.Http.Description
 Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
 Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
@@ -220,26 +221,96 @@ Namespace Areas.HelpPage
                 Dim apiDescriptions As Collection(Of ApiDescription) = config.Services.GetApiExplorer().ApiDescriptions
                 Dim ApiDescription As ApiDescription = apiDescriptions.FirstOrDefault(Function(api) String.Equals(api.GetFriendlyId(), apiDescriptionId, StringComparison.OrdinalIgnoreCase))
                 If (Not ApiDescription Is Nothing) Then
-                    Dim sampleGenerator As HelpPageSampleGenerator = config.GetHelpPageSampleGenerator()
-                    model = GenerateApiModel(ApiDescription, sampleGenerator, config)
+                    model = GenerateApiModel(ApiDescription, config)
                     config.Properties.TryAdd(modelId, model)
                 End If
             End If
             Return DirectCast(model, HelpPageApiModel)
         End Function
 
-        <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="The exception is recorded as ErrorMessages.")>
-        Public Function GenerateApiModel(apiDescription As ApiDescription, sampleGenerator As HelpPageSampleGenerator, config As HttpConfiguration) As HelpPageApiModel
-            Dim apiModel As New HelpPageApiModel()
-            apiModel.ApiDescription = apiDescription
+        Public Function GenerateApiModel(apiDescription As ApiDescription, config As HttpConfiguration) As HelpPageApiModel
+            Dim apiModel As New HelpPageApiModel() With {
+                .ApiDescription = apiDescription
+            }
 
+            Dim sampleGenerator As HelpPageSampleGenerator = config.GetHelpPageSampleGenerator()
+            Dim modelGenerator As ModelDescriptionGenerator = config.GetModelDescriptionGenerator()
+            GenerateUriParameters(apiModel, modelGenerator)
+            GenerateRequestModelDescription(apiModel, modelGenerator, sampleGenerator)
+            GenerateResourceDescription(apiModel, modelGenerator)
+            GenerateSamples(apiModel, sampleGenerator)
+
+            Return apiModel
+        End Function
+
+        Private Sub GenerateUriParameters(apiModel As HelpPageApiModel, modelGenerator As ModelDescriptionGenerator)
+            Dim apiDescription As ApiDescription = apiModel.ApiDescription
+            For Each apiParameter As ApiParameterDescription In apiDescription.ParameterDescriptions
+                If apiParameter.Source = ApiParameterSource.FromUri Then
+                    Dim parameterType As Type = apiParameter.ParameterDescriptor.ParameterType
+
+                    Dim typeDescription As ModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType)
+                    Dim complexTypeDescription As ComplexTypeModelDescription = TryCast(typeDescription, ComplexTypeModelDescription)
+                    If complexTypeDescription IsNot Nothing Then
+                        For Each uriParameter As ParameterDescription In complexTypeDescription.Properties
+                            apiModel.UriParameters.Add(uriParameter)
+                        Next
+                    Else
+                        Dim uriParameter As New ParameterDescription() With {
+                            .Name = apiParameter.Name,
+                            .Documentation = apiParameter.Documentation,
+                            .TypeDescription = typeDescription
+                        }
+                        Dim parameterDescriptor As HttpParameterDescriptor = apiParameter.ParameterDescriptor
+                        If Not parameterDescriptor.IsOptional Then
+                            uriParameter.Annotations.Add(New ParameterAnnotation() With {
+                                .Documentation = "Required"
+                            })
+                        End If
+                        Dim defaultValue As Object = parameterDescriptor.DefaultValue
+                        If defaultValue IsNot Nothing Then
+                            uriParameter.Annotations.Add(New ParameterAnnotation() With {
+                                .Documentation = "Default value is " & Convert.ToString(defaultValue, CultureInfo.InvariantCulture)
+                            })
+                        End If
+                        apiModel.UriParameters.Add(uriParameter)
+                    End If
+                End If
+            Next
+        End Sub
+
+
+        Private Sub GenerateRequestModelDescription(apiModel As HelpPageApiModel, modelGenerator As ModelDescriptionGenerator, sampleGenerator As HelpPageSampleGenerator)
+            Dim apiDescription As ApiDescription = apiModel.ApiDescription
+            For Each apiParameter As ApiParameterDescription In apiDescription.ParameterDescriptions
+                If apiParameter.Source = ApiParameterSource.FromBody Then
+                    Dim parameterType As Type = apiParameter.ParameterDescriptor.ParameterType
+                    apiModel.RequestModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType)
+                ElseIf apiParameter.ParameterDescriptor.ParameterType = GetType(HttpRequestMessage) Then
+                    Dim parameterType As Type = sampleGenerator.ResolveHttpRequestMessageType(apiDescription)
+
+                    If parameterType IsNot Nothing Then
+                        apiModel.RequestModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType)
+                    End If
+                End If
+            Next
+        End Sub
+
+        Private Sub GenerateResourceDescription(apiModel As HelpPageApiModel, modelGenerator As ModelDescriptionGenerator)
+            Dim response As ResponseDescription = apiModel.ApiDescription.ResponseDescription
+            Dim responseType As Type = If(response.ResponseType, response.DeclaredType)
+            apiModel.ResourceDescription = If(responseType IsNot Nothing, modelGenerator.GetOrCreateModelDescription(responseType), Nothing)
+        End Sub
+
+        <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="The exception is recorded as ErrorMessages.")>
+        Private Sub GenerateSamples(apiModel As HelpPageApiModel, sampleGenerator As HelpPageSampleGenerator)
             Try
-                For Each item In sampleGenerator.GetSampleRequests(apiDescription)
+                For Each item In sampleGenerator.GetSampleRequests(apiModel.ApiDescription)
                     apiModel.SampleRequests.Add(item.Key, item.Value)
                     LogInvalidSampleAsError(apiModel, item.Value)
                 Next
 
-                For Each item In sampleGenerator.GetSampleResponses(apiDescription)
+                For Each item In sampleGenerator.GetSampleResponses(apiModel.ApiDescription)
                     apiModel.SampleResponses.Add(item.Key, item.Value)
                     LogInvalidSampleAsError(apiModel, item.Value)
                 Next
@@ -248,26 +319,7 @@ Namespace Areas.HelpPage
                                                          "An exception has occurred while generating the sample. Exception message: {0}",
                                                          HelpPageSampleGenerator.UnwrapException(e).Message))
             End Try
-
-            apiModel.RequestModelDescription = GenerateParameterModelDescription(apiDescription, config)
-
-            Return apiModel
-        End Function
-
-        Private Function GenerateParameterModelDescription(apiDescription As ApiDescription, config As HttpConfiguration) As ParameterModelDescription
-            Dim parameterDescription As ApiParameterDescription = Nothing
-            Dim parameterType As Type = Nothing
-            If TryGetResourceParameter(apiDescription, config, parameterDescription, parameterType) Then
-                Dim modelGenerator As ModelDescriptionGenerator = config.GetModelDescriptionGenerator()
-                Dim modelDescription As ModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType)
-                Return New ParameterModelDescription() With {
-                    .ModelDescription = modelDescription,
-                    .ParameterDescription = parameterDescription
-                }
-            End If
-
-            Return Nothing
-        End Function
+        End Sub
 
         Private Function TryGetResourceParameter(apiDescription As ApiDescription, config As HttpConfiguration, ByRef parameterDescription As ApiParameterDescription, ByRef resourceType As Type) As Boolean
             parameterDescription = apiDescription.ParameterDescriptions.FirstOrDefault(Function(p) p.Source = ApiParameterSource.FromBody OrElse p.ParameterDescriptor.ParameterType = GetType(HttpRequestMessage))

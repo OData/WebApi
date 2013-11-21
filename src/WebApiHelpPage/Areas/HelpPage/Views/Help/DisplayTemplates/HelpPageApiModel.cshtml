@@ -1,52 +1,67 @@
 ﻿@using System.Web.Http
 @using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
+@using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 @model HelpPageApiModel
 
-@{ 
+@{
     var description = Model.ApiDescription;
-    bool hasParameters = description.ParameterDescriptions.Count > 0;
-    bool hasRequestSamples = Model.SampleRequests.Count > 0;
-    bool hasResponseSamples = Model.SampleResponses.Count > 0;
 }
 <h1>@description.HttpMethod.Method @description.RelativePath</h1>
 <div>
-    @if (description.Documentation != null)
+    <p>@description.Documentation</p>
+
+    <h2>Request Information</h2>
+
+    <h3>URI Parameters</h3>
+    @Html.DisplayFor(m => m.UriParameters, "Parameters")
+
+    <h3>Body Parameters</h3>
+    @if (Model.RequestModelDescription != null)
     {
-        <p>@description.Documentation</p>
+        @Html.DisplayFor(m => m.RequestModelDescription.ModelType, "ModelDescriptionLink", new { modelDescription = Model.RequestModelDescription })
+        <p>@Model.RequestModelDescription.Documentation</p>
+        if (Model.RequestModelDescription is ComplexTypeModelDescription ||
+            Model.RequestModelDescription is CollectionModelDescription)
+        {
+            @Html.DisplayFor(m => m.RequestModelDescription);
+        }
     }
     else
     {
-        <p>No documentation available.</p>
+        <p>None.</p>
     }
 
-    @if (hasParameters || hasRequestSamples)
+    @if (Model.SampleRequests.Count > 0)
     {
-        <h2>Request Information</h2>
-        if (hasParameters)
-        {
-            <h3>Parameters</h3>
-            @Html.DisplayFor(apiModel => apiModel.ApiDescription.ParameterDescriptions, "Parameters",
-                new { modelDescription = Model.RequestModelDescription })
-        }
-        if (hasRequestSamples)
-        {
-            <h3>Request body formats</h3>
-            @Html.DisplayFor(apiModel => apiModel.SampleRequests, "Samples")
-        }
-    } 
-
-    @if (hasResponseSamples)
-    {
-        <h2>Response Information</h2>
-        if (description.ResponseDescription.Documentation != null)
-        {
-            <p>@description.ResponseDescription.Documentation</p>
-        }
-        else
-        {
-            <p>No documentation available.</p>
-        }
-        <h3>Response body formats</h3>
-        @Html.DisplayFor(apiModel => apiModel.SampleResponses, "Samples")
+        <h3>Request Formats</h3>
+        @Html.DisplayFor(m => m.SampleRequests, "Samples")
     }
+    
+    <h2>Response Information</h2>
+
+    <p>@description.ResponseDescription.Documentation</p>
+
+    <h3>Resource Description</h3>
+
+    @if (Model.ResourceDescription != null)
+    {
+        @Html.DisplayFor(m => m.ResourceDescription.ModelType, "ModelDescriptionLink", new { modelDescription = Model.ResourceDescription })
+        <p>@Model.ResourceDescription.Documentation</p>
+        if (Model.ResourceDescription is ComplexTypeModelDescription ||
+            Model.ResourceDescription is CollectionModelDescription)
+        {
+            @Html.DisplayFor(m => m.ResourceDescription);
+        }
+    }
+    else
+    {
+        <p>None.</p>
+    }
+
+    @if (Model.SampleResponses.Count > 0)
+    {
+        <h3>Response Formats</h3>
+        @Html.DisplayFor(m => m.SampleResponses, "Samples")
+    }
+
 </div>

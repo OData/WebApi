@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models;
@@ -223,8 +224,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
                 ApiDescription apiDescription = apiDescriptions.FirstOrDefault(api => String.Equals(api.GetFriendlyId(), apiDescriptionId, StringComparison.OrdinalIgnoreCase));
                 if (apiDescription != null)
                 {
-                    HelpPageSampleGenerator sampleGenerator = config.GetHelpPageSampleGenerator();
-                    model = GenerateApiModel(apiDescription, sampleGenerator, config);
+                    model = GenerateApiModel(apiDescription, config);
                     config.Properties.TryAdd(modelId, model);
                 }
             }
@@ -232,21 +232,106 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
             return (HelpPageApiModel)model;
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The exception is recorded as ErrorMessages.")]
-        private static HelpPageApiModel GenerateApiModel(ApiDescription apiDescription, HelpPageSampleGenerator sampleGenerator, HttpConfiguration config)
+        private static HelpPageApiModel GenerateApiModel(ApiDescription apiDescription, HttpConfiguration config)
         {
-            HelpPageApiModel apiModel = new HelpPageApiModel();
-            apiModel.ApiDescription = apiDescription;
+            HelpPageApiModel apiModel = new HelpPageApiModel()
+            {
+                ApiDescription = apiDescription,
+            };
 
+            ModelDescriptionGenerator modelGenerator = config.GetModelDescriptionGenerator();
+            HelpPageSampleGenerator sampleGenerator = config.GetHelpPageSampleGenerator();
+            GenerateUriParameters(apiModel, modelGenerator);
+            GenerateRequestModelDescription(apiModel, modelGenerator, sampleGenerator);
+            GenerateResourceDescription(apiModel, modelGenerator);
+            GenerateSamples(apiModel, sampleGenerator);
+
+            return apiModel;
+        }
+
+        private static void GenerateUriParameters(HelpPageApiModel apiModel, ModelDescriptionGenerator modelGenerator)
+        {
+            ApiDescription apiDescription = apiModel.ApiDescription;
+            foreach (ApiParameterDescription apiParameter in apiDescription.ParameterDescriptions)
+            {
+                if (apiParameter.Source == ApiParameterSource.FromUri)
+                {
+                    Type parameterType = apiParameter.ParameterDescriptor.ParameterType;
+
+                    ModelDescription typeDescription = modelGenerator.GetOrCreateModelDescription(parameterType);
+                    ComplexTypeModelDescription complexTypeDescription = typeDescription as ComplexTypeModelDescription;
+                    if (complexTypeDescription != null)
+                    {
+                        foreach (ParameterDescription uriParameter in complexTypeDescription.Properties)
+                        {
+                            apiModel.UriParameters.Add(uriParameter);
+                        }
+                    }
+                    else
+                    {
+                        ParameterDescription uriParameter = new ParameterDescription()
+                        {
+                            Name = apiParameter.Name,
+                            Documentation = apiParameter.Documentation,
+                            TypeDescription = typeDescription,
+                        };
+                        HttpParameterDescriptor parameterDescriptor = apiParameter.ParameterDescriptor;
+                        if (!parameterDescriptor.IsOptional)
+                        {
+                            uriParameter.Annotations.Add(new ParameterAnnotation() { Documentation = "Required" });
+                        }
+                        object defaultValue = parameterDescriptor.DefaultValue;
+                        if (defaultValue != null)
+                        {
+                            uriParameter.Annotations.Add(new ParameterAnnotation() { Documentation = "Default value is " + Convert.ToString(defaultValue, CultureInfo.InvariantCulture) });
+                        }
+                        apiModel.UriParameters.Add(uriParameter);
+                    }
+                }
+            }
+        }
+
+        private static void GenerateRequestModelDescription(HelpPageApiModel apiModel, ModelDescriptionGenerator modelGenerator, HelpPageSampleGenerator sampleGenerator)
+        {
+            ApiDescription apiDescription = apiModel.ApiDescription;
+            foreach (ApiParameterDescription apiParameter in apiDescription.ParameterDescriptions)
+            {
+                if (apiParameter.Source == ApiParameterSource.FromBody)
+                {
+                    Type parameterType = apiParameter.ParameterDescriptor.ParameterType;
+                    apiModel.RequestModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType);
+                }
+                else if (apiParameter.ParameterDescriptor.ParameterType == typeof(HttpRequestMessage))
+                {
+                    Type parameterType = sampleGenerator.ResolveHttpRequestMessageType(apiDescription);
+
+                    if (parameterType != null)
+                    {
+                        apiModel.RequestModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType);
+                    }
+                }
+            }
+        }
+
+        private static void GenerateResourceDescription(HelpPageApiModel apiModel, ModelDescriptionGenerator modelGenerator)
+        {
+            ResponseDescription response = apiModel.ApiDescription.ResponseDescription;
+            Type responseType = response.ResponseType ?? response.DeclaredType;
+            apiModel.ResourceDescription = responseType != null ? modelGenerator.GetOrCreateModelDescription(responseType) : null;
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The exception is recorded as ErrorMessages.")]
+        private static void GenerateSamples(HelpPageApiModel apiModel, HelpPageSampleGenerator sampleGenerator)
+        {
             try
             {
-                foreach (var item in sampleGenerator.GetSampleRequests(apiDescription))
+                foreach (var item in sampleGenerator.GetSampleRequests(apiModel.ApiDescription))
                 {
                     apiModel.SampleRequests.Add(item.Key, item.Value);
                     LogInvalidSampleAsError(apiModel, item.Value);
                 }
 
-                foreach (var item in sampleGenerator.GetSampleResponses(apiDescription))
+                foreach (var item in sampleGenerator.GetSampleResponses(apiModel.ApiDescription))
                 {
                     apiModel.SampleResponses.Add(item.Key, item.Value);
                     LogInvalidSampleAsError(apiModel, item.Value);
@@ -254,32 +339,10 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
             }
             catch (Exception e)
             {
-                apiModel.ErrorMessages.Add(String.Format(CultureInfo.CurrentCulture, 
+                apiModel.ErrorMessages.Add(String.Format(CultureInfo.CurrentCulture,
                     "An exception has occurred while generating the sample. Exception message: {0}",
                     HelpPageSampleGenerator.UnwrapException(e).Message));
             }
-
-            apiModel.RequestModelDescription = GenerateParameterModelDescription(apiDescription, config);
-
-            return apiModel;
-        }
-
-        private static ParameterModelDescription GenerateParameterModelDescription(ApiDescription apiDescription, HttpConfiguration config)
-        {
-            ApiParameterDescription parameterDescription;
-            Type parameterType;
-            if (TryGetResourceParameter(apiDescription, config, out parameterDescription, out parameterType))
-            {
-                ModelDescriptionGenerator modelGenerator = config.GetModelDescriptionGenerator();
-                ModelDescription modelDescription = modelGenerator.GetOrCreateModelDescription(parameterType);
-                return new ParameterModelDescription
-                {
-                    ModelDescription = modelDescription,
-                    ParameterDescription = parameterDescription
-                };
-            }
-
-            return null;
         }
 
         private static bool TryGetResourceParameter(ApiDescription apiDescription, HttpConfiguration config, out ApiParameterDescription parameterDescription, out Type resourceType)

@@ -8,6 +8,10 @@
         Else
             @Html.ActionLink(modelDescription.Name, "ResourceModel", "Help", New With {.modelName = modelDescription.Name}, Nothing)
         End If
+    ElseIf TypeOf modelDescription Is CollectionModelDescription Then
+        Dim collectionDescription As CollectionModelDescription = DirectCast(modelDescription, CollectionModelDescription)
+        Dim elementDescription As ModelDescription = collectionDescription.ElementDescription
+        @:Collection of @Html.DisplayFor(Function(m) elementDescription.ModelType, "ModelDescriptionLink", New With {.modelDescription = elementDescription})
     Else
         @Html.DisplayFor(Function(m) modelDescription)
     End If

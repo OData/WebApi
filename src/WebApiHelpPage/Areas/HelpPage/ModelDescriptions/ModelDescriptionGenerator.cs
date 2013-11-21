@@ -264,9 +264,9 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
             return documentation;
         }
 
-        private void GenerateAnnotations(MemberInfo property, PropertyDescription propertyModel)
+        private void GenerateAnnotations(MemberInfo property, ParameterDescription propertyModel)
         {
-            List<PropertyAnnotation> annotations = new List<PropertyAnnotation>();
+            List<ParameterAnnotation> annotations = new List<ParameterAnnotation>();
 
             IEnumerable<Attribute> attributes = property.GetCustomAttributes();
             foreach (Attribute attribute in attributes)
@@ -275,7 +275,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
                 if (AnnotationTextGenerator.TryGetValue(attribute.GetType(), out textGenerator))
                 {
                     annotations.Add(
-                        new PropertyAnnotation
+                        new ParameterAnnotation
                         {
                             AnnotationAttribute = attribute,
                             Documentation = textGenerator(attribute)
@@ -300,7 +300,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
                 return String.Compare(x.Documentation, y.Documentation, StringComparison.OrdinalIgnoreCase);
             });
 
-            foreach (PropertyAnnotation annotation in annotations)
+            foreach (ParameterAnnotation annotation in annotations)
             {
                 propertyModel.Annotations.Add(annotation);
             }
@@ -338,7 +338,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
             {
                 if (ShouldDisplayMember(property, hasDataContractAttribute))
                 {
-                    PropertyDescription propertyModel = new PropertyDescription
+                    ParameterDescription propertyModel = new ParameterDescription
                     {
                         Name = GetMemberName(property, hasDataContractAttribute)
                     };
@@ -359,7 +359,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
             {
                 if (ShouldDisplayMember(field, hasDataContractAttribute))
                 {
-                    PropertyDescription propertyModel = new PropertyDescription
+                    ParameterDescription propertyModel = new ParameterDescription
                     {
                         Name = GetMemberName(field, hasDataContractAttribute)
                     };

@@ -13,7 +13,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
     /// </summary>
     public class ObjectGenerator
     {
-        private const int DefaultCollectionSize = 3;
+        private const int DefaultCollectionSize = 2;
         private readonly SimpleTypeObjectGenerator SimpleObjectGenerator = new SimpleTypeObjectGenerator();
 
         /// <summary>

@@ -1,3 +1,7 @@
+h1, .h1, h2, .h2, h3, .h3, body, .help-page-table th, .help-page-table pre, .help-page-table p {
+    font-family: "Segoe UI Light", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
 pre.wrapped {
     white-space: -moz-pre-wrap;
     white-space: -pre-wrap;
@@ -18,19 +22,19 @@ pre.wrapped {
     border-collapse: collapse;
     text-align: left;
     margin: 0px 0px 20px 0px;
-    border-top: 2px solid #D4D4D4;
+    border-top: 1px solid #D4D4D4;
 }
 
 .help-page-table th {
     text-align: left;
     font-weight: bold;
-    border-bottom: 2px solid #D4D4D4;
-    padding: 8px 6px 8px 6px;
+    border-bottom: 1px solid #D4D4D4;
+    padding: 5px 6px 5px 6px;
 }
 
 .help-page-table td {
-    border-bottom: 2px solid #D4D4D4;
-    padding: 15px 8px 15px 8px;
+    border-bottom: 1px solid #D4D4D4;
+    padding: 10px 8px 10px 8px;
     vertical-align: top;
 }
 
@@ -81,9 +85,32 @@ a:hover {
 }
 
 .parameter-documentation {
-    width: 50%;
+    width: 40%;
 }
 
-.parameter-source {
-    width: 30%;
+.parameter-type {
+    width: 20%;
+}
+
+.parameter-annotations {
+    width: 20%;
+}
+
+h1, .h1 {
+	font-size: 36px;
+}
+
+h2, .h2 {
+	font-size: 24px;
+}
+
+body {
+	font-size: 14px;
+	line-height: 143%;
+	color: #333;
+}
+
+a {
+	color: #00abec;
+	text-decoration: none;
 }

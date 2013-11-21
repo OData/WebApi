@@ -11,7 +11,13 @@
         </div>
     </section>
     <h1>@Model.Name</h1>
+    <p>@Model.Documentation</p>
     <section class="content-wrapper main-content clear-fix">
         @Html.DisplayFor(Function(m) Model)
     </section>
 </div>
+
+@Section Scripts
+    <link type="text/css" href="~/Areas/HelpPage/HelpPage.css" rel="stylesheet" />
+End Section
+

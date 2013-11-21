@@ -40,7 +40,7 @@
     <Compile Include="Areas\HelpPage\HelpPageConfigurationExtensions.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\CollectionModelDescription.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ComplexTypeModelDescription.cs" />
-    <Compile Include="Areas\HelpPage\ModelDescriptions\PropertyAnnotation.cs" />
+    <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterAnnotation.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\DictionaryModelDescription.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\EnumTypeModelDescription.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\EnumValueDescription.cs" />
@@ -51,7 +51,7 @@
     <Compile Include="Areas\HelpPage\ModelDescriptions\ModelNameAttribute.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ModelNameHelper.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterModelDescription.cs" />
-    <Compile Include="Areas\HelpPage\ModelDescriptions\PropertyDescription.cs" />
+    <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterDescription.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\ObjectGenerator.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
@@ -78,7 +78,6 @@
     <None Include="Areas\HelpPage\Views\Help\DisplayTemplates\KeyValuePairModelDescription.cshtml" />
     <None Include="Areas\HelpPage\Views\Help\DisplayTemplates\ModelDescriptionLink.cshtml" />
     <None Include="Areas\HelpPage\Views\Help\DisplayTemplates\Parameters.cshtml" />
-    <None Include="Areas\HelpPage\Views\Help\DisplayTemplates\PropertyDescriptions.cshtml" />
     <None Include="Areas\HelpPage\Views\Help\DisplayTemplates\Samples.cshtml" />
     <None Include="Areas\HelpPage\Views\Help\DisplayTemplates\SimpleTypeModelDescription.cshtml" />
     <None Include="Areas\HelpPage\Views\Help\DisplayTemplates\TextSample.cshtml" />

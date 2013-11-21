@@ -220,15 +220,15 @@ Namespace Areas.HelpPage.ModelDescriptions
             Return documentation
         End Function
 
-        Private Sub GenerateAnnotations([property] As MemberInfo, propertyModel As PropertyDescription)
-            Dim annotations As New List(Of PropertyAnnotation)()
+        Private Sub GenerateAnnotations([property] As MemberInfo, propertyModel As ParameterDescription)
+            Dim annotations As New List(Of ParameterAnnotation)()
 
             Dim attributes As IEnumerable(Of Attribute) = [property].GetCustomAttributes()
             For Each attribute As Attribute In attributes
                 Dim textGenerator As Func(Of Object, String) = Nothing
                 If AnnotationTextGenerator.TryGetValue(attribute.[GetType](), textGenerator) Then
                     annotations.Add(
-                        New PropertyAnnotation() With {
+                        New ParameterAnnotation() With {
                             .AnnotationAttribute = attribute,
                             .Documentation = textGenerator(attribute)
                         })
@@ -251,7 +251,7 @@ Namespace Areas.HelpPage.ModelDescriptions
 
                 End Function)
 
-            For Each annotation As PropertyAnnotation In annotations
+            For Each annotation As ParameterAnnotation In annotations
                 propertyModel.Annotations.Add(annotation)
             Next
         End Sub
@@ -281,7 +281,7 @@ Namespace Areas.HelpPage.ModelDescriptions
             Dim properties As PropertyInfo() = modelType.GetProperties(BindingFlags.[Public] Or BindingFlags.Instance)
             For Each [property] As PropertyInfo In properties
                 If ShouldDisplayMember([property], hasDataContractAttribute) Then
-                    Dim propertyModel As New PropertyDescription() With {
+                    Dim propertyModel As New ParameterDescription() With {
                         .Name = GetMemberName([property], hasDataContractAttribute)
                     }
 
@@ -298,7 +298,7 @@ Namespace Areas.HelpPage.ModelDescriptions
             Dim fields As FieldInfo() = modelType.GetFields(BindingFlags.[Public] Or BindingFlags.Instance)
             For Each field As FieldInfo In fields
                 If ShouldDisplayMember(field, hasDataContractAttribute) Then
-                    Dim propertyModel As New PropertyDescription() With {
+                    Dim propertyModel As New ParameterDescription() With {
                         .Name = GetMemberName(field, hasDataContractAttribute)
                     }
 

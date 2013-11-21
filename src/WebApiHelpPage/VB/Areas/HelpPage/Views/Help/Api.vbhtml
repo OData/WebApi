@@ -17,7 +17,7 @@ End Code
         </div>
     </section>
     <section class="content-wrapper main-content clear-fix">
-        @Html.DisplayFor(Function(m) Model)
+        @Html.DisplayForModel()
     </section>
 </div>
 

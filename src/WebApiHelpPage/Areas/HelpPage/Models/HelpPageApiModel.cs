@@ -16,6 +16,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
         /// </summary>
         public HelpPageApiModel()
         {
+            UriParameters = new Collection<ParameterDescription>();
             SampleRequests = new Dictionary<MediaTypeHeaderValue, object>();
             SampleResponses = new Dictionary<MediaTypeHeaderValue, object>();
             ErrorMessages = new Collection<string>();
@@ -27,9 +28,19 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
         public ApiDescription ApiDescription { get; set; }
 
         /// <summary>
-        /// Gets or sets the model description of the parameter in the request.
+        /// Gets or sets the <see cref="ParameterDescription"/> collection that describes the URI parameters for the API.
         /// </summary>
-        public ParameterModelDescription RequestModelDescription { get; set; }
+        public Collection<ParameterDescription> UriParameters { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ModelDescription"/> that describes the request body.
+        /// </summary>
+        public ModelDescription RequestModelDescription { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ModelDescription"/> that describes the resource.
+        /// </summary>
+        public ModelDescription ResourceDescription { get; set; }
 
         /// <summary>
         /// Gets the sample requests associated with the API.

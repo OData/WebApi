@@ -10,7 +10,7 @@
         Nothing)
 End Code
 
-<h2 id="@Model.Key">@Model.Key.ControllerName</h2>
+<h2 id="@Model.Key.ControllerName">@Model.Key.ControllerName</h2>
 @If Not controllerDocumentation Is Nothing Then
     @<p>@controllerDocumentation</p>
 End If

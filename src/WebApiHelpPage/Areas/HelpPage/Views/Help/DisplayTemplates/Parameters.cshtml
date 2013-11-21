@@ -1,57 +1,48 @@
-﻿@using System.Collections.ObjectModel
+﻿@using System.Collections.Generic
+@using System.Collections.ObjectModel
 @using System.Web.Http.Description
 @using System.Threading
 @using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
-@model Collection<ApiParameterDescription>
-@{
-    ParameterModelDescription requestModelDescription = ViewBag.modelDescription;
-}
-<table class="help-page-table">
-    <thead>
-        <tr><th>Name</th><th>Description</th><th>Additional information</th></tr>
-    </thead>
-    <tbody>
-        @foreach (ApiParameterDescription parameter in Model)
-        {
-            string parameterDocumentation = parameter.Documentation != null ?
-                parameter.Documentation :
-                "No documentation available.";
-            bool hasModelDescription = requestModelDescription != null && requestModelDescription.ParameterDescription == parameter;
+@model IList<ParameterDescription>
 
-            // Don't show CancellationToken because it's a special parameter
-            if (parameter.ParameterDescriptor == null ||
-                (parameter.ParameterDescriptor != null &&
-                !typeof(CancellationToken).IsAssignableFrom(parameter.ParameterDescriptor.ParameterType)))
+@if (Model.Count > 0)
+{
+    <table class="help-page-table">
+        <thead>
+            <tr><th>Name</th><th>Description</th><th>Type</th><th>Additional information</th></tr>
+        </thead>
+        <tbody>
+            @foreach (ParameterDescription parameter in Model)
             {
+                ModelDescription modelDescription = parameter.TypeDescription;
                 <tr>
-                    <td class="parameter-name"><b>@parameter.Name</b></td>
+                    <td class="parameter-name">@parameter.Name</td>
                     <td class="parameter-documentation">
-                        @if (parameter.Documentation != null || !hasModelDescription)
-                        {
-                            <p>@parameterDocumentation</p>
-                        }
-                        @if (hasModelDescription)
-                        {
-                            @Html.DisplayFor(m => requestModelDescription.ModelDescription)
-                        }
+                        <p>@parameter.Documentation</p>
                     </td>
-                    <td class="parameter-source">
-                        @switch (parameter.Source)
+                    <td class="parameter-type">
+                        @Html.DisplayFor(m => modelDescription.ModelType, "ModelDescriptionLink", new { modelDescription = modelDescription })
+                    </td>
+                    <td class="parameter-annotations">
+                        @if (parameter.Annotations.Count > 0)
                         {
-                            case ApiParameterSource.FromBody:
-                                <p>Define this parameter in the request <b>body</b>.</p>
-                                break;
-                            case ApiParameterSource.FromUri:
-                                <p>Define this parameter in the request <b>URI</b>.</p>
-                                break;
-                            case ApiParameterSource.Unknown:
-                            default:
-                                <p>None.</p>
-                                break;
+                            foreach (var annotation in parameter.Annotations)
+                            {
+                                <p>@annotation.Documentation</p>
+                            }
+                        }
+                        else
+                        {
+                            <p>None.</p>
                         }
                     </td>
                 </tr>
             }
-        }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+}
+else
+{
+    <p>None.</p>
+}
+

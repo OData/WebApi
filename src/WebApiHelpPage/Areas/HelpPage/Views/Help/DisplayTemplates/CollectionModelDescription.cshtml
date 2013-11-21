@@ -1,3 +1,6 @@
 @using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 @model CollectionModelDescription
-Collection of @Html.DisplayFor(m => Model.ElementDescription.ModelType, "ModelDescriptionLink", new { modelDescription = Model.ElementDescription })
+@if (Model.ElementDescription is ComplexTypeModelDescription)
+{
+    @Html.DisplayFor(m => m.ElementDescription)
+}

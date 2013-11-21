@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 {
@@ -6,9 +7,9 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
     {
         public EnumTypeModelDescription()
         {
-            Values = new List<EnumValueDescription>();
+            Values = new Collection<EnumValueDescription>();
         }
 
-        public IList<EnumValueDescription> Values { get; private set; }
+        public Collection<EnumValueDescription> Values { get; private set; }
     }
 }

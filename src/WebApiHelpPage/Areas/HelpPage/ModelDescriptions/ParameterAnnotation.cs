@@ -2,7 +2,7 @@
 
 namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 {
-    public class PropertyAnnotation
+    public class ParameterAnnotation
     {
         public Attribute AnnotationAttribute { get; set; }
 

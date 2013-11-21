@@ -1,7 +1,7 @@
 ﻿Imports System
 
 Namespace Areas.HelpPage.ModelDescriptions
-    Public Class PropertyAnnotation
+    Public Class ParameterAnnotation
         Private _annotationAttribute As Attribute
         Private _documentation As String
 

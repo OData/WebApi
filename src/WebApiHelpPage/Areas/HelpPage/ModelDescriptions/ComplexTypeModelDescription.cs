@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 {
@@ -6,9 +7,9 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
     {
         public ComplexTypeModelDescription()
         {
-            Properties = new List<PropertyDescription>();
+            Properties = new Collection<ParameterDescription>();
         }
 
-        public IList<PropertyDescription> Properties { get; private set; }
+        public Collection<ParameterDescription> Properties { get; private set; }
     }
 }

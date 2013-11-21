@@ -1,42 +1,59 @@
 @Imports System.Web.Http
 @Imports System.Web.Http.Description
 @Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
+@Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 @ModelType HelpPageApiModel
 
 @Code
     Dim description As ApiDescription = Model.ApiDescription
-    Dim hasParameters As Boolean = description.ParameterDescriptions.Count > 0
-    Dim hasRequestSamples As Boolean = Model.SampleRequests.Count > 0
-    Dim hasResponseSamples As Boolean = Model.SampleResponses.Count > 0
 End Code
+
 <h1>@description.HttpMethod.Method @description.RelativePath</h1>
 <div>
-    @If Not description.Documentation Is Nothing Then
-        @<p>@description.Documentation</p>
+    <p>@description.Documentation</p>
+
+    <h2>Request Information</h2>
+
+    <h3>URI Parameters</h3>
+    @Html.DisplayFor(Function(m) m.UriParameters, "Parameters")
+
+    <h3>Body Parameters</h3>
+    @If Model.RequestModelDescription IsNot Nothing Then
+    
+        @Html.DisplayFor(Function(m) m.RequestModelDescription.ModelType, "ModelDescriptionLink", New With {.modelDescription = Model.RequestModelDescription})
+            @<p>@Model.RequestModelDescription.Documentation</p>
+        If TypeOf Model.RequestModelDescription Is ComplexTypeModelDescription OrElse TypeOf Model.RequestModelDescription Is CollectionModelDescription Then
+
+            @Html.DisplayFor(Function(m) m.RequestModelDescription)  
+        End If 
     Else
-        @<p>No documentation available.</p>
+        @<p>None.</p>
     End If
 
-    @If hasParameters Or hasRequestSamples Then
-        @<h2>Request Information</h2>
-        If hasParameters Then
-            @<h3>Parameters</h3>
-            @Html.DisplayFor(Function(apiModel) apiModel.ApiDescription.ParameterDescriptions, "Parameters", New With { .modelDescription = Model.RequestModelDescription })
+    @If Model.SampleRequests.Count > 0 Then
+        @<h3>Request Formats</h3>
+        @Html.DisplayFor(Function(m) m.SampleRequests, "Samples")
+    End If 
+
+    <h2>Response Information</h2>
+
+    <p>@description.ResponseDescription.Documentation</p>
+
+    <h3>Resource Description</h3>
+
+    @If Model.ResourceDescription IsNot Nothing Then
+        @Html.DisplayFor(Function(m) m.ResourceDescription.ModelType, "ModelDescriptionLink", New With {.modelDescription = Model.ResourceDescription})
+        @<p>@Model.ResourceDescription.Documentation</p>
+        If TypeOf Model.ResourceDescription Is ComplexTypeModelDescription OrElse TypeOf Model.ResourceDescription Is CollectionModelDescription Then
+            @Html.DisplayFor(Function(m) m.ResourceDescription)
         End If
-        If hasRequestSamples Then
-            @<h3>Request body formats</h3>
-            @Html.DisplayFor(Function(apiModel) apiModel.SampleRequests, "Samples")
-        End If
+    Else
+        @<p>None.</p>
     End If
 
-    @If hasResponseSamples Then
-        @<h2>Response Information</h2>
-        If Not description.ResponseDescription.Documentation Is Nothing Then
-            @<p>@description.ResponseDescription.Documentation</p>
-        Else
-            @<p>No documentation available.</p>
-        End If
-        @<h3>Response body formats</h3>
-        @Html.DisplayFor(Function(apiModel) apiModel.SampleResponses, "Samples")
+
+    @If Model.SampleResponses.Count > 0 Then
+        @<h3>Response Formats</h3>
+        @Html.DisplayFor(Function(m) m.SampleResponses, "Samples")
     End If
 </div>

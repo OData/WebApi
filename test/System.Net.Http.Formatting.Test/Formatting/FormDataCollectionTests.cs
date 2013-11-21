@@ -19,6 +19,16 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        public void IndexerIsEquivalentToGet()
+        {
+            FormDataCollection form = new FormDataCollection(new Uri("http://foo.com/?x=1&y=2"));
+
+            Assert.Equal("1", form.Get("x"));
+            Assert.Equal(form["x"], form.Get("x"));
+            Assert.Equal(form[null], form.Get(null));
+        }
+
+        [Fact]
         public void CreateFromEmptyUri()
         {
             FormDataCollection form = new FormDataCollection(new Uri("http://foo.com"));
@@ -31,7 +41,7 @@ namespace System.Net.Http.Formatting
         {
             Assert.ThrowsArgumentNull(() => new FormDataCollection((Uri)null), "uri");
         }
-        
+
         [Fact]
         public void CreateFromEmptyString()
         {
@@ -43,7 +53,7 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void CreateFromNullString()
         {
-            FormDataCollection form = new FormDataCollection((string) null);
+            FormDataCollection form = new FormDataCollection((string)null);
 
             Assert.Empty(form);
         }
@@ -58,7 +68,7 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void CreateFromPairs()
         {
-            Dictionary<string, string> pairs = new Dictionary<string,string> 
+            Dictionary<string, string> pairs = new Dictionary<string, string> 
             { 
                 { "x",  "1"}, 
                 { "y" , "2"} 
@@ -89,8 +99,8 @@ namespace System.Net.Http.Formatting
         public void GetValues()
         {
             FormDataCollection form = new FormDataCollection(new Uri("http://foo.com/?x=1&x=2&x=3"));
-                        
-            Assert.Equal(new string[] { "1", "2", "3"}, form.GetValues("x"));
+
+            Assert.Equal(new string[] { "1", "2", "3" }, form.GetValues("x"));
         }
 
         [Fact]
@@ -117,7 +127,7 @@ namespace System.Net.Http.Formatting
             // =ValueOnly
             // KeyOnly
             Assert.Equal(4, nvc.Count);
-            Assert.Equal(new string[] { "1a", "1b"}, nvc.GetValues("x"));
+            Assert.Equal(new string[] { "1a", "1b" }, nvc.GetValues("x"));
             Assert.Equal("1a,1b", nvc.Get("x"));
             Assert.Equal("2", nvc.Get("y"));
             Assert.Equal("", nvc.Get("KeyOnly"));

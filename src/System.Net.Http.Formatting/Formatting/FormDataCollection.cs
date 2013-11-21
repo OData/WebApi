@@ -80,6 +80,19 @@ namespace System.Net.Http.Formatting
             _pairs = ParseQueryString(query);
         }
 
+        /// <summary>
+        /// Gets values associated with a given key. If there are multiple values, they're concatenated.
+        /// </summary>
+        /// <param name="name">The name of the entry that contains the values to get. The name can be null.</param>
+        /// <returns>Values associated with a given key. If there are multiple values, they're concatenated.</returns>
+        public string this[string name]
+        {
+            get
+            {
+                return Get(name);
+            }
+        }
+
         // Helper to invoke parser around a query string
         private static IEnumerable<KeyValuePair<string, string>> ParseQueryString(string query)
         {

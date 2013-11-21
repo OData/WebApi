@@ -283,6 +283,22 @@ namespace System.Net.Http.Internal
         }
 
         [Theory]
+        [PropertyData("KeyValuePairs")]
+        public void GetIsEquivalentToIndexerProperty(IEnumerable<KeyValuePair<string, string>> input)
+        {
+            var nvc = HttpValueCollection.Create(input);
+
+            int count = input.Count();
+            Assert.IsType<HttpValueCollection>(nvc);
+            Assert.Equal(count, nvc.Count);
+
+            foreach (KeyValuePair<string, string> kvp in input)
+            {
+                Assert.Equal(nvc[kvp.Key], nvc.Get(kvp.Key));
+            }
+        }
+
+        [Theory]
         [PropertyData("ToStringTestData", PropertyType = typeof(TestPropertyHolder))]
         internal void ToString_GeneratesCorrectOutput(HttpValueCollection input, string expectedOutput)
         {

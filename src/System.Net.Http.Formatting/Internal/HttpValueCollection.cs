@@ -89,7 +89,7 @@ namespace System.Net.Http.Formatting.Internal
 #if !NETFX_CORE
             override
 #endif
-            void Add(string name, string value)
+ void Add(string name, string value)
         {
             ThrowIfMaxHttpCollectionKeysExceeded(Count);
 
@@ -181,6 +181,21 @@ namespace System.Net.Http.Formatting.Internal
 
 #if NETFX_CORE
         /// <summary>
+        /// Gets the values associated with the specified name
+        /// combined into one comma-separated list.
+        /// </summary>
+        /// <param name="name">The name of the entry that contains the values to get. The name can be null.</param>
+        /// <returns>A <see cref="System.String"/> that contains a comma-separated list of url encoded values associated
+        /// with the specified name if found; otherwise, null. The values are Url encoded.</returns>
+        public string this[string name]
+        {
+            get
+            {
+                return Get(name);
+            }
+        }
+
+        /// <summary>
         /// Gets the number of names in the collection.
         /// </summary>
         public int Count
@@ -189,23 +204,6 @@ namespace System.Net.Http.Formatting.Internal
             {
                 return Names.Count;
             }
-        }
-
-        /// <summary>
-        /// Gets the values associated with the specified name.
-        /// </summary>
-        /// <param name="name">The <see cref="System.String"/></param>
-        /// <returns>A <see cref="System.String"/> that contains url encoded values associated with the name, or null if the name does not exist.</returns>
-        public string[] GetValues(string name)
-        {
-            name = name ?? String.Empty;
-
-            if (!Names.Contains(name))
-            {
-                return null;
-            }
-
-            return GetValuesInternal(name).ToArray();
         }
 
         /// <summary>
@@ -230,6 +228,23 @@ namespace System.Net.Http.Formatting.Internal
             Contract.Assert(values != null && values.Count > 0);
 
             return String.Join(",", values);
+        }
+
+        /// <summary>
+        /// Gets the values associated with the specified name.
+        /// </summary>
+        /// <param name="name">The <see cref="System.String"/></param>
+        /// <returns>A <see cref="System.String"/> that contains url encoded values associated with the name, or null if the name does not exist.</returns>
+        public string[] GetValues(string name)
+        {
+            name = name ?? String.Empty;
+
+            if (!Names.Contains(name))
+            {
+                return null;
+            }
+
+            return GetValuesInternal(name).ToArray();
         }
 
         // call this when only when there are values available.

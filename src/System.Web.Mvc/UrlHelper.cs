@@ -16,6 +16,14 @@ namespace System.Web.Mvc
         /// </summary>
         private const string HttpRouteKey = "httproute";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UrlHelper"/> class.
+        /// </summary>
+        /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
+        public UrlHelper()
+        {
+        }
+
         public UrlHelper(RequestContext requestContext)
             : this(requestContext, RouteTable.Routes)
         {

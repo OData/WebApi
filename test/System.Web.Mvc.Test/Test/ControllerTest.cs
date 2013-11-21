@@ -1853,8 +1853,7 @@ namespace System.Web.Mvc.Test
         {
             // Arrange
             var controller = new UrlHelperController();
-            RequestContext context = new RequestContext();
-            Mock<UrlHelper> urlHelper = new Mock<UrlHelper>(context);
+            Mock<UrlHelper> urlHelper = new Mock<UrlHelper>();
             urlHelper.Setup(u => u.Action("SimpleAction", new { ID = 42 })).Verifiable();
             controller.Url = urlHelper.Object;
 

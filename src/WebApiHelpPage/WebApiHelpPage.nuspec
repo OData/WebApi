@@ -37,7 +37,6 @@
     <file src="Areas\HelpPage\ModelDescriptions\ModelNameAttribute.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\ModelNameAttribute.cs.pp" />
     <file src="Areas\HelpPage\ModelDescriptions\ModelNameHelper.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\ModelNameHelper.cs.pp" />
     <file src="Areas\HelpPage\ModelDescriptions\ModelDescriptionGenerator.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\ModelDescriptionGenerator.cs.pp" />
-    <file src="Areas\HelpPage\ModelDescriptions\ParameterModelDescription.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\ParameterModelDescription.cs.pp" />
     <file src="Areas\HelpPage\ModelDescriptions\ParameterDescription.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\ParameterDescription.cs.pp" />
     <file src="Areas\HelpPage\ModelDescriptions\ParameterAnnotation.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\ParameterAnnotation.cs.pp" />
     <file src="Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.cs.pp" target="content\Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.cs.pp" />

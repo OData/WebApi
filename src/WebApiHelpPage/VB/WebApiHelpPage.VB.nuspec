@@ -59,7 +59,6 @@
     <file src="Areas\HelpPage\Views\Help\DisplayTemplates\KeyValuePairModelDescription.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\KeyValuePairModelDescription.vbhtml.pp" />
     <file src="Areas\HelpPage\Views\Help\DisplayTemplates\ModelDescriptionLink.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\ModelDescriptionLink.vbhtml.pp" />
     <file src="Areas\HelpPage\Views\Help\DisplayTemplates\Parameters.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\Parameters.vbhtml.pp" />
-    <file src="Areas\HelpPage\Views\Help\DisplayTemplates\PropertyDescriptions.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\PropertyDescriptions.vbhtml.pp" />
     <file src="Areas\HelpPage\Views\Help\DisplayTemplates\Samples.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\Samples.vbhtml.pp" />
     <file src="Areas\HelpPage\Views\Help\DisplayTemplates\SimpleTypeModelDescription.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\SimpleTypeModelDescription.vbhtml.pp" />
     <file src="Areas\HelpPage\Views\Help\DisplayTemplates\TextSample.vbhtml.pp" target="content\Areas\HelpPage\Views\Help\DisplayTemplates\TextSample.vbhtml.pp" />

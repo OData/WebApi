@@ -118,7 +118,6 @@
     <Compile Include="Areas\HelpPage\ModelDescriptions\ModelDescriptionGenerator.vb" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ModelNameAttribute.vb" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ModelNameHelper.vb" />
-    <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterModelDescription.vb" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterAnnotation.vb" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterDescription.vb" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.vb" />

@@ -50,7 +50,6 @@
     <Compile Include="Areas\HelpPage\ModelDescriptions\ModelDescriptionGenerator.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ModelNameAttribute.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ModelNameHelper.cs" />
-    <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterModelDescription.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterDescription.cs" />
     <Compile Include="Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\ObjectGenerator.cs" />

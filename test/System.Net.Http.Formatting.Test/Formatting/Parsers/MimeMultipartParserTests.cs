@@ -127,6 +127,18 @@ namespace System.Net.Http.Formatting.Parsers
             }
         }
 
+        public static TheoryDataSet<bool> TrueAndFalse
+        {
+            get
+            {
+                return new TheoryDataSet<bool>
+                {
+                    true,
+                    false,
+                };
+            }
+        }
+
         [Theory]
         [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries")]
         public void MimeMultipartParserConstructorTest(string boundary)
@@ -160,7 +172,7 @@ namespace System.Net.Http.Formatting.Parsers
         [Fact]
         public void MultipartParserNullBuffer()
         {
-            MimeMultipartParser parser = CreateMimeMultipartParser(128, "-");
+            MimeMultipartParser parser = CreateMimeMultipartParser("-", 128);
 
             int bytesConsumed = 0;
             ArraySegment<byte> out1;
@@ -175,14 +187,14 @@ namespace System.Net.Http.Formatting.Parsers
         {
             byte[] data = CreateBuffer(boundary);
 
-            for (var cnt = 1; cnt <= data.Length; cnt++)
+            for (var readSize = 1; readSize <= data.Length; readSize++)
             {
-                MimeMultipartParser parser = CreateMimeMultipartParser(data.Length, boundary);
+                MimeMultipartParser parser = CreateMimeMultipartParser(boundary);
 
 
                 int totalBytesConsumed;
                 List<string> bodyParts;
-                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, cnt, out bodyParts, out totalBytesConsumed);
+                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, readSize, out bodyParts, out totalBytesConsumed);
                 Assert.Equal(MimeMultipartParser.State.BodyPartCompleted, state);
                 Assert.Equal(data.Length, totalBytesConsumed);
 
@@ -193,18 +205,22 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries", typeof(MimeMultipartParserTests), "SingleShortBodies")]
-        public void MultipartParserSingleShortBodyPart(string boundary, string singleShortBody)
+        [TestDataSet(
+            typeof(MimeMultipartParserTests), "Boundaries",
+            typeof(MimeMultipartParserTests), "TrueAndFalse",
+            typeof(MimeMultipartParserTests), "TrueAndFalse",
+            typeof(MimeMultipartParserTests), "SingleShortBodies")]
+        public void MultipartParserSingleShortBodyPart(string boundary, bool withExtraWhitespace, bool withExtraCRLF, string singleShortBody)
         {
-            byte[] data = CreateBuffer(boundary, singleShortBody);
+            byte[] data = CreateBuffer(boundary, withExtraWhitespace, withExtraCRLF, singleShortBody);
 
-            for (var cnt = 1; cnt <= data.Length; cnt++)
+            for (var readSize = 1; readSize <= data.Length; readSize++)
             {
-                MimeMultipartParser parser = CreateMimeMultipartParser(data.Length, boundary);
+                MimeMultipartParser parser = CreateMimeMultipartParser(boundary);
 
                 int totalBytesConsumed;
                 List<string> bodyParts;
-                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, cnt, out bodyParts, out totalBytesConsumed);
+                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, readSize, out bodyParts, out totalBytesConsumed);
                 Assert.Equal(MimeMultipartParser.State.BodyPartCompleted, state);
                 Assert.Equal(data.Length, totalBytesConsumed);
 
@@ -215,18 +231,22 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries", typeof(MimeMultipartParserTests), "MultipleShortBodies")]
-        public void MultipartParserMultipleShortBodyParts(string boundary, string[] multipleShortBodies)
+        [TestDataSet(
+            typeof(MimeMultipartParserTests), "Boundaries",
+            typeof(MimeMultipartParserTests), "TrueAndFalse",
+            typeof(MimeMultipartParserTests), "TrueAndFalse",
+            typeof(MimeMultipartParserTests), "MultipleShortBodies")]
+        public void MultipartParserMultipleShortBodyParts(string boundary, bool withExtraWhitespace, bool withExtraCRLF, string[] multipleShortBodies)
         {
-            byte[] data = CreateBuffer(boundary, multipleShortBodies);
+            byte[] data = CreateBuffer(boundary, withExtraWhitespace, withExtraCRLF, multipleShortBodies);
 
-            for (var cnt = 1; cnt <= data.Length; cnt++)
+            for (var readSize = 1; readSize <= data.Length; readSize++)
             {
-                MimeMultipartParser parser = CreateMimeMultipartParser(data.Length, boundary);
+                MimeMultipartParser parser = CreateMimeMultipartParser(boundary);
 
                 int totalBytesConsumed;
                 List<string> bodyParts;
-                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, cnt, out bodyParts, out totalBytesConsumed);
+                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, readSize, out bodyParts, out totalBytesConsumed);
                 Assert.Equal(MimeMultipartParser.State.BodyPartCompleted, state);
                 Assert.Equal(data.Length, totalBytesConsumed);
 
@@ -240,45 +260,24 @@ namespace System.Net.Http.Formatting.Parsers
             }
         }
 
-        [Theory]
-        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries", typeof(MimeMultipartParserTests), "MultipleShortBodies")]
-        public void MultipartParserMultipleShortBodyPartsWithLws(string boundary, string[] multipleShortBodies)
-        {
-            byte[] data = CreateBuffer(boundary, true, multipleShortBodies);
 
-            for (var cnt = 1; cnt <= data.Length; cnt++)
+        [Theory]
+        [TestDataSet(
+            typeof(MimeMultipartParserTests), "Boundaries",
+            typeof(MimeMultipartParserTests), "TrueAndFalse",
+            typeof(MimeMultipartParserTests), "TrueAndFalse",
+            typeof(MimeMultipartParserTests), "SingleLongBodies")]
+        public void MultipartParserSingleLongBodyPart(string boundary, bool withExtraWhitespace, bool withExtraCRLF, string singleLongBody)
+        {
+            byte[] data = CreateBuffer(boundary, withExtraWhitespace, withExtraCRLF, singleLongBody);
+
+            for (var readSize = 1; readSize <= data.Length; readSize++)
             {
-                MimeMultipartParser parser = CreateMimeMultipartParser(data.Length, boundary);
+                MimeMultipartParser parser = CreateMimeMultipartParser(boundary);
 
                 int totalBytesConsumed;
                 List<string> bodyParts;
-                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, cnt, out bodyParts, out totalBytesConsumed);
-                Assert.Equal(MimeMultipartParser.State.BodyPartCompleted, state);
-                Assert.Equal(data.Length, totalBytesConsumed);
-
-                Assert.Equal(multipleShortBodies.Length + 1, bodyParts.Count);
-                Assert.Equal(0, bodyParts[0].Length);
-
-                for (var check = 0; check < multipleShortBodies.Length; check++)
-                {
-                    Assert.Equal(multipleShortBodies[check], bodyParts[check + 1]);
-                }
-            }
-        }
-
-        [Theory]
-        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries", typeof(MimeMultipartParserTests), "SingleLongBodies")]
-        public void MultipartParserSingleLongBodyPart(string boundary, string singleLongBody)
-        {
-            byte[] data = CreateBuffer(boundary, singleLongBody);
-
-            for (var cnt = 1; cnt <= data.Length; cnt++)
-            {
-                MimeMultipartParser parser = CreateMimeMultipartParser(data.Length, boundary);
-
-                int totalBytesConsumed;
-                List<string> bodyParts;
-                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, cnt, out bodyParts, out totalBytesConsumed);
+                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, readSize, out bodyParts, out totalBytesConsumed);
                 Assert.Equal(MimeMultipartParser.State.BodyPartCompleted, state);
                 Assert.Equal(data.Length, totalBytesConsumed);
 
@@ -291,18 +290,22 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries", typeof(MimeMultipartParserTests), "MultipleLongBodies")]
-        public void MultipartParserMultipleLongBodyParts(string boundary, string[] multipleLongBodies)
+        [TestDataSet(
+            typeof(MimeMultipartParserTests), "Boundaries",
+            typeof(MimeMultipartParserTests), "TrueAndFalse",
+            typeof(MimeMultipartParserTests), "TrueAndFalse",
+            typeof(MimeMultipartParserTests), "MultipleLongBodies")]
+        public void MultipartParserMultipleLongBodyParts(string boundary, bool withExtraWhitespace, bool withExtraCRLF, string[] multipleLongBodies)
         {
-            byte[] data = CreateBuffer(boundary, multipleLongBodies);
+            byte[] data = CreateBuffer(boundary, withExtraWhitespace, withExtraCRLF, multipleLongBodies);
 
-            for (var cnt = 1; cnt <= data.Length; cnt++)
+            for (var readSize = 1; readSize <= data.Length; readSize++)
             {
-                MimeMultipartParser parser = CreateMimeMultipartParser(data.Length, boundary);
+                MimeMultipartParser parser = CreateMimeMultipartParser(boundary);
 
                 int totalBytesConsumed;
                 List<string> bodyParts;
-                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, cnt, out bodyParts, out totalBytesConsumed);
+                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, readSize, out bodyParts, out totalBytesConsumed);
                 Assert.Equal(MimeMultipartParser.State.BodyPartCompleted, state);
                 Assert.Equal(data.Length, totalBytesConsumed);
 
@@ -317,18 +320,22 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries", typeof(MimeMultipartParserTests), "NearBoundaryBodies")]
-        public void MultipartParserNearMatches(string boundary, string nearBoundaryBody)
+        [TestDataSet(
+            typeof(MimeMultipartParserTests), "Boundaries",
+            typeof(MimeMultipartParserTests), "TrueAndFalse",
+            typeof(MimeMultipartParserTests), "TrueAndFalse",
+            typeof(MimeMultipartParserTests), "NearBoundaryBodies")]
+        public void MultipartParserNearMatches(string boundary, bool withExtraWhitespace, bool withExtraCRLF, string nearBoundaryBody)
         {
-            byte[] data = CreateBuffer(boundary, nearBoundaryBody);
+            byte[] data = CreateBuffer(boundary, withExtraWhitespace, withExtraCRLF, nearBoundaryBody);
 
-            for (var cnt = 1; cnt <= data.Length; cnt++)
+            for (var readSize = 1; readSize <= data.Length; readSize++)
             {
-                MimeMultipartParser parser = CreateMimeMultipartParser(data.Length, boundary);
+                MimeMultipartParser parser = CreateMimeMultipartParser(boundary);
 
                 int totalBytesConsumed;
                 List<string> bodyParts;
-                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, cnt, out bodyParts, out totalBytesConsumed);
+                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, readSize, out bodyParts, out totalBytesConsumed);
                 Assert.Equal(MimeMultipartParser.State.BodyPartCompleted, state);
                 Assert.Equal(data.Length, totalBytesConsumed);
 
@@ -348,13 +355,13 @@ namespace System.Net.Http.Formatting.Parsers
 
                 byte[] data = CreateBuffer(boundary, nested);
 
-                for (var cnt = 1; cnt <= data.Length; cnt++)
+                for (var readSize = 1; readSize <= data.Length; readSize++)
                 {
-                    MimeMultipartParser parser = CreateMimeMultipartParser(data.Length, boundary);
+                    MimeMultipartParser parser = CreateMimeMultipartParser(boundary);
 
                     int totalBytesConsumed;
                     List<string> bodyParts;
-                    MimeMultipartParser.State state = ParseBufferInSteps(parser, data, cnt, out bodyParts, out totalBytesConsumed);
+                    MimeMultipartParser.State state = ParseBufferInSteps(parser, data, readSize, out bodyParts, out totalBytesConsumed);
                     Assert.Equal(MimeMultipartParser.State.BodyPartCompleted, state);
                     Assert.Equal(data.Length, totalBytesConsumed);
 
@@ -371,15 +378,37 @@ namespace System.Net.Http.Formatting.Parsers
         {
             byte[] data = CreateBuffer(boundary);
 
-            for (var cnt = 1; cnt <= data.Length; cnt++)
+            for (var readSize = 1; readSize <= data.Length; readSize++)
             {
-                MimeMultipartParser parser = CreateMimeMultipartParser(ParserData.MinMessageSize, boundary);
+                MimeMultipartParser parser = CreateMimeMultipartParser(boundary, ParserData.MinMessageSize);
 
                 int totalBytesConsumed;
                 List<string> bodyParts;
-                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, cnt, out bodyParts, out totalBytesConsumed);
+                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, readSize, out bodyParts, out totalBytesConsumed);
                 Assert.Equal(MimeMultipartParser.State.DataTooBig, state);
                 Assert.Equal(ParserData.MinMessageSize, totalBytesConsumed);
+            }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(MimeMultipartParserTests), "TrueAndFalse", typeof(MimeMultipartParserTests), "TrueAndFalse")]
+        public void MaxMessageSizeIsExact(bool withExtraWhitespace, bool withExtraCRLF)
+        {
+            string boundary = "--A";
+            byte[] data = CreateBuffer(boundary, "cool");
+
+            for (var readSize = 1; readSize <= data.Length; readSize++)
+            {
+                MimeMultipartParser parser = CreateMimeMultipartParser(boundary, data.Length);
+
+                int totalBytesConsumed;
+                List<string> bodyParts;
+                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, 2, out bodyParts, out totalBytesConsumed);
+                Assert.Equal(MimeMultipartParser.State.BodyPartCompleted, state);
+                Assert.Equal(data.Length, totalBytesConsumed);
+
+                Assert.Equal(2, bodyParts.Count);
+                Assert.Equal(0, bodyParts[0].Length);
             }
         }
 
@@ -397,13 +426,13 @@ namespace System.Net.Http.Formatting.Parsers
             memStream.Position = 0;
             byte[] data = memStream.ToArray();
 
-            for (var cnt = 1; cnt <= data.Length; cnt++)
+            for (var readSize = 1; readSize <= data.Length; readSize++)
             {
-                MimeMultipartParser parser = CreateMimeMultipartParser(data.Length, boundary);
+                MimeMultipartParser parser = CreateMimeMultipartParser(boundary);
 
                 int totalBytesConsumed;
                 List<string> bodyParts;
-                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, cnt, out bodyParts, out totalBytesConsumed);
+                MimeMultipartParser.State state = ParseBufferInSteps(parser, data, readSize, out bodyParts, out totalBytesConsumed);
                 Assert.Equal(MimeMultipartParser.State.BodyPartCompleted, state);
                 Assert.Equal(data.Length, totalBytesConsumed);
 
@@ -416,23 +445,28 @@ namespace System.Net.Http.Formatting.Parsers
             }
         }
 
-        private static MimeMultipartParser CreateMimeMultipartParser(int maximumHeaderLength, string boundary)
+        private static MimeMultipartParser CreateMimeMultipartParser(string boundary)
         {
-            return new MimeMultipartParser(boundary, maximumHeaderLength);
+            return new MimeMultipartParser(boundary, MimeMultipartBodyPartParser.DefaultMaxMessageSize);
+        }
+
+        private static MimeMultipartParser CreateMimeMultipartParser(string boundary, int minimumLength)
+        {
+            return new MimeMultipartParser(boundary, minimumLength);
         }
 
         internal static byte[] CreateBuffer(string boundary, params string[] bodyparts)
         {
-            return CreateBuffer(boundary, false, bodyparts);
+            return CreateBuffer(boundary, false, false, bodyparts);
         }
 
         internal static string CreateNestedBuffer(int count)
         {
             StringBuilder buffer = new StringBuilder("content");
 
-            for (var cnt = 0; cnt < count; cnt++)
+            for (var readSize = 0; readSize < count; readSize++)
             {
-                byte[] nested = CreateBuffer("N" + cnt.ToString(), buffer.ToString());
+                byte[] nested = CreateBuffer("N" + readSize.ToString(), buffer.ToString());
                 var message = Encoding.UTF8.GetString(nested);
                 buffer.Length = 0;
                 buffer.AppendLine(message);
@@ -441,27 +475,31 @@ namespace System.Net.Http.Formatting.Parsers
             return buffer.ToString();
         }
 
-        private static byte[] CreateBuffer(string boundary, bool withLws, params string[] bodyparts)
+        private static byte[] CreateBuffer(string boundary, bool withExtraWhitespace, bool withTrailingCRLF, params string[] bodyparts)
         {
-            string lws = String.Empty;
-            if (withLws)
+            string whitespace = String.Empty;
+            if (withExtraWhitespace)
             {
-                lws = SP + SP + HTAB + SP;
+                whitespace = SP + SP + HTAB + SP;
             }
 
             StringBuilder message = new StringBuilder();
-            message.Append(DashDash + boundary + lws + CRLF);
-            for (var cnt = 0; cnt < bodyparts.Length; cnt++)
+            message.Append(DashDash + boundary + whitespace + CRLF);
+            for (var i = 0; i < bodyparts.Length; i++)
             {
-                message.Append(bodyparts[cnt]);
-                if (cnt < bodyparts.Length - 1)
+                message.Append(bodyparts[i]);
+                if (i < bodyparts.Length - 1)
                 {
-                    message.Append(CRLF + DashDash + boundary + lws + CRLF);
+                    message.Append(CRLF + DashDash + boundary + whitespace + CRLF);
                 }
             }
 
-            // Note: We rely on a final CRLF even though it is not required by the BNF existing application do send it
-            message.Append(CRLF + DashDash + boundary + DashDash + lws + CRLF);
+            message.Append(CRLF + DashDash + boundary + DashDash + whitespace);
+            if (withTrailingCRLF)
+            {
+                message.Append(CRLF);
+            }
+
             return Encoding.UTF8.GetBytes(message.ToString());
         }
 
@@ -474,7 +512,7 @@ namespace System.Net.Http.Formatting.Parsers
             byte[] currentBodyPart = new byte[32 * 1024];
             int currentBodyLength = 0;
 
-            while (totalBytesConsumed <= buffer.Length)
+            while (true)
             {
                 int size = Math.Min(buffer.Length - totalBytesConsumed, readsize);
                 byte[] parseBuffer = new byte[size];
@@ -509,7 +547,7 @@ namespace System.Net.Http.Formatting.Parsers
                 }
             }
 
-            Assert.True(isFinal);
+            Assert.True(isFinal, "The last segment is not a final segment.");
             return state;
         }
 
@@ -531,7 +569,7 @@ namespace System.Net.Http.Formatting.Parsers
                 longBody.Append(bookend);
             }
 
-            for (int cnt = 0; cnt < iterations; cnt++)
+            for (int i = 0; i < iterations; i++)
             {
                 longBody.Append(msg);
             }

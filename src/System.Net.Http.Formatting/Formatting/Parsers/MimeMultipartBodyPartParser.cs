@@ -16,7 +16,7 @@ namespace System.Net.Http.Formatting.Parsers
     /// </summary>
     internal class MimeMultipartBodyPartParser : IDisposable
     {
-        private const long DefaultMaxMessageSize = Int64.MaxValue;
+        internal const long DefaultMaxMessageSize = Int64.MaxValue;
         private const int DefaultMaxBodyPartHeaderSize = 4 * 1024;
 
         // MIME parser
@@ -114,7 +114,13 @@ namespace System.Net.Http.Formatting.Parsers
             int bytesConsumed = 0;
             bool isFinal = false;
 
-            if (bytesRead == 0)
+            // There's a special case here - if we've reached the end of the message and there's no optional
+            // CRLF, then we're out of bytes to read, but we have finished the message. 
+            //
+            // If IsWaitingForEndOfMessage is true and we're at the end of the stream, then we're going to 
+            // call into the parser again with an empty array as the buffer to signal the end of the parse. 
+            // Then the final boundary segment will be marked as complete. 
+            if (bytesRead == 0 && !_mimeParser.IsWaitingForEndOfMessage)
             {
                 CleanupCurrentBodyPart();
                 throw new IOException(Properties.Resources.ReadAsMimeMultipartUnexpectedTermination);
@@ -123,7 +129,7 @@ namespace System.Net.Http.Formatting.Parsers
             // Make sure we remove an old array segments.
             _currentBodyPart.Segments.Clear();
 
-            while (bytesConsumed < bytesRead)
+            while (_mimeParser.CanParseMore(bytesRead, bytesConsumed))
             {
                 _mimeStatus = _mimeParser.ParseBuffer(data, bytesRead, ref bytesConsumed, out _parsedBodyPart[0], out _parsedBodyPart[1], out isFinal);
                 if (_mimeStatus != MimeMultipartParser.State.BodyPartCompleted && _mimeStatus != MimeMultipartParser.State.NeedMoreData)

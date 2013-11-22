@@ -100,7 +100,7 @@ namespace System.Web.Http.WebHost
 
             // Add route data
             request.SetRouteData(_routeData);
-            CancellationToken cancellationToken = CancellationToken.None;
+            CancellationToken cancellationToken = contextBase.Response.GetClientDisconnectedTokenWhenFixed();
             HttpResponseMessage response = null;
 
             try

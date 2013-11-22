@@ -61,7 +61,7 @@ namespace System.Web.Http.WebHost.Routing
 
             HttpRequestMessage request = context.GetOrCreateHttpRequestMessage();
             HttpResponseMessage response = null;
-            CancellationToken cancellationToken = CancellationToken.None;
+            CancellationToken cancellationToken = context.Response.GetClientDisconnectedTokenWhenFixed();
 
             HttpResponseException responseException = exception as HttpResponseException;
 

@@ -480,6 +480,7 @@ namespace Microsoft.Web.Mvc.ModelBinding.Test
         }
 
         [Fact]
+        [ReplaceCulture]
         public void SetProperty_PropertyIsSettable_SetterThrows_RecordsError()
         {
             // Arrange
@@ -564,6 +565,7 @@ namespace Microsoft.Web.Mvc.ModelBinding.Test
         }
 
         [Fact]
+        [ReplaceCulture]
         public void SetProperty_SettingNullableTypeToNull_RequiredValidatorNotPresent_PropertySetterThrows_AddsRequiredMessageString()
         {
             // Arrange

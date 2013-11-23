@@ -120,6 +120,7 @@ namespace System.Web.Http.Validation
         }
 
         [Theory]
+        [ReplaceCulture]
         [PropertyData("ValidationErrors")]
         public void ExpectedValidationErrorsRaised(object model, Type type, Dictionary<string, string> expectedErrors)
         {

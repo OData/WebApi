@@ -16,6 +16,7 @@ namespace System.Web.Http.ModelBinding
     public class BodyBindingTests : ModelBindingTests
     {
         [Fact]
+        [ReplaceCulture]
         public void Body_Bad_Input_Receives_Validation_Error()
         {
             // Arrange

@@ -1,21 +1,30 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System;
 using System.Globalization;
 using System.Threading;
 using Microsoft.TestCommon;
 
-namespace System.Web.TestUtil
+namespace Microsoft.TestCommon
 {
     public class CultureReplacer : IDisposable
     {
         private readonly CultureInfo _originalCulture;
+        private readonly CultureInfo _originalUICulture;
         private readonly long _threadId;
 
-        public CultureReplacer(string culture = "en-us")
+        // Culture => Formatting of dates/times/money/etc, defaults to en-GB because en-US is the same as InvariantCulture
+        // We want to be able to find issues where the InvariantCulture is used, but a specific culture should be.
+        //
+        // UICulture => Language
+        public CultureReplacer(string culture = "en-GB", string uiCulture = "en-US")
         {
             _originalCulture = Thread.CurrentThread.CurrentCulture;
+            _originalUICulture = Thread.CurrentThread.CurrentUICulture;
             _threadId = Thread.CurrentThread.ManagedThreadId;
+
             Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo(culture);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(uiCulture);
         }
 
         public void Dispose()
@@ -30,6 +39,7 @@ namespace System.Web.TestUtil
             {
                 Assert.True(Thread.CurrentThread.ManagedThreadId == _threadId, "The current thread is not the same as the thread invoking the constructor. This should never happen.");
                 Thread.CurrentThread.CurrentCulture = _originalCulture;
+                Thread.CurrentThread.CurrentUICulture = _originalUICulture;
             }
         }
     }

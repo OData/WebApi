@@ -1111,29 +1111,6 @@ namespace System.Web.Mvc.Test
             return new ValueProviderResult(rawValue, attemptedValue, CultureInfo.InvariantCulture);
         }
 
-        internal static IDisposable ReplaceCulture(string currentCulture, string currentUICulture)
-        {
-            CultureInfo newCulture = CultureInfo.GetCultureInfo(currentCulture);
-            CultureInfo newUICulture = CultureInfo.GetCultureInfo(currentUICulture);
-            CultureInfo originalCulture = Thread.CurrentThread.CurrentCulture;
-            CultureInfo originalUICulture = Thread.CurrentThread.CurrentUICulture;
-            Thread.CurrentThread.CurrentCulture = newCulture;
-            Thread.CurrentThread.CurrentUICulture = newUICulture;
-            return new CultureReplacement { OriginalCulture = originalCulture, OriginalUICulture = originalUICulture };
-        }
-
-        private class CultureReplacement : IDisposable
-        {
-            public CultureInfo OriginalCulture;
-            public CultureInfo OriginalUICulture;
-
-            public void Dispose()
-            {
-                Thread.CurrentThread.CurrentCulture = OriginalCulture;
-                Thread.CurrentThread.CurrentUICulture = OriginalUICulture;
-            }
-        }
-
         private class TestableHtmlHelper : HtmlHelper
         {
             TestableHtmlHelper(ViewContext viewContext, IViewDataContainer viewDataContainer)

@@ -11,6 +11,7 @@ namespace System.Web.Mvc.Test
     public class CompareAttributeAdapterTest
     {
         [Fact]
+        [ReplaceCulture]
         public void ClientRulesWithCompareAttribute_ErrorMessageUsesDisplayName()
         {
             // Arrange
@@ -30,6 +31,7 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        [ReplaceCulture]
         public void ClientRulesWithCompareAttribute_ErrorMessageUsesPropertyName()
         {
             // Arrange

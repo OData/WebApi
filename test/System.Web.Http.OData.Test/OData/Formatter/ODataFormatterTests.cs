@@ -338,6 +338,7 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
+        [ReplaceCulture]
         public void HttpErrorInODataFormat_GetsSerializedCorrectly()
         {
             // Arrange

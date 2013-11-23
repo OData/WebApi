@@ -710,7 +710,7 @@ namespace System.Web.Mvc.Html.Test
 
             SelectList selectList = new SelectList(MultiSelectListTest.GetSampleAnonymousObjects(), "Letter", "FullWord", "C");
 
-            using (HtmlHelperTest.ReplaceCulture("en-US", "en-US"))
+            using (new CultureReplacer("en-US", "en-US"))
             {
                 // Act
                 MvcHtmlString html = helper.DropDownListFor(m => m.ElementAt(0).foo, selectList);
@@ -2309,6 +2309,7 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        [ReplaceCulture]
         public void ListBoxForWithEnumerableModel_Unobtrusive()
         {
             // Arrange

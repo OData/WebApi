@@ -295,6 +295,7 @@ namespace Microsoft.Web.Mvc.ModelBinding.Test
         }
 
         [Fact]
+        [ReplaceCulture]
         public void Validate_ValidateAllProperties_AddsValidationErrors()
         {
             // Arrange

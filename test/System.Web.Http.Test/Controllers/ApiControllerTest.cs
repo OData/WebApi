@@ -1100,6 +1100,7 @@ namespace System.Web.Http
         }
 
         [Fact]
+        [ReplaceCulture]
         public void Validate_CallsValidateOnConfiguredValidator_UsingConfiguredMetadataProvider()
         {
             // Arrange
@@ -1124,6 +1125,7 @@ namespace System.Web.Http
         }
 
         [Fact]
+        [ReplaceCulture]
         public void Validate_SetsModelStateErrors_ForInvalidModels()
         {
             // Arrange
@@ -1140,6 +1142,7 @@ namespace System.Web.Http
         }
 
         [Fact]
+        [ReplaceCulture]
         public void Validate_SetsModelStateErrorsUnderRightPrefix_ForInvalidModels()
         {
             // Arrange

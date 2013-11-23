@@ -9,6 +9,7 @@ namespace System.Web.Mvc.Test
     public class RangeAttributeAdapterTest
     {
         [Fact]
+        [ReplaceCulture]
         public void ClientRulesWithRangeAttribute()
         {
             // Arrange

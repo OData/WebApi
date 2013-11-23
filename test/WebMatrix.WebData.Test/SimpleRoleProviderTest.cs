@@ -9,6 +9,7 @@ namespace WebMatrix.WebData.Test
     public class SimpleRoleProviderTest
     {
         [Theory]
+        [ReplaceCulture]
         [InlineData(-1, false)]
         [InlineData(0, true)]
         [InlineData(1, true)]

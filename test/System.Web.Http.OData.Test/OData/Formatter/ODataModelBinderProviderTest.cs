@@ -155,6 +155,7 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Theory]
+        [ReplaceCulture]
         [PropertyData("ODataModelBinderProvider_ModelStateErrors_InvalidODataRepresentations_TestData")]
         public void ODataModelBinderProvider_ModelStateErrors_InvalidODataRepresentations(string value, string action, string error)
         {
@@ -168,6 +169,7 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Theory]
+        [ReplaceCulture]
         [PropertyData("ODataModelBinderProvider_ModelStateErrors_InvalidConversions_TestData")]
         public void ODataModelBinderProvider_ModelStateErrors_InvalidConversions(string value, string action, string error)
         {

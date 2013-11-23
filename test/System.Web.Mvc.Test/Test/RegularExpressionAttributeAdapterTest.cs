@@ -9,6 +9,7 @@ namespace System.Web.Mvc.Test
     public class RegularExpressionAttributeAdapterTest
     {
         [Fact]
+        [ReplaceCulture]
         public void ClientRulesWithRegexAttribute()
         {
             // Arrange

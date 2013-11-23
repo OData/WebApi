@@ -1248,7 +1248,7 @@ namespace System.Web.Mvc.Html.Test
             helper.ViewContext.UnobtrusiveJavaScriptEnabled = true;
             helper.ViewContext.FormContext = new FormContext();
 
-            using (HtmlHelperTest.ReplaceCulture("en-US", "en-US"))
+            using (new CultureReplacer("en-US", "en-US"))
             {
                 // Act
                 MvcHtmlString html = helper.PasswordFor(m => m.contained.foo);

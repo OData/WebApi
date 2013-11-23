@@ -459,6 +459,7 @@ namespace System.Web.Http.ModelBinding.Binders
         }
 
         [Fact]
+        [ReplaceCulture]
         public void SetProperty_PropertyIsSettable_SetterThrows_RecordsError()
         {
             // Arrange
@@ -539,6 +540,7 @@ namespace System.Web.Http.ModelBinding.Binders
         }
 
         [Fact]
+        [ReplaceCulture]
         public void SetProperty_SettingNullableTypeToNull_RequiredValidatorNotPresent_PropertySetterThrows_AddsRequiredMessageString()
         {
             // Arrange

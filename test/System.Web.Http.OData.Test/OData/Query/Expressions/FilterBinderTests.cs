@@ -177,6 +177,7 @@ namespace System.Web.Http.OData.Query.Expressions
         #region Logical Operators
 
         [Fact]
+        [ReplaceCulture]
         public void BooleanOperatorNullableTypes()
         {
             VerifyQueryDeserialization(

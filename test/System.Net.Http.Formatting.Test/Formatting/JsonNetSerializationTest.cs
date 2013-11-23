@@ -2,9 +2,11 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Newtonsoft.Json;
@@ -76,7 +78,7 @@ namespace System.Net.Http.Formatting
                     { new KeyValuePair<string, bool>("foo", false), "{\"Key\":\"foo\",\"Value\":false}" },
 
                     // ISerializable types
-                    { new ArgumentNullException("param"), "{\"ClassName\":\"System.ArgumentNullException\",\"Message\":\"Value cannot be null.\",\"Data\":null,\"InnerException\":null,\"HelpURL\":null,\"StackTraceString\":null,\"RemoteStackTraceString\":null,\"RemoteStackIndex\":0,\"ExceptionMethod\":null,\"HResult\":-2147467261,\"Source\":null,\"WatsonBuckets\":null,\"ParamName\":\"param\"}" },
+                    { new ISerializableType() { Property = "Value" }, "{\"SomeProperty\":\"Value\"}" },
 
                     // JSON Values
                     { new JValue(false), "false" },
@@ -293,6 +295,11 @@ namespace System.Net.Http.Formatting
                 if (xType == typeof(SerializableType))
                 {
                     return Equals<SerializableType>(x, y);
+                }
+
+                if (xType == typeof(ISerializableType))
+                {
+                    return Equals<ISerializableType>(x, y);
                 }
 
                 if (xType == typeof(Point))
@@ -531,5 +538,37 @@ namespace System.Net.Http.Formatting
 
     public class DangerousType
     {
+    }
+
+    [Serializable]
+    public class ISerializableType : ISerializable, IEquatable<ISerializableType>
+    {
+        public ISerializableType()
+        {
+        }
+
+        protected ISerializableType(SerializationInfo info, StreamingContext context)
+        {
+            // The key here for GetValue/SetValue is intentionally different from the property name.
+            // This tests that the serializer is using the result of GetObjectData, rather than the property
+            // name.
+            Property = (string)info.GetValue("SomeProperty", typeof(String));    
+        }
+
+        public string Property
+        {
+            get;
+            set;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("SomeProperty", this.Property, typeof(String));
+        }
+
+        public bool Equals(ISerializableType other)
+        {
+            return String.Equals(Property, other.Property, StringComparison.Ordinal);
+        }
     }
 }

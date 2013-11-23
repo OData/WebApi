@@ -113,6 +113,7 @@ namespace System.Web.Razor.Test.Editor
         }
 
         [Fact]
+        [ReplaceCulture]
         public void CheckForStructureChangesStartsReparseAndFiresDocumentParseCompletedEventIfNoAdditionalChangesQueued()
         {
             // Arrange

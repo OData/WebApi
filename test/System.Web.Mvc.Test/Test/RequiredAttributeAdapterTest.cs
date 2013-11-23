@@ -9,6 +9,7 @@ namespace System.Web.Mvc.Test
     public class RequiredAttributeAdapterTest
     {
         [Fact]
+        [ReplaceCulture]
         public void ClientRulesWithRequiredAttribute()
         {
             // Arrange

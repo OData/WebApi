@@ -44,30 +44,38 @@ namespace System.Web.Razor.Test.Generator
 
             if ((tabTest & TabTest.Tabs) == TabTest.Tabs)
             {
-                RunTestInternal(
-                    name: name, 
-                    baselineName: baselineName,
-                    generatePragmas: generatePragmas,
-                    designTimeMode: designTimeMode,
-                    expectedDesignTimePragmas: expectedDesignTimePragmas,
-                    spans: spans,
-                    withTabs: true,
-                    hostConfig: hostConfig);
+                // CodeDOM will inject its strings into the generated file header, so we force English.
+                using (new CultureReplacer())
+                {
+                    RunTestInternal(
+                        name: name,
+                        baselineName: baselineName,
+                        generatePragmas: generatePragmas,
+                        designTimeMode: designTimeMode,
+                        expectedDesignTimePragmas: expectedDesignTimePragmas,
+                        spans: spans,
+                        withTabs: true,
+                        hostConfig: hostConfig);
+                }
 
                 testRun = true;
             }
 
             if ((tabTest & TabTest.NoTabs) == TabTest.NoTabs)
             {
-                RunTestInternal(
-                    name: name, 
-                    baselineName: baselineName,
-                    generatePragmas: generatePragmas,
-                    designTimeMode: designTimeMode,
-                    expectedDesignTimePragmas: expectedDesignTimePragmas,
-                    spans: spans,
-                    withTabs: false,
-                    hostConfig: hostConfig);
+                // CodeDOM will inject its strings into the generated file header, so we force English.
+                using (new CultureReplacer())
+                {
+                    RunTestInternal(
+                        name: name,
+                        baselineName: baselineName,
+                        generatePragmas: generatePragmas,
+                        designTimeMode: designTimeMode,
+                        expectedDesignTimePragmas: expectedDesignTimePragmas,
+                        spans: spans,
+                        withTabs: false,
+                        hostConfig: hostConfig);
+                }
 
                 testRun = true;
             }

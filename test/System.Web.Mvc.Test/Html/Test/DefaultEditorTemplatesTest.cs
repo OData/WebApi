@@ -316,6 +316,7 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Theory]
+        [ReplaceCulture]
         [PropertyData("DecimalTemplateHtmlAttributeData")]
         public void DecimalTemplate_AddsHtmlAttributes(object htmlAttributes, string expectedHtml)
         {

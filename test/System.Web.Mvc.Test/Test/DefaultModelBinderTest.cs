@@ -2726,6 +2726,7 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        [ReplaceCulture]
         public void OnModelUpdatedWithValidationAttributeNoValidationMessage()
         {
             // Arrange
@@ -2841,6 +2842,7 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        [ReplaceCulture]
         public void SetPropertyCreatesValueRequiredErrorIfNecessary()
         {
             // Arrange

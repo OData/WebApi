@@ -178,6 +178,10 @@ namespace System.Web.Mvc.Html
                     // Same as fieldType.BaseType.Name in this case
                     yield return "Enum";
                 }
+                else if (fieldType == typeof(DateTimeOffset))
+                {
+                    yield return "DateTime";
+                }
 
                 yield return "String";
             }

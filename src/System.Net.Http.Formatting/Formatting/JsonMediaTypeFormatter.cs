@@ -12,6 +12,7 @@ using System.Net.Http.Internal;
 using System.Runtime.Serialization.Json;
 #endif
 using System.Text;
+using System.Threading;
 #if !NETFX_CORE
 using System.Threading.Tasks;
 #endif
@@ -243,7 +244,8 @@ namespace System.Net.Http.Formatting
         }
 
         /// <inheritdoc />
-        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content,
+            TransportContext transportContext, CancellationToken cancellationToken)
         {
             if (type == null)
             {
@@ -260,7 +262,7 @@ namespace System.Net.Http.Formatting
                 throw Error.NotSupported(Properties.Resources.UnsupportedIndent, typeof(DataContractJsonSerializer));
             }
 
-            return base.WriteToStreamAsync(type, value, writeStream, content, transportContext);
+            return base.WriteToStreamAsync(type, value, writeStream, content, transportContext, cancellationToken);
         }
 
         /// <inheritdoc />

@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Moq;
@@ -251,6 +252,90 @@ namespace System.Net.Http.Formatting
                 });
         }
 
+        [Fact]
+        public virtual async Task Overridden_WriteToStreamAsyncWithoutCancellationToken_GetsCalled()
+        {
+            // Arrange
+            Stream stream = new MemoryStream();
+            Mock<TFormatter> formatter = CreateMockFormatter();
+            ObjectContent<int> content = new ObjectContent<int>(42, formatter.Object);
+
+            formatter
+                .Setup(f => f.WriteToStreamAsync(typeof(int), 42, stream, content, null /* transportContext */))
+                .Returns(TaskHelpers.Completed())
+                .Verifiable();
+
+            // Act
+            await content.CopyToAsync(stream);
+
+            // Assert
+            formatter.Verify();
+        }
+
+        [Fact]
+        public virtual async Task Overridden_WriteToStreamAsyncWithCancellationToken_GetsCalled()
+        {
+            // Arrange
+            Stream stream = new MemoryStream();
+            Mock<TFormatter> formatter = CreateMockFormatter();
+            ObjectContent<int> content = new ObjectContent<int>(42, formatter.Object);
+
+            formatter
+                .Setup(f => f.WriteToStreamAsync(typeof(int), 42, stream, content, null /* transportContext */, CancellationToken.None))
+                .Returns(TaskHelpers.Completed())
+                .Verifiable();
+
+            // Act
+            await content.CopyToAsync(stream);
+
+            // Assert
+            formatter.Verify();
+        }
+
+        [Fact]
+        public virtual async Task Overridden_ReadFromStreamAsyncWithoutCancellationToken_GetsCalled()
+        {
+            // Arrange
+            Stream stream = new MemoryStream();
+            Mock<TFormatter> formatter = CreateMockFormatter();
+            formatter.Object.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/test"));
+            StringContent content = new StringContent(" ", Encoding.Default, "application/test");
+            CancellationTokenSource cts = new CancellationTokenSource();
+
+            formatter
+                .Setup(f => f.ReadFromStreamAsync(typeof(string), It.IsAny<Stream>(), content, null /*formatterLogger */))
+                .Returns(Task.FromResult<object>(null))
+                .Verifiable();
+
+            // Act
+            await content.ReadAsAsync<string>(new[] { formatter.Object }, cts.Token);
+
+            // Assert
+            formatter.Verify();
+        }
+
+        [Fact]
+        public virtual async Task Overridden_ReadFromStreamAsyncWithCancellationToken_GetsCalled()
+        {
+            // Arrange
+            Stream stream = new MemoryStream();
+            Mock<TFormatter> formatter = CreateMockFormatter();
+            formatter.Object.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/test"));
+            StringContent content = new StringContent(" ", Encoding.Default, "application/test");
+            CancellationTokenSource cts = new CancellationTokenSource();
+
+            formatter
+                .Setup(f => f.ReadFromStreamAsync(typeof(string), It.IsAny<Stream>(), content, null /*formatterLogger */, cts.Token))
+                .Returns(Task.FromResult<object>(null))
+                .Verifiable();
+
+            // Act
+            await content.ReadAsAsync<string>(new[] { formatter.Object }, cts.Token);
+
+            // Assert
+            formatter.Verify();
+        }
+
         public abstract Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding);
 
         public abstract Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding);
@@ -259,6 +344,11 @@ namespace System.Net.Http.Formatting
         {
             ConstructorInfo constructor = typeof(TFormatter).GetConstructor(Type.EmptyTypes);
             return (TFormatter)constructor.Invoke(null);
+        }
+
+        protected virtual Mock<TFormatter> CreateMockFormatter()
+        {
+            return new Mock<TFormatter>() { CallBase = true };
         }
 
         protected virtual MediaTypeHeaderValue CreateSupportedMediaType()

@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.OData.Batch;
 using System.Web.Http.OData.Formatter.Deserialization;
@@ -380,21 +381,24 @@ namespace System.Web.Http.OData.Formatter
 
         /// <inheritdoc/>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content,
+            TransportContext transportContext, CancellationToken cancellationToken)
         {
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
             }
-
             if (writeStream == null)
             {
                 throw Error.ArgumentNull("writeStream");
             }
-
             if (Request == null)
             {
                 throw Error.InvalidOperation(SRResources.WriteToStreamAsyncMustHaveRequest);
+            }
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return TaskHelpers.Canceled();
             }
 
             HttpContentHeaders contentHeaders = content == null ? null : content.Headers;

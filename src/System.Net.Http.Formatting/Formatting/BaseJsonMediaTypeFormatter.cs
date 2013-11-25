@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Newtonsoft.Json;
@@ -356,27 +357,22 @@ namespace System.Net.Http.Formatting
             return jsonSerializer;
         }
 
-        /// <summary>
-        /// Called during serialization to write an object of the specified <paramref name="type"/>
-        /// to the specified <paramref name="writeStream"/>.
-        /// </summary>
-        /// <param name="type">The <see cref="Type"/> of object to write.</param>
-        /// <param name="value">The object to write.</param>
-        /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
-        /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
-        /// <param name="transportContext">The <see cref="TransportContext"/>.</param>
-        /// <returns>A <see cref="Task"/> that will write the value to the stream.</returns>
+        /// <inheritdoc />
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content,
+            TransportContext transportContext, CancellationToken cancellationToken)
         {
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
             }
-
             if (writeStream == null)
             {
                 throw Error.ArgumentNull("writeStream");
+            }
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return TaskHelpers.Canceled();
             }
 
             try

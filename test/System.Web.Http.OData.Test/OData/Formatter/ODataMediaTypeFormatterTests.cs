@@ -737,6 +737,17 @@ namespace System.Web.Http.OData.Formatter
             return CreateFormatterWithRequest();
         }
 
+        protected override Mock<ODataMediaTypeFormatter> CreateMockFormatter()
+        {
+            var model = CreateModel();
+            var request = CreateFakeODataRequest(model);
+            ODataPayloadKind[] payloadKinds = new ODataPayloadKind[] { ODataPayloadKind.Property };
+            var formatter = new Mock<ODataMediaTypeFormatter>(payloadKinds) { CallBase = true };
+            formatter.Object.Request = request;
+
+            return formatter;
+        }
+
         protected override MediaTypeHeaderValue CreateSupportedMediaType()
         {
             return new MediaTypeHeaderValue("application/atom+xml");

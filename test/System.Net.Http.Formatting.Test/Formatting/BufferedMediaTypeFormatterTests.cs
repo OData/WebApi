@@ -142,6 +142,38 @@ namespace System.Net.Http.Formatting
             // Act & assert
             return WriteToStreamAsync_UsesCorrectCharacterEncodingHelper(formatter, content, content, mediaType, encoding, isDefaultEncoding);
         }
+
+        [Fact]
+        public override Task Overridden_ReadFromStreamAsyncWithCancellationToken_GetsCalled()
+        {
+            // ReadFromStreamAsync is not overridable on BufferedMediaTypeFormatter.
+            // So, let this test be a NOOP
+            return TaskHelpers.Completed();
+        }
+
+        [Fact]
+        public override Task Overridden_ReadFromStreamAsyncWithoutCancellationToken_GetsCalled()
+        {
+            // ReadFromStreamAsync is not overridable on BufferedMediaTypeFormatter.
+            // So, let this test be a NOOP
+            return TaskHelpers.Completed();
+        }
+
+        [Fact]
+        public override Task Overridden_WriteToStreamAsyncWithCancellationToken_GetsCalled()
+        {
+            // WriteToStreamAsync is not overridable on BufferedMediaTypeFormatter.
+            // So, let this test be a NOOP
+            return TaskHelpers.Completed();
+        }
+
+        [Fact]
+        public override Task Overridden_WriteToStreamAsyncWithoutCancellationToken_GetsCalled()
+        {
+            // WriteToStreamAsync is not overridable on BufferedMediaTypeFormatter.
+            // So, let this test be a NOOP
+            return TaskHelpers.Completed();
+        }
     }
 
     public class MockBufferedMediaTypeFormatter : BufferedMediaTypeFormatter

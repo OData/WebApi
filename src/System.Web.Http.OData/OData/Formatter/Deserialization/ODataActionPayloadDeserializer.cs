@@ -73,7 +73,15 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                         parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
                         // ODataLib protects against this but asserting just in case.
                         Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
-                        payload[parameterName] = Convert(reader.Value, parameter.Type, readContext);
+                        if (parameter.Type.IsPrimitive())
+                        {
+                            payload[parameterName] = reader.Value;
+                        }
+                        else
+                        {
+                            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(parameter.Type);
+                            payload[parameterName] = deserializer.ReadInline(reader.Value, parameter.Type, readContext);
+                        }
                         break;
 
                     case ODataParameterReaderState.Collection:
@@ -83,8 +91,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                         Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
                         IEdmCollectionTypeReference collectionType = parameter.Type as IEdmCollectionTypeReference;
                         Contract.Assert(collectionType != null);
-
-                        payload[parameterName] = Convert(reader.CreateCollectionReader(), collectionType, readContext);
+                        ODataCollectionValue value = ODataCollectionDeserializer.ReadCollection(reader.CreateCollectionReader());
+                        ODataCollectionDeserializer collectionDeserializer = DeserializerProvider.GetEdmTypeDeserializer(collectionType) as ODataCollectionDeserializer;
+                        payload[parameterName] = collectionDeserializer.ReadInline(value, collectionType, readContext);
                         break;
 
                     default:
@@ -93,41 +102,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
 
             return payload;
-        }
-
-        private object Convert(object value, IEdmTypeReference parameterType, ODataDeserializerContext readContext)
-        {
-            if (parameterType.IsPrimitive())
-            {
-                return value;
-            }
-            else
-            {
-                ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(parameterType);
-                return deserializer.ReadInline(value, parameterType, readContext);
-            }
-        }
-
-        private object Convert(ODataCollectionReader reader, IEdmCollectionTypeReference collectionType, ODataDeserializerContext readContext)
-        {
-            IEdmTypeReference elementType = collectionType.ElementType();
-            Type clrElementType = EdmLibHelpers.GetClrType(elementType, readContext.Model);
-            IList list = Activator.CreateInstance(typeof(List<>).MakeGenericType(clrElementType)) as IList;
-
-            while (reader.Read())
-            {
-                switch (reader.State)
-                {
-                    case ODataCollectionReaderState.Value:
-                        object element = Convert(reader.Item, elementType, readContext);
-                        list.Add(element);
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-            return list;
         }
 
         internal static IEdmFunctionImport GetFunctionImport(ODataDeserializerContext readContext)

@@ -2,6 +2,8 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
@@ -15,6 +17,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// </summary>
     public class ODataCollectionDeserializer : ODataEdmTypeDeserializer
     {
+        private static readonly MethodInfo _castMethodInfo = typeof(Enumerable).GetMethod("Cast");
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataCollectionDeserializer"/> class.
         /// </summary>
@@ -42,19 +46,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             IEdmCollectionTypeReference collectionType = edmType.AsCollection();
             IEdmTypeReference elementType = collectionType.ElementType();
-
-            IEnumerable result = ReadInline(ReadCollection(messageReader, elementType), edmType, readContext) as IEnumerable;
-            if (result != null && readContext.IsUntyped && elementType.IsComplex())
-            {
-                EdmComplexObjectCollection complexCollection = new EdmComplexObjectCollection(collectionType);
-                foreach (EdmComplexObject complexObject in result)
-                {
-                    complexCollection.Add(complexObject);
-                }
-                return complexCollection;
-            }
-
-            return result;
+            ODataCollectionReader reader = messageReader.CreateODataCollectionReader(elementType);
+            return ReadInline(ReadCollection(reader), edmType, readContext);
         }
 
         /// <inheritdoc />
@@ -84,11 +77,29 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 throw Error.Argument("item", SRResources.ArgumentMustBeOfType, typeof(ODataCollectionValue).Name);
             }
-
             // Recursion guard to avoid stack overflows
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
-            return ReadCollectionValue(collection, elementType, readContext);
+            IEnumerable result = ReadCollectionValue(collection, elementType, readContext);
+            if (result != null)
+            {
+                if (readContext.IsUntyped && elementType.IsComplex())
+                {
+                    EdmComplexObjectCollection complexCollection = new EdmComplexObjectCollection(collectionType);
+                    foreach (EdmComplexObject complexObject in result)
+                    {
+                        complexCollection.Add(complexObject);
+                    }
+                    return complexCollection;
+                }
+                else
+                {
+                    Type elementClrType = EdmLibHelpers.GetClrType(elementType, readContext.Model);
+                    IEnumerable castedResult = _castMethodInfo.MakeGenericMethod(elementClrType).Invoke(null, new object[] { result }) as IEnumerable;
+                    return castedResult;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -130,11 +141,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
         }
 
-        private static ODataCollectionValue ReadCollection(ODataMessageReader messageReader, IEdmTypeReference elementType)
+        internal static ODataCollectionValue ReadCollection(ODataCollectionReader reader)
         {
-            Contract.Assert(messageReader != null);
-
-            ODataCollectionReader reader = messageReader.CreateODataCollectionReader(elementType);
             ArrayList items = new ArrayList();
             string typeName = null;
 

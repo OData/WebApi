@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.Hosting;
@@ -117,8 +118,8 @@ namespace System.Web.Http.OData.Formatter
             Assert.Equal(1, key);
             Assert.Equal(1, parameters["p1"]);
             ValidateAddress(parameters["p2"] as ODataActionTests.Address);
-            ValidateNumbers(parameters["p3"] as IList<string>);
-            ValidateAddresses(parameters["p4"] as IList<ODataActionTests.Address>);
+            ValidateNumbers((parameters["p3"] as IEnumerable<string>).ToList());
+            ValidateAddresses((parameters["p4"] as IEnumerable<ODataActionTests.Address>).ToList());
             return true;
         }
 

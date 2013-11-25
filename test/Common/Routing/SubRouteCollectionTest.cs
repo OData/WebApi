@@ -26,10 +26,9 @@ namespace System.Web.Mvc.Routing
             collection.Add(new RouteEntry("route", route1));
 
             var expectedError =
-                "A route named 'route' is already in the route collection. Route names must be unique." + Environment.NewLine +
-                Environment.NewLine +
-                "Duplicates:" + Environment.NewLine +
-                "api/Car" + Environment.NewLine +
+                "A route named 'route' is already in the route collection. Route names must be unique.\r\n\r\n" +
+                "Duplicates:\r\n" +
+                "api/Car\r\n" +
                 "api/Person";
 
             // Act & Assert
@@ -47,10 +46,9 @@ namespace System.Web.Mvc.Routing
             collection.Add(new RouteEntry("route", route1));
 
             var expectedError =
-                "A route named 'route' is already in the route collection. Route names must be unique." + Environment.NewLine +
-                Environment.NewLine +
-                "Duplicates:" + Environment.NewLine +
-                "Person/Index" + Environment.NewLine +
+                "A route named 'route' is already in the route collection. Route names must be unique.\r\n\r\n" +
+                "Duplicates:\r\n" +
+                "Person/Index\r\n" +
                 "Home/Index";
 
             // Act & Assert

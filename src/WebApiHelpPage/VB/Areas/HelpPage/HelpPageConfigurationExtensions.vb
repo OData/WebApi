@@ -286,6 +286,7 @@ Namespace Areas.HelpPage
                 If apiParameter.Source = ApiParameterSource.FromBody Then
                     Dim parameterType As Type = apiParameter.ParameterDescriptor.ParameterType
                     apiModel.RequestModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType)
+                    apiModel.RequestDocumentation = apiParameter.Documentation
                 ElseIf apiParameter.ParameterDescriptor.ParameterType = GetType(HttpRequestMessage) Then
                     Dim parameterType As Type = sampleGenerator.ResolveHttpRequestMessageType(apiDescription)
 

@@ -300,6 +300,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
                 {
                     Type parameterType = apiParameter.ParameterDescriptor.ParameterType;
                     apiModel.RequestModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType);
+                    apiModel.RequestDocumentation = apiParameter.Documentation;
                 }
                 else if (apiParameter.ParameterDescriptor.ParameterType == typeof(HttpRequestMessage))
                 {

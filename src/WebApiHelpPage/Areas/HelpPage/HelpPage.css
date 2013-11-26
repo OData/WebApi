@@ -97,20 +97,24 @@ a:hover {
 }
 
 h1, .h1 {
-	font-size: 36px;
+    font-size: 36px;
 }
 
 h2, .h2 {
-	font-size: 24px;
+    font-size: 24px;
+}
+
+h3, .h3 {
+    font-size: 20px;
 }
 
 body {
-	font-size: 14px;
-	line-height: 143%;
-	color: #333;
+    font-size: 14px;
+    line-height: 143%;
+    color: #333;
 }
 
 a {
-	color: #00abec;
-	text-decoration: none;
+    color: #00abec;
+    text-decoration: none;
 }

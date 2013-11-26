@@ -18,13 +18,13 @@ End Code
     @Html.DisplayFor(Function(m) m.UriParameters, "Parameters")
 
     <h3>Body Parameters</h3>
-    @If Model.RequestModelDescription IsNot Nothing Then
-    
-        @Html.DisplayFor(Function(m) m.RequestModelDescription.ModelType, "ModelDescriptionLink", New With {.modelDescription = Model.RequestModelDescription})
-            @<p>@Model.RequestModelDescription.Documentation</p>
-        If TypeOf Model.RequestModelDescription Is ComplexTypeModelDescription OrElse TypeOf Model.RequestModelDescription Is CollectionModelDescription Then
 
-            @Html.DisplayFor(Function(m) m.RequestModelDescription)  
+    <p>@Model.RequestDocumentation</p>
+
+    @If Model.RequestModelDescription IsNot Nothing Then
+        @Html.DisplayFor(Function(m) m.RequestModelDescription.ModelType, "ModelDescriptionLink", New With {.modelDescription = Model.RequestModelDescription})
+        If Model.RequestBodyParameters IsNot Nothing Then
+            @Html.DisplayFor(Function(m) m.RequestBodyParameters, "Parameters")
         End If 
     Else
         @<p>None.</p>
@@ -37,15 +37,14 @@ End Code
 
     <h2>Response Information</h2>
 
-    <p>@description.ResponseDescription.Documentation</p>
-
     <h3>Resource Description</h3>
+
+    <p>@description.ResponseDescription.Documentation</p>
 
     @If Model.ResourceDescription IsNot Nothing Then
         @Html.DisplayFor(Function(m) m.ResourceDescription.ModelType, "ModelDescriptionLink", New With {.modelDescription = Model.ResourceDescription})
-        @<p>@Model.ResourceDescription.Documentation</p>
-        If TypeOf Model.ResourceDescription Is ComplexTypeModelDescription OrElse TypeOf Model.ResourceDescription Is CollectionModelDescription Then
-            @Html.DisplayFor(Function(m) m.ResourceDescription)
+        If Model.ResourceProperties IsNot Nothing Then
+            @Html.DisplayFor(Function(m) m.ResourceProperties, "Parameters")
         End If
     Else
         @<p>None.</p>

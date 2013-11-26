@@ -33,14 +33,41 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
         public Collection<ParameterDescription> UriParameters { get; private set; }
 
         /// <summary>
+        /// Gets or sets the documentation for the request.
+        /// </summary>
+        public string RequestDocumentation { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="ModelDescription"/> that describes the request body.
         /// </summary>
         public ModelDescription RequestModelDescription { get; set; }
 
         /// <summary>
+        /// Gets the request body parameter descriptions.
+        /// </summary>
+        public IList<ParameterDescription> RequestBodyParameters
+        {
+            get
+            {
+                return GetParameterDescriptions(RequestModelDescription);
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="ModelDescription"/> that describes the resource.
         /// </summary>
         public ModelDescription ResourceDescription { get; set; }
+
+        /// <summary>
+        /// Gets the resource property descriptions.
+        /// </summary>
+        public IList<ParameterDescription> ResourceProperties
+        {
+            get
+            {
+                return GetParameterDescriptions(ResourceDescription);
+            }
+        }
 
         /// <summary>
         /// Gets the sample requests associated with the API.
@@ -56,5 +83,26 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
         /// Gets the error messages associated with this model.
         /// </summary>
         public Collection<string> ErrorMessages { get; private set; }
+
+        private static IList<ParameterDescription> GetParameterDescriptions(ModelDescription modelDescription)
+        {
+            ComplexTypeModelDescription complexTypeModelDescription = modelDescription as ComplexTypeModelDescription;
+            if (complexTypeModelDescription != null)
+            {
+                return complexTypeModelDescription.Properties;
+            }
+
+            CollectionModelDescription collectionModelDescription = modelDescription as CollectionModelDescription;
+            if (collectionModelDescription != null)
+            {
+                complexTypeModelDescription = collectionModelDescription.ElementDescription as ComplexTypeModelDescription;
+                if (complexTypeModelDescription != null)
+                {
+                    return complexTypeModelDescription.Properties;
+                }
+            }
+
+            return null;
+        }
     }
 }

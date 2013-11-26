@@ -16,6 +16,7 @@ Namespace Areas.HelpPage.Models
         Private _uriParameters As Collection(Of ParameterDescription)
         Private _requestModelDescription As ModelDescription
         Private _resourceDescription As ModelDescription
+        Private _requestDocumentation As String
 
         '''<summary>
         ''' Initializes a new instance of the <see cref="HelpPageApiModel"/> class.
@@ -53,6 +54,18 @@ Namespace Areas.HelpPage.Models
         End Property
 
         ''' <summary>
+        ''' Gets or sets the documentation for the request.
+        ''' </summary>
+        Public Property RequestDocumentation() As String
+            Get
+                Return _requestDocumentation
+            End Get
+            Set(value As String)
+                _requestDocumentation = value
+            End Set
+        End Property
+
+        ''' <summary>
         ''' Gets or sets the model description of the request body.
         ''' </summary>
         Public Property RequestModelDescription() As ModelDescription
@@ -65,6 +78,15 @@ Namespace Areas.HelpPage.Models
         End Property
 
         ''' <summary>
+        ''' Gets the request body parameter descriptions.
+        ''' </summary>
+        Public ReadOnly Property RequestBodyParameters() As IList(Of ParameterDescription)
+            Get
+                Return GetParameterDescriptions(RequestModelDescription)
+            End Get
+        End Property
+
+        ''' <summary>
         ''' Gets or sets the <see cref="ModelDescription"/> that describes the resource.
         ''' </summary>
         Public Property ResourceDescription() As ModelDescription
@@ -74,6 +96,15 @@ Namespace Areas.HelpPage.Models
             Set(value As ModelDescription)
                 _resourceDescription = value
             End Set
+        End Property
+
+        ''' <summary>
+        ''' Gets the resource property descriptions.
+        ''' </summary>
+        Public ReadOnly Property ResourceProperties() As IList(Of ParameterDescription)
+            Get
+                Return GetParameterDescriptions(ResourceDescription)
+            End Get
         End Property
 
         ''' <summary>
@@ -111,5 +142,22 @@ Namespace Areas.HelpPage.Models
                 _errorMessages = value
             End Set
         End Property
+
+        Private Shared Function GetParameterDescriptions(modelDescription As ModelDescription) As IList(Of ParameterDescription)
+            Dim complexTypeModelDescription As ComplexTypeModelDescription = TryCast(modelDescription, ComplexTypeModelDescription)
+            If complexTypeModelDescription IsNot Nothing Then
+                Return complexTypeModelDescription.Properties
+            End If
+
+            Dim collectionModelDescription As CollectionModelDescription = TryCast(modelDescription, CollectionModelDescription)
+            If collectionModelDescription IsNot Nothing Then
+                complexTypeModelDescription = TryCast(collectionModelDescription.ElementDescription, ComplexTypeModelDescription)
+                If complexTypeModelDescription IsNot Nothing Then
+                    Return complexTypeModelDescription.Properties
+                End If
+            End If
+
+            Return Nothing
+        End Function
     End Class
 End Namespace

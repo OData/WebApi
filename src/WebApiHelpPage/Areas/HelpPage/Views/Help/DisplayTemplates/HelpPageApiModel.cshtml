@@ -1,10 +1,11 @@
 ﻿@using System.Web.Http
+@using System.Web.Http.Description
 @using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
 @using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 @model HelpPageApiModel
 
 @{
-    var description = Model.ApiDescription;
+    ApiDescription description = Model.ApiDescription;
 }
 <h1>@description.HttpMethod.Method @description.RelativePath</h1>
 <div>
@@ -16,14 +17,15 @@
     @Html.DisplayFor(m => m.UriParameters, "Parameters")
 
     <h3>Body Parameters</h3>
+
+    <p>@Model.RequestDocumentation</p>
+
     @if (Model.RequestModelDescription != null)
     {
         @Html.DisplayFor(m => m.RequestModelDescription.ModelType, "ModelDescriptionLink", new { modelDescription = Model.RequestModelDescription })
-        <p>@Model.RequestModelDescription.Documentation</p>
-        if (Model.RequestModelDescription is ComplexTypeModelDescription ||
-            Model.RequestModelDescription is CollectionModelDescription)
+        if (Model.RequestBodyParameters != null)
         {
-            @Html.DisplayFor(m => m.RequestModelDescription);
+            @Html.DisplayFor(m => m.RequestBodyParameters, "Parameters")
         }
     }
     else
@@ -36,21 +38,19 @@
         <h3>Request Formats</h3>
         @Html.DisplayFor(m => m.SampleRequests, "Samples")
     }
-    
+
     <h2>Response Information</h2>
 
-    <p>@description.ResponseDescription.Documentation</p>
-
     <h3>Resource Description</h3>
+
+    <p>@description.ResponseDescription.Documentation</p>
 
     @if (Model.ResourceDescription != null)
     {
         @Html.DisplayFor(m => m.ResourceDescription.ModelType, "ModelDescriptionLink", new { modelDescription = Model.ResourceDescription })
-        <p>@Model.ResourceDescription.Documentation</p>
-        if (Model.ResourceDescription is ComplexTypeModelDescription ||
-            Model.ResourceDescription is CollectionModelDescription)
+        if (Model.ResourceProperties != null)
         {
-            @Html.DisplayFor(m => m.ResourceDescription);
+            @Html.DisplayFor(m => m.ResourceProperties, "Parameters")
         }
     }
     else

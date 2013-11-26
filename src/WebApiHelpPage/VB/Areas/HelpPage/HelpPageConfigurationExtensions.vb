@@ -299,7 +299,9 @@ Namespace Areas.HelpPage
         Private Sub GenerateResourceDescription(apiModel As HelpPageApiModel, modelGenerator As ModelDescriptionGenerator)
             Dim response As ResponseDescription = apiModel.ApiDescription.ResponseDescription
             Dim responseType As Type = If(response.ResponseType, response.DeclaredType)
-            apiModel.ResourceDescription = If(responseType IsNot Nothing, modelGenerator.GetOrCreateModelDescription(responseType), Nothing)
+            If responseType IsNot Nothing AndAlso responseType <> GetType(System.Void) Then
+                apiModel.ResourceDescription = modelGenerator.GetOrCreateModelDescription(responseType)
+            End If
         End Sub
 
         <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="The exception is recorded as ErrorMessages.")>

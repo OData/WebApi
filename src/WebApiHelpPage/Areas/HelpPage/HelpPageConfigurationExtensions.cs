@@ -317,7 +317,10 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
         {
             ResponseDescription response = apiModel.ApiDescription.ResponseDescription;
             Type responseType = response.ResponseType ?? response.DeclaredType;
-            apiModel.ResourceDescription = responseType != null ? modelGenerator.GetOrCreateModelDescription(responseType) : null;
+            if (responseType != null && responseType != typeof(void))
+            {
+                apiModel.ResourceDescription = modelGenerator.GetOrCreateModelDescription(responseType);
+            }
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The exception is recorded as ErrorMessages.")]

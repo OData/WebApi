@@ -33,42 +33,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>CommonResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Analytics.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Analytics.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Facebook.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Facebook.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="FileUpload.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>FileUpload.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="GamerCard.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>GamerCard.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="LinkShare.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>LinkShare.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Maps.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Maps.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="ReCaptcha.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ReCaptcha.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="..\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
@@ -89,6 +54,7 @@
     <Compile Include="VirtualPathUtilityBase.cs" />
     <Compile Include="VirtualPathUtilityWrapper.cs" />
     <Compile Include="UrlBuilder.cs" />
+    <Compile Include="LinkShareSite.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\CommonResources.resx">
@@ -129,48 +95,17 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Analytics.cshtml">
-      <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Analytics.generated.cs</LastGenOutput>
-    </None>
-    <None Include="FileUpload.cshtml">
-      <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>FileUpload.generated.cs</LastGenOutput>
-    </None>
-    <None Include="GamerCard.cshtml">
-      <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>GamerCard.generated.cs</LastGenOutput>
-    </None>
-    <None Include="LinkShare.cshtml">
-      <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>LinkShare.generated.cs</LastGenOutput>
-    </None>
-    <Compile Include="LinkShareSite.cs">
-      <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
-    </Compile>
-    <None Include="ReCaptcha.cshtml">
-      <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ReCaptcha.generated.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Facebook.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
-      <LastGenOutput>Facebook.generated.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Maps.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <CustomToolNamespace>Microsoft.Web.Helpers</CustomToolNamespace>
-      <LastGenOutput>Maps.generated.cs</LastGenOutput>
-    </None>
+    <None Include="packages.config" />
+    <RazorSrcFiles Include="Analytics.cshtml" />
+    <RazorSrcFiles Include="FileUpload.cshtml" />
+    <RazorSrcFiles Include="GamerCard.cshtml" />
+    <RazorSrcFiles Include="LinkShare.cshtml" />
+    <RazorSrcFiles Include="ReCaptcha.cshtml" />
+    <RazorSrcFiles Include="Facebook.cshtml" />
+    <RazorSrcFiles Include="Maps.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  
+  <!-- Note: RazorGenerator.MsBuild uses Mvc 5.0 for generating views. In the event we update the Mvc parser, we'll need to ensure this package references the updated Mvc build -->
+  <Import Project="..\..\packages\RazorGenerator.MsBuild.2.2.0\build\RazorGenerator.MsBuild.targets" Condition="Exists('..\..\packages\RazorGenerator.MsBuild.2.2.0\build\RazorGenerator.MsBuild.targets')" />
 </Project>

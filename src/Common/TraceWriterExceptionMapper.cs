@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.Properties;
 
 namespace System.Web.Http.Tracing
 {
@@ -14,13 +14,13 @@ namespace System.Web.Http.Tracing
     /// </summary>
     internal static class TraceWriterExceptionMapper
     {
-        private static string httpErrorExceptionMessageFormat = "ExceptionMessage{0}='{1}'";
-        private static string httpErrorExceptionTypeFormat = "ExceptionType{0}='{1}'";
-        private static string httpErrorMessageDetailFormat = "MessageDetail='{0}'";
-        private static string httpErrorModelStateErrorFormat = "ModelStateError=[{0}]";
-        private static string httpErrorModelStatePairFormat = "{0}=[{1}]";
-        private static string httpErrorStackTraceFormat = "StackTrace{0}={1}";
-        private static string httpErrorUserMessageFormat = "UserMessage='{0}'";
+        private const string HttpErrorExceptionMessageFormat = "ExceptionMessage{0}='{1}'";
+        private const string HttpErrorExceptionTypeFormat = "ExceptionType{0}='{1}'";
+        private const string HttpErrorMessageDetailFormat = "MessageDetail='{0}'";
+        private const string HttpErrorModelStateErrorFormat = "ModelStateError=[{0}]";
+        private const string HttpErrorModelStatePairFormat = "{0}=[{1}]";
+        private const string HttpErrorStackTraceFormat = "StackTrace{0}={1}";
+        private const string HttpErrorUserMessageFormat = "UserMessage='{0}'";
 
         /// <summary>
         /// Examines the given <see cref="TraceRecord"/> to determine whether it
@@ -30,12 +30,9 @@ namespace System.Web.Http.Tracing
         /// <param name="traceRecord">The <see cref="TraceRecord"/> to examine and modify.</param>
         public static void TranslateHttpResponseException(TraceRecord traceRecord)
         {
-            if (traceRecord == null)
-            {
-                throw Error.ArgumentNull("traceRecord");
-            }
+            Contract.Assert(traceRecord != null);
 
-            HttpResponseException httpResponseException = traceRecord.Exception as HttpResponseException;
+            HttpResponseException httpResponseException = ExtractHttpResponseException(traceRecord.Exception);
             if (httpResponseException == null)
             {
                 return;
@@ -50,6 +47,8 @@ namespace System.Web.Http.Tracing
             {
                 traceRecord.Status = response.StatusCode;
             }
+
+            traceRecord.Level = GetMappedTraceLevel(httpResponseException) ?? traceRecord.Level;
 
             // HttpResponseExceptions often contain HttpError instances that carry
             // detailed information that may be filtered out by IncludeErrorDetailPolicy
@@ -73,12 +72,12 @@ namespace System.Web.Http.Tracing
 
             if (httpError.TryGetValue(HttpErrorKeys.MessageKey, out messageObject))
             {
-                messages.Add(Error.Format(httpErrorUserMessageFormat, messageObject));
+                messages.Add(Error.Format(HttpErrorUserMessageFormat, messageObject));
             }
 
             if (httpError.TryGetValue(HttpErrorKeys.MessageDetailKey, out messageDetailsObject))
             {
-                messages.Add(Error.Format(httpErrorMessageDetailFormat, messageDetailsObject));
+                messages.Add(Error.Format(HttpErrorMessageDetailFormat, messageDetailsObject));
             }
 
             // Extract the exception from this HttpError and then incrementally
@@ -100,16 +99,31 @@ namespace System.Web.Http.Tracing
         }
 
         /// <summary>
-        /// Map the <see cref="TraceLevel"/> according to information from <see cref="HttpResponseException"/> if possible.
+        /// Gets the <see cref="TraceLevel"/> per the <see cref="HttpStatusCode"/> if the given exception is
+        /// a <see cref="HttpResponseException"/>; otherwise <see langword="null"/>.
         /// </summary>
-        /// <param name="httpResponseException">The <see cref="HttpResponseException"/> that determines the <see cref="TraceLevel"/>.</param>
-        /// <returns>The mapped result of <see cref="TraceLevel"/>.</returns>
-        public static TraceLevel? GetTraceLevel(HttpResponseException httpResponseException)
+        /// <param name="exception">The exception.</param>
+        /// <returns>The corresponding trace level if the exception represents an <see cref="HttpResponseException"/>.</returns>
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "shared source. called from a different assembly")]
+        public static TraceLevel? GetMappedTraceLevel(Exception exception)
         {
+            HttpResponseException httpResponseException = ExtractHttpResponseException(exception);
             if (httpResponseException == null)
             {
-                throw new ArgumentNullException("httpResponseException");
+                return null;
             }
+
+            return GetMappedTraceLevel(httpResponseException);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="TraceLevel"/> per the <see cref="HttpStatusCode"/>.
+        /// </summary>
+        /// <param name="httpResponseException">The exception for which the trace level has to be found.</param>
+        /// <returns>The mapped trace level.</returns>
+        public static TraceLevel? GetMappedTraceLevel(HttpResponseException httpResponseException)
+        {
+            Contract.Assert(httpResponseException != null);
 
             HttpResponseMessage response = httpResponseException.Response;
             Contract.Assert(response != null);
@@ -131,12 +145,7 @@ namespace System.Web.Http.Tracing
             return level;
         }
 
-        public static HttpResponseException ExtractHttpResponseException(TraceRecord traceRecord)
-        {
-            return ExtractHttpResponseException(traceRecord.Exception);
-        }
-
-        public static HttpResponseException ExtractHttpResponseException(Exception exception)
+        private static HttpResponseException ExtractHttpResponseException(Exception exception)
         {
             if (exception == null)
             {
@@ -191,17 +200,17 @@ namespace System.Web.Http.Tracing
 
                 if (httpError.TryGetValue(HttpErrorKeys.ExceptionTypeKey, out exceptionTypeObject))
                 {
-                    messages.Add(Error.Format(httpErrorExceptionTypeFormat, indexText, exceptionTypeObject));
+                    messages.Add(Error.Format(HttpErrorExceptionTypeFormat, indexText, exceptionTypeObject));
                 }
 
                 if (httpError.TryGetValue(HttpErrorKeys.ExceptionMessageKey, out exceptionMessageObject))
                 {
-                    messages.Add(Error.Format(httpErrorExceptionMessageFormat, indexText, exceptionMessageObject));
+                    messages.Add(Error.Format(HttpErrorExceptionMessageFormat, indexText, exceptionMessageObject));
                 }
 
                 if (httpError.TryGetValue(HttpErrorKeys.StackTraceKey, out stackTraceObject))
                 {
-                    messages.Add(Error.Format(httpErrorStackTraceFormat, indexText, stackTraceObject));
+                    messages.Add(Error.Format(HttpErrorStackTraceFormat, indexText, stackTraceObject));
                 }
 
                 if (!httpError.TryGetValue(HttpErrorKeys.InnerExceptionKey, out innerExceptionObject))
@@ -225,11 +234,11 @@ namespace System.Web.Http.Tracing
                 IEnumerable<string> errorList = pair.Value as IEnumerable<string>;
                 if (errorList != null)
                 {
-                    messages.Add(Error.Format(httpErrorModelStatePairFormat, pair.Key, String.Join(", ", errorList)));
+                    messages.Add(Error.Format(HttpErrorModelStatePairFormat, pair.Key, String.Join(", ", errorList)));
                 }
             }
 
-            return Error.Format(httpErrorModelStateErrorFormat, String.Join(", ", messages));
+            return Error.Format(HttpErrorModelStateErrorFormat, String.Join(", ", messages));
         }
     }
 }

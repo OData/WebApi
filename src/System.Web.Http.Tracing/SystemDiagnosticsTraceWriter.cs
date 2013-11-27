@@ -58,8 +58,8 @@ namespace System.Web.Http.Tracing
             {
                 if (value < TraceLevel.Off || value > TraceLevel.Fatal)
                 {
-                    throw Error.ArgumentOutOfRange("value", 
-                                                    value, 
+                    throw Error.ArgumentOutOfRange("value",
+                                                    value,
                                                     SRResources.TraceLevelOutOfRange);
                 }
 
@@ -288,20 +288,6 @@ namespace System.Web.Http.Tracing
             if (traceRecord == null)
             {
                 throw Error.ArgumentNull("traceRecord");
-            }
-
-            var httpResponseException = TraceWriterExceptionMapper.ExtractHttpResponseException(traceRecord);
-            if (httpResponseException == null)
-            {
-                return;
-            }
-
-            HttpResponseMessage response = httpResponseException.Response;
-            Contract.Assert(response != null);
-            TraceLevel? mappedTraceLevel = TraceWriterExceptionMapper.GetTraceLevel(httpResponseException);
-            if (mappedTraceLevel.HasValue)
-            {
-                traceRecord.Level = mappedTraceLevel.Value;
             }
 
             TraceWriterExceptionMapper.TranslateHttpResponseException(traceRecord);

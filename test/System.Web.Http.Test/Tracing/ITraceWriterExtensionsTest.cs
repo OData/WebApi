@@ -823,19 +823,19 @@ namespace System.Web.Http.Tracing
             // Arrange
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
-            HttpResponseException exception = new HttpResponseException(Net.HttpStatusCode.NotFound);
+            HttpResponseException exception = new HttpResponseException(Net.HttpStatusCode.InternalServerError);
             List<TraceRecord> expectedTraces = new List<TraceRecord>
             {
-                new TraceRecord(request, "testCategory", TraceLevel.Error) { Kind = TraceKind.Begin, Operator = "tester", Operation = "testOp", Message = "beginMessage" },
-                new TraceRecord(request, "testCategory", TraceLevel.Warn) { Kind = TraceKind.End, Operator = "tester", Operation = "testOp", Exception = exception, Message = "errorMessage",
-                    Status = Net.HttpStatusCode.NotFound },
+                new TraceRecord(request, "testCategory", TraceLevel.Info) { Kind = TraceKind.Begin, Operator = "tester", Operation = "testOp", Message = "beginMessage" },
+                new TraceRecord(request, "testCategory", TraceLevel.Error) { Kind = TraceKind.End, Operator = "tester", Operation = "testOp", Exception = exception, Message = "errorMessage",
+                    Status = Net.HttpStatusCode.InternalServerError },
             };
 
             // Act
             Exception thrown = Assert.Throws<HttpResponseException>(
                                 () => traceWriter.TraceBeginEndAsync(request,
                                     "testCategory",
-                                    TraceLevel.Error,
+                                    TraceLevel.Info,
                                     "tester",
                                     "testOp",
                                     beginTrace: (tr) => { tr.Message = "beginMessage"; },

@@ -77,6 +77,12 @@ namespace Microsoft.TestCommon
         WithNull = 0x800,
 
         /// <summary>
+        /// Individual instances of <see cref="TestDataHolder{T}"/> containing the given <see cref="TestData"/>.  This
+        /// variation is not included in <see cref="All"/> or other variation masks.
+        /// </summary>
+        AsClassMember = 0x1000,
+
+        /// <summary>
         /// All of the flags for single instance variations of a given <see cref="TestData"/> type.
         /// </summary>
         AllSingleInstances = AsInstance | AsDerivedType | AsKnownType | AsNullable,

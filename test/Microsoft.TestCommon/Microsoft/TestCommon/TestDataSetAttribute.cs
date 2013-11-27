@@ -196,6 +196,7 @@ namespace Microsoft.TestCommon
                    variation == TestDataVariations.AsDerivedType ||
                    variation == TestDataVariations.AsKnownType ||
                    variation == TestDataVariations.AsDataMember ||
+                   variation == TestDataVariations.AsClassMember ||
                    variation == TestDataVariations.AsXmlElementProperty;
         }
     }

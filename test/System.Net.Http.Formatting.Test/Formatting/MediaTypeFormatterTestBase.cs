@@ -24,6 +24,10 @@ namespace System.Net.Http.Formatting
         {
         }
 
+        // Test data variations of interest in round-trip tests.
+        public const TestDataVariations RoundTripDataVariations =
+            TestDataVariations.All | TestDataVariations.WithNull | TestDataVariations.AsClassMember;
+
         public abstract IEnumerable<MediaTypeHeaderValue> ExpectedSupportedMediaTypes { get; }
 
         public abstract IEnumerable<Encoding> ExpectedSupportedEncodings { get; }
@@ -354,6 +358,25 @@ namespace System.Net.Http.Formatting
         protected virtual MediaTypeHeaderValue CreateSupportedMediaType()
         {
             return ExpectedSupportedMediaTypes.First();
+        }
+
+        public object ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(MediaTypeFormatter formatter, Type variationType, object testData)
+        {
+            // Arrange
+            HttpContent content = new StringContent(String.Empty);
+            HttpContentHeaders contentHeaders = content.Headers;
+            object readObj = null;
+
+            // Act & Assert
+            Assert.Stream.WriteAndRead(
+                stream =>
+                {
+                    Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, content, transportContext: null));
+                    contentHeaders.ContentLength = stream.Length;
+                },
+                stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, content, formatterLogger: null)));
+
+            return readObj;
         }
 
         public Task ReadFromStreamAsync_UsesCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)

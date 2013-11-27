@@ -366,6 +366,7 @@ namespace Microsoft.TestCommon
         private static readonly Type OpenListType = typeof(List<>);
         private static readonly Type OpenIQueryableType = typeof(IQueryable<>);
         private static readonly Type OpenDictionaryType = typeof(Dictionary<,>);
+        private static readonly Type OpenTestDataHolderType = typeof(TestDataHolder<>);
         private int dictionaryKey;
 
         /// <summary>
@@ -382,6 +383,7 @@ namespace Microsoft.TestCommon
             Type iEnumerableType = OpenIEnumerableType.MakeGenericType(typeParams);
             Type iQueryableType = OpenIQueryableType.MakeGenericType(typeParams);
             Type dictionaryType = OpenDictionaryType.MakeGenericType(dictionaryTypeParams);
+            Type testDataHolderType = OpenTestDataHolderType.MakeGenericType(typeParams);
 
             this.RegisterTestDataVariation(TestDataVariations.AsInstance, this.Type, () => GetTypedTestData());
             this.RegisterTestDataVariation(TestDataVariations.AsArray, arrayType, GetTestDataAsArray);
@@ -389,6 +391,7 @@ namespace Microsoft.TestCommon
             this.RegisterTestDataVariation(TestDataVariations.AsIQueryable, iQueryableType, GetTestDataAsIQueryable);
             this.RegisterTestDataVariation(TestDataVariations.AsList, listType, GetTestDataAsList);
             this.RegisterTestDataVariation(TestDataVariations.AsDictionary, dictionaryType, GetTestDataAsDictionary);
+            this.RegisterTestDataVariation(TestDataVariations.AsClassMember, testDataHolderType, GetTestDataInHolder);
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -444,6 +447,11 @@ namespace Microsoft.TestCommon
             // multiple times.
             dictionaryKey = 0;
             return this.GetTypedTestData().ToDictionary(_unused => (dictionaryKey++).ToString());
+        }
+
+        public IEnumerable<TestDataHolder<T>> GetTestDataInHolder()
+        {
+            return this.GetTypedTestData().Select(value => new TestDataHolder<T> { V1 = value, });
         }
 
         /// <summary>

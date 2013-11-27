@@ -123,27 +123,68 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "ValueAndRefTypeTestDataCollectionExceptULong",
-            TestDataVariations.All | TestDataVariations.WithNull)]
+        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "ValueAndRefTypeTestDataCollectionExceptULong", RoundTripDataVariations)]
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync(Type variationType, object testData)
         {
-            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            HttpContent content = new StringContent(String.Empty);
-            HttpContentHeaders contentHeaders = content.Headers;
-
+            // Guard
             bool canSerialize = IsTypeSerializableWithJsonSerializer(variationType, testData) && Assert.Http.CanRoundTrip(variationType);
             if (canSerialize)
             {
-                object readObj = null;
-                Assert.Stream.WriteAndRead(
-                    stream =>
-                    {
-                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, content, transportContext: null));
-                        contentHeaders.ContentLength = stream.Length;
-                    },
-                    stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, content, null)));
+                // Arrange
+                TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+                // Arrange & Act & Assert
+                object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
                 Assert.Equal(testData, readObj);
             }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(XmlMediaTypeFormatterTests), "BunchOfTypedObjectsTestDataCollection", RoundTripDataVariations)]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync_KnownTypes(Type variationType, object testData)
+        {
+            // Guard
+            bool canSerialize = IsTypeSerializableWithJsonSerializer(variationType, testData) && Assert.Http.CanRoundTrip(variationType);
+            if (canSerialize)
+            {
+                // Arrange
+                TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter { AddDBNullKnownType = true, };
+
+                // Arrange & Act & Assert
+                object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+                Assert.Equal(testData, readObj);
+            }
+        }
+
+        // Test alternate null value
+        [Fact]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync_DBNull()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+            Type variationType = typeof(DBNull);
+            object testData = DBNull.Value;
+
+            // Arrange & Act & Assert
+            object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+
+            // DBNull.Value round-trips as either Object or DBNull because serialization includes its type
+            Assert.Equal(testData, readObj);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync_DBNullAsEmptyString()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter { AddDBNullKnownType = true, };
+            Type variationType = typeof(string);
+            object testData = DBNull.Value;
+
+            // Arrange & Act & Assert
+            object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+
+            // Lower levels convert DBNull.Value to empty string on read
+            Assert.Equal(String.Empty, readObj);
         }
 
         [Fact]
@@ -214,6 +255,8 @@ namespace System.Net.Http.Formatting
 
         public class TestJsonMediaTypeFormatter : DataContractJsonMediaTypeFormatter
         {
+            public bool AddDBNullKnownType { get; set; }
+
             public bool CanReadTypeProxy(Type type)
             {
                 return CanReadType(type);
@@ -222,6 +265,18 @@ namespace System.Net.Http.Formatting
             public bool CanWriteTypeProxy(Type type)
             {
                 return CanWriteType(type);
+            }
+
+            public override DataContractJsonSerializer CreateDataContractSerializer(Type type)
+            {
+                if (AddDBNullKnownType)
+                {
+                    return new DataContractJsonSerializer(type, new Type[] { typeof(DBNull), });
+                }
+                else
+                {
+                    return base.CreateDataContractSerializer(type);
+                }
             }
         }
 

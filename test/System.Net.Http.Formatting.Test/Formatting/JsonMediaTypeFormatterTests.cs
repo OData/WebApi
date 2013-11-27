@@ -17,6 +17,26 @@ namespace System.Net.Http.Formatting
 {
     public class JsonMediaTypeFormatterTests : MediaTypeFormatterTestBase<JsonMediaTypeFormatter>
     {
+        // Test data which should round-trip without type information in the serialization.  Contains an exhaustive
+        // selection of JSON native types.  (BSON also supports Int32, Int64, DateTime, Guid, ... natively.)
+        private static readonly RefTypeTestData<object> BunchOfJsonObjectsTestData = new RefTypeTestData<object>(
+            () => new List<object> { null, String.Empty, "This is a string", false, true, Double.MinValue,
+                Double.MaxValue, });
+
+        // Test data for DBNull.  Separate from BunchOfJsonObjectsTestData because DBNull will round-trip as null.
+        private static readonly RefTypeTestData<object> DBNullAsObjectTestData = new RefTypeTestData<object>(
+            () => new List<object> { DBNull.Value, });
+
+        public static IEnumerable<TestData> BunchOfJsonObjectsTestDataCollection
+        {
+            get { return new TestData[] { BunchOfJsonObjectsTestData, }; }
+        }
+
+        public static IEnumerable<TestData> DBNullAsObjectTestDataCollection
+        {
+            get { return new TestData[] { DBNullAsObjectTestData, }; }
+        }
+
         public static List<Type> JTokenTypes
         {
             get
@@ -337,27 +357,140 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "ValueAndRefTypeTestDataCollectionExceptULong",
-            TestDataVariations.All | TestDataVariations.WithNull)]
+        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "ValueAndRefTypeTestDataCollectionExceptULong", RoundTripDataVariations)]
+        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "BunchOfJsonObjectsTestDataCollection", RoundTripDataVariations)]
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync(Type variationType, object testData)
         {
-            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            HttpContent content = new StringContent(String.Empty);
-            HttpContentHeaders contentHeaders = content.Headers;
-
+            // Guard
             bool canSerialize = IsTypeSerializableWithJsonSerializer(variationType, testData) && Assert.Http.CanRoundTrip(variationType);
             if (canSerialize)
             {
-                object readObj = null;
-                Assert.Stream.WriteAndRead(
-                    stream =>
-                    {
-                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, content, transportContext: null));
-                        contentHeaders.ContentLength = stream.Length;
-                    },
-                    stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, content, null)));
+                // Arrange
+                TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+                // Arrange & Act & Assert
+                object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
                 Assert.Equal(testData, readObj);
             }
+        }
+
+        // Test alternate null value; always serialized as "null"
+        [Theory]
+        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "DBNullAsObjectTestDataCollection", TestDataVariations.AllSingleInstances)]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync_DBNullAsNull(Type variationType, object testData)
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+            // Arrange & Act & Assert
+            object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+
+            // DBNull.Value can be read back as null object.
+            Assert.Null(readObj);
+        }
+
+        [Theory]
+        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "DBNullAsObjectTestDataCollection", TestDataVariations.AsDictionary)]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync_DBNullAsNull_Dictionary(Type variationType, object testData)
+        {
+            // Guard
+            Assert.IsType<Dictionary<string, object>>(testData);
+
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+            IDictionary<string, object> expectedDictionary = (IDictionary<string, object>)testData;
+
+            // Arrange & Act & Assert
+            object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+
+            // DBNull.Value can be read back as null object. Reach into collections.
+            Assert.Equal(testData.GetType(), readObj.GetType());
+
+            IDictionary<string, object> readDictionary = (IDictionary<string, object>)readObj;
+            Assert.Equal(expectedDictionary.Count, readDictionary.Count);
+
+            foreach (string key in expectedDictionary.Keys)
+            {
+                Assert.True(readDictionary.ContainsKey(key));
+                Assert.Null(readDictionary[key]);
+            }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "DBNullAsObjectTestDataCollection",
+            TestDataVariations.AsArray | TestDataVariations.AsList)]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync_DBNullAsNull_Enumerable(Type variationType, object testData)
+        {
+            // Guard
+            Assert.True((testData as IEnumerable<object>) != null);
+
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+            IEnumerable<object> expectedEnumerable = (IEnumerable<object>)testData;
+
+            // Arrange & Act & Assert
+            object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+
+            // DBNull.Value can be read back as null object. Reach into collections.
+            Assert.Equal(testData.GetType(), readObj.GetType());
+
+            IEnumerable<object> readEnumerable = (IEnumerable<object>)readObj;
+            Assert.Equal(expectedEnumerable.Count(), readEnumerable.Count());
+
+            foreach (object readContent in readEnumerable)
+            {
+                Assert.Null(readContent);
+            }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "DBNullAsObjectTestDataCollection", TestDataVariations.AsClassMember)]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync_DBNullAsNull_Holder(Type variationType, object testData)
+        {
+            // Guard
+            Assert.IsType<TestDataHolder<object>>(testData);
+
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+
+            // Arrange & Act & Assert
+            object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+
+            // DBNull.Value can be read back as null object. Reach into objects.
+            Assert.Equal(testData.GetType(), readObj.GetType());
+
+            TestDataHolder<object> readDataHolder = (TestDataHolder<object>)readObj;
+            Assert.Null(readDataHolder.V1);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync_DBNullAsNullString()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+            Type variationType = typeof(string);
+            object testData = DBNull.Value;
+
+            // Arrange & Act & Assert
+            object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+
+            // DBNull.value can be read as null of any nullable type
+            Assert.Null(readObj);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync_DBNull()
+        {
+            // Arrange
+            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
+            Type variationType = typeof(DBNull);
+            object testData = DBNull.Value;
+
+            // Arrange & Act & Assert
+            object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+
+            // Only JSON case where DBNull.Value round-trips
+            Assert.Equal(testData, readObj);
         }
 
         [Fact]

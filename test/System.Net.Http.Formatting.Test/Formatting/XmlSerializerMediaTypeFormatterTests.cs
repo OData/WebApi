@@ -197,29 +197,54 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection",
-            TestDataVariations.All | TestDataVariations.WithNull)]
+        [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection", RoundTripDataVariations)]
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsyncUsingXmlSerializer(Type variationType, object testData)
         {
-            TestXmlSerializerMediaTypeFormatter formatter = new TestXmlSerializerMediaTypeFormatter();
-            HttpContent content = new StringContent(String.Empty);
-            HttpContentHeaders contentHeaders = content.Headers;
-
+            // Guard
             bool canSerialize = IsSerializableWithXmlSerializer(variationType, testData) && Assert.Http.CanRoundTrip(variationType);
             if (canSerialize)
             {
+                // Arrange
+                TestXmlSerializerMediaTypeFormatter formatter = new TestXmlSerializerMediaTypeFormatter();
                 formatter.SetSerializer(variationType, new XmlSerializer(variationType));
 
-                object readObj = null;
-                Assert.Stream.WriteAndRead(
-                    stream =>
-                    {
-                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, content, transportContext: null));
-                        contentHeaders.ContentLength = stream.Length;
-                    },
-                    stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, content, null)));
+                // Arrange & Act & Assert
+                object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
                 Assert.Equal(testData, readObj);
             }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(XmlMediaTypeFormatterTests), "BunchOfTypedObjectsTestDataCollection", RoundTripDataVariations)]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsyncUsingXmlSerializer_ExtraTypes(Type variationType, object testData)
+        {
+            // Guard
+            bool canSerialize = IsSerializableWithXmlSerializer(variationType, testData) && Assert.Http.CanRoundTrip(variationType);
+            if (canSerialize)
+            {
+                // Arrange
+                TestXmlSerializerMediaTypeFormatter formatter = new TestXmlSerializerMediaTypeFormatter();
+                formatter.SetSerializer(variationType, new XmlSerializer(variationType, new Type[] { typeof(DBNull), }));
+
+                // Arrange & Act & Assert
+                object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+                Assert.Equal(testData, readObj);
+            }
+        }
+
+        // Test alternate null value; this serializer attempts to cast DBNull to variationType so typeof(string) variation fails
+        [Fact]
+        public void ReadFromStreamAsync_RoundTripsWriteToStreamAsyncUsingXmlSerializer_DBNull()
+        {
+            // Arrange
+            TestXmlSerializerMediaTypeFormatter formatter = new TestXmlSerializerMediaTypeFormatter();
+            Type variationType = typeof(DBNull);
+            formatter.SetSerializer(variationType, new XmlSerializer(variationType));
+            object testData = DBNull.Value;
+
+            // Arrange & Act & Assert
+            object readObj = ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(formatter, variationType, testData);
+            Assert.Equal(testData, readObj);
         }
 
         [Theory]

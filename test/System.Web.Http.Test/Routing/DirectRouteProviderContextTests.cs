@@ -60,7 +60,7 @@ namespace System.Web.Http.Routing
         private static IHttpRoute BuildWithoutResolver(string template,
             IReadOnlyCollection<HttpActionDescriptor> actions)
         {
-            DirectRouteProviderContext context = new DirectRouteProviderContext(null, actions,
+            DirectRouteFactoryContext context = new DirectRouteFactoryContext(null, actions,
                 new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object, targetIsAction: true);
             DirectRouteBuilder builder = context.CreateBuilder(template, constraintResolver: null);
             return builder.Build().Route;
@@ -69,7 +69,7 @@ namespace System.Web.Http.Routing
         private static IHttpRoute BuildWithResolver(string template, IInlineConstraintResolver constraintResolver)
         {
             HttpActionDescriptor[] actions = new HttpActionDescriptor[] { new ReflectedHttpActionDescriptor() };
-            DirectRouteProviderContext context = new DirectRouteProviderContext(null, actions, constraintResolver, targetIsAction: true);
+            DirectRouteFactoryContext context = new DirectRouteFactoryContext(null, actions, constraintResolver, targetIsAction: true);
 
             // Act
             DirectRouteBuilder builder = context.CreateBuilder(template);

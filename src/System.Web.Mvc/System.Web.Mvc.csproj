@@ -53,11 +53,11 @@
     <Compile Include="..\Common\Routing\DirectRouteBuilder.cs">
       <Link>Routing\DirectRouteBuilder.cs</Link>
     </Compile>
-    <Compile Include="..\Common\Routing\DirectRouteProviderContext.cs">
-      <Link>Routing\DirectRouteProviderContext.cs</Link>
+    <Compile Include="..\Common\Routing\DirectRouteFactoryContext.cs">
+      <Link>Routing\DirectRouteFactoryContext.cs</Link>
     </Compile>
-    <Compile Include="..\Common\Routing\IDirectRouteProvider.cs">
-      <Link>Routing\IDirectRouteProvider.cs</Link>
+    <Compile Include="..\Common\Routing\IDirectRouteFactory.cs">
+      <Link>Routing\IDirectRouteFactory.cs</Link>
     </Compile>
     <Compile Include="..\Common\Routing\IInlineConstraintResolver.cs">
       <Link>Routing\IInlineConstraintResolver.cs</Link>
@@ -65,17 +65,17 @@
     <Compile Include="..\Common\Routing\RouteEntry.cs">
       <Link>Routing\RouteEntry.cs</Link>
     </Compile>
-    <Compile Include="..\Common\Routing\RouteInfoDirectRouteProvider.cs">
-      <Link>Routing\RouteInfoDirectRouteProvider.cs</Link>
+    <Compile Include="..\Common\Routing\RouteFactoryAttribute.cs">
+      <Link>Routing\RouteFactoryAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Routing\RouteInfoDirectRouteFactory.cs">
+      <Link>Routing\RouteInfoDirectRouteFactory.cs</Link>
     </Compile>
     <Compile Include="..\Common\Routing\RouteParser.cs">
       <Link>Routing\RouteParser.cs</Link>
     </Compile>
     <Compile Include="..\Common\Routing\RoutePrecedence.cs">
       <Link>Routing\RoutePrecedence.cs</Link>
-    </Compile>
-    <Compile Include="..\Common\Routing\RouteProviderAttribute.cs">
-      <Link>Routing\RouteProviderAttribute.cs</Link>
     </Compile>
     <Compile Include="..\Common\TaskHelpers.cs">
       <Link>Common\TaskHelpers.cs</Link>

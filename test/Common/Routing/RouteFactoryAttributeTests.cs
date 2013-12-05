@@ -25,14 +25,14 @@ namespace System.Web.Http.Routing
 namespace System.Web.Mvc.Routing
 #endif
 {
-    public class RouteProviderAttributeTests
+    public class RouteFactoryAttributeTests
     {
         [Fact]
         public void TemplateGet_ReturnsSpecifiedInstance()
         {
             // Arrange
             string expectedTemplate = "RouteTemplate";
-            RouteProviderAttribute product = CreateProductUnderTest(expectedTemplate);
+            RouteFactoryAttribute product = CreateProductUnderTest(expectedTemplate);
 
             // Act
             string template = product.Template;
@@ -45,7 +45,7 @@ namespace System.Web.Mvc.Routing
         public void NameGet_ReturnsNull()
         {
             // Arrange
-            RouteProviderAttribute product = CreateProductUnderTest();
+            RouteFactoryAttribute product = CreateProductUnderTest();
 
             // Act
             string name = product.Name;
@@ -58,7 +58,7 @@ namespace System.Web.Mvc.Routing
         public void OrderGet_ReturnsZero()
         {
             // Arrange
-            RouteProviderAttribute product = CreateProductUnderTest();
+            RouteFactoryAttribute product = CreateProductUnderTest();
 
             // Act
             int order = product.Order;
@@ -71,7 +71,7 @@ namespace System.Web.Mvc.Routing
         public void ConstraintsGet_ReturnsNull()
         {
             // Arrange
-            RouteProviderAttribute product = CreateProductUnderTest();
+            RouteFactoryAttribute product = CreateProductUnderTest();
 
             // Act
             TRouteDictionary constraints = product.Constraints;
@@ -85,12 +85,12 @@ namespace System.Web.Mvc.Routing
         {
             // Arrange
             string expectedTemplate = "RouteTemplate";
-            IDirectRouteProvider product = CreateProductUnderTest(expectedTemplate);
+            IDirectRouteFactory product = CreateProductUnderTest(expectedTemplate);
 
             RouteEntry expectedEntry = CreateEntry();
 
             DirectRouteBuilder builder = CreateBuilder(() => expectedEntry);
-            DirectRouteProviderContext context = CreateContext((template) => template == expectedTemplate ? builder :
+            DirectRouteFactoryContext context = CreateContext((template) => template == expectedTemplate ? builder :
                 new DirectRouteBuilder(new TActionDescriptor[0], targetIsAction: true));
 
             // Act
@@ -105,7 +105,7 @@ namespace System.Web.Mvc.Routing
         {
             // Arrange
             string expectedName = "RouteName";
-            RouteProviderAttribute product = CreateProductUnderTest();
+            RouteFactoryAttribute product = CreateProductUnderTest();
             product.Name = expectedName;
 
             string name = null;
@@ -115,7 +115,7 @@ namespace System.Web.Mvc.Routing
                 name = builder.Name;
                 return null;
             });
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -129,7 +129,7 @@ namespace System.Web.Mvc.Routing
         {
             // Arrange
             int expectedOrder = 123;
-            RouteProviderAttribute product = CreateProductUnderTest();
+            RouteFactoryAttribute product = CreateProductUnderTest();
             product.Order = expectedOrder;
 
             int order = 0;
@@ -139,7 +139,7 @@ namespace System.Web.Mvc.Routing
                 order = builder.Order;
                 return null;
             });
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -153,9 +153,9 @@ namespace System.Web.Mvc.Routing
         {
             // Arrange
             TRouteDictionary expectedDefaults = new TRouteDictionaryConcrete();
-            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            Mock<RouteFactoryAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.Defaults).Returns(expectedDefaults);
-            IDirectRouteProvider product = productMock.Object;
+            IDirectRouteFactory product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
@@ -167,7 +167,7 @@ namespace System.Web.Mvc.Routing
                 return null;
             });
             Assert.Null(builder.Defaults); // Guard
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -195,9 +195,9 @@ namespace System.Web.Mvc.Routing
             string newConflictingDefaultValue = "NewConflictingDefault";
             additionalDefaults.Add(conflictingDefaultKey, newConflictingDefaultValue);
 
-            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            Mock<RouteFactoryAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.Defaults).Returns(additionalDefaults);
-            IDirectRouteProvider product = productMock.Object;
+            IDirectRouteFactory product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
@@ -211,7 +211,7 @@ namespace System.Web.Mvc.Routing
 
             builder.Defaults = existingDefaults;
 
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -233,9 +233,9 @@ namespace System.Web.Mvc.Routing
             // Arrange
             TRouteDictionary existingDefaults = new TRouteDictionaryConcrete();
 
-            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            Mock<RouteFactoryAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.Defaults).Returns((TRouteDictionary)null);
-            IDirectRouteProvider product = productMock.Object;
+            IDirectRouteFactory product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
@@ -249,7 +249,7 @@ namespace System.Web.Mvc.Routing
 
             builder.Defaults = existingDefaults;
 
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -263,9 +263,9 @@ namespace System.Web.Mvc.Routing
         {
             // Arrange
             TRouteDictionary expectedConstraints = new TRouteDictionaryConcrete();
-            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            Mock<RouteFactoryAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.Constraints).Returns(expectedConstraints);
-            IDirectRouteProvider product = productMock.Object;
+            IDirectRouteFactory product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
@@ -277,7 +277,7 @@ namespace System.Web.Mvc.Routing
                 return null;
             });
             Assert.Null(builder.Constraints); // Guard
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -305,9 +305,9 @@ namespace System.Web.Mvc.Routing
             string newConflictingConstraintValue = "NewConflictingConstraint";
             additionalConstraints.Add(conflictingConstraintKey, newConflictingConstraintValue);
 
-            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            Mock<RouteFactoryAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.Constraints).Returns(additionalConstraints);
-            IDirectRouteProvider product = productMock.Object;
+            IDirectRouteFactory product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
@@ -321,7 +321,7 @@ namespace System.Web.Mvc.Routing
 
             builder.Constraints = existingConstraints;
 
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -343,9 +343,9 @@ namespace System.Web.Mvc.Routing
             // Arrange
             TRouteDictionary existingConstraints = new TRouteDictionaryConcrete();
 
-            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            Mock<RouteFactoryAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.Constraints).Returns((TRouteDictionary)null);
-            IDirectRouteProvider product = productMock.Object;
+            IDirectRouteFactory product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
@@ -359,7 +359,7 @@ namespace System.Web.Mvc.Routing
 
             builder.Constraints = existingConstraints;
 
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -373,9 +373,9 @@ namespace System.Web.Mvc.Routing
         {
             // Arrange
             TRouteDictionary expectedDataTokens = new TRouteDictionaryConcrete();
-            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            Mock<RouteFactoryAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.DataTokens).Returns(expectedDataTokens);
-            IDirectRouteProvider product = productMock.Object;
+            IDirectRouteFactory product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
@@ -387,7 +387,7 @@ namespace System.Web.Mvc.Routing
                 return null;
             });
             Assert.Null(builder.DataTokens); // Guard
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -415,9 +415,9 @@ namespace System.Web.Mvc.Routing
             string newConflictingDataTokenValue = "NewConflictingDataToken";
             additionalDataTokens.Add(conflictingDataTokenKey, newConflictingDataTokenValue);
 
-            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            Mock<RouteFactoryAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.DataTokens).Returns(additionalDataTokens);
-            IDirectRouteProvider product = productMock.Object;
+            IDirectRouteFactory product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
@@ -431,7 +431,7 @@ namespace System.Web.Mvc.Routing
 
             builder.DataTokens = existingDataTokens;
 
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -453,9 +453,9 @@ namespace System.Web.Mvc.Routing
             // Arrange
             TRouteDictionary existingDataTokens = new TRouteDictionaryConcrete();
 
-            Mock<RouteProviderAttribute> productMock = CreateProductUnderTestMock();
+            Mock<RouteFactoryAttribute> productMock = CreateProductUnderTestMock();
             productMock.SetupGet(p => p.DataTokens).Returns((TRouteDictionary)null);
-            IDirectRouteProvider product = productMock.Object;
+            IDirectRouteFactory product = productMock.Object;
 
             RouteEntry expectedEntry = CreateEntry();
 
@@ -469,7 +469,7 @@ namespace System.Web.Mvc.Routing
 
             builder.DataTokens = existingDataTokens;
 
-            DirectRouteProviderContext context = CreateContext((i) => builder);
+            DirectRouteFactoryContext context = CreateContext((i) => builder);
 
             // Act
             RouteEntry ignore = product.CreateRoute(context);
@@ -483,7 +483,7 @@ namespace System.Web.Mvc.Routing
         {
             // Act
             AttributeUsageAttribute usage = (AttributeUsageAttribute)Attribute.GetCustomAttribute(
-                typeof(RouteProviderAttribute), typeof(AttributeUsageAttribute));
+                typeof(RouteFactoryAttribute), typeof(AttributeUsageAttribute));
 
             // Assert
             Assert.NotNull(usage);
@@ -497,9 +497,9 @@ namespace System.Web.Mvc.Routing
             return new LambdaDirectRouteBuilder(build);
         }
 
-        private static DirectRouteProviderContext CreateContext(Func<string, DirectRouteBuilder> createBuilder)
+        private static DirectRouteFactoryContext CreateContext(Func<string, DirectRouteBuilder> createBuilder)
         {
-            return new LambdaDirectRouteProviderContext(createBuilder);
+            return new LambdaDirectRouteFactoryContext(createBuilder);
         }
 
         private static RouteEntry CreateEntry()
@@ -512,33 +512,33 @@ namespace System.Web.Mvc.Routing
             return new RouteEntry("IgnoreEntry", route);
         }
 
-        private static RouteProviderAttribute CreateProductUnderTest()
+        private static RouteFactoryAttribute CreateProductUnderTest()
         {
             return CreateProductUnderTest("IgnoreTemplate");
         }
 
-        private static RouteProviderAttribute CreateProductUnderTest(string template)
+        private static RouteFactoryAttribute CreateProductUnderTest(string template)
         {
             return CreateProductUnderTestMock(template).Object;
         }
 
-        private static Mock<RouteProviderAttribute> CreateProductUnderTestMock()
+        private static Mock<RouteFactoryAttribute> CreateProductUnderTestMock()
         {
             return CreateProductUnderTestMock("IgnoreTemplate");
         }
 
-        private static Mock<RouteProviderAttribute> CreateProductUnderTestMock(string template)
+        private static Mock<RouteFactoryAttribute> CreateProductUnderTestMock(string template)
         {
-            Mock<RouteProviderAttribute> mock = new Mock<RouteProviderAttribute>(template);
+            Mock<RouteFactoryAttribute> mock = new Mock<RouteFactoryAttribute>(template);
             mock.CallBase = true;
             return mock;
         }
 
-        private class LambdaDirectRouteProviderContext : DirectRouteProviderContext
+        private class LambdaDirectRouteFactoryContext : DirectRouteFactoryContext
         {
             private readonly Func<string, DirectRouteBuilder> _createBuilder;
 
-            public LambdaDirectRouteProviderContext(Func<string, DirectRouteBuilder> createBuilder)
+            public LambdaDirectRouteFactoryContext(Func<string, DirectRouteBuilder> createBuilder)
 #if ASPNETWEBAPI
                 : base(null, new TActionDescriptor[] { new Mock<TActionDescriptor>().Object },
                 new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object,

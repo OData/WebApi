@@ -128,7 +128,7 @@ namespace System.Web.Mvc.Routing
             // Arrange
             string areaPrefix = null;
             string controllerPrefix = null;
-            IDirectRouteProvider provider = CreateStubRouteProvider(null);
+            IDirectRouteFactory factory = CreateStubRouteFactory(null);
             ControllerDescriptor controllerDescriptor = CreateStubControllerDescriptor("IgnoreController");
             ActionDescriptor actionDescriptor = CreateStubActionDescriptor(controllerDescriptor, "IgnoreAction");
             IReadOnlyCollection<ActionDescriptor> actions = new ActionDescriptor[] { actionDescriptor };
@@ -137,8 +137,8 @@ namespace System.Web.Mvc.Routing
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(areaPrefix,
-                controllerPrefix, provider, actions, constraintResolver, targetIsAction: false),
-                "IDirectRouteProvider.CreateRoute must not return null.");
+                controllerPrefix, factory, actions, constraintResolver, targetIsAction: false),
+                "IDirectRouteFactory.CreateRoute must not return null.");
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace System.Web.Mvc.Routing
             Route route = new Route(url: null, routeHandler: null);
             Assert.Null(route.GetTargetActionDescriptors()); // Guard
             RouteEntry entry = new RouteEntry(name: null, route: route);
-            IDirectRouteProvider provider = CreateStubRouteProvider(entry);
+            IDirectRouteFactory factory = CreateStubRouteFactory(entry);
             ControllerDescriptor controllerDescriptor = CreateStubControllerDescriptor("IgnoreController");
             ActionDescriptor actionDescriptor = CreateStubActionDescriptor(controllerDescriptor, "IgnoreAction");
             IReadOnlyCollection<ActionDescriptor> actions = new ActionDescriptor[] { actionDescriptor };
@@ -161,7 +161,7 @@ namespace System.Web.Mvc.Routing
             string expectedMessage = "The route does not have any associated action descriptors. Routing requires " +
                 "that each direct route map to a non-empty set of actions.";
             Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(areaPrefix,
-                controllerPrefix, provider, actions, constraintResolver, targetIsAction: false), expectedMessage);
+                controllerPrefix, factory, actions, constraintResolver, targetIsAction: false), expectedMessage);
         }
 
         [Fact]
@@ -177,7 +177,7 @@ namespace System.Web.Mvc.Routing
             Assert.NotNull(originalActions); // Guard
             Assert.Equal(0, originalActions.Length); // Guard
             RouteEntry entry = new RouteEntry(name: null, route: route);
-            IDirectRouteProvider provider = CreateStubRouteProvider(entry);
+            IDirectRouteFactory factory = CreateStubRouteFactory(entry);
             ControllerDescriptor controllerDescriptor = CreateStubControllerDescriptor("IgnoreController");
             ActionDescriptor actionDescriptor = CreateStubActionDescriptor(controllerDescriptor, "IgnoreAction");
             IReadOnlyCollection<ActionDescriptor> actions = new ActionDescriptor[] { actionDescriptor };
@@ -188,7 +188,7 @@ namespace System.Web.Mvc.Routing
             string expectedMessage = "The route does not have any associated action descriptors. Routing requires " +
                 "that each direct route map to a non-empty set of actions.";
             Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(areaPrefix,
-                controllerPrefix, provider, actions, constraintResolver, targetIsAction: false), expectedMessage);
+                controllerPrefix, factory, actions, constraintResolver, targetIsAction: false), expectedMessage);
         }
 
         [Fact]
@@ -205,7 +205,7 @@ namespace System.Web.Mvc.Routing
             route.RouteHandler = new Mock<IRouteHandler>(MockBehavior.Strict).Object;
             ActionDescriptor[] originalActions = route.GetTargetActionDescriptors();
             RouteEntry entry = new RouteEntry(name: null, route: route);
-            IDirectRouteProvider provider = CreateStubRouteProvider(entry);
+            IDirectRouteFactory factory = CreateStubRouteFactory(entry);
             IReadOnlyCollection<ActionDescriptor> actions = new ActionDescriptor[] { actionDescriptor };
             IInlineConstraintResolver constraintResolver =
                 new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object;
@@ -213,7 +213,7 @@ namespace System.Web.Mvc.Routing
             // Act & Assert
             string expectedMessage = "Direct routing does not support per-route route handlers.";
             Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(areaPrefix,
-                controllerPrefix, provider, actions, constraintResolver, targetIsAction: false), expectedMessage);
+                controllerPrefix, factory, actions, constraintResolver, targetIsAction: false), expectedMessage);
         }
 
         private static ActionDescriptor CreateStubActionDescriptor(ControllerDescriptor controllerDescriptor, string actionName)
@@ -231,10 +231,10 @@ namespace System.Web.Mvc.Routing
             return mock.Object;
         }
 
-        private static IDirectRouteProvider CreateStubRouteProvider(RouteEntry entry)
+        private static IDirectRouteFactory CreateStubRouteFactory(RouteEntry entry)
         {
-            Mock<IDirectRouteProvider> mock = new Mock<IDirectRouteProvider>(MockBehavior.Strict);
-            mock.Setup(p => p.CreateRoute(It.IsAny<DirectRouteProviderContext>())).Returns(entry);
+            Mock<IDirectRouteFactory> mock = new Mock<IDirectRouteFactory>(MockBehavior.Strict);
+            mock.Setup(p => p.CreateRoute(It.IsAny<DirectRouteFactoryContext>())).Returns(entry);
             return mock.Object;
         }
 
@@ -273,7 +273,7 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-        public class InvalidConstraintRouteAttribute : RouteProviderAttribute
+        public class InvalidConstraintRouteAttribute : RouteFactoryAttribute
         {
             public InvalidConstraintRouteAttribute(string template)
                 : base(template)

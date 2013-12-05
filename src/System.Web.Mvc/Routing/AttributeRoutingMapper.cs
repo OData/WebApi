@@ -160,9 +160,9 @@ namespace System.Web.Mvc.Routing
             {
                 ActionDescriptor action = CreateActionDescriptor(controller, actionSelector, method);
 
-                IEnumerable<IDirectRouteProvider> providers = GetRouteProviders(method, controller.ControllerType);
+                IEnumerable<IDirectRouteFactory> factories = GetRouteFactories(method, controller.ControllerType);
 
-                AddRouteEntries(collector, areaPrefix, prefix, providers, new ActionDescriptor[] { action },
+                AddRouteEntries(collector, areaPrefix, prefix, factories, new ActionDescriptor[] { action },
                     constraintResolver, targetIsAction: true);
             }
 
@@ -176,12 +176,12 @@ namespace System.Web.Mvc.Routing
                 actionsWithoutRoutes.Add(action);
             }
 
-            IReadOnlyCollection<IDirectRouteProvider> controllerProviders = GetRouteProviders(controller);
+            IReadOnlyCollection<IDirectRouteFactory> controllerFactories = GetRouteFactories(controller);
 
             // If they exist and have not been overridden, create routes for controller-level route providers.
-            if (controllerProviders.Count > 0 && actionsWithoutRoutes.Count > 0)
+            if (controllerFactories.Count > 0 && actionsWithoutRoutes.Count > 0)
             {
-                AddRouteEntries(collector, areaPrefix, prefix, controllerProviders, actionsWithoutRoutes,
+                AddRouteEntries(collector, areaPrefix, prefix, controllerFactories, actionsWithoutRoutes,
                     constraintResolver, targetIsAction: false);
             }
         }
@@ -197,30 +197,30 @@ namespace System.Web.Mvc.Routing
         }
 
         private static void AddRouteEntries(SubRouteCollection collector, string areaPrefix, string prefix,
-            IEnumerable<IDirectRouteProvider> providers, IReadOnlyCollection<ActionDescriptor> actions,
+            IEnumerable<IDirectRouteFactory> factories, IReadOnlyCollection<ActionDescriptor> actions,
             IInlineConstraintResolver constraintResolver, bool targetIsAction)
         {
-            foreach (IDirectRouteProvider provider in providers)
+            foreach (IDirectRouteFactory factory in factories)
             {
-                RouteEntry entry = CreateRouteEntry(areaPrefix, prefix, provider, actions, constraintResolver,
+                RouteEntry entry = CreateRouteEntry(areaPrefix, prefix, factory, actions, constraintResolver,
                     targetIsAction);
                 collector.Add(entry);
             }
         }
 
-        internal static RouteEntry CreateRouteEntry(string areaPrefix, string prefix, IDirectRouteProvider provider,
+        internal static RouteEntry CreateRouteEntry(string areaPrefix, string prefix, IDirectRouteFactory factory,
             IReadOnlyCollection<ActionDescriptor> actions, IInlineConstraintResolver constraintResolver, bool targetIsAction)
         {
-            Contract.Assert(provider != null);
+            Contract.Assert(factory != null);
 
-            DirectRouteProviderContext context = new DirectRouteProviderContext(areaPrefix, prefix, actions,
+            DirectRouteFactoryContext context = new DirectRouteFactoryContext(areaPrefix, prefix, actions,
                 constraintResolver, targetIsAction);
-            RouteEntry entry = provider.CreateRoute(context);
+            RouteEntry entry = factory.CreateRoute(context);
 
             if (entry == null)
             {
                 throw new InvalidOperationException(Error.Format(MvcResources.TypeMethodMustNotReturnNull,
-                    typeof(IDirectRouteProvider).Name, "CreateRoute"));
+                    typeof(IDirectRouteFactory).Name, "CreateRoute"));
             }
 
             Route route = entry.Route;
@@ -292,34 +292,34 @@ namespace System.Web.Mvc.Routing
             return null;
         }
 
-        public static IReadOnlyCollection<IDirectRouteProvider> GetRouteProviders(ControllerDescriptor controller)
+        public static IReadOnlyCollection<IDirectRouteFactory> GetRouteFactories(ControllerDescriptor controller)
         {
             object[] attributes = controller.GetCustomAttributes(inherit: false);
-            IEnumerable<IDirectRouteProvider> newProviders = attributes.OfType<IDirectRouteProvider>();
+            IEnumerable<IDirectRouteFactory> newFactories = attributes.OfType<IDirectRouteFactory>();
             IEnumerable<IRouteInfoProvider> oldProviders = attributes.OfType<IRouteInfoProvider>();
 
-            List<IDirectRouteProvider> combined = new List<IDirectRouteProvider>();
-            combined.AddRange(newProviders);
+            List<IDirectRouteFactory> combined = new List<IDirectRouteFactory>();
+            combined.AddRange(newFactories);
 
             foreach (IRouteInfoProvider oldProvider in oldProviders)
             {
-                if (oldProvider is IDirectRouteProvider)
+                if (oldProvider is IDirectRouteFactory)
                 {
                     continue;
                 }
 
-                combined.Add(new RouteInfoDirectRouteProvider(oldProvider));
+                combined.Add(new RouteInfoDirectRouteFactory(oldProvider));
             }
 
             return combined;
         }
 
-        private static IEnumerable<IDirectRouteProvider> GetRouteProviders(MethodInfo methodInfo, Type controllerType)
+        private static IEnumerable<IDirectRouteFactory> GetRouteFactories(MethodInfo methodInfo, Type controllerType)
         {
             // Skip Route attributes on inherited actions.
             if (methodInfo.DeclaringType != controllerType)
             {
-                return Enumerable.Empty<IDirectRouteProvider>();
+                return Enumerable.Empty<IDirectRouteFactory>();
             }
 
             // We do not want to cache this as these attributes are only being looked up during
@@ -327,23 +327,23 @@ namespace System.Web.Mvc.Routing
             // storing that cache for no reason
             object[] attributes = methodInfo.GetCustomAttributes(inherit: false);
 
-            IEnumerable<IDirectRouteProvider> newProviders = attributes.OfType<IDirectRouteProvider>();
+            IEnumerable<IDirectRouteFactory> newFactories = attributes.OfType<IDirectRouteFactory>();
 
             IEnumerable<IRouteInfoProvider> oldProviders = attributes
                 .OfType<IRouteInfoProvider>()
                 .Where(attr => attr.Template != null);
 
-            List<IDirectRouteProvider> combined = new List<IDirectRouteProvider>();
-            combined.AddRange(newProviders);
+            List<IDirectRouteFactory> combined = new List<IDirectRouteFactory>();
+            combined.AddRange(newFactories);
 
             foreach (IRouteInfoProvider oldProvider in oldProviders)
             {
-                if (oldProvider is IDirectRouteProvider)
+                if (oldProvider is IDirectRouteFactory)
                 {
                     continue;
                 }
 
-                combined.Add(new RouteInfoDirectRouteProvider(oldProvider));
+                combined.Add(new RouteInfoDirectRouteFactory(oldProvider));
             }
 
             return combined;

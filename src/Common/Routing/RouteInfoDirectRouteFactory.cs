@@ -16,16 +16,16 @@ namespace System.Web.Mvc.Routing
 #endif
 {
     /// <remarks>
-    /// This class is an adapter that turns an IHttpRouteInfoProvider into an IDirectRouteProvider. We need it because
+    /// This class is an adapter that turns an IHttpRouteInfoProvider into an IDirectRouteFactory. We need it because
     /// we already shipped IHttpRouteInfoProvider but want to standardize the internal implementation around the more
-    /// general IDirectRouteProvider interface.
+    /// general IDirectRouteFactory interface.
     /// We can remove this class if we ever stop supporting custom attributes that implement IHttpRouteInfoProvider.
     /// </remarks>
-    internal class RouteInfoDirectRouteProvider : IDirectRouteProvider
+    internal class RouteInfoDirectRouteFactory : IDirectRouteFactory
     {
         private readonly TRouteInfoProvider _infoProvider;
 
-        public RouteInfoDirectRouteProvider(TRouteInfoProvider infoProvider)
+        public RouteInfoDirectRouteFactory(TRouteInfoProvider infoProvider)
         {
             if (infoProvider == null)
             {
@@ -35,7 +35,7 @@ namespace System.Web.Mvc.Routing
             _infoProvider = infoProvider;
         }
 
-        public RouteEntry CreateRoute(DirectRouteProviderContext context)
+        public RouteEntry CreateRoute(DirectRouteFactoryContext context)
         {
             Contract.Assert(context != null);
 

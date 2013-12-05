@@ -58,11 +58,11 @@
     <Compile Include="..\Common\PrefixContainerTest.cs">
       <Link>Common\PrefixContainerTest.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\RouteFactoryAttributeTests.cs">
+      <Link>Routing\RouteFactoryAttributeTests.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Routing\RoutePrecedenceTests.cs">
       <Link>Routing\RoutePrecedenceTests.cs</Link>
-    </Compile>
-    <Compile Include="..\Common\Routing\RouteProviderAttributeTests.cs">
-      <Link>Routing\RouteProviderAttributeTests.cs</Link>
     </Compile>
     <Compile Include="..\Common\TaskHelpersExtensionsTest.cs">
       <Link>Common\TaskHelpersExtensionsTest.cs</Link>

@@ -17,13 +17,13 @@ namespace System.Web.Mvc.Routing
 {
     /// <summary>Represents an attribute route that may contain custom constraints.</summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-    public abstract class RouteProviderAttribute : Attribute, IDirectRouteProvider
+    public abstract class RouteFactoryAttribute : Attribute, IDirectRouteFactory
     {
         private readonly string _template;
 
-        /// <summary>Initializes a new instance of the <see cref="RouteProviderAttribute"/> class.</summary>
+        /// <summary>Initializes a new instance of the <see cref="RouteFactoryAttribute"/> class.</summary>
         /// <param name="template">The route template.</param>
-        protected RouteProviderAttribute(string template)
+        protected RouteFactoryAttribute(string template)
         {
             _template = template;
         }
@@ -59,7 +59,7 @@ namespace System.Web.Mvc.Routing
         }
 
         /// <inheritdoc />
-        public RouteEntry CreateRoute(DirectRouteProviderContext context)
+        public RouteEntry CreateRoute(DirectRouteFactoryContext context)
         {
             Contract.Assert(context != null);
             DirectRouteBuilder builder = context.CreateBuilder(Template);

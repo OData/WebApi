@@ -14,7 +14,7 @@ namespace System.Web.Http.Controllers
                 throw new ArgumentNullException("controllerDescriptor");
             }
 
-            return controllerDescriptor.GetCustomAttributes<IDirectRouteProvider>(inherit: false).Any()
+            return controllerDescriptor.GetCustomAttributes<IDirectRouteFactory>(inherit: false).Any()
                 || controllerDescriptor.GetCustomAttributes<IHttpRouteInfoProvider>(inherit: false).Any();
         }
     }

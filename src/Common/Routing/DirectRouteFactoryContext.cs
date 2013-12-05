@@ -26,7 +26,7 @@ namespace System.Web.Mvc.Routing
 #endif
 {
     /// <summary>Represents a context that supports creating a direct route.</summary>
-    public class DirectRouteProviderContext
+    public class DirectRouteFactoryContext
     {
         private readonly string _actionName;
 
@@ -46,17 +46,17 @@ namespace System.Web.Mvc.Routing
         private readonly bool _targetIsAction;
 
 #if ASPNETWEBAPI
-        /// <summary>Initializes a new instance of the <see cref="DirectRouteProviderContext"/></summary>
+        /// <summary>Initializes a new instance of the <see cref="DirectRouteFactoryContext"/></summary>
         /// <param name="prefix">The route prefix, if any, defined by the controller.</param>
         /// <param name="actions">The action descriptors to which to create a route.</param>
         /// <param name="inlineConstraintResolver">The inline constraint resolver.</param>
         /// <param name="targetIsAction">
         /// A value indicating whether the route is configured at the action or controller level.
         /// </param>
-        public DirectRouteProviderContext(string prefix, IReadOnlyCollection<HttpActionDescriptor> actions,
+        public DirectRouteFactoryContext(string prefix, IReadOnlyCollection<HttpActionDescriptor> actions,
             IInlineConstraintResolver inlineConstraintResolver, bool targetIsAction)
 #else
-        /// <summary>Initializes a new instance of the <see cref="DirectRouteProviderContext"/></summary>
+        /// <summary>Initializes a new instance of the <see cref="DirectRouteFactoryContext"/></summary>
         /// <param name="areaPrefix">The route prefix, if any, defined by the area.</param>
         /// <param name="controllerPrefix">The route prefix, if any, defined by the controller.</param>
         /// <param name="actions">The action descriptors to which to create a route.</param>
@@ -64,7 +64,7 @@ namespace System.Web.Mvc.Routing
         /// <param name="targetIsAction">
         /// A value indicating whether the route is configured at the action or controller level.
         /// </param>
-        public DirectRouteProviderContext(string areaPrefix, string controllerPrefix,
+        public DirectRouteFactoryContext(string areaPrefix, string controllerPrefix,
             IReadOnlyCollection<ActionDescriptor> actions, IInlineConstraintResolver inlineConstraintResolver,
             bool targetIsAction)
 #endif

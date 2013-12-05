@@ -619,7 +619,7 @@ namespace System.Web.Http.Routing
             return "fail";
         }
 
-        private class ConstrainedRouteAttribute : RouteProviderAttribute
+        private class ConstrainedRouteAttribute : RouteFactoryAttribute
         {
             public ConstrainedRouteAttribute()
                 : base(null)

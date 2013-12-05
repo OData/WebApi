@@ -11,7 +11,7 @@ namespace System.Web.Mvc
     /// When placed on a controller, it applies to actions that do not have any <see cref="RouteAttribute"/>s on them.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    public sealed class RouteAttribute : Attribute, IDirectRouteProvider, IRouteInfoProvider
+    public sealed class RouteAttribute : Attribute, IDirectRouteFactory, IRouteInfoProvider
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RouteAttribute" /> class.
@@ -42,7 +42,7 @@ namespace System.Web.Mvc
         /// <inheritdoc />
         public string Template { get; private set; }
 
-        RouteEntry IDirectRouteProvider.CreateRoute(DirectRouteProviderContext context)
+        RouteEntry IDirectRouteFactory.CreateRoute(DirectRouteFactoryContext context)
         {
             Contract.Assert(context != null);
 

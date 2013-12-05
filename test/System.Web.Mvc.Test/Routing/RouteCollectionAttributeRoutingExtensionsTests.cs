@@ -187,7 +187,7 @@ namespace System.Web.Routing
         [InlineData(null, "pref", "~/whatever", "whatever")]
         public void BuildRouteTemplate(string areaPrefix, string prefix, string template, string expected)
         {
-            var result = DirectRouteProviderContext.BuildRouteTemplate(areaPrefix, prefix, template);
+            var result = DirectRouteFactoryContext.BuildRouteTemplate(areaPrefix, prefix, template);
 
             Assert.Equal(expected, result);
         }

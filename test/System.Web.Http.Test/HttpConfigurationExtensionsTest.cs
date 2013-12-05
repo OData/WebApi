@@ -304,17 +304,17 @@ namespace System.Net.Http
             controllerDescriptor.Object.ControllerName = controllerName;
             controllerDescriptor.Setup(cd => cd.GetCustomAttributes<IRoutePrefix>(false)).Returns(routePrefixes);
             controllerDescriptor.Setup(cd => cd.GetCustomAttributes<IHttpRouteInfoProvider>(false)).Returns(new Collection<IHttpRouteInfoProvider>());
-            controllerDescriptor.Setup(cd => cd.GetCustomAttributes<IDirectRouteProvider>(false)).Returns(new Collection<IDirectRouteProvider>());
+            controllerDescriptor.Setup(cd => cd.GetCustomAttributes<IDirectRouteFactory>(false)).Returns(new Collection<IDirectRouteFactory>());
             return controllerDescriptor.Object;
         }
 
         private static HttpActionDescriptor CreateActionDescriptor(string actionName, IEnumerable<RouteAttribute> routeAttributes)
         {
-            Collection<IDirectRouteProvider> newProviders = new Collection<IDirectRouteProvider>(new List<IDirectRouteProvider>(routeAttributes));
+            Collection<IDirectRouteFactory> newProviders = new Collection<IDirectRouteFactory>(new List<IDirectRouteFactory>(routeAttributes));
             Collection<IHttpRouteInfoProvider> oldProviders = new Collection<IHttpRouteInfoProvider>(new List<IHttpRouteInfoProvider>(routeAttributes));
             Mock<ReflectedHttpActionDescriptor> actionDescriptor = new Mock<ReflectedHttpActionDescriptor>();
             actionDescriptor.Setup(ad => ad.ActionName).Returns(actionName);
-            actionDescriptor.Setup(ad => ad.GetCustomAttributes<IDirectRouteProvider>(false)).Returns(newProviders);
+            actionDescriptor.Setup(ad => ad.GetCustomAttributes<IDirectRouteFactory>(false)).Returns(newProviders);
             actionDescriptor.Setup(ad => ad.GetCustomAttributes<IHttpRouteInfoProvider>(false)).Returns(oldProviders);
             actionDescriptor.Setup(ad => ad.SupportedHttpMethods).Returns(new Collection<HttpMethod>());
             actionDescriptor.CallBase = true;

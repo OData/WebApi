@@ -39,7 +39,7 @@ namespace System.Web.Mvc.Routing
         {
             Contract.Assert(context != null);
 
-            DirectRouteBuilder builder = context.CreateBuilder(_infoProvider.Template);
+            IDirectRouteBuilder builder = context.CreateBuilder(_infoProvider.Template);
             Contract.Assert(builder != null);
 
             builder.Name = _infoProvider.Name;

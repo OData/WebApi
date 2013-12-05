@@ -62,7 +62,7 @@ namespace System.Web.Http.Routing
         {
             DirectRouteFactoryContext context = new DirectRouteFactoryContext(null, actions,
                 new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object, targetIsAction: true);
-            DirectRouteBuilder builder = context.CreateBuilder(template, constraintResolver: null);
+            IDirectRouteBuilder builder = context.CreateBuilder(template, constraintResolver: null);
             return builder.Build().Route;
         }
 
@@ -72,7 +72,7 @@ namespace System.Web.Http.Routing
             DirectRouteFactoryContext context = new DirectRouteFactoryContext(null, actions, constraintResolver, targetIsAction: true);
 
             // Act
-            DirectRouteBuilder builder = context.CreateBuilder(template);
+            IDirectRouteBuilder builder = context.CreateBuilder(template);
             IHttpRoute route = builder.Build().Route;
 
             // Assertions for default, unspecified behavior:

@@ -61,8 +61,12 @@ namespace System.Web.Mvc.Routing
         /// <inheritdoc />
         public RouteEntry CreateRoute(DirectRouteFactoryContext context)
         {
-            Contract.Assert(context != null);
-            DirectRouteBuilder builder = context.CreateBuilder(Template);
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
+
+            IDirectRouteBuilder builder = context.CreateBuilder(Template);
             Contract.Assert(builder != null);
             builder.Name = Name;
             builder.Order = Order;

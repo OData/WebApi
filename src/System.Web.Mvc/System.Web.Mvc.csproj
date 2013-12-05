@@ -56,6 +56,9 @@
     <Compile Include="..\Common\Routing\DirectRouteFactoryContext.cs">
       <Link>Routing\DirectRouteFactoryContext.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\IDirectRouteBuilder.cs">
+      <Link>Routing\IDirectRouteBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Routing\IDirectRouteFactory.cs">
       <Link>Routing\IDirectRouteFactory.cs</Link>
     </Compile>

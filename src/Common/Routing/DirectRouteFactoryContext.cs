@@ -153,12 +153,12 @@ namespace System.Web.Mvc.Routing
         /// <summary>Creates a route builder that can build a route matching this context.</summary>
         /// <param name="template">The route template.</param>
         /// <returns>A route builder that can build a route matching this context.</returns>
-        public DirectRouteBuilder CreateBuilder(string template)
+        public IDirectRouteBuilder CreateBuilder(string template)
         {
             return CreateBuilderInternal(template);
         }
 
-        internal virtual DirectRouteBuilder CreateBuilderInternal(string template)
+        internal virtual IDirectRouteBuilder CreateBuilderInternal(string template)
         {
             return CreateBuilder(template, _inlineConstraintResolver);
         }
@@ -169,7 +169,7 @@ namespace System.Web.Mvc.Routing
         /// The inline constraint resolver to use, if any; otherwise, <see langword="null"/>.
         /// </param>
         /// <returns>A route builder that can build a route matching this context.</returns>
-        public DirectRouteBuilder CreateBuilder(string template, IInlineConstraintResolver constraintResolver)
+        public IDirectRouteBuilder CreateBuilder(string template, IInlineConstraintResolver constraintResolver)
         {
             DirectRouteBuilder builder = new DirectRouteBuilder(_actions, _targetIsAction);
 

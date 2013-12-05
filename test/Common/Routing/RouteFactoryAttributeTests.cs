@@ -89,7 +89,7 @@ namespace System.Web.Mvc.Routing
 
             RouteEntry expectedEntry = CreateEntry();
 
-            DirectRouteBuilder builder = CreateBuilder(() => expectedEntry);
+            IDirectRouteBuilder builder = CreateBuilder(() => expectedEntry);
             DirectRouteFactoryContext context = CreateContext((template) => template == expectedTemplate ? builder :
                 new DirectRouteBuilder(new TActionDescriptor[0], targetIsAction: true));
 
@@ -101,6 +101,17 @@ namespace System.Web.Mvc.Routing
         }
 
         [Fact]
+        public void CreateRoute_IfContextIsNull_Throws()
+        {
+            // Arrange
+            DirectRouteFactoryContext context = null;
+            IDirectRouteFactory product = CreateProductUnderTest();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => product.CreateRoute(context), "context");
+        }
+
+        [Fact]
         public void CreateRoute_UsesNamePropertyWhenBuilding()
         {
             // Arrange
@@ -109,7 +120,7 @@ namespace System.Web.Mvc.Routing
             product.Name = expectedName;
 
             string name = null;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 name = builder.Name;
@@ -133,7 +144,7 @@ namespace System.Web.Mvc.Routing
             product.Order = expectedOrder;
 
             int order = 0;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 order = builder.Order;
@@ -160,7 +171,7 @@ namespace System.Web.Mvc.Routing
             RouteEntry expectedEntry = CreateEntry();
 
             TRouteDictionary defaults = null;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 defaults = builder.Defaults;
@@ -202,7 +213,7 @@ namespace System.Web.Mvc.Routing
             RouteEntry expectedEntry = CreateEntry();
 
             TRouteDictionary defaults = null;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 defaults = builder.Defaults;
@@ -240,7 +251,7 @@ namespace System.Web.Mvc.Routing
             RouteEntry expectedEntry = CreateEntry();
 
             TRouteDictionary defaults = null;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 defaults = builder.Defaults;
@@ -270,7 +281,7 @@ namespace System.Web.Mvc.Routing
             RouteEntry expectedEntry = CreateEntry();
 
             TRouteDictionary constraints = null;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 constraints = builder.Constraints;
@@ -312,7 +323,7 @@ namespace System.Web.Mvc.Routing
             RouteEntry expectedEntry = CreateEntry();
 
             TRouteDictionary constraints = null;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 constraints = builder.Constraints;
@@ -350,7 +361,7 @@ namespace System.Web.Mvc.Routing
             RouteEntry expectedEntry = CreateEntry();
 
             TRouteDictionary constraints = null;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 constraints = builder.Constraints;
@@ -367,7 +378,7 @@ namespace System.Web.Mvc.Routing
             // Assert
             Assert.Same(existingConstraints, constraints);
         }
-        
+
         [Fact]
         public void CreateRoute_IfBuilderDataTokensIsNull_UsesDataTokensPropertyWhenBuilding()
         {
@@ -380,7 +391,7 @@ namespace System.Web.Mvc.Routing
             RouteEntry expectedEntry = CreateEntry();
 
             TRouteDictionary dataTokens = null;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 dataTokens = builder.DataTokens;
@@ -422,7 +433,7 @@ namespace System.Web.Mvc.Routing
             RouteEntry expectedEntry = CreateEntry();
 
             TRouteDictionary dataTokens = null;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 dataTokens = builder.DataTokens;
@@ -460,7 +471,7 @@ namespace System.Web.Mvc.Routing
             RouteEntry expectedEntry = CreateEntry();
 
             TRouteDictionary dataTokens = null;
-            DirectRouteBuilder builder = null;
+            IDirectRouteBuilder builder = null;
             builder = CreateBuilder(() =>
             {
                 dataTokens = builder.DataTokens;
@@ -492,12 +503,12 @@ namespace System.Web.Mvc.Routing
             Assert.Equal(true, usage.AllowMultiple);
         }
 
-        private static DirectRouteBuilder CreateBuilder(Func<RouteEntry> build)
+        private static IDirectRouteBuilder CreateBuilder(Func<RouteEntry> build)
         {
             return new LambdaDirectRouteBuilder(build);
         }
 
-        private static DirectRouteFactoryContext CreateContext(Func<string, DirectRouteBuilder> createBuilder)
+        private static DirectRouteFactoryContext CreateContext(Func<string, IDirectRouteBuilder> createBuilder)
         {
             return new LambdaDirectRouteFactoryContext(createBuilder);
         }
@@ -536,9 +547,9 @@ namespace System.Web.Mvc.Routing
 
         private class LambdaDirectRouteFactoryContext : DirectRouteFactoryContext
         {
-            private readonly Func<string, DirectRouteBuilder> _createBuilder;
+            private readonly Func<string, IDirectRouteBuilder> _createBuilder;
 
-            public LambdaDirectRouteFactoryContext(Func<string, DirectRouteBuilder> createBuilder)
+            public LambdaDirectRouteFactoryContext(Func<string, IDirectRouteBuilder> createBuilder)
 #if ASPNETWEBAPI
                 : base(null, new TActionDescriptor[] { new Mock<TActionDescriptor>().Object },
                 new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object,
@@ -552,7 +563,7 @@ namespace System.Web.Mvc.Routing
                 _createBuilder = createBuilder;
             }
 
-            internal override DirectRouteBuilder CreateBuilderInternal(string template)
+            internal override IDirectRouteBuilder CreateBuilderInternal(string template)
             {
                 return _createBuilder.Invoke(template);
             }

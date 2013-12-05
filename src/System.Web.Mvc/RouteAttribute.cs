@@ -46,7 +46,7 @@ namespace System.Web.Mvc
         {
             Contract.Assert(context != null);
 
-            DirectRouteBuilder builder = context.CreateBuilder(Template);
+            IDirectRouteBuilder builder = context.CreateBuilder(Template);
             Contract.Assert(builder != null);
 
             builder.Name = Name;

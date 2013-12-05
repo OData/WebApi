@@ -30,7 +30,7 @@ namespace System.Web.Mvc.Routing
 #endif
 {
     /// <summary>Represents a builder that creates direct routes to actions (attribute routes).</summary>
-    public class DirectRouteBuilder
+    internal class DirectRouteBuilder : IDirectRouteBuilder
     {
         private readonly TActionDescriptor[] _actions;
         private readonly bool _targetIsAction;
@@ -54,11 +54,10 @@ namespace System.Web.Mvc.Routing
             _targetIsAction = targetIsAction;
         }
 
-        /// <summary>Gets or sets the route name, if any; otherwise <see langword="null"/>.</summary>
+        /// <inheritdoc/>
         public string Name { get; set; }
 
-        /// <summary>Gets or sets the route template.</summary>
-        /// <remarks>This value is the remaining route template after resolving any inline constraints.</remarks>
+        /// <inheritdoc/>
         public string Template
         {
             get
@@ -72,58 +71,42 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-        /// <summary>Gets or sets the route defaults.</summary>
+        /// <inheritdoc/>
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly",
             Justification = "Null and empty values are legitimate, separate options when constructing a route.")]
         public TRouteDictionary Defaults { get; set; }
 
-        /// <summary>Gets or sets the route constraints.</summary>
+        /// <inheritdoc/>
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly",
             Justification = "Null and empty values are legitimate, separate options when constructing a route.")]
         public TRouteDictionary Constraints { get; set; }
 
-        /// <summary>Gets or sets the route data tokens.</summary>
+        /// <inheritdoc/>
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly",
             Justification = "Null and empty values are legitimate, separate options when constructing a route.")]
         public TRouteDictionary DataTokens { get; set; }
 
         internal TParsedRoute ParsedRoute { get; set; }
 
-        /// <summary>Gets or sets the route order.</summary>
-        /// <remarks>
-        /// The route order disambiguates multiple matching routes and overrides precedence.
-        /// The intended use of order is for an explicitly provided precedence override value.
-        /// </remarks>
+        /// <inheritdoc/>
         public int Order { get; set; }
 
-        /// <summary>Gets or sets the route precedence.</summary>
-        /// <remarks>
-        /// The route order disambiguates multiple matching routes with the same order.
-        /// The intended use of precedence is for default, automatically computed disambiguation based on inline
-        /// constraint types.
-        /// </remarks>
+        /// <inheritdoc/>
         public decimal Precedence { get; set; }
 
-        /// <summary>Gets the action descriptors to which to create a route.</summary>
+        /// <inheritdoc/>
         public IReadOnlyCollection<TActionDescriptor> Actions
         {
             get { return _actions; }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the route is configured at the action or controller level.
-        /// </summary>
-        /// <remarks>
-        /// <see langword="true"/> when the route is configured at the action level; otherwise <see langword="false"/>
-        /// (if the route is configured at the controller level).
-        /// </remarks>
+        /// <inheritdoc/>
         public bool TargetIsAction
         {
             get { return _targetIsAction; }
         }
 
-        /// <summary>Creates a route entry based on the current property values.</summary>
-        /// <returns>The route entry created.</returns>
+        /// <inheritdoc/>
         public virtual RouteEntry Build()
         {
             if (ParsedRoute == null)

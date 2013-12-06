@@ -520,7 +520,6 @@
     <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Modelbinding_ClassDiagram.cd" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

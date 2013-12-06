@@ -470,6 +470,8 @@ namespace System.Web.Mvc.Test
                     { typeof(RegularExpressionAttribute), new RegularExpressionAttribute("abc"), typeof(RegularExpressionAttributeAdapter), null },
                     { typeof(RequiredAttribute), new RequiredAttribute(), typeof(RequiredAttributeAdapter), null },
                     { typeof(StringLengthAttribute), new StringLengthAttribute(6), typeof(StringLengthAttributeAdapter), null },
+                    { typeof(MaxLengthAttribute), new MaxLengthAttribute(), typeof(MaxLengthAttributeAdapter), null },
+                    { typeof(MinLengthAttribute), new MinLengthAttribute(1), typeof(MinLengthAttributeAdapter), null },
                     { typeof(MembershipPasswordAttribute), new MembershipPasswordAttribute(), typeof(MembershipPasswordAttributeAdapter), null },
                     { typeof(DataAnnotationsCompareAttribute), new DataAnnotationsCompareAttribute("other"), typeof(CompareAttributeAdapter), null },
                     { typeof(FileExtensionsAttribute), new FileExtensionsAttribute(), typeof(FileExtensionsAttributeAdapter), null },
@@ -685,6 +687,10 @@ namespace System.Web.Mvc.Test
                 get { return base.MyProperty; }
                 set { base.MyProperty = value; }
             }
+
+            [MinLength(2)]
+            [MaxLength(4)]
+            public List<DateTime> MinMaxProperty { get; set; }
         }
 
         [Fact]
@@ -704,6 +710,26 @@ namespace System.Web.Mvc.Test
             ModelClientValidationRule clientRule = validator.GetClientValidationRules().Single();
             Assert.IsType<ModelClientValidationStringLengthRule>(clientRule);
             Assert.Equal(10, clientRule.ValidationParameters["max"]);
+        }
+
+        [Fact]
+        public void GetValidatorsReturnsValidationRulesForPropertiesWithMinAndMaxLength()
+        { // Dev10 Bug #868619
+            // Arrange
+            var provider = new DataAnnotationsModelValidatorProvider();
+            var context = new ControllerContext();
+            var viewdata = new ViewDataDictionary<DerivedModel>();
+            var metadata = ModelMetadata.FromLambdaExpression(m => m.MinMaxProperty, viewdata);
+
+            // Act
+            IEnumerable<ModelValidator> validators = provider.GetValidators(metadata, context);
+
+            // Assert
+            ModelClientValidationRule[] clientRule = validators.SelectMany(v => v.GetClientValidationRules())
+                                                               .OrderBy(t => t.GetType().Name)
+                                                               .ToArray();
+            Assert.IsType<ModelClientValidationMaxLengthRule>(clientRule[0]);
+            Assert.IsType<ModelClientValidationMinLengthRule>(clientRule[1]);
         }
     }
 }

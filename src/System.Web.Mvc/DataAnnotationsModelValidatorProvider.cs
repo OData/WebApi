@@ -375,6 +375,12 @@ namespace System.Web.Mvc
             AddValidationAttributeAdapter(dict, typeof(StringLengthAttribute),
                 (metadata, context, attribute) => new StringLengthAttributeAdapter(metadata, context, (StringLengthAttribute)attribute));
 
+            AddValidationAttributeAdapter(dict, typeof(MaxLengthAttribute),
+                (metadata, context, attribute) => new MaxLengthAttributeAdapter(metadata, context, (MaxLengthAttribute)attribute));
+
+            AddValidationAttributeAdapter(dict, typeof(MinLengthAttribute),
+                (metadata, context, attribute) => new MinLengthAttributeAdapter(metadata, context, (MinLengthAttribute)attribute));
+
             AddValidationAttributeAdapter(dict, typeof(MembershipPasswordAttribute),
                     (metadata, context, attribute) => new MembershipPasswordAttributeAdapter(metadata, context, (MembershipPasswordAttribute)attribute));
 

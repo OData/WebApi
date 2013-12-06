@@ -156,6 +156,8 @@
     <Compile Include="ActionNameSelector.cs" />
     <Compile Include="ControllerDescriptorExtensions.cs" />
     <Compile Include="Html\EnumHelper.cs" />
+    <Compile Include="MaxLengthAttributeAdapter.cs" />
+    <Compile Include="MinLengthAttributeAdapter.cs" />
     <Compile Include="Properties\MvcResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

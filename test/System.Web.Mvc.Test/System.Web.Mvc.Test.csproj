@@ -110,6 +110,7 @@
     <Compile Include="Test\BuildManagerViewEngineTest.cs" />
     <Compile Include="Test\CompareAttributeTest.cs" />
     <Compile Include="Test\CompareAttributeAdapterTest.cs" />
+    <Compile Include="Test\MinLengthAttributeAdapterTest.cs" />
     <Compile Include="Test\OverrideResultFiltersAttributeTests.cs" />
     <Compile Include="Test\OverrideAuthenticationAttributeTests.cs" />
     <Compile Include="Test\OverrideAuthorizationAttributeTests.cs" />
@@ -144,6 +145,7 @@
     <Compile Include="Test\OverrideFiltersAttributeTests.cs" />
     <Compile Include="Test\PreApplicationStartCodeTest.cs" />
     <Compile Include="Test\RemoteAttributeTest.cs" />
+    <Compile Include="Test\MaxLengthAttributeAdapterTest.cs" />
     <Compile Include="Test\UrlHelperTest.cs" />
     <Compile Include="Test\UrlParameterTest.cs" />
     <Compile Include="Test\ViewStartPageTest.cs" />

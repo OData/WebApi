@@ -69,6 +69,10 @@
     <Compile Include="Html\LabelHelperTest.cs" />
     <Compile Include="LatestRazorVersion.cs" />
     <Compile Include="Mvc\ModelClientValidationMembershipPasswordRuleTest.cs" />
+    <Compile Include="Mvc\ModelClientValidationMaxLengthRuleTest.cs" />
+    <Compile Include="Mvc\ModelClientValidationMinLengthRuleTest.cs" />
+    <Compile Include="Mvc\ModelClientValidationStringLengthRuleTest.cs" />
+    <Compile Include="Mvc\UnobtrusiveValidationAttributesGeneratorTest.cs" />
     <Compile Include="Utils\HtmlAttributePropertyHelperTest.cs" />
     <Compile Include="Utils\PropertyHelperTest.cs" />
     <Compile Include="Utils\SessionStateUtilTest.cs" />

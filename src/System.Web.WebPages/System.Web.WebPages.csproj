@@ -121,12 +121,14 @@
     <Compile Include="IVirtualPathUtility.cs" />
     <Compile Include="MimeMapping.cs" />
     <Compile Include="Mvc\ModelClientValidationEqualToRule.cs" />
+    <Compile Include="Mvc\ModelClientValidationMinLengthRule.cs" />
     <Compile Include="Mvc\ModelClientValidationMembershipPasswordRule.cs" />
     <Compile Include="Mvc\ModelClientValidationRangeRule.cs" />
     <Compile Include="Mvc\ModelClientValidationRegexRule.cs" />
     <Compile Include="Mvc\ModelClientValidationRemoteRule.cs" />
     <Compile Include="Mvc\ModelClientValidationRequiredRule.cs" />
     <Compile Include="Mvc\ModelClientValidationRule.cs" />
+    <Compile Include="Mvc\ModelClientValidationMaxLengthRule.cs" />
     <Compile Include="Mvc\ModelClientValidationStringLengthRule.cs" />
     <Compile Include="Mvc\UnobtrusiveValidationAttributesGenerator.cs" />
     <Compile Include="RequestBrowserOverrideStore.cs" />

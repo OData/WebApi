@@ -117,7 +117,10 @@ namespace System.Web.Http.Controllers
         /// <see cref="HttpResponseMessage"/>. 
         /// </summary>
         /// <remarks>
-        /// <para>This converter is not used when returning an <see cref="IHttpActionResult"/>.</para>
+        /// <para>This converter is not used when the runtime return value of an action is an <see cref="IHttpActionResult"/>.</para>
+        /// <para>
+        /// This value is <see langword="null" /> when the declared <see cref="ReturnType"/> is an <see cref="IHttpActionResult"/>.
+        /// </para>
         /// <para>
         /// The behavior of the returned converter should align with the action's declared <see cref="ReturnType"/>.
         /// </para>

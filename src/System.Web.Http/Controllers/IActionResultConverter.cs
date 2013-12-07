@@ -11,7 +11,9 @@ namespace System.Web.Http.Controllers
     /// <see cref="HttpActionDescriptor.ExecuteAsync(HttpControllerContext, IDictionary{string, object}, CancellationToken)"/>
     /// and synchronously convert it to an instance of <see cref="HttpResponseMessage"/>.
     /// </summary>
-    /// <remarks>This interface is not used when returning an <see cref="IHttpActionResult"/>.</remarks>
+    /// <remarks>
+    /// This interface is not used when the runtime return value of an action is an <see cref="IHttpActionResult"/>.
+    /// </remarks>
     public interface IActionResultConverter
     {
         HttpResponseMessage Convert(HttpControllerContext controllerContext, object actionResult);

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.Results;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -193,7 +194,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void InvokeActionAsync_ForActionResult_PropogatesHttpResponseException()
+        public void InvokeActionAsync_ForActionResult_HandlesHttpResponseException()
         {
             // Arrange
             _actionDescriptorMock.Setup(d => d.ReturnType).Returns(typeof(IHttpActionResult));
@@ -207,8 +208,8 @@ namespace System.Web.Http
 
             // Assert
             task.WaitUntilCompleted();
-            Assert.Equal<TaskStatus>(TaskStatus.Faulted, task.Status);
-            Assert.Same(expectedException, task.Exception.InnerException);
+            Assert.Equal<TaskStatus>(TaskStatus.RanToCompletion, task.Status);
+            Assert.Equal(HttpStatusCode.Ambiguous, task.Result.StatusCode);
         }
 
         [Fact]
@@ -260,7 +261,79 @@ namespace System.Web.Http
 
             // Assert
             Assert.Throws<InvalidOperationException>(() => { HttpResponseMessage ignore = task.Result; },
-                "An object of type 'Object' was returned where an instance of IHttpActionResult was expected.");
+                "An object of type 'System.Object' was returned where an instance of IHttpActionResult was expected.");
+        }
+
+        [Fact]
+        public void InvokeActionAsync_DeclaredObject_ReturnsWidget()
+        {
+            using (var expectedResponse = new HttpResponseMessage())
+            {
+                var result = new Widget() { Name = "CoolWidget" };
+
+                _actionDescriptorMock.Setup(d => d.ReturnType).Returns(typeof(object));
+                _actionDescriptorMock.Setup(d => d.ExecuteAsync(
+                    It.IsAny<HttpControllerContext>(),
+                    It.IsAny<IDictionary<string, object>>(),
+                    It.IsAny<CancellationToken>())).Returns(Task.FromResult((object)result));
+
+                _converterMock.Setup(c => c.Convert(It.IsAny<HttpControllerContext>(), result)).Returns(expectedResponse);
+
+                // Act
+                Task<HttpResponseMessage> task = _actionInvoker.InvokeActionAsync(_actionContext, CancellationToken.None);
+                task.WaitUntilCompleted();
+
+                // Assert
+                 Assert.Same(expectedResponse, task.Result);
+            }
+        }
+
+        [Fact]
+        public void InvokeActionAsync_WrongReturnType_Throws()
+        {
+            using (var expectedResponse = new HttpResponseMessage())
+            {
+                var result = new Mock<IHttpActionResult>().Object;
+
+                _actionDescriptorMock.Setup(d => d.ReturnType).Returns(typeof(Widget));
+                _actionDescriptorMock.SetupGet(d => d.ResultConverter).Returns(new ValueResultConverter<Widget>());
+                _actionDescriptorMock.Setup(d => d.ExecuteAsync(
+                    It.IsAny<HttpControllerContext>(),
+                    It.IsAny<IDictionary<string, object>>(),
+                    It.IsAny<CancellationToken>())).Returns(Task.FromResult((object)result));
+
+                // Act
+                Task<HttpResponseMessage> task = _actionInvoker.InvokeActionAsync(_actionContext, CancellationToken.None);
+
+                // Assert
+                Assert.Throws<InvalidCastException>(() => { var ignore = task.Result; });
+            }
+        }
+
+        [Fact]
+        public void InvokeActionAsync_DeclaredObject_ReturnsActionResult()
+        {
+            // Arrange
+            using (var expectedResponse = new HttpResponseMessage())
+            {
+                var mockActionResult = new Mock<IHttpActionResult>();
+                mockActionResult
+                    .Setup(m => m.ExecuteAsync(It.IsAny<CancellationToken>()))
+                    .Returns(Task.FromResult(expectedResponse));
+
+                _actionDescriptorMock.Setup(d => d.ReturnType).Returns(typeof(object));
+                _actionDescriptorMock.Setup(d => d.ExecuteAsync(
+                    It.IsAny<HttpControllerContext>(),
+                    It.IsAny<IDictionary<string, object>>(),
+                    It.IsAny<CancellationToken>())).Returns(Task.FromResult((object)mockActionResult.Object));
+
+                // Act
+                Task<HttpResponseMessage> task = _actionInvoker.InvokeActionAsync(_actionContext, CancellationToken.None);
+                task.WaitUntilCompleted();
+
+                // Assert
+                Assert.Same(expectedResponse, task.Result);
+            }
         }
 
         private static HttpResponseMessage CreateResponse(HttpRequestMessage request)
@@ -276,6 +349,15 @@ namespace System.Web.Http
             Mock<IHttpActionResult> mock = new Mock<IHttpActionResult>();
             mock.Setup(r => r.ExecuteAsync(It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
             return mock.Object;
+        }
+
+        private class Widget
+        {
+            public string Name
+            {
+                get;
+                set;
+            }
         }
     }
 }

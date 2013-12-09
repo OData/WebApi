@@ -27,26 +27,24 @@ namespace System.Web.Http.Routing
             _innerRoute = innerRoute;
         }
 
-        private static readonly IDictionary<string, object> _empty = EmptyReadOnlyDictionary<string, object>.Value;
-
         public string RouteTemplate
         {
-            get { return String.Empty; }
+            get { return _innerRoute.RouteTemplate; }
         }
 
         public IDictionary<string, object> Defaults
         {
-            get { return _empty; }
+            get { return _innerRoute.Defaults; }
         }
 
         public IDictionary<string, object> Constraints
         {
-            get { return _empty; }
+            get { return _innerRoute.Constraints; }
         }
 
         public IDictionary<string, object> DataTokens
         {
-            get { return _empty; }
+            get { return _innerRoute.DataTokens; }
         }
 
         public HttpMessageHandler Handler

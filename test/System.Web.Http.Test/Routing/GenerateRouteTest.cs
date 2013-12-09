@@ -12,23 +12,33 @@ namespace System.Web.Http.Routing
         [Fact]
         public void GenerateRoute_DoesNotClaimData()
         {
-            GenerationRoute route = new GenerationRoute(new NotImplementedRoute());
+            GenerationRoute route = new GenerationRoute(new InnerRoute());
 
             IHttpRouteData data = route.GetRouteData(string.Empty, new HttpRequestMessage());
 
-            Assert.Null(data);            
+            Assert.Null(data);
         }
 
         [Fact]
-        public void GenerateRoute_EmptyProperties()
+        public void GenerateRoute_ForwardsInnerProperties()
         {
-            GenerationRoute route = new GenerationRoute(new NotImplementedRoute());
+            IHttpRoute innerRoute = new InnerRoute();
+            GenerationRoute route = new GenerationRoute(innerRoute);
 
-            AssertDictionaryIsEmptyAndImmutable(route.Defaults);
-            AssertDictionaryIsEmptyAndImmutable(route.Constraints);
-            AssertDictionaryIsEmptyAndImmutable(route.DataTokens);
-            Assert.Equal(null, route.Handler);
-            Assert.Equal(string.Empty, route.RouteTemplate);
+            Assert.NotNull(route.Defaults);
+            Assert.Equal(innerRoute.Defaults, route.Defaults);
+
+            Assert.NotNull(route.Constraints);
+            Assert.Equal(innerRoute.Constraints, route.Constraints);
+
+            Assert.NotNull(route.DataTokens);
+            Assert.Equal(innerRoute.DataTokens, route.DataTokens);
+
+            Assert.NotNull(innerRoute.Handler);
+            Assert.Null(route.Handler);
+
+            Assert.NotNull(route.RouteTemplate);
+            Assert.Equal(innerRoute.RouteTemplate, route.RouteTemplate);
         }
 
         [Fact]
@@ -46,54 +56,50 @@ namespace System.Web.Http.Routing
 
             IHttpVirtualPathData result = route.GetVirtualPath(request, values);
 
-            Assert.Equal(data, result);        
-        }
-
-        static void AssertDictionaryIsEmptyAndImmutable<TKey, TValue>(IDictionary<TKey, TValue> dict)
-        {
-            Assert.Equal(0, dict.Count);
-
-            // Verify it's immutable by trying to add an object. 
-            // The exact exception thrown is not important. 
-            Assert.Throws<NotSupportedException>(() => dict[default(TKey)] = default(TValue));
+            Assert.Equal(data, result);
         }
 
         // Route where everything is not implemented. Tests that the generated route is not forwarding calls. 
-        private class NotImplementedRoute : IHttpRoute
+        private class InnerRoute : IHttpRoute
         {
+            private readonly IHttpRouteData _routeData = new Mock<IHttpRouteData>().Object;
+            private readonly IHttpVirtualPathData _virtualPathData = new Mock<IHttpVirtualPathData>().Object;
+
+            public InnerRoute()
+            {
+                Defaults = new Dictionary<string, object>();
+                Defaults.Add("default", "value");
+
+                Constraints = new Dictionary<string, object>();
+                Constraints.Add("constraint", "value");
+
+                DataTokens = new Dictionary<string, object>();
+                DataTokens.Add("token", "value");
+
+                Handler = new Mock<HttpMessageHandler>().Object;
+            }
+
             public string RouteTemplate
             {
-                get { throw new NotImplementedException(); }
+                get { return "InnerRoute"; }
             }
 
-            public Collections.Generic.IDictionary<string, object> Defaults
-            {
-                get { throw new NotImplementedException(); }
-            }
+            public IDictionary<string, object> Defaults { get; private set; }
 
-            public Collections.Generic.IDictionary<string, object> Constraints
-            {
-                get { throw new NotImplementedException(); }
-            }
+            public IDictionary<string, object> Constraints { get; private set; }
 
-            public Collections.Generic.IDictionary<string, object> DataTokens
-            {
-                get { throw new NotImplementedException(); }
-            }
+            public IDictionary<string, object> DataTokens { get; private set; }
 
-            public HttpMessageHandler Handler
-            {
-                get { throw new NotImplementedException(); }
-            }
+            public HttpMessageHandler Handler { get; private set; }
 
             public IHttpRouteData GetRouteData(string virtualPathRoot, HttpRequestMessage request)
             {
-                throw new NotImplementedException();
+                return _routeData;
             }
 
             public IHttpVirtualPathData GetVirtualPath(HttpRequestMessage request, Collections.Generic.IDictionary<string, object> values)
             {
-                throw new NotImplementedException();
+                return _virtualPathData;
             }
         }
     }

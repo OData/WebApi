@@ -187,7 +187,7 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void MapHttpAttributeRoutes_AddsGenerationRoutes()
+        public void MapHttpAttributeRoutes_AddsLinkGenerationRoutes()
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
@@ -210,12 +210,12 @@ namespace System.Net.Http
             Assert.IsType<RouteCollectionRoute>(routes.ElementAt(0));
             for (int i = 1; i < 4; i++)
             {
-                Assert.IsType<GenerationRoute>(routes.ElementAt(i));
+                Assert.IsType<LinkGenerationRoute>(routes.ElementAt(i));
             }
 
-            Assert.IsType<GenerationRoute>(routes["one"]);
-            Assert.IsType<GenerationRoute>(routes["two"]);
-            Assert.IsType<GenerationRoute>(routes["three"]);
+            Assert.IsType<LinkGenerationRoute>(routes["one"]);
+            Assert.IsType<LinkGenerationRoute>(routes["two"]);
+            Assert.IsType<LinkGenerationRoute>(routes["three"]);
         }
 
         [Fact]

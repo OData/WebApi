@@ -78,8 +78,8 @@ namespace System.Web.Http.Routing
                 {
                     IHttpRoute route = entry.Route;
                     Contract.Assert(route != null);
-                    IHttpRoute generationRoute = new GenerationRoute(route);
-                    routeTable.Add(name, generationRoute);
+                    IHttpRoute linkGenerationRoute = new LinkGenerationRoute(route);
+                    routeTable.Add(name, linkGenerationRoute);
                 }
             }
         }

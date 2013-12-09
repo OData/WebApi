@@ -11,13 +11,13 @@ namespace System.Web.Http.Routing
     /// Delegates to an inner route to do actual generation.
     /// </summary>
     /// <remarks>
-    /// Corresponds to the MVC implementation of attribute routing in System.Web.Mvc.Routing.GenerationRoute.
+    /// Parallel to the MVC implementation of attribute routing in System.Web.Mvc.Routing.LinkGenerationRoute.
     /// </remarks>
-    internal class GenerationRoute : IHttpRoute
+    internal class LinkGenerationRoute : IHttpRoute
     {
         private readonly IHttpRoute _innerRoute;
 
-        public GenerationRoute(IHttpRoute innerRoute)
+        public LinkGenerationRoute(IHttpRoute innerRoute)
         {
             if (innerRoute == null)
             {

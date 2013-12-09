@@ -106,16 +106,16 @@ namespace System.Web.Mvc.Routing
                 Contract.Assert(entry != null);
                 Route route = entry.Route;
                 Contract.Assert(route != null);
-                RouteBase generationRoute = new GenerationRoute(route);
+                RouteBase linkGenerationRoute = new LinkGenerationRoute(route);
                 string name = entry.Name;
 
                 if (name == null)
                 {
-                    routeTable.Add(generationRoute);
+                    routeTable.Add(linkGenerationRoute);
                 }
                 else
                 {
-                    routeTable.Add(name, generationRoute);
+                    routeTable.Add(name, linkGenerationRoute);
                 }
             }
         }

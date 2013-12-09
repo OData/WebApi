@@ -10,13 +10,13 @@ namespace System.Web.Mvc.Routing
     /// routing, don't go into the main collection and so can't be matched by name.
     /// </summary>
     /// <remarks>
-    /// Corresponds to the Web API implementation of attribute routing in System.Web.Http.Routing.GenerationRoute.
+    /// Parallel to the Web API implementation of attribute routing in System.Web.Http.Routing.LinkGenerationRoute.
     /// </remarks>
-    internal class GenerationRoute : Route
+    internal class LinkGenerationRoute : Route
     {
         private readonly Route _innerRoute;
 
-        public GenerationRoute(Route innerRoute)
+        public LinkGenerationRoute(Route innerRoute)
             : base(innerRoute.Url, innerRoute.Defaults, innerRoute.Constraints, innerRoute.DataTokens,
             innerRoute.RouteHandler)
         {

@@ -7,12 +7,12 @@ using Moq;
 
 namespace System.Web.Http.Routing
 {
-    public class GenerateRouteTests
+    public class LinkGenerationRouteTests
     {
         [Fact]
         public void GenerateRoute_DoesNotClaimData()
         {
-            GenerationRoute route = new GenerationRoute(new InnerRoute());
+            LinkGenerationRoute route = new LinkGenerationRoute(new InnerRoute());
 
             IHttpRouteData data = route.GetRouteData(string.Empty, new HttpRequestMessage());
 
@@ -23,7 +23,7 @@ namespace System.Web.Http.Routing
         public void GenerateRoute_ForwardsInnerProperties()
         {
             IHttpRoute innerRoute = new InnerRoute();
-            GenerationRoute route = new GenerationRoute(innerRoute);
+            LinkGenerationRoute route = new LinkGenerationRoute(innerRoute);
 
             Assert.NotNull(route.Defaults);
             Assert.Equal(innerRoute.Defaults, route.Defaults);
@@ -52,7 +52,7 @@ namespace System.Web.Http.Routing
             Mock<IHttpRoute> inner = new Mock<IHttpRoute>();
             inner.Setup(r => r.GetVirtualPath(request, values)).Returns(data);
 
-            GenerationRoute route = new GenerationRoute(inner.Object);
+            LinkGenerationRoute route = new LinkGenerationRoute(inner.Object);
 
             IHttpVirtualPathData result = route.GetVirtualPath(request, values);
 

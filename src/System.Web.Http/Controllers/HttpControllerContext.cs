@@ -81,6 +81,8 @@ namespace System.Web.Http.Controllers
         /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
         public HttpControllerContext()
         {
+            // Note: This constructor is also used by a FormDataCollectionExtensions where we attempt to create a 
+            // controller context with incomplete request context.
             _requestContext = new HttpRequestContext();
         }
 

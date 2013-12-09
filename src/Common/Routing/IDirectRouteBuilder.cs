@@ -4,10 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 #if ASPNETWEBAPI
-
-#endif
-
-#if ASPNETWEBAPI
 using TActionDescriptor = System.Web.Http.Controllers.HttpActionDescriptor;
 using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
 #else
@@ -28,7 +24,9 @@ namespace System.Web.Mvc.Routing
         string Name { get; set; }
 
         /// <summary>Gets or sets the route template.</summary>
-        /// <remarks>This value is the remaining route template after resolving any inline constraints.</remarks>
+        /// <remarks>
+        /// This value is the core route template that remains after resolving and removing any inline constraints.
+        /// </remarks>
         string Template { get; set; }
 
         /// <summary>Gets or sets the route defaults.</summary>

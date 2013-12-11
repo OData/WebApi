@@ -16,6 +16,7 @@ using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
+using Newtonsoft.Json;
 
 namespace System.Web.Http.OData
 {
@@ -72,6 +73,24 @@ namespace System.Web.Http.OData
             object retrievedValue;
             delta.TryGetPropertyValue(propertyName, out retrievedValue);
             Assert.Equal(value, retrievedValue);
+        }
+
+        [Fact]
+        public void GetDynamicMemberNames_IncludesPropertyNames()
+        {
+            // Arrange
+            var properties = typeof(DeltaModel).GetProperties().Select(p => p.Name).ToArray();
+            var delta = new Delta<DeltaModel>();
+
+            // Act
+            var dynamicMemberNames = delta.GetDynamicMemberNames().ToArray();
+
+            // Assert
+            Assert.Equal(properties.Length, dynamicMemberNames.Length);
+            foreach (var property in properties)
+            {
+                Assert.Contains(property, dynamicMemberNames);
+            }
         }
 
         [Fact]
@@ -455,6 +474,34 @@ namespace System.Web.Http.OData
             // Assert
             Assert.Equal(typeof(Customer), actualExpectedType);
             Assert.Equal(actualType, actualActualType);
+        }
+
+        /// <summary>
+        /// There are some significant limitations to the 'in the box' serialization of this type.
+        /// 
+        /// Namely, conversions don't work, so by default when Json.Net turns "1" into an long, it won't be able
+        /// to set a value for an int or double property. We didn't want to change this behavior, because the primary use
+        /// case of this type is for OData, and the OData formatter doesn't need it.
+        /// 
+        /// We recommend that users implement a custom JsonContract for real serialization support, and we're publishing
+        /// a sample for it.
+        /// </summary>
+        [Fact]
+        public void DeltaOfT_CanBeDeserializedWithJsonNet()
+        {
+            // Arrange
+            var input = "{ \"LongProperty\": 5, \"StringProperty\": \"Cool\" }";
+
+            // Act
+            var deserialized = JsonConvert.DeserializeObject<Delta<DeltaModel>>(input);
+
+            // Assert
+            Assert.Equal(2, deserialized.GetChangedPropertyNames().Count());
+            Assert.Contains("LongProperty", deserialized.GetChangedPropertyNames());
+            Assert.Contains("StringProperty", deserialized.GetChangedPropertyNames());
+
+            Assert.Equal(5L, ((dynamic)deserialized).LongProperty);
+            Assert.Equal("Cool", ((dynamic)deserialized).StringProperty);
         }
 
         public static T GetDefaultValue<T>()

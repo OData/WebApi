@@ -2,7 +2,8 @@
 @Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
 @ModelType ModelDescription
 
-<div id="body">
+<link type="text/css" href="~/Areas/HelpPage/HelpPage.css" rel="stylesheet" />
+<div id="body" class="help-page">
     <section class="featured">
         <div class="content-wrapper">
             <p>
@@ -16,8 +17,3 @@
         @Html.DisplayFor(Function(m) Model)
     </section>
 </div>
-
-@Section Scripts
-    <link type="text/css" href="~/Areas/HelpPage/HelpPage.css" rel="stylesheet" />
-End Section
-

@@ -12,14 +12,15 @@
     Dim apiGroups As ILookup(Of HttpControllerDescriptor, ApiDescription) = Model.ToLookup(Function(api) api.ActionDescriptor.ControllerDescriptor)
 End Code
 
-<header>
+<link type="text/css" href="~/Areas/HelpPage/HelpPage.css" rel="stylesheet" />
+<header class="help-page">
     <div class="content-wrapper">
         <div class="float-left">
             <h1>@ViewData("Title")</h1>
         </div>
     </div>
 </header>
-<div id="body">
+<div id="body" class="help-page">
     <section class="featured">
         <div class="content-wrapper">
             <h2>Introduction</h2>
@@ -34,7 +35,3 @@ End Code
         Next
     </section>
 </div>
-
-@Section Scripts
-    <link type="text/css" href="~/Areas/HelpPage/HelpPage.css" rel="stylesheet" />
-End Section

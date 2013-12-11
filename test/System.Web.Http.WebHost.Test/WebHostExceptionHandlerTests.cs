@@ -246,8 +246,9 @@ namespace System.Web.Http.WebHost
             // Arrange
             using (HttpResponseMessage response = CreateResponse())
             {
-                ExceptionHandlerContext context = CreateValidContext(null,
-                    WebHostExceptionCatchBlocks.HttpControllerHandlerBufferContent);
+                ExceptionHandlerContext context = CreateContext(
+                    CreateMinimalValidExceptionContext(WebHostExceptionCatchBlocks.HttpControllerHandlerBufferContent));
+
                 Assert.Null(context.ExceptionContext.Request); // Guard
                 CancellationToken cancellationToken = CancellationToken.None;
 
@@ -364,7 +365,7 @@ namespace System.Web.Http.WebHost
 
         private static ExceptionHandlerContext CreateContext()
         {
-            return CreateContext(new ExceptionContext());
+            return CreateContext(new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer));
         }
 
         private static ExceptionHandlerContext CreateContext(ExceptionContext exceptionContext)
@@ -406,12 +407,15 @@ namespace System.Web.Http.WebHost
         private static ExceptionHandlerContext CreateValidContext(HttpRequestMessage request,
             ExceptionContextCatchBlock catchBlock)
         {
-            return CreateContext(new ExceptionContext
-            {
-                Exception = new InvalidOperationException(),
-                CatchBlock = catchBlock,
-                Request = request
-            });
+            return CreateContext(CreateMinimalValidExceptionContext(catchBlock, request));
+        }
+
+        private static ExceptionContext CreateMinimalValidExceptionContext(ExceptionContextCatchBlock catchBlock, HttpRequestMessage request = null)
+        {
+            return new ExceptionContext(new InvalidOperationException(), catchBlock)
+                        {
+                            Request = request,
+                        };
         }
     }
 }

@@ -25,12 +25,6 @@ namespace System.Web.Http.ExceptionHandling
             ExceptionContext exceptionContext = context.ExceptionContext;
             Contract.Assert(exceptionContext != null);
 
-            if (exceptionContext.Exception == null)
-            {
-                throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
-                    typeof(ExceptionContext).Name, "Exception"), "context");
-            }
-
             if (!ShouldLog(context))
             {
                 return TaskHelpers.Completed();
@@ -72,15 +66,8 @@ namespace System.Web.Http.ExceptionHandling
 
             ExceptionContext exceptionContext = context.ExceptionContext;
             Contract.Assert(exceptionContext != null);
-            Exception exception = exceptionContext.Exception;
 
-            if (exception == null)
-            {
-                throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
-                    typeof(ExceptionContext).Name, "Exception"), "context");
-            }
-
-            IDictionary data = exception.Data;
+            IDictionary data = exceptionContext.Exception.Data;
 
             if (data == null || data.IsReadOnly)
             {

@@ -23,7 +23,7 @@ namespace System.Web.Http.ExceptionHandling
 
             using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
             {
-                ExceptionContext expectedContext = CreateContext();
+                ExceptionContext expectedContext = CreateMinimalValidContext();
                 CancellationToken expectedCancellationToken = tokenSource.Token;
 
                 // Act
@@ -43,7 +43,7 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             IExceptionLogger logger = null;
-            ExceptionContext context = CreateContext();
+            ExceptionContext context = CreateMinimalValidContext();
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act & Assert
@@ -76,9 +76,9 @@ namespace System.Web.Http.ExceptionHandling
             return source.Task;
         }
 
-        private static ExceptionContext CreateContext()
+        private static ExceptionContext CreateMinimalValidContext()
         {
-            return new ExceptionContext();
+            return new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer);
         }
 
         private static IExceptionLogger CreateDummyLogger()

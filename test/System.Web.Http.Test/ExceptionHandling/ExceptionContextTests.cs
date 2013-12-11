@@ -9,97 +9,19 @@ namespace System.Web.Http.ExceptionHandling
     public class ExceptionContextTests
     {
         [Fact]
-        public void RequestSet_UpdatesValue()
-        {
-            // Arrange
-            ExceptionContext product = CreateProductUnderTest();
-
-            using (HttpRequestMessage expectedRequest = CreateRequest())
-            {
-                // Act
-                product.Request = expectedRequest;
-
-                // Assert
-                HttpRequestMessage request = product.Request;
-                Assert.Same(expectedRequest, request);
-            }
-        }
-
-        [Fact]
-        public void RequestContextSet_UpdatesValue()
-        {
-            // Arrange
-            ExceptionContext product = CreateProductUnderTest();
-            HttpRequestContext expectedRequestContext = CreateRequestContext();
-
-            // Act
-            product.RequestContext = expectedRequestContext;
-
-            // Assert
-            HttpRequestContext requestContext = product.RequestContext;
-            Assert.Same(expectedRequestContext, requestContext);
-        }
-
-        [Fact]
-        public void ControllerContextSet_UpdatesValue()
-        {
-            // Arrange
-            ExceptionContext product = CreateProductUnderTest();
-            HttpControllerContext expectedControllerContext = CreateControllerContext();
-
-            // Act
-            product.ControllerContext = expectedControllerContext;
-
-            // Assert
-            HttpControllerContext controllerContext = product.ControllerContext;
-            Assert.Same(expectedControllerContext, controllerContext);
-        }
-
-        [Fact]
-        public void ActionContextSet_UpdatesValue()
-        {
-            // Arrange
-            ExceptionContext product = CreateProductUnderTest();
-            HttpActionContext expectedActionContext = CreateActionContext();
-
-            // Act
-            product.ActionContext = expectedActionContext;
-
-            // Assert
-            HttpActionContext actionContext = product.ActionContext;
-            Assert.Same(expectedActionContext, actionContext);
-        }
-
-        [Fact]
-        public void ResponseSet_UpdatesValue()
-        {
-            // Arrange
-            ExceptionContext product = CreateProductUnderTest();
-
-            using (HttpResponseMessage expectedResponse = CreateResponse())
-            {
-                // Act
-                product.Response = expectedResponse;
-
-                // Assert
-                HttpResponseMessage response = product.Response;
-                Assert.Same(expectedResponse, response);
-            }
-        }
-
-        [Fact]
         public void ConstructorWithoutArguments_SetsPropertiesToSpecifiedValues()
         {
             // Act
             ExceptionContext product = CreateProductUnderTest();
 
             // Assert
-            Assert.Null(product.Exception);
+            Assert.NotNull(product.Exception);
+            Assert.NotNull(product.CatchBlock);
+
             Assert.Null(product.ActionContext);
             Assert.Null(product.ControllerContext);
             Assert.Null(product.RequestContext);
             Assert.Null(product.Request);
-            Assert.Null(product.CatchBlock);
             Assert.Null(product.Response);
         }
 
@@ -427,36 +349,6 @@ namespace System.Web.Http.ExceptionHandling
             }
         }
 
-        [Fact]
-        public void ExceptionSet_UpdatesValue()
-        {
-            // Arrange
-            ExceptionContext product = CreateProductUnderTest();
-            Exception expectedException = CreateException();
-
-            // Act
-            product.Exception = expectedException;
-
-            // Assert
-            Exception exception = product.Exception;
-            Assert.Same(expectedException, exception);
-        }
-
-        [Fact]
-        public void CatchBlockSet_UpdatesValue()
-        {
-            // Arrange
-            ExceptionContext product = CreateProductUnderTest();
-            ExceptionContextCatchBlock expectedCatchBlock = CreateCatchBlock();
-
-            // Act
-            product.CatchBlock = expectedCatchBlock;
-
-            // Assert
-            ExceptionContextCatchBlock catchBlock = product.CatchBlock;
-            Assert.Same(expectedCatchBlock, catchBlock);
-        }
-
         private static HttpActionContext CreateActionContext()
         {
             return new HttpActionContext();
@@ -497,7 +389,7 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionContext CreateProductUnderTest()
         {
-            return new ExceptionContext();
+            return new ExceptionContext(CreateException(), CreateCatchBlock());
         }
 
         private static ExceptionContext CreateProductUnderTest(Exception exception,

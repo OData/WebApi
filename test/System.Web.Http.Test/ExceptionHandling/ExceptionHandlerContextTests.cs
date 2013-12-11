@@ -23,7 +23,7 @@ namespace System.Web.Http.ExceptionHandling
         public void ExceptionContextGet_ReturnsSpecifiedInstance()
         {
             // Arrange
-            ExceptionContext expectedContext = CreateContext();
+            ExceptionContext expectedContext = CreateMinimalContext();
             ExceptionHandlerContext product = CreateProductUnderTest(expectedContext);
 
             // Act
@@ -37,7 +37,7 @@ namespace System.Web.Http.ExceptionHandling
         public void ResultSet_UpdatesValue()
         {
             // Arrange
-            ExceptionHandlerContext product = CreateProductUnderTest();
+            ExceptionHandlerContext product = CreateProductUnderTest(CreateMinimalContext());
             IHttpActionResult expectedResult = CreateDummyResult();
 
             // Act
@@ -53,10 +53,7 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             Exception expectedException = new InvalidOperationException();
-            ExceptionContext context = new ExceptionContext
-            {
-                Exception = expectedException
-            };
+            ExceptionContext context = new ExceptionContext(expectedException, ExceptionCatchBlocks.HttpServer);
             ExceptionHandlerContext product = CreateProductUnderTest(context);
 
             // Act
@@ -71,10 +68,7 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             ExceptionContextCatchBlock expectedCatchBlock = new ExceptionContextCatchBlock("IgnoreName", false, false);
-            ExceptionContext context = new ExceptionContext
-            {
-                CatchBlock = expectedCatchBlock
-            };
+            ExceptionContext context = new ExceptionContext(new Exception(), expectedCatchBlock);
             ExceptionHandlerContext product = CreateProductUnderTest(context);
 
             // Act
@@ -90,10 +84,7 @@ namespace System.Web.Http.ExceptionHandling
             // Arrange
             using (HttpRequestMessage expectedRequest = new HttpRequestMessage())
             {
-                ExceptionContext context = new ExceptionContext
-                {
-                    Request = expectedRequest
-                };
+                ExceptionContext context = CreateMinimalContext(expectedRequest);
                 ExceptionHandlerContext product = CreateProductUnderTest(context);
 
                 // Act
@@ -109,10 +100,7 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             HttpRequestContext expectedRequestContext = new HttpRequestContext();
-            ExceptionContext context = new ExceptionContext
-            {
-                RequestContext = expectedRequestContext
-            };
+            ExceptionContext context = CreateMinimalContext(expectedRequestContext);
             ExceptionHandlerContext product = CreateProductUnderTest(context);
 
             // Act
@@ -122,19 +110,22 @@ namespace System.Web.Http.ExceptionHandling
             Assert.Same(expectedRequestContext, requestContext);
         }
 
-        private static ExceptionContext CreateContext()
+        private static ExceptionContext CreateMinimalContext(HttpRequestContext context = null)
         {
-            return new ExceptionContext();
+            return new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer)
+            {
+                RequestContext = context,
+            };
+        }
+
+        private static ExceptionContext CreateMinimalContext(HttpRequestMessage request)
+        {
+            return new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer, request);
         }
 
         private static IHttpActionResult CreateDummyResult()
         {
             return new Mock<IHttpActionResult>(MockBehavior.Strict).Object;
-        }
-
-        private static ExceptionHandlerContext CreateProductUnderTest()
-        {
-            return CreateProductUnderTest(CreateContext());
         }
 
         private static ExceptionHandlerContext CreateProductUnderTest(ExceptionContext exceptionContext)

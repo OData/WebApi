@@ -26,22 +26,6 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void LogAsync_IfExceptionIsNull_Throws()
-        {
-            // Arrange
-            Mock<ExceptionLogger> mock = new Mock<ExceptionLogger>(MockBehavior.Strict);
-            IExceptionLogger product = mock.Object;
-
-            ExceptionLoggerContext context = CreateContext(CreateExceptionContext());
-            Assert.Null(context.ExceptionContext.Exception); // Guard
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            // Act & Assert
-            Assert.ThrowsArgument(() => product.LogAsync(context, cancellationToken), "context",
-                "ExceptionContext.Exception must not be null.");
-        }
-
-        [Fact]
         public void LogAsync_IfShouldLogReturnsTrue_DelegatesToLogAsyncCore()
         {
             // Arrange
@@ -54,7 +38,7 @@ namespace System.Web.Http.ExceptionHandling
 
             IExceptionLogger product = mock.Object;
 
-            ExceptionLoggerContext expectedContext = CreateValidContext();
+            ExceptionLoggerContext expectedContext = CreateMinimalValidLoggerContext();
 
             using (CancellationTokenSource tokenSource = CreateTokenSource())
             {
@@ -80,7 +64,7 @@ namespace System.Web.Http.ExceptionHandling
 
             IExceptionLogger product = mock.Object;
 
-            ExceptionLoggerContext expectedContext = CreateValidContext();
+            ExceptionLoggerContext expectedContext = CreateMinimalValidLoggerContext();
             CancellationToken expectedCancellationToken = CancellationToken.None;
 
             // Act
@@ -103,7 +87,7 @@ namespace System.Web.Http.ExceptionHandling
             mock.CallBase = true;
             ExceptionLogger product = mock.Object;
 
-            ExceptionLoggerContext expectedContext = CreateContext();
+            ExceptionLoggerContext expectedContext = CreateMinimalValidLoggerContext();
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act
@@ -125,7 +109,7 @@ namespace System.Web.Http.ExceptionHandling
             mock.CallBase = true;
             ExceptionLogger product = mock.Object;
 
-            ExceptionLoggerContext context = CreateContext();
+            ExceptionLoggerContext context = CreateMinimalValidLoggerContext();
 
             // Act & Assert
             Assert.DoesNotThrow(() => product.Log(context));
@@ -146,22 +130,6 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void ShouldLog_IfExceptionIsNull_Throws()
-        {
-            // Arrange
-            Mock<ExceptionLogger> mock = new Mock<ExceptionLogger>();
-            mock.CallBase = true;
-            ExceptionLogger product = mock.Object;
-
-            ExceptionLoggerContext context = CreateContext(CreateExceptionContext());
-            Assert.Null(context.ExceptionContext.Exception); // Guard
-
-            // Act & Assert
-            Assert.ThrowsArgument(() => product.ShouldLog(context), "context",
-                "ExceptionContext.Exception must not be null.");
-        }
-
-        [Fact]
         public void ShouldLog_IfExceptionDataIsNull_ReturnsTrue()
         {
             // Arrange
@@ -170,7 +138,7 @@ namespace System.Web.Http.ExceptionHandling
             ExceptionLogger product = mock.Object;
 
             Exception exception = CreateException(data: null);
-            ExceptionLoggerContext context = CreateValidContext(exception);
+            ExceptionLoggerContext context = CreateMinimalValidLoggerContext(exception);
 
             // Act
             bool shouldLog = product.ShouldLog(context);
@@ -198,7 +166,7 @@ namespace System.Web.Http.ExceptionHandling
             dataMock.Setup(d => d.IsReadOnly).Returns(true);
             IDictionary data = dataMock.Object;
             Exception exception = CreateException(data);
-            ExceptionLoggerContext context = CreateValidContext(exception);
+            ExceptionLoggerContext context = CreateMinimalValidLoggerContext(exception);
 
             // Act
             bool shouldLog = product.ShouldLog(context);
@@ -217,7 +185,7 @@ namespace System.Web.Http.ExceptionHandling
 
             IDictionary data = new Dictionary();
             Exception exception = CreateException(data);
-            ExceptionLoggerContext context = CreateValidContext(exception);
+            ExceptionLoggerContext context = CreateMinimalValidLoggerContext(exception);
 
             // Act
             bool shouldLog = product.ShouldLog(context);
@@ -242,7 +210,7 @@ namespace System.Web.Http.ExceptionHandling
             IDictionary data = new Dictionary();
             data.Add(ExceptionLogger.LoggedByKey, loggedBy);
             Exception exception = CreateException(data);
-            ExceptionLoggerContext context = CreateValidContext(exception);
+            ExceptionLoggerContext context = CreateMinimalValidLoggerContext(exception);
 
             // Act
             bool shouldLog = product.ShouldLog(context);
@@ -267,7 +235,7 @@ namespace System.Web.Http.ExceptionHandling
             ICollection<object> loggedBy = new List<object>() { product };
             data.Add(ExceptionLogger.LoggedByKey, loggedBy);
             Exception exception = CreateException(data);
-            ExceptionLoggerContext context = CreateValidContext(exception);
+            ExceptionLoggerContext context = CreateMinimalValidLoggerContext(exception);
 
             // Act
             bool shouldLog = product.ShouldLog(context);
@@ -291,7 +259,7 @@ namespace System.Web.Http.ExceptionHandling
             IDictionary data = new Dictionary();
             data.Add(ExceptionLogger.LoggedByKey, null);
             Exception exception = CreateException(data);
-            ExceptionLoggerContext context = CreateValidContext(exception);
+            ExceptionLoggerContext context = CreateMinimalValidLoggerContext(exception);
 
             // Act
             bool shouldLog = product.ShouldLog(context);
@@ -309,11 +277,6 @@ namespace System.Web.Http.ExceptionHandling
             return source.Task;
         }
 
-        private static ExceptionLoggerContext CreateContext()
-        {
-            return CreateContext(CreateExceptionContext());
-        }
-
         private static ExceptionLoggerContext CreateContext(ExceptionContext exceptionContext)
         {
             return new ExceptionLoggerContext(exceptionContext);
@@ -326,9 +289,9 @@ namespace System.Web.Http.ExceptionHandling
             return mock.Object;
         }
 
-        private static ExceptionContext CreateExceptionContext()
+        private static ExceptionContext CreateMinimalValidExceptionContext()
         {
-            return new ExceptionContext();
+            return new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer);
         }
 
         private static CancellationTokenSource CreateTokenSource()
@@ -336,17 +299,14 @@ namespace System.Web.Http.ExceptionHandling
             return new CancellationTokenSource();
         }
 
-        private static ExceptionLoggerContext CreateValidContext()
+        private static ExceptionLoggerContext CreateMinimalValidLoggerContext()
         {
-            return CreateValidContext(new Exception());
+            return CreateMinimalValidLoggerContext(new Exception());
         }
 
-        private static ExceptionLoggerContext CreateValidContext(Exception exception)
+        private static ExceptionLoggerContext CreateMinimalValidLoggerContext(Exception exception)
         {
-            return CreateContext(new ExceptionContext
-            {
-                Exception = exception
-            });
+            return CreateContext(new ExceptionContext(exception, ExceptionCatchBlocks.HttpServer));
         }
 
         private class Dictionary : DictionaryBase

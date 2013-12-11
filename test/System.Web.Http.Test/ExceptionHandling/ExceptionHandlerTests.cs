@@ -24,22 +24,6 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void HandleAsync_IfExceptionIsNull_Throws()
-        {
-            // Arrange
-            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>(MockBehavior.Strict);
-            IExceptionHandler product = mock.Object;
-
-            ExceptionHandlerContext context = CreateContext(CreateExceptionContext());
-            Assert.Null(context.ExceptionContext.Exception); // Guard
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            // Act & Assert
-            Assert.ThrowsArgument(() => product.HandleAsync(context, cancellationToken), "context",
-                "ExceptionContext.Exception must not be null.");
-        }
-
-        [Fact]
         public void HandleAsync_IfShouldHandleReturnsTrue_DelegatesToHandleAsyncCore()
         {
             // Arrange
@@ -52,7 +36,7 @@ namespace System.Web.Http.ExceptionHandling
 
             IExceptionHandler product = mock.Object;
 
-            ExceptionHandlerContext expectedContext = CreateValidContext();
+            ExceptionHandlerContext expectedContext = CreateMinimalValidHandlerContext();
 
             using (CancellationTokenSource tokenSource = CreateTokenSource())
             {
@@ -78,7 +62,7 @@ namespace System.Web.Http.ExceptionHandling
 
             IExceptionHandler product = mock.Object;
 
-            ExceptionHandlerContext expectedContext = CreateValidContext();
+            ExceptionHandlerContext expectedContext = CreateMinimalValidHandlerContext();
             CancellationToken expectedCancellationToken = CancellationToken.None;
 
             // Act
@@ -101,7 +85,7 @@ namespace System.Web.Http.ExceptionHandling
             mock.CallBase = true;
             ExceptionHandler product = mock.Object;
 
-            ExceptionHandlerContext expectedContext = CreateContext();
+            ExceptionHandlerContext expectedContext = CreateMinimalValidHandlerContext();
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act
@@ -123,7 +107,7 @@ namespace System.Web.Http.ExceptionHandling
             mock.CallBase = true;
             ExceptionHandler product = mock.Object;
 
-            ExceptionHandlerContext context = CreateContext();
+            ExceptionHandlerContext context = CreateMinimalValidHandlerContext();
 
             // Act & Assert
             Assert.DoesNotThrow(() => product.Handle(context));
@@ -143,22 +127,6 @@ namespace System.Web.Http.ExceptionHandling
             Assert.ThrowsArgumentNull(() => product.ShouldHandle(context), "context");
         }
 
-        [Fact]
-        public void ShouldHandle_IfCallStackIsNull_Throws()
-        {
-            // Arrange
-            Mock<ExceptionHandler> mock = new Mock<ExceptionHandler>();
-            mock.CallBase = true;
-            ExceptionHandler product = mock.Object;
-
-            ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext());
-            Assert.Null(context.ExceptionContext.CatchBlock); // Guard
-
-            // Act & Assert
-            Assert.ThrowsArgument(() => product.ShouldHandle(context), "context",
-                "ExceptionContext.CatchBlock must not be null.");
-        }
-
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -169,10 +137,8 @@ namespace System.Web.Http.ExceptionHandling
             mock.CallBase = true;
             ExceptionHandler product = mock.Object;
 
-            ExceptionHandlerContext context = CreateContext(new ExceptionContext
-            {
-                CatchBlock = new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevelCatchBlock, callsHandler: false)
-            });
+            ExceptionHandlerContext context = CreateContext(new ExceptionContext(new Exception(),
+                new ExceptionContextCatchBlock("IgnoreCaughtAt", isTopLevelCatchBlock, callsHandler: false)));
 
             // Act
             bool shouldHandle = product.ShouldHandle(context);
@@ -187,19 +153,14 @@ namespace System.Web.Http.ExceptionHandling
             return source.Task;
         }
 
-        private static ExceptionHandlerContext CreateContext()
-        {
-            return CreateContext(CreateExceptionContext());
-        }
-
         private static ExceptionHandlerContext CreateContext(ExceptionContext exceptionContext)
         {
             return new ExceptionHandlerContext(exceptionContext);
         }
 
-        private static ExceptionContext CreateExceptionContext()
+        private static ExceptionContext CreateMinimalValidExceptionContext()
         {
-            return new ExceptionContext();
+            return new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer);
         }
 
         private static CancellationTokenSource CreateTokenSource()
@@ -207,12 +168,9 @@ namespace System.Web.Http.ExceptionHandling
             return new CancellationTokenSource();
         }
 
-        private static ExceptionHandlerContext CreateValidContext()
+        private static ExceptionHandlerContext CreateMinimalValidHandlerContext()
         {
-            return new ExceptionHandlerContext(new ExceptionContext
-            {
-                Exception = new Exception()
-            });
+            return new ExceptionHandlerContext(CreateMinimalValidExceptionContext());
         }
     }
 }

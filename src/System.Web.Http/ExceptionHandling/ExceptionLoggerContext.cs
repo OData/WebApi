@@ -80,12 +80,6 @@ namespace System.Web.Http.ExceptionHandling
                 Contract.Assert(_exceptionContext != null);
                 ExceptionContextCatchBlock catchBlock = _exceptionContext.CatchBlock;
 
-                if (catchBlock == null)
-                {
-                    throw new InvalidOperationException(Error.Format(SRResources.TypePropertyMustNotBeNull,
-                        typeof(ExceptionContext).Name, "CatchBlock"));
-                }
-
                 return catchBlock.CallsHandler;
             }
         }

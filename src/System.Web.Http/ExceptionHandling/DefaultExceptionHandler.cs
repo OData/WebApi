@@ -38,12 +38,6 @@ namespace System.Web.Http.ExceptionHandling
             Contract.Assert(exceptionContext != null);
             Exception exception = exceptionContext.Exception;
 
-            if (exception == null)
-            {
-                throw new ArgumentException(Error.Format(SRResources.TypePropertyMustNotBeNull,
-                    typeof(ExceptionContext).Name, "Exception"), "context");
-            }
-
             HttpRequestMessage request = exceptionContext.Request;
 
             if (request == null)

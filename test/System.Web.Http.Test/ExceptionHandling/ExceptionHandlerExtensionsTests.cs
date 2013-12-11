@@ -23,7 +23,7 @@ namespace System.Web.Http.ExceptionHandling
 
             using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
             {
-                ExceptionContext expectedContext = CreateContext();
+                ExceptionContext expectedContext = CreateMinimalValidContext();
                 CancellationToken expectedCancellationToken = tokenSource.Token;
 
                 // Act
@@ -45,7 +45,7 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             IExceptionHandler handler = CreateStubHandler();
-            ExceptionContext context = CreateContext();
+            ExceptionContext context = CreateMinimalValidContext();
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act
@@ -72,7 +72,7 @@ namespace System.Web.Http.ExceptionHandling
 
                 using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
                 {
-                    ExceptionContext context = CreateContext();
+                    ExceptionContext context = CreateMinimalValidContext();
                     CancellationToken expectedCancellationToken = tokenSource.Token;
 
                     // Act
@@ -100,7 +100,7 @@ namespace System.Web.Http.ExceptionHandling
                 IHttpActionResult result = mock.Object;
                 IExceptionHandler handler = CreateResultHandler(result);
 
-                ExceptionContext context = CreateContext();
+                ExceptionContext context = CreateMinimalValidContext();
                 CancellationToken cancellationToken = CancellationToken.None;
 
                 // Act
@@ -119,7 +119,7 @@ namespace System.Web.Http.ExceptionHandling
         {
             // Arrange
             IExceptionHandler handler = null;
-            ExceptionContext context = CreateContext();
+            ExceptionContext context = CreateMinimalValidContext();
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act & Assert
@@ -150,7 +150,7 @@ namespace System.Web.Http.ExceptionHandling
                 .Returns(Task.FromResult<HttpResponseMessage>(null));
             IHttpActionResult result = mock.Object;
             IExceptionHandler handler = CreateResultHandler(result);
-            ExceptionContext context = CreateContext();
+            ExceptionContext context = CreateMinimalValidContext();
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act
@@ -172,9 +172,9 @@ namespace System.Web.Http.ExceptionHandling
             return new CancellationTokenSource();
         }
 
-        private static ExceptionContext CreateContext()
+        private static ExceptionContext CreateMinimalValidContext()
         {
-            return new ExceptionContext();
+            return new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer);
         }
 
         private static IExceptionHandler CreateDummyHandler()

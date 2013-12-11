@@ -29,28 +29,11 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void HandleAsync_IfExceptionIsNull_Throws()
-        {
-            // Arrange
-            IExceptionHandler product = CreateProductUnderTest();
-            ExceptionHandlerContext context = CreateContext(new ExceptionContext());
-            Assert.Null(context.ExceptionContext.Exception); // Guard
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            // Act & Assert
-            Assert.ThrowsArgument(() => product.HandleAsync(context, cancellationToken), "context",
-                "ExceptionContext.Exception must not be null.");
-        }
-
-        [Fact]
         public void HandleAsync_IfRequestIsNull_Throws()
         {
             // Arrange
             IExceptionHandler product = CreateProductUnderTest();
-            ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext
-            {
-                Exception = CreateException()
-            });
+            ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext(CreateException(), ExceptionCatchBlocks.HttpServer));
             Assert.Null(context.ExceptionContext.Request); // Guard
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -155,22 +138,13 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionHandlerContext CreateValidContext(HttpRequestMessage request)
         {
-            return CreateContext(new ExceptionContext
-            {
-                Exception = CreateException(),
-                Request = request
-            });
+            return CreateContext(new ExceptionContext(CreateException(), ExceptionCatchBlocks.HttpServer, request));
         }
 
         private static ExceptionHandlerContext CreateValidContext(HttpRequestMessage request,
             ExceptionContextCatchBlock catchBlock)
         {
-            return CreateContext(new ExceptionContext
-            {
-                Exception = CreateException(),
-                Request = request,
-                CatchBlock = catchBlock
-            });
+            return CreateContext(new ExceptionContext(CreateException(), catchBlock, request));
         }
     }
 }

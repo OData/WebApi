@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -508,12 +509,14 @@ namespace System.Web.Http.Description
 
         private ApiParameterDescription CreateParameterDescriptionFromDescriptor(HttpParameterDescriptor parameter)
         {
-            ApiParameterDescription parameterDescription = new ApiParameterDescription();
-            parameterDescription.ParameterDescriptor = parameter;
-            parameterDescription.Name = parameter.Prefix ?? parameter.ParameterName;
-            parameterDescription.Documentation = GetApiParameterDocumentation(parameter);
-            parameterDescription.Source = ApiParameterSource.Unknown;
-            return parameterDescription;
+            Contract.Assert(parameter != null);
+            return new ApiParameterDescription
+            {
+                ParameterDescriptor = parameter,
+                Name = parameter.Prefix ?? parameter.ParameterName,
+                Documentation = GetApiParameterDocumentation(parameter),
+                Source = ApiParameterSource.Unknown,
+            };
         }
 
         private ApiParameterDescription CreateParameterDescriptionFromBinding(HttpParameterBinding parameterBinding)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -256,10 +257,17 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
             {
                 if (apiParameter.Source == ApiParameterSource.FromUri)
                 {
-                    Type parameterType = apiParameter.ParameterDescriptor.ParameterType;
+                    HttpParameterDescriptor parameterDescriptor = apiParameter.ParameterDescriptor;
+                    Type parameterType = null;
+                    ModelDescription typeDescription = null;
+                    ComplexTypeModelDescription complexTypeDescription = null;
+                    if (parameterDescriptor != null)
+                    {
+                        parameterType = parameterDescriptor.ParameterType;
+                        typeDescription = modelGenerator.GetOrCreateModelDescription(parameterType);
+                        complexTypeDescription = typeDescription as ComplexTypeModelDescription;
+                    }
 
-                    ModelDescription typeDescription = modelGenerator.GetOrCreateModelDescription(parameterType);
-                    ComplexTypeModelDescription complexTypeDescription = typeDescription as ComplexTypeModelDescription;
                     if (complexTypeDescription != null)
                     {
                         foreach (ParameterDescription uriParameter in complexTypeDescription.Properties)
@@ -267,28 +275,48 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
                             apiModel.UriParameters.Add(uriParameter);
                         }
                     }
-                    else
+                    else if (parameterDescriptor != null)
                     {
-                        ParameterDescription uriParameter = new ParameterDescription()
-                        {
-                            Name = apiParameter.Name,
-                            Documentation = apiParameter.Documentation,
-                            TypeDescription = typeDescription,
-                        };
-                        HttpParameterDescriptor parameterDescriptor = apiParameter.ParameterDescriptor;
+                        ParameterDescription uriParameter =
+                            AddParameterDescription(apiModel, apiParameter, typeDescription);
+
                         if (!parameterDescriptor.IsOptional)
                         {
                             uriParameter.Annotations.Add(new ParameterAnnotation() { Documentation = "Required" });
                         }
+
                         object defaultValue = parameterDescriptor.DefaultValue;
                         if (defaultValue != null)
                         {
                             uriParameter.Annotations.Add(new ParameterAnnotation() { Documentation = "Default value is " + Convert.ToString(defaultValue, CultureInfo.InvariantCulture) });
                         }
-                        apiModel.UriParameters.Add(uriParameter);
+                    }
+                    else
+                    {
+                        Debug.Assert(parameterDescriptor == null);
+
+                        // If parameterDescriptor is null, this is an undeclared route parameter which only occurs
+                        // when source is FromUri. Ignored in request model and among resource parameters but listed
+                        // as a simple string here.
+                        ModelDescription modelDescription = modelGenerator.GetOrCreateModelDescription(typeof(string));
+                        AddParameterDescription(apiModel, apiParameter, modelDescription);
                     }
                 }
             }
+        }
+
+        private static ParameterDescription AddParameterDescription(HelpPageApiModel apiModel,
+            ApiParameterDescription apiParameter, ModelDescription typeDescription)
+        {
+            ParameterDescription parameterDescription = new ParameterDescription
+            {
+                Name = apiParameter.Name,
+                Documentation = apiParameter.Documentation,
+                TypeDescription = typeDescription,
+            };
+
+            apiModel.UriParameters.Add(parameterDescription);
+            return parameterDescription;
         }
 
         private static void GenerateRequestModelDescription(HelpPageApiModel apiModel, ModelDescriptionGenerator modelGenerator, HelpPageSampleGenerator sampleGenerator)
@@ -302,7 +330,8 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
                     apiModel.RequestModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType);
                     apiModel.RequestDocumentation = apiParameter.Documentation;
                 }
-                else if (apiParameter.ParameterDescriptor.ParameterType == typeof(HttpRequestMessage))
+                else if (apiParameter.ParameterDescriptor != null &&
+                    apiParameter.ParameterDescriptor.ParameterType == typeof(HttpRequestMessage))
                 {
                     Type parameterType = sampleGenerator.ResolveHttpRequestMessageType(apiDescription);
 
@@ -351,7 +380,9 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
 
         private static bool TryGetResourceParameter(ApiDescription apiDescription, HttpConfiguration config, out ApiParameterDescription parameterDescription, out Type resourceType)
         {
-            parameterDescription = apiDescription.ParameterDescriptions.FirstOrDefault(p => p.Source == ApiParameterSource.FromBody || p.ParameterDescriptor.ParameterType == typeof(HttpRequestMessage));
+            parameterDescription = apiDescription.ParameterDescriptions.FirstOrDefault(
+                p => p.Source == ApiParameterSource.FromBody ||
+                    (p.ParameterDescriptor != null && p.ParameterDescriptor.ParameterType == typeof(HttpRequestMessage)));
 
             if (parameterDescription == null)
             {

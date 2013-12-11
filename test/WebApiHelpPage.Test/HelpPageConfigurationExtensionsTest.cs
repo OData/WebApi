@@ -48,6 +48,42 @@ namespace WebApiHelpPageWebHost.UnitTest
         }
 
         [Theory]
+        [InlineData("Get-Values-Unused")]
+        [InlineData("get-values-unused")]
+        [InlineData("Get-Values-Unused_Name")]
+        [InlineData("get-values-unused_NAME")]
+        [InlineData("Get-Values-Unused-id")]
+        [InlineData("Get-Values-unused-ID")]
+        [InlineData("Post-Values-Unused")]
+        [InlineData("POST-VALUES-UNUSED")]
+        [InlineData("Put-Values-Unused-id")]
+        [InlineData("Put-VALUES-UNUSED-ID")]
+        [InlineData("Put-Values-Unused")]
+        [InlineData("Put-VALUES-UNUSED")]
+        [InlineData("Delete-Values-Unused-id")]
+        [InlineData("Delete-VALUES-UNUSED-id")]
+        [InlineData("Patch-Values-Unused")]
+        [InlineData("Patch-VALUES-UNUSED")]
+        [InlineData("Options-Values-Unused")]
+        [InlineData("OpTions-VALUES-UNUSED")]
+        [InlineData("Head-Values-Unused-id")]
+        [InlineData("HEAD-VALUES-UNUSED-id")]
+        public void GetHelpPageApiModel_ReturnsTheModel_WhenIdIsValid_UnusedParameters(string apiId)
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "{controller}/{unused}/{id}", new { id = RouteParameter.Optional });
+
+            // Act
+            HelpPageApiModel model = config.GetHelpPageApiModel(apiId);
+
+            // Assert
+            Assert.NotNull(model);
+            Assert.Same(model, config.GetHelpPageApiModel(apiId));
+            Assert.Equal(apiId, model.ApiDescription.GetFriendlyId(), StringComparer.OrdinalIgnoreCase);
+        }
+
+        [Theory]
         [InlineData("foo")]
         [InlineData("bar")]
         [InlineData("@alpha")]

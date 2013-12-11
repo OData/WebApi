@@ -94,7 +94,7 @@ namespace System.Web.Http.ExceptionHandling
             };
             IExceptionLogger product = CreateProductUnderTest(loggers);
 
-            ExceptionLoggerContext expectedContext = CreateContext();
+            ExceptionLoggerContext expectedContext = CreateMinimalValidContext();
             CancellationToken expectedCancellationToken = CreateCancellationToken();
 
             // Act
@@ -115,7 +115,7 @@ namespace System.Web.Http.ExceptionHandling
             IEnumerable<IExceptionLogger> loggers = new IExceptionLogger[] { null };
             IExceptionLogger product = CreateProductUnderTest(loggers);
 
-            ExceptionLoggerContext context = CreateContext();
+            ExceptionLoggerContext context = CreateMinimalValidContext();
             CancellationToken cancellationToken = CreateCancellationToken();
 
             // Act & Assert
@@ -130,9 +130,9 @@ namespace System.Web.Http.ExceptionHandling
             return source.Token;
         }
 
-        private static ExceptionLoggerContext CreateContext()
+        private static ExceptionLoggerContext CreateMinimalValidContext()
         {
-            return new ExceptionLoggerContext(new ExceptionContext());
+            return new ExceptionLoggerContext(new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer));
         }
 
         private static IExceptionLogger CreateDummyLogger()

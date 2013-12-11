@@ -261,10 +261,7 @@ namespace System.Web.Http.Owin
         {
             Assert.NotNull(actual);
 
-            ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext()
-            {
-                Exception = new Exception()
-            });
+            ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer));
             CancellationToken cancellationToken = CancellationToken.None;
 
             expected
@@ -284,10 +281,7 @@ namespace System.Web.Http.Owin
         {
             Assert.NotNull(actual);
 
-            ExceptionLoggerContext context = new ExceptionLoggerContext(new ExceptionContext()
-            {
-                Exception = new Exception()
-            });
+            ExceptionLoggerContext context = new ExceptionLoggerContext(new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer));
             CancellationToken cancellationToken = CancellationToken.None;
 
             expected

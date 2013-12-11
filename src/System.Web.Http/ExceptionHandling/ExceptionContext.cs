@@ -11,19 +11,10 @@ namespace System.Web.Http.ExceptionHandling
     public class ExceptionContext
     {
         /// <summary>Initializes a new instance of the <see cref="ExceptionContext"/> class.</summary>
-        /// <remarks>This constructor is for unit testing purposes only.</remarks>
-        public ExceptionContext()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExceptionContext"/> class using the values provided.
-        /// </summary>
         /// <param name="exception">The exception caught.</param>
         /// <param name="catchBlock">The catch block where the exception was caught.</param>
-        /// <param name="actionContext">The action context in which the exception occurred.</param>
-        public ExceptionContext(Exception exception, ExceptionContextCatchBlock catchBlock,
-            HttpActionContext actionContext)
+        /// <remarks>This constructor is for unit testing purposes only.</remarks>
+        public ExceptionContext(Exception exception, ExceptionContextCatchBlock catchBlock)
         {
             if (exception == null)
             {
@@ -38,7 +29,18 @@ namespace System.Web.Http.ExceptionHandling
             }
 
             CatchBlock = catchBlock;
+        }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExceptionContext"/> class using the values provided.
+        /// </summary>
+        /// <param name="exception">The exception caught.</param>
+        /// <param name="catchBlock">The catch block where the exception was caught.</param>
+        /// <param name="actionContext">The action context in which the exception occurred.</param>
+        public ExceptionContext(Exception exception, ExceptionContextCatchBlock catchBlock,
+            HttpActionContext actionContext)
+            : this(exception, catchBlock)
+        {
             if (actionContext == null)
             {
                 throw new ArgumentNullException("actionContext");
@@ -78,21 +80,8 @@ namespace System.Web.Http.ExceptionHandling
         /// <param name="catchBlock">The catch block where the exception was caught.</param>
         /// <param name="request">The request being processed when the exception was caught.</param>
         public ExceptionContext(Exception exception, ExceptionContextCatchBlock catchBlock, HttpRequestMessage request)
+            : this(exception, catchBlock)
         {
-            if (exception == null)
-            {
-                throw new ArgumentNullException("exception");
-            }
-
-            Exception = exception;
-
-            if (catchBlock == null)
-            {
-                throw new ArgumentNullException("catchBlock");
-            }
-
-            CatchBlock = catchBlock;
-
             if (request == null)
             {
                 throw new ArgumentNullException("request");
@@ -110,22 +99,8 @@ namespace System.Web.Http.ExceptionHandling
         /// <param name="request">The request being processed when the exception was caught.</param>
         /// <param name="response">The repsonse being returned when the exception was caught.</param>
         public ExceptionContext(Exception exception, ExceptionContextCatchBlock catchBlock, HttpRequestMessage request,
-            HttpResponseMessage response)
+            HttpResponseMessage response) : this(exception, catchBlock)
         {
-            if (exception == null)
-            {
-                throw new ArgumentNullException("exception");
-            }
-
-            Exception = exception;
-
-            if (catchBlock == null)
-            {
-                throw new ArgumentNullException("catchBlock");
-            }
-
-            CatchBlock = catchBlock;
-
             if (request == null)
             {
                 throw new ArgumentNullException("request");
@@ -143,12 +118,10 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         /// <summary>Gets the exception caught.</summary>
-        /// <remarks>The setter is for unit testing purposes only.</remarks>
-        public Exception Exception { get; set; }
+        public Exception Exception { get; private set; }
 
         /// <summary>Gets the catch block in which the exception was caught.</summary>
-        /// <remarks>The setter is for unit testing purposes only.</remarks>
-        public ExceptionContextCatchBlock CatchBlock { get; set; }
+        public ExceptionContextCatchBlock CatchBlock { get; private set; }
 
         /// <summary>Gets the request being processed when the exception was caught.</summary>
         /// <remarks>The setter is for unit testing purposes only.</remarks>

@@ -95,16 +95,16 @@ namespace System.Web.Http.ExceptionHandling
                 MediaTypeFormatter expectedFormatter = CreateDummyFormatter();
                 configuration.Formatters.Add(expectedFormatter);
 
-                ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext
+                ExceptionHandlerContext context = new ExceptionHandlerContext(new ExceptionContext(
+                    exception: expectedException,
+                    catchBlock: CreateTopLevelCatchBlock(),
+                    request: expectedRequest)
                 {
-                    Exception = expectedException,
-                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = new HttpRequestContext
-                    {
-                        Configuration = configuration,
-                        IncludeErrorDetail = includeDetail
-                    },
-                    Request = expectedRequest
+                                    {
+                                        Configuration = configuration,
+                                        IncludeErrorDetail = includeDetail
+                                    },
                 });
 
                 CancellationToken cancellationToken = CancellationToken.None;
@@ -138,16 +138,16 @@ namespace System.Web.Http.ExceptionHandling
             using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpRequestMessage request = CreateRequest())
             {
-                ExceptionContext context = new ExceptionContext
-                {
-                    Exception = exception,
-                    CatchBlock = CreateNonTopLevelCatchBlock(),
-                    RequestContext = new HttpRequestContext
+                ExceptionContext context = new ExceptionContext(
+                    exception,
+                    CreateNonTopLevelCatchBlock(),
+                    request)
                     {
-                        Configuration = configuration
-                    },
-                    Request = request
-                };
+                        RequestContext = new HttpRequestContext
+                                        {
+                                            Configuration = configuration
+                                        },
+                    };
 
                 // More Arrange; then Act & Assert
                 TestHandleAsyncLeavesResultNull(context);
@@ -165,56 +165,6 @@ namespace System.Web.Http.ExceptionHandling
         }
 
         [Fact]
-        public void HandleAsync_IfExceptionIsNull_LeavesResultNull()
-        {
-            // Arrange
-            Exception exception = null;
-
-            using (HttpConfiguration configuration = CreateConfiguration())
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                ExceptionContext context = new ExceptionContext
-                {
-                    Exception = exception,
-                    CatchBlock = CreateTopLevelCatchBlock(),
-                    RequestContext = new HttpRequestContext
-                    {
-                        Configuration = configuration
-                    },
-                    Request = request
-                };
-
-                // More Arrange; then Act & Assert
-                TestHandleAsyncLeavesResultNull(context);
-            }
-        }
-
-        [Fact]
-        public void HandleAsync_IfCatchBlockIsNull_LeavesResultNull()
-        {
-            // Arrange
-            Exception exception = CreateDummyException();
-
-            using (HttpConfiguration configuration = CreateConfiguration())
-            using (HttpRequestMessage request = CreateRequest())
-            {
-                ExceptionContext context = new ExceptionContext
-                {
-                    Exception = exception,
-                    CatchBlock = null,
-                    RequestContext = new HttpRequestContext
-                    {
-                        Configuration = configuration
-                    },
-                    Request = request
-                };
-
-                // More Arrange; then Act & Assert
-                TestHandleAsyncLeavesResultNull(context);
-            }
-        }
-
-        [Fact]
         public void HandleAsync_IfRequestIsNull_LeavesResultNull()
         {
             // Arrange
@@ -222,10 +172,10 @@ namespace System.Web.Http.ExceptionHandling
 
             using (HttpConfiguration configuration = CreateConfiguration())
             {
-                ExceptionContext context = new ExceptionContext
+                ExceptionContext context = new ExceptionContext(
+                    exception,
+                    CreateTopLevelCatchBlock())
                 {
-                    Exception = exception,
-                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = new HttpRequestContext
                     {
                         Configuration = configuration
@@ -246,10 +196,10 @@ namespace System.Web.Http.ExceptionHandling
 
             using (HttpRequestMessage request = CreateRequest())
             {
-                ExceptionContext context = new ExceptionContext
+                ExceptionContext context = new ExceptionContext(
+                    exception,
+                    CreateTopLevelCatchBlock())
                 {
-                    Exception = exception,
-                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = null,
                     Request = request
                 };
@@ -267,10 +217,10 @@ namespace System.Web.Http.ExceptionHandling
 
             using (HttpRequestMessage request = CreateRequest())
             {
-                ExceptionContext context = new ExceptionContext
+                ExceptionContext context = new ExceptionContext(
+                    exception,
+                    CreateTopLevelCatchBlock())
                 {
-                    Exception = exception,
-                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = new HttpRequestContext
                     {
                         Configuration = null
@@ -294,10 +244,10 @@ namespace System.Web.Http.ExceptionHandling
             {
                 configuration.Services.Clear(typeof(IContentNegotiator));
 
-                ExceptionContext context = new ExceptionContext
+                ExceptionContext context = new ExceptionContext(
+                    exception,
+                    CreateTopLevelCatchBlock())
                 {
-                    Exception = exception,
-                    CatchBlock = CreateTopLevelCatchBlock(),
                     RequestContext = new HttpRequestContext
                     {
                         Configuration = configuration
@@ -362,7 +312,12 @@ namespace System.Web.Http.ExceptionHandling
 
         private static ExceptionHandlerContext CreateContext()
         {
-            return new ExceptionHandlerContext(new ExceptionContext());
+            return new ExceptionHandlerContext(CreateMinimalValidExceptionContext());
+        }
+
+        private static ExceptionContext CreateMinimalValidExceptionContext()
+        {
+            return new ExceptionContext(new Exception(), ExceptionCatchBlocks.HttpServer);
         }
 
         private static ExceptionHandlerContext CreateContext(ExceptionContext exceptionContext)

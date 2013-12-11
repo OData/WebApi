@@ -31,13 +31,6 @@ namespace System.Web.Http.Owin.ExceptionHandling
 
             ExceptionContext exceptionContext = context.ExceptionContext;
             Contract.Assert(exceptionContext != null);
-            Exception exception = exceptionContext.Exception;
-
-            if (exception == null)
-            {
-                throw new ArgumentException(Error.Format(OwinResources.TypePropertyMustNotBeNull,
-                    typeof(ExceptionContext).Name, "Exception"), "context");
-            }
 
             HttpRequestMessage request = exceptionContext.Request;
 
@@ -48,7 +41,7 @@ namespace System.Web.Http.Owin.ExceptionHandling
             }
 
             context.Result = new ResponseMessageResult(request.CreateErrorResponse(HttpStatusCode.InternalServerError,
-                exception));
+                exceptionContext.Exception));
         }
     }
 }

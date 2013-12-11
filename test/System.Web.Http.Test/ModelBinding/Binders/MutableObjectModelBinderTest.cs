@@ -315,6 +315,7 @@ namespace System.Web.Http.ModelBinding.Binders
         }
 
         [Fact]
+        [ReplaceCulture]
         public void ProcessDto_BindRequiredFieldMissing_RaisesModelError()
         {
             // Arrange
@@ -339,10 +340,246 @@ namespace System.Web.Http.ModelBinding.Binders
 
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
-            // Act & assert
+            // Act
             testableBinder.ProcessDto(context, bindingContext, dto);
 
-            Assert.False(bindingContext.ModelState.IsValid);
+            // Assert
+            ModelStateDictionary modelStateDictionary = bindingContext.ModelState;
+            Assert.False(modelStateDictionary.IsValid);
+            Assert.Equal(1, modelStateDictionary.Count);
+
+            // Check Age error.
+            ModelState modelState;
+            Assert.True(modelStateDictionary.TryGetValue("theModel.Age", out modelState));
+            Assert.Equal(1, modelState.Errors.Count);
+
+            ModelError modelError = modelState.Errors[0];
+            Assert.Null(modelError.Exception);
+            Assert.NotNull(modelError.ErrorMessage);
+            Assert.Equal("The Age property is required.", modelError.ErrorMessage);
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void ProcessDto_BindRequiredFieldNull_RaisesModelError()
+        {
+            // Arrange
+            ModelWithBindRequired model = new ModelWithBindRequired
+            {
+                Name = "original value",
+                Age = -20
+            };
+
+            ModelMetadata containerMetadata = GetMetadataForObject(model);
+            HttpActionContext context = ContextUtil.CreateActionContext();
+            ModelBindingContext bindingContext = new ModelBindingContext()
+            {
+                ModelMetadata = containerMetadata,
+                ModelName = "theModel",
+                ModelState = context.ModelState,
+            };
+
+            ComplexModelDto dto = new ComplexModelDto(containerMetadata, containerMetadata.Properties);
+            TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
+
+            ModelMetadata propertyMetadata = dto.PropertyMetadata.Single(o => o.PropertyName == "Name");
+            dto.Results[propertyMetadata] =
+                new ComplexModelDtoResult("John Doe", new ModelValidationNode(propertyMetadata, "theModel.Name"));
+
+            // Attempt to set non-Nullable property to null.  HttpBindRequiredAttribute should not be relevant in this
+            // case because the binding exists.
+            propertyMetadata = dto.PropertyMetadata.Single(o => o.PropertyName == "Age");
+            dto.Results[propertyMetadata] =
+                new ComplexModelDtoResult(null, new ModelValidationNode(propertyMetadata, "theModel.Age"));
+
+            // Act; must also Validate because null-check error handler is late-bound
+            testableBinder.ProcessDto(context, bindingContext, dto);
+            bindingContext.ValidationNode.Validate(context);
+
+            // Assert
+            ModelStateDictionary modelStateDictionary = bindingContext.ModelState;
+            Assert.False(modelStateDictionary.IsValid);
+            Assert.Equal(1, modelStateDictionary.Count);
+
+            // Check Age error.
+            ModelState modelState;
+            Assert.True(modelStateDictionary.TryGetValue("theModel.Age", out modelState));
+            Assert.Equal(1, modelState.Errors.Count);
+
+            ModelError modelError = modelState.Errors[0];
+            Assert.Null(modelError.Exception);
+            Assert.NotNull(modelError.ErrorMessage);
+            Assert.Equal("A value is required.", modelError.ErrorMessage);
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void ProcessDto_RequiredFieldMissing_RaisesModelError()
+        {
+            // Arrange
+            ModelWithRequired model = new ModelWithRequired();
+            ModelMetadata containerMetadata = GetMetadataForObject(model);
+            HttpActionContext context = ContextUtil.CreateActionContext();
+
+            ModelBindingContext bindingContext = new ModelBindingContext
+            {
+                ModelMetadata = containerMetadata,
+                ModelName = "theModel"
+            };
+
+            // Set no properties though Age (a non-Nullable struct) and City (a class) properties are required.
+            ComplexModelDto dto = new ComplexModelDto(containerMetadata, containerMetadata.Properties);
+            TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
+
+            // Act
+            testableBinder.ProcessDto(context, bindingContext, dto);
+
+            // Assert
+            ModelStateDictionary modelStateDictionary = bindingContext.ModelState;
+            Assert.False(modelStateDictionary.IsValid);
+            Assert.Equal(2, modelStateDictionary.Count);
+
+            // Check Age error.
+            ModelState modelState;
+            Assert.True(modelStateDictionary.TryGetValue("theModel.Age", out modelState));
+            Assert.Equal(1, modelState.Errors.Count);
+
+            ModelError modelError = modelState.Errors[0];
+            Assert.Null(modelError.Exception);
+            Assert.NotNull(modelError.ErrorMessage);
+            Assert.Equal("The Age field is required.", modelError.ErrorMessage);
+
+            // Check City error.
+            Assert.True(modelStateDictionary.TryGetValue("theModel.City", out modelState));
+            Assert.Equal(1, modelState.Errors.Count);
+
+            modelError = modelState.Errors[0];
+            Assert.Null(modelError.Exception);
+            Assert.NotNull(modelError.ErrorMessage);
+            Assert.Equal("The City field is required.", modelError.ErrorMessage);
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void ProcessDto_RequiredFieldNull_RaisesModelError()
+        {
+            // Arrange
+            ModelWithRequired model = new ModelWithRequired();
+            ModelMetadata containerMetadata = GetMetadataForObject(model);
+            HttpActionContext context = ContextUtil.CreateActionContext();
+
+            ModelBindingContext bindingContext = new ModelBindingContext
+            {
+                ModelMetadata = containerMetadata,
+                ModelName = "theModel"
+            };
+
+            ComplexModelDto dto = new ComplexModelDto(containerMetadata, containerMetadata.Properties);
+            TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
+
+            // Make Age valid and City invalid.
+            ModelMetadata propertyMetadata = dto.PropertyMetadata.Single(p => p.PropertyName == "Age");
+            dto.Results[propertyMetadata] =
+                new ComplexModelDtoResult(23, new ModelValidationNode(propertyMetadata, "theModel.Age"));
+            propertyMetadata = dto.PropertyMetadata.Single(p => p.PropertyName == "City");
+            dto.Results[propertyMetadata] =
+                new ComplexModelDtoResult(null, new ModelValidationNode(propertyMetadata, "theModel.City"));
+
+            // Act
+            testableBinder.ProcessDto(context, bindingContext, dto);
+
+            // Assert
+            ModelStateDictionary modelStateDictionary = bindingContext.ModelState;
+            Assert.False(modelStateDictionary.IsValid);
+            Assert.Equal(1, modelStateDictionary.Count);
+
+            // Check City error.
+            ModelState modelState;
+            Assert.True(modelStateDictionary.TryGetValue("theModel.City", out modelState));
+            Assert.Equal(1, modelState.Errors.Count);
+
+            ModelError modelError = modelState.Errors[0];
+            Assert.Null(modelError.Exception);
+            Assert.NotNull(modelError.ErrorMessage);
+            Assert.Equal("The City field is required.", modelError.ErrorMessage);
+        }
+
+        [Fact]
+        public void ProcessDto_RequiredFieldMissing_RaisesModelErrorWithMessage()
+        {
+            // Arrange
+            Person model = new Person();
+            ModelMetadata containerMetadata = GetMetadataForObject(model);
+            HttpActionContext context = ContextUtil.CreateActionContext();
+
+            ModelBindingContext bindingContext = new ModelBindingContext
+            {
+                ModelMetadata = containerMetadata,
+                ModelName = "theModel"
+            };
+
+            // Set no properties though ValueTypeRequired (a non-Nullable struct) property is required.
+            ComplexModelDto dto = new ComplexModelDto(containerMetadata, containerMetadata.Properties);
+            TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
+
+            // Act
+            testableBinder.ProcessDto(context, bindingContext, dto);
+
+            // Assert
+            ModelStateDictionary modelStateDictionary = bindingContext.ModelState;
+            Assert.False(modelStateDictionary.IsValid);
+            Assert.Equal(1, modelStateDictionary.Count);
+
+            // Check ValueTypeRequired error.
+            ModelState modelState;
+            Assert.True(modelStateDictionary.TryGetValue("theModel.ValueTypeRequired", out modelState));
+            Assert.Equal(1, modelState.Errors.Count);
+
+            ModelError modelError = modelState.Errors[0];
+            Assert.Null(modelError.Exception);
+            Assert.NotNull(modelError.ErrorMessage);
+            Assert.Equal("Sample message", modelError.ErrorMessage);
+        }
+
+        [Fact]
+        public void ProcessDto_RequiredFieldNull_RaisesModelErrorWithMessage()
+        {
+            // Arrange
+            Person model = new Person();
+            ModelMetadata containerMetadata = GetMetadataForObject(model);
+            HttpActionContext context = ContextUtil.CreateActionContext();
+
+            ModelBindingContext bindingContext = new ModelBindingContext
+            {
+                ModelMetadata = containerMetadata,
+                ModelName = "theModel"
+            };
+
+            ComplexModelDto dto = new ComplexModelDto(containerMetadata, containerMetadata.Properties);
+            TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
+
+            // Make ValueTypeRequired invalid.
+            ModelMetadata propertyMetadata = dto.PropertyMetadata.Single(p => p.PropertyName == "ValueTypeRequired");
+            dto.Results[propertyMetadata] =
+                new ComplexModelDtoResult(null, new ModelValidationNode(propertyMetadata, "theModel.ValueTypeRequired"));
+
+            // Act
+            testableBinder.ProcessDto(context, bindingContext, dto);
+
+            // Assert
+            ModelStateDictionary modelStateDictionary = bindingContext.ModelState;
+            Assert.False(modelStateDictionary.IsValid);
+            Assert.Equal(1, modelStateDictionary.Count);
+
+            // Check ValueTypeRequired error.
+            ModelState modelState;
+            Assert.True(modelStateDictionary.TryGetValue("theModel.ValueTypeRequired", out modelState));
+            Assert.Equal(1, modelState.Errors.Count);
+
+            ModelError modelError = modelState.Errors[0];
+            Assert.Null(modelError.Exception);
+            Assert.NotNull(modelError.ErrorMessage);
+            Assert.Equal("Sample message", modelError.ErrorMessage);
         }
 
         [Fact]
@@ -655,6 +892,17 @@ namespace System.Web.Http.ModelBinding.Binders
             public string FirstName { get; set; }
             public string LastName { get; set; }
             public string NonUpdateableProperty { get; private set; }
+        }
+
+        private class ModelWithRequired
+        {
+            public string Name { get; set; }
+
+            [Required]
+            public int Age { get; set; }
+
+            [Required]
+            public string City { get; set; }
         }
 
         private class ModelWithBindRequired

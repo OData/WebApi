@@ -212,12 +212,31 @@ namespace System.Web.Http.ModelBinding.Binders
             HashSet<string> skipProperties;
             GetRequiredPropertiesCollection(actionContext, bindingContext, out requiredProperties, out requiredValidators, out skipProperties);
 
-            // Are all of the required fields accounted for?
-            HashSet<string> missingRequiredProperties = new HashSet<string>(requiredProperties.Except(dto.Results.Select(r => r.Key.PropertyName)));
-            foreach (string missingRequiredProperty in missingRequiredProperties)
+            // Eliminate provided properties from requiredProperties; leaving just *missing* required properties.
+            requiredProperties.ExceptWith(dto.Results.Select(r => r.Key.PropertyName));
+
+            foreach (string missingRequiredProperty in requiredProperties)
             {
-                string key = ModelBindingHelper.CreatePropertyModelName(bindingContext.ValidationNode.ModelStateKey, missingRequiredProperty);
-                bindingContext.ModelState.AddModelError(key, Error.Format(SRResources.MissingRequiredMember, missingRequiredProperty));
+                string modelStateKey = ModelBindingHelper.CreatePropertyModelName(
+                    bindingContext.ValidationNode.ModelStateKey, missingRequiredProperty);
+
+                // Update Model as SetProperty() would: Place null value where validator will check for non-null. This
+                // ensures a failure result from a required validator (if any) even for a non-nullable property.
+                // (Otherwise, propertyMetadata.Model is likely already null.)
+                ModelMetadata propertyMetadata = bindingContext.PropertyMetadata[missingRequiredProperty];
+                propertyMetadata.Model = null;
+
+                // Execute validator (if any) to get custom error message.
+                ModelValidator validator = requiredValidators[missingRequiredProperty];
+                bool addedError = RunValidator(validator, bindingContext, propertyMetadata, modelStateKey);
+
+                // Fall back to default message if HttpBindingBehaviorAttribute required this property or validator
+                // (oddly) succeeded.
+                if (!addedError)
+                {
+                    bindingContext.ModelState.AddModelError(modelStateKey,
+                        Error.Format(SRResources.MissingRequiredMember, missingRequiredProperty));
+                }
             }
 
             // for each property that was bound, call the setter, recording exceptions as necessary
@@ -254,13 +273,7 @@ namespace System.Web.Http.ModelBinding.Binders
                 string modelStateKey = dtoResult.ValidationNode.ModelStateKey;
                 if (bindingContext.ModelState.IsValidField(modelStateKey))
                 {
-                    if (requiredValidator != null)
-                    {
-                        foreach (ModelValidationResult validationResult in requiredValidator.Validate(propertyMetadata, bindingContext.Model))
-                        {
-                            bindingContext.ModelState.AddModelError(modelStateKey, validationResult.Message);
-                        }
-                    }
+                    RunValidator(requiredValidator, bindingContext, propertyMetadata, modelStateKey);
                 }
             }
 
@@ -289,6 +302,23 @@ namespace System.Web.Http.ModelBinding.Binders
                     dtoResult.ValidationNode.Validated += CreateNullCheckFailedHandler(propertyMetadata, value);
                 }
             }
+        }
+
+        // Returns true if validator execution adds a model error.
+        private static bool RunValidator(ModelValidator validator, ModelBindingContext bindingContext,
+            ModelMetadata propertyMetadata, string modelStateKey)
+        {
+            bool addedError = false;
+            if (validator != null)
+            {
+                foreach (ModelValidationResult validationResult in validator.Validate(propertyMetadata, bindingContext.Model))
+                {
+                    bindingContext.ModelState.AddModelError(modelStateKey, validationResult.Message);
+                    addedError = true;
+                }
+            }
+
+            return addedError;
         }
     }
 }

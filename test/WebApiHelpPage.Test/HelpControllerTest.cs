@@ -125,6 +125,31 @@ namespace WebApiHelpPageWebHost.UnitTest
         }
 
         [Theory]
+        [InlineData("WebApiHelpPageWebHost.UnitTest.Controllers.User")]
+        [InlineData("WebApiHelpPageWebHost.UnitTest.Controllers.Order")]
+        [InlineData("WebApiHelpPageWebHost.UnitTest.Controllers.Product")]
+        [InlineData("WebApiHelpPageWebHost.UnitTest.Controllers.Address")]
+        [InlineData("webapihelppagewebhost.unittest.controllers.user")]
+        [InlineData("WEBAPIHELPPAGEWEBHOST.UNITTEST.CONTROLLERS.ORDER")]
+        [InlineData("webApiHelpPageWebHost.UnitTest.Controllers.Product")]
+        [InlineData("WebApiHelpPageWebHost.unittest.Controllers.ADDRESS")]
+        public void ResourceModel_ReturnsCachedModels_UnusedParameters(string modelName)
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "{controller}/{unused}/{id}", new { id = RouteParameter.Optional });
+            HelpController controller = new HelpController(config);
+            ModelDescriptionGenerator modelDescriptionGenerator = config.GetModelDescriptionGenerator();
+            ModelDescription expectedModelDescription;
+            modelDescriptionGenerator.GeneratedModels.TryGetValue(modelName, out expectedModelDescription);
+
+            ViewResult result = Assert.IsType<ViewResult>(controller.ResourceModel(modelName));
+            ViewResult result2 = Assert.IsType<ViewResult>(controller.ResourceModel(modelName));
+
+            Assert.Same(expectedModelDescription, result.Model);
+            Assert.Same(result.Model, result2.Model);
+        }
+
+        [Theory]
         [InlineData("")]
         [InlineData(null)]
         [InlineData("@@@@@@@")]

@@ -1,6 +1,7 @@
 Imports System
 Imports System.Collections.Generic
 Imports System.Collections.ObjectModel
+Imports System.Diagnostics
 Imports System.Diagnostics.CodeAnalysis
 Imports System.Globalization
 Imports System.Linq
@@ -247,38 +248,62 @@ Namespace Areas.HelpPage
             Dim apiDescription As ApiDescription = apiModel.ApiDescription
             For Each apiParameter As ApiParameterDescription In apiDescription.ParameterDescriptions
                 If apiParameter.Source = ApiParameterSource.FromUri Then
-                    Dim parameterType As Type = apiParameter.ParameterDescriptor.ParameterType
+                    Dim parameterDescriptor As HttpParameterDescriptor = apiParameter.ParameterDescriptor
+                    Dim parameterType As Type = Nothing
+                    Dim typeDescription As ModelDescription = Nothing
+                    Dim complexTypeDescription As ComplexTypeModelDescription = Nothing
+                    If parameterDescriptor IsNot Nothing Then
+                        parameterType = parameterDescriptor.ParameterType
+                        typeDescription = modelGenerator.GetOrCreateModelDescription(parameterType)
+                        complexTypeDescription = TryCast(typeDescription, ComplexTypeModelDescription)
+                    End If
 
-                    Dim typeDescription As ModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType)
-                    Dim complexTypeDescription As ComplexTypeModelDescription = TryCast(typeDescription, ComplexTypeModelDescription)
                     If complexTypeDescription IsNot Nothing Then
                         For Each uriParameter As ParameterDescription In complexTypeDescription.Properties
                             apiModel.UriParameters.Add(uriParameter)
                         Next
-                    Else
-                        Dim uriParameter As New ParameterDescription() With {
-                            .Name = apiParameter.Name,
-                            .Documentation = apiParameter.Documentation,
-                            .TypeDescription = typeDescription
-                        }
-                        Dim parameterDescriptor As HttpParameterDescriptor = apiParameter.ParameterDescriptor
+                    ElseIf parameterDescriptor IsNot Nothing Then
+                        Dim uriParameter As ParameterDescription =
+                            AddParameterDescription(apiModel, apiParameter, typeDescription)
+
                         If Not parameterDescriptor.IsOptional Then
                             uriParameter.Annotations.Add(New ParameterAnnotation() With {
                                 .Documentation = "Required"
                             })
                         End If
+
                         Dim defaultValue As Object = parameterDescriptor.DefaultValue
                         If defaultValue IsNot Nothing Then
                             uriParameter.Annotations.Add(New ParameterAnnotation() With {
                                 .Documentation = "Default value is " & Convert.ToString(defaultValue, CultureInfo.InvariantCulture)
                             })
                         End If
-                        apiModel.UriParameters.Add(uriParameter)
+                    Else
+                        Debug.Assert(parameterDescriptor Is Nothing)
+
+                        '' If parameterDescriptor is Nothing, this is an undeclared route parameter which only occurs
+                        '' when source is FromUri. Ignored in request model and among resource parameters but listed
+                        '' as a simple string here.
+                        Dim modelDescription As ModelDescription =
+                            modelGenerator.GetOrCreateModelDescription(GetType(String))
+                        AddParameterDescription(apiModel, apiParameter, modelDescription)
                     End If
                 End If
             Next
         End Sub
 
+        Private Function AddParameterDescription(apiModel As HelpPageApiModel, apiParameter As ApiParameterDescription,
+                                                 typeDescription As ModelDescription) As ParameterDescription
+            Dim parameterDescription As New ParameterDescription() With
+            {
+                .Name = apiParameter.Name,
+                .Documentation = apiParameter.Documentation,
+                .TypeDescription = typeDescription
+            }
+
+            apiModel.UriParameters.Add(parameterDescription)
+            Return parameterDescription
+        End Function
 
         Private Sub GenerateRequestModelDescription(apiModel As HelpPageApiModel, modelGenerator As ModelDescriptionGenerator, sampleGenerator As HelpPageSampleGenerator)
             Dim apiDescription As ApiDescription = apiModel.ApiDescription
@@ -287,7 +312,8 @@ Namespace Areas.HelpPage
                     Dim parameterType As Type = apiParameter.ParameterDescriptor.ParameterType
                     apiModel.RequestModelDescription = modelGenerator.GetOrCreateModelDescription(parameterType)
                     apiModel.RequestDocumentation = apiParameter.Documentation
-                ElseIf apiParameter.ParameterDescriptor.ParameterType = GetType(HttpRequestMessage) Then
+                ElseIf apiParameter.ParameterDescriptor IsNot Nothing AndAlso
+                    apiParameter.ParameterDescriptor.ParameterType = GetType(HttpRequestMessage) Then
                     Dim parameterType As Type = sampleGenerator.ResolveHttpRequestMessageType(apiDescription)
 
                     If parameterType IsNot Nothing Then
@@ -325,7 +351,9 @@ Namespace Areas.HelpPage
         End Sub
 
         Private Function TryGetResourceParameter(apiDescription As ApiDescription, config As HttpConfiguration, ByRef parameterDescription As ApiParameterDescription, ByRef resourceType As Type) As Boolean
-            parameterDescription = apiDescription.ParameterDescriptions.FirstOrDefault(Function(p) p.Source = ApiParameterSource.FromBody OrElse p.ParameterDescriptor.ParameterType = GetType(HttpRequestMessage))
+            parameterDescription = apiDescription.ParameterDescriptions.FirstOrDefault(
+                Function(p) p.Source = ApiParameterSource.FromBody OrElse
+                    (p.ParameterDescriptor IsNot Nothing AndAlso p.ParameterDescriptor.ParameterType = GetType(HttpRequestMessage)))
 
             If parameterDescription Is Nothing Then
                 resourceType = Nothing

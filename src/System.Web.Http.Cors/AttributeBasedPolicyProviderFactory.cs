@@ -144,14 +144,12 @@ namespace System.Web.Http.Cors
                 };
             }
 
-            HttpControllerContext controllerContext = new HttpControllerContext
+            IHttpController controller = controllerDescriptor.CreateController(request);
+            using (controller as IDisposable)
             {
-                RequestContext = requestContext,
-                Request = request,
-                ControllerDescriptor = controllerDescriptor
-            };
-
-            return config.Services.GetActionSelector().SelectAction(controllerContext);
+                HttpControllerContext controllerContext = new HttpControllerContext(requestContext, request, controllerDescriptor, controller);
+                return config.Services.GetActionSelector().SelectAction(controllerContext);
+            }
         }
     }
 }

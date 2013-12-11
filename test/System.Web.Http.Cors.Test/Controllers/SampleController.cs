@@ -5,6 +5,8 @@ namespace System.Web.Http.Cors
     [EnableCors("*", "*", "*")]
     public class SampleController : ApiController
     {
+        public bool Disposed { get; private set; }
+
         public string Get()
         {
             return "value";
@@ -34,6 +36,12 @@ namespace System.Web.Http.Cors
         [EnableCors("http://example.com, http://localhost", "*", "*")]
         public void Put()
         {
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            Disposed = true;
+            base.Dispose(disposing);
         }
     }
 }

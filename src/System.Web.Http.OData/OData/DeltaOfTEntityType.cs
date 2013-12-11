@@ -80,6 +80,12 @@ namespace System.Web.Http.OData
         }
 
         /// <inheritdoc/>
+        public override IEnumerable<string> GetDynamicMemberNames()
+        {
+            return this._allProperties.Keys;
+        }
+
+        /// <inheritdoc/>
         public override bool TrySetPropertyValue(string name, object value)
         {
             if (name == null)

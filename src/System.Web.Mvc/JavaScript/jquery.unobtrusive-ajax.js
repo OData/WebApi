@@ -75,6 +75,7 @@
         duration = element.getAttribute("data-ajax-loading-duration") || 0;
 
         $.extend(options, {
+            context: element,
             type: element.getAttribute("data-ajax-method") || undefined,
             url: element.getAttribute("data-ajax-url") || undefined,
             beforeSend: function (xhr) {

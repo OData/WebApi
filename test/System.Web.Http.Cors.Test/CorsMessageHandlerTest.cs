@@ -143,6 +143,23 @@ namespace System.Web.Http.Cors
         }
 
         [Fact]
+        public void SendAsync_Preflight_ReturnsSoftNotFound_WhenControllerSelectionFails()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("default", "{controller}");
+            config.MessageHandlers.Add(new CorsMessageHandler(config));
+            HttpServer server = new HttpServer(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Options, "http://localhost/nomatch");
+            request.Headers.Add(CorsConstants.Origin, "http://localhost");
+            request.Headers.Add(CorsConstants.AccessControlRequestMethod, "POST");
+
+            HttpResponseMessage response = invoker.SendAsync(request, CancellationToken.None).Result;
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
         public void SendAsync_HandlesExceptions_ThrownDuringPreflight()
         {
             HttpConfiguration config = new HttpConfiguration();

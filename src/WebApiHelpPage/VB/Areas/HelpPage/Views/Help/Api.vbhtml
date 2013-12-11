@@ -8,7 +8,8 @@
     ViewData("Title") = description.HttpMethod.Method + " " + description.RelativePath
 End Code
 
-<div id="body">
+<link type="text/css" href="~/Areas/HelpPage/HelpPage.css" rel="stylesheet" />
+<div id="body" class="help-page">
     <section class="featured">
         <div class="content-wrapper">
             <p>
@@ -20,7 +21,3 @@ End Code
         @Html.DisplayForModel()
     </section>
 </div>
-
-@Section Scripts
-    <link type="text/css" href="~/Areas/HelpPage/HelpPage.css" rel="stylesheet" />
-End Section

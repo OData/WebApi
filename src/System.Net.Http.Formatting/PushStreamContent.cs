@@ -140,21 +140,21 @@ namespace System.Net.Http
             }
 
 #if NETFX_CORE
-            // In the non portable version, we don't want to close the inner stream as HttpContent will do that for us
-            // For the portable library version, we implement dispose in order to signal task completion
-            // since there is no Close on Stream. In that case we do want to dispose the inner stream since in
-            // client scenarios we can't rely on HttpContent.Dispose to do this for us since the stream is not
-            // necessarily owned by HttpContent.
+            [SuppressMessage(
+                "Microsoft.Usage", 
+                "CA2215:Dispose methods should call base class dispose", 
+                Justification = "See comments, this is intentional.")]
             protected override void Dispose(bool disposing)
             {
-                base.Dispose(disposing);
+                // We don't dispose the underlying stream because we don't own it. Dispose in this case just signifies
+                // that the user's action is finished.
                 _serializeToStreamTask.TrySetResult(true);
             }
 #else
             public override void Close()
             {
-                // Note we don't call close on the inner stream as the stream will get closed when this
-                // HttpContent instance is disposed.
+                // We don't Close the underlying stream because we don't own it. Dispose in this case just signifies
+                // that the user's action is finished.
                 _serializeToStreamTask.TrySetResult(true);
             }
 #endif

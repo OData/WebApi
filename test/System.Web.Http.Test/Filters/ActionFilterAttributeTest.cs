@@ -314,7 +314,7 @@ namespace System.Web.Http.Filters
         }
 
         [Fact]
-        public void ExecuteActionFilterAsync_IfOnActionExecutedDoesNotHandleExceptionFromContinuation_ReturnsFaultedTask()
+        public async Task ExecuteActionFilterAsync_IfOnActionExecutedDoesNotHandleExceptionFromContinuation_ReturnsFaultedTask()
         {
             // Arrange
             HttpActionContext context = ContextUtil.CreateActionContext();
@@ -331,16 +331,16 @@ namespace System.Web.Http.Filters
             });
 
             // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => TaskHelpers.FromError<HttpResponseMessage>(exception));
+            Exception result = await Assert.ThrowsAsync<Exception>(
+                () => filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => TaskHelpers.FromError<HttpResponseMessage>(exception))
+            );
 
             // Assert
-            result.WaitUntilCompleted();
-            Assert.True(result.IsFaulted);
-            Assert.Same(exception, result.Exception.InnerException);
+            Assert.Same(exception, result);
         }
 
         [Fact]
-        public void ExecuteActionFilterAsync_IfOnActionExecutedDoesHandleExceptionFromContinuation_ReturnsSuccessfulTask()
+        public async Task ExecuteActionFilterAsync_IfOnActionExecutedDoesHandleExceptionFromContinuation_ReturnsSuccessfulTask()
         {
             // Arrange
             HttpActionContext context = ContextUtil.CreateActionContext();
@@ -357,16 +357,17 @@ namespace System.Web.Http.Filters
             });
 
             // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => TaskHelpers.FromError<HttpResponseMessage>(new Exception("{ED525C8E-7165-4207-B3F6-4AB095739017}")));
+            HttpResponseMessage result = await filter.ExecuteActionFilterAsync(
+                                                        context, 
+                                                        CancellationToken.None, 
+                                                        () => TaskHelpers.FromError<HttpResponseMessage>(new Exception("{ED525C8E-7165-4207-B3F6-4AB095739017}")));
 
             // Assert
-            result.WaitUntilCompleted();
-            Assert.True(result.IsCompleted);
-            Assert.Same(newResponse, result.Result);
+            Assert.Same(newResponse, result);
         }
 
         [Fact]
-        public void ExecuteActionFilterAsync_IfOnActionExecutedThrowsException_ReturnsFaultedTask()
+        public async Task ExecuteActionFilterAsync_IfOnActionExecutedThrowsException_ReturnsFaultedTask()
         {
             // Arrange
             HttpActionContext context = ContextUtil.CreateActionContext();
@@ -383,16 +384,17 @@ namespace System.Web.Http.Filters
             });
 
             // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(new HttpResponseMessage()));
+            Exception actual = await Assert.ThrowsAsync<Exception>(
+                () => filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(new HttpResponseMessage()))
+            );
+            
 
             // Assert
-            result.WaitUntilCompleted();
-            Assert.True(result.IsFaulted);
-            Assert.Same(exception, result.Exception.InnerException);
+            Assert.Same(exception, actual);
         }
 
         [Fact]
-        public void ExecuteActionFilterAsync_IfOnActionExecutedSetsResult_ReturnsNewResult()
+        public async Task ExecuteActionFilterAsync_IfOnActionExecutedSetsResult_ReturnsNewResult()
         {
             // Arrange
             HttpActionContext context = ContextUtil.CreateActionContext();
@@ -409,16 +411,14 @@ namespace System.Web.Http.Filters
             });
 
             // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(new HttpResponseMessage()));
+            HttpResponseMessage result = await filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(new HttpResponseMessage()));
 
             // Assert
-            result.WaitUntilCompleted();
-            Assert.True(result.IsCompleted);
-            Assert.Same(newResponse, result.Result);
+            Assert.Same(newResponse, result);
         }
 
         [Fact]
-        public void ExecuteActionFilterAsync_IfOnActionExecutedDoesNotChangeResult_ReturnsSameResult()
+        public async Task ExecuteActionFilterAsync_IfOnActionExecutedDoesNotChangeResult_ReturnsSameResult()
         {
             // Arrange
             HttpActionContext context = ContextUtil.CreateActionContext();
@@ -435,12 +435,10 @@ namespace System.Web.Http.Filters
             });
 
             // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(response));
+            HttpResponseMessage result = await filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(response));
 
             // Assert
-            result.WaitUntilCompleted();
-            Assert.True(result.IsCompleted);
-            Assert.Same(response, result.Result);
+            Assert.Same(response, result);
         }
 
         [Fact]
@@ -460,20 +458,15 @@ namespace System.Web.Http.Filters
                 ec.Response = null;
             });
 
-            // Act
-            var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(response));
-
-            // Assert
-            result.WaitUntilCompleted();
-            Assert.Equal(TaskStatus.Faulted, result.Status);
-            Assert.IsException<InvalidOperationException>(
-                exception: result.Exception,
-                expectedMessage: "After calling ActionFilterAttributeProxy.OnActionExecuted, the HttpActionExecutedContext properties Result and Exception were both null. At least one of these values must be non-null. To provide a new response, please set the Result object; to indicate an error, please throw an exception."
+            // Act and Assert
+            Assert.Throws<InvalidOperationException>(
+                () => filter.ExecuteActionFilterAsync(context, CancellationToken.None, () => Task.FromResult(response)).Result,
+                "After calling ActionFilterAttributeProxy.OnActionExecuted, the HttpActionExecutedContext properties Result and Exception were both null. At least one of these values must be non-null. To provide a new response, please set the Result object; to indicate an error, please throw an exception."
             );
         }
 
         [Fact]
-        public void ExecuteActionFilterAsync_IfOnActionExecutedReplacesException_ThrowsNewException()
+        public async Task ExecuteActionFilterAsync_IfOnActionExecutedReplacesException_ThrowsNewException()
         {
             // Arrange
             Exception expectedReplacementException = CreateException();
@@ -492,21 +485,17 @@ namespace System.Web.Http.Filters
                     CreateFaultedTask<HttpResponseMessage>(CreateException());
 
                 // Act
-                Task<HttpResponseMessage> task = product.ExecuteActionFilterAsync(context, CancellationToken.None,
-                    continuation);
+                Exception exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                    () => product.ExecuteActionFilterAsync(context, CancellationToken.None, continuation)
+                );
 
                 // Assert
-                Assert.NotNull(task);
-                task.WaitUntilCompleted();
-                Assert.Equal(TaskStatus.Faulted, task.Status);
-                Assert.NotNull(task.Exception);
-                Exception exception = task.Exception.GetBaseException();
                 Assert.Same(expectedReplacementException, exception);
             }
         }
 
         [Fact]
-        public void ExecuteActionFilterAsync_IfFaultedTaskExceptionIsUnhandled_PreservesExceptionStackTrace()
+        public async Task ExecuteActionFilterAsync_IfFaultedTaskExceptionIsUnhandled_PreservesExceptionStackTrace()
         {
             // Arrange
             Exception originalException = CreateExceptionWithStackTrace();
@@ -520,18 +509,12 @@ namespace System.Web.Http.Filters
                     originalException);
 
                 // Act
-                Task<HttpResponseMessage> task = product.ExecuteActionFilterAsync(context, CancellationToken.None,
-                    continuation);
+                Exception exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                    () => product.ExecuteActionFilterAsync(context, CancellationToken.None, continuation)
+                );
 
                 // Assert
-                Assert.NotNull(task);
-                task.WaitUntilCompleted();
-                Assert.Equal(TaskStatus.Faulted, task.Status);
-                Assert.NotNull(task.Exception);
-                Exception exception = task.Exception.GetBaseException();
                 Assert.NotNull(expectedStackTrace);
-                Assert.NotNull(exception);
-                Assert.NotNull(exception.StackTrace);
                 Assert.True(exception.StackTrace.StartsWith(expectedStackTrace));
             }
         }
@@ -559,9 +542,7 @@ namespace System.Web.Http.Filters
 
         private static Task<T> CreateFaultedTask<T>(Exception exception)
         {
-            TaskCompletionSource<T> source = new TaskCompletionSource<T>();
-            source.SetException(exception);
-            return source.Task;
+            return TaskHelpers.FromError<T>(exception);
         }
 
         public class TestableActionFilter : ActionFilterAttribute

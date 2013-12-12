@@ -15,29 +15,28 @@ namespace System.Web.Http
         }
 
         [Fact]
+        [ReplaceCulture]
         public void Constructor_SetsResponseProperty()
         {
+            // Arrange and Act
             var response = new HttpResponseMessage();
-
             var exception = new HttpResponseException(response);
 
+            // Assert
             Assert.Same(response, exception.Response);
-            if (Assert.CurrentCultureIsEnglish)
-            {
-                Assert.Equal("Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the 'Response' property of this exception for details.", exception.Message);
-            }
+            Assert.Equal("Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the 'Response' property of this exception for details.", exception.Message);
         }
 
         [Fact]
+        [ReplaceCulture]
         public void Constructor_SetsResponsePropertyWithGivenStatusCode()
         {
+            // Arrange and Act
             var exception = new HttpResponseException(HttpStatusCode.BadGateway);
 
+            // Assert
             Assert.Equal(HttpStatusCode.BadGateway, exception.Response.StatusCode);
-            if (Assert.CurrentCultureIsEnglish)
-            {
-                Assert.Equal("Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the 'Response' property of this exception for details.", exception.Message);
-            }
+            Assert.Equal("Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the 'Response' property of this exception for details.", exception.Message);
         }
     }
 }

@@ -3,12 +3,14 @@
 using System;
 using System.Globalization;
 using System.Threading;
-using Microsoft.TestCommon;
 
 namespace Microsoft.TestCommon
 {
     public class CultureReplacer : IDisposable
     {
+        private const string _defaultCultureName = "en-GB";
+        private const string _defaultUICultureName = "en-US";
+        private static readonly CultureInfo _defaultCulture = CultureInfo.GetCultureInfo(_defaultCultureName);
         private readonly CultureInfo _originalCulture;
         private readonly CultureInfo _originalUICulture;
         private readonly long _threadId;
@@ -17,7 +19,7 @@ namespace Microsoft.TestCommon
         // We want to be able to find issues where the InvariantCulture is used, but a specific culture should be.
         //
         // UICulture => Language
-        public CultureReplacer(string culture = "en-GB", string uiCulture = "en-US")
+        public CultureReplacer(string culture = _defaultCultureName, string uiCulture = _defaultUICultureName)
         {
             _originalCulture = Thread.CurrentThread.CurrentCulture;
             _originalUICulture = Thread.CurrentThread.CurrentUICulture;
@@ -25,6 +27,30 @@ namespace Microsoft.TestCommon
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo(culture);
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(uiCulture);
+        }
+
+        /// <summary>
+        /// The name of the culture that is used as the default value for Thread.CurrentCulture when CultureReplacer is used.
+        /// </summary>
+        public static string DefaultCultureName
+        {
+            get { return _defaultCultureName; }
+        }
+
+        /// <summary>
+        /// The name of the culture that is used as the default value for Thread.UICurrentCulture when CultureReplacer is used.
+        /// </summary>
+        public static string DefaultUICultureName
+        {
+            get { return _defaultUICultureName; }
+        }
+
+        /// <summary>
+        /// The culture that is used as the default value for Thread.CurrentCulture when CultureReplacer is used.
+        /// </summary>
+        public static CultureInfo DefaultCulture
+        {
+            get { return _defaultCulture; }
         }
 
         public void Dispose()

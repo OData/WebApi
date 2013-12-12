@@ -18,8 +18,8 @@ namespace Microsoft.TestCommon
 
         public ReplaceCultureAttribute()
         {
-            Culture = "en-GB";
-            UICulture = "en-US";
+            Culture = CultureReplacer.DefaultCultureName;
+            UICulture = CultureReplacer.DefaultUICultureName;
         }
 
         /// <summary>

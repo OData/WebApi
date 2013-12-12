@@ -2,90 +2,14 @@
 
 using System;
 using System.ComponentModel;
-using System.Globalization;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace Microsoft.TestCommon
 {
     public partial class Assert
     {
-        /// <summary>
-        /// Determines if your thread's current culture and current UI culture is English.
-        /// </summary>
-        public static bool CurrentCultureIsEnglish
-        {
-            get
-            {
-                return String.Equals(CultureInfo.CurrentCulture.TwoLetterISOLanguageName, "en", StringComparison.OrdinalIgnoreCase)
-                    && String.Equals(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, "en", StringComparison.OrdinalIgnoreCase);
-            }
-        }
-
-        /// <summary>
-        /// Determines whether the specified exception is of the given type (or optionally of a derived type).
-        /// The exception is not allowed to be null;
-        /// </summary>
-        /// <param name="exceptionType">The type of the exception to test for.</param>
-        /// <param name="exception">The exception to be tested.</param>
-        /// <param name="expectedMessage">The expected exception message (only verified on US English OSes).</param>
-        /// <param name="allowDerivedExceptions">Pass true to allow exceptions which derive from TException; pass false, otherwise</param>
-        public static void IsException(Type exceptionType, Exception exception, string expectedMessage = null, bool allowDerivedExceptions = false)
-        {
-            exception = UnwrapException(exception);
-            NotNull(exception);
-
-            if (allowDerivedExceptions)
-                IsAssignableFrom(exceptionType, exception);
-            else
-                IsType(exceptionType, exception);
-
-            VerifyExceptionMessage(exception, expectedMessage, partialMatch: false);
-        }
-
-        /// <summary>
-        /// Determines whether the specified exception is of the given type (or optionally of a derived type).
-        /// The exception is not allowed to be null;
-        /// </summary>
-        /// <typeparam name="TException">The type of the exception to test for.</typeparam>
-        /// <param name="exception">The exception to be tested.</param>
-        /// <param name="expectedMessage">The expected exception message (only verified on US English OSes).</param>
-        /// <param name="allowDerivedExceptions">Pass true to allow exceptions which derive from TException; pass false, otherwise</param>
-        /// <returns>The exception cast to TException.</returns>
-        public static TException IsException<TException>(Exception exception, string expectedMessage = null, bool allowDerivedExceptions = false)
-            where TException : Exception
-        {
-            TException result;
-
-            exception = UnwrapException(exception);
-            NotNull(exception);
-
-            if (allowDerivedExceptions)
-                result = IsAssignableFrom<TException>(exception);
-            else
-                result = IsType<TException>(exception);
-
-            VerifyExceptionMessage(exception, expectedMessage, partialMatch: false);
-            return result;
-        }
-
-        // We've re-implemented all the xUnit.net Throws code so that we can get this
-        // updated implementation of RecordException which silently unwraps any instances
-        // of AggregateException. This lets our tests better simulate what "await" would do
-        // and thus makes them easier to port to .NET 4.5.
-        private static Exception RecordException(Action testCode)
-        {
-            try
-            {
-                testCode();
-                return null;
-            }
-            catch (Exception exception)
-            {
-                return UnwrapException(exception);
-            }
-        }
-
         /// <summary>
         /// Verifies that the exact exception is thrown (and not a derived exception type).
         /// </summary>
@@ -123,14 +47,7 @@ namespace Microsoft.TestCommon
         public static Exception Throws(Type exceptionType, Action testCode)
         {
             Exception exception = RecordException(testCode);
-
-            if (exception == null)
-                throw new ThrowsException(exceptionType);
-
-            if (!exceptionType.Equals(exception.GetType()))
-                throw new ThrowsException(exceptionType, exception);
-
-            return exception;
+            return VerifyException(exceptionType, exception);
         }
 
         /// <summary>
@@ -143,7 +60,7 @@ namespace Microsoft.TestCommon
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
         public static Exception Throws(Type exceptionType, Func<object> testCode)
         {
-            return Throws(exceptionType, () => { object unused = testCode(); });
+            return Throws(exceptionType, () => { testCode(); });
         }
 
         /// <summary>
@@ -197,7 +114,7 @@ namespace Microsoft.TestCommon
 
         /// <summary>
         /// Verifies that an exception of the given type (or optionally a derived type) is thrown.
-        /// Also verified that the exception message matches if the current thread locale is English.
+        /// Also verifies that the exception message matches.
         /// </summary>
         /// <typeparam name="TException">The type of the exception expected to be thrown</typeparam>
         /// <param name="testCode">A delegate to the code to be tested</param>
@@ -215,7 +132,7 @@ namespace Microsoft.TestCommon
 
         /// <summary>
         /// Verifies that an exception of the given type (or optionally a derived type) is thrown.
-        /// Also verified that the exception message matches if the current thread locale is English.
+        /// Also verified that the exception message matches.
         /// </summary>
         /// <typeparam name="TException">The type of the exception expected to be thrown</typeparam>
         /// <param name="testCode">A delegate to the code to be tested</param>
@@ -349,10 +266,15 @@ namespace Microsoft.TestCommon
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
         public static ArgumentOutOfRangeException ThrowsArgumentOutOfRange(Action testCode, string paramName, string exceptionMessage, bool allowDerivedExceptions = false, object actualValue = null)
         {
-            exceptionMessage = exceptionMessage != null
-                                   ? exceptionMessage + "\r\nParameter name: " + paramName +
-                                       (actualValue != null ? "\r\nActual value was " + actualValue.ToString() + "." : "")
-                                   : exceptionMessage;
+            if (exceptionMessage != null)
+            {
+                exceptionMessage = exceptionMessage + "\r\nParameter name: " + paramName;
+                if (actualValue != null)
+                {
+                    exceptionMessage += String.Format(CultureReplacer.DefaultCulture, "\r\nActual value was {0}.", actualValue);
+                }
+            }
+
             var ex = Throws<ArgumentOutOfRangeException>(testCode, exceptionMessage, allowDerivedExceptions);
 
             if (paramName != null)
@@ -375,7 +297,10 @@ namespace Microsoft.TestCommon
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
         public static ArgumentOutOfRangeException ThrowsArgumentGreaterThan(Action testCode, string paramName, string value, object actualValue = null)
         {
-            return ThrowsArgumentOutOfRange(testCode, paramName, String.Format("Value must be greater than {0}.", value), false, actualValue);
+            return ThrowsArgumentOutOfRange(
+                        testCode,
+                        paramName,
+                        String.Format(CultureReplacer.DefaultCulture, "Value must be greater than {0}.", value), false, actualValue);
         }
 
         /// <summary>
@@ -389,7 +314,10 @@ namespace Microsoft.TestCommon
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
         public static ArgumentOutOfRangeException ThrowsArgumentGreaterThanOrEqualTo(Action testCode, string paramName, string value, object actualValue = null)
         {
-            return ThrowsArgumentOutOfRange(testCode, paramName, String.Format("Value must be greater than or equal to {0}.", value), false, actualValue);
+            return ThrowsArgumentOutOfRange(
+                        testCode,
+                        paramName,
+                        String.Format(CultureReplacer.DefaultCulture, "Value must be greater than or equal to {0}.", value), false, actualValue);
         }
 
         /// <summary>
@@ -404,7 +332,10 @@ namespace Microsoft.TestCommon
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
         public static ArgumentOutOfRangeException ThrowsArgumentLessThan(Action testCode, string paramName, string maxValue, object actualValue = null)
         {
-            return ThrowsArgumentOutOfRange(testCode, paramName, String.Format("Value must be less than {0}.", maxValue), false, actualValue);
+            return ThrowsArgumentOutOfRange(
+                        testCode,
+                        paramName,
+                        String.Format(CultureReplacer.DefaultCulture, "Value must be less than {0}.", maxValue), false, actualValue);
         }
 
         /// <summary>
@@ -419,7 +350,10 @@ namespace Microsoft.TestCommon
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
         public static ArgumentOutOfRangeException ThrowsArgumentLessThanOrEqualTo(Action testCode, string paramName, string maxValue, object actualValue = null)
         {
-            return ThrowsArgumentOutOfRange(testCode, paramName, String.Format("Value must be less than or equal to {0}.", maxValue), false, actualValue);
+            return ThrowsArgumentOutOfRange(
+                        testCode,
+                        paramName,
+                        String.Format(CultureReplacer.DefaultCulture, "Value must be less than or equal to {0}.", maxValue), false, actualValue);
         }
 
         /// <summary>
@@ -450,11 +384,10 @@ namespace Microsoft.TestCommon
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
         public static InvalidEnumArgumentException ThrowsInvalidEnumArgument(Action testCode, string paramName, int invalidValue, Type enumType, bool allowDerivedExceptions = false)
         {
-            return Throws<InvalidEnumArgumentException>(
-                testCode,
-                String.Format("The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.{3}Parameter name: {0}", paramName, invalidValue, enumType.Name, Environment.NewLine),
-                allowDerivedExceptions
-            );
+            string message = String.Format(CultureReplacer.DefaultCulture,
+                                           "The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.{3}Parameter name: {0}",
+                                           paramName, invalidValue, enumType.Name, Environment.NewLine);
+            return Throws<InvalidEnumArgumentException>(testCode, message, allowDerivedExceptions);
         }
 
         /// <summary>
@@ -477,6 +410,56 @@ namespace Microsoft.TestCommon
             return ex;
         }
 
+        /// <summary>
+        /// Verifies that an exception of the given type is thrown.
+        /// </summary>
+        /// <typeparam name="TException">The type of the exception expected to be thrown</typeparam>
+        /// <param name="testCode">A delegate to the code to be tested</param>
+        /// <returns>The exception that was thrown, when successful</returns>
+        /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
+        /// <remarks>
+        /// Unlike other Throws* methods, this method does not enforce running the exception delegate with a known Thread Culture.
+        /// </remarks>
+        public static async Task<TException> ThrowsAsync<TException>(Func<Task> testCode)
+            where TException : Exception
+        {
+            Exception exception = null;
+            try
+            {
+                // The 'testCode' Task might execute asynchronously in a different thread making it hard to enforce the thread culture.
+                // The correct way to verify exception messages in such a scenario would be to run the task synchronously inside of a 
+                // culture enforced block.
+                await testCode();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+            VerifyException(typeof(TException), exception);
+            return (TException)exception;
+        }
+
+        // We've re-implemented all the xUnit.net Throws code so that we can get this 
+        // updated implementation of RecordException which silently unwraps any instances
+        // of AggregateException. In addition to unwrapping exceptions, this method ensures 
+        // that tests are executed in with a known set of Culture and UICulture. This prevents
+        // tests from failing when executed on a non-English machine. 
+        private static Exception RecordException(Action testCode)
+        {
+            try
+            {
+                using (new CultureReplacer())
+                {
+                    testCode();
+                }
+                return null;
+            }
+            catch (Exception exception)
+            {
+                return UnwrapException(exception);
+            }
+        }
+
         private static Exception UnwrapException(Exception exception)
         {
             AggregateException aggEx = exception as AggregateException;
@@ -487,9 +470,23 @@ namespace Microsoft.TestCommon
             return exception;
         }
 
+        private static Exception VerifyException(Type exceptionType, Exception exception)
+        {
+            if (exception == null)
+            {
+                throw new ThrowsException(exceptionType);
+            }
+            else if (exceptionType != exception.GetType())
+            {
+                throw new ThrowsException(exceptionType, exception);
+            }
+
+            return exception;
+        }
+
         private static void VerifyExceptionMessage(Exception exception, string expectedMessage, bool partialMatch = false)
         {
-            if (expectedMessage != null && CurrentCultureIsEnglish)
+            if (expectedMessage != null)
             {
                 if (!partialMatch)
                 {

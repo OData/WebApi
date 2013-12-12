@@ -2,6 +2,7 @@
 
 using System.IO;
 using System.Net.Http.Formatting;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Moq;
@@ -59,15 +60,9 @@ namespace System.Net.Http
                     Assert.True(streamAction.WasInvoked);
                     Assert.Same(content, streamAction.Content);
                     Assert.IsType<PushStreamContent.CompleteTaskOnCloseStream>(streamAction.OutputStream);
-#if NETFX_CORE
-                    // In portable libraries, we expect the dispose to be called because we passed close: true above
-                    // on netfx45, we let the HttpContent call close on the stream.
-                    // CompleteTaskOnCloseStream for this reason does not dispose the innerStream when close is called
-                    Assert.False(outputStream.CanRead);
-#else
-                    Assert.True(outputStream.CanRead);
-#endif
 
+                    // We don't close the underlying stream
+                    Assert.True(outputStream.CanRead);
                 });
         }
 
@@ -93,13 +88,8 @@ namespace System.Net.Http
         }
 
 #if NETFX_CORE
-        // In the non portable version, we don't want to close the inner stream as HttpContent will do that for us
-        // For the portable library version, we implement dispose in order to signal task completion
-        // since there is no Close on Stream. In that case we do want to dispose the inner stream since in
-        // client scenarios we can't rely on HttpContent.Dispose to do this for us since the stream is not
-        // necessarily owned by HttpContent.
         [Fact]
-        public void CompleteTaskOnCloseStream_Dispose_CompletesTaskAndClosesInnerStream()
+        public void CompleteTaskOnCloseStream_Dispose_CompletesTaskButDoNotDisposeInnerStream()
         {
             // Arrange
             Mock<Stream> mockInnerStream = new Mock<Stream>() { CallBase = true };
@@ -110,7 +100,7 @@ namespace System.Net.Http
             mockStream.Dispose();
 
             // Assert
-            mockInnerStream.Protected().Verify("Dispose", Times.Once(), true);
+            mockInnerStream.Protected().Verify("Dispose", Times.Never(), true);
             Assert.Equal(TaskStatus.RanToCompletion, serializeToStreamTask.Task.Status);
             Assert.True(serializeToStreamTask.Task.Result);
         }
@@ -151,6 +141,7 @@ namespace System.Net.Http
             Assert.True(serializeToStreamTask.Task.Result);
         }
 #endif
+
         [Fact]
         public async Task PushStreamContentWithAsyncOnStreamAvailableHandler_ExceptionsInOnStreamAvailable_AreCaught()
         {
@@ -177,6 +168,38 @@ namespace System.Net.Http
 
             // Assert
             Assert.True(faulted);
+        }
+
+        [Fact]
+        public async Task PushStream_HttpContentIntegrationTest()
+        {
+            // Arrange
+            var expected = "Hello, world!";
+
+            using (var client = new MockHttpClient())
+            {
+                // We mock the client, so this doesn't actually hit the web. This client will just echo back
+                // the body content we give it.
+                using (var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:30000/"))
+                {
+                    request.Content = new PushStreamContent((stream, content, context) =>
+                    {
+                        using (var writer = new StreamWriter(stream))
+                        {
+                            writer.Write(expected);
+                        }
+                    }, "text/plain");
+
+                    // Act
+                    using (var response = await client.SendAsync(request, CancellationToken.None))
+                    {
+                        // Assert
+                        response.EnsureSuccessStatusCode();
+                        var responseText = await response.Content.ReadAsStringAsync();
+                        Assert.Equal(expected, responseText);
+                    }
+                }
+            }
         }
 
         private class MockStreamAction
@@ -226,6 +249,21 @@ namespace System.Net.Http
             public MockCompleteTaskOnCloseStream(Stream innerStream, TaskCompletionSource<bool> serializeToStreamTask)
                 : base(innerStream, serializeToStreamTask)
             {
+            }
+        }
+
+        private class MockHttpClient : HttpClient
+        {
+            public override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Threading.CancellationToken cancellationToken)
+            {
+                var stream = new MemoryStream();
+                await request.Content.CopyToAsync(stream);
+                stream.Position = 0;
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StreamContent(stream),
+                };
             }
         }
     }

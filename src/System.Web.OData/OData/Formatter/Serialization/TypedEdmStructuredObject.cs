@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Web.Http.Internal;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,9 +10,9 @@ using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.Routing.Conventions;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using SelectExpandClause = Microsoft.Data.OData.Query.SemanticAst.SelectExpandClause;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using SelectExpandClause = Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause;
 
 namespace System.Net.Http
 {
@@ -33,7 +33,7 @@ namespace System.Net.Http
         private const string SelectExpandClauseKey = "MS_SelectExpandClause";
         private const string RoutingConventionDataStoreKey = "MS_RoutingConventionDataStore";
 
-        private const string ODataMaxServiceVersion = "MaxDataServiceVersion";
+        private const string ODataMaxServiceVersion = "OData-MaxVersion";
 
         /// <summary>
         /// Retrieves the EDM model associated with the request.
@@ -228,9 +228,9 @@ namespace System.Net.Http
         {
             // OData protocol requires that you send the minimum version that the client needs to know to understand the response.
             // There is no easy way we can figure out the minimum version that the client needs to understand our response. We send response headers much ahead
-            // generating the response. So if the requestMessage has a MaxDataServiceVersion, tell the client that our response is of the same version; Else use
+            // generating the response. So if the requestMessage has a OData-MaxVersion, tell the client that our response is of the same version; Else use
             // the DataServiceVersionHeader. Our response might require a higher version of the client and it might fail.
-            // If the client doesn't send these headers respond with the default version (V3).
+            // If the client doesn't send these headers respond with the default version (V4).
             return GetODataVersionFromHeaders(request.Headers, ODataMaxServiceVersion, ODataMediaTypeFormatter.ODataServiceVersion) ?? ODataMediaTypeFormatter.DefaultODataVersion;
         }
 

@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Http.OData.Builder.Conventions;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 
 namespace System.Web.Http.OData.Formatter
 {
@@ -78,7 +78,7 @@ namespace System.Web.Http.OData.Formatter
                 // base64 decode
                 byte[] bytes = Convert.FromBase64String(rawValue);
                 string valueString = Encoding.UTF8.GetString(bytes);
-                object obj = ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V3);
+                object obj = ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V4);
                 if (obj is ODataUriNullValue)
                 {
                     obj = null;

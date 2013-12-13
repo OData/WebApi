@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
 using System.Net.Http;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Web.Http.OData.Batch;
 using System.Web.Http.OData.Formatter;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http

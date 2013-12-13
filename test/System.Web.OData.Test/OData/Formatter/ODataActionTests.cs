@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Net.Http.Headers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.TestCommon;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -59,21 +59,16 @@ namespace System.Web.Http.OData.Formatter
         {
             string editLink = "http://localhost/Customers(1)";
             string expectedTarget = editLink + "/DoSomething";
-            string expectedMetadata = "http://localhost/$metadata#Container.DoSomething";
+            string expectedMetadata = "#org.odata.DoSomething";
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, editLink);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             HttpResponseMessage response = _client.SendAsync(request).Result;
             string responseString = response.Content.ReadAsStringAsync().Result;
 
             dynamic result = JObject.Parse(responseString);
-            result = result.d.__metadata.actions;
 
-            JObject allActions = result as JObject;
-            JArray doSomethings = allActions[expectedMetadata] as JArray;
-            Assert.NotNull(doSomethings);
-            Assert.Equal(1, doSomethings.Count);
-            dynamic doSomething = doSomethings[0];
+            dynamic doSomething = result[expectedMetadata];
             Assert.NotNull(doSomething);
             Assert.Equal(expectedTarget, (string)doSomething.target);
             Assert.Equal("DoSomething", (string)doSomething.title);

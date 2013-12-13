@@ -1,24 +1,24 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing
 {
     internal static class ProcedureHelpers
     {
-        public static IEdmFunctionImport FindAction(this IEdmEntityContainer container,
+        public static IEdmActionImport FindAction(this IEdmEntityContainer container,
             string actionIdentifier, IEdmType bindingParameterType)
         {
             Contract.Assert(container != null);
             Contract.Assert(actionIdentifier != null);
 
-            IEnumerable<IEdmFunctionImport> matches =
-                container.FunctionImports()
-                .GetMatchingProcedures(actionIdentifier, bindingParameterType, isSideEffecting: true);
+            IEnumerable<IEdmOperationImport> matchedOperations = container.OperationImports()
+                         .GetMatchingProcedures(actionIdentifier, bindingParameterType, isAction: true);
+            IEnumerable<IEdmActionImport> matches = matchedOperations.OfType<IEdmActionImport>();
 
             if (bindingParameterType != null)
             {
@@ -34,7 +34,7 @@ namespace System.Web.Http.OData.Routing
             }
             else
             {
-                IEdmFunctionImport[] matchesArray = matches.ToArray();
+                IEdmActionImport[] matchesArray = matches.ToArray();
                 if (matchesArray.Length > 1)
                 {
                     string message = String.Join(", ", matchesArray.Select(match => match.Container.FullName() + "." + match.Name));
@@ -57,17 +57,18 @@ namespace System.Web.Http.OData.Routing
             Contract.Assert(container != null);
             Contract.Assert(functionIdentifier != null);
 
-            return container.FunctionImports()
-                .GetMatchingProcedures(functionIdentifier, bindingParameterType, isSideEffecting: false);
+            IEnumerable<IEdmOperationImport> procedures = container.OperationImports()
+                .GetMatchingProcedures(functionIdentifier, bindingParameterType, isAction: false);
+            return procedures.OfType<IEdmFunctionImport>();
         }
 
-        private static IEnumerable<IEdmFunctionImport> GetMatchingProcedures(this IEnumerable<IEdmFunctionImport> procedures,
-            string procedureIdentifier, IEdmType bindingParameterType, bool isSideEffecting)
+        private static IEnumerable<IEdmOperationImport> GetMatchingProcedures(this IEnumerable<IEdmOperationImport> procedures,
+            string procedureIdentifier, IEdmType bindingParameterType, bool isAction)
         {
             Contract.Assert(procedures != null);
             Contract.Assert(procedureIdentifier != null);
 
-            procedures = procedures.Where(p => p.IsSideEffecting == isSideEffecting);
+            procedures = procedures.Where(p => p.IsActionImport() == isAction);
 
             string[] nameParts = procedureIdentifier.Split('.');
             Contract.Assert(nameParts.Length != 0);
@@ -100,24 +101,25 @@ namespace System.Web.Http.OData.Routing
             }
             else
             {
-                procedures = procedures.Where(procedure => !procedure.IsBindable);
+                procedures = procedures.Where(procedure => !procedure.Operation.IsBound);
             }
 
             return procedures;
         }
 
-        private static bool CanBindTo(this IEdmFunctionImport function, IEdmType type)
+        private static bool CanBindTo(this IEdmOperationImport operation, IEdmType type)
         {
-            Contract.Assert(function != null);
+            Contract.Assert(operation != null);
             Contract.Assert(type != null);
 
-            if (!function.IsBindable)
+            IEdmOperation edmOperation = operation.Operation;
+            if (edmOperation == null || !edmOperation.IsBound)
             {
                 return false;
             }
 
             // The binding parameter is the first parameter by convention
-            IEdmFunctionParameter bindingParameter = function.Parameters.FirstOrDefault();
+            IEdmOperationParameter bindingParameter = edmOperation.Parameters.FirstOrDefault();
             if (bindingParameter == null)
             {
                 return false;
@@ -152,7 +154,7 @@ namespace System.Web.Http.OData.Routing
         // cannot be multiple bindable actions with same name and different sets of non-bindable paramters. 
         // The resolution logic is simple and is dependant only on the binding parameter and choses the action that is defined
         // closest to the binding parameter in the inheritance hierarchy.
-        private static IEdmFunctionImport FindBest(string actionIdentifier, IEnumerable<IEdmFunctionImport> bindableActions,
+        private static IEdmActionImport FindBest(string actionIdentifier, IEnumerable<IEdmActionImport> bindableActions,
             IEdmEntityType bindingParameterType, bool isCollection)
         {
             if (bindingParameterType == null)
@@ -160,10 +162,10 @@ namespace System.Web.Http.OData.Routing
                 return null;
             }
 
-            List<IEdmFunctionImport> actionsBoundToThisType = new List<IEdmFunctionImport>();
-            foreach (IEdmFunctionImport action in bindableActions)
+            List<IEdmActionImport> actionsBoundToThisType = new List<IEdmActionImport>();
+            foreach (IEdmActionImport action in bindableActions)
             {
-                IEdmType actionParameterType = action.Parameters.First().Type.Definition;
+                IEdmType actionParameterType = action.Action.Parameters.First().Type.Definition;
                 if (isCollection)
                 {
                     actionParameterType = ((IEdmCollectionType)actionParameterType).ElementType.Definition;

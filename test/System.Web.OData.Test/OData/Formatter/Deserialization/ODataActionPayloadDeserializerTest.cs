@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -10,8 +10,8 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon;
 using System.Web.Http.OData.TestCommon.Models;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -84,8 +84,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             Assert.NotNull(payload);
             Assert.Same(
-                model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "Primitive"),
-                ODataActionPayloadDeserializer.GetFunctionImport(context));
+                model.EntityContainers().Single().OperationImports().SingleOrDefault(f => f.Name == "Primitive"),
+                ODataActionPayloadDeserializer.GetActionImport(context));
             Assert.True(payload.ContainsKey("Quantity"));
             Assert.Equal(quantity, payload["Quantity"]);
             Assert.True(payload.ContainsKey("ProductCode"));
@@ -110,8 +110,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             Assert.NotNull(payload);
             Assert.Same(
-                model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "Complex"),
-                ODataActionPayloadDeserializer.GetFunctionImport(context));
+                model.EntityContainers().Single().OperationImports().SingleOrDefault(f => f.Name == "Complex"),
+                ODataActionPayloadDeserializer.GetActionImport(context));
             Assert.True(payload.ContainsKey("Quantity"));
             Assert.Equal(1, payload["Quantity"]);
             Assert.True(payload.ContainsKey("Address"));
@@ -124,11 +124,15 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
-        void Can_Deserialize_PrimitiveCollections_InUntypedMode()
+        public void Can_Deserialize_PrimitiveCollections_InUntypedMode()
         {
             // Arrange
             IEdmModel model = GetModel();
-            IEdmFunctionImport action = model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "PrimitiveCollection");
+            IEdmActionImport action = model.EntityContainers()
+                .Single()
+                .OperationImports()
+                .SingleOrDefault(o => o.Name == "PrimitiveCollection") as IEdmActionImport;
+            Assert.NotNull(action);
             string body = @"{ ""Name"": ""Avatar"", ""Ratings"": [ 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 ] }";
             int[] expectedRatings = new int[] { 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 };
             ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(body));
@@ -146,8 +150,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             //Assert
             Assert.NotNull(payload);
             Assert.Same(
-                model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "PrimitiveCollection"),
-                ODataActionPayloadDeserializer.GetFunctionImport(context));
+                model.EntityContainers()
+                     .Single()
+                     .OperationImports()
+                     .SingleOrDefault(f => f.Name == "PrimitiveCollection") as IEdmActionImport,
+                ODataActionPayloadDeserializer.GetActionImport(context));
             Assert.True(payload.ContainsKey("Name"));
             Assert.Equal("Avatar", payload["Name"]);
             Assert.True(payload.ContainsKey("Ratings"));
@@ -157,11 +164,13 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
-        void Can_Deserialize_ComplexCollections_InUntypedMode()
+        public void Can_Deserialize_ComplexCollections_InUntypedMode()
         {
             //Arrange
             IEdmModel model = GetModel();
-            IEdmFunctionImport action = model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "ComplexCollection");
+            IEdmActionImport action =
+                model.EntityContainers().Single().OperationImports().SingleOrDefault(f => f.Name == "ComplexCollection")
+                as IEdmActionImport;
             string body = @"{ ""Name"": ""Avatar"" , ""Addresses"": [{ ""StreetAddress"":""1 Microsoft Way"", ""City"": ""Redmond"", ""State"": ""WA"", ""ZipCode"": 98052 }] }";
 
             ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(body));
@@ -178,8 +187,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             //Assert
             Assert.NotNull(payload);
             Assert.Same(
-                model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "ComplexCollection"),
-                ODataActionPayloadDeserializer.GetFunctionImport(context));
+                model.EntityContainers().Single().OperationImports().SingleOrDefault(f => f.Name == "ComplexCollection") as IEdmActionImport,
+                ODataActionPayloadDeserializer.GetActionImport(context));
             Assert.True(payload.ContainsKey("Name"));
             Assert.Equal("Avatar", payload["Name"]);
             Assert.True(payload.ContainsKey("Addresses"));
@@ -197,7 +206,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             // Arrange
             IEdmModel model = GetModel();
-            IEdmFunctionImport action = model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "Complex");
+            IEdmActionImport action = model.EntityContainers().Single().OperationImports()
+                .SingleOrDefault(o => o.Name == "Complex") as IEdmActionImport;
             string body = @"{ ""Quantity"": 1 , ""Address"": { ""StreetAddress"":""1 Microsoft Way"", ""City"": ""Redmond"", ""State"": ""WA"", ""ZipCode"": 98052 } }";
             ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(body));
             message.SetHeader("Content-Type", "application/json;odata=verbose");
@@ -243,8 +253,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             Assert.NotNull(payload);
             Assert.Same(
-                model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "PrimitiveCollection"),
-                ODataActionPayloadDeserializer.GetFunctionImport(context));
+                model.EntityContainers().Single().OperationImports().SingleOrDefault(f => f.Name == "PrimitiveCollection"),
+                ODataActionPayloadDeserializer.GetActionImport(context));
             Assert.True(payload.ContainsKey("Name"));
             Assert.Equal("Avatar", payload["Name"]);
             Assert.True(payload.ContainsKey("Ratings"));
@@ -299,14 +309,15 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Assert.Throws<ODataException>(() =>
             {
                 ODataActionParameters payload = deserializer.Read(reader, typeof(ODataActionParameters), context) as ODataActionParameters;
-            }, "The parameter 'MissingParameter' in the request payload is not a valid parameter for the function import 'Primitive'.");
+            }, "The parameter 'MissingParameter' in the request payload is not a valid parameter for the operation 'Primitive'.");
         }
 
         private static ODataPath CreatePath(IEdmModel model, string actionName)
         {
-            IEdmFunctionImport functionImport =
-                model.EntityContainers().Single().FindFunctionImports(actionName).Single();
-            return new ODataPath(new ActionPathSegment(functionImport));
+            IEdmActionImport actionImport =
+                model.EntityContainers().Single().FindOperationImports(actionName).Single() as IEdmActionImport;
+            Assert.NotNull(actionImport);
+            return new ODataPath(new ActionPathSegment(actionImport));
         }
 
         private IEdmModel GetModel()

@@ -1,11 +1,11 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Query
 {

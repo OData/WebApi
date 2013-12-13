@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -22,8 +22,13 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             IEdmEntityType returnType = new Mock<IEdmEntityType>().Object;
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-            EdmFunctionImport function = new EdmFunctionImport(container, "Function",
-                new EdmEntityTypeReference(returnType, isNullable: false));
+            EdmFunctionImport function = new EdmFunctionImport(
+                container,
+                "Function",
+                new EdmFunction(
+                    "NS",
+                    "Function",
+                    new EdmEntityTypeReference(returnType, isNullable: false)));
 
             Dictionary<string, string> parameterValues = new Dictionary<string, string>()
             {

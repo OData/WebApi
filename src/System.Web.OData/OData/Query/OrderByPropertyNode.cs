@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Query
 {

@@ -1,11 +1,10 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Specialized;
 using System.Net.Http;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -83,7 +82,7 @@ namespace System.Web.Http.OData.Routing
             string parameterValue = parameterNameValues[Alias];
             if (parameterValue != null)
             {
-                return ODataUriUtils.ConvertFromUriLiteral(parameterValue, ODataVersion.V3, EdmModel, EdmType);
+                return ODataUriUtils.ConvertFromUriLiteral(parameterValue, ODataVersion.V4, EdmModel, EdmType);
             }
 
             return null;

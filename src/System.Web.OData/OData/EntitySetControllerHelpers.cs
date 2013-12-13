@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -9,8 +9,8 @@ using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 
 namespace System.Web.Http.OData
 {
@@ -92,7 +92,7 @@ namespace System.Web.Http.OData
             UrlHelper urlHelper = controller.Url ?? new UrlHelper(request);
             response.Headers.Location = new Uri(urlHelper.ODataLink(
                                                     entitySetSegment,
-                                                    new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(entityKey, ODataVersion.V3))));
+                                                    new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(entityKey, ODataVersion.V4))));
             return response;
         }
 

@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
@@ -139,7 +139,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         private static IEdmNavigationProperty GetNavigationProperty(IEdmModel model)
         {
             return
-                model.EntityContainers().Single().EntitySets().First().NavigationTargets.Single().NavigationProperty;
+                model.EntityContainers().Single().EntitySets().First().NavigationPropertyBindings.Single().NavigationProperty;
         }
 
         private class Entity

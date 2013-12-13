@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -6,9 +6,9 @@ using System.Net.Http;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Expressions;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Expressions;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -238,11 +238,9 @@ namespace System.Web.Http.OData.Builder
             // Assert
             IEdmEntityContainer container = model.EntityContainers().SingleOrDefault();
             Assert.NotNull(container);
-            Assert.Equal(1, container.Elements.OfType<IEdmFunctionImport>().Count());
-            IEdmFunctionImport action = container.Elements.OfType<IEdmFunctionImport>().Single();
-            Assert.False(action.IsComposable);
-            Assert.True(action.IsSideEffecting);
-            Assert.True(action.IsBindable);
+            Assert.Equal(1, container.Elements.OfType<IEdmActionImport>().Count());
+            IEdmAction action = container.Elements.OfType<IEdmActionImport>().Single().Action;
+            Assert.True(action.IsBound);
             Assert.True(model.IsAlwaysBindable(action));
             Assert.Equal("ActionName", action.Name);
             Assert.Null(action.ReturnType);
@@ -266,19 +264,17 @@ namespace System.Web.Http.OData.Builder
             // Assert
             IEdmEntityContainer container = model.EntityContainers().SingleOrDefault();
             Assert.NotNull(container);
-            Assert.Equal(1, container.Elements.OfType<IEdmFunctionImport>().Count());
+            Assert.Equal(1, container.Elements.OfType<IEdmActionImport>().Count());
             Assert.Equal(1, container.Elements.OfType<IEdmEntitySet>().Count());
-            IEdmFunctionImport action = container.Elements.OfType<IEdmFunctionImport>().Single();
-            Assert.False(action.IsComposable);
-            Assert.True(action.IsSideEffecting);
-            Assert.False(action.IsBindable);
-            Assert.False(model.IsAlwaysBindable(action));
+            IEdmActionImport action = container.Elements.OfType<IEdmActionImport>().Single();
+            Assert.False(action.Action.IsBound);
+            Assert.False(model.IsAlwaysBindable(action.Action));
             Assert.Equal("ActionName", action.Name);
-            Assert.NotNull(action.ReturnType);
+            Assert.NotNull(action.Action.ReturnType);
             Assert.NotNull(action.EntitySet);
             Assert.Equal("Customers", (action.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.Name);
             Assert.Equal(typeof(Customer).FullName, (action.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.ElementType.FullName());
-            Assert.Empty(action.Parameters);
+            Assert.Empty(action.Action.Parameters);
         }
 
         [Fact]
@@ -296,10 +292,10 @@ namespace System.Web.Http.OData.Builder
             // Assert
             IEdmEntityContainer container = model.EntityContainers().SingleOrDefault();
             Assert.NotNull(container);
-            Assert.Equal(1, container.Elements.OfType<IEdmFunctionImport>().Count());
-            IEdmFunctionImport action = container.Elements.OfType<IEdmFunctionImport>().Single();
-            Assert.True(action.IsBindable);
-            Assert.False(model.IsAlwaysBindable(action));
+            Assert.Equal(1, container.Elements.OfType<IEdmActionImport>().Count());
+            IEdmActionImport action = container.Elements.OfType<IEdmActionImport>().Single();
+            Assert.True(action.Action.IsBound);
+            Assert.False(model.IsAlwaysBindable(action.Action));
         }
 
         [Fact]
@@ -322,8 +318,12 @@ namespace System.Web.Http.OData.Builder
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model };
 
             EntityInstanceContext context = new EntityInstanceContext(serializerContext, customerType.AsReference(), new Customer { CustomerId = 1 });
-            IEdmFunctionImport rewardAction = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault().FunctionImports().SingleOrDefault();
-            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(rewardAction);
+            IEdmActionImport rewardAction = model.SchemaElements.OfType<IEdmEntityContainer>()
+                .SingleOrDefault()
+                .OperationImports()
+                .SingleOrDefault() as IEdmActionImport;
+            Assert.NotNull(rewardAction);
+            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(rewardAction.Action);
 
             //Assert
             Assert.Equal(expectedUri, reward.GetActionLink()(context));
@@ -353,12 +353,13 @@ namespace System.Web.Http.OData.Builder
             // Act
             IEdmEntityType movieType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
             IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
-            IEdmFunctionImport watchAction = container.FunctionImports().SingleOrDefault();
+            IEdmActionImport watchAction = container.OperationImports().SingleOrDefault() as IEdmActionImport;
+            Assert.NotNull(watchAction);
             IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model, EntitySet = entitySet, Url = urlHelper };
 
             EntityInstanceContext context = new EntityInstanceContext(serializerContext, movieType.AsReference(), new Movie { ID = 1, Name = "Avatar" });
-            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(watchAction);
+            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(watchAction.Action);
 
             //Assert
             Assert.Equal(expectedUri, watch.GetActionLink()(context));
@@ -383,7 +384,8 @@ namespace System.Web.Http.OData.Builder
 
             //Assert
             IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
-            IEdmFunctionImport action = container.FindFunctionImports("Watch").Single();
+            IEdmOperation action = container.FindOperationImports("Watch").Single().Operation as IEdmAction;
+            Assert.NotNull(action);
             Assert.False(action.FindParameter("int").Type.IsNullable);
             Assert.True(action.FindParameter("nullableOfInt").Type.IsNullable);
             Assert.False(action.FindParameter("dateTime").Type.IsNullable);

@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {

@@ -1,13 +1,13 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -26,7 +26,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     { typeof(byte[]), EdmPrimitiveTypeKind.Binary },
                     { typeof(bool), EdmPrimitiveTypeKind.Boolean },
                     { typeof(byte), EdmPrimitiveTypeKind.Byte },
-                    { typeof(DateTime), EdmPrimitiveTypeKind.DateTime },
+                    // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+                    // { typeof(DateTime), EdmPrimitiveTypeKind.DateTimeOffset },
                     { typeof(DateTimeOffset), EdmPrimitiveTypeKind.DateTimeOffset },
                     { typeof(decimal), EdmPrimitiveTypeKind.Decimal },
                     { typeof(double), EdmPrimitiveTypeKind.Double },
@@ -38,7 +39,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     { typeof(float), EdmPrimitiveTypeKind.Single },
                     { typeof(Stream), EdmPrimitiveTypeKind.Stream },
                     { typeof(string), EdmPrimitiveTypeKind.String },
-                    { typeof(TimeSpan), EdmPrimitiveTypeKind.Time },
+                    { typeof(TimeSpan), EdmPrimitiveTypeKind.Duration },
                     { typeof(TestEnum), EdmPrimitiveTypeKind.String },
                 };
             }

@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -11,23 +11,25 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     internal class BindableProcedureFinder
     {
-        private Dictionary<IEdmEntityType, List<IEdmFunctionImport>> _map = new Dictionary<IEdmEntityType, List<IEdmFunctionImport>>();
+        private Dictionary<IEdmEntityType, List<IEdmOperation>> _map = new Dictionary<IEdmEntityType, List<IEdmOperation>>();
 
         /// <summary>
         /// Constructs a concurrent cache for looking up bindable procedures for any EntityType in the provided model.
         /// </summary>
         public BindableProcedureFinder(IEdmModel model)
         {
-            var query =
-                from ec in model.EntityContainers()
-                from fi in ec.FunctionImports()
-                where fi.IsBindable && fi.Parameters.First().Type.TypeKind() == EdmTypeKind.Entity
-                group fi by fi.Parameters.First().Type.Definition into fgroup
-                select new { EntityType = fgroup.Key as IEdmEntityType, BindableFunctions = fgroup.ToList() };
-
-            foreach (var match in query)
+            var operationGroups =
+                from op in model.SchemaElements.OfType<IEdmOperation>()
+                where op.IsBound && op.Parameters.First().Type.TypeKind() == EdmTypeKind.Entity
+                group op by op.Parameters.First().Type.Definition;
+            
+            foreach (var operationGroup in operationGroups)
             {
-                _map[match.EntityType] = match.BindableFunctions;
+                var entityType = operationGroup.Key as IEdmEntityType;
+                if (entityType != null)
+                {
+                    _map[entityType] = operationGroup.ToList();
+                }
             }
         }
 
@@ -37,12 +39,12 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="entityType">The EDM entity type.</param>
         /// <returns>A collection of procedures bound to the entity type.</returns>
-        public virtual IEnumerable<IEdmFunctionImport> FindProcedures(IEdmEntityType entityType)
+        public virtual IEnumerable<IEdmOperation> FindProcedures(IEdmEntityType entityType)
         {
-            return GetTypeHierarchy(entityType).SelectMany(e => FindDeclaredProcedures(e));
+            return GetTypeHierarchy(entityType).SelectMany(FindDeclaredProcedures);
         }
 
-        private IEnumerable<IEdmEntityType> GetTypeHierarchy(IEdmEntityType entityType)
+        private static IEnumerable<IEdmEntityType> GetTypeHierarchy(IEdmEntityType entityType)
         {
             IEdmEntityType current = entityType;
             while (current != null)
@@ -52,9 +54,9 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private IEnumerable<IEdmFunctionImport> FindDeclaredProcedures(IEdmEntityType entityType)
+        private IEnumerable<IEdmOperation> FindDeclaredProcedures(IEdmEntityType entityType)
         {
-            List<IEdmFunctionImport> results = null;
+            List<IEdmOperation> results;
 
             if (_map.TryGetValue(entityType, out results))
             {
@@ -62,7 +64,7 @@ namespace System.Web.Http.OData.Builder
             }
             else
             {
-                return Enumerable.Empty<IEdmFunctionImport>();
+                return Enumerable.Empty<IEdmFunction>();
             }
         }
     }

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Net.Http.Formatting;
@@ -6,7 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
 
 namespace System.Web.Http.OData.Formatter
 {

@@ -1,12 +1,11 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http.OData.Builder;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
 
 namespace System.Web.Http.OData.Query
 {
@@ -191,7 +190,7 @@ namespace System.Web.Http.OData.Query
         public IEnumerable<string> Tags { get; set; }
         public IEnumerable<QueryCompositionCustomer> Contacts { get; set; }
         public byte[] Image { get; set; }
-        public DateTime Birthday { get; set; }
+        public DateTimeOffset Birthday { get; set; }
         public double AmountSpent { get; set; }
 
 

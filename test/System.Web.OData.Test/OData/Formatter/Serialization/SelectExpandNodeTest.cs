@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -55,7 +55,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [InlineData("ID,Name,Orders", "Orders", true, "ID,Name")] // expand and select on derived type -> select requested
         [InlineData("NS.SpecialCustomer/SpecialCustomerProperty", "", false, "")] // select derived type properties -> select none
         [InlineData("NS.SpecialCustomer/SpecialCustomerProperty", "", true, "SpecialCustomerProperty")] // select derived type properties on derived type -> select requested
-        [InlineData("ID,Orders/ID,Orders/Customer/ID", "Orders,Orders/Customer", true, "ID")] // deep expand and selects
+        [InlineData("ID", "Orders($select=ID),Orders($expand=Customer($select=ID))", true, "ID")] // deep expand and selects
         public void GetPropertiesToBeSelected_Selects_ExpectedProperties_OnCustomer(
             string select, string expand, bool specialCustomer, string structuralPropertiesToSelect)
         {
@@ -75,10 +75,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Theory]
         [InlineData("ID,Name,Orders", "Orders", false, "Amount,ID")] // expand and select -> select all
         [InlineData("ID,Name,Orders", "Orders", true, "Amount,ID,SpecialOrderProperty")] // expand and select on derived type -> select all
-        [InlineData("ID,Name,Orders/ID", "Orders", false, "ID")] // expand and select properties on expand -> select requested
-        [InlineData("ID,Name,Orders/ID", "Orders", true, "ID")] // expand and select properties on expand on derived type -> select requested
-        [InlineData("Orders,Orders/Customer", "Orders,Orders/Customer", false, "Amount,ID")]
-        [InlineData("Orders,Orders/Customer", "Orders,Orders/Customer", true, "Amount,ID,SpecialOrderProperty")]
+        [InlineData("ID,Name,Orders", "Orders($select=ID)", false, "ID")] // expand and select properties on expand -> select requested
+        [InlineData("ID,Name,Orders", "Orders($select=ID)", true, "ID")] // expand and select properties on expand on derived type -> select requested
+        [InlineData("Orders", "Orders,Orders($expand=Customer)", false, "Amount,ID")]
+        [InlineData("Orders", "Orders,Orders($expand=Customer)", true, "Amount,ID,SpecialOrderProperty")]
         public void GetPropertiesToBeSelected_Selects_ExpectedProperties_OnExpandedOrders(
             string select, string expand, bool specialOrder, string structuralPropertiesToSelect)
         {
@@ -138,8 +138,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [InlineData(null, "Orders", true, "Orders")] // simple expand and no select on derived type -> expand requested
         [InlineData(null, "Orders,Orders,Orders", false, "Orders")] // duplicate expand -> expand requested
         [InlineData(null, "Orders,Orders,Orders", true, "Orders")] // duplicate expand on derived type -> expand requested
-        [InlineData("ID", "Orders", false, "")] // simple expand and expand not in select -> expand none
-        [InlineData("ID", "Orders", true, "")] // simple expand and expand not in select on derived type -> expand none
+        [InlineData("ID", "Orders", false, "Orders")] // Expanded navigation properties MUST be returned, even if they are not specified as a selectItem.
+        [InlineData("ID", "Orders", true, "Orders")] // Expanded navigation properties MUST be returned, even if they are not specified as a selectItem.
         [InlineData("Orders", "Orders", false, "Orders")] // only expand -> expand requested
         [InlineData("ID,Orders", "Orders", false, "Orders")] // simple expand and expand in select -> expand requested
         [InlineData("ID,Orders", "Orders", true, "Orders")] // simple expand and expand in select on derived type -> expand requested
@@ -163,17 +163,17 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(null, null, false, "IsLocal,IsUpgraded,IsUpgradedWithParam,upgrade")] // no select and no expand -> select all actions
-        [InlineData(null, null, true, "IsLocal,IsSpecialUpgraded,IsUpgraded,IsUpgradedWithParam,specialUpgrade,upgrade")] // no select and no expand -> select all actions
+        [InlineData(null, null, false, "upgrade")] // no select and no expand -> select all actions
+        [InlineData(null, null, true, "specialUpgrade,upgrade")] // no select and no expand -> select all actions
         [InlineData("*", null, false, "")] // select * -> select no actions
         [InlineData("*", null, true, "")] // select * -> select no actions
-        [InlineData("ModelWithInheritance.upgrade", null, false, "upgrade")] // select single actions -> select requested action
-        [InlineData("ModelWithInheritance.upgrade", null, true, "upgrade")] // select single actions -> select requested action
-        [InlineData("ModelWithInheritance.specialUpgrade", null, false, "")] // select single derived action on base type -> select nothing
-        [InlineData("ModelWithInheritance.specialUpgrade", null, true, "specialUpgrade")] // select single derived action on derived type  -> select requested action
-        [InlineData("ModelWithInheritance.upgrade,ModelWithInheritance.upgrade", null, false, "upgrade")] // select duplicate actions -> de-duplicate
-        [InlineData("ModelWithInheritance.*", null, false, "IsLocal,IsUpgraded,IsUpgradedWithParam,upgrade")] // select wild card actions -> select all
-        [InlineData("ModelWithInheritance.*", null, true, "IsLocal,IsSpecialUpgraded,IsUpgraded,IsUpgradedWithParam,specialUpgrade,upgrade")] // select wild card actions -> select all
+        [InlineData("NS.upgrade", null, false, "upgrade")] // select single actions -> select requested action
+        [InlineData("NS.upgrade", null, true, "upgrade")] // select single actions -> select requested action
+        [InlineData("NS.specialUpgrade", null, false, "")] // select single derived action on base type -> select nothing
+        [InlineData("NS.specialUpgrade", null, true, "specialUpgrade")] // select single derived action on derived type  -> select requested action
+        [InlineData("NS.upgrade,NS.upgrade", null, false, "upgrade")] // select duplicate actions -> de-duplicate
+        [InlineData("ModelWithInheritance.*", null, false, "upgrade")] // select wild card actions -> select all
+        [InlineData("ModelWithInheritance.*", null, true, "specialUpgrade,upgrade")] // select wild card actions -> select all
         public void GetActionsToBeSelected_Selects_ExpectedActions(
             string select, string expand, bool specialCustomer, string actionsToSelect)
         {

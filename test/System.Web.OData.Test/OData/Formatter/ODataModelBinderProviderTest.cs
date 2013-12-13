@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,8 +9,8 @@ using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Routing;
 using System.Web.Http.ValueProviders;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 
@@ -50,11 +50,13 @@ namespace System.Web.Http.OData.Formatter
                     { (byte)1, "GetByte" },
                     { "123", "GetString" },
                     { Guid.Empty, "GetGuid" },
-                    { DateTime.Now, "GetDateTime" },
+                    // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+                    //{ DateTime.Now, "GetDateTime" },
                     { TimeSpan.FromTicks(424242), "GetTimeSpan" },
                     { DateTimeOffset.MaxValue, "GetDateTimeOffset" },
                     { float.NaN, "GetFloat" },
-                    { decimal.MaxValue, "GetDecimal" },
+                    // TODO: ODataLib v4 issue on decimal handling, bug filed.
+                    //{ decimal.MaxValue, "GetDecimal" } 
                     // { double.NaN, "GetDouble" } // doesn't work with uri parser.
                     { SimpleEnum.First.ToString(), "GetEnum" },
                     { (FlagsEnum.One | FlagsEnum.Two).ToString(), "GetFlagsEnum" }
@@ -69,7 +71,7 @@ namespace System.Web.Http.OData.Formatter
                 return new TheoryDataSet<object, string>
                 {
                     { "123", "GetBool" },
-                    { 123, "GetDateTime" },
+                    //{ 123, "GetDateTime" }, // v4 does not support DateTime
                     { "abc", "GetInt32" },
                     { "abc", "GetEnum" },
                     { "abc", "GetGuid" },
@@ -77,7 +79,7 @@ namespace System.Web.Http.OData.Formatter
                     { "abc", "GetFloat" },
                     { "abc", "GetDouble" },
                     { "abc", "GetDecimal" },
-                    { "abc", "GetDateTime" },
+                    //{ "abc", "GetDateTime" }, // v4 does not support DateTime
                     { "abc", "GetTimeSpan" },
                     { "abc", "GetDateTimeOffset" },
                     { -1, "GetUInt16"},
@@ -94,7 +96,7 @@ namespace System.Web.Http.OData.Formatter
                 return new TheoryDataSet<string, string, string>
                 {
                     { "abc", "GetNullableBool", "Expected literal type token but found token 'abc'." },
-                    { "datetime'123'", "GetNullableDateTime", "Unrecognized 'Edm.DateTime' literal 'datetime'123'' at '0' in 'datetime'123''." }
+                    { "datetime'123'", "GetNullableDateTimeOffset", "Expected literal type token but found token 'datetime'123''." }
                 };
             }
         }
@@ -136,7 +138,10 @@ namespace System.Web.Http.OData.Formatter
         [PropertyData("ODataModelBinderProvider_Works_TestData")]
         public void ODataModelBinderProvider_Works(object value, string action)
         {
-            string url = String.Format("http://localhost/ODataModelBinderProviderTest/{0}({1})", action, Uri.EscapeDataString(ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V3)));
+            string url = String.Format(
+                "http://localhost/ODataModelBinderProviderTest/{0}({1})",
+                action,
+                Uri.EscapeDataString(ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4)));
             HttpResponseMessage response = _client.GetAsync(url).Result;
             response.EnsureSuccessStatusCode();
             Assert.Equal(
@@ -148,7 +153,10 @@ namespace System.Web.Http.OData.Formatter
         [PropertyData("ODataModelBinderProvider_Throws_TestData")]
         public void ODataModelBinderProvider_Throws(object value, string action)
         {
-            string url = String.Format("http://localhost/ODataModelBinderProviderThrowsTest/{0}({1})", action, Uri.EscapeDataString(ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V3)));
+            string url = String.Format(
+                "http://localhost/ODataModelBinderProviderThrowsTest/{0}({1})",
+                action,
+                Uri.EscapeDataString(ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4)));
             HttpResponseMessage response = _client.GetAsync(url).Result;
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -187,8 +195,8 @@ namespace System.Web.Http.OData.Formatter
         {
             string url = String.Format(
                 "http://localhost/ODataModeBinderMultipleKeys/GetMultipleKeys(name={0},model={1})",
-                Uri.EscapeDataString(ODataUriUtils.ConvertToUriLiteral("name", ODataVersion.V3)),
-                Uri.EscapeDataString(ODataUriUtils.ConvertToUriLiteral(2009, ODataVersion.V3)));
+                Uri.EscapeDataString(ODataUriUtils.ConvertToUriLiteral("name", ODataVersion.V4)),
+                Uri.EscapeDataString(ODataUriUtils.ConvertToUriLiteral(2009, ODataVersion.V4)));
 
             HttpResponseMessage response = _client.GetAsync(url).Result;
 
@@ -308,11 +316,12 @@ namespace System.Web.Http.OData.Formatter
             return id;
         }
 
-        public DateTime GetDateTime(DateTime id)
-        {
-            ThrowIfInsideThrowsController();
-            return id;
-        }
+        // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+        //public DateTime GetDateTime(DateTime id)
+        //{
+        //    ThrowIfInsideThrowsController();
+        //    return id;
+        //}
 
         public TimeSpan GetTimeSpan(TimeSpan id)
         {
@@ -372,7 +381,7 @@ namespace System.Web.Http.OData.Formatter
             return ModelState["id"].Errors.Select(e => e.ErrorMessage);
         }
 
-        public IEnumerable<string> GetNullableDateTime(DateTime? id)
+        public IEnumerable<string> GetNullableDateTimeOffset(DateTimeOffset? id)
         {
             return ModelState["id"].Errors.Select(e => e.ErrorMessage);
         }

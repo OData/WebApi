@@ -1,11 +1,12 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.OData.Formatter;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
+
 namespace System.Web.Http.OData.Builder
 {
     public static class EdmModelAsserts
@@ -14,7 +15,7 @@ namespace System.Web.Http.OData.Builder
         {
             string entityTypeName = mappedEntityClrType.FullName;
 
-            var entitySet = model.EntityContainers().Single().EntitySets().Where(set => set.Name == entitySetName).Single();
+            var entitySet = model.EntityContainers().Single().EntitySets().Single(set => set.Name == entitySetName);
             Assert.NotNull(entitySet);
             Assert.Equal(entitySet.Name, entitySetName);
             Assert.True(model.GetEdmType(mappedEntityClrType).IsEquivalentTo(entitySet.ElementType));
@@ -22,9 +23,9 @@ namespace System.Web.Http.OData.Builder
             return entitySet.ElementType;
         }
 
-        public static IEdmNavigationTargetMapping AssertHasNavigationTarget(this IEdmEntitySet entitySet, IEdmNavigationProperty navigationProperty, string targetEntitySet)
+        public static IEdmNavigationPropertyBinding AssertHasNavigationTarget(this IEdmEntitySet entitySet, IEdmNavigationProperty navigationProperty, string targetEntitySet)
         {
-            IEdmNavigationTargetMapping navMapping = entitySet.NavigationTargets.Where(n => n.NavigationProperty == navigationProperty).SingleOrDefault();
+            IEdmNavigationPropertyBinding navMapping = entitySet.NavigationPropertyBindings.SingleOrDefault(n => n.NavigationProperty == navigationProperty);
             Assert.NotNull(navMapping);
             Assert.Equal(targetEntitySet, navMapping.TargetEntitySet.Name);
             return navMapping;
@@ -86,7 +87,7 @@ namespace System.Web.Http.OData.Builder
         {
             IEdmNavigationProperty navigationProperty = edmType.AssertHasProperty<IEdmNavigationProperty>(model, propertyName, propertyType: null, isNullable: isNullable);
 
-            Assert.Equal(multiplicity, navigationProperty.Partner.Multiplicity());
+            Assert.Equal(multiplicity, navigationProperty.TargetMultiplicity());
 
             Assert.True(navigationProperty.ToEntityType().IsEquivalentTo(model.GetEdmType(mappedPropertyClrType)));
             return navigationProperty;

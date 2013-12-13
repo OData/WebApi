@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -114,7 +114,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="entityContext">The <see cref="EntityInstanceContext"/> representing the entity for which the action link needs to be generated.</param>
         /// <param name="action">The action for which the action link needs to be generated.</param>
         /// <returns>The generated action link following OData URL conventions.</returns>
-        public static Uri GenerateActionLink(this EntityInstanceContext entityContext, IEdmFunctionBase action)
+        public static Uri GenerateActionLink(this EntityInstanceContext entityContext, IEdmOperation action)
         {
             if (entityContext == null)
             {
@@ -125,7 +125,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("action");
             }
 
-            IEdmFunctionParameter bindingParameter = action.Parameters.FirstOrDefault();
+            IEdmOperationParameter bindingParameter = action.Parameters.FirstOrDefault();
             if (bindingParameter == null || !bindingParameter.Type.IsEntity())
             {
                 throw Error.Argument("action", SRResources.ActionNotBoundToEntity, action.Name);
@@ -159,7 +159,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="entityContext">The <see cref="EntityInstanceContext"/> representing the entity for which the function link needs to be generated.</param>
         /// <param name="function">The function for which the function link needs to be generated.</param>
         /// <returns>The generated function link following OData URL conventions.</returns>
-        public static Uri GenerateFunctionLink(this EntityInstanceContext entityContext, IEdmFunctionBase function)
+        public static Uri GenerateFunctionLink(this EntityInstanceContext entityContext, IEdmOperation function)
         {
             if (entityContext == null)
             {
@@ -170,7 +170,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("function");
             }
 
-            IEdmFunctionParameter bindingParameter = function.Parameters.FirstOrDefault();
+            IEdmOperationParameter bindingParameter = function.Parameters.FirstOrDefault();
             if (bindingParameter == null || !bindingParameter.Type.IsEntity())
             {
                 throw Error.Argument("function", SRResources.FunctionNotBoundToEntity, function.Name);

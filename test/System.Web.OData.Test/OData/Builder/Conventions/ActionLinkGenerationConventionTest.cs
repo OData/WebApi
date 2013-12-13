@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Serialization;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -27,7 +27,11 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
             var vehiclesEdmSet = model.EntityContainers().Single().FindEntitySet("vehicles");
             var carEdmType = model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType;
-            var paintEdmAction = model.GetAvailableProcedures(model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType).Single();
+            var paintEdmAction =
+                model.GetAvailableProcedures(
+                    model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType).Single()
+                as IEdmAction;
+            Assert.NotNull(paintEdmAction);
 
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapODataRoute(model);
@@ -58,7 +62,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             // Assert
             IEdmModel model = builder.GetEdmModel();
-            var paintEdmAction = model.EntityContainers().Single().Elements.OfType<IEdmFunctionImport>().Single();
+            var paintEdmAction = model.EntityContainers().Single().Elements.OfType<IEdmActionImport>().Single();
 
             ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(paintEdmAction);
 

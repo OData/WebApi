@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -210,7 +210,7 @@ namespace System.Web.Http.OData.Routing
                 return new EntitySetPathSegment(entitySet);
             }
 
-            IEdmFunctionImport action = container.FindAction(segment, bindingParameterType: null);
+            IEdmActionImport action = container.FindAction(segment, bindingParameterType: null);
             if (action != null)
             {
                 return new ActionPathSegment(action);
@@ -377,10 +377,10 @@ namespace System.Web.Http.OData.Routing
 
             // now look for bindable actions
             IEdmEntityContainer container = ExtractEntityContainer(model);
-            IEdmFunctionImport procedure = container.FindAction(segment, collectionType);
-            if (procedure != null)
+            IEdmActionImport action = container.FindAction(segment, collectionType);
+            if (action != null)
             {
-                return new ActionPathSegment(procedure);
+                return new ActionPathSegment(action);
             }
 
             // Try to match this to a function call
@@ -488,10 +488,10 @@ namespace System.Web.Http.OData.Routing
 
             // finally look for bindable procedures
             IEdmEntityContainer container = ExtractEntityContainer(model);
-            IEdmFunctionImport procedure = container.FindAction(segment, previousType);
-            if (procedure != null)
+            IEdmActionImport action = container.FindAction(segment, previousType);
+            if (action != null)
             {
-                return new ActionPathSegment(procedure);
+                return new ActionPathSegment(action);
             }
 
             // Try to match this to a function call

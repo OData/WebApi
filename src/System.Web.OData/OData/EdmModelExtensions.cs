@@ -1,11 +1,11 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData
 {
@@ -66,7 +66,7 @@ namespace System.Web.Http.OData
         /// <returns>The <see cref="ActionLinkBuilder"/> for the given action if one is set; otherwise, a new <see cref="ActionLinkBuilder"/> that 
         /// generates action links following OData URL conventions.</returns>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IEdmFunctionImport is more relevant here.")]
-        public static ActionLinkBuilder GetActionLinkBuilder(this IEdmModel model, IEdmFunctionImport action)
+        public static ActionLinkBuilder GetActionLinkBuilder(this IEdmModel model, IEdmAction action)
         {
             if (model == null)
             {
@@ -94,7 +94,7 @@ namespace System.Web.Http.OData
         /// <param name="action">The action for which the action link is to be generated.</param>
         /// <param name="actionLinkBuilder">The <see cref="ActionLinkBuilder"/> to set.</param>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IEdmFunctionImport is more relevant here.")]
-        public static void SetActionLinkBuilder(this IEdmModel model, IEdmFunctionImport action, ActionLinkBuilder actionLinkBuilder)
+        public static void SetActionLinkBuilder(this IEdmModel model, IEdmAction action, ActionLinkBuilder actionLinkBuilder)
         {
             if (model == null)
             {
@@ -111,7 +111,7 @@ namespace System.Web.Http.OData
         /// <param name="function">The function for which the function link is to be generated.</param>
         /// <param name="functionLinkBuilder">The <see cref="FunctionLinkBuilder"/> to set.</param>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IEdmFunctionImport is more relevant here.")]
-        public static void SetFunctionLinkBuilder(this IEdmModel model, IEdmFunctionImport function, FunctionLinkBuilder functionLinkBuilder)
+        public static void SetFunctionLinkBuilder(this IEdmModel model, IEdmFunction function, FunctionLinkBuilder functionLinkBuilder)
         {
             if (model == null)
             {

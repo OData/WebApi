@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -10,9 +10,9 @@ using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Query.Expressions;
 using System.Web.Http.OData.Query.Validators;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 
@@ -761,7 +761,7 @@ namespace System.Web.Http.OData.Query
                     { e.Select(i => (double)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (double)6 },
                     { e.Select(i => (decimal)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (decimal)6 },
                     { e.Select(i => (SimpleEnum)(i%3)), "$filter=$it eq 'First'&$orderby=$it desc&$skip=1&$top=1", SimpleEnum.First },
-                    { e.Select(i => new DateTime(i, 1, 1)), "$filter=year($it) ge 5&$orderby=$it desc&$skip=3&$top=1", new DateTime(year: 6, month: 1, day: 1) },
+                    { e.Select(i => new DateTimeOffset(new DateTime(i, 1, 1), TimeSpan.Zero)), "$filter=year($it) ge 5&$orderby=$it desc&$skip=3&$top=1", new DateTimeOffset(new DateTime(year: 6, month: 1, day: 1), TimeSpan.Zero) },
                     { e.Select(i => i.ToString()), "$filter=$it ge '5'&$orderby=$it desc&$skip=3&$top=1", "6" },
                   
                     { e.Select(i => (i % 2 != 0 ? null : (short?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (short?)6 },

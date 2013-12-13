@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Data.Linq;
@@ -13,10 +13,11 @@ using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using System.Xml.Linq;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Core.UriParser.TreeNodeKinds;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Query.Expressions
 {
@@ -491,8 +492,8 @@ namespace System.Web.Http.OData.Query.Expressions
                 case ClrCanonicalFunctions.EndswithFunctionName:
                     return BindEndsWith(node);
 
-                case ClrCanonicalFunctions.SubstringofFunctionName:
-                    return BindSubstringOf(node);
+                case ClrCanonicalFunctions.ContainsFunctionName:
+                    return BindContains(node);
 
                 case ClrCanonicalFunctions.SubstringFunctionName:
                     return BindSubstring(node);
@@ -650,7 +651,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("ceiling" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
@@ -662,7 +663,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("floor" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
@@ -674,7 +675,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("round" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
@@ -684,7 +685,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression BindDateOrDateTimeOffsetProperty(SingleValueFunctionCallNode node)
         {
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
 
             Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
 
@@ -705,7 +706,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression BindTimeSpanProperty(SingleValueFunctionCallNode node)
         {
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
 
             Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
             Contract.Assert(ClrCanonicalFunctions.TimeSpanProperties.ContainsKey(node.Name));
@@ -717,7 +718,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("concat" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
             ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
@@ -729,7 +730,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("trim" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
             ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
@@ -741,7 +742,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("toupper" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
             ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
@@ -753,7 +754,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("tolower" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
             ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
@@ -765,7 +766,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("indexof" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
             ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
@@ -777,7 +778,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("substring" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
             if (arguments[0].Type != typeof(string))
             {
                 throw new ODataException(Error.Format(SRResources.FunctionNotSupportedOnEnum, node.Name));
@@ -827,7 +828,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("length" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
             ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
@@ -835,24 +836,23 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.Length, arguments);
         }
 
-        private Expression BindSubstringOf(SingleValueFunctionCallNode node)
+        private Expression BindContains(SingleValueFunctionCallNode node)
         {
-            Contract.Assert("substringof" == node.Name);
+            Contract.Assert("contains" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
             ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
-            // NOTE: this is reversed because it is reverse in WCF DS and in the OData spec
-            return MakeFunctionCall(ClrCanonicalFunctions.Contains, arguments[1], arguments[0]);
+            return MakeFunctionCall(ClrCanonicalFunctions.Contains, arguments[0], arguments[1]);
         }
 
         private Expression BindStartsWith(SingleValueFunctionCallNode node)
         {
             Contract.Assert("startswith" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
             ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
@@ -864,7 +864,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert("endswith" == node.Name);
 
-            Expression[] arguments = BindArguments(node.Arguments);
+            Expression[] arguments = BindArguments(node.Parameters);
             ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));

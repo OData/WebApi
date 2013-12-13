@@ -1,11 +1,12 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -15,8 +16,8 @@ namespace System.Web.Http.OData.Builder
     // TODO: Feature 443884: add support for starting from an original model
     public class ODataModelBuilder
     {
-        private static readonly Version _defaultDataServiceVersion = new Version(3, 0);
-        private static readonly Version _defaultMaxDataServiceVersionn = new Version(3, 0);
+        private static readonly Version _defaultDataServiceVersion = EdmConstants.EdmVersion4;
+        private static readonly Version _defaultMaxDataServiceVersionn = EdmConstants.EdmVersion4;
 
         private Dictionary<Type, StructuralTypeConfiguration> _structuralTypes = new Dictionary<Type, StructuralTypeConfiguration>();
         private Dictionary<string, EntitySetConfiguration> _entitySets = new Dictionary<string, EntitySetConfiguration>();

@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData
@@ -213,8 +213,8 @@ namespace System.Web.Http.OData
                 {
                     { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Double, isNullable: true), null },
                     { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Double, isNullable: false), default(double) },
-                    { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.DateTime, isNullable: true), null },
-                    { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.DateTime, isNullable: false), default(DateTime) },
+                    { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.DateTimeOffset, isNullable: true), null },
+                    { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.DateTimeOffset, isNullable: false), default(DateTimeOffset) },
                     { new EdmComplexTypeReference(new EdmComplexType("NS", "Complex"), isNullable: true), null },
                     { new EdmEntityTypeReference(new EdmEntityType("NS", "Entity"), isNullable: true), null },
                     { new EdmCollectionTypeReference(new EdmCollectionType(nullableDouble), isNullable: false),  new List<double?>() },

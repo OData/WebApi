@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Data.Linq;
@@ -7,8 +7,8 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Serialization.Models;
 using System.Web.Http.OData.Query.Expressions;
 using System.Xml.Linq;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter
@@ -55,7 +55,7 @@ namespace System.Web.Http.OData.Formatter
         [InlineData(typeof(bool))]
         [InlineData(typeof(byte))]
         [InlineData(typeof(sbyte))]
-        [InlineData(typeof(DateTime))]
+        // [InlineData(typeof(DateTime))]   // OData v4 does not support DateTime
         [InlineData(typeof(DateTimeOffset))]
         [InlineData(typeof(TimeSpan))]
         public void IsNonstandardEdmPrimitive_Returns_False(Type primitiveType)

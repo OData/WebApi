@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Routing
@@ -205,58 +205,101 @@ namespace System.Web.Http.OData.Routing
             EdmEntityContainer container = new EdmEntityContainer("NS", "Name");
 
             // non-bindable action
-            container.AddFunctionImport("NonBindableAction", returnType: null, entitySet: null, sideEffecting: true,
-                composable: false, bindable: false);
+            container.AddActionImport(new EdmAction("NS", "NonBindableAction", returnType: null));
 
             // action bound to entity
-            var actionBoundToEntity = container.AddFunctionImport("ActionBoundToEntity", returnType: null, entitySet: null,
-                sideEffecting: true, composable: false, bindable: true);
+            var actionBoundToEntity = new EdmAction(
+                "NS",
+                "ActionBoundToEntity",
+                returnType: null,
+                isBound: true,
+                entitySetPathExpression: null);
             actionBoundToEntity.AddParameter("Param", _entityType);
+            container.AddActionImport(actionBoundToEntity);
 
             // action bound to derived entity
-            var actionBoundToDerivedEntity = container.AddFunctionImport("ActionBoundToDerivedEntity", returnType: null,
-                entitySet: null, sideEffecting: true, composable: false, bindable: true);
+            var actionBoundToDerivedEntity = new EdmAction(
+                "NS",
+                "ActionBoundToDerivedEntity",
+                returnType: null,
+                isBound: true,
+                entitySetPathExpression: null);
             actionBoundToDerivedEntity.AddParameter("Param", _derivedEntityType);
+            container.AddActionImport(actionBoundToDerivedEntity);
 
             // action bound to entity collection
-            var actionBoundToEntityCollection = container.AddFunctionImport("ActionBoundToEntityCollection", returnType: null,
-                entitySet: null, sideEffecting: true, composable: false, bindable: true);
+            var actionBoundToEntityCollection = new EdmAction(
+                "NS",
+                "ActionBoundToEntityCollection",
+                returnType: null,
+                isBound: true,
+                entitySetPathExpression: null);
             actionBoundToEntityCollection.AddParameter("Param", entityCollection);
+            container.AddActionImport(actionBoundToEntityCollection);
 
             // action bound to derived entity collection
-            var actionBoundToDerivedEntityCollection = container.AddFunctionImport("ActionBoundToDerivedEntityCollection",
-                returnType: null, entitySet: null, sideEffecting: true, composable: false, bindable: true);
+            var actionBoundToDerivedEntityCollection = new EdmAction(
+                "NS",
+                "ActionBoundToDerivedEntityCollection",
+                returnType: null,
+                isBound: true,
+                entitySetPathExpression: null);
             actionBoundToDerivedEntityCollection.AddParameter("Param", derivedEntityCollection);
+            container.AddActionImport(actionBoundToDerivedEntityCollection);
 
             // ambiguos actions
-            container.AddFunctionImport("AmbiguousAction", returnType: null, entitySet: null, sideEffecting: true,
-                composable: false, bindable: false);
-            container.AddFunctionImport("AmbiguousAction", returnType: null, entitySet: null, sideEffecting: true,
-                composable: false, bindable: false);
+            container.AddActionImport(new EdmAction("NS", "AmbiguousAction", returnType: null));
+            container.AddActionImport(new EdmAction("NS", "AmbiguousAction", returnType: null));
+
+            IEdmTypeReference returnType = new EdmPrimitiveTypeReference(
+                EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32), false);
 
             // non-bindable function
-            container.AddFunctionImport("NonBindableFunction", returnType: null, entitySet: null, sideEffecting: false,
-                composable: false, bindable: false);
+            container.AddFunctionImport(new EdmFunction("NS", "NonBindableFunction", returnType));
 
             // function bound to entity
-            var functionBoundToEntity = container.AddFunctionImport("FunctionBoundToEntity", returnType: null, entitySet: null,
-                sideEffecting: false, composable: false, bindable: true);
+            var functionBoundToEntity = new EdmFunction(
+                "NS",
+                "FunctionBoundToEntity",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
             functionBoundToEntity.AddParameter("Param", _entityType);
+            container.AddFunctionImport(functionBoundToEntity);
 
             // function bound to entity
-            var functionBoundToDerivedEntity = container.AddFunctionImport("FunctionBoundToDerivedEntity", returnType: null, entitySet: null,
-                sideEffecting: false, composable: false, bindable: true);
+            var functionBoundToDerivedEntity = new EdmFunction(
+                "NS",
+                "FunctionBoundToDerivedEntity",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
             functionBoundToDerivedEntity.AddParameter("Param", _derivedEntityType);
+            container.AddFunctionImport(functionBoundToDerivedEntity);
 
             // function bound to entity collection
-            var functionBoundToEntityCollection = container.AddFunctionImport("FunctionBoundToEntityCollection", returnType: null,
-                entitySet: null, sideEffecting: false, composable: false, bindable: true);
+            var functionBoundToEntityCollection = new EdmFunction(
+                "NS",
+                "FunctionBoundToEntityCollection",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
             functionBoundToEntityCollection.AddParameter("Param", entityCollection);
+            container.AddFunctionImport(functionBoundToEntityCollection);
 
             // function bound to derived entity collection
-            var functionBoundToDerivedEntityCollection = container.AddFunctionImport("FunctionBoundToDerivedEntityCollection", returnType: null,
-                entitySet: null, sideEffecting: false, composable: false, bindable: true);
+            var functionBoundToDerivedEntityCollection = new EdmFunction(
+                "NS",
+                "FunctionBoundToDerivedEntityCollection",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
             functionBoundToDerivedEntityCollection.AddParameter("Param", derivedEntityCollection);
+            container.AddFunctionImport(functionBoundToDerivedEntityCollection);
 
             return container;
         }

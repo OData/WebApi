@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.IO;
@@ -9,8 +9,8 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -45,7 +45,6 @@ namespace System.Web.Http.OData.Formatter
             response.EnsureSuccessStatusCode();
 
             dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            result = result.d;
             ValidateMotorcycle(result);
         }
 
@@ -56,7 +55,6 @@ namespace System.Web.Http.OData.Formatter
             response.EnsureSuccessStatusCode();
 
             dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            result = result.d;
             ValidateCar(result);
         }
 
@@ -67,7 +65,6 @@ namespace System.Web.Http.OData.Formatter
             response.EnsureSuccessStatusCode();
 
             dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            result = result.d;
             ValidateSportbike(result);
         }
 
@@ -78,11 +75,10 @@ namespace System.Web.Http.OData.Formatter
             response.EnsureSuccessStatusCode();
 
             dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            result = result.d;
 
-            ValidateMotorcycle(result.results[0]);
-            ValidateCar(result.results[1]);
-            ValidateSportbike(result.results[2]);
+            ValidateMotorcycle(result.value[0]);
+            ValidateCar(result.value[1]);
+            ValidateSportbike(result.value[2]);
         }
 
         [Fact]
@@ -91,7 +87,7 @@ namespace System.Web.Http.OData.Formatter
             Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/atom+xml");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Motorcycle");
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             AddRequestInfo(request);
             request.Content = new StreamContent(body);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
@@ -100,7 +96,6 @@ namespace System.Web.Http.OData.Formatter
             response.EnsureSuccessStatusCode();
 
             dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            result = result.d;
 
             ValidateMotorcycle(result);
         }
@@ -118,7 +113,6 @@ namespace System.Web.Http.OData.Formatter
             response.EnsureSuccessStatusCode();
 
             dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            result = result.d;
 
             Assert.False((bool)result.CanDoAWheelie);
         }
@@ -138,7 +132,6 @@ namespace System.Web.Http.OData.Formatter
             response.EnsureSuccessStatusCode();
 
             dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            result = result.d;
 
             ValidateMotorcycle(result);
         }
@@ -146,13 +139,13 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void Can_Post_DerivedType_To_Action_Expecting_BaseType_ForJsonLight()
         {
-            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json;odata=minimalmetadata");
+            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json;odata.metadata=minimal");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Vehicle");
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=minimalmetadata"));
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
             AddRequestInfo(request);
             request.Content = new StreamContent(body);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal");
 
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
@@ -168,14 +161,13 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
             AddRequestInfo(request);
-            request.Content = new StringContent("{ '__metadata': { 'type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle' }, 'CanDoAWheelie' : false }");
+            request.Content = new StringContent("{ 'odata.type': '#System.Web.Http.OData.Builder.TestModels.Motorcycle', 'CanDoAWheelie' : false }");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
 
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
 
             dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            result = result.d;
 
             Assert.False((bool)result.CanDoAWheelie);
         }
@@ -184,10 +176,10 @@ namespace System.Web.Http.OData.Formatter
         public void Can_Patch_DerivedType_To_Action_Expecting_BaseType_ForJsonLight()
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=minimalmetadata"));
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
             AddRequestInfo(request);
             request.Content = new StringContent("{ 'odata.type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle', 'CanDoAWheelie' : false }");
-            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=minimalmetadata");
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal");
 
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
@@ -200,7 +192,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void Posting_NonDerivedType_To_Action_Expecting_BaseType_Throws()
         {
-            StringContent content = new StringContent("{ '__metadata' : { 'type' : 'System.Web.Http.OData.Builder.TestModels.Motorcycle' } }");
+            StringContent content = new StringContent("{ 'odata.type' : '#System.Web.Http.OData.Builder.TestModels.Motorcycle' }");
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
             IODataRequestMessage oDataRequest = new ODataMessageWrapper(content.ReadAsStreamAsync().Result, content.Headers);
             ODataMessageReader reader = new ODataMessageReader(oDataRequest, new ODataMessageReaderSettings(), _model);
@@ -208,7 +200,12 @@ namespace System.Web.Http.OData.Formatter
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
 
             ODataDeserializerContext context = new ODataDeserializerContext { Model = _model };
-            context.Path = new ODataPath(new ActionPathSegment(_model.EntityContainers().Single().FunctionImports().Single(f => f.Name == "PostMotorcycle_When_Expecting_Car")));
+            IEdmActionImport action = _model.EntityContainers()
+                .Single()
+                .OperationImports()
+                .Single(f => f.Name == "PostMotorcycle_When_Expecting_Car") as IEdmActionImport;
+            Assert.NotNull(action);
+            context.Path = new ODataPath(new ActionPathSegment(action));
 
             Assert.Throws<ODataException>(
                 () => new ODataEntityDeserializer(deserializerProvider).Read(reader, typeof(Car), context),
@@ -231,14 +228,14 @@ namespace System.Web.Http.OData.Formatter
 
         private static void ValidateMotorcycle(dynamic result)
         {
-            ValidateMotorcycle(result, false);
+            ValidateMotorcycle(result, true);
         }
 
         private static void ValidateMotorcycle(dynamic result, bool jsonLight)
         {
             if (jsonLight)
             {
-                Assert.Equal("System.Web.Http.OData.Builder.TestModels.Motorcycle", (string)result["odata.type"]);
+                Assert.Equal("#System.Web.Http.OData.Builder.TestModels.Motorcycle", (string)result["@odata.type"]);
             }
             else
             {
@@ -253,7 +250,7 @@ namespace System.Web.Http.OData.Formatter
 
         private static void ValidateCar(dynamic result)
         {
-            Assert.Equal("System.Web.Http.OData.Builder.TestModels.Car", (string)result.__metadata.type);
+            Assert.Equal("#System.Web.Http.OData.Builder.TestModels.Car", (string)result["@odata.type"]);
             Assert.Equal("sample car", (string)result.Name);
             Assert.Equal("2009", (string)result.Model);
             Assert.Equal(4, (int)result.WheelCount);
@@ -262,7 +259,7 @@ namespace System.Web.Http.OData.Formatter
 
         private static void ValidateSportbike(dynamic result)
         {
-            Assert.Equal("System.Web.Http.OData.Builder.TestModels.Motorcycle", (string)result.__metadata.type);
+            Assert.Equal("#System.Web.Http.OData.Builder.TestModels.Motorcycle", (string)result["@odata.type"]);
             Assert.Equal("sample sportsbike", (string)result.Name);
             Assert.Equal("2009", (string)result.Model);
             Assert.Equal(2, (int)result.WheelCount);

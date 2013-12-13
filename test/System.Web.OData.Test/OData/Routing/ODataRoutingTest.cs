@@ -1,13 +1,7 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Linq;
 using System.Net.Http;
-using System.Web.Http.OData.Builder;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Routing

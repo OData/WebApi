@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
 using System.Linq;
 using System.Web.Http.OData.Builder.TestModels;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder

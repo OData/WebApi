@@ -1,7 +1,7 @@
-{
-  "odata.metadata":"http://localhost/$metadata#employees","value":[
+﻿{
+  "@odata.context":"http://localhost/$metadata#employees","value":[
     {
-      "EmployeeId":"0","Age":20,"Gender":"Male","FirstName":"Frank","Alias":[
+      "EmployeeId":0,"Age":20,"Gender":"Male","FirstName":"Frank","Alias":[
         "Alias0"
       ],"Address":{
         "StreetAddress":"StreetAddress1","City":"City1","State":"State1","ZipCode":1
@@ -11,7 +11,7 @@
         "ActivityName":"Xbox Gaming"
       }
     },{
-      "EmployeeId":"1","Age":21,"Gender":"Male","FirstName":"Steve","Alias":[
+      "EmployeeId":1,"Age":21,"Gender":"Male","FirstName":"Steve","Alias":[
         "Alias1"
       ],"Address":{
         "StreetAddress":"StreetAddress2","City":"City2","State":"State2","ZipCode":2

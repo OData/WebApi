@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,7 +9,7 @@ using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -45,7 +45,7 @@ namespace System.Web.Http.OData.Formatter
         [InlineData("CustomCollection")]
         public void CollectionProperties_Deserialize(string propertyName)
         {
-            string message = "{ \"ID\" : 42, \"" + propertyName + "\": { \"results\":[ 1, 2, 3 ] } }";
+            string message = "{ \"ID\" : 42, \"" + propertyName + "\": [ 1, 2, 3 ] }";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
@@ -53,16 +53,15 @@ namespace System.Web.Http.OData.Formatter
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
 
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            result = result.d;
+            dynamic result = JToken.Parse(response.Content.ReadAsStringAsync().Result);
 
-            Assert.Equal(new[] { 1, 2, 3 }, (IEnumerable<int>)result[propertyName]["results"].Values<int>());
+            Assert.Equal(new[] { 1, 2, 3 }, (IEnumerable<int>)result[propertyName].Values<int>());
         }
 
         [Fact]
         public void ComplexCollectionProperty_Deserialize()
         {
-            string message = "{ \"ID\" : 42, \"ComplexCollection\" : { \"results\":[  { \"A\": 1 }, { \"A\": 2 }, { \"A\": 3 } ] } }";
+            string message = "{ \"ID\" : 42, \"ComplexCollection\" : [  { \"A\": 1 }, { \"A\": 2 }, { \"A\": 3 } ] }";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
@@ -70,9 +69,8 @@ namespace System.Web.Http.OData.Formatter
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
 
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            result = result.d;
-            IEnumerable<JObject> complexCollection = result["ComplexCollection"]["results"].Values<JObject>();
+            dynamic result = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+            IEnumerable<JObject> complexCollection = result["ComplexCollection"].Values<JObject>();
             Assert.Equal(
                 new[] { 1, 2, 3 },
                 complexCollection.AsQueryable().Select(v => (int)v.Property("A")));
@@ -82,9 +80,9 @@ namespace System.Web.Http.OData.Formatter
         public void EntityCollectionProperty_Deserialize()
         {
             string message = "{ 'ID' : 44,  'Vehicles' : [ " +
-                "{ '__metadata' : { 'type': 'System.Web.Http.OData.Builder.TestModels.Car' }, 'Model': 2009, 'Name': 'Car'}, " +
-                "{ '__metadata' : { 'type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle' }, 'Model': 2010, 'Name': 'Motorcycle'}, " +
-                "{ '__metadata' : { 'type': 'System.Web.Http.OData.Builder.TestModels.SportBike' }, 'Model': 2012, 'Name': 'SportBike'} " +
+                "{ 'odata.type' : '#System.Web.Http.OData.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
+                "{ 'odata.type' : '#System.Web.Http.OData.Builder.TestModels.Motorcycle', 'Model': 2010, 'Name': 'Motorcycle'}, " +
+                "{ 'odata.type' : '#System.Web.Http.OData.Builder.TestModels.SportBike', 'Model': 2012, 'Name': 'SportBike'} " +
                 " ] }";
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
@@ -99,9 +97,9 @@ namespace System.Web.Http.OData.Formatter
         public void Posting_A_Feed_To_NonCollectionProperty_ODataLibThrows()
         {
             string message = "{ 'ID' : 44,  'Vehicle' : [ " +
-                "{ '__metadata' : { 'type': 'System.Web.Http.OData.Builder.TestModels.Car' }, 'Model': 2009, 'Name': 'Car'}, " +
-                "{ '__metadata' : { 'type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle' }, 'Model': 2010, 'Name': 'Motorcycle'}, " +
-                "{ '__metadata' : { 'type': 'System.Web.Http.OData.Builder.TestModels.SportBike' }, 'Model': 2012, 'Name': 'SportBike'} " +
+                "{ 'odata.type' : '#System.Web.Http.OData.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
+                "{ 'odata.type' : '#System.Web.Http.OData.Builder.TestModels.Motorcycle', 'Model': 2010, 'Name': 'Motorcycle'}, " +
+                "{ 'odata.type' : '#System.Web.Http.OData.Builder.TestModels.SportBike', 'Model': 2012, 'Name': 'SportBike'} " +
                 " ] }";
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");

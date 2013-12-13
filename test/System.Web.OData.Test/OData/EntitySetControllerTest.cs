@@ -1,16 +1,14 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -68,7 +66,7 @@ namespace System.Web.Http.OData
         public void EntitySetController_SupportsODataUriParameters()
         {
             Guid guid = Guid.Parse("835ef7c7-ff60-4ecf-8c47-92ceacaf6a19");
-            string uri = "http://localhost/Employees(guid'835ef7c7-ff60-4ecf-8c47-92ceacaf6a19')";
+            string uri = "http://localhost/Employees(835ef7c7-ff60-4ecf-8c47-92ceacaf6a19)";
 
             HttpResponseMessage response = _client.SendAsync(new HttpRequestMessage(HttpMethod.Get, uri)).Result;
 

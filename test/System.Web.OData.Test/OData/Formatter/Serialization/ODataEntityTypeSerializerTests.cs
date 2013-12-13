@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +9,12 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Annotations;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Annotations;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 using ODataPath = System.Web.Http.OData.Routing.ODataPath;
@@ -544,7 +544,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataAction[] actions = new ODataAction[] { new ODataAction(), new ODataAction() };
             SelectExpandNode selectExpandNode = new SelectExpandNode
             {
-                SelectedActions = { new Mock<IEdmFunctionImport>().Object, new Mock<IEdmFunctionImport>().Object }
+                SelectedActions = { new Mock<IEdmAction>().Object, new Mock<IEdmAction>().Object }
             };
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
             serializer.CallBase = true;
@@ -705,7 +705,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void CreateODataAction_ThrowsArgumentNull_EntityInstanceContext()
         {
-            IEdmFunctionImport action = new Mock<IEdmFunctionImport>().Object;
+            IEdmAction action = new Mock<IEdmAction>().Object;
 
             Assert.ThrowsArgumentNull(
                 () => _serializer.CreateODataAction(action, entityInstanceContext: null),
@@ -914,19 +914,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             string expectedContainerName = "Container";
+            string expectedNamespace = "NS";
             string expectedActionName = "Action";
             string expectedTarget = "aa://Target";
             string expectedMetadataPrefix = "http://Metadata";
 
             IEdmEntityContainer container = CreateFakeContainer(expectedContainerName);
-            IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, expectedActionName,
-                isBindable: true);
+            IEdmAction action = CreateFakeAction(expectedNamespace, expectedActionName, isBindable: true);
 
             ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri(expectedTarget),
                 followsConventions: true);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
-            annotationsManager.SetIsAlwaysBindable(functionImport);
+            annotationsManager.SetActionLinkBuilder(action, linkBuilder);
+            annotationsManager.SetIsAlwaysBindable(action);
             annotationsManager.SetDefaultContainer(container);
             IEdmModel model = CreateFakeModel(annotationsManager);
             UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
@@ -935,10 +935,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             context.SerializerContext.MetadataLevel = ODataMetadataLevel.Default;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
+            ODataAction actualAction = _serializer.CreateODataAction(action, context);
 
             // Assert
-            string expectedMetadata = expectedMetadataPrefix + "#" + expectedContainerName + "." + expectedActionName;
+            string expectedMetadata = expectedMetadataPrefix + "#" + expectedNamespace + "." + expectedActionName;
             ODataAction expectedAction = new ODataAction
             {
                 Metadata = new Uri(expectedMetadata),
@@ -953,12 +953,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateODataAction_OmitsAction_WhenActionLinkBuilderReturnsNull()
         {
             // Arrange
-            IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
-            IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, "IgnoreAction");
+            IEdmAction action = CreateFakeAction("IgnoreAction");
 
             ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => null, followsConventions: false);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
+            annotationsManager.SetActionLinkBuilder(action, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
 
@@ -966,7 +965,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             context.SerializerContext.MetadataLevel = ODataMetadataLevel.MinimalMetadata;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
+            ODataAction actualAction = _serializer.CreateODataAction(action, context);
 
             // Assert
             Assert.Null(actualAction);
@@ -977,15 +976,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             string expectedMetadataPrefix = "http://Metadata";
+            string expectedNamespace = "NS";
             string expectedActionName = "Action";
 
             IEdmEntityContainer container = CreateFakeContainer("ContainerShouldNotAppearInResult");
-            IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, expectedActionName);
+            IEdmAction action = CreateFakeAction(expectedNamespace, expectedActionName);
 
             ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://IgnoreTarget"),
                 followsConventions: false);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
+            annotationsManager.SetActionLinkBuilder(action, linkBuilder);
             annotationsManager.SetDefaultContainer(container);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
@@ -995,11 +995,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             context.SerializerContext.MetadataLevel = ODataMetadataLevel.MinimalMetadata;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
+            ODataAction actualAction = _serializer.CreateODataAction(action, context);
 
             // Assert
             Assert.NotNull(actualAction);
-            string expectedMetadata = expectedMetadataPrefix + "#" + expectedActionName;
+            string expectedMetadata = expectedMetadataPrefix + "#" + expectedNamespace + "." + expectedActionName;
             AssertEqual(new Uri(expectedMetadata), actualAction.Metadata);
         }
 
@@ -1007,13 +1007,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateODataAction_SkipsAlwaysAvailableAction_PerShouldOmitAction()
         {
             // Arrange
-            IEdmFunctionImport functionImport = CreateFakeFunctionImport(true);
+            IEdmActionImport actionImport = CreateFakeActionImport(true);
 
             ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://IgnoreTarget"),
                 followsConventions: true);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
-            annotationsManager.SetIsAlwaysBindable(functionImport);
+            annotationsManager.SetActionLinkBuilder(actionImport, linkBuilder);
+            annotationsManager.SetIsAlwaysBindable(actionImport.Action);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
 
@@ -1021,7 +1021,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             context.SerializerContext.MetadataLevel = ODataMetadataLevel.MinimalMetadata;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
+            ODataAction actualAction = _serializer.CreateODataAction(actionImport.Action, context);
 
             // Assert
             Assert.Null(actualAction);
@@ -1035,13 +1035,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             string expectedActionName = "Action";
 
-            IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
-            IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, expectedActionName);
+            IEdmAction action = CreateFakeAction(expectedActionName);
 
             ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://IgnoreTarget"),
                 followsConventions: false);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
+            annotationsManager.SetActionLinkBuilder(action, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
             UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
@@ -1050,7 +1049,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
+            ODataAction actualAction = _serializer.CreateODataAction(action, context);
 
             // Assert
             Assert.NotNull(actualAction);
@@ -1063,13 +1062,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateODataAction_OmitsTitle(TestODataMetadataLevel metadataLevel)
         {
             // Arrange
-            IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
-            IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, "IgnoreAction");
+            IEdmAction action = CreateFakeAction("IgnoreAction");
 
             ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://Ignore"),
                 followsConventions: false);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
+            annotationsManager.SetActionLinkBuilder(action, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
             UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
@@ -1078,7 +1076,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
+            ODataAction actualAction = _serializer.CreateODataAction(action, context);
 
             // Assert
             Assert.NotNull(actualAction);
@@ -1097,12 +1095,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             Uri expectedTarget = new Uri("aa://Target");
 
-            IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
-            IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, "IgnoreAction");
+            IEdmAction action = CreateFakeAction("IgnoreAction");
 
             ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => expectedTarget, followsConventions);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
+            annotationsManager.SetActionLinkBuilder(action, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
             UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
@@ -1111,7 +1108,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
+            ODataAction actualAction = _serializer.CreateODataAction(action, context);
 
             // Assert
             Assert.NotNull(actualAction);
@@ -1124,13 +1121,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateODataAction_OmitsTarget_WhenFollowingConventions(TestODataMetadataLevel metadataLevel)
         {
             // Arrange
-            IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
-            IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, "IgnoreAction");
+            IEdmAction action = CreateFakeAction("IgnoreAction", isBindable: true);
 
             ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://Ignore"),
                 followsConventions: true);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
+            annotationsManager.SetActionLinkBuilder(action, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
             UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
@@ -1139,81 +1135,32 @@ namespace System.Web.Http.OData.Formatter.Serialization
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
-            ODataAction actualAction = _serializer.CreateODataAction(functionImport, context);
+            ODataAction actualAction = _serializer.CreateODataAction(action, context);
 
             // Assert
             Assert.NotNull(actualAction);
             Assert.Null(actualAction.Target);
         }
-
-        [InlineData(TestODataMetadataLevel.Default)]
-        [InlineData(TestODataMetadataLevel.FullMetadata)]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata)]
-        [InlineData(TestODataMetadataLevel.NoMetadata)]
-        public void CreateMetadataFragment_IncludesNonDefaultContainerName(TestODataMetadataLevel metadataLevel)
-        {
-            // Arrange
-            string expectedContainerName = "Container";
-            string expectedActionName = "Action";
-
-            IEdmEntityContainer container = CreateFakeContainer(expectedContainerName);
-            IEdmFunctionImport action = CreateFakeFunctionImport(container, expectedActionName);
-
-            IEdmModel model = CreateFakeModel();
-
-            // Act
-            string actualFragment = ODataEntityTypeSerializer.CreateMetadataFragment(action, model,
-                (ODataMetadataLevel)metadataLevel);
-
-            // Assert
-            Assert.Equal(expectedContainerName + "." + expectedActionName, actualFragment);
-        }
-
-        [Theory]
-        [InlineData(TestODataMetadataLevel.Default)]
-        [InlineData(TestODataMetadataLevel.FullMetadata)]
-        public void CreateMetadataFragment_IncludesDefaultContainerName(TestODataMetadataLevel metadataLevel)
-        {
-            // Arrange
-            string expectedContainerName = "Container";
-            string expectedActionName = "Action";
-
-            IEdmEntityContainer container = CreateFakeContainer(expectedContainerName);
-            IEdmFunctionImport action = CreateFakeFunctionImport(container, expectedActionName);
-
-            IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetDefaultContainer(container);
-            IEdmModel model = CreateFakeModel(annotationsManager);
-
-            // Act
-            string actualFragment = ODataEntityTypeSerializer.CreateMetadataFragment(action, model,
-                (ODataMetadataLevel)metadataLevel);
-
-            // Assert
-            Assert.Equal(expectedContainerName + "." + expectedActionName, actualFragment);
-        }
-
-        [Theory]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata)]
-        [InlineData(TestODataMetadataLevel.NoMetadata)]
-        public void CreateMetadataFragment_OmitsDefaultContainerName(TestODataMetadataLevel metadataLevel)
+        
+        [Fact]
+        public void CreateMetadataFragment_IncludesNamespaceAndName()
         {
             // Arrange
             string expectedActionName = "Action";
+            string expectedNamespace = "NS";
 
             IEdmEntityContainer container = CreateFakeContainer("ContainerShouldNotAppearInResult");
-            IEdmFunctionImport action = CreateFakeFunctionImport(container, expectedActionName);
+            IEdmAction action = CreateFakeAction(expectedNamespace, expectedActionName);
 
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetDefaultContainer(container);
             IEdmModel model = CreateFakeModel(annotationsManager);
 
             // Act
-            string actualFragment = ODataEntityTypeSerializer.CreateMetadataFragment(action, model,
-                (ODataMetadataLevel)metadataLevel);
+            string actualFragment = ODataEntityTypeSerializer.CreateMetadataFragment(action);
 
             // Assert
-            Assert.Equal(expectedActionName, actualFragment);
+            Assert.Equal(expectedNamespace + "." + expectedActionName, actualFragment);
         }
 
         [Theory]
@@ -1237,12 +1184,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             bool followsConventions, bool expectedResult)
         {
             // Arrange
-            IEdmFunctionImport action = CreateFakeFunctionImport(true);
+            IEdmActionImport action = CreateFakeActionImport(true);
             IEdmDirectValueAnnotationsManager annonationsManager = CreateFakeAnnotationsManager();
 
             if (isAlwaysAvailable)
             {
-                annonationsManager.SetIsAlwaysBindable(action);
+                annonationsManager.SetIsAlwaysBindable(action.Action);
             }
 
             IEdmModel model = CreateFakeModel(annonationsManager);
@@ -1251,7 +1198,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 followsConventions);
 
             // Act
-            bool actualResult = ODataEntityTypeSerializer.ShouldOmitAction(action, model, builder,
+            bool actualResult = ODataEntityTypeSerializer.ShouldOmitAction(action.Action, model, builder,
                 (ODataMetadataLevel)metadataLevel);
 
             // Assert
@@ -1413,29 +1360,65 @@ namespace System.Web.Http.OData.Formatter.Serialization
             return mock.Object;
         }
 
-        private static IEdmFunctionImport CreateFakeFunctionImport(IEdmEntityContainer container, string name)
+        private static IEdmActionImport CreateFakeActionImport(IEdmEntityContainer container, string name)
         {
-            Mock<IEdmFunctionImport> mock = new Mock<IEdmFunctionImport>();
+            Mock<IEdmAction> mockAction = new Mock<IEdmAction>();
+            mockAction.Setup(o => o.IsBound).Returns(true);
+            Mock<IEdmActionImport> mock = new Mock<IEdmActionImport>();
             mock.Setup(o => o.Container).Returns(container);
             mock.Setup(o => o.Name).Returns(name);
+            mock.Setup(o => o.Action).Returns(mockAction.Object);
+            return mock.Object;
+        }
+        
+        private static IEdmActionImport CreateFakeActionImport(IEdmEntityContainer container, string name, bool isBindable)
+        {
+            Mock<IEdmActionImport> mock = new Mock<IEdmActionImport>();
+            mock.Setup(o => o.Container).Returns(container);
+            mock.Setup(o => o.Name).Returns(name);
+            Mock<IEdmAction> mockAction = new Mock<IEdmAction>();
+            mockAction.Setup(o => o.IsBound).Returns(isBindable);
+            mock.Setup(o => o.Action).Returns(mockAction.Object);
             return mock.Object;
         }
 
-        private static IEdmFunctionImport CreateFakeFunctionImport(IEdmEntityContainer container, string name,
-            bool isBindable)
+        private static IEdmActionImport CreateFakeActionImport(bool isBindable)
         {
-            Mock<IEdmFunctionImport> mock = new Mock<IEdmFunctionImport>();
-            mock.Setup(o => o.Container).Returns(container);
-            mock.Setup(o => o.Name).Returns(name);
-            mock.Setup(o => o.IsBindable).Returns(isBindable);
+            Mock<IEdmActionImport> mock = new Mock<IEdmActionImport>();
+            Mock<IEdmAction> mockAction = new Mock<IEdmAction>();
+            mockAction.Setup(o => o.IsBound).Returns(isBindable);
+            mock.Setup(o => o.Action).Returns(mockAction.Object);
             return mock.Object;
         }
 
-        private static IEdmFunctionImport CreateFakeFunctionImport(bool isBindable)
+        private static IEdmAction CreateFakeAction(string name)
         {
-            Mock<IEdmFunctionImport> mock = new Mock<IEdmFunctionImport>();
-            mock.Setup(o => o.IsBindable).Returns(isBindable);
-            return mock.Object;
+            return CreateFakeAction(nameSpace: null, name: name, isBindable: true);
+        }
+
+        private static IEdmAction CreateFakeAction(string name, bool isBindable)
+        {
+            return CreateFakeAction(nameSpace: null, name: name, isBindable: isBindable);
+        }
+
+        private static IEdmAction CreateFakeAction(string nameSpace, string name)
+        {
+            return CreateFakeAction(nameSpace, name, isBindable: true);
+        }
+
+        private static IEdmAction CreateFakeAction(string nameSpace, string name, bool isBindable)
+        {
+            Mock<IEdmAction> mockAction = new Mock<IEdmAction>();
+            mockAction.SetupGet(o => o.Namespace).Returns(nameSpace);
+            mockAction.SetupGet(o => o.Name).Returns(name);
+            mockAction.Setup(o => o.IsBound).Returns(isBindable);
+            Mock<IEdmOperationParameter> mockParameter = new Mock<IEdmOperationParameter>();
+            mockParameter.SetupGet(o => o.DeclaringOperation).Returns(mockAction.Object);
+            Mock<IEdmEntityTypeReference> mockEntityTyeRef = new Mock<IEdmEntityTypeReference>();
+            mockEntityTyeRef.Setup(o => o.Definition).Returns(new Mock<IEdmEntityType>().Object);
+            mockParameter.SetupGet(o => o.Type).Returns(mockEntityTyeRef.Object);
+            mockAction.SetupGet(o => o.Parameters).Returns(new[] { mockParameter.Object });
+            return mockAction.Object;
         }
 
         private static IEdmModel CreateFakeModel()
@@ -1484,15 +1467,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         private class FakeBindableProcedureFinder : BindableProcedureFinder
         {
-            private IEdmFunctionImport[] _procedures;
+            private IEdmOperation[] _procedures;
 
-            public FakeBindableProcedureFinder(params IEdmFunctionImport[] procedures)
+            public FakeBindableProcedureFinder(params IEdmOperation[] procedures)
                 : base(EdmCoreModel.Instance)
             {
                 _procedures = procedures;
             }
 
-            public override IEnumerable<IEdmFunctionImport> FindProcedures(IEdmEntityType entityType)
+            public override IEnumerable<IEdmOperation> FindProcedures(IEdmEntityType entityType)
             {
                 return _procedures;
             }

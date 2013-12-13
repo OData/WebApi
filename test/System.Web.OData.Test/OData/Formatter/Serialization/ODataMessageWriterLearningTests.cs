@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
 using System.Linq;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
@@ -105,7 +105,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestWriteEntityReferenceLink_InJsonLight_WithoutEntitySetOrNavigationProperty_Throws()
+        public void TestWriteEntityReferenceLink_InJsonLight_WithoutEntitySetOrNavigationProperty_DoesNotThrow()
         {
             // Arrange
             IODataResponseMessage response = CreateResponse();
@@ -119,12 +119,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => writer.WriteEntityReferenceLink(link));
+                Assert.DoesNotThrow(() => writer.WriteEntityReferenceLink(link));
             }
         }
 
         [Fact]
-        public void TestWriteEntityReferenceLink_InJsonLight_WithEntitySetButNotNavigationProperty_Throws()
+        public void TestWriteEntityReferenceLink_InJsonLight_WithEntitySetButNotNavigationProperty_DoesNotThrow()
         {
             // Arrange
             IODataResponseMessage response = CreateResponse();
@@ -139,7 +139,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => writer.WriteEntityReferenceLink(link, entitySet, null));
+                Assert.DoesNotThrow(() => writer.WriteEntityReferenceLink(link, entitySet, null));
             }
         }
 
@@ -156,7 +156,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             };
             IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().First();
             IEdmNavigationProperty navigationProperty =
-                model.EntityContainers().Single().EntitySets().First().NavigationTargets.First().NavigationProperty;
+                model.EntityContainers().Single().EntitySets().First().NavigationPropertyBindings.First().NavigationProperty;
 
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
@@ -202,8 +202,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
             var orderSet = container.AddEntitySet("Orders", orderType);
             var customerSet = container.AddEntitySet("Customers", customerType);
 
-            container.AddFunctionImport("GetId", new EdmPrimitiveTypeReference(
-                EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32), true));
+            container.AddFunctionImport(
+                new EdmFunction(
+                    "Default",
+                    "GetId",
+                    new EdmPrimitiveTypeReference(
+                        EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32),
+                        isNullable: true)));
 
             orderSet.AddNavigationTarget(orderType.NavigationProperties().Single(np => np.Name == "Customer"),
                 customerSet);

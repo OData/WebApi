@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Data.Linq;
@@ -21,8 +21,8 @@ namespace System.Web.Http.OData.Query.Expressions
 
         public short? ReorderLevel { get; set; }
         public bool? Discontinued { get; set; }
-        public DateTime? DiscontinuedDate { get; set; }
-        public DateTime NonNullableDiscontinuedDate { get; set; }
+        public DateTimeOffset? DiscontinuedDate { get; set; }
+        public DateTimeOffset NonNullableDiscontinuedDate { get; set; }
 
         public DateTimeOffset DiscontinuedOffset { get; set; }
         public TimeSpan DiscontinuedSince { get; set; }
@@ -61,7 +61,7 @@ namespace System.Web.Http.OData.Query.Expressions
     {
         public int Id { get; set; }
         public Guid GuidProp { get; set; }
-        public DateTime DateTimeProp { get; set; }
+        public DateTimeOffset DateTimeProp { get; set; }
         public DateTimeOffset DateTimeOffsetProp { get; set; }
         public byte[] ByteArrayProp { get; set; }
         public byte[] ByteArrayPropWithNullValue { get; set; }

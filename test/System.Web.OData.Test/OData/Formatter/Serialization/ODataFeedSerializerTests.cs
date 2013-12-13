@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
 using System.Linq;
@@ -9,11 +9,11 @@ using System.Web.Http.OData.Formatter.Serialization.Models;
 using System.Web.Http.OData.Query;
 using System.Web.Http.Routing;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Atom;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.Atom;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 

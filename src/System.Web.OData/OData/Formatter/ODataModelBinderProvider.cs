@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
@@ -7,8 +7,8 @@ using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.ValueProviders;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 
 namespace System.Web.Http.OData.Formatter
 {
@@ -96,7 +96,7 @@ namespace System.Web.Http.OData.Formatter
                     return null;
                 }
 
-                object value = ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V3);
+                object value = ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V4);
 
                 bool isNonStandardEdmPrimitive;
                 EdmLibHelpers.IsNonstandardEdmPrimitive(type, out isNonStandardEdmPrimitive);

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,7 +11,7 @@ using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.TestCommon;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -163,7 +163,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             product.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
             product.AssertHasPrimitiveProperty(model, "ID", EdmPrimitiveTypeKind.Int32, isNullable: false);
             product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
-            product.AssertHasPrimitiveProperty(model, "ReleaseDate", EdmPrimitiveTypeKind.DateTime, isNullable: true);
+            product.AssertHasPrimitiveProperty(model, "ReleaseDate", EdmPrimitiveTypeKind.DateTimeOffset, isNullable: true);
             product.AssertHasComplexProperty(model, "Version", typeof(ProductVersion), isNullable: true);
             product.AssertHasNavigationProperty(model, "Category", typeof(Category), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
@@ -197,7 +197,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             product.AssertHasKey(model, "IdOfProduct", EdmPrimitiveTypeKind.Int32);
             product.AssertHasPrimitiveProperty(model, "IdOfProduct", EdmPrimitiveTypeKind.Int32, isNullable: false);
             product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
-            product.AssertHasPrimitiveProperty(model, "ReleaseDate", EdmPrimitiveTypeKind.DateTime, isNullable: true);
+            product.AssertHasPrimitiveProperty(model, "ReleaseDate", EdmPrimitiveTypeKind.DateTimeOffset, isNullable: true);
             product.AssertHasComplexProperty(model, "Version", typeof(ProductVersion), isNullable: true);
             product.AssertHasNavigationProperty(model, "Category", typeof(CategoryWithKeyAttribute), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
@@ -740,7 +740,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntityType motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
             IEdmEntityType sportbike = model.AssertHasEntityType(typeof(SportBike));
 
-            Assert.Equal(2, vehicles.NavigationTargets.Count());
+            Assert.Equal(2, vehicles.NavigationPropertyBindings.Count());
             vehicles.AssertHasNavigationTarget(
                 car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
                 "manufacturers");
@@ -769,7 +769,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntityType motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
             IEdmEntityType sportbike = model.AssertHasEntityType(typeof(SportBike));
 
-            Assert.Equal(2, vehicles.NavigationTargets.Count());
+            Assert.Equal(2, vehicles.NavigationPropertyBindings.Count());
             vehicles.AssertHasNavigationTarget(
                 car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
                 "car_manufacturers");
@@ -797,27 +797,27 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             // one for motorcycle manufacturer and one for car manufacturer
             IEdmEntitySet vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
-            Assert.Equal(2, vehicles.NavigationTargets.Count());
+            Assert.Equal(2, vehicles.NavigationPropertyBindings.Count());
 
             // one for car manufacturer
             IEdmEntitySet cars = model.EntityContainers().Single().FindEntitySet("cars");
-            Assert.Equal(1, cars.NavigationTargets.Count());
+            Assert.Equal(1, cars.NavigationPropertyBindings.Count());
 
             // one for motorcycle manufacturer
             IEdmEntitySet motorcycles = model.EntityContainers().Single().FindEntitySet("motorcycles");
-            Assert.Equal(1, motorcycles.NavigationTargets.Count());
+            Assert.Equal(1, motorcycles.NavigationPropertyBindings.Count());
 
             // one for motorcycle manufacturer
             IEdmEntitySet sportbikes = model.EntityContainers().Single().FindEntitySet("sportbikes");
-            Assert.Equal(1, sportbikes.NavigationTargets.Count());
+            Assert.Equal(1, sportbikes.NavigationPropertyBindings.Count());
 
             // no navigations
             IEdmEntitySet carManufacturers = model.EntityContainers().Single().FindEntitySet("car_manufacturers");
-            Assert.Equal(0, carManufacturers.NavigationTargets.Count());
+            Assert.Equal(0, carManufacturers.NavigationPropertyBindings.Count());
 
             //  no navigations
             IEdmEntitySet motorcycleManufacturers = model.EntityContainers().Single().FindEntitySet("motorcycle_manufacturers");
-            Assert.Equal(0, motorcycleManufacturers.NavigationTargets.Count());
+            Assert.Equal(0, motorcycleManufacturers.NavigationPropertyBindings.Count());
         }
 
         [Fact]
@@ -1346,7 +1346,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
         public string Name { get; set; }
 
-        public DateTime? ReleaseDate { get; set; }
+        public DateTimeOffset? ReleaseDate { get; set; }
 
         public ProductVersion Version { get; set; }
 
@@ -1379,7 +1379,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
         public string Name { get; set; }
 
-        public DateTime? ReleaseDate { get; set; }
+        public DateTimeOffset? ReleaseDate { get; set; }
 
         public ProductVersion Version { get; set; }
 

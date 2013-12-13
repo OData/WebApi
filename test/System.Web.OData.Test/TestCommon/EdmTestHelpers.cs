@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.IO;
@@ -8,10 +8,10 @@ using System.Reflection;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Xml;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Csdl;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.Edm.Validation;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Csdl;
+using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Validation;
 
 namespace System.Web.Http.OData
 {

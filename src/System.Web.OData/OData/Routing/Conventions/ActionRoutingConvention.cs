@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing.Conventions
 {
@@ -51,10 +51,10 @@ namespace System.Web.Http.OData.Routing.Conventions
             return null;
         }
 
-        private static IEdmFunctionImport GetAction(ODataPath odataPath)
+        private static IEdmActionImport GetAction(ODataPath odataPath)
         {
             ODataPathSegment odataSegment = odataPath.Segments.Last();
-            IEdmFunctionImport action = null;
+            IEdmActionImport action = null;
             ActionPathSegment actionSegment = odataSegment as ActionPathSegment;
             if (actionSegment != null)
             {

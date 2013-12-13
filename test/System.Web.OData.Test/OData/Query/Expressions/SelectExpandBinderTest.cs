@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -8,11 +8,11 @@ using System.Reflection;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Serialization.Models;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query.Expressions
@@ -62,7 +62,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void Bind_GeneratedExpression_ContainsExpandedObject()
         {
             // Arrange
-            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption("Orders,Orders/Customer", "Orders,Orders/Customer", _context);
+            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption("Orders", "Orders,Orders($expand=Customer)", _context);
 
             // Act
             IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, selectExpand);
@@ -327,7 +327,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         [Theory]
         [InlineData("Name")]
-        [InlineData("ModelWithInheritance.upgrade")]
+        [InlineData("NS.upgrade")]
         public void ProjectAsWrapper_Element_ProjectedValueContains_KeyPropertiesEvenIfNotPresentInSelectClause(string select)
         {
             // Arrange
@@ -346,7 +346,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         [Theory]
         [InlineData("Name")]
-        [InlineData("ModelWithInheritance.upgrade")]
+        [InlineData("NS.upgrade")]
         public void ProjectAsWrapper_ProjectedValueContainsConcurrencyProperties_EvenIfNotPresentInSelectClause(string select)
         {
             // Arrange

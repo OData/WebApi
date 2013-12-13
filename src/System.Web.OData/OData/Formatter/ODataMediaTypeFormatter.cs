@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -18,8 +18,8 @@ using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Formatter
 {
@@ -28,8 +28,8 @@ namespace System.Web.Http.OData.Formatter
     /// </summary>
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
-        internal const ODataVersion DefaultODataVersion = ODataVersion.V3;
-        internal const string ODataServiceVersion = "DataServiceVersion";
+        internal const ODataVersion DefaultODataVersion = ODataVersion.V4;
+        internal const string ODataServiceVersion = "OData-Version";
         private readonly ODataVersion _version;
 
         /// <summary>
@@ -457,8 +457,12 @@ namespace System.Web.Http.OData.Formatter
                     throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
                 }
 
-                string selectClause = GetSelectClause(Request);
-                writerSettings.SetMetadataDocumentUri(new Uri(metadataLink), selectClause);
+                string resourcePath = path != null ? path.ToString() : String.Empty;
+                writerSettings.SetMetadataDocumentUri(
+                    new Uri(metadataLink),
+                    Request.GetSelectExpandClause(),
+                    resourcePath,
+                    isIndividualProperty: false);
             }
 
             MediaTypeHeaderValue contentType = null;

@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Serialization;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
@@ -43,7 +43,7 @@ namespace System.Web.Http.OData.Builder
             Assert.NotNull(customers);
             var orders = container.EntitySets().SingleOrDefault(e => e.Name == "Orders");
             Assert.NotNull(orders);
-            var customerOrders = customers.NavigationTargets.First(nt => nt.NavigationProperty.Name == "Orders");
+            var customerOrders = customers.NavigationPropertyBindings.FirstOrDefault(nt => nt.NavigationProperty.Name == "Orders");
             Assert.NotNull(customerOrders);
             Assert.Equal("Orders", customerOrders.TargetEntitySet.Name);
         }

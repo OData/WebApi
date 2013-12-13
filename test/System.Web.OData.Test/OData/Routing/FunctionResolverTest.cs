@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Routing
@@ -29,7 +29,8 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             IEdmModel model = GetEdmModel();
             IEdmEntityContainer container = model.EntityContainers().Single();
-            IEnumerable<IEdmFunctionImport> functions = container.FunctionImports().Where(f => f.Name == functionName);
+            IEnumerable<IEdmFunctionImport> functions =
+                container.OperationImports().Where(o => o.Name == functionName).OfType<IEdmFunctionImport>();
 
             // Act
             FunctionPathSegment pathSegment = FunctionResolver.TryResolve(functions, model, nextSegment);
@@ -45,15 +46,16 @@ namespace System.Web.Http.OData.Routing
         [InlineData("FunctionWithOneParam", "()")] // empty parameters
         [InlineData("FunctionWithOneParam", "something")] // not a function call parameter list
         [InlineData("FunctionWithOneParam", "(UnknownParam=42)")] // unknown parameter
-        [InlineData("FunctionWithOneParam", "(UnknownParam1=42,UknownParam2=42)")] // unknown parameters
-        [InlineData("FunctionWithOneParam", "(Parameter=42,UknownParam2=42)")] // known and unknown parameters
+        [InlineData("FunctionWithOneParam", "(UnknownParam1=42,UnknownParam2=42)")] // unknown parameters
+        [InlineData("FunctionWithOneParam", "(Parameter=42,UnknownParam2=42)")] // known and unknown parameters
         [InlineData("FunctionWithMultipleParams", "(Parameter1=42,Parameter2=42)")] // subset parameters
         public void TryResolve_NegativeTests(string functionName, string nextSegment)
         {
             // Arrange
             IEdmModel model = GetEdmModel();
             IEdmEntityContainer container = model.EntityContainers().Single();
-            IEnumerable<IEdmFunctionImport> functions = container.FunctionImports().Where(f => f.Name == functionName);
+            IEnumerable<IEdmFunctionImport> functions =
+                container.OperationImports().Where(o => o.Name == functionName).OfType<IEdmFunctionImport>();
 
             // Act & Assert
             Assert.Null(FunctionResolver.TryResolve(functions, model, nextSegment));
@@ -68,23 +70,27 @@ namespace System.Web.Http.OData.Routing
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
             IEdmTypeReference parameterType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
 
-            container.AddFunctionImport("FunctionWithoutParams", returnType);
+            container.AddFunctionImport(new EdmFunction("NS", "FunctionWithoutParams", returnType));
 
-            container.AddFunctionImport("FunctionWithOneParam", returnType)
-                .AddParameter("Parameter", parameterType);
+            var functionWithOneParam = new EdmFunction("NS", "FunctionWithOneParam", returnType);
+            functionWithOneParam.AddParameter("Parameter", parameterType);
+            container.AddFunctionImport(functionWithOneParam);
 
-            var functionWithMultipleParams = container.AddFunctionImport("FunctionWithMultipleParams", returnType);
+            var functionWithMultipleParams = new EdmFunction("NS", "FunctionWithMultipleParams", returnType);
             functionWithMultipleParams.AddParameter("Parameter1", parameterType);
             functionWithMultipleParams.AddParameter("Parameter2", parameterType);
             functionWithMultipleParams.AddParameter("Parameter3", parameterType);
+            container.AddFunctionImport(functionWithMultipleParams);
 
-            container.AddFunctionImport("FunctionWithOverloads", returnType);
-            container.AddFunctionImport("FunctionWithOverloads", returnType)
-                .AddParameter("Parameter", parameterType);
-            var functionWithOverloads = container.AddFunctionImport("FunctionWithOverloads", returnType);
-            functionWithOverloads.AddParameter("Parameter1", parameterType);
-            functionWithOverloads.AddParameter("Parameter2", parameterType);
-            functionWithOverloads.AddParameter("Parameter3", parameterType);
+            container.AddFunctionImport(new EdmFunction("NS", "FunctionWithOverloads", returnType));
+            var functionWithOverloads2 = new EdmFunction("NS", "FunctionWithOverloads", returnType);
+            functionWithOverloads2.AddParameter("Parameter", parameterType);
+            container.AddFunctionImport(functionWithOverloads2);
+            var functionWithOverloads3 = new EdmFunction("NS", "FunctionWithOverloads", returnType);
+            functionWithOverloads3.AddParameter("Parameter1", parameterType);
+            functionWithOverloads3.AddParameter("Parameter2", parameterType);
+            functionWithOverloads3.AddParameter("Parameter3", parameterType);
+            container.AddFunctionImport(functionWithOverloads3);
 
             return model;
         }

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +8,10 @@ using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Query.Validators;
 using System.Web.Http.OData.TestCommon;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Core.UriParser.TreeNodeKinds;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
@@ -34,7 +34,7 @@ namespace System.Web.Http.OData.Query
 
                     // Complex properties
                     { "Address/City eq 'redmond'", new int[] { 1 } },
-                    { "substringof('e', Address/City)", new int[] { 1, 2 } },
+                    { "contains(Address/City, 'e')", new int[] { 1, 2 } },
 
                     // Primitive property collections
                     { "Aliases/any(alias: alias eq 'alias34')", new int[] { 3, 4 } },
@@ -423,7 +423,7 @@ namespace System.Web.Http.OData.Query
         [InlineData("length(SimpleNullable) eq 5", "The 'length' function cannot be applied to an enumeration-typed argument.")]
         [InlineData("length(Flag) eq 5", "The 'length' function cannot be applied to an enumeration-typed argument.")]
         [InlineData("length(FlagNullable) eq 5", "The 'length' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("substringof('foo', Simple) eq true", "The 'substringof' function cannot be applied to an enumeration-typed argument.")]
+        [InlineData("contains(Simple, 'foo') eq true", "The 'contains' function cannot be applied to an enumeration-typed argument.")]
         [InlineData("startswith(Simple, 'foo') eq true", "The 'startswith' function cannot be applied to an enumeration-typed argument.")]
         [InlineData("endswith(Simple, 'foo') eq true", "The 'endswith' function cannot be applied to an enumeration-typed argument.")]
         [InlineData("tolower(Simple) eq 'foo'", "The 'tolower' function cannot be applied to an enumeration-typed argument.")]

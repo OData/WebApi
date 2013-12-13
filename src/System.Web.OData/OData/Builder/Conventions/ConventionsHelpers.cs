@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -8,9 +8,9 @@ using System.Reflection;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
@@ -136,7 +136,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(value);
 
-            return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V3);
+            return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
         }
 
         private static string GetUriRepresentationForKeyValue(IEdmProperty key, EntityInstanceContext entityInstanceContext)

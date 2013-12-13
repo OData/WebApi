@@ -1,7 +1,7 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -18,12 +18,13 @@ using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
+using Newtonsoft.Json.Linq;
 using ODataPath = System.Web.Http.OData.Routing.ODataPath;
 
 namespace System.Web.Http.OData.Formatter
@@ -65,7 +66,7 @@ namespace System.Web.Http.OData.Formatter
         {
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[0]);
             Assert.ThrowsArgumentNull(
-                () => new ODataMediaTypeFormatter(formatter, version: ODataVersion.V2, request: null),
+                () => new ODataMediaTypeFormatter(formatter, version: ODataVersion.V4, request: null),
                 "request");
         }
 
@@ -73,7 +74,7 @@ namespace System.Web.Http.OData.Formatter
         public void CopyCtor_ThrowsArgumentNull_Formatter()
         {
             Assert.ThrowsArgumentNull(
-                () => new ODataMediaTypeFormatter(formatter: null, version: ODataVersion.V2, request: new HttpRequestMessage()),
+                () => new ODataMediaTypeFormatter(formatter: null, version: ODataVersion.V4, request: new HttpRequestMessage()),
                 "formatter");
         }
 
@@ -181,26 +182,26 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Theory]
-        [InlineData(null, null, "3.0")]
-        [InlineData("1.0", null, "1.0")]
-        [InlineData("2.0", null, "2.0")]
-        [InlineData("3.0", null, "3.0")]
-        [InlineData(null, "1.0", "1.0")]
-        [InlineData(null, "2.0", "2.0")]
-        [InlineData(null, "3.0", "3.0")]
-        [InlineData("1.0", "1.0", "1.0")]
-        [InlineData("1.0", "2.0", "2.0")]
-        [InlineData("1.0", "3.0", "3.0")]
+        [InlineData(null, null, "4.0")]
+        [InlineData("1.0", null, "4.0")]
+        [InlineData("2.0", null, "4.0")]
+        [InlineData("3.0", null, "4.0")]
+        [InlineData(null, "1.0", "4.0")]
+        [InlineData(null, "2.0", "4.0")]
+        [InlineData(null, "3.0", "4.0")]
+        [InlineData("1.0", "1.0", "4.0")]
+        [InlineData("1.0", "2.0", "4.0")]
+        [InlineData("1.0", "3.0", "4.0")]
         public void SetDefaultContentHeaders_SetsRightODataServiceVersion(string requestDataServiceVersion, string requestMaxDataServiceVersion, string expectedDataServiceVersion)
         {
             HttpRequestMessage request = new HttpRequestMessage();
             if (requestDataServiceVersion != null)
             {
-                request.Headers.TryAddWithoutValidation("DataServiceVersion", requestDataServiceVersion);
+                request.Headers.TryAddWithoutValidation("OData-Version", requestDataServiceVersion);
             }
             if (requestMaxDataServiceVersion != null)
             {
-                request.Headers.TryAddWithoutValidation("MaxDataServiceVersion", requestMaxDataServiceVersion);
+                request.Headers.TryAddWithoutValidation("OData-MaxVersion", requestMaxDataServiceVersion);
             }
 
             HttpContentHeaders contentHeaders = new StringContent("").Headers;
@@ -210,7 +211,7 @@ namespace System.Web.Http.OData.Formatter
             .SetDefaultContentHeaders(typeof(int), contentHeaders, MediaTypeHeaderValue.Parse("application/xml"));
 
             IEnumerable<string> headervalues;
-            Assert.True(contentHeaders.TryGetValues("DataServiceVersion", out headervalues));
+            Assert.True(contentHeaders.TryGetValues("OData-Version", out headervalues));
             Assert.Equal(new string[] { expectedDataServiceVersion }, headervalues);
         }
 
@@ -269,7 +270,7 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeFormatter formatter = CreateFormatterWithRequest();
             formatter.SupportedEncodings.Add(CreateEncoding(encoding));
             string formattedContent = CreateFormattedContent(content);
-            string mediaType = string.Format("application/json; odata=minimalmetadata; charset={0}", encoding);
+            string mediaType = string.Format("application/json; odata.metadata=minimal; charset={0}", encoding);
 
             // Act & assert
             return ReadContentUsingCorrectCharacterEncodingHelper(
@@ -285,7 +286,7 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeFormatter formatter = CreateFormatterWithRequest();
             formatter.SupportedEncodings.Add(CreateEncoding(encoding));
             string formattedContent = CreateFormattedContent(content);
-            string mediaType = string.Format("application/json; odata=minimalmetadata; charset={0}", encoding);
+            string mediaType = string.Format("application/json; odata.metadata=minimal; charset={0}", encoding);
 
             // Act & assert
             return WriteContentUsingCorrectCharacterEncodingHelper(
@@ -337,7 +338,7 @@ namespace System.Web.Http.OData.Formatter
             var formatter = new ODataMediaTypeFormatter(deserializerProvider, serializerProvider.Object, Enumerable.Empty<ODataPayloadKind>());
             formatter.Request = request;
             HttpContent content = new StringContent("42");
-            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
 
             // Act
             formatter.WriteToStreamAsync(typeof(int), 42, new MemoryStream(), content, transportContext: null);
@@ -370,7 +371,7 @@ namespace System.Web.Http.OData.Formatter
             var formatter = new ODataMediaTypeFormatter(deserializerProvider, serializerProvider.Object, Enumerable.Empty<ODataPayloadKind>());
             formatter.Request = request;
             HttpContent content = new StringContent("42");
-            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
 
             // Act
             formatter.WriteToStreamAsync(typeof(int), 42, new MemoryStream(), content, transportContext: null);
@@ -480,7 +481,7 @@ namespace System.Web.Http.OData.Formatter
             var formatter = new ODataMediaTypeFormatter(deserializerProvider.Object, serializerProvider, Enumerable.Empty<ODataPayloadKind>());
             formatter.Request = request;
             HttpContent content = new StringContent("42");
-            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
 
             // Act
             formatter.ReadFromStreamAsync(typeof(int), new MemoryStream(), content, formatterLogger: null);
@@ -665,9 +666,18 @@ namespace System.Web.Http.OData.Formatter
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             IEdmModel model = CreateModel();
+            IEdmSchemaType entityType = model.FindDeclaredType("System.Net.Http.Formatting.SampleType");
+            IEdmStructuralProperty property =
+                ((IEdmStructuredType)entityType).FindProperty("Number") as IEdmStructuralProperty;
             HttpRequestMessage request = CreateFakeODataRequest(model);
-            request.RequestUri = new Uri("http://localhost/Customers?$select=something");
-            request.SetSelectExpandClause(new SelectExpandClause(new SelectItem[0], allSelected: true));
+            request.RequestUri = new Uri("http://localhost/sampleTypes?$select=Number");
+            request.SetSelectExpandClause(
+                new SelectExpandClause(
+                    new Collection<SelectItem>
+                        {
+                            new PathSelectItem(new ODataSelectPath(new PropertySegment(property))),
+                        },
+                    allSelected: false));
 
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.Entry);
 
@@ -675,11 +685,10 @@ namespace System.Web.Http.OData.Formatter
             formatter.WriteToStreamAsync(typeof(SampleType[]), new SampleType[0], stream, content, transportContext: null);
 
             // Assert
-            // This is ugly, but ODataWriter doesn't expose the writer settings that it uses. So, validate that
-            // the $select clause shows up in the response payload.
             stream.Seek(0, SeekOrigin.Begin);
             string result = content.ReadAsStringAsync().Result;
-            Assert.Contains("$select=something", result);
+            JObject obj = JObject.Parse(result);
+            Assert.Equal("http://localhost/#sampleTypes(Number)", obj["@odata.context"]);
         }
 
         [Fact]
@@ -729,7 +738,7 @@ namespace System.Web.Http.OData.Formatter
         private static string CreateFormattedContent(string value)
         {
             return string.Format(CultureInfo.InvariantCulture,
-                "{{\r\n  \"odata.metadata\":\"http://dummy/#Edm.String\",\"value\":\"{0}\"\r\n}}", value);
+                "{{\r\n  \"@odata.context\":\"http://dummy/#Edm.String\",\"value\":\"{0}\"\r\n}}", value);
         }
 
         protected override ODataMediaTypeFormatter CreateFormatter()
@@ -826,8 +835,8 @@ namespace System.Web.Http.OData.Formatter
             get
             {
                 return Encoding.UTF8.GetBytes(
-                  @"<entry xml:base=""http://localhost/"" xmlns=""http://www.w3.org/2005/Atom"" xmlns:d=""http://schemas.microsoft.com/ado/2007/08/dataservices"" xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" xmlns:georss=""http://www.georss.org/georss"" xmlns:gml=""http://www.opengis.net/gml"">
-                      <category term=""System.Net.Http.Formatting.SampleType"" scheme=""http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"" />
+                  @"<entry xml:base=""http://localhost/"" xmlns=""http://www.w3.org/2005/Atom"" xmlns:d=""http://docs.oasis-open.org/odata/ns/data"" xmlns:m=""http://docs.oasis-open.org/odata/ns/metadata"" xmlns:georss=""http://www.georss.org/georss"" xmlns:gml=""http://www.opengis.net/gml"">
+                      <category term=""#System.Net.Http.Formatting.SampleType"" scheme=""http://docs.oasis-open.org/odata/ns/scheme"" />
                       <id />
                       <title />
                       <updated>2012-08-17T00:16:14Z</updated>
@@ -836,7 +845,7 @@ namespace System.Web.Http.OData.Formatter
                       </author>
                       <content type=""application/xml"">
                         <m:properties>
-                          <d:Number m:type=""Edm.Int32"">42</d:Number>
+                          <d:Number m:type=""Int32"">42</d:Number>
                         </m:properties>
                       </content>
                     </entry>"

@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Web.Http.OData.TestCommon.Models;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Csdl;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Csdl;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -107,7 +107,7 @@ namespace System.Web.Http.OData.Builder
         {
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            Assert.Reflection.Property(builder, b => b.DataServiceVersion, new Version(3, 0), allowNull: false, roundTripTestValue: new Version(1, 0));
+            Assert.Reflection.Property(builder, b => b.DataServiceVersion, new Version(4, 0), allowNull: false, roundTripTestValue: new Version(1, 0));
         }
 
         [Fact]
@@ -115,7 +115,7 @@ namespace System.Web.Http.OData.Builder
         {
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            Assert.Reflection.Property(builder, b => b.MaxDataServiceVersion, new Version(3, 0), allowNull: false, roundTripTestValue: new Version(1, 0));
+            Assert.Reflection.Property(builder, b => b.MaxDataServiceVersion, new Version(4, 0), allowNull: false, roundTripTestValue: new Version(1, 0));
         }
 
         [Fact]
@@ -172,9 +172,9 @@ namespace System.Web.Http.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            IEdmFunctionImport functionImport =
-                model.EntityContainers().Single().Elements.OfType<IEdmFunctionImport>().Single();
-            ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(functionImport);
+            IEdmActionImport actionImport =
+                model.EntityContainers().Single().Elements.OfType<IEdmActionImport>().Single();
+            ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(actionImport.Action);
             Assert.Equal(value, actionLinkBuilder.FollowsConventions);
         }
 

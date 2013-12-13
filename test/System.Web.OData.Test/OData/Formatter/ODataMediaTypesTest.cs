@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
@@ -70,7 +70,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataFullMetadata_Value()
         {
-            Assert.Equal("application/json; odata=fullmetadata",
+            Assert.Equal("application/json; odata.metadata=full",
                 ODataMediaTypes.ApplicationJsonODataFullMetadata.ToString());
         }
 
@@ -84,7 +84,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataFullMetadataStreamingFalse_Value()
         {
-            Assert.Equal("application/json; odata=fullmetadata; streaming=false",
+            Assert.Equal("application/json; odata.metadata=full; streaming=false",
                 ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingFalse.ToString());
         }
 
@@ -98,7 +98,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataFullMetadataStreamingTrue_Value()
         {
-            Assert.Equal("application/json; odata=fullmetadata; streaming=true",
+            Assert.Equal("application/json; odata.metadata=full; streaming=true",
                 ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue.ToString());
         }
 
@@ -112,7 +112,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataMinimalMetadata_Value()
         {
-            Assert.Equal("application/json; odata=minimalmetadata",
+            Assert.Equal("application/json; odata.metadata=minimal",
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadata.ToString());
         }
 
@@ -126,7 +126,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataMinimalMetadataStreamingFalse_Value()
         {
-            Assert.Equal("application/json; odata=minimalmetadata; streaming=false",
+            Assert.Equal("application/json; odata.metadata=minimal; streaming=false",
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingFalse.ToString());
         }
 
@@ -140,7 +140,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataMinimalMetadataStreamingTrue_Value()
         {
-            Assert.Equal("application/json; odata=minimalmetadata; streaming=true",
+            Assert.Equal("application/json; odata.metadata=minimal; streaming=true",
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingTrue.ToString());
         }
 
@@ -154,7 +154,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataNoMetadata_Value()
         {
-            Assert.Equal("application/json; odata=nometadata",
+            Assert.Equal("application/json; odata.metadata=none",
                 ODataMediaTypes.ApplicationJsonODataNoMetadata.ToString());
         }
 
@@ -168,7 +168,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataNoMetadataStreamingFalse_Value()
         {
-            Assert.Equal("application/json; odata=nometadata; streaming=false",
+            Assert.Equal("application/json; odata.metadata=none; streaming=false",
                 ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingFalse.ToString());
         }
 
@@ -182,7 +182,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataNoMetadataStreamingTrue_Value()
         {
-            Assert.Equal("application/json; odata=nometadata; streaming=true",
+            Assert.Equal("application/json; odata.metadata=none; streaming=true",
                 ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingTrue.ToString());
         }
 
@@ -262,14 +262,12 @@ namespace System.Web.Http.OData.Formatter
         [InlineData("application/atom+xml;odata=entry", ODataMetadataLevel.Default)]
         [InlineData("application/atom+xml;odata=feed", ODataMetadataLevel.Default)]
         [InlineData("application/atom+xml;odata=feed;randomparameter=randomvalue", ODataMetadataLevel.Default)]
-        [InlineData("application/json;odata=verbose;randomparameter=randomvalue", ODataMetadataLevel.Default)]
-        [InlineData("application/json;odata=fullmetadata", ODataMetadataLevel.FullMetadata)]
-        [InlineData("application/json;odata=nometadata", ODataMetadataLevel.NoMetadata)]
-        [InlineData("application/json;odata=minimalmetadata", ODataMetadataLevel.MinimalMetadata)]
-        [InlineData("application/json;ODATA=VERBOSE", ODataMetadataLevel.Default)]
-        [InlineData("application/json;ODATA=FULLMETADATA", ODataMetadataLevel.FullMetadata)]
-        [InlineData("application/json;ODATA=NOMETADATA", ODataMetadataLevel.NoMetadata)]
-        [InlineData("application/json;ODATA=MINIMALMETADATA", ODataMetadataLevel.MinimalMetadata)]
+        [InlineData("application/json;randomparameter=randomvalue", ODataMetadataLevel.MinimalMetadata)]
+        [InlineData("application/json;odata.metadata=full", ODataMetadataLevel.FullMetadata)]
+        [InlineData("application/json;odata.metadata=none", ODataMetadataLevel.NoMetadata)]
+        [InlineData("application/json;odata.metadata=minimal", ODataMetadataLevel.MinimalMetadata)]
+        [InlineData("application/json;odata.metadata=full", ODataMetadataLevel.FullMetadata)]
+        [InlineData("application/json;odata.metadata=none", ODataMetadataLevel.NoMetadata)]
         [InlineData("application/json", ODataMetadataLevel.MinimalMetadata)]
         [InlineData("application/json;randomparameter=randomvalue", ODataMetadataLevel.MinimalMetadata)]
         [InlineData("application/random", ODataMetadataLevel.Default)]

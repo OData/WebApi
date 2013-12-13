@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -30,7 +30,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [InlineData(typeof(Int16), EdmPrimitiveTypeKind.Int16)]
         [InlineData(typeof(int), EdmPrimitiveTypeKind.Int32)]
         [InlineData(typeof(Decimal), EdmPrimitiveTypeKind.Decimal)]
-        [InlineData(typeof(DateTime), EdmPrimitiveTypeKind.DateTime)]
+        [InlineData(typeof(DateTimeOffset), EdmPrimitiveTypeKind.DateTimeOffset)]
         [InlineData(typeof(double), EdmPrimitiveTypeKind.Double)]
         [InlineData(typeof(byte[]), EdmPrimitiveTypeKind.Binary)]
         [InlineData(typeof(bool), EdmPrimitiveTypeKind.Boolean)]

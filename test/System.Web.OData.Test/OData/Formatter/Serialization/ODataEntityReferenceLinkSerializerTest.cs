@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Routing;
 using System.Xml.Linq;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
@@ -123,7 +123,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Assert
             stream.Seek(0, SeekOrigin.Begin);
             XElement element = XElement.Load(stream);
-            Assert.Equal("http://sampleuri/", element.Value);
+            Assert.Equal("http://sampleuri/", element.FirstAttribute.Value);
         }
     }
 }

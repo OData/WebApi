@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -6,10 +6,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Csdl;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Atom;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.Atom;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Csdl;
 
 namespace System.Web.Http.OData
 {
@@ -18,7 +18,7 @@ namespace System.Web.Http.OData
     /// </summary>
     public class ODataMetadataController : ODataController
     {
-        private static readonly Version _defaultEdmxVersion = new Version(1, 0);
+        private static readonly Version _defaultEdmxVersion = new Version(4, 0);
 
         /// <summary>
         /// Generates the OData $metadata document.

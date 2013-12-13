@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.Edm.Library.Expressions;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -28,7 +28,7 @@ namespace System.Web.Http.OData.Routing
         {
             // Arrange
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-            Mock<IEdmFunctionImport> edmAction = new Mock<IEdmFunctionImport>();
+            Mock<IEdmActionImport> edmAction = new Mock<IEdmActionImport>();
             edmAction.Setup(a => a.Name).Returns("SomeAction");
             edmAction.Setup(a => a.Container).Returns(container);
 
@@ -44,7 +44,7 @@ namespace System.Web.Http.OData.Routing
         {
             // Arrange
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-            Mock<IEdmFunctionImport> edmAction = new Mock<IEdmFunctionImport>();
+            Mock<IEdmActionImport> edmAction = new Mock<IEdmActionImport>();
             edmAction.Setup(a => a.Name).Returns("SomeAction");
             edmAction.Setup(a => a.Container).Returns(container);
 
@@ -75,10 +75,10 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             Mock<IEdmEntityType> returnType = new Mock<IEdmEntityType>();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-            Mock<IEdmFunctionImport> edmAction = new Mock<IEdmFunctionImport>();
+            Mock<IEdmActionImport> edmAction = new Mock<IEdmActionImport>();
             edmAction.Setup(a => a.Name).Returns("SomeAction");
             edmAction.Setup(a => a.Container).Returns(container);
-            edmAction.Setup(a => a.ReturnType).Returns(new EdmEntityTypeReference(returnType.Object, isNullable: false));
+            edmAction.Setup(a => a.Action.ReturnType).Returns(new EdmEntityTypeReference(returnType.Object, isNullable: false));
 
             // Act
             ActionPathSegment segment = new ActionPathSegment(edmAction.Object);
@@ -94,10 +94,10 @@ namespace System.Web.Http.OData.Routing
             Mock<IEdmEntitySet> targetEntitySet = new Mock<IEdmEntitySet>();
             Mock<IEdmEntityType> returnType = new Mock<IEdmEntityType>();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-            Mock<IEdmFunctionImport> edmAction = new Mock<IEdmFunctionImport>();
+            Mock<IEdmActionImport> edmAction = new Mock<IEdmActionImport>();
             edmAction.Setup(a => a.Name).Returns("SomeAction");
             edmAction.Setup(a => a.Container).Returns(container);
-            edmAction.Setup(a => a.ReturnType).Returns(new EdmEntityTypeReference(returnType.Object, isNullable: false));
+            edmAction.Setup(a => a.Action.ReturnType).Returns(new EdmEntityTypeReference(returnType.Object, isNullable: false));
             edmAction.Setup(a => a.EntitySet).Returns(new EdmEntitySetReferenceExpression(targetEntitySet.Object));
 
             // Act
@@ -119,7 +119,7 @@ namespace System.Web.Http.OData.Routing
         {
             // Arrange
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-            Mock<IEdmFunctionImport> edmAction = new Mock<IEdmFunctionImport>();
+            Mock<IEdmActionImport> edmAction = new Mock<IEdmActionImport>();
             edmAction.Setup(a => a.Name).Returns("SomeAction");
             edmAction.Setup(a => a.Container).Returns(container);
 

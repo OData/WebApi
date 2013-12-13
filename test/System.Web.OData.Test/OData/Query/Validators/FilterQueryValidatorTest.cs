@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.OData.Query.Expressions;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query.Validators
@@ -332,7 +332,7 @@ namespace System.Web.Http.OData.Query.Validators
         [InlineData("Id eq Id mod 1")]
         [InlineData("startswith(Name, 'Microsoft')")]
         [InlineData("endswith(Name, 'Microsoft')")]
-        [InlineData("substringof(Name, 'Microsoft')")]
+        [InlineData("contains(Name, 'Microsoft')")]
         [InlineData("substring(Name, 1) eq 'Name'")]
         [InlineData("substring(Name, 1, 2) eq 'Name'")]
         [InlineData("length(Name) eq 1")]

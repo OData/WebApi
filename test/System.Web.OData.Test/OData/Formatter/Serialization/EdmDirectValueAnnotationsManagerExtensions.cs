@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
 using System.Web.Http.OData.Builder;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Annotations;
-using Microsoft.Data.Edm.Values;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Annotations;
+using Microsoft.OData.Edm.Values;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -22,10 +22,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             SetODataAnnotation(manager, container, "IsDefaultEntityContainer", "true");
         }
 
-        public static void SetIsAlwaysBindable(this IEdmDirectValueAnnotationsManager manager,
-            IEdmFunctionImport functionImport)
+        public static void SetIsAlwaysBindable(this IEdmDirectValueAnnotationsManager manager, IEdmOperation operation)
         {
-            SetODataAnnotation(manager, functionImport, "IsAlwaysBindable", "true");
+            SetODataAnnotation(manager, operation, "IsAlwaysBindable", "true");
         }
 
         private static void SetCoreAnnotation<T>(this IEdmDirectValueAnnotationsManager manager, IEdmElement element,
@@ -40,7 +39,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             string name, string value)
         {
             Contract.Assert(manager != null);
-            manager.SetAnnotationValue(element, "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata", name,
+            manager.SetAnnotationValue(element, "http://docs.oasis-open.org/odata/ns/metadata", name,
                 new FakeEdmStringValue(value));
         }
 

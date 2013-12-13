@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
@@ -35,7 +35,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IODataRequestMessage request = CreateJsonLightRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
-            IEdmFunctionImport producingFunctionImport = model.EntityContainers().Single().FunctionImports().First();
+            IEdmOperationImport producingOperationImport = model.EntityContainers().Single().OperationImports().First();
             IEdmTypeReference expectedItemTypeReference = new EdmPrimitiveTypeReference(
                 EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32), false);
 
@@ -144,7 +144,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void TestReadEntityReferenceLink_InJsonLight_WithoutNavigationProperty_Throws()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest("{\"url\":\"aa:b\"}");
+            IODataRequestMessage request = CreateJsonLightRequest("{\"odata.id\":\"aa:b\"}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
@@ -159,11 +159,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void TestReadEntityReferenceLink_InJsonLight_WithNavigationProperty_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest("{\"url\":\"aa:b\"}");
+            IODataRequestMessage request = CreateJsonLightRequest("{\"odata.id\":\"aa:b\"}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
             IEdmNavigationProperty navigationProperty =
-                model.EntityContainers().Single().EntitySets().First().NavigationTargets.First().NavigationProperty;
+                model.EntityContainers().Single().EntitySets().First().NavigationPropertyBindings.First().NavigationProperty;
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
@@ -229,7 +229,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 headers = content.Headers;
             }
 
-            headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
+            headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
 
             return new ODataMessageWrapper(Stream.Null, headers);
         }
@@ -238,7 +238,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             HttpContent content = new StringContent(body);
             HttpContentHeaders headers = content.Headers;
-            headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
+            headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
 
             return new ODataMessageWrapper(content.ReadAsStreamAsync().Result, headers);
         }
@@ -263,9 +263,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
             var orderSet = container.AddEntitySet("Orders", orderType);
             var customerSet = container.AddEntitySet("Customers", customerType);
 
-            container.AddFunctionImport("GetIDs", new EdmCollectionTypeReference(new EdmCollectionType(
-                new EdmPrimitiveTypeReference(EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32),
-                false)), false));
+            container.AddFunctionImport(
+                new EdmFunction(
+                    "Default",
+                    "GetIDs",
+                    new EdmCollectionTypeReference(
+                        new EdmCollectionType(
+                            new EdmPrimitiveTypeReference(
+                                EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32),
+                                isNullable: false)),
+                        isNullable: false)));
 
             orderSet.AddNavigationTarget(orderType.NavigationProperties().Single(np => np.Name == "Customer"),
                 customerSet);

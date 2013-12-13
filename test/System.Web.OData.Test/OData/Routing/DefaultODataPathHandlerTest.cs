@@ -1,13 +1,13 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+ï»¿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Expressions;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.Edm.Library.Expressions;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Expressions;
+using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Routing
@@ -50,14 +50,14 @@ namespace System.Web.Http.OData.Routing
         [Fact]
         public void Parse_WorksOnEncodedCharacters()
         {
-            string odataPath = "üCategories";
+            string odataPath = "Ã¼Categories";
 
             ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             Assert.NotNull(path);
             Assert.Equal("~/entityset", path.PathTemplate);
-            Assert.Equal("üCategories", segment.ToString());
+            Assert.Equal("Ã¼Categories", segment.ToString());
         }
 
         [Fact]
@@ -282,7 +282,10 @@ namespace System.Web.Http.OData.Routing
             string odataPath = "GetRoutingCustomerById()";
             string expectedText = "Default.Container.GetRoutingCustomerById";
             IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
-            IEdmFunctionImport expectedEdmElement = _model.EntityContainers().First().FunctionImports().SingleOrDefault(s => s.Name == "GetRoutingCustomerById");
+            IEdmActionImport expectedEdmElement = _model.EntityContainers()
+                .First()
+                .OperationImports()
+                .SingleOrDefault(s => s.Name == "GetRoutingCustomerById") as IEdmActionImport;
 
             // Act
             ODataPath path = _parser.Parse(_model, odataPath);
@@ -405,9 +408,13 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers(112)/GetRelatedRoutingCustomers";
             string expectedText = "Default.Container.GetRelatedRoutingCustomers";
-            IEdmFunctionImport expectedEdmElement = _model.EntityContainers().First().FunctionImports().SingleOrDefault(p => p.Name == "GetRelatedRoutingCustomers");
+            IEdmActionImport expectedEdmElement = _model.EntityContainers()
+                .First()
+                .OperationImports()
+                .SingleOrDefault(p => p.Name == "GetRelatedRoutingCustomers") as IEdmActionImport;
+            Assert.NotNull(expectedEdmElement);
             IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(e => e.Name == "RoutingCustomers");
-            IEdmType expectedType = expectedEdmElement.ReturnType.Definition;
+            IEdmType expectedType = expectedEdmElement.Action.ReturnType.Definition;
 
             // Act
             ODataPath path = _parser.Parse(_model, odataPath);
@@ -428,9 +435,12 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers/System.Web.Http.OData.Routing.VIP/GetMostProfitable";
             string expectedText = "Default.Container.GetMostProfitable";
-            IEdmFunctionImport expectedEdmElement = _model.EntityContainers().First().FunctionImports().SingleOrDefault(p => p.Name == "GetMostProfitable");
+            IEdmActionImport expectedEdmElement =
+                _model.EntityContainers().First().OperationImports().SingleOrDefault(p => p.Name == "GetMostProfitable")
+                as IEdmActionImport;
+            Assert.NotNull(expectedEdmElement);
             IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(e => e.Name == "RoutingCustomers");
-            IEdmType expectedType = expectedEdmElement.ReturnType.Definition;
+            IEdmType expectedType = expectedEdmElement.Action.ReturnType.Definition;
 
             // Act
             ODataPath path = _parser.Parse(_model, odataPath);
@@ -451,7 +461,14 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             var model = new CustomersModelWithInheritance();
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
-            var function = model.Container.AddFunctionImport("FunctionAtRoot", returnType, entitySet: null, sideEffecting: false, composable: true, bindable: false);
+            var function = model.Container.AddFunctionImport(
+                new EdmFunction(
+                    model.Container.Namespace,
+                    "FunctionAtRoot",
+                    returnType,
+                    isBound: false,
+                    entitySetPathExpression: null,
+                    isComposable: true));
 
             // Act
             ODataPath path = _parser.Parse(model.Model, "FunctionAtRoot");
@@ -471,8 +488,16 @@ namespace System.Web.Http.OData.Routing
             var model = new CustomersModelWithInheritance();
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
             IEdmExpression entitySet = new EdmEntitySetReferenceExpression(model.Customers);
-            var function = model.Container.AddFunctionImport("IsSpecial", returnType, entitySet, sideEffecting: false, composable: true, bindable: true);
+            var function = new EdmFunction(
+                model.Container.Namespace,
+                "IsSpecial",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: true);
             function.AddParameter("entity", new EdmEntityTypeReference(model.Customer, isNullable: false));
+            model.Model.AddElement(function);
+            EdmFunctionImport functionImport = model.Container.AddFunctionImport("IsSpecial", function, entitySet);
 
             // Act
             ODataPath path = _parser.Parse(model.Model, "Customers(42)/IsSpecial");
@@ -481,7 +506,7 @@ namespace System.Web.Http.OData.Routing
             Assert.NotNull(path);
             Assert.Equal(3, path.Segments.Count);
             var functionSegment = Assert.IsType<FunctionPathSegment>(path.Segments.Last());
-            Assert.Same(function, functionSegment.Function);
+            Assert.Same(functionImport, functionSegment.Function);
             Assert.Empty(functionSegment.Values);
         }
 
@@ -492,10 +517,17 @@ namespace System.Web.Http.OData.Routing
             var model = new CustomersModelWithInheritance();
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
             IEdmExpression entitySet = new EdmEntitySetReferenceExpression(model.Customers);
-            var function = model.Container.AddFunctionImport("Count", returnType, entitySet, sideEffecting: false, composable: true, bindable: true);
+            var function = new EdmFunction(
+                model.Container.Namespace,
+                "Count",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: true);
             IEdmTypeReference bindingParameterType = new EdmCollectionTypeReference(
                 new EdmCollectionType(new EdmEntityTypeReference(model.Customer, isNullable: false)), isNullable: false);
             function.AddParameter("customers", bindingParameterType);
+            EdmFunctionImport functionImport = model.Container.AddFunctionImport("Count", function, entitySet);
 
             // Act
             ODataPath path = _parser.Parse(model.Model, "Customers/Count");
@@ -504,7 +536,7 @@ namespace System.Web.Http.OData.Routing
             Assert.NotNull(path);
             Assert.Equal(2, path.Segments.Count);
             var functionSegment = Assert.IsType<FunctionPathSegment>(path.Segments.Last());
-            Assert.Same(function, functionSegment.Function);
+            Assert.Same(functionImport, functionSegment.Function);
             Assert.Empty(functionSegment.Values);
         }
 
@@ -514,8 +546,15 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             var model = new CustomersModelWithInheritance();
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
-            var function = model.Container.AddFunctionImport("FunctionAtRoot", returnType, entitySet: null, sideEffecting: false, composable: true, bindable: false);
+            var function = new EdmFunction(
+                model.Container.Namespace,
+                "FunctionAtRoot",
+                returnType,
+                isBound: false,
+                entitySetPathExpression: null,
+                isComposable: true);
             function.AddParameter("IntParameter", EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false));
+            model.Container.AddFunctionImport("FunctionAtRoot", function, entitySet: null);
 
             // Act
             ODataPath path = _parser.Parse(model.Model, "FunctionAtRoot(IntParameter=1)");
@@ -532,8 +571,15 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             var model = new CustomersModelWithInheritance();
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
-            var function = model.Container.AddFunctionImport("FunctionAtRoot", returnType, entitySet: null, sideEffecting: false, composable: true, bindable: false);
+            var function = new EdmFunction(
+                model.Container.Namespace,
+                "FunctionAtRoot",
+                returnType,
+                isBound: false,
+                entitySetPathExpression: null,
+                isComposable: true);
             function.AddParameter("IntParameter", EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false));
+            model.Container.AddFunctionImport("FunctionAtRoot", function, entitySet: null);
 
             // Act
             ODataPath path = _parser.Parse(model.Model, "FunctionAtRoot(IntParameter=@p1)");
@@ -845,12 +891,13 @@ namespace System.Web.Http.OData.Routing
             Assert.NotNull(odataPath);
             ActionPathSegment actionSegment = Assert.IsType<ActionPathSegment>(odataPath.Segments.Last());
             Assert.Equal("NS.Container." + actionName, actionSegment.ActionName);
-            Assert.Equal(expectedEntityBound, actionSegment.Action.Parameters.First().Type.Definition.ToTraceString());
+            Assert.Equal(expectedEntityBound, actionSegment.Action.Action.Parameters.First().Type.Definition.ToTraceString());
         }
 
-        private static IEdmFunctionImport AddBindableAction(EdmEntityContainer container, string name, IEdmEntityType bindingType, bool isCollection)
+        private static IEdmActionImport AddBindableAction(EdmEntityContainer container, string name, IEdmEntityType bindingType, bool isCollection)
         {
-            var action = container.AddFunctionImport(name, returnType: null, entitySet: null, sideEffecting: true, composable: false, bindable: true);
+            var action = new EdmAction(
+                container.Namespace, name, returnType: null, isBound: true, entitySetPathExpression: null);
 
             IEdmTypeReference bindingParamterType = new EdmEntityTypeReference(bindingType, isNullable: false);
             if (isCollection)
@@ -860,7 +907,8 @@ namespace System.Web.Http.OData.Routing
             }
 
             action.AddParameter("bindingParameter", bindingParamterType);
-            return action;
+            var actionImport = container.AddActionImport(action);
+            return actionImport;
         }
 
         [Theory]
@@ -916,17 +964,25 @@ namespace System.Web.Http.OData.Routing
             }
         }
 
-        private static EdmFunctionImport AddFunction(EdmEntityContainer container, string name,
+        private static EdmFunction AddFunction(EdmEntityContainer container, string name,
             IEdmTypeReference returnType = null, IEdmEntitySet entitySet = null, IEdmTypeReference bindingParameterType = null)
         {
             returnType = returnType ?? EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
             IEdmExpression expression = entitySet == null ? null : new EdmEntitySetReferenceExpression(entitySet);
 
-            var function = container.AddFunctionImport(name, returnType, expression, sideEffecting: false, composable: true, bindable: bindingParameterType != null);
+            var function = new EdmFunction(
+                container.Namespace,
+                name,
+                returnType,
+                isBound: bindingParameterType != null,
+                entitySetPathExpression: null,
+                isComposable: true);
             if (bindingParameterType != null)
             {
                 function.AddParameter("bindingParameter", bindingParameterType);
             }
+            container.AddFunctionImport(name, function, expression);
+
             return function;
         }
     }

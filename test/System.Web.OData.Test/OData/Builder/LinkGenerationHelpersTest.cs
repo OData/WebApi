@@ -1,11 +1,11 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -89,9 +89,9 @@ namespace System.Web.Http.OData.Builder
         public void GenerateActionLink_ThrowsArgumentNull_EntityInstanceContext()
         {
             EntityInstanceContext entityContext = null;
-            IEdmFunctionImport action = new Mock<IEdmFunctionImport>().Object;
+            IEdmActionImport action = new Mock<IEdmActionImport>().Object;
 
-            Assert.ThrowsArgumentNull(() => entityContext.GenerateActionLink(action), "entityContext");
+            Assert.ThrowsArgumentNull(() => entityContext.GenerateActionLink(action.Action), "entityContext");
         }
 
         [Fact]
@@ -106,8 +106,8 @@ namespace System.Web.Http.OData.Builder
         public void GenerateActionLink_ThrowsActionNotBoundToEntity_IfActionHasNoParameters()
         {
             EntityInstanceContext entityContext = new EntityInstanceContext();
-            Mock<IEdmFunctionImport> action = new Mock<IEdmFunctionImport>();
-            action.Setup(a => a.Parameters).Returns(Enumerable.Empty<IEdmFunctionParameter>());
+            Mock<IEdmAction> action = new Mock<IEdmAction>();
+            action.Setup(a => a.Parameters).Returns(Enumerable.Empty<IEdmOperationParameter>());
             action.Setup(a => a.Name).Returns("SomeAction");
 
             Assert.ThrowsArgument(
@@ -125,7 +125,7 @@ namespace System.Web.Http.OData.Builder
             var entityContext = new EntityInstanceContext(serializerContext, _model.Customer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
+            Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer.Action);
 
             Assert.Equal("http://localhost/Customers(42)/upgrade", link.AbsoluteUri);
         }
@@ -139,7 +139,7 @@ namespace System.Web.Http.OData.Builder
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateActionLink(_model.UpgradeSpecialCustomer);
+            Uri link = entityContext.GenerateActionLink(_model.UpgradeSpecialCustomer.Action);
 
             Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/specialUpgrade", link.AbsoluteUri);
         }
@@ -154,7 +154,7 @@ namespace System.Web.Http.OData.Builder
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
+            Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer.Action);
 
             Assert.Equal("http://localhost/SpecialCustomers(42)/NS.Customer/upgrade", link.AbsoluteUri);
         }
@@ -168,7 +168,7 @@ namespace System.Web.Http.OData.Builder
             var entityContext = new EntityInstanceContext(serializerContext, _model.Customer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);
+            Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded.Function);
 
             // Assert
             Assert.Equal("http://localhost/Customers(42)/IsUpgraded(entity=@entity)", link.AbsoluteUri);
@@ -183,7 +183,7 @@ namespace System.Web.Http.OData.Builder
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateFunctionLink(_model.IsSpecialCustomerUpgraded);
+            Uri link = entityContext.GenerateFunctionLink(_model.IsSpecialCustomerUpgraded.Function);
 
             // Assert
             Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/IsSpecialUpgraded(entity=@entity)", link.AbsoluteUri);
@@ -199,7 +199,7 @@ namespace System.Web.Http.OData.Builder
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);
+            Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded.Function);
 
             // Assert
             Assert.Equal("http://localhost/SpecialCustomers(42)/NS.Customer/IsUpgraded(entity=@entity)", link.AbsoluteUri);

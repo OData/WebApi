@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -8,8 +8,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
@@ -46,7 +46,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("messageReader");
             }
 
-            IEdmFunctionImport action = GetFunctionImport(readContext);
+            IEdmActionImport action = GetActionImport(readContext);
 
             // Create the correct resource type;
             Dictionary<string, object> payload;
@@ -64,13 +64,13 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             while (reader.Read())
             {
                 string parameterName = null;
-                IEdmFunctionParameter parameter = null;
+                IEdmOperationParameter parameter = null;
 
                 switch (reader.State)
                 {
                     case ODataParameterReaderState.Value:
                         parameterName = reader.Name;
-                        parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
+                        parameter = action.Operation.Parameters.SingleOrDefault(p => p.Name == parameterName);
                         // ODataLib protects against this but asserting just in case.
                         Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
                         if (parameter.Type.IsPrimitive())
@@ -86,13 +86,13 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
                     case ODataParameterReaderState.Collection:
                         parameterName = reader.Name;
-                        parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
+                        parameter = action.Operation.Parameters.SingleOrDefault(p => p.Name == parameterName);
                         // ODataLib protects against this but asserting just in case.
                         Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
                         IEdmCollectionTypeReference collectionType = parameter.Type as IEdmCollectionTypeReference;
                         Contract.Assert(collectionType != null);
                         ODataCollectionValue value = ODataCollectionDeserializer.ReadCollection(reader.CreateCollectionReader());
-                        ODataCollectionDeserializer collectionDeserializer = DeserializerProvider.GetEdmTypeDeserializer(collectionType) as ODataCollectionDeserializer;
+                        ODataCollectionDeserializer collectionDeserializer = (ODataCollectionDeserializer)DeserializerProvider.GetEdmTypeDeserializer(collectionType);
                         payload[parameterName] = collectionDeserializer.ReadInline(value, collectionType, readContext);
                         break;
 
@@ -104,7 +104,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return payload;
         }
 
-        internal static IEdmFunctionImport GetFunctionImport(ODataDeserializerContext readContext)
+        internal static IEdmActionImport GetActionImport(ODataDeserializerContext readContext)
         {
             if (readContext == null)
             {

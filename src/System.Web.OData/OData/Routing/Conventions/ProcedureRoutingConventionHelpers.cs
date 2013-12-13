@@ -1,16 +1,16 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Controllers;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing.Conventions
 {
     internal static class ProcedureRoutingConventionHelpers
     {
-        public static string SelectAction(this IEdmFunctionImport procedure, ILookup<string, HttpActionDescriptor> actionMap, bool isCollection)
+        public static string SelectAction(this IEdmOperationImport procedure, ILookup<string, HttpActionDescriptor> actionMap, bool isCollection)
         {
             Contract.Assert(actionMap != null);
 
@@ -19,9 +19,15 @@ namespace System.Web.Http.OData.Routing.Conventions
                 return null;
             }
 
+            IEdmOperation operation = procedure.Operation;
+            if (operation == null)
+            {
+                return null;
+            }
+
             // The binding parameter is the first parameter by convention
-            IEdmFunctionParameter bindingParameter = procedure.Parameters.FirstOrDefault();
-            if (procedure.IsBindable && bindingParameter != null)
+            IEdmOperationParameter bindingParameter = operation.Parameters.FirstOrDefault();
+            if (operation.IsBound && bindingParameter != null)
             {
                 IEdmEntityType entityType = null;
                 if (!isCollection)

@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
@@ -23,7 +23,8 @@ namespace System.Web.Http.OData.Query
                     typeof(byte[]),
                     typeof(bool),
                     typeof(byte),
-                    typeof(DateTime),
+                    // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+                    // typeof(DateTime),
                     typeof(DateTimeOffset),
                     typeof(decimal),
                     typeof(double),

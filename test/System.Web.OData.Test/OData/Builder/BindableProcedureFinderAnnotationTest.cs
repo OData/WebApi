@@ -1,7 +1,7 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
@@ -46,9 +46,15 @@ namespace System.Web.Http.OData.Builder
 
             // Act 
             BindableProcedureFinder annotation = new BindableProcedureFinder(model);
-            IEdmFunctionImport[] movieActions = annotation.FindProcedures(movieType).ToArray();
-            IEdmFunctionImport[] customerActions = annotation.FindProcedures(customerType).ToArray();
-            IEdmFunctionImport[] blockBusterActions = annotation.FindProcedures(blockBusterType).ToArray();
+            IEdmAction[] movieActions = annotation.FindProcedures(movieType)
+                .OfType<IEdmAction>()
+                .ToArray();
+            IEdmAction[] customerActions = annotation.FindProcedures(customerType)
+                .OfType<IEdmAction>()
+                .ToArray();
+            IEdmAction[] blockBusterActions = annotation.FindProcedures(blockBusterType)
+                .OfType<IEdmAction>()
+                .ToArray();
 
             // Assert
             Assert.Equal(2, customerActions.Length);

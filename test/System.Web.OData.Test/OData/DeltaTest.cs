@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData
@@ -382,11 +382,15 @@ namespace System.Web.Http.OData
                     { "NullableIntProperty", "null", null },
                     { "BoolProperty", "true", true },
                     { "NullableBoolProperty", "null", null },
-                    { "DateTimeProperty", "'\\/Date(694224000000)\\/'", new DateTime(1992, 1, 1) },
+                    // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+                    // { "DateTimeProperty", "'1992-01-01'", new DateTime(1992, 1, 1) },
+                    { "DateTimeOffsetProperty", "'1992-01-01'", new DateTimeOffset(new DateTime(1992, 1, 1)) },
+                    { "NullableDateTimeOffsetProperty", "'1992-01-01'", new DateTimeOffset(new DateTime(1992, 1, 1)) },
+                    { "NullableDateTimeOffsetProperty", "null", null },
                     { "StringProperty", "'42'", "42" },
                     { "ComplexModelProperty", "{ 'ComplexIntProperty' : 42 }", new ComplexModel { ComplexIntProperty = 42 } },
-                    { "CollectionProperty", "{ 'results' : [ 1, 2, 3 ] }", new Collection<int> { 1,2, 3} },
-                    { "ComplexModelCollectionProperty", "{ 'results' : [ { 'ComplexIntProperty' : 42 } ] }", new Collection<ComplexModel> { new ComplexModel { ComplexIntProperty = 42 } } }
+                    { "CollectionProperty", "[ 1, 2, 3 ]", new Collection<int> { 1, 2, 3} },
+                    { "ComplexModelCollectionProperty", "[ { 'ComplexIntProperty' : 42 } ]", new Collection<ComplexModel> { new ComplexModel { ComplexIntProperty = 42 } } }
                 };
             }
         }
@@ -416,7 +420,7 @@ namespace System.Web.Http.OData
                     (f) => f.GetPerRequestFormatterInstance(typeof(Delta<DeltaModel>), request, null));
 
                 HttpContent content = new StringContent(String.Format("{{ '{0}' : {1} }}", propertyName, propertyJsonValue));
-                content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+                content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;IEEE754Compatible=true");
 
                 // Act
                 delta = content.ReadAsAsync<Delta<DeltaModel>>(perRequestFormatters).Result;
@@ -437,8 +441,8 @@ namespace System.Web.Http.OData
                 {
                     { "StringProperty", "StringPropertyAlias", "'42'", "42" },
                     { "ComplexModelProperty", "ComplexModelPropertyAlias", "{ 'ComplexIntPropertyAlias' : 42 }", new ComplexModelWithAlias { ComplexIntProperty = 42 } },
-                    { "CollectionProperty", "CollectionPropertyAlias", "{ 'results' : [ 1, 2, 3 ] }", new Collection<int> { 1,2, 3} },
-                    { "ComplexModelCollectionProperty", "ComplexModelCollectionPropertyAlias", "{ 'results' : [ { 'ComplexIntPropertyAlias' : 42 } ] }", new Collection<ComplexModelWithAlias> { new ComplexModelWithAlias { ComplexIntProperty = 42 } } }
+                    { "CollectionProperty", "CollectionPropertyAlias", "[ 1, 2, 3 ]", new Collection<int> { 1, 2, 3} },
+                    { "ComplexModelCollectionProperty", "ComplexModelCollectionPropertyAlias", "[ { 'ComplexIntPropertyAlias' : 42 } ]", new Collection<ComplexModelWithAlias> { new ComplexModelWithAlias { ComplexIntProperty = 42 } } }
                 };
             }
         }
@@ -535,6 +539,10 @@ namespace System.Web.Http.OData
             public DateTime DateTimeProperty { get; set; }
 
             public DateTime? NullableDateTimeProperty { get; set; }
+
+            public DateTimeOffset DateTimeOffsetProperty { get; set; }
+
+            public DateTimeOffset? NullableDateTimeOffsetProperty { get; set; }
 
             public string StringProperty { get; set; }
 

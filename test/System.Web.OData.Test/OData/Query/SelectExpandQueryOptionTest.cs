@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Web.Http.Dispatcher;
@@ -6,9 +6,9 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Serialization.Models;
 using System.Web.Http.OData.TestCommon;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -102,7 +102,7 @@ namespace System.Web.Http.OData.Query
         [InlineData("LastName,FirstName", "Orders")]
         [InlineData("LastName,FirstName,Orders", "Orders")]
         [InlineData("LastName,FirstName,Orders", "Orders")]
-        [InlineData("Orders,Orders/Customer,Orders/Customer/Orders", "Orders,Orders/Customer,Orders/Customer/Orders")]
+        [InlineData("Orders", "Orders,Orders($expand=Customer),Orders($expand=Customer($expand=Orders))")]
         public void SelectExpandClause_CanParse_ModelBuiltForQueryable(string select, string expand)
         {
             // Arrange

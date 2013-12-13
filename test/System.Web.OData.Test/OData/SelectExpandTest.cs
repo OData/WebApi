@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Query;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -17,7 +17,7 @@ namespace System.Web.Http.OData
 {
     public class SelectExpandTest
     {
-        private const string AcceptJsonFullMetadata = "application/json;odata=fullmetadata";
+        private const string AcceptJsonFullMetadata = "application/json;odata.metadata=full";
         private const string AcceptJson = "application/json";
 
         private HttpConfiguration _configuration;
@@ -54,7 +54,7 @@ namespace System.Web.Http.OData
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers&$select=ID,Orders", result["odata.metadata"]);
+            Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers(ID,Orders)", result["@odata.context"]);
             ValidateCustomer(result["value"][0]);
         }
 
@@ -95,8 +95,8 @@ namespace System.Web.Http.OData
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             Assert.Equal(
-                "http://localhost/odata-alias/$metadata#SelectExpandTestCustomersAlias&$select=ID,OrdersAlias",
-                result["odata.metadata"]);
+                "http://localhost/odata-alias/$metadata#SelectExpandTestCustomersAlias(ID,OrdersAlias)",
+                result["@odata.context"]);
             ValidateCustomerAlias(result["value"][0]);
         }
 
@@ -159,7 +159,7 @@ namespace System.Web.Http.OData
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers/@Element&$select=ID,Orders", result["odata.metadata"]);
+            Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers(ID,Orders)/$entity", result["@odata.context"]);
             ValidateCustomer(result);
         }
 
@@ -185,7 +185,7 @@ namespace System.Web.Http.OData
         private HttpResponseMessage GetResponse(string uri, string acceptHeader)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=fullmetadata"));
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             return _client.SendAsync(request).Result;
         }
 

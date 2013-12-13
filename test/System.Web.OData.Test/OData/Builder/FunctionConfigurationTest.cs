@@ -1,13 +1,11 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Net.Http;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Serialization;
-using System.Web.Http.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Expressions;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Expressions;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -151,9 +149,10 @@ namespace System.Web.Http.OData.Builder
             FunctionConfiguration getOrderCustomer = order.Function("GetOrderCustomer").ReturnsEntityViaEntitySetPath<Customer>("bindingParameter/Customer");
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
-            IEdmFunctionImport function = container.FindFunctionImports("GetOrderCustomer").Single();
+            IEdmFunctionImport function = container.FindOperationImports("GetOrderCustomer").Single() as IEdmFunctionImport;
 
             // Assert
+            Assert.NotNull(function);
             Assert.Equal(function.EntitySet.ExpressionKind, EdmExpressionKind.Path);
             Assert.Equal(string.Join("/", ((IEdmPathExpression)(function.EntitySet)).Path), "bindingParameter/Customer");
         }
@@ -169,9 +168,10 @@ namespace System.Web.Http.OData.Builder
             FunctionConfiguration getOrders = customer.Function("GetOrders").ReturnsCollectionViaEntitySetPath<Order>("bindingParameter/Orders");
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
-            IEdmFunctionImport function = container.FindFunctionImports("GetOrders").Single();
+            IEdmFunctionImport function = container.FindOperationImports("GetOrders").Single() as IEdmFunctionImport;
 
             // Assert
+            Assert.NotNull(function);
             Assert.Equal(function.EntitySet.ExpressionKind, EdmExpressionKind.Path);
             Assert.Equal(string.Join("/", ((IEdmPathExpression)(function.EntitySet)).Path), "bindingParameter/Orders");
         }
@@ -277,10 +277,9 @@ namespace System.Web.Http.OData.Builder
             IEdmEntityContainer container = model.EntityContainers().SingleOrDefault();
             Assert.NotNull(container);
             Assert.Equal(1, container.Elements.OfType<IEdmFunctionImport>().Count());
-            IEdmFunctionImport function = container.Elements.OfType<IEdmFunctionImport>().Single();
+            IEdmFunction function = container.Elements.OfType<IEdmFunctionImport>().Single().Function;
             Assert.False(function.IsComposable);
-            Assert.False(function.IsSideEffecting);
-            Assert.True(function.IsBindable);
+            Assert.True(function.IsBound);
             Assert.True(model.IsAlwaysBindable(function));
             Assert.Equal("FunctionName", function.Name);
             Assert.NotNull(function.ReturnType);
@@ -306,16 +305,16 @@ namespace System.Web.Http.OData.Builder
             Assert.NotNull(container);
             Assert.Equal(1, container.Elements.OfType<IEdmFunctionImport>().Count());
             Assert.Equal(1, container.Elements.OfType<IEdmEntitySet>().Count());
-            IEdmFunctionImport function = container.Elements.OfType<IEdmFunctionImport>().Single();
+            IEdmFunctionImport functionImport = container.Elements.OfType<IEdmFunctionImport>().Single();
+            IEdmFunction function = functionImport.Function;
             Assert.False(function.IsComposable);
-            Assert.False(function.IsSideEffecting);
-            Assert.False(function.IsBindable);
+            Assert.False(function.IsBound);
             Assert.False(model.IsAlwaysBindable(function));
             Assert.Equal("FunctionName", function.Name);
             Assert.NotNull(function.ReturnType);
-            Assert.NotNull(function.EntitySet);
-            Assert.Equal("Customers", (function.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.Name);
-            Assert.Equal(typeof(Customer).FullName, (function.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.ElementType.FullName());
+            Assert.NotNull(functionImport.EntitySet);
+            Assert.Equal("Customers", (functionImport.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.Name);
+            Assert.Equal(typeof(Customer).FullName, (functionImport.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.ElementType.FullName());
             Assert.Empty(function.Parameters);
         }
 
@@ -336,8 +335,8 @@ namespace System.Web.Http.OData.Builder
             IEdmEntityContainer container = model.EntityContainers().SingleOrDefault();
             Assert.NotNull(container);
             Assert.Equal(1, container.Elements.OfType<IEdmFunctionImport>().Count());
-            IEdmFunctionImport function = container.Elements.OfType<IEdmFunctionImport>().Single();
-            Assert.True(function.IsBindable);
+            IEdmFunction function = container.Elements.OfType<IEdmFunctionImport>().Single().Function;
+            Assert.True(function.IsBound);
             Assert.False(model.IsAlwaysBindable(function));
         }
 
@@ -362,7 +361,11 @@ namespace System.Web.Http.OData.Builder
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model };
 
             EntityInstanceContext context = new EntityInstanceContext(serializerContext, customerType.AsReference(), new Customer { CustomerId = 1 });
-            IEdmFunctionImport rewardFunction = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault().FunctionImports().SingleOrDefault();
+            IEdmFunction rewardFunction = model.SchemaElements.OfType<IEdmEntityContainer>()
+                .SingleOrDefault()
+                .OperationImports()
+                .SingleOrDefault().Operation as IEdmFunction;
+            Assert.NotNull(rewardFunction);
             FunctionLinkBuilder functionLinkBuilder = model.GetAnnotationValue<FunctionLinkBuilder>(rewardFunction);
 
             //Assert
@@ -389,7 +392,8 @@ namespace System.Web.Http.OData.Builder
 
             //Assert
             IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
-            IEdmFunctionImport function = container.FindFunctionImports("Watch").Single();
+            IEdmOperation function = container.FindOperationImports("Watch").Single().Operation as IEdmFunction;
+            Assert.NotNull(function);
             Assert.False(function.FindParameter("int").Type.IsNullable);
             Assert.True(function.FindParameter("nullableOfInt").Type.IsNullable);
             Assert.False(function.FindParameter("dateTime").Type.IsNullable);

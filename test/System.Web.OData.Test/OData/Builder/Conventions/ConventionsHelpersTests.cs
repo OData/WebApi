@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Web.Http.OData.Formatter.Serialization;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
@@ -22,11 +22,11 @@ namespace System.Web.Http.OData.Builder.Conventions
                 {
                     { 1, "1" },
                     { "1", "'1'" },
-                    { new DateTime(2012,12,31),"datetime'2012-12-31T00:00:00'" },
-                    { new byte[] { 1,2 }, "X'0102'" },
+                    { new DateTimeOffset(new DateTime(2012,12,31,0,0,0,DateTimeKind.Utc)), "2012-12-31T00:00:00Z" },
+                    { new byte[] { 1,2 }, "binary'AQI='" },
                     { false, "false" },
                     { true, "true" },
-                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), "guid'dddddddd-dddd-dddd-dddd-dddddddddddd'" }
+                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), "dddddddd-dddd-dddd-dddd-dddddddddddd" }
                 };
             }
         }
@@ -44,23 +44,23 @@ namespace System.Web.Http.OData.Builder.Conventions
                     { (char[])new char[] { '1', '2', '3' }, "'123'" },
                     { (int)123, "123" },
                     { (short)123, "123" },
-                    { (long)123, "123L" },
+                    { (long)123, "123" },
                     { (ushort)123, "123" },
-                    { (uint)123, "123L" },
-                    { (ulong)123, "123L" },
+                    { (uint)123, "123" },
+                    { (ulong)123, "123" },
                     { (int?)123, "123" },
                     { (short?)123, "123" },
-                    { (long?)123, "123L" },
+                    { (long?)123, "123" },
                     { (ushort?)123, "123" },
-                    { (uint?)123, "123L" },
-                    { (ulong?)123, "123L" },
-                    { (float)123.123, "123.123f" },
-                    { (double)123.123, "123.123D" },
-                    { (decimal)123.123, "123.123M" },
-                    { Guid.Empty, "guid'00000000-0000-0000-0000-000000000000'" },
-                    { DateTime.FromBinary(0), "datetime'0001-01-01T00:00:00'" },
-                    { TimeSpan.FromSeconds(86456), "time'P1DT56S'" },
-                    { DateTimeOffset.FromFileTime(0).ToUniversalTime(), "datetimeoffset'1601-01-01T00:00:00Z'" },
+                    { (uint?)123, "123" },
+                    { (ulong?)123, "123" },
+                    { (float)123.123, "123.123" },
+                    { (double)123.123, "123.123" },
+                    { (decimal)123.123, "123.123" },
+                    { Guid.Empty, "00000000-0000-0000-0000-000000000000" },
+                    { new DateTimeOffset(1,1,1,0,0,0,TimeSpan.Zero), "0001-01-01T00:00:00Z" },
+                    { TimeSpan.FromSeconds(86456), "duration'P1DT56S'" },
+                    { DateTimeOffset.FromFileTime(0).ToUniversalTime(), "1601-01-01T00:00:00Z" },
                     { SimpleEnum.First, "'First'" },
                     { FlagsEnum.One | FlagsEnum.Two, "'One, Two'" },
                 };

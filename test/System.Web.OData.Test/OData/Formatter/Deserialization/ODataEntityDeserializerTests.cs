@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -9,9 +9,9 @@ using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -661,7 +661,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Assert.Equal(product.ID, 0);
             Assert.Equal(product.Rating, 4);
             Assert.Equal(product.Price, 2.5m);
-            Assert.Equal(product.ReleaseDate, new DateTime(1992, 1, 1, 0, 0, 0));
+            Assert.Equal(product.ReleaseDate, new DateTimeOffset(new DateTime(1992, 1, 1, 0, 0, 0), TimeSpan.Zero));
             Assert.Null(product.DiscontinuedDate);
         }
 
@@ -683,8 +683,16 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
 
             ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_deserializerProvider);
+
+            var readContext = new ODataDeserializerContext
+            {
+                Path = new ODataPath(new EntitySetPathSegment(_edmModel.EntityContainers().Single().FindEntitySet("Suppliers"))),
+                Model = _edmModel,
+                ResourceType = typeof(Supplier)
+            };
+
             Supplier supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(content, json), _edmModel),
-                typeof(Supplier), _readContext) as Supplier;
+                typeof(Supplier), readContext) as Supplier;
 
             Assert.Equal(supplier.Name, "Supplier Name");
 
@@ -713,12 +721,18 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             IEdmEntityType supplierEntityType =
                 EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
-            _readContext.ResourceType = typeof(Delta<Supplier>);
+
+            var readContext = new ODataDeserializerContext
+            {
+                Path = new ODataPath(new EntitySetPathSegment(_edmModel.EntityContainers().Single().FindEntitySet("Suppliers"))),
+                Model = _edmModel,
+                ResourceType = typeof(Delta<Supplier>)
+            };
 
             ODataEntityDeserializer deserializer =
                 new ODataEntityDeserializer(_deserializerProvider);
             Delta<Supplier> supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(content, json), _edmModel),
-                typeof(Delta<Supplier>), _readContext) as Delta<Supplier>;
+                typeof(Delta<Supplier>), readContext) as Delta<Supplier>;
 
             Assert.NotNull(supplier);
             Assert.Equal(supplier.GetChangedPropertyNames(), new string[] { "ID", "Name", "Address" });
@@ -768,12 +782,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/OData/OData.svc/Products");
 
             request.Content = new StringContent(content);
-            request.Headers.Add("DataServiceVersion", "1.0");
+            request.Headers.Add("OData-Version", "4.0");
 
             if (json)
             {
                 MediaTypeWithQualityHeaderValue mediaType = new MediaTypeWithQualityHeaderValue("application/json");
-                mediaType.Parameters.Add(new NameValueHeaderValue("odata", "fullmetadata"));
+                mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "full"));
                 request.Headers.Accept.Add(mediaType);
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             }
@@ -799,9 +813,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             public string Description { get; set; }
 
-            public DateTime? ReleaseDate { get; set; }
+            public DateTimeOffset? ReleaseDate { get; set; }
 
-            public DateTime? DiscontinuedDate { get; set; }
+            public DateTimeOffset? DiscontinuedDate { get; set; }
 
             public int Rating { get; set; }
 

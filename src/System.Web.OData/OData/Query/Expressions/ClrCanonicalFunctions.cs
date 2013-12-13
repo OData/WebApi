@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -16,7 +16,7 @@ namespace System.Web.Http.OData.Query.Expressions
         // function names
         internal const string StartswithFunctionName = "startswith";
         internal const string EndswithFunctionName = "endswith";
-        internal const string SubstringofFunctionName = "substringof";
+        internal const string ContainsFunctionName = "contains";
         internal const string SubstringFunctionName = "substring";
         internal const string LengthFunctionName = "length";
         internal const string IndexofFunctionName = "indexof";

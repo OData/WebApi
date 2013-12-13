@@ -8,10 +8,10 @@ using System.Reflection;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
 using System.Xml.Linq;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query.Expressions
@@ -795,7 +795,7 @@ namespace System.Web.Http.OData.Query.Expressions
             // String.Contains expression
 
             var filters = VerifyQueryDeserialization(
-                "substringof('Abc', ProductName)",
+                "contains(ProductName, 'Abc')",
                 "$it => $it.ProductName.Contains(\"Abc\")",
                 NotTesting);
 
@@ -804,8 +804,8 @@ namespace System.Web.Http.OData.Query.Expressions
               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
 
             filters = VerifyQueryDeserialization(
-                "substringof(ProductName, 'Abc')",
-                "$it => \"Abc\".Contains($it.ProductName)",
+                "contains(ProductName, 'Abc')",
+                "$it => $it.ProductName.Contains(\"Abc\")",
                 NotTesting);
         }
 
@@ -1143,22 +1143,22 @@ namespace System.Web.Http.OData.Query.Expressions
         public void GuidExpression()
         {
             VerifyQueryDeserialization<DataTypes>(
-                "GuidProp eq guid'0EFDAECF-A9F0-42F3-A384-1295917AF95E'",
+                "GuidProp eq 0EFDAECF-A9F0-42F3-A384-1295917AF95E",
                 "$it => ($it.GuidProp == 0efdaecf-a9f0-42f3-a384-1295917af95e)");
 
             // verify case insensitivity
             VerifyQueryDeserialization<DataTypes>(
-                "GuidProp eq GuiD'0EFDAECF-A9F0-42F3-A384-1295917AF95E'",
+                "GuidProp eq 0EFDAECF-A9F0-42F3-A384-1295917AF95E",
                 "$it => ($it.GuidProp == 0efdaecf-a9f0-42f3-a384-1295917af95e)");
         }
 
         [Theory]
-        [InlineData("DateTimeProp eq datetime'2000-12-12T12:00:00'", "$it => ($it.DateTimeProp == {0})")]
-        [InlineData("DateTimeProp lt datetime'2000-12-12T12:00:00'", "$it => ($it.DateTimeProp < {0})")]
+        [InlineData("DateTimeProp eq 2000-12-12T12:00:00Z", "$it => ($it.DateTimeProp == {0})")]
+        [InlineData("DateTimeProp lt 2000-12-12T12:00:00Z", "$it => ($it.DateTimeProp < {0})")]
         // TODO: [InlineData("DateTimeProp ge datetime'2000-12-12T12:00'", "$it => ($it.DateTimeProp >= {0})")] (uriparser fails on optional seconds)
         public void DateTimeExpression(string clause, string expectedExpression)
         {
-            var dateTime = new DateTime(2000, 12, 12, 12, 0, 0);
+            var dateTime = new DateTimeOffset(new DateTime(2000, 12, 12, 12, 0, 0), TimeSpan.Zero);
             VerifyQueryDeserialization<DataTypes>(
                 "" + clause,
                 Error.Format(expectedExpression, dateTime));
@@ -1225,9 +1225,9 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("'\"hello,world'", "\"hello,world")]
         [InlineData("'hello,world\"'", "hello,world\"")]
         [InlineData("'hello,\"world'", "hello,\"world")]
-        [InlineData("'México D.F.'", "México D.F.")]
-        [InlineData("'æææøøøååå'", "æææøøøååå")]
-        [InlineData("'?????????'", "?????????")]
+        [InlineData("'MÃ©xico D.F.'", "MÃ©xico D.F.")]
+        [InlineData("'Ã¦Ã¦Ã¦Ã¸Ã¸Ã¸Ã¥Ã¥Ã¥'", "Ã¦Ã¦Ã¦Ã¸Ã¸Ã¸Ã¥Ã¥Ã¥")]
+        [InlineData("'ã„ãã¤ã‹ã®ãƒ†ã‚­ã‚¹ãƒˆ'", "ã„ãã¤ã‹ã®ãƒ†ã‚­ã‚¹ãƒˆ")]
         public void StringLiterals(string literal, string expected)
         {
             VerifyQueryDeserialization<Product>(
@@ -1383,7 +1383,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [Theory]
         [InlineData("UShortProp eq 12", "$it => (Convert($it.UShortProp) == 12)")]
         [InlineData("ULongProp eq 12L", "$it => (Convert($it.ULongProp) == 12)")]
-        [InlineData("UIntProp eq 12", "$it => (Convert($it.UIntProp) == Convert(12))")]
+        [InlineData("UIntProp eq 12", "$it => (Convert($it.UIntProp) == 12)")]
         [InlineData("CharProp eq 'a'", "$it => (Convert($it.CharProp.ToString()) == \"a\")")]
         [InlineData("CharArrayProp eq 'a'", "$it => (new String($it.CharArrayProp) == \"a\")")]
         [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == System.Byte[])")]

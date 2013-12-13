@@ -1,13 +1,13 @@
-{
-  "odata.count":"3","value":[
+﻿{
+  "@odata.count":3,"value":[
     {
-      "#DoSometimes":{
+      "#Default.DoSometimes":{
         "target":"http://localhost:8081/MainEntity/DoSometimes/1"
       },"Id":1,"Int16":-1
     },{
-      "#DoSometimes":{
+      "#Default.DoSometimes":{
         "target":"http://localhost:8081/MainEntity/DoSometimes/2"
       },"Id":2,"Int16":-2
     }
-  ],"odata.nextLink":"aa:b"
+  ],"@odata.nextLink":"aa:b"
 }

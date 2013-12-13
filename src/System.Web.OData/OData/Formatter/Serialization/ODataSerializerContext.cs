@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Net.Http;
@@ -6,8 +6,8 @@ using System.Web.Http.Controllers;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
-using Microsoft.Data.Edm;
-using SelectExpandClause = Microsoft.Data.OData.Query.SemanticAst.SelectExpandClause;
+using Microsoft.OData.Edm;
+using SelectExpandClause = Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {

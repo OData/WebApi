@@ -1,11 +1,11 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.OData.Batch;
 using System.Web.Http.OData.Formatter;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http
@@ -48,12 +48,12 @@ namespace System.Web.Http
         {
             ODataBatchContent batchContent = new ODataBatchContent(new ODataBatchResponseItem[0], new ODataMessageWriterSettings
             {
-                Version = ODataVersion.V2
+                Version = ODataVersion.V4
             });
             var odataVersion = batchContent.Headers.FirstOrDefault(h => String.Equals(h.Key, ODataMediaTypeFormatter.ODataServiceVersion, StringComparison.OrdinalIgnoreCase));
 
             Assert.NotNull(odataVersion);
-            Assert.Equal("2.0", odataVersion.Value.FirstOrDefault());
+            Assert.Equal("4.0", odataVersion.Value.FirstOrDefault());
         }
 
         [Fact]

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+ï»¿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.TestCommon;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -21,7 +21,7 @@ namespace System.Web.Http.OData.Routing
             builder.EntitySet<Product>("Products");
             builder.EntitySet<SalesPerson>("SalesPeople");
             builder.EntitySet<EmailAddress>("EmailAddresses");
-            builder.EntitySet<üCategory>("üCategories");
+            builder.EntitySet<Ã¼Category>("Ã¼Categories");
 
             ActionConfiguration getRoutingCustomerById = builder.Action("GetRoutingCustomerById");
             getRoutingCustomerById.Parameter<int>("RoutingCustomerId");
@@ -168,7 +168,7 @@ namespace System.Web.Http.OData.Routing
             public virtual SalesPerson LeadSalesPerson { get; set; }
         }
 
-        public class üCategory
+        public class Ã¼Category
         {
             public int ID { get; set; }
         }

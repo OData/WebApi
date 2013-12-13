@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing
 {
     /// <summary>
-    /// An <see cref="ODataPathSegment"/> implementation representing an action invocation.
+    /// An <see cref="ODataPathSegment"/> implementation representing a bound action invocation.
     /// </summary>
     public class ActionPathSegment : ODataPathSegment
     {
@@ -14,7 +14,7 @@ namespace System.Web.Http.OData.Routing
         /// Initializes a new instance of the <see cref="ActionPathSegment" /> class.
         /// </summary>
         /// <param name="action">The action being invoked.</param>
-        public ActionPathSegment(IEdmFunctionImport action)
+        public ActionPathSegment(IEdmActionImport action)
         {
             if (action == null)
             {
@@ -53,7 +53,7 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Gets the action being invoked.
         /// </summary>
-        public IEdmFunctionImport Action
+        public IEdmActionImport Action
         {
             get;
             private set;
@@ -79,7 +79,7 @@ namespace System.Web.Http.OData.Routing
         {
             if (Action != null)
             {
-                IEdmTypeReference returnType = Action.ReturnType;
+                IEdmTypeReference returnType = Action.Action.ReturnType;
                 if (returnType != null)
                 {
                     return returnType.Definition;

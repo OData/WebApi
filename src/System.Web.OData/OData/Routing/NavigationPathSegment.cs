@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Web.Http.OData.Formatter;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -80,9 +80,7 @@ namespace System.Web.Http.OData.Routing
         {
             if (NavigationProperty != null)
             {
-                return NavigationProperty.Partner.Multiplicity() == EdmMultiplicity.Many ?
-                    (IEdmType)NavigationProperty.ToEntityType().GetCollection() :
-                    (IEdmType)NavigationProperty.ToEntityType();
+                return NavigationProperty.Type.Definition;
             }
             return null;
         }

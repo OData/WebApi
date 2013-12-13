@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -18,12 +18,11 @@ namespace System.Web.Http.OData.Formatter
                     (bool)true,
                     (string)"123",
                     (int)123,
-                    (long)123,
+                    (long)123123123123,
                     (float)123.123,
-                    (double)123.123,
-                    (decimal)123.123,
+                    (double)123123123123.123,
                     Guid.Empty,
-                    DateTime.FromBinary(0),
+                    new DateTimeOffset(DateTime.FromBinary(0), TimeSpan.Zero),
                     TimeSpan.FromSeconds(86456),
                     DateTimeOffset.FromFileTime(0).ToUniversalTime(),
                 };

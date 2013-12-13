@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -10,9 +10,9 @@ using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -391,12 +391,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         private IEnumerable<ODataAction> CreateODataActions(
-            IEnumerable<IEdmFunctionImport> actions, EntityInstanceContext entityInstanceContext)
+            IEnumerable<IEdmAction> actions, EntityInstanceContext entityInstanceContext)
         {
             Contract.Assert(actions != null);
             Contract.Assert(entityInstanceContext != null);
 
-            foreach (IEdmFunctionImport action in actions)
+            foreach (IEdmAction action in actions)
             {
                 ODataAction oDataAction = CreateODataAction(action, entityInstanceContext);
                 if (oDataAction != null)
@@ -413,7 +413,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <param name="entityInstanceContext">The context for the entity instance being written.</param>
         /// <returns>The created action or null if the action should not be written.</returns>
         [SuppressMessage("Microsoft.Usage", "CA2234: Pass System.Uri objects instead of strings", Justification = "This overload is equally good")]
-        public virtual ODataAction CreateODataAction(IEdmFunctionImport action, EntityInstanceContext entityInstanceContext)
+        public virtual ODataAction CreateODataAction(IEdmAction action, EntityInstanceContext entityInstanceContext)
         {
             if (action == null)
             {
@@ -448,7 +448,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             Uri baseUri = new Uri(entityInstanceContext.Url.ODataLink(new MetadataPathSegment()));
-            Uri metadata = new Uri(baseUri, "#" + CreateMetadataFragment(action, model, metadataLevel));
+            Uri metadata = new Uri(baseUri, "#" + CreateMetadataFragment(action));
 
             ODataAction odataAction = new ODataAction
             {
@@ -474,22 +474,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             return odataAction;
         }
 
-        internal static string CreateMetadataFragment(IEdmFunctionImport action, IEdmModel model,
-            ODataMetadataLevel metadataLevel)
+        internal static string CreateMetadataFragment(IEdmAction action)
         {
-            IEdmEntityContainer container = action.Container;
+            // There can only be one entity container in OData V4.
             string actionName = action.Name;
-            string fragment;
-
-            if ((metadataLevel == ODataMetadataLevel.MinimalMetadata || metadataLevel == ODataMetadataLevel.NoMetadata)
-                && model.IsDefaultEntityContainer(container))
-            {
-                fragment = actionName;
-            }
-            else
-            {
-                fragment = container.Name + "." + actionName;
-            }
+            string fragment = action.Namespace + "." + actionName;
 
             return fragment;
         }
@@ -561,7 +550,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             return metadataLevel != ODataMetadataLevel.Default;
         }
 
-        internal static bool ShouldOmitAction(IEdmFunctionImport action, IEdmModel model, ActionLinkBuilder builder,
+        internal static bool ShouldOmitAction(IEdmAction action, IEdmModel model, ActionLinkBuilder builder,
             ODataMetadataLevel metadataLevel)
         {
             Contract.Assert(model != null);

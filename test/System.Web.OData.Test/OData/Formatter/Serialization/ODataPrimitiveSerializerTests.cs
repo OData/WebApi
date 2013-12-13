@@ -1,13 +1,13 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Data.Linq;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
@@ -60,7 +60,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     (string)"1",
                     (Boolean)true,
                     (Byte)1,
-                    (DateTime)DateTime.Now,
+                    // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+                    // (DateTime)DateTime.Now,
                     (Decimal)1,
                     (Double)1,
                     (Guid)Guid.Empty,

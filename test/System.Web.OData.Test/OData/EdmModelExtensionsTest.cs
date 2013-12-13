@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -53,7 +53,7 @@ namespace System.Web.Http.OData
         public void GetActionLinkBuilder_ThrowsArgumentNull_Model()
         {
             IEdmModel model = null;
-            IEdmFunctionImport action = new Mock<IEdmFunctionImport>().Object;
+            IEdmAction action = new Mock<IEdmAction>().Object;
 
             Assert.ThrowsArgumentNull(() => model.GetActionLinkBuilder(action), "model");
         }
@@ -64,7 +64,7 @@ namespace System.Web.Http.OData
             // Arrange
             IEdmModel model = new EdmModel();
             IEdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-            IEdmFunctionImport action = new Mock<IEdmFunctionImport>().Object;
+            IEdmAction action = new Mock<IEdmAction>().Object;
             ActionLinkBuilder builder = new ActionLinkBuilder(_=> null, followsConventions: false);
 
             // Act
@@ -81,7 +81,7 @@ namespace System.Web.Http.OData
             // Arrange
             IEdmModel model = new EdmModel();
             IEdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-            IEdmFunctionImport action = new EdmFunctionImport(container, "Action", returnType: null);
+            IEdmAction action = new EdmAction("NS", "Action", returnType: null);
 
             Assert.NotNull(model.GetActionLinkBuilder(action));
         }

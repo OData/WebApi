@@ -1,11 +1,11 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData
@@ -25,7 +25,7 @@ namespace System.Web.Http.OData
             ODataPath path = new DefaultODataPathHandler().Parse(model, url);
             Assert.NotNull(path); // Guard
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
-            IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
+            IEdmActionImport action = ODataActionPayloadDeserializer.GetActionImport(context);
             Assert.NotNull(action);
             Assert.Equal(actionName, action.Name);
         }
@@ -39,7 +39,7 @@ namespace System.Web.Http.OData
             Assert.NotNull(path); // Guard
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
 
-            IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
+            IEdmActionImport action = ODataActionPayloadDeserializer.GetActionImport(context);
 
             Assert.NotNull(action);
             Assert.Equal("Wash", action.Name);
@@ -52,7 +52,7 @@ namespace System.Web.Http.OData
             ODataDeserializerContext context = new ODataDeserializerContext { Path = null };
             Assert.Throws<SerializationException>(() =>
             {
-                IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
+                IEdmActionImport action = ODataActionPayloadDeserializer.GetActionImport(context);
             }, "The operation cannot be completed because no ODataPath is available for the request.");
         }
 

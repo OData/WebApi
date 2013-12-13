@@ -1,11 +1,11 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Globalization;
 using System.Web.Http.OData.Formatter.Serialization.Models;
 using System.Web.Http.TestCommon;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query.Validators
@@ -22,11 +22,11 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         [Theory]
-        [InlineData("Orders/Customer", 1)]
-        [InlineData("Orders,Orders/Customer", 1)]
-        [InlineData("Orders/Customer/Orders", 2)]
-        [InlineData("Orders/Customer/Orders/Customer/Orders/Customer", 5)]
-        [InlineData("Orders/NS.SpecialOrder/SpecialCustomer", 1)]
+        [InlineData("Orders($expand=Customer)", 1)]
+        [InlineData("Orders,Orders($expand=Customer)", 1)]
+        [InlineData("Orders($expand=Customer($expand=Orders))", 2)]
+        [InlineData("Orders($expand=Customer($expand=Orders($expand=Customer($expand=Orders($expand=Customer)))))", 5)]
+        [InlineData("Orders($expand=NS.SpecialOrder/SpecialCustomer)", 1)]
         public void Validate_DepthChecks(string expand, int maxExpansionDepth)
         {
             // Arrange
@@ -46,7 +46,7 @@ namespace System.Web.Http.OData.Query.Validators
         [Fact]
         public void ValidateDoesNotThrow_IfExpansionDepthIsZero()
         {
-            string expand = "Orders/Customer/Orders/Customer/Orders/Customer";
+            string expand = "Orders($expand=Customer($expand=Orders($expand=Customer($expand=Orders($expand=Customer)))))";
             SelectExpandQueryValidator validator = new SelectExpandQueryValidator();
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, _queryContext);
 

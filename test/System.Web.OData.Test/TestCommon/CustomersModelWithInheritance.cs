@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Http.OData.Builder;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.Edm.Library.Expressions;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Library.Expressions;
 
 namespace System.Web.Http.TestCommon
 {
@@ -65,35 +65,96 @@ namespace System.Web.Http.TestCommon
             EdmEntitySet orders = container.AddEntitySet("Orders", order);
 
             // actions
-            EdmFunctionImport upgradeCustomer = container.AddFunctionImport(
-                "upgrade", returnType: null, entitySet: new EdmEntitySetReferenceExpression(customers), sideEffecting: true, composable: false, bindable: true);
-            upgradeCustomer.AddParameter("entity", new EdmEntityTypeReference(customer, false));
-            EdmFunctionImport upgradeSpecialCustomer = container.AddFunctionImport(
-                "specialUpgrade", returnType: null, entitySet: new EdmEntitySetReferenceExpression(customers), sideEffecting: true, composable: false, bindable: true);
-            upgradeSpecialCustomer.AddParameter("entity", new EdmEntityTypeReference(specialCustomer, false));
+            EdmAction upgrade = new EdmAction("NS", "upgrade", returnType: null, isBound: true, entitySetPathExpression: null);
+            upgrade.AddParameter("entity", new EdmEntityTypeReference(customer, false));
+            model.AddElement(upgrade);
+            EdmActionImport upgradeCustomer = container.AddActionImport(
+                "upgrade",
+                upgrade,
+                new EdmEntitySetReferenceExpression(customers));
+
+            EdmAction specialUpgrade =
+                new EdmAction("NS", "specialUpgrade", returnType: null, isBound: true, entitySetPathExpression: null);
+            specialUpgrade.AddParameter("entity", new EdmEntityTypeReference(specialCustomer, false));
+            model.AddElement(specialUpgrade);
+            EdmActionImport upgradeSpecialCustomer = container.AddActionImport(
+                "specialUpgrade",
+                specialUpgrade,
+                new EdmEntitySetReferenceExpression(customers));
 
             // functions
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
+            EdmFunction IsUpgraded = new EdmFunction(
+                "NS",
+                "IsUpgraded",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
+            IsUpgraded.AddParameter("entity", new EdmEntityTypeReference(customer, false));
+            model.AddElement(IsUpgraded);
             EdmFunctionImport isCustomerUpgraded = container.AddFunctionImport(
-                "IsUpgraded", returnType: returnType, entitySet: new EdmEntitySetReferenceExpression(customers), sideEffecting: false, composable: false, bindable: true);
-            isCustomerUpgraded.AddParameter("entity", new EdmEntityTypeReference(customer, false));
-            EdmFunctionImport isSpecialCustomerUpgraded = container.AddFunctionImport(
-                "IsSpecialUpgraded", returnType: returnType, entitySet: new EdmEntitySetReferenceExpression(customers), sideEffecting: false, composable: false, bindable: true);
-            isSpecialCustomerUpgraded.AddParameter("entity", new EdmEntityTypeReference(specialCustomer, false));
+                "IsUpgraded",
+                IsUpgraded,
+                new EdmEntitySetReferenceExpression(customers));
 
-            EdmFunctionImport isAnyCustomerUpgraded = container.AddFunctionImport(
-                "IsAnyUpgraded", returnType: returnType, entitySet: new EdmEntitySetReferenceExpression(customers), sideEffecting: false, composable: false, bindable: true);
+            EdmFunction IsSpecialUpgraded = new EdmFunction(
+                "NS",
+                "IsSpecialUpgraded",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
+            IsSpecialUpgraded.AddParameter("entity", new EdmEntityTypeReference(specialCustomer, false));
+            model.AddElement(IsSpecialUpgraded);
+            var isSpecialCustomerUpgraded = container.AddFunctionImport(
+                "IsSpecialUpgraded",
+                IsSpecialUpgraded,
+                new EdmEntitySetReferenceExpression(customers));
+
+            EdmFunction IsAnyUpgraded = new EdmFunction(
+                "NS",
+                "IsAnyUpgraded",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
             EdmCollectionType edmCollectionType = new EdmCollectionType(new EdmEntityTypeReference(customer, false));
-            isAnyCustomerUpgraded.AddParameter("entityset", new EdmCollectionTypeReference(edmCollectionType, false));
+            IsAnyUpgraded.AddParameter("entityset", new EdmCollectionTypeReference(edmCollectionType, false));
+            model.AddElement(IsAnyUpgraded);
+            container.AddFunctionImport(
+                "IsAnyUpgraded",
+                IsAnyUpgraded,
+                new EdmEntitySetReferenceExpression(customers));
 
-            EdmFunctionImport isCustomerUpgradedWithParam = container.AddFunctionImport(
-                "IsUpgradedWithParam", returnType: returnType, entitySet: new EdmEntitySetReferenceExpression(customers), sideEffecting: false, composable: false, bindable: true);
+            EdmFunction isCustomerUpgradedWithParam = new EdmFunction(
+                "NS",
+                "IsUpgradedWithParam",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
             isCustomerUpgradedWithParam.AddParameter("entity", new EdmEntityTypeReference(customer, false));
             isCustomerUpgradedWithParam.AddParameter("city", EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: false));
+            model.AddElement(isCustomerUpgradedWithParam);
+            container.AddFunctionImport(
+                "IsUpgradedWithParam",
+                isCustomerUpgradedWithParam,
+                new EdmEntitySetReferenceExpression(customers));
 
-            EdmFunctionImport isCustomerLocal = container.AddFunctionImport(
-                "IsLocal", returnType: returnType, entitySet: new EdmEntitySetReferenceExpression(customers), sideEffecting: false, composable: false, bindable: true);
+            EdmFunction isCustomerLocal = new EdmFunction(
+                "NS",
+                "IsLocal",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
             isCustomerLocal.AddParameter("entity", new EdmEntityTypeReference(customer, false));
+            model.AddElement(isCustomerLocal);
+            container.AddFunctionImport(
+                "IsLocal",
+                isCustomerLocal,
+                new EdmEntitySetReferenceExpression(customers));
 
             // navigation properties
             customers.AddNavigationTarget(
@@ -167,9 +228,9 @@ namespace System.Web.Http.TestCommon
 
         public EdmEntityContainer Container { get; private set; }
 
-        public EdmFunctionImport UpgradeCustomer { get; private set; }
+        public EdmActionImport UpgradeCustomer { get; private set; }
 
-        public EdmFunctionImport UpgradeSpecialCustomer { get; private set; }
+        public EdmActionImport UpgradeSpecialCustomer { get; private set; }
 
         public IEdmProperty CustomerName { get; private set; }
 

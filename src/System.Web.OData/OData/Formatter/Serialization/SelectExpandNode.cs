@@ -1,12 +1,13 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -25,7 +26,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             SelectedStructuralProperties = new HashSet<IEdmStructuralProperty>();
             SelectedNavigationProperties = new HashSet<IEdmNavigationProperty>();
             ExpandedNavigationProperties = new Dictionary<IEdmNavigationProperty, SelectExpandClause>();
-            SelectedActions = new HashSet<IEdmFunctionImport>();
+            SelectedActions = new HashSet<IEdmAction>();
         }
 
         /// <summary>
@@ -49,13 +50,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             HashSet<IEdmStructuralProperty> allStructuralProperties = new HashSet<IEdmStructuralProperty>(entityType.StructuralProperties());
             HashSet<IEdmNavigationProperty> allNavigationProperties = new HashSet<IEdmNavigationProperty>(entityType.NavigationProperties());
-            HashSet<IEdmFunctionImport> allActions = new HashSet<IEdmFunctionImport>(model.GetAvailableProcedures(entityType));
+            HashSet<IEdmAction> allActions = new HashSet<IEdmAction>(model.GetAvailableActions(entityType));
+            HashSet<IEdmFunction> allFunctions = new HashSet<IEdmFunction>(model.GetAvailableFunctions(entityType));
 
             if (selectExpandClause == null)
             {
                 SelectedStructuralProperties = allStructuralProperties;
                 SelectedNavigationProperties = allNavigationProperties;
                 SelectedActions = allActions;
+                SelectedFunctions = allFunctions;
             }
             else
             {
@@ -64,10 +67,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     SelectedStructuralProperties = allStructuralProperties;
                     SelectedNavigationProperties = allNavigationProperties;
                     SelectedActions = allActions;
+                    SelectedFunctions = allFunctions;
                 }
                 else
                 {
-                    BuildSelections(selectExpandClause, allStructuralProperties, allNavigationProperties, allActions);
+                    BuildSelections(selectExpandClause, allStructuralProperties, allNavigationProperties, allActions, allFunctions);
                 }
 
                 BuildExpansions(selectExpandClause, allNavigationProperties);
@@ -95,7 +99,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <summary>
         /// Gets the list of OData actions to be included in the response.
         /// </summary>
-        public ISet<IEdmFunctionImport> SelectedActions { get; private set; }
+        public ISet<IEdmAction> SelectedActions { get; private set; }
+
+        /// <summary>
+        /// Gets the list of OData functions to be included in the response.
+        /// </summary>
+        public ISet<IEdmFunction> SelectedFunctions { get; private set; }
 
         private void BuildExpansions(SelectExpandClause selectExpandClause, HashSet<IEdmNavigationProperty> allNavigationProperties)
         {
@@ -115,7 +124,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
         }
 
-        private void BuildSelections(SelectExpandClause selectExpandClause, HashSet<IEdmStructuralProperty> allStructuralProperties, HashSet<IEdmNavigationProperty> allNavigationProperties, HashSet<IEdmFunctionImport> allActions)
+        private void BuildSelections(
+            SelectExpandClause selectExpandClause,
+            HashSet<IEdmStructuralProperty> allStructuralProperties,
+            HashSet<IEdmNavigationProperty> allNavigationProperties,
+            HashSet<IEdmAction> allActions,
+            HashSet<IEdmFunction> allFunctions)
         {
             foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
@@ -156,16 +170,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     OperationSegment operationSegment = segment as OperationSegment;
                     if (operationSegment != null)
                     {
-                        foreach (IEdmFunctionImport action in operationSegment.Operations)
-                        {
-                            if (allActions.Contains(action))
-                            {
-                                SelectedActions.Add(action);
-                            }
-                        }
+                        AddOperations(allActions, allFunctions, operationSegment);
                         continue;
                     }
-
                     throw new ODataException(Error.Format(SRResources.SelectionTypeNotSupported, segment.GetType().Name));
                 }
 
@@ -180,15 +187,30 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 ContainerQualifiedWildcardSelectItem wildCardActionSelection = selectItem as ContainerQualifiedWildcardSelectItem;
                 if (wildCardActionSelection != null)
                 {
-                    IEnumerable<IEdmFunctionImport> actionsInThisContainer = allActions.Where(a => a.Container == wildCardActionSelection.Container);
-                    foreach (IEdmFunctionImport action in actionsInThisContainer)
-                    {
-                        SelectedActions.Add(action);
-                    }
+                    SelectedActions = allActions;
+                    SelectedFunctions = allFunctions;
                     continue;
                 }
 
                 throw new ODataException(Error.Format(SRResources.SelectionTypeNotSupported, selectItem.GetType().Name));
+            }
+        }
+
+        private void AddOperations(HashSet<IEdmAction> allActions, HashSet<IEdmFunction> allFunctions, OperationSegment operationSegment)
+        {
+            foreach (IEdmOperation operation in operationSegment.Operations)
+            {
+                IEdmAction action = operation as IEdmAction;
+                if (action != null && allActions.Contains(action))
+                {
+                    SelectedActions.Add(action);
+                }
+
+                IEdmFunction function = operation as IEdmFunction;
+                if (function != null && allFunctions.Contains(function))
+                {
+                    SelectedFunctions.Add(function);
+                }
             }
         }
 

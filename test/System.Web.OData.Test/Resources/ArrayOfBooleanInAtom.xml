@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices">
-  <element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">true</element>
-  <element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">false</element>
-  <element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">true</element>
-  <element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">false</element>
-</root>
+﻿<m:value xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata">
+  <m:element m:type="Boolean">true</m:element>
+  <m:element m:type="Boolean">false</m:element>
+  <m:element m:type="Boolean">true</m:element>
+  <m:element m:type="Boolean">false</m:element>
+</m:value>

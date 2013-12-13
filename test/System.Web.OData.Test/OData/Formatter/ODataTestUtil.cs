@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,8 +10,8 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -21,9 +21,7 @@ namespace System.Web.Http.OData.Formatter
     {
         private static IEdmModel _model;
 
-        public const string Version1NumberString = "1.0";
-        public const string Version2NumberString = "2.0";
-        public const string Version3NumberString = "3.0";
+        public const string Version4NumberString = "4.0";
         public static MediaTypeHeaderValue ApplicationJsonMediaType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
         public static MediaTypeHeaderValue ApplicationAtomMediaType = MediaTypeHeaderValue.Parse("application/atom+xml");
         public static MediaTypeWithQualityHeaderValue ApplicationJsonMediaTypeWithQuality = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
@@ -48,8 +46,8 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage requestMessage = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, address);
             MediaTypeWithQualityHeaderValue mediaType = isAtom ? ApplicationAtomMediaTypeWithQuality : ApplicationJsonMediaTypeWithQuality;
             requestMessage.Headers.Accept.Add(mediaType);
-            requestMessage.Headers.Add("DataServiceVersion", "2.0");
-            requestMessage.Headers.Add("MaxDataServiceVersion", "3.0");
+            requestMessage.Headers.Add("OData-Version", "4.0");
+            requestMessage.Headers.Add("OData-MaxVersion", "4.0");
             return requestMessage;
         }
 
@@ -57,7 +55,7 @@ namespace System.Web.Http.OData.Formatter
         {
             string dataServiceVersion = null;
             IEnumerable<string> values;
-            if (headers.TryGetValues("DataServiceVersion", out values))
+            if (headers.TryGetValues("OData-Version", out values))
             {
                 dataServiceVersion = values.FirstOrDefault();
             }

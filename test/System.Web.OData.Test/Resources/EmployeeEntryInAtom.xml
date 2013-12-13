@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
-<entry xml:base="http://localhost/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml">
-  <id>http://localhost/employees(0L)</id>
-  <category term="System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
-  <link rel="edit" href="http://localhost/employees(0L)" />
-  <link rel="self" href="http://localhost/employees(0L)" />
-  <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(0L)/Manager" />
-  <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(0L)/DirectReports" />
-  <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/WorkItem" type="application/atom+xml;type=entry" title="WorkItem" href="http://localhost/employees(0L)/WorkItem" />
+﻿<?xml version="1.0" encoding="utf-8"?>
+<entry xml:base="http://localhost/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:context="http://localhost/$metadata#employees/$entity">
+  <id>http://localhost/employees(0)</id>
+  <category term="#System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
+  <link rel="edit" href="http://localhost/employees(0)" />
+  <link rel="self" href="http://localhost/employees(0)" />
+  <link rel="http://docs.oasis-open.org/odata/ns/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(0)/Manager" />
+  <link rel="http://docs.oasis-open.org/odata/ns/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(0)/DirectReports" />
+  <link rel="http://docs.oasis-open.org/odata/ns/related/WorkItem" type="application/atom+xml;type=entry" title="WorkItem" href="http://localhost/employees(0)/WorkItem" />
   <title />
   <updated>UpdatedTime</updated>
   <author>
@@ -14,26 +14,26 @@
   </author>
   <content type="application/xml">
     <m:properties>
-      <d:EmployeeId m:type="Edm.Int64">0</d:EmployeeId>
-      <d:Age m:type="Edm.Int32">20</d:Age>
+      <d:EmployeeId m:type="Int64">0</d:EmployeeId>
+      <d:Age m:type="Int32">20</d:Age>
       <d:Gender>Male</d:Gender>
       <d:FirstName>Frank</d:FirstName>
-      <d:Alias m:type="Collection(Edm.String)">
-        <d:element>Alias0</d:element>
+      <d:Alias m:type="#Collection(String)">
+        <m:element>Alias0</m:element>
       </d:Alias>
-      <d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address">
+      <d:Address m:type="#System.Web.Http.OData.TestCommon.Models.Address">
         <d:StreetAddress>StreetAddress1</d:StreetAddress>
         <d:City>City1</d:City>
         <d:State>State1</d:State>
-        <d:ZipCode m:type="Edm.Int32">1</d:ZipCode>
+        <d:ZipCode m:type="Int32">1</d:ZipCode>
       </d:Address>
-      <d:HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber">
-        <d:CountryCode m:type="Edm.Int32">1</d:CountryCode>
-        <d:AreaCode m:type="Edm.Int32">425</d:AreaCode>
-        <d:Number m:type="Edm.Int32">9879089</d:Number>
+      <d:HomeNumber m:type="#System.Web.Http.OData.TestCommon.Models.PhoneNumber">
+        <d:CountryCode m:type="Int32">1</d:CountryCode>
+        <d:AreaCode m:type="Int32">425</d:AreaCode>
+        <d:Number m:type="Int32">9879089</d:Number>
         <d:PhoneType>HomePhone</d:PhoneType>
       </d:HomeNumber>
-      <d:FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity">
+      <d:FavoriteHobby m:type="#System.Web.Http.OData.TestCommon.Models.IActivity">
         <d:ActivityName>Xbox Gaming</d:ActivityName>
       </d:FavoriteHobby>
     </m:properties>

@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData
 {
@@ -18,7 +18,7 @@ namespace System.Web.Http.OData
         /// Initializes a new instance of the <see cref="ODataUntypedActionParameters"/> class.
         /// </summary>
         /// <param name="action">The OData action of this parameters.</param>
-        public ODataUntypedActionParameters(IEdmFunctionImport action)
+        public ODataUntypedActionParameters(IEdmActionImport action)
         {
             if (action == null)
             {
@@ -31,6 +31,6 @@ namespace System.Web.Http.OData
         /// <summary>
         /// Gets the OData action of this parameters.
         /// </summary>
-        public IEdmFunctionImport Action { get; private set; }
+        public IEdmActionImport Action { get; private set; }
     }
 }

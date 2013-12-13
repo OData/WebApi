@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Data.Edm;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -69,14 +69,14 @@ namespace System.Web.Http.OData.Routing
 
         private static bool IsMatch(IEdmFunctionImport function, IEnumerable<string> parameterNames)
         {
-            IEnumerable<IEdmFunctionParameter> nonBindingParameters = GetNonBindingParameters(function);
+            IEnumerable<IEdmOperationParameter> nonBindingParameters = GetNonBindingParameters(function);
             return new HashSet<string>(parameterNames).SetEquals(nonBindingParameters.Select(p => p.Name));
         }
 
-        private static IEnumerable<IEdmFunctionParameter> GetNonBindingParameters(IEdmFunctionImport function)
+        private static IEnumerable<IEdmOperationParameter> GetNonBindingParameters(IEdmOperationImport operation)
         {
-            IEnumerable<IEdmFunctionParameter> functionParameters = function.Parameters;
-            if (function.IsBindable)
+            IEnumerable<IEdmOperationParameter> functionParameters = operation.Operation.Parameters;
+            if (operation.Operation.IsBound)
             {
                 // skip the binding parameter(first one by convention) for matching.
                 functionParameters = functionParameters.Skip(1);

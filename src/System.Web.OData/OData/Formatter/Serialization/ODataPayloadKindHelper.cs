@@ -1,6 +1,6 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -21,6 +21,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 || payloadKind == ODataPayloadKind.Property
                 || payloadKind == ODataPayloadKind.ServiceDocument
                 || payloadKind == ODataPayloadKind.Value
+                || payloadKind == ODataPayloadKind.IndividualProperty
                 || payloadKind == ODataPayloadKind.Unsupported;
         }
 

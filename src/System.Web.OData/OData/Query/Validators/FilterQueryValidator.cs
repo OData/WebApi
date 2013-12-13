@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -6,10 +6,11 @@ using System.Runtime.CompilerServices;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query.Expressions;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Core.UriParser.TreeNodeKinds;
+using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Query.Validators
 {
@@ -423,7 +424,7 @@ namespace System.Web.Http.OData.Query.Validators
 
             ValidateFunction(node.Name, settings);
 
-            foreach (QueryNode argumentNode in node.Arguments)
+            foreach (QueryNode argumentNode in node.Parameters)
             {
                 ValidateQueryNode(argumentNode, settings);
             }
@@ -659,6 +660,9 @@ namespace System.Web.Http.OData.Query.Validators
                 case ClrCanonicalFunctions.ConcatFunctionName:
                     result = AllowedFunctions.Concat;
                     break;
+                case ClrCanonicalFunctions.ContainsFunctionName:
+                    result = AllowedFunctions.SubstringOf;
+                    break;
                 case ClrCanonicalFunctions.DayFunctionName:
                     result = AllowedFunctions.Day;
                     break;
@@ -712,9 +716,6 @@ namespace System.Web.Http.OData.Query.Validators
                     break;
                 case ClrCanonicalFunctions.SubstringFunctionName:
                     result = AllowedFunctions.Substring;
-                    break;
-                case ClrCanonicalFunctions.SubstringofFunctionName:
-                    result = AllowedFunctions.SubstringOf;
                     break;
                 case ClrCanonicalFunctions.TolowerFunctionName:
                     result = AllowedFunctions.ToLower;

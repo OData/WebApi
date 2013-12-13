@@ -1,12 +1,13 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Validation;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -89,7 +90,7 @@ namespace System.Web.Http.OData.Routing
         {
             if (Function != null)
             {
-                IEdmTypeReference returnType = Function.ReturnType;
+                IEdmTypeReference returnType = Function.Function.ReturnType;
                 if (returnType != null)
                 {
                     return returnType.Definition;
@@ -116,9 +117,11 @@ namespace System.Web.Http.OData.Routing
                     return functionEntitySet;
                 }
                 // entity set path
-                IEdmFunctionParameter parameter;
+                IEdmOperationParameter parameter;
                 IEnumerable<IEdmNavigationProperty> path;
-                if (Function.TryGetRelativeEntitySetPath(_edmModel, out parameter, out path))
+                IEnumerable<EdmError> edmErrors;
+                if (Function.TryGetRelativeEntitySetPath(_edmModel, out parameter, out path, out edmErrors) &&
+                    !edmErrors.Any())
                 {
                     IEdmEntitySet entitySet = previousEntitySet;
                     foreach (IEdmNavigationProperty prop in path)
@@ -148,12 +151,12 @@ namespace System.Web.Http.OData.Routing
             string paramValue;
             if (Values.TryGetValue(parameterName, out paramValue))
             {
-                IEdmFunctionParameter edmParam = Function.FindParameter(parameterName);
+                IEdmOperationParameter edmParam = Function.Function.FindParameter(parameterName);
                 if (edmParam != null)
                 {
                     return paramValue.StartsWith("@", StringComparison.Ordinal) ?
                         new UnresolvedParameterValue(edmParam.Type, paramValue, _edmModel) :
-                        ODataUriUtils.ConvertFromUriLiteral(paramValue, ODataVersion.V3, _edmModel, edmParam.Type);
+                        ODataUriUtils.ConvertFromUriLiteral(paramValue, ODataVersion.V4, _edmModel, edmParam.Type);
                 }
             }
 

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
-using Microsoft.Data.OData;
+using Microsoft.OData.Core;
 
 namespace System.Web.Http.OData.Batch
 {
@@ -25,7 +25,7 @@ namespace System.Web.Http.OData.Batch
         private const string BatchIdKey = "BatchId";
         private const string ChangeSetIdKey = "ChangesetId";
         private const string ContentIdMappingKey = "ContentIdMapping";
-        private const string ODataMaxServiceVersion = "MaxDataServiceVersion";
+        private const string ODataMaxServiceVersion = "OData-MaxVersion";
         private const string BatchMediaType = "multipart/mixed";
         private const string Boundary = "boundary";
 

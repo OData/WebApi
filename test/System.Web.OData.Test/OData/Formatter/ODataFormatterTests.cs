@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -11,9 +11,9 @@ using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Tracing;
 using System.Xml.Linq;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.Data.OData.Atom;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.Atom;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 using Newtonsoft.Json.Linq;
@@ -39,7 +39,7 @@ namespace System.Web.Http.OData.Formatter
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
                 // Assert
-                AssertODataVersion3AtomResponse(Resources.PersonEntryInAtom, response);
+                AssertODataVersion4AtomResponse(Resources.PersonEntryInAtom, response);
             }
         }
 
@@ -61,25 +61,25 @@ namespace System.Web.Http.OData.Formatter
                 using (HttpResponseMessage response = client.SendAsync(request).Result)
                 {
                     // Assert
-                    AssertODataVersion3AtomResponse(Resources.PersonEntryInAtom, response, HttpStatusCode.Created);
+                    AssertODataVersion4AtomResponse(Resources.PersonEntryInAtom, response, HttpStatusCode.Created);
                 }
             }
         }
 
         [Fact]
-        public void GetEntryInODataJsonVerboseFormat()
+        public void GetEntryInODataJsonFormat()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
-                MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose")))
+                MediaTypeWithQualityHeaderValue.Parse("application/json")))
             // Act
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
                 // Assert
-                AssertODataVersion3JsonResponse(Resources.PersonEntryInJsonVerbose, response);
+                AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonVerbose, response);
             }
         }
 
@@ -91,12 +91,12 @@ namespace System.Web.Http.OData.Formatter
             using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
-                MediaTypeWithQualityHeaderValue.Parse("application/json;odata=fullmetadata")))
+                MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full")))
             // Act
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
                 // Assert
-                AssertODataVersion3JsonResponse(Resources.PersonEntryInJsonFullMetadata, response);
+                AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonFullMetadata, response);
             }
         }
 
@@ -153,12 +153,12 @@ namespace System.Web.Http.OData.Formatter
             using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("MainEntity",
-                MediaTypeWithQualityHeaderValue.Parse("application/json;odata=fullmetadata")))
+                MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full")))
             // Act
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
                 // Assert
-                AssertODataVersion3JsonResponse(
+                AssertODataVersion4JsonResponse(
                     Resources.MainEntryFeedInJsonFullMetadata, response);
             }
         }
@@ -173,12 +173,12 @@ namespace System.Web.Http.OData.Formatter
             using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("MainEntity",
-                MediaTypeWithQualityHeaderValue.Parse("application/json;odata=nometadata")))
+                MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none")))
             // Act
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
                 // Assert
-                AssertODataVersion3JsonResponse(Resources.MainEntryFeedInJsonNoMetadata, response);
+                AssertODataVersion4JsonResponse(Resources.MainEntryFeedInJsonNoMetadata, response);
             }
         }
 
@@ -205,7 +205,7 @@ namespace System.Web.Http.OData.Formatter
                     using (HttpResponseMessage response = client.SendAsync(request).Result)
                     {
                         // Assert #1
-                        AssertODataVersion3AtomResponse(Resources.PersonEntryInAtom, response);
+                        AssertODataVersion4AtomResponse(Resources.PersonEntryInAtom, response);
                     }
 
                     // Arrange #2
@@ -249,7 +249,7 @@ namespace System.Web.Http.OData.Formatter
                     using (HttpResponseMessage response = client.SendAsync(request).Result)
                     {
                         // Assert #1
-                        AssertODataVersion3AtomResponse(Resources.PersonEntryInAtom, response);
+                        AssertODataVersion4AtomResponse(Resources.PersonEntryInAtom, response);
                     }
 
                     // Arrange #2: this request should return response in OData json format
@@ -259,7 +259,7 @@ namespace System.Web.Http.OData.Formatter
                     using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
                     {
                         // Assert #2
-                        AssertODataVersion3JsonResponse(Resources.PersonEntryInJsonVerbose, response);
+                        AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonVerbose, response);
                     }
 
                     // Arrange #3: when the query string is not present, request should be handled by the regular Json
@@ -326,7 +326,7 @@ namespace System.Web.Http.OData.Formatter
                 XElement nextPageLink = xml.Elements(XName.Get("link", "http://www.w3.org/2005/Atom"))
                     .Where(link => link.Attribute(XName.Get("rel")).Value == "next")
                     .SingleOrDefault();
-                XElement count = xml.Element(XName.Get("count", "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"));
+                XElement count = xml.Element(XName.Get("count", "http://docs.oasis-open.org/odata/ns/metadata"));
 
                 // Assert the PageSize correctly limits three results to two
                 Assert.Equal(2, entries.Length);
@@ -360,13 +360,13 @@ namespace System.Web.Http.OData.Formatter
 
                     Assert.Equal("error", xml.Name.LocalName);
                     Assert.Equal("The query specified in the URI is not valid. Could not find a property named 'abc' on type 'System.Web.Http.OData.Formatter.FormatterPerson'.",
-                        xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
-                    XElement innerErrorXml = xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}innererror"));
+                        xml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}message")).Value);
+                    XElement innerErrorXml = xml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}innererror"));
                     Assert.NotNull(innerErrorXml);
                     Assert.Equal("Could not find a property named 'abc' on type 'System.Web.Http.OData.Formatter.FormatterPerson'.",
-                        innerErrorXml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
-                    Assert.Equal("Microsoft.Data.OData.ODataException",
-                        innerErrorXml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}type")).Value);
+                        innerErrorXml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}message")).Value);
+                    Assert.Equal("Microsoft.OData.Core.ODataException",
+                        innerErrorXml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}type")).Value);
                 }
             }
         }
@@ -399,33 +399,33 @@ namespace System.Web.Http.OData.Formatter
 
         private static void AddDataServiceVersionHeaders(HttpRequestMessage request)
         {
-            request.Headers.Add("DataServiceVersion", "2.0");
-            request.Headers.Add("MaxDataServiceVersion", "3.0");
+            request.Headers.Add("OData-Version", "4.0");
+            request.Headers.Add("OData-MaxVersion", "4.0");
         }
 
-        private static void AssertODataVersion3AtomResponse(string expectedContent, HttpResponseMessage actual)
+        private static void AssertODataVersion4AtomResponse(string expectedContent, HttpResponseMessage actual)
         {
-            AssertODataVersion3AtomResponse(expectedContent, actual, HttpStatusCode.OK);
+            AssertODataVersion4AtomResponse(expectedContent, actual, HttpStatusCode.OK);
         }
 
-        private static void AssertODataVersion3AtomResponse(string expectedContent, HttpResponseMessage actual, HttpStatusCode statusCode)
+        private static void AssertODataVersion4AtomResponse(string expectedContent, HttpResponseMessage actual, HttpStatusCode statusCode)
         {
             Assert.NotNull(actual);
             Assert.Equal(statusCode, actual.StatusCode);
             Assert.Equal(ODataTestUtil.ApplicationAtomMediaTypeWithQuality.MediaType,
                 actual.Content.Headers.ContentType.MediaType);
             Assert.Equal(ODataTestUtil.GetDataServiceVersion(actual.Content.Headers),
-                ODataTestUtil.Version3NumberString);
+                ODataTestUtil.Version4NumberString);
             ODataTestUtil.VerifyResponse(actual.Content, expectedContent);
         }
 
-        private static void AssertODataVersion3JsonResponse(string expectedContent, HttpResponseMessage actual)
+        private static void AssertODataVersion4JsonResponse(string expectedContent, HttpResponseMessage actual)
         {
             Assert.NotNull(actual);
             Assert.Equal(HttpStatusCode.OK, actual.StatusCode);
             Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
                 actual.Content.Headers.ContentType.MediaType);
-            Assert.Equal(ODataTestUtil.Version3NumberString,
+            Assert.Equal(ODataTestUtil.Version4NumberString,
                 ODataTestUtil.GetDataServiceVersion(actual.Content.Headers));
             ODataTestUtil.VerifyJsonResponse(actual.Content, expectedContent);
         }

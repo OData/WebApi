@@ -18,7 +18,7 @@
     white-space: pre-wrap;
 }
 
-.help-page warning-message-container {
+.help-page .warning-message-container {
     margin-top: 20px;
     padding: 0 10px;
     color: #525252;
@@ -63,7 +63,7 @@
     background-color: transparent;
 }
 
-.help-page sample-header {
+.help-page .sample-header {
     border: 2px solid #D4D4D4;
     background: #76B8DB;
     color: #FFFFFF;
@@ -73,7 +73,7 @@
     margin: 10px 0px 0px 0px;
 }
 
-.help-page sample-content {
+.help-page .sample-content {
     display: block;
     border-width: 0;
     padding: 15px 20px;
@@ -82,27 +82,27 @@
     margin: 0px 0px 10px 0px;
 }
 
-.help-page api-name {
+.help-page .api-name {
     width: 40%;
 }
 
-.help-page api-documentation {
+.help-page .api-documentation {
     width: 60%;
 }
 
-.help-page parameter-name {
+.help-page .parameter-name {
     width: 20%;
 }
 
-.help-page parameter-documentation {
+.help-page .parameter-documentation {
     width: 40%;
 }
 
-.help-page parameter-type {
+.help-page .parameter-type {
     width: 20%;
 }
 
-.help-page parameter-annotations {
+.help-page .parameter-annotations {
     width: 20%;
 }
 

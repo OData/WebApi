@@ -21,6 +21,7 @@
   <assembly name="System.Web.Http.Tracing"/>
   <assembly name="System.Web.Http.WebHost"/>
   <assembly name="System.Web.Mvc"/>
+  <assembly name="System.Web.OData"/>
   <assembly name="System.Web.Razor"/>
   <assembly name="System.Web.WebPages"/>
   <assembly name="System.Web.WebPages.Administration"/>
@@ -55,6 +56,7 @@
   <assembly name="System.Web.Http.Tracing.Test"/>
   <assembly name="System.Web.Http.WebHost.Test"/>
   <assembly name="System.Web.Mvc.Test"/>
+  <assembly name="System.Web.OData.Test"/>
   <assembly name="System.Web.Razor.Test"/>
   <assembly name="System.Web.WebPages.Administration.Test"/>
   <assembly name="System.Web.WebPages.Deployment.Test"/>

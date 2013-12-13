@@ -40,6 +40,7 @@
     <Compile Include="Routing\HttpRouteExceptionHandlerTests.cs" />
     <Compile Include="Routing\HttpRouteExceptionRouteHandlerTests.cs" />
     <Compile Include="Routing\HttpWebRouteTests.cs" />
+    <Compile Include="SeekableBufferedRequestStreamTest.cs" />
     <Compile Include="WebHostExceptionCatchBlocksTests.cs" />
     <Compile Include="WebHostExceptionHandlerTests.cs" />
     <Compile Include="WebHostHttpRequestContextTests.cs" />

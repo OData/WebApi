@@ -35,6 +35,9 @@
     <Compile Include="..\Common\HttpMethodHelper.cs">
       <Link>Common\HttpMethodHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Common\NonOwnedStream.cs">
+      <Link>Common\NonOwnedStream.cs</Link>
+    </Compile>
     <Compile Include="..\Common\TaskHelpers.cs">
       <Link>Common\TaskHelpers.cs</Link>
     </Compile>
@@ -44,6 +47,7 @@
     <Compile Include="HttpResponseBaseExtensions.cs" />
     <Compile Include="Routing\HttpRouteExceptionHandler.cs" />
     <Compile Include="Routing\HttpRouteExceptionRouteHandler.cs" />
+    <Compile Include="SeekableBufferedRequestStream.cs" />
     <Compile Include="WebHostExceptionCatchBlocks.cs" />
     <Compile Include="HttpBatchContextWrapper.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />

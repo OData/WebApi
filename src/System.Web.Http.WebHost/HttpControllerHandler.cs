@@ -207,7 +207,7 @@ namespace System.Web.Http.WebHost
 
             if (isInputBuffered)
             {
-                request.Content = new LazyStreamContent(() => requestBase.InputStream);
+                request.Content = new LazyStreamContent(() => new SeekableBufferedRequestStream(requestBase));
             }
             else
             {

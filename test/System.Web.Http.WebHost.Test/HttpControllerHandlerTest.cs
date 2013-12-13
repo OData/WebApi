@@ -1340,6 +1340,169 @@ namespace System.Web.Http.WebHost
             }
         }
 
+        [Fact]
+        public async Task GetBufferedStream_ReadAsString_GetsSeekableInputStream()
+        {
+            // Arrange
+            using (MemoryStream nonSeekable = new MemoryStream())
+            using (MemoryStream seekable = new MemoryStream())
+            {
+                var request = CreateStubRequestBaseMock("IgnoreMethod", nonSeekable, seekable);
+                var context = CreateStubContextBase(request.Object);
+
+                using (HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context))
+                {
+                    // Guard 
+                    request.Verify(r => r.GetBufferedInputStream(), Times.Never());
+                    request.Verify(r => r.InputStream, Times.Never());
+
+                    // Act
+                    var content = await actualRequest.Content.ReadAsStringAsync();
+
+                    // Assert
+                    request.Verify(r => r.GetBufferedInputStream(), Times.Once());
+                    request.Verify(r => r.InputStream, Times.Once());
+                }
+            }
+        }
+
+        [Fact]
+        public async Task GetBufferedStream_ReadAsStream_DoesNotGetSeekableInputStream()
+        {
+            // Arrange
+            using (MemoryStream nonSeekable = new MemoryStream())
+            using (MemoryStream seekable = new MemoryStream())
+            {
+                var request = CreateStubRequestBaseMock("IgnoreMethod", nonSeekable, seekable);
+                var context = CreateStubContextBase(request.Object);
+
+                using (HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context))
+                {
+                    // Guard 
+                    request.Verify(r => r.GetBufferedInputStream(), Times.Never());
+                    request.Verify(r => r.InputStream, Times.Never());
+
+                    // Act
+                    var stream = await actualRequest.Content.ReadAsStreamAsync();
+
+                    // Assert
+                    request.Verify(r => r.GetBufferedInputStream(), Times.Once());
+                    request.Verify(r => r.InputStream, Times.Never());
+                }
+            }
+        }
+
+        [Fact]
+        public async Task GetBufferedStream_ReadAsStream_ThenSeek_GetsSeekableInputStream()
+        {
+            // Arrange
+            string content = "Hello, World!";
+            using (MemoryStream nonSeekable = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            using (MemoryStream seekable = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            {
+                var request = CreateStubRequestBaseMock("IgnoreMethod", nonSeekable, seekable);
+                var context = CreateStubContextBase(request.Object);
+
+                using (HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context))
+                {
+                    var stream = await actualRequest.Content.ReadAsStreamAsync();
+
+                    // Guard 
+                    request.Verify(r => r.GetBufferedInputStream(), Times.Once());
+                    request.Verify(r => r.InputStream, Times.Never());
+
+                    // Act
+                    stream.Seek(1L, SeekOrigin.Begin);
+
+                    // Assert
+                    request.Verify(r => r.GetBufferedInputStream(), Times.Once());
+                    request.Verify(r => r.InputStream, Times.Once());
+                }
+            }
+        }
+
+        [Fact]
+        public async Task GetBufferedStream_EndToEnd_ReadContentTwice()
+        {
+            // Arrange
+            string content = "Hello, World!";
+            using (MemoryStream nonSeekable = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            using (MemoryStream seekable = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            {
+                var request = CreateStubRequestBaseMock("IgnoreMethod", nonSeekable, seekable);
+                var context = CreateStubContextBase(request.Object);
+
+                using (HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context))
+                {
+                    // Act
+                    var actual1 = await actualRequest.Content.ReadAsStringAsync();
+                    var actual2 = await actualRequest.Content.ReadAsStringAsync();
+
+                    // Assert
+                    Assert.Equal(content, actual1);
+                    Assert.Equal(content, actual2);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task GetBufferedStream_EndToEnd_ReadContentThenSeekThenRead()
+        {
+            // Arrange
+            string content = "Hello, World!";
+            using (MemoryStream nonSeekable = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            using (MemoryStream seekable = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            {
+                var request = CreateStubRequestBaseMock("IgnoreMethod", nonSeekable, seekable);
+                var context = CreateStubContextBase(request.Object);
+
+                using (HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context))
+                {
+                    // Act
+                    var actual1 = await actualRequest.Content.ReadAsStringAsync();
+
+                    var stream = await actualRequest.Content.ReadAsStreamAsync();
+                    stream.Seek(0, SeekOrigin.Begin);
+
+                    string actual2;
+                    using (var reader = new StreamReader(stream))
+                    {
+                        actual2 = await reader.ReadToEndAsync();
+                    }
+
+                    // Assert
+                    Assert.Equal(content, actual1);
+                    Assert.Equal(content, actual2);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task GetBufferedStream_EndToEnd_SeekThenRead()
+        {
+            // Arrange
+            string content = "Hello, World!";
+            using (MemoryStream nonSeekable = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            using (MemoryStream seekable = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            {
+                var request = CreateStubRequestBaseMock("IgnoreMethod", nonSeekable, seekable);
+                var context = CreateStubContextBase(request.Object);
+
+                using (HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context))
+                {
+                    // Act
+                    var stream = await actualRequest.Content.ReadAsStreamAsync();
+                    stream.Seek(1L, SeekOrigin.Begin);
+                    stream.Seek(0L, SeekOrigin.Begin);
+
+                    var actual = await actualRequest.Content.ReadAsStringAsync();
+
+                    // Assert
+                    Assert.Equal(content, actual);
+                }
+            }
+        }
+
         private static Task CopyResponseAsync(HttpContextBase contextBase, HttpRequestMessage request, HttpResponseMessage response)
         {
             IExceptionLogger exceptionLogger = CreateDummyExceptionLogger();
@@ -1395,6 +1558,11 @@ namespace System.Web.Http.WebHost
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
             contextMock.SetupGet(m => m.Request).Returns(request);
             return contextMock.Object;
+        }
+
+        internal static HttpContextBase CreateStubContextBase(HttpRequestBase request)
+        {
+            return CreateStubContextBase(request, new Hashtable());
         }
 
         internal static HttpContextBase CreateStubContextBase(HttpRequestBase request, IDictionary items)
@@ -1455,12 +1623,22 @@ namespace System.Web.Http.WebHost
 
         private static HttpRequestBase CreateStubRequestBase(string httpMethod, Stream bufferedStream)
         {
+            return CreateStubRequestBaseMock(httpMethod, bufferedStream, bufferedStream).Object;
+        }
+
+        private static Mock<HttpRequestBase> CreateStubRequestBaseMock(string httpMethod, Stream nonSeekableStream, Stream seekableStream)
+        {
             Mock<HttpRequestBase> requestBaseMock = new Mock<HttpRequestBase>() { CallBase = true };
             requestBaseMock.SetupGet(m => m.HttpMethod).Returns(httpMethod);
             requestBaseMock.SetupGet(m => m.Url).Returns(new Uri("Http://localhost"));
             requestBaseMock.SetupGet(m => m.Headers).Returns(new NameValueCollection());
-            requestBaseMock.Setup(m => m.InputStream).Returns(bufferedStream);
-            return requestBaseMock.Object;
+
+            requestBaseMock.Setup(m => m.GetBufferedInputStream()).Returns(nonSeekableStream).Verifiable();
+            requestBaseMock.SetupGet(m => m.InputStream).Returns(seekableStream).Verifiable();
+
+            requestBaseMock.Setup(m => m.GetBufferlessInputStream()).Throws<InvalidOperationException>();
+
+            return requestBaseMock;
         }
 
         internal static HttpRequestBase CreateStubRequestBase(Func<Stream> getStream, bool buffered)
@@ -1471,10 +1649,16 @@ namespace System.Web.Http.WebHost
             requestBaseMock.SetupGet(m => m.Headers).Returns(new NameValueCollection());
             if (buffered)
             {
-                requestBaseMock.Setup(m => m.InputStream).Returns(() => getStream());
+                requestBaseMock.Setup(m => m.GetBufferedInputStream()).Returns(() => getStream());
+                requestBaseMock.SetupGet(m => m.InputStream).Returns(() => getStream());
+
+                requestBaseMock.Setup(m => m.GetBufferlessInputStream()).Throws<InvalidOperationException>();
             }
             else
             {
+                requestBaseMock.Setup(m => m.GetBufferedInputStream()).Throws<InvalidOperationException>();
+                requestBaseMock.SetupGet(m => m.InputStream).Throws<InvalidOperationException>();
+
                 requestBaseMock.Setup(m => m.GetBufferlessInputStream()).Returns(() => getStream());
             }
             return requestBaseMock.Object;

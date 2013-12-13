@@ -39,6 +39,9 @@
     <Compile Include="..\Common\ListWrapperCollection.cs">
       <Link>Common\ListWrapperCollection.cs</Link>
     </Compile>
+    <Compile Include="..\Common\NonOwnedStream.cs">
+      <Link>Common\NonOwnedStream.cs</Link>
+    </Compile>
     <Compile Include="..\Common\TaskHelpers.cs">
       <Link>Common\TaskHelpers.cs</Link>
     </Compile>
@@ -50,7 +53,6 @@
     <Compile Include="OwinExceptionCatchBlocks.cs" />
     <Compile Include="HostAuthenticationAttribute.cs" />
     <Compile Include="HttpMessageHandlerOptions.cs" />
-    <Compile Include="NonOwnedStream.cs" />
     <Compile Include="OwinHttpConfigurationExtensions.cs" />
     <Compile Include="HostAuthenticationFilter.cs" />
     <Compile Include="OwinBufferPolicySelector.cs" />

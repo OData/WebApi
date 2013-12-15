@@ -81,6 +81,47 @@ namespace System.Web.Http.Validation.Validators
         }
 
         [Fact]
+        public void ValidateReturnsSingleValidationResultIfMemberNameSequenceIsNull()
+        {
+            // Arrange
+            const string errorMessage = "Some error message";
+            ModelMetadata metadata = _metadataProvider.GetMetadataForProperty(() => 15, typeof(string), "Length");
+            Mock<ValidationAttribute> attribute = new Mock<ValidationAttribute> { CallBase = true };
+            attribute.Protected()
+                     .Setup<ValidationResult>("IsValid", ItExpr.IsAny<object>(), ItExpr.IsAny<ValidationContext>())
+                     .Returns(new ValidationResult(errorMessage, memberNames: null));
+            var validator = new DataAnnotationsModelValidator(_noValidatorProviders, attribute.Object);
+
+            // Act
+            IEnumerable<ModelValidationResult> results = validator.Validate(metadata, container: null);
+
+            // Assert
+            ModelValidationResult validationResult = Assert.Single(results);
+            Assert.Equal(errorMessage, validationResult.Message);
+        }
+
+        [Fact]
+        public void ValidateReturnsSingleValidationResultIfOneMemberNameIsSpecified()
+        {
+            // Arrange
+            const string errorMessage = "A different error message";
+            ModelMetadata metadata = _metadataProvider.GetMetadataForType(() => new object(), typeof(object));
+            Mock<ValidationAttribute> attribute = new Mock<ValidationAttribute> { CallBase = true };
+            attribute.Protected()
+                     .Setup<ValidationResult>("IsValid", ItExpr.IsAny<object>(), ItExpr.IsAny<ValidationContext>())
+                     .Returns(new ValidationResult(errorMessage, new[] { "FirstName" }));
+            var validator = new DataAnnotationsModelValidator(_noValidatorProviders, attribute.Object);
+
+            // Act
+            IEnumerable<ModelValidationResult> results = validator.Validate(metadata, container: null);
+
+            // Assert
+            ModelValidationResult validationResult = Assert.Single(results);
+            Assert.Equal(errorMessage, validationResult.Message);
+            Assert.Equal("FirstName", validationResult.MemberName);
+        }
+
+        [Fact]
         public void ValidatateWithValidationResultSuccess()
         {
             // Arrange

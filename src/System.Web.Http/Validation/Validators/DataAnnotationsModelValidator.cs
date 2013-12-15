@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Security;
+using System.Linq;
 using System.Web.Http.Metadata;
 
 namespace System.Web.Http.Validation.Validators
@@ -31,17 +31,21 @@ namespace System.Web.Http.Validation.Validators
         {
             // Per the WCF RIA Services team, instance can never be null (if you have
             // no parent, you pass yourself for the "instance" parameter).
-            ValidationContext context = new ValidationContext(container ?? metadata.Model, null, null);
+            ValidationContext context = new ValidationContext(container ?? metadata.Model);
             context.DisplayName = metadata.GetDisplayName();
 
             ValidationResult result = Attribute.GetValidationResult(metadata.Model, context);
 
             if (result != ValidationResult.Success)
             {
-                return new ModelValidationResult[] { new ModelValidationResult { Message = result.ErrorMessage } };
+                var validationResult = new ModelValidationResult
+                {
+                    Message = result.ErrorMessage,
+                    MemberName = result.MemberNames.FirstOrDefault()
+                };
+                return new ModelValidationResult[] { validationResult };
             }
-
-            return new ModelValidationResult[0];
+            return Enumerable.Empty<ModelValidationResult>();
         }
     }
 }

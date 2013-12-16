@@ -310,8 +310,8 @@ namespace System.Web.Http.OData
             Assert.Throws<SerializationException>(
                 () => delta.CollectionPropertyWithoutSetAndClear = new[] { "1" },
                 "The type 'System.Int32[]' of the property 'CollectionPropertyWithoutSetAndClear' on type 'System.Web." +
-                "Http.OData.DeltaTest+InvalidDeltaModel' does not have an Clear method. Consider using a collection type" +
-                " that does have an Clear method, such as IList<T> or ICollection<T>.");
+                "Http.OData.DeltaTest+InvalidDeltaModel' does not have a Clear method. Consider using a collection type" +
+                " that does have a Clear method, such as IList<T> or ICollection<T>.");
         }
 
         [Fact]

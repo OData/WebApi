@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
   <PropertyGroup>
@@ -127,6 +127,7 @@
     <Compile Include="OData\EntitySetControllerHelpersTest.cs" />
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="OData\PerRequestParameterBindingTest.cs" />
+    <Compile Include="OData\QueryableLimitationTest.cs" />
     <Compile Include="OData\Query\TruncatedCollectionTest.cs" />
     <Compile Include="OData\Results\CreatedODataResultTest.cs" />
     <Compile Include="OData\Results\UpdatedODataResultTest.cs" />

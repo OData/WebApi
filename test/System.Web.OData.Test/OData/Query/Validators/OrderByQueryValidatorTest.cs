@@ -42,6 +42,77 @@ namespace System.Web.Http.OData.Query.Validators
                 "The property 'UnsortableProperty' cannot be used in the $orderby query option.");
         }
 
+
+        [Fact]
+        public void Validate_ThrowsUnsortableException_ForUnsortableProperty_OnEmptyAllowedPropertiesList()
+        {
+            // Arrange : empty allowed orderby list
+            ODataValidationSettings settings = new ODataValidationSettings();
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(new OrderByQueryOption("UnsortableProperty asc", _context), settings),
+                "The property 'UnsortableProperty' cannot be used in the $orderby query option.");
+        }
+
+
+        [Fact]
+        public void Validate_ThrowsUnsortableException_ForUnsortableProperty_OnNonEmptyAllowedPropertiesList()
+        {
+            // Arrange : nonempty allowed orderby list
+            ODataValidationSettings settings = new ODataValidationSettings();
+            settings.AllowedOrderByProperties.Add("UnsortableProperty");
+            settings.AllowedOrderByProperties.Add("Address");
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(new OrderByQueryOption("UnsortableProperty asc", _context), settings), 
+                "The property 'UnsortableProperty' cannot be used in the $orderby query option.");
+        }
+
+        [Fact]
+        public void Validate_NoException_ForAllowedAndSortableUnlimitedProperty_OnEmptyAllowedPropertiesList()
+        {
+            // Arrange: empty allowed orderby list
+            ODataValidationSettings settings = new ODataValidationSettings();
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(new OrderByQueryOption("Name asc", _context), settings));
+        }
+
+        [Fact]
+        public void Validate_NoException_ForAllowedAndSortableUnlimitedProperty_OnNonEmptyAllowedPropertiesList()
+        {
+            // Arrange: nonempty allowed orbderby list
+            ODataValidationSettings settings = new ODataValidationSettings();
+            settings.AllowedOrderByProperties.Add("Name");
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(new OrderByQueryOption("Name asc", _context), settings));
+        }
+
+        [Fact]
+        public void Validate_ThrowsNotAllowedException_ForNotAllowedAndSortableLimitedProperty()
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings();
+            settings.AllowedOrderByProperties.Add("Name");
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(new OrderByQueryOption("UnsortableProperty asc", _context), settings),
+                "Order by 'UnsortableProperty' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings.");
+        }
+
+        [Fact]
+        public void Validate_ThrowsNotAllowedException_ForNotAllowedAndSortableUnlimitedProperty()
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings();
+            settings.AllowedOrderByProperties.Add("Address");
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(new OrderByQueryOption("Name asc", _context), settings),
+                "Order by 'Name' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings.");
+        }
+
         [Fact]
         public void ValidateWillNotAllowName()
         {

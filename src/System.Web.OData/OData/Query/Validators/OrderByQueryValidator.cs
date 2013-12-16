@@ -40,30 +40,41 @@ namespace System.Web.Http.OData.Query.Validators
                 }
             }
 
-            if (validationSettings.AllowedOrderByProperties.Count > 0)
+            // need to validate only if orderby options presented
+            if (orderByOption.OrderByNodes.Count > 0)
             {
-                IEnumerable<OrderByNode> orderByNodes = orderByOption.OrderByNodes;
-
-                foreach (OrderByNode node in orderByNodes)
+                foreach (OrderByNode node in orderByOption.OrderByNodes)
                 {
                     string propertyName = null;
-                    OrderByPropertyNode property = node as OrderByPropertyNode;
-                    if (property != null)
+                    OrderByPropertyNode propertyNode = node as OrderByPropertyNode;
+                    if (propertyNode != null)
                     {
-                        propertyName = property.Property.Name;
-                        if (EdmLibHelpers.IsUnsortable(property.Property, orderByOption.Context.Model))
+                        propertyName = propertyNode.Property.Name;
+
+                        // First validate whether it's allowed or not
+                        if (propertyName != null && 
+                            validationSettings.AllowedOrderByProperties.Count > 0 && 
+                            !validationSettings.AllowedOrderByProperties.Contains(propertyName))
+                        {
+                            throw new ODataException(Error.Format(SRResources.NotAllowedOrderByProperty, propertyName,
+                                "AllowedOrderByProperties"));
+                        }
+
+                        // Second validate whether it's limited or not
+                        if (EdmLibHelpers.IsUnsortable(propertyNode.Property, orderByOption.Context.Model))
                         {
                             throw new ODataException(Error.Format(SRResources.UnsortablePropertyUsedInOrderBy, propertyName));
                         }
                     }
-                    else if ((node as OrderByItNode) != null && !validationSettings.AllowedOrderByProperties.Contains("$it"))
+                    else if (node as OrderByItNode != null)
                     {
                         propertyName = "$it";
-                    }
-
-                    if (propertyName != null && !validationSettings.AllowedOrderByProperties.Contains(propertyName))
-                    {
-                        throw new ODataException(Error.Format(SRResources.NotAllowedOrderByProperty, propertyName, "AllowedOrderByProperties"));
+                        if (validationSettings.AllowedOrderByProperties.Count > 0 &&
+                            !validationSettings.AllowedOrderByProperties.Contains(propertyName))
+                        {
+                            throw new ODataException(Error.Format(SRResources.NotAllowedOrderByProperty, propertyName,
+                                "AllowedOrderByProperties"));
+                        }
                     }
                 }
             }

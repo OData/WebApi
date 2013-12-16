@@ -286,7 +286,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CollectionProperties must implement IEnumerable&lt;&gt;. The Property &apos;{0}&apos; declared on &apos;{1}&apos; does not implement IEnumerable&lt;&gt;. .
+        ///   Looks up a localized string similar to CollectionProperties must implement IEnumerable&lt;&gt;. The property &apos;{0}&apos; declared on &apos;{1}&apos; does not implement IEnumerable&lt;&gt;..
         /// </summary>
         internal static string CollectionPropertiesMustReturnIEnumerable {
             get {
@@ -304,7 +304,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The type &apos;{0}&apos; of the property &apos;{1}&apos; on type &apos;{2}&apos; does not have an Clear method. Consider using a collection type that does have an Clear method, such as IList&lt;T&gt; or ICollection&lt;T&gt;..
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of the property &apos;{1}&apos; on type &apos;{2}&apos; does not have a Clear method. Consider using a collection type that does have a Clear method, such as IList&lt;T&gt; or ICollection&lt;T&gt;..
         /// </summary>
         internal static string CollectionShouldHaveClearMethod {
             get {
@@ -412,7 +412,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not an supported edm type..
+        ///   Looks up a localized string similar to {0} is not a supported EDM type..
         /// </summary>
         internal static string EdmTypeNotSupported {
             get {
@@ -916,7 +916,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to More than one matching clr type found for the Edm type {0}.\nThe matching clr types are {1}..
+        ///   Looks up a localized string similar to More than one matching CLR type found for the EDM type {0}.\nThe matching CLR types are {1}..
         /// </summary>
         internal static string MultipleMatchingClrTypesForEdmType {
             get {
@@ -1546,7 +1546,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The type &apos;{0}&apos; cannot be configured as a EntityType. It was previously configured as an ComplexType..
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; cannot be configured as an EntityType. It was previously configured as a ComplexType..
         /// </summary>
         internal static string TypeCannotBeEntityWasComplex {
             get {

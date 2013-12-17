@@ -1,6 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Web.Http.Controllers;
+using System.Web.Http.Internal;
 
 namespace System.Web.Http.Description
 {
@@ -46,5 +50,16 @@ namespace System.Web.Http.Description
         /// route parameter handling.
         /// </remarks>
         public HttpParameterDescriptor ParameterDescriptor { get; set; }
+
+        internal IEnumerable<PropertyInfo> GetBindableProperties()
+        {
+            return ParameterDescriptor.ParameterType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                       .Where(p => p.GetGetMethod() != null && p.GetSetMethod() != null);
+        }
+
+        internal bool CanConvertPropertiesFromString()
+        {
+            return GetBindableProperties().All(p => TypeHelper.CanConvertFromString(p.PropertyType));
+        }
     }
 }

@@ -190,10 +190,10 @@
     <value>The value for OData query '{0}' cannot be empty.</value>
   </data>
   <data name="EdmTypeNotSupported" xml:space="preserve">
-    <value>{0} is not an supported edm type.</value>
+    <value>{0} is not a supported EDM type.</value>
   </data>
   <data name="MultipleMatchingClrTypesForEdmType" xml:space="preserve">
-    <value>More than one matching clr type found for the Edm type {0}.\nThe matching clr types are {1}.</value>
+    <value>More than one matching CLR type found for the EDM type {0}.\nThe matching CLR types are {1}.</value>
   </data>
   <data name="ODataFunctionNotSupported" xml:space="preserve">
     <value>Unknown function '{0}'.</value>
@@ -220,7 +220,7 @@
     <value>The type '{0}' cannot be configured as a ComplexType. It was previously configured as an EntityType.</value>
   </data>
   <data name="TypeCannotBeEntityWasComplex" xml:space="preserve">
-    <value>The type '{0}' cannot be configured as a EntityType. It was previously configured as an ComplexType.</value>
+    <value>The type '{0}' cannot be configured as an EntityType. It was previously configured as a ComplexType.</value>
   </data>
   <data name="RecursiveComplexTypesNotAllowed" xml:space="preserve">
     <value>The complex type '{0}' has a reference to itself through the property '{1}'. A recursive loop of complex types is not allowed.</value>
@@ -283,7 +283,7 @@
     <value>GetEdmModel cannot be called more than once. Consider using a different instance of the model builder or reusing the model you have built earlier.</value>
   </data>
   <data name="CollectionPropertiesMustReturnIEnumerable" xml:space="preserve">
-    <value>CollectionProperties must implement IEnumerable&lt;&gt;. The Property '{0}' declared on '{1}' does not implement IEnumerable&lt;&gt;. </value>
+    <value>CollectionProperties must implement IEnumerable&lt;&gt;. The property '{0}' declared on '{1}' does not implement IEnumerable&lt;&gt;.</value>
   </data>
   <data name="MustBeCollectionProperty" xml:space="preserve">
     <value>The '{0}' property on '{1}' must be a Collection property.</value>
@@ -591,6 +591,7 @@
   </data>
   <data name="EdmTypeCannotBeNull" xml:space="preserve">
     <value>The EDM type of the object of type '{0}' is null. The EDM type of an {1} cannot be null.</value>
+    <comment>{1} may be System.Web.Http.OData.IEdmObject which doesn't scan. https://aspnetwebstack.codeplex.com/workitem/1558</comment>
   </data>
   <data name="EdmObjectNull" xml:space="preserve">
     <value>The property 'EdmObject' of {0} cannot be null.</value>
@@ -653,7 +654,7 @@
     <value>The property 'ElementClrType' of {0} cannot be null.</value>
   </data>
   <data name="CollectionShouldHaveClearMethod" xml:space="preserve">
-    <value>The type '{0}' of the property '{1}' on type '{2}' does not have an Clear method. Consider using a collection type that does have an Clear method, such as IList&lt;T&gt; or ICollection&lt;T&gt;.</value>
+    <value>The type '{0}' of the property '{1}' on type '{2}' does not have a Clear method. Consider using a collection type that does have a Clear method, such as IList&lt;T&gt; or ICollection&lt;T&gt;.</value>
   </data>
   <data name="OrderByNodeCountExceeded" xml:space="preserve">
     <value>The number of clauses in $orderby query option exceeded the maximum number allowed. The maximum number of $orderby clauses allowed is {0}.</value>

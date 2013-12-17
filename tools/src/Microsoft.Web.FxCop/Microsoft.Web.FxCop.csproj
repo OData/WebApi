@@ -31,12 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <Dev11FxCopLocation>$(MSBuildProgramFiles32)\Microsoft Visual Studio 11.0\Team Tools\Static Analysis Tools\FxCop\</Dev11FxCopLocation>
-    <Dev12FxCopLocation>$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Team Tools\Static Analysis Tools\FxCop\</Dev12FxCopLocation>
-    <FxCopLocation>
-    </FxCopLocation>
-    <FxCopLocation Condition=" EXISTS('$(Dev11FxCopLocation)') ">$(Dev11FxCopLocation)</FxCopLocation>
-    <FxCopLocation Condition=" EXISTS('$(Dev12FxCopLocation)') ">$(Dev12FxCopLocation)</FxCopLocation>
+    <FxCopLocation>$(MSBuildProgramFiles32)\Microsoft Visual Studio $(VisualStudioVersion)\Team Tools\Static Analysis Tools\FxCop\</FxCopLocation>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FxCopSdk">
@@ -73,7 +68,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <!-- If the FxCop SDK does not exist at all have this build no-op. -->
-    <BuildDependsOn Condition=" '$(FxCopLocation)' == '' ">
+    <BuildDependsOn Condition=" !Exists('$(FxCopLocation)') ">
     </BuildDependsOn>
   </PropertyGroup>
 </Project>

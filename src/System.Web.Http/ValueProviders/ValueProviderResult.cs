@@ -118,23 +118,23 @@ namespace System.Web.Http.ValueProviders
             }
 
             CultureInfo cultureToUse = culture ?? Culture;
-            return UnwrapPossibleArrayType(cultureToUse, value, type);
+            return UnwrapPossibleListType(cultureToUse, value, type);
         }
 
-        private static object UnwrapPossibleArrayType(CultureInfo culture, object value, Type destinationType)
+        private static object UnwrapPossibleListType(CultureInfo culture, object value, Type destinationType)
         {
             // array conversion results in four cases, as below
-            Array valueAsArray = value as Array;
+            IList valueAsList = value as IList;
             if (destinationType.IsArray)
             {
                 Type destinationElementType = destinationType.GetElementType();
-                if (valueAsArray != null)
+                if (valueAsList != null)
                 {
-                    // case 1: both destination + source type are arrays, so convert each element
-                    IList converted = Array.CreateInstance(destinationElementType, valueAsArray.Length);
-                    for (int i = 0; i < valueAsArray.Length; i++)
+                    // case 1: both destination + source type are lists, so convert each element
+                    IList converted = Array.CreateInstance(destinationElementType, valueAsList.Count);
+                    for (int i = 0; i < valueAsList.Count; i++)
                     {
-                        converted[i] = ConvertSimpleType(culture, valueAsArray.GetValue(i), destinationElementType);
+                        converted[i] = ConvertSimpleType(culture, valueAsList[i], destinationElementType);
                     }
                     return converted;
                 }
@@ -147,12 +147,12 @@ namespace System.Web.Http.ValueProviders
                     return converted;
                 }
             }
-            else if (valueAsArray != null)
+            else if (valueAsList != null)
             {
                 // case 3: destination type is single element but source is array, so extract first element + convert
-                if (valueAsArray.Length > 0)
+                if (valueAsList.Count > 0)
                 {
-                    value = valueAsArray.GetValue(0);
+                    value = valueAsList[0];
                     return ConvertSimpleType(culture, value, destinationType);
                 }
                 else

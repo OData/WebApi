@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
   <PropertyGroup>
@@ -340,7 +340,7 @@
     <EmbeddedResource Include="Resources\BooleanInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\ByteInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\CollectionOfPersonInJsonLight.json" />
-    <EmbeddedResource Include="Resources\DateTimeInJsonFullMetadata.json" />
+    <EmbeddedResource Include="Resources\DateTimeOffsetInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\DecimalInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\DoubleInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\EmployeeEntryInJsonLight.json" />
@@ -357,7 +357,6 @@
     <EmbeddedResource Include="Resources\NullableInt32InJsonNoMetadata.json" />
     <EmbeddedResource Include="Resources\PersonComplexTypeInJsonLight.json" />
     <EmbeddedResource Include="Resources\PersonEntryInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\PersonEntryInJsonVerbose.json" />
     <EmbeddedResource Include="Resources\PersonEntryInPlainOldJson.json" />
     <EmbeddedResource Include="Resources\PersonRequestEntryInPlainOldJson.json" />
     <EmbeddedResource Include="Resources\ProductRequestEntryInPlainOldJson.json" />
@@ -370,6 +369,10 @@
     <EmbeddedResource Include="Resources\SupplierRequestEntryInPlainOldJson.json" />
     <EmbeddedResource Include="Resources\TimeSpanInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\WorkItemEntryInJsonLight.json" />
+    <EmbeddedResource Include="Resources\PersonEntryInJsonLightFullMetadata.json" />
+    <EmbeddedResource Include="Resources\PersonEntryInJsonLightMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\PersonEntryInJsonLightNoMetadata.json" />
+    <EmbeddedResource Include="Resources\PersonEntryInJsonLight.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">
@@ -403,7 +406,7 @@
     <EmbeddedResource Include="Resources\BooleanInXml.xml" />
     <EmbeddedResource Include="Resources\ByteInXml.xml" />
     <EmbeddedResource Include="Resources\CollectionOfPersonInAtom.xml" />
-    <EmbeddedResource Include="Resources\DateTimeInXml.xml" />
+    <EmbeddedResource Include="Resources\DateTimeOffsetInXml.xml" />
     <EmbeddedResource Include="Resources\DecimalInXml.xml" />
     <EmbeddedResource Include="Resources\DoubleInXml.xml" />
     <EmbeddedResource Include="Resources\EmployeeEntryInAtom.xml" />

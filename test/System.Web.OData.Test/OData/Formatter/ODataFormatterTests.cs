@@ -66,37 +66,23 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
-        [Fact]
-        public void GetEntryInODataJsonFormat()
+        [Theory]
+        [InlineData("application/json;odata.metadata=none", "PersonEntryInJsonLightNoMetadata.json")]
+        [InlineData("application/json;odata.metadata=minimal", "PersonEntryInJsonLightMinimalMetadata.json")]
+        [InlineData("application/json;odata.metadata=full", "PersonEntryInJsonLightFullMetadata.json")]
+        public void GetEntryInODataJsonLightFormat(string metadata, string expect)
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
-                MediaTypeWithQualityHeaderValue.Parse("application/json")))
+                MediaTypeWithQualityHeaderValue.Parse(metadata)))
             // Act
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
                 // Assert
-                AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonVerbose, response);
-            }
-        }
-
-        [Fact]
-        public void GetEntryInODataJsonFullMetadataFormat()
-        {
-            // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration())
-            using (HttpServer host = new HttpServer(configuration))
-            using (HttpClient client = new HttpClient(host))
-            using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
-                MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full")))
-            // Act
-            using (HttpResponseMessage response = client.SendAsync(request).Result)
-            {
-                // Assert
-                AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonFullMetadata, response);
+                AssertODataVersion4JsonResponse(Resources.GetString(expect), response);
             }
         }
 
@@ -244,7 +230,7 @@ namespace System.Web.Http.OData.Formatter
                 {
                     // Arrange #1 this request should return response in OData atom format
                     using (HttpRequestMessage request = ODataTestUtil.GenerateRequestMessage(
-                        CreateAbsoluteUri("People(10)?format=odata"), isAtom: true))
+                        CreateAbsoluteUri("People(10)?$format=atom"), isAtom: true))
                     // Act #1
                     using (HttpResponseMessage response = client.SendAsync(request).Result)
                     {
@@ -254,12 +240,12 @@ namespace System.Web.Http.OData.Formatter
 
                     // Arrange #2: this request should return response in OData json format
                     using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                        CreateAbsoluteUri("People(10)?format=odata"), isAtom: false))
+                        CreateAbsoluteUri("People(10)?$format=application/json"), isAtom: false))
                     // Act #2
                     using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
                     {
                         // Assert #2
-                        AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonVerbose, response);
+                        AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonLight, response);
                     }
 
                     // Arrange #3: when the query string is not present, request should be handled by the regular Json
@@ -414,8 +400,8 @@ namespace System.Web.Http.OData.Formatter
             Assert.Equal(statusCode, actual.StatusCode);
             Assert.Equal(ODataTestUtil.ApplicationAtomMediaTypeWithQuality.MediaType,
                 actual.Content.Headers.ContentType.MediaType);
-            Assert.Equal(ODataTestUtil.GetDataServiceVersion(actual.Content.Headers),
-                ODataTestUtil.Version4NumberString);
+            Assert.Equal(ODataTestUtil.Version4NumberString,
+                ODataTestUtil.GetDataServiceVersion(actual.Content.Headers));
             ODataTestUtil.VerifyResponse(actual.Content, expectedContent);
         }
 

@@ -142,19 +142,27 @@ namespace System.Web.Http
             }
         }
 
-        public static string PersonEntryInJsonFullMetadata
+        public static string PersonEntryInJsonLightNoMetadata
         {
             get
             {
-                return GetString("PersonEntryInJsonFullMetadata.json");
+                return GetString("PersonEntryInJsonLightNoMetadata.json");
             }
         }
 
-        public static string PersonEntryInJsonVerbose
+        public static string PersonEntryInJsonLightMinimalMetadata
         {
             get
             {
-                return GetString("PersonEntryInJsonVerbose.json");
+                return GetString("PersonEntryInJsonLightMinimalMetadata.json");
+            }
+        }
+        
+        public static string PersonEntryInJsonLightFullMetadata
+        {
+            get
+            {
+                return GetString("PersonEntryInJsonLightFullMetadata.json");
             }
         }
 
@@ -166,11 +174,11 @@ namespace System.Web.Http
             }
         }
 
-        public static string PersonRequestEntryInPlainOldJson
+        public static string PersonEntryInJsonLight
         {
             get
             {
-                return GetString("PersonRequestEntryInPlainOldJson.json");
+                return GetString("PersonEntryInJsonLight.json");
             }
         }
 

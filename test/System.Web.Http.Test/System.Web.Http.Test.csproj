@@ -100,6 +100,7 @@
     <Compile Include="Controllers\HttpConfigurationTest.cs" />
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
     <Compile Include="Description\ApiExplorerTest.cs" />
+    <Compile Include="Description\ApiParameterDescriptionTest.cs" />
     <Compile Include="ExceptionHandling\CompositeExceptionLoggerTests.cs" />
     <Compile Include="ExceptionHandling\ExceptionContextCatchBlockTests.cs" />
     <Compile Include="ExceptionHandling\ExceptionLoggerExtensionsTests.cs" />

@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
@@ -412,10 +413,21 @@ namespace System.Web.Http.Description
             }
         }
 
+        private static bool ShouldEmitPrefixes(ICollection<ApiParameterDescription> parameterDescriptions)
+        {
+            // Determine if there are two or more complex objects from the Uri so TryExpandUriParameters needs to emit prefixes.
+            return parameterDescriptions.Count(parameter =>
+                        parameter.Source == ApiParameterSource.FromUri &&
+                        parameter.ParameterDescriptor != null &&
+                        !TypeHelper.CanConvertFromString(parameter.ParameterDescriptor.ParameterType) &&
+                        parameter.CanConvertPropertiesFromString()) > 1;
+        }
+
         private static bool TryExpandUriParameters(IHttpRoute route, HttpParsedRoute parsedRoute, ICollection<ApiParameterDescription> parameterDescriptions, out string expandedRouteTemplate)
         {
             Dictionary<string, object> parameterValuesForRoute = new Dictionary<string, object>();
-
+            bool emitPrefixes = ShouldEmitPrefixes(parameterDescriptions);
+            string prefix = String.Empty;
             foreach (ApiParameterDescription parameterDescriptor in parameterDescriptions)
             {
                 if (parameterDescriptor.Source == ApiParameterSource.FromUri)
@@ -425,6 +437,24 @@ namespace System.Web.Http.Description
                         TypeHelper.CanConvertFromString(parameterDescriptor.ParameterDescriptor.ParameterType)))
                     {
                         parameterValuesForRoute.Add(parameterDescriptor.Name, "{" + parameterDescriptor.Name + "}");
+                    }
+                    else if (parameterDescriptor.ParameterDescriptor != null &&
+                             parameterDescriptor.CanConvertPropertiesFromString())
+                    {
+                        if (emitPrefixes)
+                        {
+                            prefix = parameterDescriptor.Name + ".";
+                        }
+                        Type propertyType = parameterDescriptor.ParameterDescriptor.ParameterType;
+
+                        // Inserting the individual properties of the object in the query string
+                        // as all the complex object can not be converted from string, but all its
+                        // individual properties can.
+                        foreach (PropertyInfo property in parameterDescriptor.GetBindableProperties())
+                        {
+                            string queryParameterName = prefix + property.Name;
+                            parameterValuesForRoute.Add(queryParameterName, "{" + queryParameterName + "}");
+                        }
                     }
                 }
             }

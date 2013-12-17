@@ -22,9 +22,9 @@ namespace System.Web.Http.OData.Formatter
         private static IEdmModel _model;
 
         public const string Version4NumberString = "4.0";
-        public static MediaTypeHeaderValue ApplicationJsonMediaType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+        public static MediaTypeHeaderValue ApplicationJsonMediaType = MediaTypeHeaderValue.Parse("application/json");
         public static MediaTypeHeaderValue ApplicationAtomMediaType = MediaTypeHeaderValue.Parse("application/atom+xml");
-        public static MediaTypeWithQualityHeaderValue ApplicationJsonMediaTypeWithQuality = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
+        public static MediaTypeWithQualityHeaderValue ApplicationJsonMediaTypeWithQuality = MediaTypeWithQualityHeaderValue.Parse("application/json");
         public static MediaTypeWithQualityHeaderValue ApplicationAtomMediaTypeWithQuality = MediaTypeWithQualityHeaderValue.Parse("application/atom+xml");
 
         public static void VerifyResponse(HttpContent responseContent, string expected)

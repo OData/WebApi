@@ -40,8 +40,8 @@ namespace System.Web.Http.OData.Formatter
                     // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
                     //{typeof(DateTime), new DateTime(2010, 1, 1), fullMetadata, "DateTimeInJsonFullMetadata.json"},
                     //{typeof(DateTime), new DateTime(2010, 1, 1), xml, "DateTimeInXml.xml"},
-                    {typeof(DateTimeOffset), new DateTimeOffset(new DateTime(2010, 1, 1), TimeSpan.Zero), fullMetadata, "DateTimeInJsonFullMetadata.json"},
-                    {typeof(DateTimeOffset), new DateTimeOffset(new DateTime(2010, 1, 1), TimeSpan.Zero), xml, "DateTimeInXml.xml"},
+                    {typeof(DateTimeOffset), new DateTimeOffset(2010, 1, 1, 0, 0, 0, TimeSpan.Zero), fullMetadata, "DateTimeOffsetInJsonFullMetadata.json"},
+                    {typeof(DateTimeOffset), new DateTimeOffset(2010, 1, 1, 0, 0, 0, TimeSpan.Zero), xml, "DateTimeOffsetInXml.xml"},
                     {typeof(decimal), 12345.99999M, fullMetadata, "DecimalInJsonFullMetadata.json"},
                     {typeof(decimal), 12345.99999M, xml, "DecimalInXml.xml"},
                     {typeof(double), 99999.12345, fullMetadata, "DoubleInJsonFullMetadata.json"},
@@ -70,7 +70,7 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
-        [Theory(Skip = "TODO: Update resource files to OData V4 format.")]
+        [Theory]
         [PropertyData("PrimitiveTypesToTest")]
         public void PrimitiveTypesSerializeAsOData(Type valueType, object value, MediaTypeHeaderValue mediaType,
             string resourceName)
@@ -118,7 +118,7 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
-        [Theory(Skip = "TODO: Update resource files to OData V4 format.")]
+        [Theory]
         [PropertyData("PrimitiveTypesToTest")]
         public void PrimitiveTypesDeserializeAsOData(Type valueType, object value, MediaTypeHeaderValue mediaType,
             string resourceName)

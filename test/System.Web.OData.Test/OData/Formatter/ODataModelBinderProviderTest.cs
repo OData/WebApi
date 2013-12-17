@@ -51,13 +51,11 @@ namespace System.Web.Http.OData.Formatter
                     { "123", "GetString" },
                     { Guid.Empty, "GetGuid" },
                     // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
-                    //{ DateTime.Now, "GetDateTime" },
                     { TimeSpan.FromTicks(424242), "GetTimeSpan" },
                     { DateTimeOffset.MaxValue, "GetDateTimeOffset" },
                     { float.NaN, "GetFloat" },
                     // TODO: ODataLib v4 issue on decimal handling, bug filed.
                     //{ decimal.MaxValue, "GetDecimal" } 
-                    // { double.NaN, "GetDouble" } // doesn't work with uri parser.
                     { SimpleEnum.First.ToString(), "GetEnum" },
                     { (FlagsEnum.One | FlagsEnum.Two).ToString(), "GetFlagsEnum" }
                 };

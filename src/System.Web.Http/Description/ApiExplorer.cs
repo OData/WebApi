@@ -445,8 +445,7 @@ namespace System.Web.Http.Description
                         {
                             prefix = parameterDescriptor.Name + ".";
                         }
-                        Type propertyType = parameterDescriptor.ParameterDescriptor.ParameterType;
-
+     
                         // Inserting the individual properties of the object in the query string
                         // as all the complex object can not be converted from string, but all its
                         // individual properties can.

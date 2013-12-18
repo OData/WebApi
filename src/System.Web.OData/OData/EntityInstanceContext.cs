@@ -186,7 +186,9 @@ namespace System.Web.Http.OData
                 IEdmTypeReference edmType = EdmObject.GetEdmType();
                 if (edmType == null)
                 {
-                    throw Error.InvalidOperation(SRResources.EdmTypeCannotBeNull, EdmObject.GetType(), typeof(IEdmObject));
+                    // Provide general guidance in the message. typeof(IEdmTypeReference).Name would be too specific.
+                    throw Error.InvalidOperation(SRResources.EdmTypeCannotBeNull, EdmObject.GetType().FullName,
+                        typeof(IEdmObject).Name);
                 }
 
                 throw Error.InvalidOperation(SRResources.PropertyNotFound, edmType.ToTraceString(), propertyName);

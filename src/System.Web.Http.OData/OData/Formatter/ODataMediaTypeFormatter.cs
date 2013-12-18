@@ -556,8 +556,8 @@ namespace System.Web.Http.OData.Formatter
                 IEdmTypeReference edmType = edmObject.GetEdmType();
                 if (edmType == null)
                 {
-                    throw new SerializationException(
-                        Error.Format(SRResources.EdmTypeCannotBeNull, type.FullName, typeof(IEdmObject).Name));
+                    throw new SerializationException(Error.Format(SRResources.EdmTypeCannotBeNull,
+                        edmObject.GetType().FullName, typeof(IEdmObject).Name));
                 }
 
                 serializer = serializerProvider.GetEdmTypeSerializer(edmType);

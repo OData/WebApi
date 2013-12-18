@@ -610,7 +610,7 @@ namespace System.Web.Http.OData.Formatter
                 () => formatter
                     .WriteToStreamAsync(typeof(int), edmObject.Object, new MemoryStream(), new Mock<HttpContent>().Object, transportContext: null)
                     .Wait(),
-                "The EDM type of the object of type 'System.Int32' is null. The EDM type of an IEdmObject cannot be null.");
+                "The EDM type of the object of type 'Castle.Proxies.IEdmObjectProxy' is null. The EDM type of an IEdmObject cannot be null.");
         }
 
         [Fact]

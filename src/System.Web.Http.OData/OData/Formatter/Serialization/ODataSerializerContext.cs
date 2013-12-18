@@ -150,7 +150,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 edmType = edmObject.GetEdmType();
                 if (edmType == null)
                 {
-                    throw Error.InvalidOperation(SRResources.EdmTypeCannotBeNull);
+                    throw Error.InvalidOperation(SRResources.EdmTypeCannotBeNull, edmObject.GetType().FullName,
+                        typeof(IEdmObject).Name);
                 }
             }
             else

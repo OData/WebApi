@@ -90,5 +90,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataSerializerContext context = new ODataSerializerContext();
             Assert.NotNull(context.Items);
         }
+
+        [Fact]
+        public void GetEdmType_ThrowsInvalidOperation_IfEdmObjectGetEdmTypeReturnsNull()
+        {
+            // Arrange (this code path does not use ODataSerializerContext fields or properties)
+            var context = new ODataSerializerContext();
+            Mock<IEdmObject> mock = new Mock<IEdmObject>(MockBehavior.Strict);
+            mock.Setup(edmObject => edmObject.GetEdmType()).Returns<IEdmTypeReference>(null).Verifiable();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => context.GetEdmType(mock.Object, null),
+                exceptionMessage: "The EDM type of the object of type 'Castle.Proxies.IEdmObjectProxy' is null. " +
+                "The EDM type of an IEdmObject cannot be null.");
+            mock.Verify();
+        }
     }
 }

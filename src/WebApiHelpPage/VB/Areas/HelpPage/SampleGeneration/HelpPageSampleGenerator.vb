@@ -22,6 +22,7 @@ Namespace Areas.HelpPage
         Private _actualHttpMessageTypes As IDictionary(Of HelpPageSampleKey, Type)
         Private _actionSamples As IDictionary(Of HelpPageSampleKey, Object)
         Private _sampleObjects As IDictionary(Of Type, Object)
+        Private _sampleObjectFactories As IList(Of Func(Of HelpPageSampleGenerator, Type, Object))
 
         ''' <summary>
         ''' Initializes a new instance of the <see cref="HelpPageSampleGenerator"/> class.
@@ -30,6 +31,8 @@ Namespace Areas.HelpPage
             ActualHttpMessageTypes = New Dictionary(Of HelpPageSampleKey, Type)
             ActionSamples = New Dictionary(Of HelpPageSampleKey, Object)
             SampleObjects = New Dictionary(Of Type, Object)
+            SampleObjectFactories = New List(Of Func(Of HelpPageSampleGenerator, Type, Object))
+            SampleObjectFactories.Add(AddressOf DefaultSampleObjectFactory)
         End Sub
 
         ''' <summary>
@@ -65,6 +68,25 @@ Namespace Areas.HelpPage
             End Get
             Friend Set(value As IDictionary(Of Type, Object))
                 _sampleObjects = value
+            End Set
+        End Property
+
+        ''' <summary>
+        ''' Gets factories for the objects that the supported formatters will serialize as samples. Processed in order,
+        ''' stopping when the factory successfully returns a non-<see langref="null"/> object.
+        ''' </summary>
+        ''' <remarks>
+        ''' Collection includes just <see cref="ObjectGenerator.GenerateObject"/> initially. Use
+        ''' <code>SampleObjectFactories.Insert(0, func)</code> to provide an override and
+        ''' <code>SampleObjectFactories.Add(func)</code> to provide a fallback.</remarks>
+        <SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification:="This is an appropriate nesting of generic types")>
+        Public Property SampleObjectFactories As IList(Of Func(Of HelpPageSampleGenerator, Type, Object))
+            Get
+                Return _sampleObjectFactories
+            End Get
+            Private Set(value As IList(Of Func(Of HelpPageSampleGenerator, Type, Object)))
+                _sampleObjectFactories = value
             End Set
         End Property
 
@@ -160,18 +182,36 @@ Namespace Areas.HelpPage
 
         ''' <summary>
         ''' Gets the sample object that will be serialized by the formatters. 
-        ''' First, it will look at the <see cref="SampleObjects"/>. If no sample object is found, it will try to create one using <see cref="ObjectGenerator"/>.
+        ''' First, it will look at the <see cref="SampleObjects"/>. If no sample object is found, it will try to create
+        ''' one using <see cref="DefaultSampleObjectFactory"/> (which wraps an <see cref="ObjectGenerator"/>) and other
+        ''' factories in <see cref="SampleObjectFactories"/>.
         ''' </summary>
         ''' <param name="type">The type.</param>
         ''' <returns>The sample object.</returns>
+        <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification:="Even if all items in SampleObjectFactories list throw, problems visible as missing sample.")>
         Public Overridable Function GetSampleObject(type As Type) As Object
             Dim sampleObject As New Object
 
             If (Not SampleObjects.TryGetValue(type, sampleObject)) Then
-                ' Try create a default sample object
-                Dim objectGenerator As New ObjectGenerator()
-                sampleObject = objectGenerator.GenerateObject(type)
+                '' No specific object available, try our factories.
+                For Each factory As Func(Of HelpPageSampleGenerator, Type, Object) In SampleObjectFactories
+                    If factory Is Nothing Then
+                        '' Odd for user to include a null delegate in list but silently skip this entry.
+                        Continue For
+                    End If
+
+                    Try
+                        sampleObject = factory(Me, type)
+                        If sampleObject IsNot Nothing Then
+                            Exit For
+                        End If
+                    Catch
+                        '' Ignore any problems encountered in the factory; go on to the next one (if any).
+                    End Try
+                Next
             End If
+
             Return sampleObject
         End Function
 
@@ -300,6 +340,12 @@ Namespace Areas.HelpPage
                 Return aggregateException.Flatten().InnerException
             End If
             Return exception
+        End Function
+
+        Private Shared Function DefaultSampleObjectFactory(sampleGenerator As HelpPageSampleGenerator, type As Type) As Object
+            ' Try create a default sample object
+            Dim objectGenerator As New ObjectGenerator()
+            Return objectGenerator.GenerateObject(type)
         End Function
 
         <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="Handling the failure by returning the original string.")>

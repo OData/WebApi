@@ -189,15 +189,14 @@ Namespace Areas.HelpPage
         ''' <param name="type">The type.</param>
         ''' <returns>The sample object.</returns>
         <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification:="Even if all items in SampleObjectFactories list throw, problems visible as missing sample.")>
+            Justification:="Even if all items in SampleObjectFactories throw, problem will be visible as missing sample.")>
         Public Overridable Function GetSampleObject(type As Type) As Object
             Dim sampleObject As New Object
 
             If (Not SampleObjects.TryGetValue(type, sampleObject)) Then
-                '' No specific object available, try our factories.
+                ' No specific object available, try our factories.
                 For Each factory As Func(Of HelpPageSampleGenerator, Type, Object) In SampleObjectFactories
                     If factory Is Nothing Then
-                        '' Odd for user to include a null delegate in list but silently skip this entry.
                         Continue For
                     End If
 
@@ -207,7 +206,7 @@ Namespace Areas.HelpPage
                             Exit For
                         End If
                     Catch
-                        '' Ignore any problems encountered in the factory; go on to the next one (if any).
+                        ' Ignore any problems encountered in the factory; go on to the next one (if any).
                     End Try
                 Next
             End If

@@ -294,7 +294,7 @@ namespace System.Web.Helpers.Test
         }
 
         [Fact]
-        public void PrintWritesEnumeratedElementsUntilLimitIsHit()
+        public void PrintWritesEnumeratedElementsUntilLimitIsReached()
         {
             // Arrange
             MockObjectVisitor visitor = CreateObjectVisitor();

@@ -151,8 +151,8 @@ namespace System.Web.Mvc.Test
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("barFromRoute", result.AttemptedValue);
-            Assert.Equal("barFromRoute", result.RawValue);
+            Assert.Equal("barInRoute", result.AttemptedValue);
+            Assert.Equal("barInRoute", result.RawValue);
             Assert.Equal(CultureInfo.InvariantCulture, result.Culture);
         }
 
@@ -167,12 +167,12 @@ namespace System.Web.Mvc.Test
 
             RouteData rd = new RouteData();
             rd.Values["foo"] = "fooFromRoute";
-            rd.Values["bar"] = "barFromRoute";
+            rd.Values["bar"] = "barInRoute";
 
             NameValueCollection queryString = new NameValueCollection()
             {
                 { "foo", "fooFromQueryString" },
-                { "bar", "barFromQueryString" },
+                { "bar", "barInQueryString" },
                 { "baz", "bazFromQueryString" },
                 { null, "nullValue" },
                 { "", "emptyStringValue" }

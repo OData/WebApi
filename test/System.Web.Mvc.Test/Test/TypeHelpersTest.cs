@@ -117,15 +117,15 @@ namespace System.Web.Mvc.Test
             TryGetValueDelegate d = TypeHelpers.CreateTryGetValueDelegate(dictionary.GetType());
 
             object fooValue;
-            bool fooFound = d(dictionary, "foo", out fooValue);
+            bool fooIsFound = d(dictionary, "foo", out fooValue);
 
             object barValue;
-            bool barFound = d(dictionary, "bar", out barValue);
+            bool barIsFound = d(dictionary, "bar", out barValue);
 
             // Assert
-            Assert.True(fooFound);
+            Assert.True(fooIsFound);
             Assert.Equal(42, fooValue);
-            Assert.False(barFound);
+            Assert.False(barIsFound);
             Assert.Null(barValue);
         }
 

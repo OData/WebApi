@@ -224,7 +224,7 @@ namespace WebApiHelpPageWebHost.UnitTest
 
         [JsonProperty("JsonProperty")]
         [DataMember(Name = "XmlProperty")]
-        public string BarFoo { get; set; }
+        public string Property4 { get; set; }
     }
 
     [DataContract]
@@ -242,7 +242,7 @@ namespace WebApiHelpPageWebHost.UnitTest
 
         [JsonProperty("JsonProperty")]
         [DataMember(Name = "XmlProperty")]
-        public string BarFoo { get; set; }
+        public string Property4 { get; set; }
     }
 
     public class MultipleDataAnnotations

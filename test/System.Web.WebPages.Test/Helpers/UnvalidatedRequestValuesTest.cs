@@ -46,8 +46,8 @@ namespace Microsoft.WebPages.Test.Helpers
 
             NameValueCollection form = new NameValueCollection()
             {
-                { "foo", "fooForm" },
-                { "bar", "barForm" },
+                { "foo", "fooInForm" },
+                { "bar", "barInForm" },
             };
 
             HttpCookieCollection cookies = new HttpCookieCollection()
@@ -88,7 +88,7 @@ namespace Microsoft.WebPages.Test.Helpers
 
             // Assert
             Assert.Equal("fooQueryString", fooValue);
-            Assert.Equal("barForm", barValue);
+            Assert.Equal("barInForm", barValue);
             Assert.Equal("bazCookie", bazValue);
             Assert.Equal("quuxServerVars", quuxValue);
             Assert.Null(notFoundValue);

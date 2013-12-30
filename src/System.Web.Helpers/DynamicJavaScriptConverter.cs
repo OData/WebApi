@@ -39,7 +39,13 @@ namespace System.Web.Helpers
             // Get the value for each member in the dynamic object
             foreach (string memberName in memberNames)
             {
-                values[memberName] = DynamicHelper.GetMemberValue(obj, memberName);
+                object value = DynamicHelper.GetMemberValue(obj, memberName);
+                var jsonValue = value as DynamicJsonArray;
+                if (jsonValue != null)
+                {
+                    value = (object[])jsonValue;
+                }
+                values[memberName] = value;
             }
 
             return values;

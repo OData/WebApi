@@ -51,6 +51,19 @@ namespace System.Web.Helpers.Test
         }
 
         [Fact]
+        public void EncodeObjectWithArrayProperty()
+        {
+            // Arrange
+            dynamic personJson = Json.Decode("{name:'George', aliases: ['Peter', 'David']}");
+
+            // Act
+            string json = Json.Encode(personJson);
+
+            // Assert
+            Assert.Equal("{\"name\":\"George\",\"aliases\":[\"Peter\",\"David\"]}", json);
+        }
+
+        [Fact]
         public void DecodeDynamicObject()
         {
             // Act

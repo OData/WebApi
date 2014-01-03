@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -104,6 +105,7 @@ namespace System.Web.Http.WebHost
         {
             ThrowIfDisposed();
 
+            long currentPosition = InnerStream.Position;
             long? newPosition = null;
             switch (origin)
             {
@@ -111,7 +113,7 @@ namespace System.Web.Http.WebHost
                     newPosition = offset;
                     break;
                 case SeekOrigin.Current:
-                    newPosition = Position + offset;
+                    newPosition = currentPosition + offset;
                     break;
                 case SeekOrigin.End:
                     // We have to check Length here because we might not know the length in some scenarios. 
@@ -122,14 +124,13 @@ namespace System.Web.Http.WebHost
                     }
                     break;
                 default:
-                    Debug.Fail("Unknown value of SeekOrigin.");
-                    break;
+                    throw new InvalidEnumArgumentException("origin", (int)origin, typeof(SeekOrigin));
             }
 
-            if (newPosition == Position)
+            if (newPosition == currentPosition)
             {
                 // This is a no-op, we want to short circuit because we do significant work on a seek.
-                return Position;
+                return currentPosition;
             }
 
             if (!_isReadToEndComplete)

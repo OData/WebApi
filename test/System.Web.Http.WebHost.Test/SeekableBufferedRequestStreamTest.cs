@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -213,6 +214,25 @@ namespace System.Web.Http.WebHost
             Assert.False(stream.CanRead);
             Assert.True(nonSeekable.CanRead);
             Assert.True(seekable.CanRead);
+        }
+
+        [Fact]
+        public void Seek_ThrowsOnInvalidSeekOrigin()
+        {
+            // Arrange
+            var nonSeekable = CreateNonSeekableStream(Content);
+            var seekable = CreateSeekableStream(Content);
+            var stream = CreateStream(nonSeekable, seekable);
+
+            var origin = (SeekOrigin)5;
+
+            var message = 
+                "The value of argument 'origin' (" + (int)origin + ") is invalid for Enum type " +
+                "'SeekOrigin'." + Environment.NewLine +
+                "Parameter name: origin";
+
+            // Act & Assert
+            Assert.Throws<InvalidEnumArgumentException>(() => stream.Seek(0L, origin), message);
         }
 
         private Stream CreateSeekableStream(string content)

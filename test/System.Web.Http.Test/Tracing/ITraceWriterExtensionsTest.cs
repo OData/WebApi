@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http.ModelBinding;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.Tracing
@@ -683,6 +684,51 @@ namespace System.Web.Http.Tracing
         }
 
         [Fact]
+        public void TraceBeginEnd_Traces_And_Throws_AggregateException()
+        {
+            // Arrange
+            TestTraceWriter traceWriter = new TestTraceWriter();
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpError httpError = new HttpError(new ModelStateDictionary()
+                                                {
+                                                    { "key", new ModelState() { Errors = { new ModelError("error") } } },
+                                                    { "username", new ModelState() { Errors = { new ModelError("invalid") } } },
+                                                }, true);
+            HttpResponseException hre = new HttpResponseException(request.CreateErrorResponse(Net.HttpStatusCode.BadRequest, new HttpError("Error Message from HRE.")));
+            Exception nestedHre = new Exception("Level 1", new Exception("Level 2", new HttpResponseException(request.CreateErrorResponse(Net.HttpStatusCode.NotFound, httpError))));
+            List<Exception> exceptions = new List<Exception>();
+            exceptions.Add(hre);
+            exceptions.Add(nestedHre);
+            AggregateException aggEx = new AggregateException(exceptions);
+            List<TraceRecord> expectedTraces = new List<TraceRecord>
+            {
+                new TraceRecord(request, "testCategory", TraceLevel.Error) { Kind = TraceKind.Begin, Operator = "tester", Operation = "testOp", Message = "beginMessage" },
+                new TraceRecord(request, "testCategory", TraceLevel.Warn)
+                { 
+                    Kind = TraceKind.End, Operator = "tester", Operation = "testOp", Exception = aggEx,
+                    Message = "UserMessage='The request is invalid.', ModelStateError=[key=[error], username=[invalid]]",
+                    Status = Net.HttpStatusCode.NotFound
+                },
+            };
+
+            // Act
+            Exception thrown = Assert.Throws<AggregateException>(
+                                () => traceWriter.TraceBeginEnd(request,
+                                    "testCategory",
+                                    TraceLevel.Error,
+                                    "tester",
+                                    "testOp",
+                                    beginTrace: (tr) => { tr.Message = "beginMessage"; },
+                                    execute: () => { throw aggEx; },
+                                    endTrace: (tr) => { tr.Message = "won't Happen"; },
+                                    errorTrace: null));
+
+            // Assert
+            Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+            Assert.Same(thrown, aggEx);
+        }
+
+        [Fact]
         public void TraceBeginEnd_Does_Not_Trace_HttpResponseException_When_Tracing_Only_Higher_Level()
         {
             // Arrange
@@ -1145,6 +1191,59 @@ namespace System.Web.Http.Tracing
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TraceBeginEndAsync_Traces_And_Throws_AggregateException(bool isExThrownAtExecution)
+        {
+            // Arrange
+            TestTraceWriter traceWriter = new TestTraceWriter();
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpError httpError = new HttpError(new ModelStateDictionary()
+                                                {
+                                                    { "key", new ModelState() { Errors = { new ModelError("error") } } },
+                                                    { "username", new ModelState() { Errors = { new ModelError("invalid") } } },
+                                                }, true);
+            HttpResponseException hre = new HttpResponseException(request.CreateErrorResponse(Net.HttpStatusCode.BadRequest, new HttpError("Error Message from HRE.")));
+            Exception nestedHre = new Exception("Level 1", new Exception("Level 2", new HttpResponseException(request.CreateErrorResponse(Net.HttpStatusCode.NotFound, httpError))));
+            List<Exception> exceptions = new List<Exception>();
+            exceptions.Add(hre);
+            exceptions.Add(nestedHre);
+            AggregateException aggEx = new AggregateException(exceptions);
+            Action action = () => 
+            {
+                throw aggEx;
+            };
+            Task task = new Task(action);
+            List<TraceRecord> expectedTraces = new List<TraceRecord>
+            {
+                new TraceRecord(request, "testCategory", TraceLevel.Error) { Kind = TraceKind.Begin, Operator = "tester", Operation = "testOp", Message = "beginMessage" },
+                new TraceRecord(request, "testCategory", TraceLevel.Warn)
+                { 
+                    Kind = TraceKind.End, Operator = "tester", Operation = "testOp", Exception = aggEx,
+                    Message = "UserMessage='The request is invalid.', ModelStateError=[key=[error], username=[invalid]]",
+                    Status = Net.HttpStatusCode.NotFound
+                },
+            };
+
+            // Act
+            task.Start();
+            Exception thrown = Assert.Throws<AggregateException>(
+                                () => traceWriter.TraceBeginEndAsync(request,
+                                    "testCategory",
+                                    TraceLevel.Error,
+                                    "tester",
+                                    "testOp",
+                                    beginTrace: (tr) => { tr.Message = "beginMessage"; },
+                                    execute: () => { if (isExThrownAtExecution) throw aggEx; return task; },
+                                    endTrace: (tr) => { tr.Message = "won't Happen"; },
+                                    errorTrace: null).Wait());
+
+            // Assert
+            Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+            Assert.Same(thrown, aggEx);
+        }
+
         [Fact]
         public void TraceBeginAsync_Traces_And_Faults_When_Inner_Faults()
         {
@@ -1290,6 +1389,55 @@ namespace System.Web.Http.Tracing
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
             Assert.Same(thrown, exception);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TraceBeginEndAsyncGeneric_Traces_And_Throws_AggregateException(bool isExThrownAtExecution)
+        {
+            // Arrange
+            TestTraceWriter traceWriter = new TestTraceWriter();
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpError httpError = new HttpError(new ModelStateDictionary()
+                                                {
+                                                    { "key", new ModelState() { Errors = { new ModelError("error") } } },
+                                                    { "username", new ModelState() { Errors = { new ModelError("invalid") } } },
+                                                }, true);
+            HttpResponseException hre = new HttpResponseException(request.CreateErrorResponse(Net.HttpStatusCode.BadRequest, new HttpError("Error Message from HRE.")));
+            Exception nestedHre = new Exception("Level 1", new Exception("Level 2", new HttpResponseException(request.CreateErrorResponse(Net.HttpStatusCode.NotFound, httpError))));
+            List<Exception> exceptions = new List<Exception>();
+            exceptions.Add(hre);
+            exceptions.Add(nestedHre);
+            AggregateException aggEx = new AggregateException(exceptions);
+            Task<int> task = new Task<int>(() => { throw aggEx; });
+            List<TraceRecord> expectedTraces = new List<TraceRecord>
+            {
+                new TraceRecord(request, "testCategory", TraceLevel.Error) { Kind = TraceKind.Begin, Operator = "tester", Operation = "testOp", Message = "beginMessage" },
+                new TraceRecord(request, "testCategory", TraceLevel.Warn)
+                { 
+                    Kind = TraceKind.End, Operator = "tester", Operation = "testOp", Exception = aggEx,
+                    Message = "UserMessage='The request is invalid.', ModelStateError=[key=[error], username=[invalid]]",
+                    Status = Net.HttpStatusCode.NotFound
+                },
+            };
+
+            // Act
+            task.Start();
+            Exception thrown = Assert.Throws<AggregateException>(
+                                () => traceWriter.TraceBeginEndAsync<int>(request,
+                                    "testCategory",
+                                    TraceLevel.Error,
+                                    "tester",
+                                    "testOp",
+                                    beginTrace: (tr) => { tr.Message = "beginMessage"; },
+                                    execute: () => { if (isExThrownAtExecution) throw aggEx; return task; },
+                                    endTrace: (tr, result) => { tr.Message = "won't Happen"; },
+                                    errorTrace: null).Wait());
+
+            // Assert
+            Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+            Assert.Same(thrown, aggEx);
         }
 
         [Fact]

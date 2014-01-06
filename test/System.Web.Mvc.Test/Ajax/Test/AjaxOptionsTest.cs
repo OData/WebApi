@@ -164,6 +164,31 @@ namespace System.Web.Mvc.Ajax.Test
                          "onSuccess: Function.createDelegate(this, some_success_function) }", s);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ToJavascriptStringIgnoresAllowCache(bool allowCache)
+        {
+            // Arrange
+            AjaxOptions options = new AjaxOptions
+            {
+                InsertionMode = InsertionMode.InsertAfter,
+                UpdateTargetId = "someId",
+                Url = "http://someurl.com",
+                OnComplete = "some_complete_function",
+                AllowCache = allowCache
+            };
+
+            // Act
+            string s = options.ToJavascriptString();
+
+            // Assert
+            Assert.Equal("{ insertionMode: Sys.Mvc.InsertionMode.insertAfter, " +
+                         "updateTargetId: 'someId', " +
+                         "url: 'http://someurl.com', " +
+                         "onComplete: Function.createDelegate(this, some_complete_function) }", s);
+        }
+
         [Fact]
         public void ToJavascriptStringWithOnlyUpdateTargetId()
         {
@@ -240,6 +265,33 @@ namespace System.Web.Mvc.Ajax.Test
             Assert.Equal("some_complete_function", attributes["data-ajax-complete"]);
             Assert.Equal("some_failure_function", attributes["data-ajax-failure"]);
             Assert.Equal("some_success_function", attributes["data-ajax-success"]);
+        }
+
+        [Fact]
+        public void ToUnobtrusiveHtmlAttributesWithAllowCache()
+        {
+            // Arrange
+            AjaxOptions options = new AjaxOptions
+            {
+                UpdateTargetId = "someId",
+                HttpMethod = "GET",
+                AllowCache = true,
+                Url = "http://someurl.com",
+                OnComplete = "some_complete_function"
+            };
+
+            // Act
+            var attributes = options.ToUnobtrusiveHtmlAttributes();
+
+            // Assert
+            Assert.Equal(7, attributes.Count);
+            Assert.Equal("true", attributes["data-ajax"]);
+            Assert.Equal("GET", attributes["data-ajax-method"]);
+            Assert.Equal("http://someurl.com", attributes["data-ajax-url"]);
+            Assert.Equal("#someId", attributes["data-ajax-update"]);
+            Assert.Equal("true", attributes["data-ajax-cache"]);
+            Assert.Equal("replace", attributes["data-ajax-mode"]);
+            Assert.Equal("some_complete_function", attributes["data-ajax-complete"]);
         }
 
         [Fact]

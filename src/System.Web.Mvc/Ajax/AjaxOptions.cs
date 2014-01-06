@@ -132,11 +132,15 @@ namespace System.Web.Mvc.Ajax
             set { _url = value; }
         }
 
+        public bool AllowCache { get; set; }
+
         internal string ToJavascriptString()
         {
             // creates a string of the form { key1: value1, key2 : value2, ... }
+            // This method is used for generating obtrusive JavaScript (using MicrosoftMvcAjax.js) which is no longer 
+            // actively maintained. Consequently, we'll ignore the AllowCache option if it's set for this code path.
             StringBuilder optionsBuilder = new StringBuilder("{");
-            optionsBuilder.Append(String.Format(CultureInfo.InvariantCulture, " insertionMode: {0},", InsertionModeString));
+            optionsBuilder.AppendFormat(CultureInfo.InvariantCulture, " insertionMode: {0},", InsertionModeString);
             optionsBuilder.Append(PropertyStringIfSpecified("confirm", Confirm));
             optionsBuilder.Append(PropertyStringIfSpecified("httpMethod", HttpMethod));
             optionsBuilder.Append(PropertyStringIfSpecified("loadingElementId", LoadingElementId));
@@ -166,6 +170,13 @@ namespace System.Web.Mvc.Ajax
             AddToDictionaryIfSpecified(result, "data-ajax-complete", OnComplete);
             AddToDictionaryIfSpecified(result, "data-ajax-failure", OnFailure);
             AddToDictionaryIfSpecified(result, "data-ajax-success", OnSuccess);
+
+            if (AllowCache)
+            {
+                // On the client, the absence of the data-ajax-cache attribute is equivalent to setting it to false.
+                // Consequently we'll only set it if the user wants to opt into caching. 
+                AddToDictionaryIfSpecified(result, "data-ajax-cache", "true");
+            }
 
             if (!String.IsNullOrWhiteSpace(LoadingElementId))
             {

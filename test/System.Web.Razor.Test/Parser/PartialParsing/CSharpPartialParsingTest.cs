@@ -12,9 +12,195 @@ namespace System.Web.Razor.Test.Parser.PartialParsing
     public class CSharpPartialParsingTest : PartialParsingTestBase<CSharpRazorCodeLanguage>
     {
         [Fact]
+        public void ImplicitExpressionAcceptsDotlessCommitInsertionsInStatementBlockAfterIdentifiers()
+        {
+            SpanFactory factory = SpanFactory.CreateCsHtml();
+            StringTextBuffer changed = new StringTextBuffer("@{" + Environment.NewLine
+                                                          + "    @DateTime." + Environment.NewLine
+                                                          + "}");
+            StringTextBuffer old = new StringTextBuffer("@{" + Environment.NewLine
+                                                      + "    @DateTime" + Environment.NewLine
+                                                      + "}");
+
+            var textChange = new TextChange(17, 0, old, 1, changed);
+            TestParserManager manager = CreateParserManager();
+            Action<TextChange, PartialParseResult, string> applyAndVerifyPartialChange = (changeToApply, expectedResult, expectedCode) =>
+            {
+                PartialParseResult result = manager.CheckForStructureChangesAndWait(textChange);
+
+                // Assert
+                Assert.Equal(expectedResult, result);
+                Assert.Equal(1, manager.ParseCount);
+                ParserTestBase.EvaluateParseTree(manager.Parser.CurrentParseTree, new MarkupBlock(
+                    factory.EmptyHtml(),
+                    new StatementBlock(
+                        factory.CodeTransition(),
+                        factory.MetaCode("{").Accepts(AcceptedCharacters.None),
+                        factory.Code("\r\n    ").AsStatement(),
+                        new ExpressionBlock(
+                            factory.CodeTransition(),
+                            factory.Code(expectedCode)
+                                   .AsImplicitExpression(CSharpCodeParser.DefaultKeywords, acceptTrailingDot: true)
+                                   .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                        factory.Code("\r\n").AsStatement(),
+                        factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    factory.EmptyHtml()));
+            };
+
+            manager.InitializeWithDocument(textChange.OldBuffer);
+
+            // This is the process of a dotless commit when doing "." insertions to commit intellisense changes.
+            applyAndVerifyPartialChange(textChange, PartialParseResult.Accepted, "DateTime.");
+
+            old = changed;
+            changed = new StringTextBuffer("@{" + Environment.NewLine
+                                        + "    @DateTime.." + Environment.NewLine
+                                        + "}");
+            textChange = new TextChange(18, 0, old, 1, changed);
+
+            applyAndVerifyPartialChange(textChange, PartialParseResult.Accepted, "DateTime..");
+
+            old = changed;
+            changed = new StringTextBuffer("@{" + Environment.NewLine
+                                        + "    @DateTime.Now." + Environment.NewLine
+                                        + "}");
+            textChange = new TextChange(18, 0, old, 3, changed);
+
+            applyAndVerifyPartialChange(textChange, PartialParseResult.Accepted, "DateTime.Now.");
+        }
+
+        [Fact]
+        public void ImplicitExpressionAcceptsDotlessCommitInsertionsInStatementBlock()
+        {
+            SpanFactory factory = SpanFactory.CreateCsHtml();
+            StringTextBuffer changed = new StringTextBuffer("@{" + Environment.NewLine
+                                                          + "    @DateT." + Environment.NewLine
+                                                          + "}");
+            StringTextBuffer old = new StringTextBuffer("@{" + Environment.NewLine
+                                                      + "    @DateT" + Environment.NewLine
+                                                      + "}");
+
+            var textChange = new TextChange(14, 0, old, 1, changed);
+            TestParserManager manager = CreateParserManager();
+            Action<TextChange, PartialParseResult, string> applyAndVerifyPartialChange = (changeToApply, expectedResult, expectedCode) =>
+            {
+                PartialParseResult result = manager.CheckForStructureChangesAndWait(textChange);
+
+                // Assert
+                Assert.Equal(expectedResult, result);
+                Assert.Equal(1, manager.ParseCount);
+                ParserTestBase.EvaluateParseTree(manager.Parser.CurrentParseTree, new MarkupBlock(
+                    factory.EmptyHtml(),
+                    new StatementBlock(
+                        factory.CodeTransition(),
+                        factory.MetaCode("{").Accepts(AcceptedCharacters.None),
+                        factory.Code("\r\n    ").AsStatement(),
+                        new ExpressionBlock(
+                            factory.CodeTransition(),
+                            factory.Code(expectedCode)
+                                   .AsImplicitExpression(CSharpCodeParser.DefaultKeywords, acceptTrailingDot: true)
+                                   .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                        factory.Code("\r\n").AsStatement(),
+                        factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    factory.EmptyHtml()));
+            };
+
+            manager.InitializeWithDocument(textChange.OldBuffer);
+
+            // This is the process of a dotless commit when doing "." insertions to commit intellisense changes.
+            applyAndVerifyPartialChange(textChange, PartialParseResult.Accepted, "DateT.");
+
+            old = changed;
+            changed = new StringTextBuffer("@{" + Environment.NewLine
+                                        + "    @DateTime." + Environment.NewLine
+                                        + "}");
+            textChange = new TextChange(14, 0, old, 3, changed);
+
+            applyAndVerifyPartialChange(textChange, PartialParseResult.Accepted, "DateTime.");
+        }
+
+        [Fact]
+        public void ImplicitExpressionProvisionallyAcceptsDotlessCommitInsertions()
+        {
+            SpanFactory factory = SpanFactory.CreateCsHtml();
+            var changed = new StringTextBuffer("foo @DateT. baz");
+            var old = new StringTextBuffer("foo @DateT baz");
+            var textChange = new TextChange(10, 0, old, 1, changed);
+            TestParserManager manager = CreateParserManager();
+            Action<TextChange, PartialParseResult, string> applyAndVerifyPartialChange = (changeToApply, expectedResult, expectedCode) =>
+            {
+                PartialParseResult result = manager.CheckForStructureChangesAndWait(textChange);
+
+                // Assert
+                Assert.Equal(expectedResult, result);
+                Assert.Equal(1, manager.ParseCount);
+
+                ParserTestBase.EvaluateParseTree(manager.Parser.CurrentParseTree, new MarkupBlock(
+                    factory.Markup("foo "),
+                    new ExpressionBlock(
+                        factory.CodeTransition(),
+                        factory.Code(expectedCode).AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    factory.Markup(" baz")));
+            };
+
+            manager.InitializeWithDocument(textChange.OldBuffer);
+
+            // This is the process of a dotless commit when doing "." insertions to commit intellisense changes.
+            applyAndVerifyPartialChange(textChange, PartialParseResult.Accepted | PartialParseResult.Provisional, "DateT.");
+
+            old = changed;
+            changed = new StringTextBuffer("foo @DateTime. baz");
+            textChange = new TextChange(10, 0, old, 3, changed);
+
+            applyAndVerifyPartialChange(textChange, PartialParseResult.Accepted | PartialParseResult.Provisional, "DateTime.");
+        }
+
+        [Fact]
+        public void ImplicitExpressionProvisionallyAcceptsDotlessCommitInsertionsAfterIdentifiers()
+        {
+            SpanFactory factory = SpanFactory.CreateCsHtml();
+            var changed = new StringTextBuffer("foo @DateTime. baz");
+            var old = new StringTextBuffer("foo @DateTime baz");
+            var textChange = new TextChange(13, 0, old, 1, changed);
+            TestParserManager manager = CreateParserManager();
+            Action<TextChange, PartialParseResult, string> applyAndVerifyPartialChange = (changeToApply, expectedResult, expectedCode) =>
+            {
+                PartialParseResult result = manager.CheckForStructureChangesAndWait(textChange);
+
+                // Assert
+                Assert.Equal(expectedResult, result);
+                Assert.Equal(1, manager.ParseCount);
+
+                ParserTestBase.EvaluateParseTree(manager.Parser.CurrentParseTree, new MarkupBlock(
+                    factory.Markup("foo "),
+                    new ExpressionBlock(
+                        factory.CodeTransition(),
+                        factory.Code(expectedCode).AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    factory.Markup(" baz")));
+            };
+
+            manager.InitializeWithDocument(textChange.OldBuffer);
+
+            // This is the process of a dotless commit when doing "." insertions to commit intellisense changes.
+            applyAndVerifyPartialChange(textChange, PartialParseResult.Accepted | PartialParseResult.Provisional, "DateTime.");
+
+            old = changed;
+            changed = new StringTextBuffer("foo @DateTime.. baz");
+            textChange = new TextChange(14, 0, old, 1, changed);
+
+            applyAndVerifyPartialChange(textChange, PartialParseResult.Accepted | PartialParseResult.Provisional, "DateTime..");
+
+            old = changed;
+            changed = new StringTextBuffer("foo @DateTime.Now. baz");
+            textChange = new TextChange(14, 0, old, 3, changed);
+
+            applyAndVerifyPartialChange(textChange, PartialParseResult.Accepted | PartialParseResult.Provisional, "DateTime.Now.");
+        }
+
+        [Fact]
         public void ImplicitExpressionProvisionallyAcceptsDeleteOfIdentifierPartsIfDotRemains()
         {
-            var factory = SpanFactory.CreateCsHtml();
+            SpanFactory factory = SpanFactory.CreateCsHtml();
             StringTextBuffer changed = new StringTextBuffer("foo @User. baz");
             StringTextBuffer old = new StringTextBuffer("foo @User.Name baz");
             RunPartialParseTest(new TextChange(10, 4, old, 0, changed),

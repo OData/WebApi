@@ -55,6 +55,18 @@ namespace System.Web.Razor.Editor
                 return PartialParseResult.Rejected;
             }
 
+            // In some editors intellisense insertions are handled as "dotless commits".  If an intellisense selection is confirmed 
+            // via something like '.' a dotless commit will append a '.' and then insert the remaining intellisense selection prior 
+            // to the appended '.'.  This 'if' statement attempts to accept the intermediate steps of a dotless commit via 
+            // intellisense.  It will accept two cases:
+            //     1. '@foo.' -> '@foobaz.'.
+            //     2. '@foobaz..' -> '@foobaz.bar.'. Includes Sub-cases '@foobaz()..' -> '@foobaz().bar.' etc.
+            // The key distinction being the double '.' in the second case.
+            if (IsDotlessCommitInsertion(target, normalizedChange))
+            {
+                return HandleDotlessCommitInsertion(target);
+            }
+
             if (IsAcceptableReplace(target, normalizedChange))
             {
                 return HandleReplacement(target, normalizedChange);
@@ -95,6 +107,36 @@ namespace System.Web.Razor.Editor
             AcceptTrailingDot = acceptTrailingDot;
         }
 
+        // A dotless commit is the process of inserting a '.' with an intellisense selection.
+        private static bool IsDotlessCommitInsertion(Span target, TextChange change)
+        {
+            return IsNewDotlessCommitInsertion(target, change) || IsSecondaryDotlessCommitInsertion(target, change);
+        }
+
+        // Completing 'DateTime' in intellisense with a '.' could result in: '@DateT' -> '@DateT.' -> '@DateTime.' which is accepted.
+        private static bool IsNewDotlessCommitInsertion(Span target, TextChange change)
+        {
+            return !IsAtEndOfSpan(target, change) &&
+                   change.NewPosition > 0 &&
+                   change.NewLength > 0 &&
+                   target.Content.Last() == '.' &&
+                   ParserHelpers.IsIdentifier(change.NewText, requireIdentifierStart: false) &&
+                   (change.OldLength == 0 || ParserHelpers.IsIdentifier(change.OldText, requireIdentifierStart: false));
+        }
+
+        // Once a dotless commit has been performed you then have something like '@DateTime.'.  This scenario is used to detect the
+        // situation when you try to perform another dotless commit resulting in a textchange with '..'.  Completing 'DateTime.Now' 
+        // in intellisense with a '.' could result in: '@DateTime.' -> '@DateTime..' -> '@DateTime.Now.' which is accepted.
+        private static bool IsSecondaryDotlessCommitInsertion(Span target, TextChange change)
+        {
+            // Do not need to worry about other punctuation, just looking for double '.' (after change)
+            return change.NewLength == 1 &&
+                   !String.IsNullOrEmpty(target.Content) &&
+                   target.Content.Last() == '.' &&
+                   change.NewText == "." &&
+                   change.OldLength == 0;
+        }
+
         private static bool IsAcceptableReplace(Span target, TextChange change)
         {
             return IsEndReplace(target, change) ||
@@ -117,6 +159,16 @@ namespace System.Web.Razor.Editor
         {
             int offset = (change.OldPosition - target.Start.AbsoluteIndex) + change.OldLength;
             return String.IsNullOrWhiteSpace(target.Content.Substring(offset));
+        }
+
+        private PartialParseResult HandleDotlessCommitInsertion(Span target)
+        {
+            PartialParseResult result = PartialParseResult.Accepted;
+            if (!AcceptTrailingDot && target.Content.LastOrDefault() == '.')
+            {
+                result |= PartialParseResult.Provisional;
+            }
+            return result;
         }
 
         private PartialParseResult HandleReplacement(Span target, TextChange change)

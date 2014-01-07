@@ -12,13 +12,13 @@ namespace System.Web.Http.Routing
 {
     internal sealed class HttpParsedRoute
     {
-        public HttpParsedRoute(IList<PathSegment> pathSegments)
+        public HttpParsedRoute(List<PathSegment> pathSegments)
         {
             Contract.Assert(pathSegments != null);
             PathSegments = pathSegments;
         }
 
-        public IList<PathSegment> PathSegments { get; private set; }
+        public List<PathSegment> PathSegments { get; private set; }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Not changing original algorithm")]
         [SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode", Justification = "Not changing original algorithm")]
@@ -244,8 +244,9 @@ namespace System.Web.Http.Routing
                         // segment "v1-v2.xml".
                         bool addedAnySubsegments = false;
 
-                        foreach (PathSubsegment subsegment in contentPathSegment.Subsegments)
+                        for (int j = 0; j < contentPathSegment.Subsegments.Count; j++)
                         {
+                            PathSubsegment subsegment = contentPathSegment.Subsegments[j];
                             PathLiteralSubsegment literalSubsegment = subsegment as PathLiteralSubsegment;
                             if (literalSubsegment != null)
                             {
@@ -406,7 +407,7 @@ namespace System.Web.Http.Routing
             return Uri.HexEscape(m.Value[0]);
         }
 
-        private static bool ForEachParameter(IList<PathSegment> pathSegments, Func<PathParameterSubsegment, bool> action)
+        private static bool ForEachParameter(List<PathSegment> pathSegments, Func<PathParameterSubsegment, bool> action)
         {
             for (int i = 0; i < pathSegments.Count; i++)
             {
@@ -422,8 +423,9 @@ namespace System.Web.Http.Routing
                     PathContentSegment contentPathSegment = pathSegment as PathContentSegment;
                     if (contentPathSegment != null)
                     {
-                        foreach (PathSubsegment subsegment in contentPathSegment.Subsegments)
+                        for (int j = 0; j < contentPathSegment.Subsegments.Count; j++)
                         {
+                            PathSubsegment subsegment = contentPathSegment.Subsegments[j];
                             PathLiteralSubsegment literalSubsegment = subsegment as PathLiteralSubsegment;
                             if (literalSubsegment != null)
                             {
@@ -457,7 +459,7 @@ namespace System.Web.Http.Routing
             return true;
         }
 
-        private static PathParameterSubsegment GetParameterSubsegment(IList<PathSegment> pathSegments, string parameterName)
+        private static PathParameterSubsegment GetParameterSubsegment(List<PathSegment> pathSegments, string parameterName)
         {
             PathParameterSubsegment foundParameterSubsegment = null;
 
@@ -498,9 +500,9 @@ namespace System.Web.Http.Routing
             return routePart != null;
         }
 
-        public HttpRouteValueDictionary Match(string virtualPath, HttpRouteValueDictionary defaultValues)
+        public HttpRouteValueDictionary Match(RoutingContext context, HttpRouteValueDictionary defaultValues)
         {
-            IList<string> requestPathSegments = RouteParser.SplitUriToPathSegmentStrings(virtualPath);
+            List<string> requestPathSegments = context.PathSegments;
 
             if (defaultValues == null)
             {

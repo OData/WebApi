@@ -13,7 +13,7 @@ namespace System.Web.Mvc.Routing
     // Represents a segment of a URI that is not a separator. It contains subsegments such as literals and parameters.
     internal sealed class PathContentSegment : PathSegment
     {
-        public PathContentSegment(IList<PathSubsegment> subsegments)
+        public PathContentSegment(List<PathSubsegment> subsegments)
         {
             Subsegments = subsegments;
         }
@@ -40,7 +40,7 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-        public IList<PathSubsegment> Subsegments { get; private set; }
+        public List<PathSubsegment> Subsegments { get; private set; }
 
 #if ROUTE_DEBUGGING
         public override string LiteralText

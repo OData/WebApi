@@ -251,6 +251,7 @@
       <Link>Routing\IRoutePrefix.cs</Link>
     </Compile>
     <Compile Include="Routing\IHttpRouteInfoProvider.cs" />
+    <Compile Include="Routing\RoutingContext.cs" />
     <Compile Include="Routing\StopRoutingHandler.cs" />
     <Compile Include="Services\Decorator.cs" />
     <Compile Include="Services\IDecorator.cs" />

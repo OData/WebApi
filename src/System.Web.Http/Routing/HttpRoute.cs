@@ -24,6 +24,8 @@ namespace System.Web.Http.Routing
         /// </summary>
         public static readonly string HttpRouteKey = "httproute";
 
+        private const string RoutingContextKey = "MS_RoutingContext";
+
         private string _routeTemplate;
         private HttpRouteValueDictionary _defaults;
         private HttpRouteValueDictionary _constraints;
@@ -114,25 +116,13 @@ namespace System.Web.Http.Routing
                 throw Error.ArgumentNull("request");
             }
 
-            // Note: we don't validate host/port as this is expected to be done at the host level
-            string requestPath = "/" + request.RequestUri.GetComponents(UriComponents.Path, UriFormat.Unescaped);
-            if (!requestPath.StartsWith(virtualPathRoot, StringComparison.OrdinalIgnoreCase))
+            RoutingContext context = GetOrCreateRoutingContext(virtualPathRoot, request);
+            if (!context.IsValid)
             {
                 return null;
             }
 
-            string relativeRequestPath = null;
-            int virtualPathLength = virtualPathRoot.Length;
-            if (requestPath.Length > virtualPathLength && requestPath[virtualPathLength] == '/')
-            {
-                relativeRequestPath = requestPath.Substring(virtualPathLength + 1);
-            }
-            else
-            {
-                relativeRequestPath = requestPath.Substring(virtualPathLength);
-            }
-
-            HttpRouteValueDictionary values = ParsedRoute.Match(relativeRequestPath, _defaults);
+            HttpRouteValueDictionary values = ParsedRoute.Match(context, _defaults);
             if (values == null)
             {
                 // If we got back a null value set, that means the URI did not match
@@ -146,6 +136,47 @@ namespace System.Web.Http.Routing
             }
 
             return new HttpRouteData(this, values);
+        }
+
+        private static RoutingContext GetOrCreateRoutingContext(string virtualPathRoot, HttpRequestMessage request)
+        {
+            RoutingContext context;
+            if (!request.Properties.TryGetValue<RoutingContext>(RoutingContextKey, out context))
+            {
+                context = CreateRoutingContext(virtualPathRoot, request);
+                request.Properties[RoutingContextKey] = context;
+            }
+
+            return context;
+        }
+
+        private static RoutingContext CreateRoutingContext(string virtualPathRoot, HttpRequestMessage request)
+        {
+            // Note: we don't validate host/port as this is expected to be done at the host level
+            string requestPath = "/" + request.RequestUri.GetComponents(UriComponents.Path, UriFormat.Unescaped);
+
+            // This code is optimized for the common path being an exact case match on the virtual path string.
+            // An Ordinal (case-sensitive) comparison is significantly faster than OrdinalIgnoreCase.
+            if (!requestPath.StartsWith(virtualPathRoot, StringComparison.Ordinal))
+            {
+                if (!requestPath.StartsWith(virtualPathRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    return RoutingContext.Invalid();
+                }
+            }
+
+            string relativeRequestPath = null;
+            int virtualPathLength = virtualPathRoot.Length;
+            if (requestPath.Length > virtualPathLength && requestPath[virtualPathLength] == '/')
+            {
+                relativeRequestPath = requestPath.Substring(virtualPathLength + 1);
+            }
+            else
+            {
+                relativeRequestPath = requestPath.Substring(virtualPathLength);
+            }
+
+            return RoutingContext.Valid(RouteParser.SplitUriToPathSegmentStrings(relativeRequestPath));
         }
 
         /// <summary>

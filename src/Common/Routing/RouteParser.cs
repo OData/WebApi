@@ -108,14 +108,14 @@ namespace System.Web.Mvc.Routing
                 throw Error.Argument("routeTemplate", ErrorResources.Route_InvalidRouteTemplate);
             }
 
-            IList<string> uriParts = SplitUriToPathSegmentStrings(routeTemplate);
+            List<string> uriParts = SplitUriToPathSegmentStrings(routeTemplate);
             Exception ex = ValidateUriParts(uriParts);
             if (ex != null)
             {
                 throw ex;
             }
 
-            IList<PathSegment> pathSegments = SplitUriToPathSegments(uriParts);
+            List<PathSegment> pathSegments = SplitUriToPathSegments(uriParts);
 
             Contract.Assert(uriParts.Count == pathSegments.Count, "The number of string segments should be the same as the number of path segments");
 
@@ -124,7 +124,7 @@ namespace System.Web.Mvc.Routing
 
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly",
             Justification = "The exceptions are just constructed here, but they are thrown from a method that does have those parameter names.")]
-        private static IList<PathSubsegment> ParseUriSegment(string segment, out Exception exception)
+        private static List<PathSubsegment> ParseUriSegment(string segment, out Exception exception)
         {
             int startIndex = 0;
 
@@ -179,7 +179,7 @@ namespace System.Web.Mvc.Routing
             return pathSubsegments;
         }
 
-        private static IList<PathSegment> SplitUriToPathSegments(IList<string> uriParts)
+        private static List<PathSegment> SplitUriToPathSegments(List<string> uriParts)
         {
             List<PathSegment> pathSegments = new List<PathSegment>();
 
@@ -193,7 +193,7 @@ namespace System.Web.Mvc.Routing
                 else
                 {
                     Exception exception;
-                    IList<PathSubsegment> subsegments = ParseUriSegment(pathSegment, out exception);
+                    List<PathSubsegment> subsegments = ParseUriSegment(pathSegment, out exception);
                     Contract.Assert(exception == null, "This only gets called after the path has been validated, so there should never be an exception here");
                     pathSegments.Add(new PathContentSegment(subsegments));
                 }
@@ -201,7 +201,7 @@ namespace System.Web.Mvc.Routing
             return pathSegments;
         }
 
-        internal static IList<string> SplitUriToPathSegmentStrings(string uri)
+        internal static List<string> SplitUriToPathSegmentStrings(string uri)
         {
             List<string> parts = new List<string>();
 
@@ -244,7 +244,7 @@ namespace System.Web.Mvc.Routing
         [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily", Justification = "Not changing original algorithm")]
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly",
             Justification = "The exceptions are just constructed here, but they are thrown from a method that does have those parameter names.")]
-        private static Exception ValidateUriParts(IList<string> pathSegments)
+        private static Exception ValidateUriParts(List<string> pathSegments)
         {
             Contract.Assert(pathSegments != null, "The value should always come from SplitUri(), and that function should never return null.");
 
@@ -287,7 +287,7 @@ namespace System.Web.Mvc.Routing
                 if (!isCurrentPartSeparator)
                 {
                     Exception exception;
-                    IList<PathSubsegment> subsegments = ParseUriSegment(pathSegment, out exception);
+                    List<PathSubsegment> subsegments = ParseUriSegment(pathSegment, out exception);
                     if (exception != null)
                     {
                         return exception;
@@ -307,7 +307,7 @@ namespace System.Web.Mvc.Routing
 
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly",
             Justification = "The exceptions are just constructed here, but they are thrown from a method that does have those parameter names.")]
-        private static Exception ValidateUriSegment(IList<PathSubsegment> pathSubsegments, HashSet<string> usedParameterNames)
+        private static Exception ValidateUriSegment(List<PathSubsegment> pathSubsegments, HashSet<string> usedParameterNames)
         {
             bool segmentContainsCatchAll = false;
 

@@ -12,6 +12,55 @@ namespace System.Web.Razor.Test.Parser.PartialParsing
     public class CSharpPartialParsingTest : PartialParsingTestBase<CSharpRazorCodeLanguage>
     {
         [Fact]
+        public void ImplicitExpressionAcceptsInnerInsertionsInStatementBlock()
+        {
+            // Arrange
+            SpanFactory factory = SpanFactory.CreateCsHtml();
+            StringTextBuffer changed = new StringTextBuffer("@{" + Environment.NewLine
+                                                          + "    @DateTime..Now" + Environment.NewLine
+                                                          + "}");
+            StringTextBuffer old = new StringTextBuffer("@{" + Environment.NewLine
+                                                      + "    @DateTime.Now" + Environment.NewLine
+                                                      + "}");
+
+            // Act and Assert
+            RunPartialParseTest(new TextChange(17, 0, old, 1, changed),
+                new MarkupBlock(
+                    factory.EmptyHtml(),
+                    new StatementBlock(
+                        factory.CodeTransition(),
+                        factory.MetaCode("{").Accepts(AcceptedCharacters.None),
+                        factory.Code("\r\n    ").AsStatement(),
+                        new ExpressionBlock(
+                            factory.CodeTransition(),
+                            factory.Code("DateTime..Now")
+                                   .AsImplicitExpression(CSharpCodeParser.DefaultKeywords, acceptTrailingDot: true)
+                                   .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                        factory.Code("\r\n").AsStatement(),
+                        factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    factory.EmptyHtml()));
+        }
+
+        [Fact]
+        public void ImplicitExpressionAcceptsInnerInsertions()
+        {
+            // Arrange
+            SpanFactory factory = SpanFactory.CreateCsHtml();
+            StringTextBuffer changed = new StringTextBuffer("foo @DateTime..Now baz");
+            StringTextBuffer old = new StringTextBuffer("foo @DateTime.Now baz");
+
+            // Act and Assert
+            RunPartialParseTest(new TextChange(13, 0, old, 1, changed),
+                new MarkupBlock(
+                    factory.Markup("foo "),
+                    new ExpressionBlock(
+                        factory.CodeTransition(),
+                        factory.Code("DateTime..Now").AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    factory.Markup(" baz")), additionalFlags: PartialParseResult.Provisional);
+        }
+
+
+        [Fact]
         public void ImplicitExpressionAcceptsDotlessCommitInsertionsInStatementBlockAfterIdentifiers()
         {
             SpanFactory factory = SpanFactory.CreateCsHtml();

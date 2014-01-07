@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -86,7 +87,7 @@ namespace System.Web.Razor.Editor
                 return PartialParseResult.Rejected;
             }
 
-            // Only support insertions at the end of the span
+            // Accepts cases when insertions are made at the end of a span or '.' is inserted within a span.
             if (IsAcceptableInsertion(target, normalizedChange))
             {
                 // Handle the insertion
@@ -149,10 +150,36 @@ namespace System.Web.Razor.Editor
                    (change.IsDelete && RemainingIsWhitespace(target, change));
         }
 
+        // Acceptable insertions can occur at the end of a span or when a '.' is inserted within a span.
         private static bool IsAcceptableInsertion(Span target, TextChange change)
         {
-            return IsEndInsertion(target, change) ||
-                   (change.IsInsert && RemainingIsWhitespace(target, change));
+            return change.IsInsert &&
+                   (IsAcceptableEndInsertion(target, change) ||
+                   IsAcceptableInnerInsertion(target, change));
+        }
+
+        // Accepts character insertions at the end of spans.  AKA: '@foo' -> '@fooo' or '@foo' -> '@foo   ' etc.
+        private static bool IsAcceptableEndInsertion(Span target, TextChange change)
+        {
+            Debug.Assert(change.IsInsert);
+
+            return IsAtEndOfSpan(target, change) ||
+                   RemainingIsWhitespace(target, change);
+        }
+
+        // Accepts '.' insertions in the middle of spans. Ex: '@foo.baz.bar' -> '@foo..baz.bar'
+        // This is meant to allow intellisense when editing a span.
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "target", Justification = "The 'target' parameter is used in Debug to validate that the function is called in the correct context.")]
+        private static bool IsAcceptableInnerInsertion(Span target, TextChange change)
+        {
+            Debug.Assert(change.IsInsert);
+
+            // Ensure that we're actually inserting in the middle of a span and not at the end.
+            // This case will fail if the IsAcceptableEndInsertion does not capture an end insertion correctly.
+            Debug.Assert(!IsAtEndOfSpan(target, change));
+
+            return change.NewPosition > 0 &&
+                   change.NewText == ".";
         }
 
         private static bool RemainingIsWhitespace(Span target, TextChange change)
@@ -258,8 +285,8 @@ namespace System.Web.Razor.Editor
 
         private PartialParseResult HandleInsertionAfterDot(Span target, TextChange change)
         {
-            // If the insertion is a full identifier, accept it
-            if (ParserHelpers.IsIdentifier(change.NewText))
+            // If the insertion is a full identifier or another dot, accept it
+            if (ParserHelpers.IsIdentifier(change.NewText) || change.NewText == ".")
             {
                 return TryAcceptChange(target, change);
             }

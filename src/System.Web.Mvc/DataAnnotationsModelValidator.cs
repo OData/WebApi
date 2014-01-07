@@ -53,20 +53,17 @@ namespace System.Web.Mvc
         {
             // Per the WCF RIA Services team, instance can never be null (if you have
             // no parent, you pass yourself for the "instance" parameter).
-            ValidationContext context = new ValidationContext(container ?? Metadata.Model);
+            ValidationContext context = new ValidationContext(container ?? Metadata.Model, null, null);
             context.DisplayName = Metadata.GetDisplayName();
 
             ValidationResult result = Attribute.GetValidationResult(Metadata.Model, context);
             if (result != ValidationResult.Success)
             {
-                var validationResult = new ModelValidationResult
+                yield return new ModelValidationResult
                 {
-                    Message = result.ErrorMessage,
-                    MemberName = result.MemberNames.FirstOrDefault()
+                    Message = result.ErrorMessage
                 };
-                return new ModelValidationResult[] { validationResult };
             }
-            return Enumerable.Empty<ModelValidationResult>();
         }
     }
 }

@@ -106,6 +106,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   
-  <!-- Note: RazorGenerator.MsBuild uses Mvc 5.0 for generating views. In the event we update the Mvc parser, we'll need to ensure this package references the updated Mvc build -->
+  <!-- Note: RazorGenerator.MsBuild uses Razor 3.0 \ Mvc 5.0 for generating views. In the event we update the Mvc parser, we'll need to ensure this package references the updated Mvc build -->
   <Import Project="..\..\packages\RazorGenerator.MsBuild.2.2.0\build\RazorGenerator.MsBuild.targets" Condition="Exists('..\..\packages\RazorGenerator.MsBuild.2.2.0\build\RazorGenerator.MsBuild.targets')" />
 </Project>

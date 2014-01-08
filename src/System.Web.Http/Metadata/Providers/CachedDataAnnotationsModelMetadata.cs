@@ -48,17 +48,34 @@ namespace System.Web.Http.Metadata.Providers
 
         public override string GetDisplayName()
         {
+            // DisplayName could be provided by either the DisplayAttribute, or DisplayNameAttribute. If neither of
+            // those supply a name, then we fall back to the property name (in base.GetDisplayName()).
+            // 
+            // DisplayName has lower precedence than Display.Name, for consistency with MVC.
+
+            // DisplayAttribute doesn't require you to set a name, so this could be null. 
             if (PrototypeCache.Display != null)
             {
                 string name = PrototypeCache.Display.GetName();
-
-                // if the user specified a display property but not the name we still fallback to the property name.
                 if (name != null)
                 {
                     return name;
                 }
             }
 
+            // It's also possible for DisplayNameAttribute to be used without setting a name. If a user does that, then DisplayName will
+            // return the empty string - but for consistency with MVC we allow it. We do fallback to the property name in the (unlikely)
+            // scenario that the user sets null as the DisplayName, again, for consistency with MVC.
+            if (PrototypeCache.DisplayName != null)
+            {
+                string name = PrototypeCache.DisplayName.DisplayName;
+                if (name != null)
+                {
+                    return name;
+                }
+            }
+
+            // If neither attribute specifies a name, we'll fall back to the property name.
             return base.GetDisplayName();
         }
     }

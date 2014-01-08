@@ -53,40 +53,83 @@ namespace System.Web.Http.Metadata.Providers
             Assert.Null(result.PropertyName);
         }
 
-        // [ReadOnly] & [Editable] tests
-
-        private class ReadOnlyModel
-        {
-            public int NoAttributes { get; set; }
-
-            [ReadOnly(true)]
-            public int ReadOnlyAttribute { get; set; }
-
-            [Editable(false)]
-            public int EditableAttribute { get; set; }
-
-            [ReadOnly(true)]
-            [Editable(true)]
-            public int BothAttributes { get; set; }
-
-            // Editable trumps ReadOnly
-        }
-
-        [Fact]
-        public void ReadOnlyTests()
+        [Theory]
+        [InlineData("NoAttributes", false)]
+        [InlineData("ReadOnlyAttribute", true)]
+        [InlineData("EditableAttribute", true)]
+        [InlineData("BothAttributes", false)]
+        public void ReadOnlyTests(string propertyName, bool expected)
         {
             // Arrange
             var provider = new DataAnnotationsModelMetadataProvider();
 
-            // Act & Assert
-            Assert.False(provider.GetMetadataForProperty(null, typeof(ReadOnlyModel), "NoAttributes").IsReadOnly);
-            Assert.True(provider.GetMetadataForProperty(null, typeof(ReadOnlyModel), "ReadOnlyAttribute").IsReadOnly);
-            Assert.True(provider.GetMetadataForProperty(null, typeof(ReadOnlyModel), "EditableAttribute").IsReadOnly);
-            Assert.False(provider.GetMetadataForProperty(null, typeof(ReadOnlyModel), "BothAttributes").IsReadOnly);
+            // Act
+            var actual = provider.GetMetadataForProperty(null, typeof(ReadOnlyModel), propertyName).IsReadOnly;
+
+            // Assert
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData("NoAttribute", "NoAttribute")]
+        [InlineData("NothingSet", "NothingSet")]
+        [InlineData("EmptyDisplayName", "")]
+        [InlineData("DescriptionSet", "DescriptionSet")]
+        [InlineData("NameSet", "Name text1")]
+        [InlineData("DisplayNameSet", "Just DisplayName")]
+        [InlineData("BothSet", "Name text2")]
+        [InlineData("FallbackToDisplayName", "Fallback")]
+        [InlineData("FallbackToProperty", "FallbackToProperty")]
+        [InlineData("FallbackToPropertyFromDisplayName", "FallbackToPropertyFromDisplayName")]
+        [InlineData("DisplayNameDefault", "")] // The default for DisplayName is the empty string, we don't have special handling for it, and nither does MVC.
+        public void DataAnnotationsNameTests(string propertyName, string expected)
+        {
+            // Arrange
+            var provider = new DataAnnotationsModelMetadataProvider();
+
+            // Act
+            var actual = provider.GetMetadataForProperty(null, typeof(DisplayModel), propertyName).GetDisplayName();
+
+            // Assert
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void DisplayAttribute_WithLocalizedName()
+        {
+            // Guard
+            var expected = Resources.String1;
+            Assert.NotEqual("String1", expected);
+
+            // Arrange
+            var provider = new DataAnnotationsModelMetadataProvider();
+
+            // Act
+            var actual = provider.GetMetadataForProperty(null, typeof(DisplayModel), "Localized").GetDisplayName();
+            
+            // Assert
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData("NoAttribute", null)]
+        [InlineData("NothingSet", null)]
+        [InlineData("NameSet", null)]
+        [InlineData("DescriptionSet", "Description text1")]
+        [InlineData("BothSet", "Description text2")]
+        public void DataAnnotationsDescriptionTests(string propertyName, string expected)
+        {
+            // Arrange
+            var provider = new DataAnnotationsModelMetadataProvider();
+
+            // Act
+            var actual = provider.GetMetadataForProperty(null, typeof(DisplayModel), propertyName).Description;
+
+            // Assert
+            Assert.Equal(expected, actual);
         }
 
         // [Display] & [DisplayName] tests
-
         private class DisplayModel
         {
             public int NoAttribute { get; set; }
@@ -105,43 +148,46 @@ namespace System.Web.Http.Metadata.Providers
             [Display(Name = "Name text1")]
             public int NameSet { get; set; }
 
+            [DisplayName("Just DisplayName")]
+            public int DisplayNameSet { get; set; }
+
             [Display(Description = "Description text2", Name = "Name text2")]
+            [DisplayName("This won't be used")]
             public int BothSet { get; set; }
 
             [Display(Name = "String1", ResourceType = typeof(Resources))]
             public int Localized { get; set; }
+
+            [Display]
+            [DisplayName("Fallback")]
+            public int FallbackToDisplayName { get; set; }
+
+            [Display]
+            public int FallbackToProperty { get; set; }
+
+            [DisplayName(null)]
+            public int FallbackToPropertyFromDisplayName { get; set; }
+
+            [DisplayName]
+            public int DisplayNameDefault { get; set; }
         }
 
-        [Fact]
-        public void DataAnnotationsNameTests()
+        // [ReadOnly] & [Editable] tests
+        private class ReadOnlyModel
         {
-            // Arrange
-            var provider = new DataAnnotationsModelMetadataProvider();
+            public int NoAttributes { get; set; }
 
-            // Act & Assert
-            Assert.Equal("NoAttribute", provider.GetMetadataForProperty(null, typeof(DisplayModel), "NoAttribute").GetDisplayName());
-            Assert.Equal("NothingSet", provider.GetMetadataForProperty(null, typeof(DisplayModel), "NothingSet").GetDisplayName());
-            Assert.Equal("", provider.GetMetadataForProperty(null, typeof(DisplayModel), "EmptyDisplayName").GetDisplayName());
-            Assert.Equal("DescriptionSet", provider.GetMetadataForProperty(null, typeof(DisplayModel), "DescriptionSet").GetDisplayName());
-            Assert.Equal("Name text1", provider.GetMetadataForProperty(null, typeof(DisplayModel), "NameSet").GetDisplayName());
-            Assert.Equal("Name text2", provider.GetMetadataForProperty(null, typeof(DisplayModel), "BothSet").GetDisplayName());
+            [ReadOnly(true)]
+            public int ReadOnlyAttribute { get; set; }
 
-            Assert.NotEqual("String1", Resources.String1);
-            Assert.Equal(Resources.String1, provider.GetMetadataForProperty(null, typeof(DisplayModel), "Localized").GetDisplayName());
-        }
+            [Editable(false)]
+            public int EditableAttribute { get; set; }
 
-        [Fact]
-        public void DataAnnotationsDescriptionTests()
-        {
-            // Arrange
-            var provider = new DataAnnotationsModelMetadataProvider();
+            [ReadOnly(true)]
+            [Editable(true)]
+            public int BothAttributes { get; set; }
 
-            // Act & Assert
-            Assert.Null(provider.GetMetadataForProperty(null, typeof(DisplayModel), "NoAttribute").Description);
-            Assert.Null(provider.GetMetadataForProperty(null, typeof(DisplayModel), "NothingSet").Description);
-            Assert.Null(provider.GetMetadataForProperty(null, typeof(DisplayModel), "NameSet").Description);
-            Assert.Equal("Description text1", provider.GetMetadataForProperty(null, typeof(DisplayModel), "DescriptionSet").Description);
-            Assert.Equal("Description text2", provider.GetMetadataForProperty(null, typeof(DisplayModel), "BothSet").Description);
+            // Editable trumps ReadOnly
         }
     }
 }

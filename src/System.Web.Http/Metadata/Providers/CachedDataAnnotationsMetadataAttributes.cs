@@ -8,28 +8,25 @@ using System.Security;
 
 namespace System.Web.Http.Metadata.Providers
 {
-    // REVIEW: No access to HiddenInputAttribute
     public class CachedDataAnnotationsMetadataAttributes
     {
         public CachedDataAnnotationsMetadataAttributes(IEnumerable<Attribute> attributes)
         {
-            CacheAttributes(attributes);
+            Display = attributes.OfType<DisplayAttribute>().FirstOrDefault();
+            DisplayFormat = attributes.OfType<DisplayFormatAttribute>().FirstOrDefault();
+            DisplayName = attributes.OfType<DisplayNameAttribute>().FirstOrDefault();
+            Editable = attributes.OfType<EditableAttribute>().FirstOrDefault();
+            ReadOnly = attributes.OfType<ReadOnlyAttribute>().FirstOrDefault();
         }
 
         public DisplayAttribute Display { get; protected set; }
+
+        public DisplayNameAttribute DisplayName { get; protected set; }
 
         public DisplayFormatAttribute DisplayFormat { get; protected set; }
 
         public EditableAttribute Editable { get; protected set; }
 
         public ReadOnlyAttribute ReadOnly { get; protected set; }
-
-        private void CacheAttributes(IEnumerable<Attribute> attributes)
-        {
-            Display = attributes.OfType<DisplayAttribute>().FirstOrDefault();
-            DisplayFormat = attributes.OfType<DisplayFormatAttribute>().FirstOrDefault();
-            Editable = attributes.OfType<EditableAttribute>().FirstOrDefault();
-            ReadOnly = attributes.OfType<ReadOnlyAttribute>().FirstOrDefault();
-        }
     }
 }

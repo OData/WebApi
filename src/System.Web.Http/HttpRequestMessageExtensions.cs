@@ -804,7 +804,10 @@ namespace System.Net.Http
             {
                 // Uri --> FormData --> NVC
                 FormDataCollection formData = new FormDataCollection(uri);
-                queryString = formData.GetJQueryNameValuePairs();
+
+                // The ToArray call here avoids reparsing the query string, and avoids storing an Enumerator state
+                // machine in the request state.
+                queryString = formData.GetJQueryNameValuePairs().ToArray();
                 request.Properties.Add(HttpPropertyKeys.RequestQueryNameValuePairsKey, queryString);
             }
 

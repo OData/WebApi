@@ -1199,6 +1199,41 @@ namespace System.Net.Http
             }
         }
 
+        [Fact]
+        public void GetQueryNameValuePairs_ParsesQueryString()
+        {
+            // Arrange
+            var request = CreateRequest();
+            request.RequestUri = new Uri("http://localhost/api/Person/10?x=7&y=cool");
+
+            // Act
+            var actual = request.GetQueryNameValuePairs();
+
+            // Assert
+            Assert.IsType<KeyValuePair<string, string>[]>(actual); // We call ToArray to ensure that we're not caching an iterator block.
+
+            Assert.Single(actual, kvp => kvp.Key == "x" && kvp.Value == "7");
+            Assert.Single(actual, kvp => kvp.Key == "y" && kvp.Value == "cool");
+        }
+
+        [Fact]
+        public void GetQueryNameValuePairs_StoresResult()
+        {
+            // Arrange
+            var request = CreateRequest();
+            request.RequestUri = new Uri("http://localhost/api/Person/10?x=7&y=cool");
+
+            // Act
+            var returned = request.GetQueryNameValuePairs();
+
+            // Assert
+            IEnumerable<KeyValuePair<string, string>> cached;
+            Assert.True(request.Properties.TryGetValue<IEnumerable<KeyValuePair<string, string>>>(HttpPropertyKeys.RequestQueryNameValuePairsKey, out cached));
+
+            Assert.Same(returned, cached);
+            Assert.Same(returned, request.GetQueryNameValuePairs());
+        }
+
         private class TraceIdScope : IDisposable
         {
             Guid _oldValue;

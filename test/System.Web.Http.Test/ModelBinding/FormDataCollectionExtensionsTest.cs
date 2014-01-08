@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
@@ -26,6 +27,23 @@ namespace System.Web.Http.ModelBinding
         public void TestNormalize(string expectedMvc, string jqueryString)
         {
             Assert.Equal(expectedMvc, FormDataCollectionExtensions.NormalizeJQueryToMvc(jqueryString));            
+        }
+
+        [Fact]
+        public void TestGetJQueryNameValuePairs()
+        {
+            // Arrange
+            var formData = new FormDataCollection("x.y=30&x[y]=70&x[z][20]=cool");
+
+            // Act
+            var actual = FormDataCollectionExtensions.GetJQueryNameValuePairs(formData).ToArray();
+
+            // Assert
+            var arraySetter = Assert.Single(actual, kvp => kvp.Key == "x.z[20]");
+            Assert.Equal("cool", arraySetter.Value);
+
+            Assert.Single(actual, kvp => kvp.Key == "x.y" && kvp.Value == "30");
+            Assert.Single(actual, kvp => kvp.Key == "x.y" && kvp.Value == "70");
         }
 
         [Fact]

@@ -192,15 +192,17 @@
             /// attribute values.
             /// </summary>
             /// <param name="selector" type="String">Any valid jQuery selector.</param>
-            var $forms = $(selector)
-                .parents("form")
-                .andSelf()
-                .add($(selector).find("form"))
-                .filter("form");
 
-            // :input is a psuedoselector provided by jQuery which selects input and input-like elements
-            // combining :input with other selectors significantly decreases performance.
-            $(selector).find(":input").filter("[data-val=true]").each(function () {
+            // $forms includes all forms in selector's DOM hierarchy (parent, children and self) that have at least one
+            // element with data-val=true
+            var $selector = $(selector),
+                $forms = $selector.parents("form")
+                                  .andSelf()
+                                  .filter("form")
+                                  .add($selector.find("form"))
+                                  .has("[data-val=true]");
+
+            $selector.find("[data-val=true]").each(function () {
                 $jQval.unobtrusive.parseElement(this, true);
             });
 

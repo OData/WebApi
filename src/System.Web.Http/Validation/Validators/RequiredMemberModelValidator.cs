@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http.Metadata;
 
 namespace System.Web.Http.Validation.Validators
@@ -22,7 +23,7 @@ namespace System.Web.Http.Validation.Validators
 
         public override IEnumerable<ModelValidationResult> Validate(ModelMetadata metadata, object container)
         {
-            return new ModelValidationResult[0];
+            return Enumerable.Empty<ModelValidationResult>();
         }
     }
 }

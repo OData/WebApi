@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Formatting;
 using System.Reflection;
 using System.Web.Http.Metadata;
@@ -29,7 +30,8 @@ namespace System.Web.Http.Validation.Providers
                     return new ModelValidator[] { new RequiredMemberModelValidator(validatorProviders) };
                 }
             }
-            return new ModelValidator[0];
+
+            return Enumerable.Empty<ModelValidator>();
         }
     }
 }

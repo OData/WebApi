@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Security;
 using System.Web.Http.Metadata;
 
@@ -41,7 +42,7 @@ namespace System.Web.Http.Validation.Validators
                 return new ModelValidationResult[] { new ModelValidationResult { Message = result.ErrorMessage } };
             }
 
-            return new ModelValidationResult[0];
+            return Enumerable.Empty<ModelValidationResult>();
         }
     }
 }

@@ -19,7 +19,7 @@ namespace System.Web.Http.Metadata
         /// Explicit backing store for the things we want initialized by default, so don't have to call
         /// the protected virtual setters of an auto-generated property.
         /// </summary>
-        private readonly Dictionary<string, object> _additionalValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, object> _additionalValues;
         private bool _convertEmptyStringToNull = true;
         private object _model;
         private Func<object> _modelAccessor;
@@ -58,7 +58,15 @@ namespace System.Web.Http.Metadata
 
         public virtual Dictionary<string, object> AdditionalValues
         {
-            get { return _additionalValues; }
+            get
+            {
+                if (_additionalValues == null)
+                {
+                    _additionalValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                }
+
+                return _additionalValues;
+            }
         }
 
         public Type ContainerType

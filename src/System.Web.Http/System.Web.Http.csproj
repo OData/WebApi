@@ -257,6 +257,7 @@
     <Compile Include="Tracing\TraceLevelHelper.cs" />
     <Compile Include="Tracing\TraceKindHelper.cs" />
     <Compile Include="Tracing\Tracers\AuthenticationFilterTracer.cs" />
+    <Compile Include="Tracing\Tracers\FormatterLoggerTraceWrapper.cs" />
     <Compile Include="Tracing\Tracers\DefaultHttpControllerTypeResolverTracer.cs" />
     <Compile Include="Tracing\Tracers\OverrideFilterTracer.cs" />
     <Compile Include="Validation\IModelValidatorCache.cs" />

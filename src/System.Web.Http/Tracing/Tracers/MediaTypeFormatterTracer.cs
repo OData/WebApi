@@ -211,6 +211,13 @@ namespace System.Web.Http.Tracing.Tracers
             HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
             MediaTypeHeaderValue contentType = contentHeaders == null ? null : contentHeaders.ContentType;
 
+            IFormatterLogger formatterLoggerTraceWrapper =
+                (formatterLogger == null) ? null : new FormatterLoggerTraceWrapper(formatterLogger,
+                                                                                   TraceWriter,
+                                                                                   Request,
+                                                                                   InnerFormatter.GetType().Name,
+                                                                                   ReadFromStreamAsyncMethodName);
+
             return TraceWriter.TraceBeginEndAsync<object>(
                 Request,
                 TraceCategories.FormattingCategory,
@@ -229,11 +236,11 @@ namespace System.Web.Http.Tracing.Tracers
                 {
                     if (cancellationToken.HasValue)
                     {
-                        return InnerFormatter.ReadFromStreamAsync(type, readStream, content, formatterLogger, cancellationToken.Value);
+                        return InnerFormatter.ReadFromStreamAsync(type, readStream, content, formatterLoggerTraceWrapper, cancellationToken.Value);
                     }
                     else
                     {
-                        return InnerFormatter.ReadFromStreamAsync(type, readStream, content, formatterLogger);
+                        return InnerFormatter.ReadFromStreamAsync(type, readStream, content, formatterLoggerTraceWrapper);
                     }
                 },
                 endTrace: (tr, value) =>

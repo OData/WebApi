@@ -126,6 +126,64 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
         }
 
+        [Fact]
+        [ReplaceCulture]
+        public void FormatterLoggerTracer_LogErrorException()
+        {
+            // Arrange
+            TestTraceWriter traceWriter = new TestTraceWriter();
+            HttpRequestMessage request = new HttpRequestMessage();
+            string operatorName = this.GetType().Name;
+            string operationName = "FormatterLoggerTracer_LogErrorException";
+            var loggerMock = new Mock<IFormatterLogger>();
+            loggerMock.Setup(o => o.LogError(It.IsAny<string>(), It.IsAny<Exception>()));
+            IFormatterLogger tracer = new FormatterLoggerTraceWrapper(loggerMock.Object, traceWriter, request, operatorName, operationName);
+            Exception exception = new Exception("message");
+            string errorPath = "errorPath";
+            TraceRecord[] expectedTraces = new TraceRecord[]
+            {
+                new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Error) 
+                {
+                    Kind = TraceKind.Trace, Operation = operationName, Exception = exception, Operator = operatorName
+                },
+            };
+
+            // Act
+            tracer.LogError(errorPath, exception);
+
+            // Assert
+            Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void FormatterLoggerTracer_LogErrorMessage()
+        {
+            // Arrange
+            TestTraceWriter traceWriter = new TestTraceWriter();
+            HttpRequestMessage request = new HttpRequestMessage();
+            string operatorName = this.GetType().Name;
+            string operationName = "FormatterLoggerTracer_LogErrorMessage";
+            var loggerMock = new Mock<IFormatterLogger>();
+            loggerMock.Setup(o => o.LogError(It.IsAny<string>(), It.IsAny<string>()));
+            IFormatterLogger tracer = new FormatterLoggerTraceWrapper(loggerMock.Object, traceWriter, request, operatorName, operationName);
+            string errorMessage = "errorMessage";
+            string errorPath = "errorPath";
+            TraceRecord[] expectedTraces = new TraceRecord[]
+            {
+                new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Error)
+                {
+                    Kind = TraceKind.Trace, Operation = operationName, Message = errorMessage, Operator = operatorName 
+                },
+            };
+
+            // Act
+            tracer.LogError(errorPath, errorMessage);
+
+            // Assert
+            Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
+        }
+
         private class CustomMediaTypeFormatter : MediaTypeFormatter
         {
             private object _result;

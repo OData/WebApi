@@ -46,6 +46,48 @@ namespace System.Web.Http.Validation.Validators
             Assert.Same(attribute, validator.Attribute);
         }
 
+        public static TheoryDataSet<ModelMetadata, string> ValidateSetsMemberNamePropertyDataSet
+        {
+            get
+            {
+                return new TheoryDataSet<ModelMetadata, string>
+                {
+                    {
+                        _metadataProvider.GetMetadataForProperty(() => 15, typeof(string), "Length"),
+                        "Length"
+                    },
+                    {
+                        _metadataProvider.GetMetadataForType(() => new object(), typeof(SampleModel)),
+                        "SampleModel"
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("ValidateSetsMemberNamePropertyDataSet")]
+        public void ValidateSetsMemberNamePropertyOfValidationContextForProperties(ModelMetadata metadata, string expectedMemberName)
+        {
+            // Arrange
+            var attribute = new Mock<ValidationAttribute> { CallBase = true };
+            attribute.Protected()
+                     .Setup<ValidationResult>("IsValid", ItExpr.IsAny<object>(), ItExpr.IsAny<ValidationContext>())
+                     .Callback((object o, ValidationContext context) =>
+                     {
+                         Assert.Equal(expectedMemberName, context.MemberName);
+                     })
+                     .Returns(ValidationResult.Success)
+                     .Verifiable();
+            DataAnnotationsModelValidator validator = new DataAnnotationsModelValidator(_noValidatorProviders, attribute.Object);
+
+            // Act
+            IEnumerable<ModelValidationResult> results = validator.Validate(metadata, container: null);
+
+            // Assert
+            Assert.Empty(results);
+            attribute.VerifyAll();
+        }
+
         [Fact]
         public void ValidateWithIsValidTrue()
         {
@@ -99,6 +141,67 @@ namespace System.Web.Http.Validation.Validators
         }
 
         [Fact]
+        public void ValidateReturnsSingleValidationResultIfMemberNameSequenceIsEmpty()
+        {
+            // Arrange
+            const string errorMessage = "Some error message";
+            ModelMetadata metadata = _metadataProvider.GetMetadataForProperty(() => 15, typeof(string), "Length");
+            Mock<ValidationAttribute> attribute = new Mock<ValidationAttribute> { CallBase = true };
+            attribute.Protected()
+                     .Setup<ValidationResult>("IsValid", ItExpr.IsAny<object>(), ItExpr.IsAny<ValidationContext>())
+                     .Returns(new ValidationResult(errorMessage, memberNames: null));
+            var validator = new DataAnnotationsModelValidator(_noValidatorProviders, attribute.Object);
+
+            // Act
+            IEnumerable<ModelValidationResult> results = validator.Validate(metadata, container: null);
+
+            // Assert
+            ModelValidationResult validationResult = Assert.Single(results);
+            Assert.Equal(errorMessage, validationResult.Message);
+            Assert.Empty(validationResult.MemberName);
+        }
+
+        [Fact]
+        public void ValidateReturnsSingleValidationResultIfOneMemberNameIsSpecified()
+        {
+            // Arrange
+            const string errorMessage = "A different error message";
+            ModelMetadata metadata = _metadataProvider.GetMetadataForType(() => new object(), typeof(object));
+            Mock<ValidationAttribute> attribute = new Mock<ValidationAttribute> { CallBase = true };
+            attribute.Protected()
+                     .Setup<ValidationResult>("IsValid", ItExpr.IsAny<object>(), ItExpr.IsAny<ValidationContext>())
+                     .Returns(new ValidationResult(errorMessage, new[] { "FirstName" }));
+            var validator = new DataAnnotationsModelValidator(_noValidatorProviders, attribute.Object);
+
+            // Act
+            IEnumerable<ModelValidationResult> results = validator.Validate(metadata, container: null);
+
+            // Assert
+            ModelValidationResult validationResult = Assert.Single(results);
+            Assert.Equal(errorMessage, validationResult.Message);
+            Assert.Equal("FirstName", validationResult.MemberName);
+        }
+
+        [Fact]
+        public void ValidateReturnsMemberNameIfItIsDifferentFromDisplayName()
+        {
+            // Arrange
+            ModelMetadata metadata = _metadataProvider.GetMetadataForType(() => new SampleModel(), typeof(SampleModel));
+            Mock<ValidationAttribute> attribute = new Mock<ValidationAttribute> { CallBase = true };
+            attribute.Protected()
+                     .Setup<ValidationResult>("IsValid", ItExpr.IsAny<object>(), ItExpr.IsAny<ValidationContext>())
+                     .Returns(new ValidationResult("Name error", new[] { "Name" }));
+            DataAnnotationsModelValidator validator = new DataAnnotationsModelValidator(_noValidatorProviders, attribute.Object);
+
+            // Act
+            IEnumerable<ModelValidationResult> results = validator.Validate(metadata, container: null);
+
+            // Assert
+            ModelValidationResult validationResult = Assert.Single(results);
+            Assert.Equal("Name", validationResult.MemberName);
+        }
+
+        [Fact]
         public void IsRequiredTests()
         {
             // Arrange
@@ -112,6 +215,11 @@ namespace System.Web.Http.Validation.Validators
 
         class DerivedRequiredAttribute : RequiredAttribute
         {
+        }
+
+        class SampleModel
+        {
+            public string Name { get; set; }
         }
     }
 }

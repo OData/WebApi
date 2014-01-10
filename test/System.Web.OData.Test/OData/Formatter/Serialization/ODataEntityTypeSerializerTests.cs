@@ -1209,6 +1209,40 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void TestSetTitleAnnotation()
+        {
+            // Arrange
+            IEdmActionImport action = CreateFakeActionImport(true);
+            IEdmDirectValueAnnotationsManager annonationsManager = CreateFakeAnnotationsManager();
+            IEdmModel model = CreateFakeModel(annonationsManager);
+            string expectedTitle = "The title";
+            model.SetOperationTitleAnnotation(action.Operation, new OperationTitleAnnotation(expectedTitle));
+            ODataAction odataAction = new ODataAction();
+
+            // Act
+            ODataEntityTypeSerializer.EmitTitle(model, action.Operation, odataAction);
+
+            // Assert
+            Assert.Equal(expectedTitle, odataAction.Title);
+        }
+
+        [Fact]
+        public void TestSetTitleAnnotation_UsesNameIfNoTitleAnnotationIsPresent()
+        {
+            // Arrange
+            IEdmActionImport action = CreateFakeActionImport(CreateFakeContainer("Container"), "Action");
+            IEdmDirectValueAnnotationsManager annonationsManager = CreateFakeAnnotationsManager();
+            IEdmModel model = CreateFakeModel(annonationsManager);
+            ODataAction odataAction = new ODataAction();
+
+            // Act
+            ODataEntityTypeSerializer.EmitTitle(model, action.Operation, odataAction);
+
+            // Assert
+            Assert.Equal(action.Operation.Name, odataAction.Title);
+        }
+
+        [Fact]
         public void WriteObjectInline_SetsParentContext_ForExpandedNavigationProperties()
         {
             // Arrange
@@ -1367,10 +1401,12 @@ namespace System.Web.OData.Formatter.Serialization
         {
             Mock<IEdmAction> mockAction = new Mock<IEdmAction>();
             mockAction.Setup(o => o.IsBound).Returns(true);
+            mockAction.Setup(o => o.Name).Returns(name);
             Mock<IEdmActionImport> mock = new Mock<IEdmActionImport>();
             mock.Setup(o => o.Container).Returns(container);
             mock.Setup(o => o.Name).Returns(name);
             mock.Setup(o => o.Action).Returns(mockAction.Object);
+            mock.Setup(o => o.Operation).Returns(mockAction.Object);
             return mock.Object;
         }
         
@@ -1391,6 +1427,7 @@ namespace System.Web.OData.Formatter.Serialization
             Mock<IEdmAction> mockAction = new Mock<IEdmAction>();
             mockAction.Setup(o => o.IsBound).Returns(isBindable);
             mock.Setup(o => o.Action).Returns(mockAction.Object);
+            mock.Setup(o => o.Operation).Returns(mockAction.Object);
             return mock.Object;
         }
 

@@ -42,6 +42,13 @@ namespace System.Web.OData.Builder
         public string Name { get; protected set; }
 
         /// <summary>
+        /// The Title of the procedure. When customized, the title of the procedure
+        /// will be sent back when the OData client asks for an entity or a feed in
+        /// JSON full metadata or Atom.
+        /// </summary>
+        public string Title { get; set; }
+
+        /// <summary>
         /// The Kind of procedure, which can be either Action or Function
         /// </summary>
         public abstract ProcedureKind Kind { get; }
@@ -49,7 +56,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Can the procedure be composed upon.
         /// 
-        /// For example can a URL that invokes the procedure be used as the base url for 
+        /// For example can a URL that invokes the procedure be used as the base URL for 
         /// a request that invokes the procedure and does something else with the results
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "Copies existing spelling used in EdmLib.")]
@@ -61,7 +68,7 @@ namespace System.Web.OData.Builder
         public abstract bool IsSideEffecting { get; }
 
         /// <summary>
-        /// The qualified name of the procedure when used in OData urls.
+        /// The qualified name of the procedure when used in OData URLs.
         /// Qualification is required to distinguish the procedure from other possible single part identifiers.
         /// </summary>
         public string ContainerQualifiedName
@@ -129,7 +136,7 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Can the procedure be bound to a url representing the BindingParameter.
+        /// Can the procedure be bound to a URL representing the BindingParameter.
         /// </summary>
         public virtual bool IsBindable
         {

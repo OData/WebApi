@@ -135,5 +135,17 @@ namespace System.Web.OData
 
             return typeMappingCache;
         }
+
+        internal static void SetOperationTitleAnnotation(this IEdmModel model, IEdmOperation action, OperationTitleAnnotation title)
+        {
+            Contract.Assert(model != null);
+            model.SetAnnotationValue(action, title);
+        }
+
+        internal static OperationTitleAnnotation GetOperationTitleAnnotation(this IEdmModel model, IEdmOperation action)
+        {
+            Contract.Assert(model != null);
+            return model.GetAnnotationValue<OperationTitleAnnotation>(action);
+        }
     }
 }

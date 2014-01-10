@@ -412,6 +412,53 @@ namespace System.Web.OData.Builder
             Assert.Equal(value, function.FollowsConventions);
         }
 
+        [Fact]
+        public void Cant_SetActionTile_OnNonBindableFunctions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("MyFunction");
+            function.Returns<int>();
+            function.Title = "My Function";
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+            IEdmOperationImport functionImport = model.EntityContainers().First().OperationImports().OfType<IEdmFunctionImport>().Single();
+            Assert.NotNull(functionImport);
+            OperationTitleAnnotation functionTitleAnnotation = model.GetOperationTitleAnnotation(functionImport.Operation);
+
+            // Assert
+            Assert.Null(functionTitleAnnotation);
+        }
+
+        [Fact]
+        public void Can_SetActionTitle_OnBindable_Functions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntitySetConfiguration<Movie> movies = builder.EntitySet<Movie>("Movies");
+            movies.EntityType.HasKey(m => m.ID);
+            FunctionConfiguration entityAction = movies.EntityType.Function("Checkout");
+            entityAction.Returns<int>();
+            entityAction.Title = "Check out";
+            FunctionConfiguration collectionAction = movies.EntityType.Collection.Function("RemoveOld");
+            collectionAction.Returns<int>();
+            collectionAction.Title = "Remove Old Movies";
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+            IEdmOperationImport checkout = model.EntityContainers().First().OperationImports().Single(f => f.Name == "Checkout");
+            IEdmOperationImport removeOld = model.EntityContainers().First().OperationImports().Single(f => f.Name == "RemoveOld");
+            OperationTitleAnnotation checkoutTitle = model.GetOperationTitleAnnotation(checkout.Operation);
+            OperationTitleAnnotation removeOldTitle = model.GetOperationTitleAnnotation(removeOld.Operation);
+
+            // Assert
+            Assert.NotNull(checkoutTitle);
+            Assert.Equal("Check out", checkoutTitle.Title);
+            Assert.NotNull(removeOldTitle);
+            Assert.Equal("Remove Old Movies", removeOldTitle.Title);
+        }
+
         public class Movie
         {
             public int ID { get; set; }

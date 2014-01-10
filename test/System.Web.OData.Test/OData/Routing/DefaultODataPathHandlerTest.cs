@@ -90,7 +90,7 @@ namespace System.Web.Http.OData.Routing
         [InlineData("RoutingCustomers(100)/Products", "~/entityset/key/navigation")]
         [InlineData("RoutingCustomers(100)/Products()", "~/entityset/key/navigation")]
         [InlineData("RoutingCustomers(100)/System.Web.Http.OData.Routing.VIP/RelationshipManager", "~/entityset/key/cast/navigation")]
-        [InlineData("GetRoutingCustomerById()", "~/action")]
+        [InlineData("GetRoutingCustomerById()", "~/unboundaction")]
         [InlineData("RoutingCustomers(112)/Address/Street", "~/entityset/key/property/property")]
         [InlineData("RoutingCustomers(1)/Name/$value", "~/entityset/key/property/$value")]
         [InlineData("RoutingCustomers(1)/$links/Products", "~/entityset/key/$links/navigation")]
@@ -296,7 +296,7 @@ namespace System.Web.Http.OData.Routing
             Assert.Equal(expectedText, segment.ToString());
             Assert.Same(expectedSet, path.EntitySet);
             Assert.Equal(expectedSet.ElementType, path.EdmType);
-            ActionPathSegment action = Assert.IsType<ActionPathSegment>(segment);
+            UnboundActionPathSegment action = Assert.IsType<UnboundActionPathSegment>(segment);
             Assert.Same(expectedEdmElement, action.Action);
         }
 
@@ -476,7 +476,7 @@ namespace System.Web.Http.OData.Routing
             // Assert
             Assert.NotNull(path);
             Assert.Equal(1, path.Segments.Count);
-            var functionSegment = Assert.IsType<FunctionPathSegment>(path.Segments.First());
+            var functionSegment = Assert.IsType<UnboundFunctionPathSegment>(path.Segments.First());
             Assert.Same(function, functionSegment.Function);
             Assert.Empty(functionSegment.Values);
         }
@@ -558,7 +558,7 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(model.Model, "FunctionAtRoot(IntParameter=1)");
-            FunctionPathSegment functionSegment = (FunctionPathSegment)path.Segments.Last();
+            UnboundFunctionPathSegment functionSegment = (UnboundFunctionPathSegment)path.Segments.Last();
 
             // Assert
             int intParameter = (int) functionSegment.GetParameterValue("IntParameter");
@@ -583,7 +583,7 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(model.Model, "FunctionAtRoot(IntParameter=@p1)");
-            FunctionPathSegment functionSegment = (FunctionPathSegment)path.Segments.Last();
+            UnboundFunctionPathSegment functionSegment = (UnboundFunctionPathSegment)path.Segments.Last();
 
             // Assert
             UnresolvedParameterValue unresolvedParamValue = functionSegment.GetParameterValue("IntParameter") as UnresolvedParameterValue;
@@ -592,10 +592,10 @@ namespace System.Web.Http.OData.Routing
         }
 
         [Theory]
-        [InlineData("unBoundWithoutParams", 1, "Edm.Boolean", "~/function")]
-        [InlineData("unBoundWithoutParams()", 1, "Edm.Boolean", "~/function")]
-        [InlineData("unBoundWithOneParam(Param=false)", 1, "Edm.Boolean", "~/function")]
-        [InlineData("unBoundWithMultipleParams(Param1=false, Param2=false, Param3='')", 1, "Edm.Boolean", "~/function")]
+        [InlineData("unBoundWithoutParams", 1, "Edm.Boolean", "~/unboundfunction")]
+        [InlineData("unBoundWithoutParams()", 1, "Edm.Boolean", "~/unboundfunction")]
+        [InlineData("unBoundWithOneParam(Param=false)", 1, "Edm.Boolean", "~/unboundfunction")]
+        [InlineData("unBoundWithMultipleParams(Param1=false, Param2=false, Param3='')", 1, "Edm.Boolean", "~/unboundfunction")]
         [InlineData("Customers(42)/BoundToEntityNoParams()", 3, "Edm.Boolean", "~/entityset/key/function")]
         [InlineData("Customers(42)/BoundToEntityNoParams", 3, "Edm.Boolean", "~/entityset/key/function")]
         [InlineData("Customers(42)/BoundToEntity(Param=something)", 3, "Edm.Boolean", "~/entityset/key/function")]

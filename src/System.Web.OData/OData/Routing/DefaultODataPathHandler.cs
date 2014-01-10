@@ -210,14 +210,16 @@ namespace System.Web.Http.OData.Routing
                 return new EntitySetPathSegment(entitySet);
             }
 
-            IEdmActionImport action = container.FindAction(segment, bindingParameterType: null);
+            // It's not possible to use a bound function (or action) at root.
+            // So, try to match an unbound action call
+            IEdmActionImport action = container.FindActionImport(segment);
             if (action != null)
             {
-                return new ActionPathSegment(action);
+                return new UnboundActionPathSegment(action);
             }
 
-            // Try to match this to a function call
-            FunctionPathSegment pathSegment = TryMatchFunctionCall(segment, segments, model, bindingType: null);
+            // Try to match an unbound function call
+            UnboundFunctionPathSegment pathSegment = TryMatchUnboundFunctionCall(segment, segments, model);
             if (pathSegment != null)
             {
                 return pathSegment;
@@ -544,6 +546,21 @@ namespace System.Web.Http.OData.Routing
             return functionSegment;
         }
 
+        private static UnboundFunctionPathSegment TryMatchUnboundFunctionCall(string segment, Queue<string> segments, IEdmModel model)
+        {
+            IEdmEntityContainer container = ExtractEntityContainer(model);
+            string nextSegment = segments.Count > 0 ? segments.Peek() : null;
+
+            IEnumerable<IEdmFunctionImport> possibleFunctions = container.FindFunctions(segment, null);
+            UnboundFunctionPathSegment unboundFunctionSegment = FunctionResolver.TryResolveUnbound(possibleFunctions, model, nextSegment);
+            if (unboundFunctionSegment != null && FunctionResolver.IsEnclosedInParentheses(nextSegment))
+            {
+                segments.Dequeue();
+            }
+
+            return unboundFunctionSegment;
+        }
+
         private static ODataPathTemplate Templatify(ODataPath path, string pathTemplate)
         {
             if (path == null)
@@ -561,11 +578,15 @@ namespace System.Web.Http.OData.Routing
                             Error.Format(SRResources.UnresolvedPathSegmentInTemplate, pathSegment.ToString(), pathTemplate));
 
                     case ODataSegmentKinds._Key:
-                        templateSegments.Add(new KeyValuePathSegmentTemplate(pathSegment as KeyValuePathSegment));
+                        templateSegments.Add(new KeyValuePathSegmentTemplate((KeyValuePathSegment)pathSegment));
                         break;
 
                     case ODataSegmentKinds._Function:
-                        templateSegments.Add(new FunctionPathSegmentTemplate(pathSegment as FunctionPathSegment));
+                        templateSegments.Add(new FunctionPathSegmentTemplate((FunctionPathSegment)pathSegment));
+                        break;
+
+                    case ODataSegmentKinds._UnboundFunction:
+                        templateSegments.Add(new UnboundFunctionPathSegmentTemplate((UnboundFunctionPathSegment)pathSegment));
                         break;
 
                     default:

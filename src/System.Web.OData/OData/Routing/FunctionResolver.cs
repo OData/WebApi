@@ -43,24 +43,53 @@ namespace System.Web.Http.OData.Routing
             return null;
         }
 
+        public static UnboundFunctionPathSegment TryResolveUnbound(IEnumerable<IEdmFunctionImport> functions, IEdmModel model, string nextSegment)
+        {
+            Dictionary<string, string> parameters = null;
+            IEnumerable<string> parameterNames = null;
+            if (IsEnclosedInParentheses(nextSegment))
+            {
+                string value = nextSegment.Substring(1, nextSegment.Length - 2);
+                parameters = KeyValueParser.ParseKeys(value);
+                parameterNames = parameters.Keys;
+            }
+
+            IEdmFunctionImport function = FindBestFunction(functions, parameterNames);
+            if (function != null)
+            {
+                if (GetNonBindingParameters(function).Any())
+                {
+                    return new UnboundFunctionPathSegment(function, model, parameters);
+                }
+                else
+                {
+                    return new UnboundFunctionPathSegment(function, model, parameterValues: null);
+                }
+            }
+
+            return null;
+        }
+
         private static IEdmFunctionImport FindBestFunction(IEnumerable<IEdmFunctionImport> possibleFunctions, IEnumerable<string> parameterNames)
         {
             if (parameterNames != null)
             {
                 // function call with parameters.
                 IEnumerable<IEdmFunctionImport> possibleFunctionsUsingParameters = possibleFunctions.Where(f => IsMatch(f, parameterNames));
-                if (possibleFunctionsUsingParameters.Count() == 1)
+                IEdmFunctionImport[] matchedFunctions = possibleFunctionsUsingParameters.ToArray();
+                if (matchedFunctions.Length == 1)
                 {
-                    return possibleFunctionsUsingParameters.Single();
+                    return matchedFunctions[0];
                 }
             }
             else
             {
                 // function call with no parameters.
                 possibleFunctions = possibleFunctions.Where(f => GetNonBindingParameters(f).Count() == 0);
-                if (possibleFunctions.Count() == 1)
+                IEdmFunctionImport[] matchedFunctions = possibleFunctions.ToArray();
+                if (matchedFunctions.Length == 1)
                 {
-                    return possibleFunctions.Single();
+                    return matchedFunctions[0];
                 }
             }
 

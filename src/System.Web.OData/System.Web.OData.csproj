@@ -145,6 +145,9 @@
     <Compile Include="OData\Query\Validators\SelectExpandQueryValidator.cs" />
     <Compile Include="OData\Results\CreatedODataResult.cs" />
     <Compile Include="OData\Results\UpdatedODataResult.cs" />
+    <Compile Include="OData\Routing\UnboundFunctionPathSegmentTemplate.cs" />
+    <Compile Include="OData\Routing\UnboundFunctionPathSegment.cs" />
+    <Compile Include="OData\Routing\UnboundActionPathSegment.cs" />
     <Compile Include="OData\Routing\Conventions\ActionMapExtensions.cs" />
     <Compile Include="OData\Routing\Conventions\FunctionRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\AttributeRoutingConvention.cs" />

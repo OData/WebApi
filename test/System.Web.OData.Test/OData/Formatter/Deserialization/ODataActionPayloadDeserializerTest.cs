@@ -317,7 +317,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmActionImport actionImport =
                 model.EntityContainers().Single().FindOperationImports(actionName).Single() as IEdmActionImport;
             Assert.NotNull(actionImport);
-            return new ODataPath(new ActionPathSegment(actionImport));
+            return new ODataPath(new UnboundActionPathSegment(actionImport));
         }
 
         private IEdmModel GetModel()

@@ -15,6 +15,8 @@ namespace System.Web.Http.OData.Routing
         internal const string _Value = "$value";
         internal const string _Action = "action";
         internal const string _Function = "function";
+        internal const string _UnboundAction = "unboundaction";
+        internal const string _UnboundFunction = "unboundfunction";
         internal const string _Cast = "cast";
         internal const string _EntitySet = "entityset";
         internal const string _Key = "key";
@@ -48,14 +50,24 @@ namespace System.Web.Http.OData.Routing
         public static readonly string Value = _Value;
 
         /// <summary>
-        /// Represents a segment indicating an OData action.
+        /// Represents a segment indicating a bound OData action.
         /// </summary>
         public static readonly string Action = _Action;
 
         /// <summary>
-        /// Represents a segment indicating an OData function.
+        /// Represents a segment indicating a bound OData function.
         /// </summary>
         public static readonly string Function = _Function;
+
+        /// <summary>
+        /// Represents a segment indicating an unbound OData action.
+        /// </summary>
+        public static readonly string UnboundAction = _UnboundAction;
+
+        /// <summary>
+        /// Represents a segment indicating an unbound OData function.
+        /// </summary>
+        public static readonly string UnboundFunction = _UnboundFunction;
 
         /// <summary>
         /// Represents a segment indicating a type cast.

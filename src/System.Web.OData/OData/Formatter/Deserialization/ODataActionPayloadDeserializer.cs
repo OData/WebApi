@@ -112,18 +112,38 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
 
             ODataPath path = readContext.Path;
-            if (path == null)
+            if (path == null || path.Segments.Count == 0)
             {
                 throw new SerializationException(SRResources.ODataPathMissing);
             }
 
-            ActionPathSegment lastSegment = path.Segments.Last() as ActionPathSegment;
-            if (lastSegment == null)
+            IEdmActionImport actionImport = null;
+            if (path.Segments.Count == 1)
+            {
+                // only one segment, it may be an unbound action
+                UnboundActionPathSegment unboundActionSegment = path.Segments.Last() as UnboundActionPathSegment;
+                if (unboundActionSegment != null)
+                {
+                    actionImport = unboundActionSegment.Action;
+                }
+            }
+            else
+            {
+                // otherwise, it may be a bound action
+                ActionPathSegment actionSegment = path.Segments.Last() as ActionPathSegment;
+                if (actionSegment != null)
+                {
+                    actionImport = actionSegment.Action;
+                }
+            }
+
+            if (actionImport == null)
             {
                 string message = Error.Format(SRResources.RequestNotActionInvocation, path.ToString());
                 throw new SerializationException(message);
             }
-            return lastSegment.Action;
+
+            return actionImport;
         }
     }
 }

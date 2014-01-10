@@ -131,6 +131,10 @@
     <Compile Include="OData\Query\TruncatedCollectionTest.cs" />
     <Compile Include="OData\Results\CreatedODataResultTest.cs" />
     <Compile Include="OData\Results\UpdatedODataResultTest.cs" />
+    <Compile Include="OData\Routing\UnboundFunctionPathSegmentTemplateTest.cs" />
+    <Compile Include="OData\Routing\UnboundActionPathSegmentTest.cs" />
+    <Compile Include="OData\Routing\UnboundFunctionPathSegmentTest.cs" />
+    <Compile Include="OData\Routing\AttributeRoutingUnboundTest.cs" />
     <Compile Include="OData\Routing\CastPathSegmentTest.cs" />
     <Compile Include="OData\Routing\Conventions\FunctionRoutingConventionTests.cs" />
     <Compile Include="OData\Routing\ActionPathSegmentTest.cs" />

@@ -51,6 +51,29 @@ namespace System.Web.Http.OData.Routing
             }
         }
 
+        public static IEdmActionImport FindActionImport(this IEdmEntityContainer container, string actionIdentifier)
+        {
+            Contract.Assert(container != null);
+            Contract.Assert(actionIdentifier != null);
+
+            IEnumerable<IEdmOperationImport> matchedOperations = container.OperationImports()
+                         .GetMatchingProcedures(actionIdentifier, null, isAction: true);
+            IEdmActionImport[] matchesArray = matchedOperations.OfType<IEdmActionImport>().ToArray();
+            if (matchesArray.Length > 1)
+            {
+                string message = String.Join(", ", matchesArray.Select(match => match.Container.FullName() + "." + match.Name));
+                throw Error.Argument("actionIdentifier", SRResources.ActionResolutionFailed, actionIdentifier, message);
+            }
+            else if (matchesArray.Length == 1)
+            {
+                return matchesArray[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public static IEnumerable<IEdmFunctionImport> FindFunctions(this IEdmEntityContainer container,
             string functionIdentifier, IEdmType bindingParameterType)
         {

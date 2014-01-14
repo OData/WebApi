@@ -63,6 +63,10 @@
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\EnumMemberConfiguration.cs" />
+    <Compile Include="OData\Builder\EnumPropertyConfiguration.cs" />
+    <Compile Include="OData\Builder\EnumTypeConfiguration.cs" />
+    <Compile Include="OData\Builder\EnumTypeConfigurationOfTEnumType.cs" />
     <Compile Include="OData\Query\NonFilterableAttribute.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NonFilterableAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Query\NotExpandableAttribute.cs" />

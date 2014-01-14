@@ -215,6 +215,19 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Adds a new EDM enum property to this entity type.
+        /// </summary>
+        /// <param name="propertyInfo">The backing CLR property.</param>
+        /// <returns>Returns the <see cref="EnumPropertyConfiguration"/> of the added property.</returns>
+        public override EnumPropertyConfiguration AddEnumProperty(PropertyInfo propertyInfo)
+        {
+            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
+            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
+
+            return base.AddEnumProperty(propertyInfo);
+        }
+
+        /// <summary>
         /// Adds a new EDM complex property to this entity type.
         /// </summary>
         /// <param name="propertyInfo">The backing CLR property.</param>

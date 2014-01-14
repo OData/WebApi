@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.OData.Edm;
+using Microsoft.TestCommon.Types;
 
 namespace System.Web.Http.OData
 {
@@ -12,6 +13,24 @@ namespace System.Web.Http.OData
         public static IEdmModel GetServiceModel(this ODataModelBuilder builder)
         {
             return EdmModelHelperMethods.BuildEdmModel(builder);
+        }
+
+        public static ODataModelBuilder Add_Color_EnumType(this ODataModelBuilder builder)
+        {
+            var color = builder.EnumType<Color>();
+            color.Member(Color.Red);
+            color.Member(Color.Green);
+            color.Member(Color.Blue);
+            return builder;
+        }
+
+        public static ODataModelBuilder Add_LongEnum_EnumType(this ODataModelBuilder builder)
+        {
+            var longEnum = builder.EnumType<LongEnum>();
+            longEnum.Member(LongEnum.FirstLong);
+            longEnum.Member(LongEnum.SecondLong);
+            longEnum.Member(LongEnum.ThirdLong);
+            return builder;
         }
 
         public static ODataModelBuilder Add_Address_ComplexType(this ODataModelBuilder builder)

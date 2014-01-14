@@ -19,6 +19,7 @@ namespace System.Web.Http.OData.Builder
         private static readonly Version _defaultDataServiceVersion = EdmConstants.EdmVersion4;
         private static readonly Version _defaultMaxDataServiceVersionn = EdmConstants.EdmVersion4;
 
+        private Dictionary<Type, EnumTypeConfiguration> _enumTypes = new Dictionary<Type, EnumTypeConfiguration>();
         private Dictionary<Type, StructuralTypeConfiguration> _structuralTypes = new Dictionary<Type, StructuralTypeConfiguration>();
         private Dictionary<string, EntitySetConfiguration> _entitySets = new Dictionary<string, EntitySetConfiguration>();
         private Dictionary<Type, PrimitiveTypeConfiguration> _primitiveTypes = new Dictionary<Type, PrimitiveTypeConfiguration>();
@@ -109,6 +110,14 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Gets the collection of EDM types in the model to be built.
+        /// </summary>
+        public virtual IEnumerable<EnumTypeConfiguration> EnumTypes
+        {
+            get { return _enumTypes.Values; }
+        }
+
+        /// <summary>
         /// Gets the collection of Procedures (i.e. Actions, Functions and ServiceOperations) in the model to be built
         /// </summary>
         public virtual IEnumerable<ProcedureConfiguration> Procedures
@@ -149,6 +158,16 @@ namespace System.Web.Http.OData.Builder
         {
             EntityTypeConfiguration entity = AddEntity(typeof(TEntityType));
             return new EntitySetConfiguration<TEntityType>(this, AddEntitySet(name, entity));
+        }
+
+        /// <summary>
+        /// Registers an enum type as part of the model and returns an object that can be used to configure the enum.
+        /// </summary>
+        /// <typeparam name="TEnumType">The enum type to be registered or configured.</typeparam>
+        /// <returns>The configuration object for the specified enum type.</returns>
+        public EnumTypeConfiguration<TEnumType> EnumType<TEnumType>()
+        {
+            return new EnumTypeConfiguration<TEnumType>(AddEnumType(typeof(TEnumType)));
         }
 
         /// <summary>
@@ -239,6 +258,41 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Registers an enum type as part of the model and returns an object that can be used to configure the enum type.
+        /// </summary>
+        /// <param name="type">The type to be registered or configured.</param>
+        /// <returns>The configuration object for the specified enum type.</returns>
+        public virtual EnumTypeConfiguration AddEnumType(Type type)
+        {
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+
+            if (!type.IsEnum)
+            {
+                throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
+            }
+
+            if (!_enumTypes.ContainsKey(type))
+            {
+                EnumTypeConfiguration enumTypeConfig = new EnumTypeConfiguration(this, type);
+                _enumTypes.Add(type, enumTypeConfig);
+                return enumTypeConfig;
+            }
+            else
+            {
+                EnumTypeConfiguration enumTypeConfig = _enumTypes[type];
+                if (enumTypeConfig.ClrType != type)
+                {
+                    throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
+                }
+
+                return enumTypeConfig;
+            }
+        }
+
+        /// <summary>
         /// Adds a procedure to the model.
         /// </summary>
         public virtual void AddProcedure(ProcedureConfiguration procedure)
@@ -290,7 +344,7 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Removes the type from the model.
         /// </summary>
-        /// <param name="type">The type to be removed</param>
+        /// <param name="type">The type to be removed.</param>
         /// <returns><see>true</see> if the type is present in the model and <see>false</see> otherwise.</returns>
         public virtual bool RemoveStructuralType(Type type)
         {
@@ -303,9 +357,24 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Removes the type from the model.
+        /// </summary>
+        /// <param name="type">The type to be removed.</param>
+        /// <returns><see>true</see> if the type is present in the model and <see>false</see> otherwise.</returns>
+        public virtual bool RemoveEnumType(Type type)
+        {
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+
+            return _enumTypes.Remove(type);
+        }
+
+        /// <summary>
         /// Removes the entity set from the model.
         /// </summary>
-        /// <param name="name">The name of the entity set to be removed</param>
+        /// <param name="name">The name of the entity set to be removed.</param>
         /// <returns><see>true</see> if the entity set is present in the model and <see>false</see> otherwise.</returns>
         public virtual bool RemoveEntitySet(string name)
         {
@@ -324,7 +393,7 @@ namespace System.Web.Http.OData.Builder
         /// You need to use the other RemoveProcedure(..) overload instead.
         /// </remarks>
         /// </summary>
-        /// <param name="name">The name of the procedure to be removed</param>
+        /// <param name="name">The name of the procedure to be removed.</param>
         /// <returns><see>true</see> if the procedure is present in the model and <see>false</see> otherwise.</returns>
         public virtual bool RemoveProcedure(string name)
         {
@@ -354,7 +423,7 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Remove the procedure from the model
         /// </summary>
-        /// <param name="procedure">The procedure to be removed</param>
+        /// <param name="procedure">The procedure to be removed.</param>
         /// <returns><see>true</see> if the procedure is present in the model and <see>false</see> otherwise.</returns>
         public virtual bool RemoveProcedure(ProcedureConfiguration procedure)
         {
@@ -366,7 +435,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Attempts to find either a pre-configured structural type or a primitive type that matches the T.
+        /// Attempts to find a pre-configured structural type or a primitive type or an enum type that matches the T.
         /// If no matches are found NULL is returned.
         /// </summary>
         public IEdmTypeConfiguration GetTypeConfigurationOrNull(Type type)
@@ -389,12 +458,16 @@ namespace System.Web.Http.OData.Builder
                 {
                     return _structuralTypes[type];
                 }
+                else if (_enumTypes.ContainsKey(type))
+                {
+                    return _enumTypes[type];
+                }
             }
             return null;
         }
 
         /// <summary>
-        /// Creates a <see cref="IEdmModel"/> based on the configuration performed using this builder. 
+        /// Creates a <see cref="IEdmModel"/> based on the configuration performed using this builder.
         /// </summary>
         /// <returns>The model that was built.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Property is not appropriate, method does work")]

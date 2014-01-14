@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.OData.Core;
@@ -30,7 +29,7 @@ namespace System.Web.Http.OData.Builder
             EdmEntityContainer container = new EdmEntityContainer(builder.Namespace, builder.ContainerName);
 
             // add types and sets, building an index on the way.
-            Dictionary<Type, IEdmStructuredType> edmTypeMap = model.AddTypes(builder.StructuralTypes);
+            Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(builder.StructuralTypes, builder.EnumTypes);
             Dictionary<string, EdmEntitySet> edmEntitySetMap = model.AddEntitySets(builder, container, edmTypeMap);
 
             // add procedures
@@ -50,18 +49,19 @@ namespace System.Web.Http.OData.Builder
             return model;
         }
 
-        private static void AddTypes(this EdmModel model, Dictionary<Type, IEdmStructuredType> structuredTypes)
+        private static void AddTypes(this EdmModel model, Dictionary<Type, IEdmType> types)
         {
             Contract.Assert(model != null);
-            Contract.Assert(structuredTypes != null);
+            Contract.Assert(types != null);
 
-            foreach (IEdmStructuredType type in structuredTypes.Values)
+            foreach (IEdmType type in types.Values)
             {
                 model.AddType(type);
             }
         }
 
-        private static Dictionary<string, EdmEntitySet> AddEntitySets(this EdmModel model, ODataModelBuilder builder, EdmEntityContainer container, Dictionary<Type, IEdmStructuredType> edmTypeMap)
+        private static Dictionary<string, EdmEntitySet> AddEntitySets(this EdmModel model, ODataModelBuilder builder,
+            EdmEntityContainer container, Dictionary<Type, IEdmType> edmTypeMap)
         {
             IEnumerable<EntitySetConfiguration> configurations = builder.EntitySets;
 
@@ -94,7 +94,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         private static void AddNavigationBindings(EntitySetConfiguration configuration, EdmEntitySet entitySet, EntitySetLinkBuilderAnnotation linkBuilder, ODataModelBuilder builder,
-            Dictionary<Type, IEdmStructuredType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
+            Dictionary<Type, IEdmType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
         {
             foreach (EntityTypeConfiguration entity in builder.ThisAndBaseAndDerivedTypes(configuration.EntityType))
             {
@@ -118,7 +118,7 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private static void AddProcedureParameters(EdmOperation operation, ProcedureConfiguration procedure, Dictionary<Type, IEdmStructuredType> edmTypeMap)
+        private static void AddProcedureParameters(EdmOperation operation, ProcedureConfiguration procedure, Dictionary<Type, IEdmType> edmTypeMap)
         {
             foreach (ParameterConfiguration parameter in procedure.Parameters)
             {
@@ -164,7 +164,8 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private static void AddProcedures(this IEdmModel model, IEnumerable<ProcedureConfiguration> configurations, EdmEntityContainer container, Dictionary<Type, IEdmStructuredType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
+        private static void AddProcedures(this IEdmModel model, IEnumerable<ProcedureConfiguration> configurations, EdmEntityContainer container,
+            Dictionary<Type, IEdmType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
         {
             foreach (ProcedureConfiguration procedure in configurations)
             {
@@ -187,7 +188,7 @@ namespace System.Web.Http.OData.Builder
             this IEdmModel model,
             ProcedureConfiguration procedure,
             EdmEntityContainer container,
-            Dictionary<Type, IEdmStructuredType> edmTypeMap,
+            Dictionary<Type, IEdmType> edmTypeMap,
             Dictionary<string, EdmEntitySet> edmEntitySetMap,
             bool isAction)
         {
@@ -236,13 +237,14 @@ namespace System.Web.Http.OData.Builder
             container.AddElement(operationImport);
         }
 
-        private static Dictionary<Type, IEdmStructuredType> AddTypes(this EdmModel model, IEnumerable<StructuralTypeConfiguration> types)
+        private static Dictionary<Type, IEdmType> AddTypes(this EdmModel model, IEnumerable<StructuralTypeConfiguration> types,
+            IEnumerable<EnumTypeConfiguration> enumTypes)
         {
-            StructuralTypeConfiguration[] configTypes = types.ToArray();
+            IEnumerable<IEdmTypeConfiguration> configTypes = types.Concat<IEdmTypeConfiguration>(enumTypes);
 
             // build types
             EdmTypeMap edmTypeMap = EdmTypeBuilder.GetTypesAndProperties(configTypes);
-            Dictionary<Type, IEdmStructuredType> edmTypes = edmTypeMap.EdmTypes;
+            Dictionary<Type, IEdmType> edmTypes = edmTypeMap.EdmTypes;
 
             // Add an annotate types
             model.AddTypes(edmTypes);
@@ -255,7 +257,7 @@ namespace System.Web.Http.OData.Builder
             return edmTypes;
         }
 
-        private static void AddType(this EdmModel model, IEdmStructuredType type)
+        private static void AddType(this EdmModel model, IEdmType type)
         {
             if (type.TypeKind == EdmTypeKind.Complex)
             {
@@ -265,29 +267,33 @@ namespace System.Web.Http.OData.Builder
             {
                 model.AddElement(type as IEdmEntityType);
             }
+            else if (type.TypeKind == EdmTypeKind.Enum)
+            {
+                model.AddElement(type as IEdmEnumType);
+            }
             else
             {
-                Contract.Assert(false, "Only ComplexTypes and EntityTypes are supported.");
+                Contract.Assert(false, "Only ComplexTypes, EntityTypes and EnumTypes are supported.");
             }
         }
 
-        private static EdmEntitySet AddEntitySet(this EdmEntityContainer container, EntitySetConfiguration entitySet, IDictionary<Type, IEdmStructuredType> edmTypeMap)
+        private static EdmEntitySet AddEntitySet(this EdmEntityContainer container, EntitySetConfiguration entitySet, IDictionary<Type, IEdmType> edmTypeMap)
         {
             return container.AddEntitySet(entitySet.Name, (IEdmEntityType)edmTypeMap[entitySet.EntityType.ClrType]);
         }
 
-        private static IEnumerable<Tuple<EdmEntitySet, EntitySetConfiguration>> AddEntitySets(IEnumerable<EntitySetConfiguration> entitySets, EdmEntityContainer container, Dictionary<Type, IEdmStructuredType> edmTypeMap)
+        private static IEnumerable<Tuple<EdmEntitySet, EntitySetConfiguration>> AddEntitySets(IEnumerable<EntitySetConfiguration> entitySets, EdmEntityContainer container, Dictionary<Type, IEdmType> edmTypeMap)
         {
             return entitySets.Select(es => Tuple.Create(container.AddEntitySet(es, edmTypeMap), es));
         }
 
-        private static void AddClrTypeAnnotations(this EdmModel model, Dictionary<Type, IEdmStructuredType> edmTypes)
+        private static void AddClrTypeAnnotations(this EdmModel model, Dictionary<Type, IEdmType> edmTypes)
         {
-            foreach (KeyValuePair<Type, IEdmStructuredType> map in edmTypes)
+            foreach (KeyValuePair<Type, IEdmType> map in edmTypes)
             {
                 // pre-populate the model with clr-type annotations so that we dont have to scan 
                 // all loaded assemblies to find the clr type for an edm type that we build.
-                IEdmStructuredType edmType = map.Value;
+                IEdmType edmType = map.Value;
                 Type clrType = map.Key;
                 model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(clrType));
             }
@@ -338,7 +344,7 @@ namespace System.Web.Http.OData.Builder
             return null;
         }
 
-        private static IEdmTypeReference GetEdmTypeReference(Dictionary<Type, IEdmStructuredType> availableTypes, IEdmTypeConfiguration configuration, bool nullable)
+        private static IEdmTypeReference GetEdmTypeReference(Dictionary<Type, IEdmType> availableTypes, IEdmTypeConfiguration configuration, bool nullable)
         {
             Contract.Assert(availableTypes != null);
 
@@ -356,14 +362,18 @@ namespace System.Web.Http.OData.Builder
             }
             else if (availableTypes.ContainsKey(configuration.ClrType))
             {
-                IEdmStructuredType structuralType = availableTypes[configuration.ClrType];
+                IEdmType type = availableTypes[configuration.ClrType];
                 if (kind == EdmTypeKind.Complex)
                 {
-                    return new EdmComplexTypeReference(structuralType as IEdmComplexType, nullable);
+                    return new EdmComplexTypeReference((IEdmComplexType)type, nullable);
                 }
                 else if (kind == EdmTypeKind.Entity)
                 {
-                    return new EdmEntityTypeReference(structuralType as IEdmEntityType, nullable);
+                    return new EdmEntityTypeReference((IEdmEntityType)type, nullable);
+                }
+                else if (kind == EdmTypeKind.Enum)
+                {
+                    return new EdmEnumTypeReference((IEdmEnumType)type, nullable);
                 }
                 else
                 {

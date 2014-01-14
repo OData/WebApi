@@ -655,6 +655,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value of enum member &apos;{0}&apos; cannot be converted to a long type..
+        /// </summary>
+        internal static string EnumValueCannotBeLong {
+            get {
+                return ResourceManager.GetString("EnumValueCannotBeLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError..
         /// </summary>
         internal static string ErrorTypeMustBeODataErrorOrHttpError {
@@ -1020,6 +1029,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string MustBeComplexProperty {
             get {
                 return ResourceManager.GetString("MustBeComplexProperty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be an Enum property..
+        /// </summary>
+        internal static string MustBeEnumProperty {
+            get {
+                return ResourceManager.GetString("MustBeEnumProperty", resourceCulture);
             }
         }
         
@@ -1704,6 +1722,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string TypeCannotBeEntityWasComplex {
             get {
                 return ResourceManager.GetString("TypeCannotBeEntityWasComplex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; cannot be configured as an enum type..
+        /// </summary>
+        internal static string TypeCannotBeEnum {
+            get {
+                return ResourceManager.GetString("TypeCannotBeEnum", resourceCulture);
             }
         }
         

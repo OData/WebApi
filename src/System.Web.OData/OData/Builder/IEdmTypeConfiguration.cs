@@ -33,7 +33,7 @@ namespace System.Web.Http.OData.Builder
 
         /// <summary>
         /// The kind of the EdmType.
-        /// Examples include EntityType, ComplexType, PrimitiveType, CollectionType.
+        /// Examples include EntityType, ComplexType, PrimitiveType, CollectionType, EnumType.
         /// </summary>
         EdmTypeKind Kind { get; }
 

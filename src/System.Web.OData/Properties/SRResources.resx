@@ -222,6 +222,12 @@
   <data name="TypeCannotBeEntityWasComplex" xml:space="preserve">
     <value>The type '{0}' cannot be configured as an EntityType. It was previously configured as a ComplexType.</value>
   </data>
+  <data name="TypeCannotBeEnum" xml:space="preserve">
+    <value>The type '{0}' cannot be configured as an enum type.</value>
+  </data>
+  <data name="EnumValueCannotBeLong" xml:space="preserve">
+    <value>The value of enum member '{0}' cannot be converted to a long type.</value>
+  </data>
   <data name="RecursiveComplexTypesNotAllowed" xml:space="preserve">
     <value>The complex type '{0}' has a reference to itself through the property '{1}'. A recursive loop of complex types is not allowed.</value>
   </data>
@@ -251,6 +257,9 @@
   </data>
   <data name="MustBePrimitiveProperty" xml:space="preserve">
     <value>The property '{0}'  on type '{1}' must be a Primitive property.</value>
+  </data>
+  <data name="MustBeEnumProperty" xml:space="preserve">
+    <value>The property '{0}' on type '{1}' must be an Enum property.</value>
   </data>
   <data name="MustHaveMatchingMultiplicity" xml:space="preserve">
     <value>The multiplicity of the '{0}' property must be '{1}'.</value>

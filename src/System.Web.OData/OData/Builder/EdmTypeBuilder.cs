@@ -2,12 +2,14 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Library.Values;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -16,29 +18,31 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     internal class EdmTypeBuilder
     {
-        private readonly List<StructuralTypeConfiguration> _configurations;
-        private readonly Dictionary<Type, IEdmStructuredType> _types = new Dictionary<Type, IEdmStructuredType>();
+        private readonly List<IEdmTypeConfiguration> _configurations;
+        private readonly Dictionary<Type, IEdmType> _types = new Dictionary<Type, IEdmType>();
         private readonly Dictionary<PropertyInfo, IEdmProperty> _properties = new Dictionary<PropertyInfo, IEdmProperty>();
         private readonly Dictionary<IEdmProperty, QueryableRestrictions> _propertiesRestrictions = new Dictionary<IEdmProperty, QueryableRestrictions>();
+        private readonly Dictionary<Enum, IEdmEnumMember> _members = new Dictionary<Enum, IEdmEnumMember>();
 
-        internal EdmTypeBuilder(IEnumerable<StructuralTypeConfiguration> configurations)
+        internal EdmTypeBuilder(IEnumerable<IEdmTypeConfiguration> configurations)
         {
             _configurations = configurations.ToList();
         }
 
-        private Dictionary<Type, IEdmStructuredType> GetEdmTypes()
+        private Dictionary<Type, IEdmType> GetEdmTypes()
         {
             // Reset
             _types.Clear();
             _properties.Clear();
+            _members.Clear();
 
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
-            foreach (StructuralTypeConfiguration config in _configurations)
+            foreach (IEdmTypeConfiguration config in _configurations)
             {
                 CreateEdmTypeHeader(config);
             }
 
-            foreach (StructuralTypeConfiguration config in _configurations)
+            foreach (IEdmTypeConfiguration config in _configurations)
             {
                 CreateEdmTypeBody(config);
             }
@@ -46,7 +50,7 @@ namespace System.Web.Http.OData.Builder
             return _types;
         }
 
-        private void CreateEdmTypeHeader(StructuralTypeConfiguration config)
+        private void CreateEdmTypeHeader(IEdmTypeConfiguration config)
         {
             if (!_types.ContainsKey(config.ClrType))
             {
@@ -54,7 +58,7 @@ namespace System.Web.Http.OData.Builder
                 {
                     _types.Add(config.ClrType, new EdmComplexType(config.Namespace, config.Name));
                 }
-                else
+                else if (config.Kind == EdmTypeKind.Entity)
                 {
                     EntityTypeConfiguration entity = config as EntityTypeConfiguration;
                     Contract.Assert(entity != null);
@@ -71,23 +75,34 @@ namespace System.Web.Http.OData.Builder
 
                     _types.Add(config.ClrType, new EdmEntityType(config.Namespace, config.Name, baseType, entity.IsAbstract ?? false, isOpen: false));
                 }
+                else
+                {
+                    EnumTypeConfiguration enumTypeConfiguration = config as EnumTypeConfiguration;
+
+                    // The config has to be enum.
+                    Contract.Assert(enumTypeConfiguration != null);
+
+                    _types.Add(enumTypeConfiguration.ClrType, new EdmEnumType(enumTypeConfiguration.Namespace, enumTypeConfiguration.Name, GetTypeKind(enumTypeConfiguration.UnderlyingType), enumTypeConfiguration.IsFlags));
+                }
             }
         }
 
-        private void CreateEdmTypeBody(StructuralTypeConfiguration config)
+        private void CreateEdmTypeBody(IEdmTypeConfiguration config)
         {
             IEdmType edmType = _types[config.ClrType];
 
             if (edmType.TypeKind == EdmTypeKind.Complex)
             {
-                CreateComplexTypeBody(edmType as EdmComplexType, config as ComplexTypeConfiguration);
+                CreateComplexTypeBody((EdmComplexType)edmType, (ComplexTypeConfiguration)config);
+            }
+            else if (edmType.TypeKind == EdmTypeKind.Entity)
+            {
+                CreateEntityTypeBody((EdmEntityType)edmType, (EntityTypeConfiguration)config);
             }
             else
             {
-                if (edmType.TypeKind == EdmTypeKind.Entity)
-                {
-                    CreateEntityTypeBody(edmType as EdmEntityType, config as EntityTypeConfiguration);
-                }
+                Contract.Assert(edmType.TypeKind == EdmTypeKind.Enum);
+                CreateEnumTypeBody((EdmEnumType)edmType, (EnumTypeConfiguration)config);
             }
         }
 
@@ -134,7 +149,15 @@ namespace System.Web.Http.OData.Builder
                         if (_types.ContainsKey(collectionProperty.ElementType))
                         {
                             IEdmComplexType elementType = _types[collectionProperty.ElementType] as IEdmComplexType;
-                            elementTypeReference = new EdmComplexTypeReference(elementType, false);
+                            if (elementType != null)
+                            {
+                                elementTypeReference = new EdmComplexTypeReference(elementType, false);
+                            }
+                            else
+                            {
+                                IEdmEnumType enumElementType = (IEdmEnumType)_types[collectionProperty.ElementType];
+                                elementTypeReference = new EdmEnumTypeReference(enumElementType, false);
+                            }
                         }
                         else
                         {
@@ -145,6 +168,10 @@ namespace System.Web.Http.OData.Builder
                             new EdmCollectionTypeReference(
                                 new EdmCollectionType(elementTypeReference),
                                 collectionProperty.OptionalProperty));
+                        break;
+
+                    case PropertyKind.Enum:
+                        edmProperty = CreateStructuralTypeEnumPropertyBody(type, config, (EnumPropertyConfiguration)property);
                         break;
 
                     default:
@@ -163,13 +190,38 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        private IEdmProperty CreateStructuralTypeEnumPropertyBody(EdmStructuredType type, StructuralTypeConfiguration config, EnumPropertyConfiguration enumProperty)
+        {
+            Type enumPropertyType = Nullable.GetUnderlyingType(enumProperty.RelatedClrType) ?? enumProperty.RelatedClrType;
+            IEdmEnumType enumType = (IEdmEnumType)_types[enumPropertyType];
+            IEdmTypeReference enumTypeReference = new EdmEnumTypeReference(enumType, enumProperty.OptionalProperty);
+
+            // Set concurrency token if is entity type, and concurrency token is true
+            EdmConcurrencyMode enumConcurrencyMode = EdmConcurrencyMode.None;
+            if (config.Kind == EdmTypeKind.Entity && enumProperty.ConcurrencyToken)
+            {
+                enumConcurrencyMode = EdmConcurrencyMode.Fixed;
+            }
+
+            return type.AddStructuralProperty(
+                enumProperty.Name,
+                enumTypeReference,
+                defaultValue: null,
+                concurrencyMode: enumConcurrencyMode);
+        }
         private void CreateComplexTypeBody(EdmComplexType type, ComplexTypeConfiguration config)
         {
+            Contract.Assert(type != null);
+            Contract.Assert(config != null);
+
             CreateStructuralTypeBody(type, config);
         }
 
         private void CreateEntityTypeBody(EdmEntityType type, EntityTypeConfiguration config)
         {
+            Contract.Assert(type != null);
+            Contract.Assert(config != null);
+
             CreateStructuralTypeBody(type, config);
             IEdmStructuralProperty[] keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name)).ToArray();
             type.AddKeys(keys);
@@ -195,13 +247,38 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        private void CreateEnumTypeBody(EdmEnumType type, EnumTypeConfiguration config)
+        {
+            Contract.Assert(type != null);
+            Contract.Assert(config != null);
+
+            foreach (EnumMemberConfiguration member in config.Members)
+            {
+                // EdmIntegerConstant can only support a value of long type.
+                long value;
+                try
+                {
+                    value = Convert.ToInt64(member.MemberInfo, CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    throw Error.Argument("value", SRResources.EnumValueCannotBeLong, Enum.GetName(member.MemberInfo.GetType(), member.MemberInfo));
+                }
+
+                EdmEnumMember edmMember = new EdmEnumMember(type, member.Name,
+                    new EdmIntegerConstant(value));
+                type.AddMember(edmMember);
+                _members[member.MemberInfo] = edmMember;
+            }
+        }
+
         /// <summary>
         /// Builds <see cref="IEdmType"/> and <see cref="IEdmProperty"/>'s from <paramref name="configurations"/>
         /// </summary>
-        /// <param name="configurations">A collection of <see cref="StructuralTypeConfiguration"/>'s</param>
+        /// <param name="configurations">A collection of <see cref="IEdmTypeConfiguration"/>'s</param>
         /// <returns>The built dictionary of <see cref="StructuralTypeConfiguration"/>'s indexed by their backing CLR type,
         /// and dictionary of <see cref="StructuralTypeConfiguration"/>'s indexed by their backing CLR property info</returns>
-        public static EdmTypeMap GetTypesAndProperties(IEnumerable<StructuralTypeConfiguration> configurations)
+        public static EdmTypeMap GetTypesAndProperties(IEnumerable<IEdmTypeConfiguration> configurations)
         {
             if (configurations == null)
             {
@@ -209,9 +286,9 @@ namespace System.Web.Http.OData.Builder
             }
 
             EdmTypeBuilder builder = new EdmTypeBuilder(configurations);
-            return new EdmTypeMap(builder.GetEdmTypes(), builder._properties, builder._propertiesRestrictions);
+            return new EdmTypeMap(builder.GetEdmTypes(), builder._properties, builder._propertiesRestrictions, builder._members);
         }
-        
+
         /// <summary>
         /// Gets the <see cref="EdmPrimitiveTypeKind"/> that maps to the <see cref="Type"/>
         /// </summary>

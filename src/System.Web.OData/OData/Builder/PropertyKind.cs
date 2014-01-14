@@ -25,6 +25,11 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Represents an EDM navigation property.
         /// </summary>
-        Navigation = 3
+        Navigation = 3,
+
+        /// <summary>
+        /// Represents an EDM enum property.
+        /// </summary>
+        Enum = 4
     }
 }

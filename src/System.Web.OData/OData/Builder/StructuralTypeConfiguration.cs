@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
@@ -203,6 +202,54 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Adds an enum property to this edm type.
+        /// </summary>
+        /// <param name="propertyInfo">The property being added.</param>
+        /// <returns>The <see cref="EnumPropertyConfiguration"/> so that the property can be configured further.</returns>
+        public virtual EnumPropertyConfiguration AddEnumProperty(PropertyInfo propertyInfo)
+        {
+            if (propertyInfo == null)
+            {
+                throw Error.ArgumentNull("propertyInfo");
+            }
+
+            if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
+            }
+
+            Type enumType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
+
+            if (!enumType.IsEnum)
+            {
+                throw Error.Argument("propertyInfo", SRResources.MustBeEnumProperty, propertyInfo.Name, ClrType.FullName);
+            }
+
+            // Remove from the ignored properties
+            if (RemovedProperties.Contains(propertyInfo))
+            {
+                RemovedProperties.Remove(propertyInfo);
+            }
+
+            EnumPropertyConfiguration propertyConfiguration;
+            if (ExplicitProperties.ContainsKey(propertyInfo))
+            {
+                propertyConfiguration = ExplicitProperties[propertyInfo] as EnumPropertyConfiguration;
+                if (propertyConfiguration == null)
+                {
+                    throw Error.Argument("propertyInfo", SRResources.MustBeEnumProperty, propertyInfo.Name, ClrType.FullName);
+                }
+            }
+            else
+            {
+                propertyConfiguration = new EnumPropertyConfiguration(propertyInfo, this);
+                ExplicitProperties[propertyInfo] = propertyConfiguration;
+            }
+
+            return propertyConfiguration;
+        }
+
+        /// <summary>
         /// Adds a complex property to this edm type.
         /// </summary>
         /// <param name="propertyInfo">The property being added.</param>
@@ -275,7 +322,7 @@ namespace System.Web.Http.OData.Builder
                 RemovedProperties.Remove(propertyInfo);
             }
 
-            CollectionPropertyConfiguration propertyConfiguration = null;
+            CollectionPropertyConfiguration propertyConfiguration;
             if (ExplicitProperties.ContainsKey(propertyInfo))
             {
                 propertyConfiguration = ExplicitProperties[propertyInfo] as CollectionPropertyConfiguration;
@@ -293,13 +340,14 @@ namespace System.Web.Http.OData.Builder
                 if (propertyConfiguration.ElementType == ClrType)
                 {
                     throw Error.Argument("propertyInfo",
-                                         SRResources.RecursiveComplexTypesNotAllowed,
-                                         ClrType.Name,
-                                         propertyConfiguration.Name);
+                        SRResources.RecursiveComplexTypesNotAllowed,
+                        ClrType.Name,
+                        propertyConfiguration.Name);
                 }
 
                 // If the ElementType is not primitive treat as a ComplexType and Add to the model.
-                IEdmPrimitiveTypeReference edmType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(propertyConfiguration.ElementType);
+                IEdmPrimitiveTypeReference edmType =
+                    EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(propertyConfiguration.ElementType);
                 if (edmType == null)
                 {
                     ModelBuilder.AddComplexType(propertyConfiguration.ElementType);

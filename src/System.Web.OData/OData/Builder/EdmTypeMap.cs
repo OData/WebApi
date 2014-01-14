@@ -9,19 +9,23 @@ namespace System.Web.Http.OData.Builder
     internal class EdmTypeMap
     {
         public EdmTypeMap(
-            Dictionary<Type, IEdmStructuredType> edmTypes,
+            Dictionary<Type, IEdmType> edmTypes,
             Dictionary<PropertyInfo, IEdmProperty> edmProperties,
-            Dictionary<IEdmProperty, QueryableRestrictions> edmPropertiesRestrictions)
+            Dictionary<IEdmProperty, QueryableRestrictions> edmPropertiesRestrictions,
+            Dictionary<Enum, IEdmEnumMember> enumMembers)
         {
             EdmTypes = edmTypes;
             EdmProperties = edmProperties;
             EdmPropertiesRestrictions = edmPropertiesRestrictions;
+            EnumMembers = enumMembers;
         }
 
-        public Dictionary<Type, IEdmStructuredType> EdmTypes { get; private set; }
+        public Dictionary<Type, IEdmType> EdmTypes { get; private set; }
 
         public Dictionary<PropertyInfo, IEdmProperty> EdmProperties { get; private set; }
 
         public Dictionary<IEdmProperty, QueryableRestrictions> EdmPropertiesRestrictions { get; private set; }
+
+        public Dictionary<Enum, IEdmEnumMember> EnumMembers { get; private set; }
     }
 }

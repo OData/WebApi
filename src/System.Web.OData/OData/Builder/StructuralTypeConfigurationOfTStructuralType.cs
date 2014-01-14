@@ -157,7 +157,35 @@ namespace System.Web.Http.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
         public PrimitivePropertyConfiguration Property<T>(Expression<Func<TStructuralType, T>> propertyExpression) where T : struct
         {
-            return GetPrimitivePropertyConfiguration(propertyExpression);
+            return GetPrimitivePropertyConfiguration(propertyExpression, optional: false);
+        }
+
+        /// <summary>
+        /// Adds an optional enum property to the EDM type.
+        /// </summary>
+        /// <typeparam name="T">The enum property type.</typeparam>
+        /// <param name="propertyExpression">A lambda expression representing the navigation property for the relationship.
+        /// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
+        /// <returns>A configuration object that can be used to further configure the property.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
+        public EnumPropertyConfiguration EnumProperty<T>(Expression<Func<TStructuralType, T?>> propertyExpression) where T : struct
+        {
+            return GetEnumPropertyConfiguration(propertyExpression, optional: true);
+        }
+
+        /// <summary>
+        /// Adds a required enum property to the EDM type.
+        /// </summary>
+        /// <typeparam name="T">The enum property type.</typeparam>
+        /// <param name="propertyExpression">A lambda expression representing the navigation property for the relationship.
+        /// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
+        /// <returns>A configuration object that can be used to further configure the property.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
+        public EnumPropertyConfiguration EnumProperty<T>(Expression<Func<TStructuralType, T>> propertyExpression) where T : struct
+        {
+            return GetEnumPropertyConfiguration(propertyExpression, optional: false);
         }
 
         /// <summary>
@@ -188,10 +216,23 @@ namespace System.Web.Http.OData.Builder
             return GetCollectionPropertyConfiguration(propertyExpression);
         }
 
-        private PrimitivePropertyConfiguration GetPrimitivePropertyConfiguration(Expression propertyExpression, bool optional = false)
+        private PrimitivePropertyConfiguration GetPrimitivePropertyConfiguration(Expression propertyExpression, bool optional)
         {
             PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
             PrimitivePropertyConfiguration property = _configuration.AddProperty(propertyInfo);
+            if (optional)
+            {
+                property.IsOptional();
+            }
+
+            return property;
+        }
+
+        private EnumPropertyConfiguration GetEnumPropertyConfiguration(Expression propertyExpression, bool optional)
+        {
+            PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
+
+            EnumPropertyConfiguration property = _configuration.AddEnumProperty(propertyInfo);
             if (optional)
             {
                 property.IsOptional();
@@ -219,7 +260,10 @@ namespace System.Web.Http.OData.Builder
         private CollectionPropertyConfiguration GetCollectionPropertyConfiguration(Expression propertyExpression, bool optional = false)
         {
             PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
-            CollectionPropertyConfiguration property = _configuration.AddCollectionProperty(propertyInfo);
+            CollectionPropertyConfiguration property;
+
+            property = _configuration.AddCollectionProperty(propertyInfo);
+
             if (optional)
             {
                 property.IsOptional();

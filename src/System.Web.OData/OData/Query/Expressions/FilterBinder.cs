@@ -18,6 +18,8 @@ using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library.Values;
+using Microsoft.OData.Edm.Values;
 
 namespace System.Web.Http.OData.Query.Expressions
 {
@@ -138,6 +140,7 @@ namespace System.Web.Http.OData.Query.Expressions
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
             CollectionNode collectionNode = node as CollectionNode;
+            EnumNode enumNode = node as EnumNode;
             SingleValueNode singleValueNode = node as SingleValueNode;
 
             if (collectionNode != null)
@@ -157,6 +160,11 @@ namespace System.Web.Http.OData.Query.Expressions
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }
+            }
+            else if (enumNode != null)
+            {
+                // TODO: remove this else if, once the ODataLib v4 EnumNode.Kind bug 1818931 is fixed.
+                return BindEnumNode(enumNode);
             }
             else if (singleValueNode != null)
             {
@@ -343,6 +351,32 @@ namespace System.Web.Http.OData.Query.Expressions
             else
             {
                 return Expression.Constant(constantNode.Value, constantType);
+            }
+        }
+
+        private Expression BindEnumNode(EnumNode enumNode)
+        {
+            Contract.Assert(enumNode != null);
+
+            // no need to parameterize null's as there cannot be multiple values for null.
+            if (enumNode.Value == null || enumNode.Value.Value == null)
+            {
+                return _nullConstant;
+            }
+
+            Type enumType = EdmLibHelpers.GetClrType(enumNode.TypeReference, _model, _assembliesResolver);
+            IEdmPrimitiveValue value = enumNode.Value.Value;
+            EdmIntegerConstant intConst = value as EdmIntegerConstant;
+            Contract.Assert(intConst != null);
+            object enumValue = Enum.ToObject(enumType, intConst.Value);
+
+            if (_querySettings.EnableConstantParameterization)
+            {
+                return LinqParameterContainer.Parameterize(enumType, enumValue);
+            }
+            else
+            {
+                return Expression.Constant(enumValue, enumType);
             }
         }
 
@@ -872,6 +906,15 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.EndsWith, arguments);
         }
 
+        private Expression BindHas(Expression left, Expression flag)
+        {
+            Contract.Assert(left.Type.IsEnum);
+            Contract.Assert(flag.Type == typeof(Enum));
+
+            Expression[] arguments = new[] { left, flag };
+            return MakeFunctionCall(ClrCanonicalFunctions.HasFlag, arguments);
+        }
+        
         private Expression[] BindArguments(IEnumerable<QueryNode> nodes)
         {
             return nodes.OfType<SingleValueNode>().Select(n => Bind(n)).ToArray();
@@ -1084,16 +1127,17 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
-        private static Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull)
+        private Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull)
         {
             ExpressionType binaryExpressionType;
 
             // When comparing an enum to a string, parse the string, convert both to the enum underlying type, and compare the values
-            // When comparing an enum to an enum, convert both to the underlying type, and compare the values
+            // When comparing an enum to an enum with the same type, convert both to the underlying type, and compare the values
             Type leftUnderlyingType = Nullable.GetUnderlyingType(left.Type) ?? left.Type;
             Type rightUnderlyingType = Nullable.GetUnderlyingType(right.Type) ?? right.Type;
 
-            if (leftUnderlyingType.IsEnum || rightUnderlyingType.IsEnum)
+            // Convert to integers unless Enum type is required
+            if ((leftUnderlyingType.IsEnum || rightUnderlyingType.IsEnum) && binaryOperator != BinaryOperatorKind.Has)
             {
                 Type enumType = leftUnderlyingType.IsEnum ? leftUnderlyingType : rightUnderlyingType;
                 Type enumUnderlyingType = Enum.GetUnderlyingType(enumType);
@@ -1154,7 +1198,17 @@ namespace System.Web.Http.OData.Query.Expressions
             }
             else
             {
-                throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, binaryOperator, typeof(FilterBinder).Name);
+                // Enum has a "has" operator
+                // {(c1, c2) => c1.HasFlag(Convert(c2))}
+                if (left.Type.IsEnum && right.Type.IsEnum && binaryOperator == BinaryOperatorKind.Has)
+                {
+                    UnaryExpression flag = Expression.Convert(right, typeof(Enum));
+                    return BindHas(left, flag);
+                }
+                else
+                {
+                    throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, binaryOperator, typeof(FilterBinder).Name);
+                }
             }
         }
 
@@ -1164,8 +1218,19 @@ namespace System.Web.Http.OData.Query.Expressions
             if (parameterizedConstantValue != null)
             {
                 string enumStringValue = parameterizedConstantValue as string;
-                Contract.Assert(enumStringValue != null);
-                return Expression.Constant(Convert.ChangeType(Enum.Parse(enumType, enumStringValue), enumUnderlyingType, CultureInfo.InvariantCulture));
+                if (enumStringValue != null)
+                {
+                    return Expression.Constant(
+                        Convert.ChangeType(
+                            Enum.Parse(enumType, enumStringValue), enumUnderlyingType, CultureInfo.InvariantCulture));
+                }
+                else
+                {
+                    // enum member value
+                    return Expression.Constant(
+                        Convert.ChangeType(
+                            parameterizedConstantValue, enumUnderlyingType, CultureInfo.InvariantCulture));
+                }
             }
             else if (expression.NodeType == ExpressionType.Constant)
             {
@@ -1209,7 +1274,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             return null;
         }
-
+        
         private static IEnumerable<Expression> ExtractValueFromNullableArguments(IEnumerable<Expression> arguments)
         {
             return arguments.Select(arg => ExtractValueFromNullableExpression(arg));

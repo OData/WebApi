@@ -2,11 +2,10 @@
 
 namespace Microsoft.TestCommon.Types
 {
-    public enum SimpleEnum
+    public enum UIntEnum : uint
     {
-        First,
-        Second,
-        Third,
-        Fourth
+        FirstUInt,
+        SecondUInt,
+        ThirdUInt
     }
 }

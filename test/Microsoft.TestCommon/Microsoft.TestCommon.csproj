@@ -34,6 +34,11 @@
     <Compile Include="InlineDataAttribute.cs" />
     <Compile Include="MatrixTheoryDataSet.cs" />
     <Compile Include="Microsoft\TestCommon\DataSets\TestDataHolder.cs" />
+    <Compile Include="Microsoft\TestCommon\Types\ByteEnum.cs" />
+    <Compile Include="Microsoft\TestCommon\Types\SByteEnum.cs" />
+    <Compile Include="Microsoft\TestCommon\Types\ShortEnum.cs" />
+    <Compile Include="Microsoft\TestCommon\Types\UIntEnum.cs" />
+    <Compile Include="Microsoft\TestCommon\Types\UShortEnum.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="PlatformInfo.cs" />
     <Compile Include="PortReserver.cs" />

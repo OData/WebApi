@@ -222,7 +222,7 @@ namespace System.Web.Http.OData.Query
             Assert.NotNull(queryable);
             IEnumerable<EnumModel> actualCustomers = Assert.IsAssignableFrom<IEnumerable<EnumModel>>(queryable);
             Assert.Equal(
-                new int[] { 2, 1, 3 },
+                new int[] { 5, 2, 1, 3, 6 },
                 actualCustomers.Select(enumModel => enumModel.Id));
         }
 

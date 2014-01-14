@@ -132,6 +132,7 @@
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="OData\PerRequestParameterBindingTest.cs" />
     <Compile Include="OData\QueryableLimitationTest.cs" />
+    <Compile Include="OData\Query\EnumNodeLearningTests.cs" />
     <Compile Include="OData\Query\TruncatedCollectionTest.cs" />
     <Compile Include="OData\Results\CreatedODataResultTest.cs" />
     <Compile Include="OData\Results\UpdatedODataResultTest.cs" />

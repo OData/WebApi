@@ -804,7 +804,7 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(result, enumerator.Current);
         }
 
-        //[Theory(Skip = "TODO: Enum Support For Query")]
+        [Theory]
         [PropertyData("Querying_Enum_Collections_Data")]
         public void Querying_Enum_Collections(IQueryable queryable, string query, object result)
         {

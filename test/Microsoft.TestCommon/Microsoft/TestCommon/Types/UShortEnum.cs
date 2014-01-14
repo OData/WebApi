@@ -2,11 +2,10 @@
 
 namespace Microsoft.TestCommon.Types
 {
-    public enum SimpleEnum
+    public enum UShortEnum : ushort
     {
-        First,
-        Second,
-        Third,
-        Fourth
+        FirstUShort,
+        SecondUShort,
+        ThirdUShort
     }
 }

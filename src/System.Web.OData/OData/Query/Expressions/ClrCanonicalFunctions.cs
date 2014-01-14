@@ -12,6 +12,7 @@ namespace System.Web.Http.OData.Query.Expressions
     internal class ClrCanonicalFunctions
     {
         private static string _defaultString = default(string);
+        private static Enum _defaultEnum = default(Enum);
 
         // function names
         internal const string StartswithFunctionName = "startswith";
@@ -62,6 +63,9 @@ namespace System.Web.Http.OData.Query.Expressions
         public static readonly MethodInfo CeilingOfDecimal;
         public static readonly MethodInfo RoundOfDecimal;
         public static readonly MethodInfo FloorOfDecimal;
+
+        // enum functions
+        public static readonly MethodInfo HasFlag;
 
         // Date properties
         public static readonly Dictionary<string, PropertyInfo> DateProperties = new[]
@@ -122,6 +126,8 @@ namespace System.Web.Http.OData.Query.Expressions
             CeilingOfDouble = MethodOf(_ => Math.Ceiling(default(double)));
             RoundOfDouble = MethodOf(_ => Math.Round(default(double)));
             FloorOfDouble = MethodOf(_ => Math.Floor(default(double)));
+
+            HasFlag = MethodOf(_ => _defaultEnum.HasFlag(default(Enum)));
         }
 
         private static MethodInfo MethodOf<TReturn>(Expression<Func<object, TReturn>> expression)

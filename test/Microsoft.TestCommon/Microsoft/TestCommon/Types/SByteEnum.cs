@@ -2,11 +2,10 @@
 
 namespace Microsoft.TestCommon.Types
 {
-    public enum SimpleEnum
+    public enum SByteEnum : sbyte
     {
-        First,
-        Second,
-        Third,
-        Fourth
+        FirstSByte,
+        SecondSByte,
+        ThirdSByte
     }
 }

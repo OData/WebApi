@@ -106,40 +106,71 @@ namespace System.Web.Http.OData.Query
                 return new TheoryDataSet<string, int[]>
                 {
                     // Simple Enums
-                    { "Simple eq 'First'", new int[] { 1, 3 } },
-                    { "'First' eq Simple", new int[] { 1, 3 } },
+                    { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'First'", new int[] { 1, 3 } },
+                    { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'0'", new int[] { 1, 3 } },
+                    { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'Fourth'", new int[] { } },
+                    { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'3'", new int[] { } },
+                    { "Microsoft.TestCommon.Types.SimpleEnum'First' eq Simple", new int[] { 1, 3 } },
+                    // TODO: Support cast() in $filter, workitem 1586
+                    // { "Simple eq cast(cast(0, 'Edm.String'), 'Microsoft.TestCommon.Types.SimpleEnum')", new int[] { 1, 3} },
+                    // { "Simple eq cast('First', 'Microsoft.TestCommon.Types.SimpleEnum')", new int[] { 1, 3} },
                     { "Simple eq null", new int[] { } },
                     { "null eq Simple", new int[] { } },
                     { "Simple eq SimpleNullable", new int[] { 1 } },
-                    { "SimpleNullable eq 'First'", new int[] { 1 } },
-                    { "'First' eq SimpleNullable", new int[] { 1 } },
-                    { "SimpleNullable eq null", new int[] { 3 } },
-                    { "null eq SimpleNullable", new int[] { 3 } },
-                    
+                    { "Simple has Microsoft.TestCommon.Types.SimpleEnum'First'", new int[] { 1, 2, 3, 5, 6 } },
+                    { "Simple has Microsoft.TestCommon.Types.SimpleEnum'0'", new int[] { 1, 2, 3, 5, 6 } },
+                    { "Simple has Microsoft.TestCommon.Types.SimpleEnum'Second'", new int[] { 5 } },
+                    { "SimpleNullable eq Microsoft.TestCommon.Types.SimpleEnum'First'", new int[] { 1 } },
+                    { "Microsoft.TestCommon.Types.SimpleEnum'First' eq SimpleNullable", new int[] { 1 } },
+                    { "SimpleNullable eq null", new int[] { 3, 5 } },
+                    { "null eq SimpleNullable", new int[] { 3, 5 } },
+
                     // Long enums
-                    { "Long eq 'SecondLong'", new int[] { 2 } },
+                    { "Long eq Microsoft.TestCommon.Types.LongEnum'SecondLong'", new int[] { 2 } },
+                    { "Long eq Microsoft.TestCommon.Types.LongEnum'FourthLong'", new int[] { } },
+                    { "Long eq Microsoft.TestCommon.Types.LongEnum'3'", new int[] { } },
+
+                    // Byte enums
+                    { "Byte eq Microsoft.TestCommon.Types.ByteEnum'SecondByte'", new int[] { 2 } },
+
+                    // SByte enums
+                    { "SByte eq Microsoft.TestCommon.Types.SByteEnum'SecondSByte'", new int[] { 2 } },
+
+                    // Short enums
+                    { "Short eq Microsoft.TestCommon.Types.ShortEnum'SecondShort'", new int[] { 2 } },
+
+                    // UShort enums
+                    { "UShort eq Microsoft.TestCommon.Types.UShortEnum'SecondUShort'", new int[] { 2 } },
+
+                    // UInt enums
+                    { "UInt eq Microsoft.TestCommon.Types.UIntEnum'SecondUInt'", new int[] { 2 } },
 
                     // Flag enums
-                    { "Flag eq 'One, Four'", new int[] { 1 } },
-                    { "'One, Four' eq Flag", new int[] { 1 } },
+                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 1 } },
+                    { "Microsoft.TestCommon.Types.FlagsEnum'One, Four' eq Flag", new int[] { 1 } },
+                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'0'", new int[] { } },
+                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'1'", new int[] { 5 } },
+                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'5'", new int[] { 1 } },
+                    { "Flag has Microsoft.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 1 } },
+                    { "Flag has Microsoft.TestCommon.Types.FlagsEnum'One'", new int[] { 1, 2, 5 } },
                     { "Flag eq null", new int[] { } },
                     { "null eq Flag", new int[] { } },
                     { "Flag eq FlagNullable", new int[] { 1 } },
-                    { "FlagNullable eq 'One, Four'", new int[] { 1 } },
-                    { "'One, Four' eq FlagNullable", new int[] { 1 } },
-                    { "FlagNullable eq null", new int[] { 3 } },
-                    { "null eq FlagNullable", new int[] { 3 } },
+                    { "FlagNullable eq Microsoft.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 1 } },
+                    { "Microsoft.TestCommon.Types.FlagsEnum'One, Four' eq FlagNullable", new int[] { 1 } },
+                    { "FlagNullable eq null", new int[] { 3, 5 } },
+                    { "null eq FlagNullable", new int[] { 3, 5 } },
 
                     // Flag enums with different formats
-                    { "Flag eq 'One,Four'", new int[] { 1 } },
-                    { "Flag eq 'One,    Four'", new int[] { 1 } },
-                    { "Flag eq 'Four, One'", new int[] { 1 } },
+                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'One,Four'", new int[] { 1 } },
+                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'One,    Four'", new int[] { 1 } },
+                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'Four, One'", new int[] { 1 } },
 
                     // Other expressions
-                    { "Flag ne 'One, Four'", new int[] { 2, 3 } },
+                    { "Flag ne Microsoft.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 2, 3, 5, 6 } },
                     { "Flag eq FlagNullable and Simple eq SimpleNullable", new int[] { 1 } },
-                    { "Simple gt 'First'", new int[] { 2 } },
-                    { "Flag ge 'Four,One'", new int[] { 1, 3 } }
+                    { "Simple gt Microsoft.TestCommon.Types.SimpleEnum'First'", new int[] { 2, 5, 6 } },
+                    { "Flag ge Microsoft.TestCommon.Types.FlagsEnum'Four,One'", new int[] { 1, 3, 6 } }
                 };
             }
         }
@@ -157,6 +188,11 @@ namespace System.Web.Http.OData.Query
                         Simple = SimpleEnum.First,
                         SimpleNullable = SimpleEnum.First,
                         Long = LongEnum.ThirdLong,
+                        Byte = ByteEnum.ThirdByte,
+                        SByte = SByteEnum.ThirdSByte,
+                        Short = ShortEnum.ThirdShort,
+                        UShort = UShortEnum.ThirdUShort,
+                        UInt = UIntEnum.ThirdUInt,
                         Flag = FlagsEnum.One | FlagsEnum.Four,
                         FlagNullable = FlagsEnum.One | FlagsEnum.Four
                     },
@@ -166,6 +202,11 @@ namespace System.Web.Http.OData.Query
                         Simple = SimpleEnum.Third,
                         SimpleNullable = SimpleEnum.Second,
                         Long = LongEnum.SecondLong,
+                        Byte = ByteEnum.SecondByte,
+                        SByte = SByteEnum.SecondSByte,
+                        Short = ShortEnum.SecondShort,
+                        UShort = UShortEnum.SecondUShort,
+                        UInt = UIntEnum.SecondUInt,
                         Flag = FlagsEnum.One | FlagsEnum.Two,
                         FlagNullable = FlagsEnum.Two | FlagsEnum.Four
                     },
@@ -175,8 +216,41 @@ namespace System.Web.Http.OData.Query
                         Simple = SimpleEnum.First,
                         SimpleNullable = null,
                         Long = LongEnum.FirstLong,
+                        Byte = ByteEnum.FirstByte,
+                        SByte = SByteEnum.FirstSByte,
+                        Short = ShortEnum.FirstShort,
+                        UShort = UShortEnum.FirstUShort,
+                        UInt = UIntEnum.FirstUInt,
                         Flag = FlagsEnum.Two | FlagsEnum.Four,
                         FlagNullable = null
+                    },
+                    new EnumModel()
+                    {
+                        Id = 5,
+                        Simple = SimpleEnum.Second,
+                        SimpleNullable = null,
+                        Long = LongEnum.FirstLong,
+                        Byte = ByteEnum.FirstByte,
+                        SByte = SByteEnum.FirstSByte,
+                        Short = ShortEnum.FirstShort,
+                        UShort = UShortEnum.FirstUShort,
+                        UInt = UIntEnum.FirstUInt,
+                        Flag = FlagsEnum.One,
+                        FlagNullable = null
+                    },
+                    new EnumModel()
+                    {
+                        Id = 6,
+                        Simple = (SimpleEnum)4,
+                        SimpleNullable = (SimpleEnum)8,
+                        Long = (LongEnum)4,
+                        Byte = (ByteEnum)8,
+                        SByte = (SByteEnum)8,
+                        Short = (ShortEnum)8,
+                        UShort = (UShortEnum)8,
+                        UInt = (UIntEnum)8,
+                        Flag = (FlagsEnum)8,
+                        FlagNullable = (FlagsEnum)16
                     }
                 };
             }
@@ -397,7 +471,7 @@ namespace System.Web.Http.OData.Query
                 actualCustomers.Select(customer => customer.CustomerId));
         }
 
-        //[Theory(Skip = "TODO: Enum Support For Query")]
+        [Theory]
         [PropertyData("EnumModelTestFilters")]
         public void ApplyToEnums_ReturnsCorrectQueryable(string filter, int[] enumModelIds)
         {
@@ -418,21 +492,71 @@ namespace System.Web.Http.OData.Query
                 actualCustomers.Select(enumModel => enumModel.Id));
         }
 
-        //[Theory(Skip = "TODO: Enum Support For Query")]
-        [InlineData("length(Simple) eq 5", "The 'length' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("length(SimpleNullable) eq 5", "The 'length' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("length(Flag) eq 5", "The 'length' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("length(FlagNullable) eq 5", "The 'length' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("contains(Simple, 'foo') eq true", "The 'contains' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("startswith(Simple, 'foo') eq true", "The 'startswith' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("endswith(Simple, 'foo') eq true", "The 'endswith' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("tolower(Simple) eq 'foo'", "The 'tolower' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("toupper(Simple) eq 'foo'", "The 'toupper' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("trim(Simple) eq 'foo'", "The 'trim' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("indexof(Simple, 'foo') eq 2", "The 'indexof' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("substring(Simple, 3) eq 'foo'", "The 'substring' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("substring(Simple, 1, 3) eq 'foo'", "The 'substring' function cannot be applied to an enumeration-typed argument.")]
-        [InlineData("concat(Simple, 'bar') eq 'foo'", "The 'concat' function cannot be applied to an enumeration-typed argument.")]
+        [Theory]
+        [InlineData(
+            "Simple eq Microsoft.TestCommon.Types.SimpleEnum'4'",
+            "The string 'Microsoft.TestCommon.Types.SimpleEnum'4'' is not a valid enumeration type constant.")]
+        [InlineData(
+            "Flag eq Microsoft.TestCommon.Types.FlagsEnum'8'",
+            "The string 'Microsoft.TestCommon.Types.FlagsEnum'8'' is not a valid enumeration type constant.")]
+        public void ApplyToEnums_ThrowsNotValidEnumTypeConst_ForUndefinedValue(string filter, string exceptionMessage)
+        {
+            // Arrange
+            var model = GetEnumModel();
+            var context = new ODataQueryContext(model, typeof(EnumModel));
+            var filterOption = new FilterQueryOption(filter, context);
+            IEnumerable<EnumModel> enumModels = EnumModelTestData;
+
+            // Act
+            Assert.Throws<ODataException>(
+                () => filterOption.ApplyTo(enumModels.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }),
+                exceptionMessage
+            );
+        }
+
+        [Theory]
+        [InlineData(
+            "length(Simple) eq 5",
+            "No function signature for the function with name 'length' matches the specified arguments. The function signatures considered are: length(Edm.String Nullable=true).")]
+        [InlineData(
+            "length(SimpleNullable) eq 5",
+            "No function signature for the function with name 'length' matches the specified arguments. The function signatures considered are: length(Edm.String Nullable=true).")]
+        [InlineData(
+            "length(Flag) eq 5",
+            "No function signature for the function with name 'length' matches the specified arguments. The function signatures considered are: length(Edm.String Nullable=true).")]
+        [InlineData(
+            "length(FlagNullable) eq 5",
+            "No function signature for the function with name 'length' matches the specified arguments. The function signatures considered are: length(Edm.String Nullable=true).")]
+        [InlineData(
+            "contains(Simple, 'foo') eq true",
+            "No function signature for the function with name 'contains' matches the specified arguments. The function signatures considered are: contains(Edm.String Nullable=true, Edm.String Nullable=true).")]
+        [InlineData(
+            "startswith(Simple, 'foo') eq true",
+            "No function signature for the function with name 'startswith' matches the specified arguments. The function signatures considered are: startswith(Edm.String Nullable=true, Edm.String Nullable=true).")]
+        [InlineData(
+            "endswith(Simple, 'foo') eq true",
+            "No function signature for the function with name 'endswith' matches the specified arguments. The function signatures considered are: endswith(Edm.String Nullable=true, Edm.String Nullable=true).")]
+        [InlineData(
+            "tolower(Simple) eq 'foo'",
+            "No function signature for the function with name 'tolower' matches the specified arguments. The function signatures considered are: tolower(Edm.String Nullable=true).")]
+        [InlineData(
+            "toupper(Simple) eq 'foo'",
+            "No function signature for the function with name 'toupper' matches the specified arguments. The function signatures considered are: toupper(Edm.String Nullable=true).")]
+        [InlineData(
+            "trim(Simple) eq 'foo'",
+            "No function signature for the function with name 'trim' matches the specified arguments. The function signatures considered are: trim(Edm.String Nullable=true).")]
+        [InlineData(
+            "indexof(Simple, 'foo') eq 2",
+            "No function signature for the function with name 'indexof' matches the specified arguments. The function signatures considered are: indexof(Edm.String Nullable=true, Edm.String Nullable=true).")]
+        [InlineData(
+            "substring(Simple, 3) eq 'foo'",
+            "No function signature for the function with name 'substring' matches the specified arguments. The function signatures considered are: substring(Edm.String Nullable=true, Edm.Int32); substring(Edm.String Nullable=true, Edm.Int32 Nullable=true); substring(Edm.String Nullable=true, Edm.Int32, Edm.Int32); substring(Edm.String Nullable=true, Edm.Int32 Nullable=true, Edm.Int32); substring(Edm.String Nullable=true, Edm.Int32, Edm.Int32 Nullable=true); substring(Edm.String Nullable=true, Edm.Int32 Nullable=true, Edm.Int32 Nullable=true).")]
+        [InlineData(
+            "substring(Simple, 1, 3) eq 'foo'",
+            "No function signature for the function with name 'substring' matches the specified arguments. The function signatures considered are: substring(Edm.String Nullable=true, Edm.Int32); substring(Edm.String Nullable=true, Edm.Int32 Nullable=true); substring(Edm.String Nullable=true, Edm.Int32, Edm.Int32); substring(Edm.String Nullable=true, Edm.Int32 Nullable=true, Edm.Int32); substring(Edm.String Nullable=true, Edm.Int32, Edm.Int32 Nullable=true); substring(Edm.String Nullable=true, Edm.Int32 Nullable=true, Edm.Int32 Nullable=true).")]
+        [InlineData(
+            "concat(Simple, 'bar') eq 'foo'",
+            "No function signature for the function with name 'concat' matches the specified arguments. The function signatures considered are: concat(Edm.String Nullable=true, Edm.String Nullable=true).")]
         public void ApplyToEnums_ThrowsNotSupported_ForStringFunctions(string filter, string exceptionMessage)
         {
             // Arrange

@@ -6,6 +6,7 @@ namespace Microsoft.TestCommon.Types
     {
         FirstLong,
         SecondLong,
-        ThirdLong
+        ThirdLong,
+        FourthLong
     }
 }

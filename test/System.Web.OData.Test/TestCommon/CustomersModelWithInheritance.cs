@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Expressions;
+using Microsoft.OData.Edm.Library.Values;
 
 namespace System.Web.Http.TestCommon
 {
@@ -12,6 +14,13 @@ namespace System.Web.Http.TestCommon
         public CustomersModelWithInheritance()
         {
             EdmModel model = new EdmModel();
+
+            // Enum type simpleEnum
+            EdmEnumType simpleEnum = new EdmEnumType("NS", "SimpleEnum");
+            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "First", new EdmIntegerConstant(0)));
+            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Second", new EdmIntegerConstant(1)));
+            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Third", new EdmIntegerConstant(2)));
+            model.AddElement(simpleEnum);
 
             // complex type address
             EdmComplexType address = new EdmComplexType("NS", "Address");
@@ -26,6 +35,7 @@ namespace System.Web.Http.TestCommon
             EdmEntityType customer = new EdmEntityType("NS", "Customer");
             customer.AddKeys(customer.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
             IEdmProperty customerName = customer.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            customer.AddStructuralProperty("SimpleEnum", simpleEnum.ToEdmTypeReference(isNullable: false));
             customer.AddStructuralProperty("Address", new EdmComplexTypeReference(address, isNullable: true));
             IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
                 EdmPrimitiveTypeKind.String,

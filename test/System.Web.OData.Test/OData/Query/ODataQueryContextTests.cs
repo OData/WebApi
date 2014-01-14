@@ -45,6 +45,16 @@ namespace System.Web.Http.OData.Query
                     typeof(ushort),
                     typeof(uint),
                     typeof(ulong),
+                };
+            }
+        }
+
+        public static TheoryDataSet<Type> QueryEnumTypes
+        {
+            get
+            {
+                return new TheoryDataSet<Type>
+                {
                     typeof(FlagsEnum),
                     typeof(SimpleEnum),
                     typeof(LongEnum),
@@ -59,6 +69,24 @@ namespace System.Web.Http.OData.Query
         {
             // Arrange & Act
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, type);
+
+            // Assert
+            Assert.True(context.ElementClrType == type);
+        }
+
+        [Theory]
+        [PropertyData("QueryEnumTypes")]
+        public void Constructor_TakingClrType_WithEnumTypes(Type type)
+        {
+            // Arrange
+            ODataModelBuilder odataModel = new ODataModelBuilder()
+                .Add_SimpleEnum_EnumType()
+                .Add_FlagsEnum_EnumType()
+                .Add_LongEnum_EnumType();
+            IEdmModel model = odataModel.GetEdmModel();
+
+            // Act
+            ODataQueryContext context = new ODataQueryContext(model, type);
 
             // Assert
             Assert.True(context.ElementClrType == type);

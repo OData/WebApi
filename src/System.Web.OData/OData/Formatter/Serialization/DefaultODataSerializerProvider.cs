@@ -19,6 +19,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private static readonly ODataMetadataSerializer _metadataSerializer = new ODataMetadataSerializer();
         private static readonly ODataRawValueSerializer _rawValueSerializer = new ODataRawValueSerializer();
         private static readonly ODataPrimitiveSerializer _primitiveSerializer = new ODataPrimitiveSerializer();
+        private static readonly ODataEnumSerializer _enumSerializer = new ODataEnumSerializer();
 
         private static readonly DefaultODataSerializerProvider _instance = new DefaultODataSerializerProvider();
 
@@ -59,6 +60,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             switch (edmType.TypeKind())
             {
+                case EdmTypeKind.Enum:
+                    return _enumSerializer;
+
                 case EdmTypeKind.Primitive:
                     return _primitiveSerializer;
 

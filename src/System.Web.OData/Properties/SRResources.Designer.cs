@@ -655,6 +655,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The enum type &apos;{0}&apos; doesn&apos;t exist..
+        /// </summary>
+        internal static string EnumTypeNotExisting {
+            get {
+                return ResourceManager.GetString("EnumTypeNotExisting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value of enum member &apos;{0}&apos; cannot be converted to a long type..
         /// </summary>
         internal static string EnumValueCannotBeLong {
@@ -1447,6 +1456,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value with type &apos;{0}&apos; must have type &apos;{1}&apos;..
+        /// </summary>
+        internal static string PropertyMustBeEnum {
+            get {
+                return ResourceManager.GetString("PropertyMustBeEnum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value must be a string..
         /// </summary>
         internal static string PropertyMustBeString {
@@ -1767,6 +1785,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string TypeMustBeEntityCollection {
             get {
                 return ResourceManager.GetString("TypeMustBeEntityCollection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; must be an enum or Nullable&lt;T&gt; where T is an enum type..
+        /// </summary>
+        internal static string TypeMustBeEnumOrNullableEnum {
+            get {
+                return ResourceManager.GetString("TypeMustBeEnumOrNullableEnum", resourceCulture);
             }
         }
         

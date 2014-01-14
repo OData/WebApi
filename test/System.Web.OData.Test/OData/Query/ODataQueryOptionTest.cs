@@ -760,7 +760,6 @@ namespace System.Web.Http.OData.Query
                     { e.Select(i => (float)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (float)6 },
                     { e.Select(i => (double)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (double)6 },
                     { e.Select(i => (decimal)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (decimal)6 },
-                    { e.Select(i => (SimpleEnum)(i%3)), "$filter=$it eq 'First'&$orderby=$it desc&$skip=1&$top=1", SimpleEnum.First },
                     { e.Select(i => new DateTimeOffset(new DateTime(i, 1, 1), TimeSpan.Zero)), "$filter=year($it) ge 5&$orderby=$it desc&$skip=3&$top=1", new DateTimeOffset(new DateTime(year: 6, month: 1, day: 1), TimeSpan.Zero) },
                     { e.Select(i => i.ToString()), "$filter=$it ge '5'&$orderby=$it desc&$skip=3&$top=1", "6" },
                   
@@ -773,6 +772,18 @@ namespace System.Web.Http.OData.Query
                     { e.Select(i => (i % 2 != 0 ? null : (float?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (float?)6 },
                     { e.Select(i => (i % 2 != 0 ? null : (double?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (double?)6 },
                     { e.Select(i => (i % 2 != 0 ? null : (decimal?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (decimal?)6 },
+                };
+            }
+        }
+
+        public static TheoryDataSet<IQueryable, string, object> Querying_Enum_Collections_Data
+        {
+            get
+            {
+                IQueryable<int> e = Enumerable.Range(1, 9).AsQueryable();
+                return new TheoryDataSet<IQueryable, string, object>
+                {
+                    { e.Select(i => (SimpleEnum)(i%3)), "$filter=$it eq Microsoft.TestCommon.Types.SimpleEnum'First'&$orderby=$it desc&$skip=1&$top=1", SimpleEnum.First },
                     { e.Select(i => (SimpleEnum?)null), "$filter=$it eq null&$orderby=$it desc&$skip=1&$top=1", null },
                 };
             }
@@ -788,6 +799,26 @@ namespace System.Web.Http.OData.Query
 
             queryable = options.ApplyTo(queryable);
 
+            IEnumerator enumerator = queryable.GetEnumerator();
+            Assert.True(enumerator.MoveNext());
+            Assert.Equal(result, enumerator.Current);
+        }
+
+        //[Theory(Skip = "TODO: Enum Support For Query")]
+        [PropertyData("Querying_Enum_Collections_Data")]
+        public void Querying_Enum_Collections(IQueryable queryable, string query, object result)
+        {
+            // Arrange
+            ODataModelBuilder odataModel = new ODataModelBuilder().Add_SimpleEnum_EnumType();
+            IEdmModel model = odataModel.GetEdmModel();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
+            ODataQueryContext context = new ODataQueryContext(model, queryable.ElementType);
+            ODataQueryOptions options = new ODataQueryOptions(context, request);
+
+            // Act
+            queryable = options.ApplyTo(queryable);
+
+            // Assert
             IEnumerator enumerator = queryable.GetEnumerator();
             Assert.True(enumerator.MoveNext());
             Assert.Equal(result, enumerator.Current);

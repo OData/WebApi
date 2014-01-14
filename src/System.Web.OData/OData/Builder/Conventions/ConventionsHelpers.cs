@@ -132,10 +132,18 @@ namespace System.Web.Http.OData.Builder.Conventions
         public static string GetUriRepresentationForValue(object value)
         {
             Contract.Assert(value != null);
-            Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(value.GetType()) != null);
+
+            // TODO: Delete enum processing when OData beta1 or later is referenced.
+            Type underlyingType = Nullable.GetUnderlyingType(value.GetType()) ?? value.GetType();
+            Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(value.GetType()) != null || underlyingType.IsEnum);
+
+            if (underlyingType.IsEnum)
+            {
+                return String.Format(CultureInfo.InvariantCulture,
+                    "{0}'{1}'", underlyingType.Name, value);
+            }
 
             value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(value);
-
             return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
         }
 

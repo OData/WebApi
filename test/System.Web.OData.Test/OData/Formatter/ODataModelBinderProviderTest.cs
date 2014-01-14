@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
+using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.Routing;
 using System.Web.Http.ValueProviders;
 using Microsoft.OData.Core;
@@ -56,8 +57,6 @@ namespace System.Web.Http.OData.Formatter
                     { float.NaN, "GetFloat" },
                     // TODO: ODataLib v4 issue on decimal handling, bug filed.
                     //{ decimal.MaxValue, "GetDecimal" } 
-                    { SimpleEnum.First.ToString(), "GetEnum" },
-                    { (FlagsEnum.One | FlagsEnum.Two).ToString(), "GetFlagsEnum" }
                 };
             }
         }
@@ -71,7 +70,6 @@ namespace System.Web.Http.OData.Formatter
                     { "123", "GetBool" },
                     //{ 123, "GetDateTime" }, // v4 does not support DateTime
                     { "abc", "GetInt32" },
-                    { "abc", "GetEnum" },
                     { "abc", "GetGuid" },
                     { "abc", "GetByte" },
                     { "abc", "GetFloat" },
@@ -139,7 +137,7 @@ namespace System.Web.Http.OData.Formatter
             string url = String.Format(
                 "http://localhost/ODataModelBinderProviderTest/{0}({1})",
                 action,
-                Uri.EscapeDataString(ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4)));
+                Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
             HttpResponseMessage response = _client.GetAsync(url).Result;
             response.EnsureSuccessStatusCode();
             Assert.Equal(
@@ -349,18 +347,6 @@ namespace System.Web.Http.OData.Formatter
         {
             ThrowIfInsideThrowsController();
             return id;
-        }
-
-        public string GetEnum(SimpleEnum id)
-        {
-            ThrowIfInsideThrowsController();
-            return id.ToString();
-        }
-
-        public string GetFlagsEnum(FlagsEnum id)
-        {
-            ThrowIfInsideThrowsController();
-            return id.ToString();
         }
 
         private void ThrowIfInsideThrowsController()

@@ -134,6 +134,12 @@ namespace System.Web.Http.OData.Formatter
                     }
                 }
 
+                Type underlyingType = Nullable.GetUnderlyingType(clrType) ?? clrType;
+                if (underlyingType.IsEnum)
+                {
+                    clrType = underlyingType;
+                }
+
                 // search for the ClrTypeAnnotation and return it if present
                 IEdmType returnType =
                     edmModel
@@ -316,13 +322,6 @@ namespace System.Web.Http.OData.Formatter
 
         public static IEdmPrimitiveType GetEdmPrimitiveTypeOrNull(Type clrType)
         {
-            Type underlyingType = Nullable.GetUnderlyingType(clrType) ?? clrType;
-            if (underlyingType.IsEnum)
-            {
-                // Enums are treated as strings
-                clrType = typeof(string);
-            }
-
             IEdmPrimitiveType primitiveType;
             return _builtInTypesMapping.TryGetValue(clrType, out primitiveType) ? primitiveType : null;
         }

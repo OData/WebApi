@@ -411,18 +411,18 @@ namespace System.Web.Http.OData.Builder
             foreach (PropertyInfo property in properties)
             {
                 bool isCollection;
-                StructuralTypeConfiguration mappedType;
+                IEdmTypeConfiguration mappedType;
 
                 PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType);
 
-                if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex)
+                if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Enum)
                 {
                     MapStructuralProperty(entity, property, propertyKind, isCollection);
                 }
                 else
                 {
                     // don't add this property if the user has already added it.
-                    if (!entity.NavigationProperties.Where(p => p.Name == property.Name).Any())
+                    if (!entity.NavigationProperties.Any(p => p.Name == property.Name))
                     {
                         NavigationPropertyConfiguration addedNavigationProperty;
                         if (!isCollection)
@@ -448,11 +448,11 @@ namespace System.Web.Http.OData.Builder
             foreach (PropertyInfo property in properties)
             {
                 bool isCollection;
-                StructuralTypeConfiguration mappedType;
+                IEdmTypeConfiguration mappedType;
 
                 PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType);
 
-                if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex)
+                if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Enum)
                 {
                     MapStructuralProperty(complexType, property, propertyKind, isCollection);
                 }
@@ -488,7 +488,7 @@ namespace System.Web.Http.OData.Builder
         {
             Contract.Assert(type != null);
             Contract.Assert(property != null);
-            Contract.Assert(propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Primitive);
+            Contract.Assert(propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Enum);
 
             bool addedExplicitly = type.Properties.Any(p => p.PropertyInfo.Name == property.Name);
 
@@ -498,6 +498,11 @@ namespace System.Web.Http.OData.Builder
                 if (propertyKind == PropertyKind.Primitive)
                 {
                     addedEdmProperty = type.AddProperty(property);
+                }
+                else if (propertyKind == PropertyKind.Enum)
+                {
+                    AddEnumTypeAndMembers(property.PropertyType);
+                    addedEdmProperty = type.AddEnumProperty(property);
                 }
                 else
                 {
@@ -511,15 +516,39 @@ namespace System.Web.Http.OData.Builder
                     Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");
                 }
 
+                if (property.PropertyType.IsGenericType)
+                {
+                    Type elementType = property.PropertyType.GetGenericArguments().First();
+                    AddEnumTypeAndMembers(elementType);
+                }
+
                 addedEdmProperty = type.AddCollectionProperty(property);
             }
 
             addedEdmProperty.AddedExplicitly = addedExplicitly;
         }
 
+        private void AddEnumTypeAndMembers(Type type)
+        {
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+
+            Type enumType = Nullable.GetUnderlyingType(type) ?? type;
+            if (enumType.IsEnum && EnumTypes.All(e => e.ClrType != enumType))
+            {
+                EnumTypeConfiguration enumTypeConfiguration = AddEnumType(enumType);
+                foreach (object member in Enum.GetValues(enumType))
+                {
+                    enumTypeConfiguration.AddMember((Enum)member);
+                }
+            }
+        }
+
         // figures out the type of the property (primitive, complex, navigation) and the corresponding edm type if we have seen this type
         // earlier or the user told us about it.
-        private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out StructuralTypeConfiguration mappedType)
+        private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out IEdmTypeConfiguration mappedType)
         {
             Contract.Assert(property != null);
 
@@ -529,58 +558,79 @@ namespace System.Web.Http.OData.Builder
                 mappedType = null;
                 return PropertyKind.Primitive;
             }
-            else
+
+            mappedType = GetStructuralTypeOrNull(property.PropertyType);
+            if (mappedType != null)
             {
-                mappedType = GetStructuralTypeOrNull(property.PropertyType);
+                isCollection = false;
+
+                if (mappedType is ComplexTypeConfiguration)
+                {
+                    return PropertyKind.Complex;
+                }
+                else if (mappedType is EnumTypeConfiguration)
+                {
+                    return PropertyKind.Enum;
+                }
+                else
+                {
+                    return PropertyKind.Navigation;
+                }
+            }
+
+            Type underlyingType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+            if (underlyingType.IsEnum)
+            {
+                isCollection = false;
+                mappedType = null;
+                return PropertyKind.Enum;
+            }
+
+            Type elementType;
+            if (property.PropertyType.IsCollection(out elementType))
+            {
+                isCollection = true;
+
+                // Collection properties - can be a collection of primitives, enum, complex or entities.
+                if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(elementType) != null)
+                {
+                    return PropertyKind.Primitive;
+                }
+
+                mappedType = GetStructuralTypeOrNull(elementType);
                 if (mappedType != null)
                 {
-                    isCollection = false;
-
                     if (mappedType is ComplexTypeConfiguration)
                     {
                         return PropertyKind.Complex;
                     }
-                    else
+                    else if (mappedType is EntityTypeConfiguration)
                     {
                         return PropertyKind.Navigation;
                     }
-                }
-                else
-                {
-                    Type elementType;
-                    if (property.PropertyType.IsCollection(out elementType))
+                    else
                     {
-                        isCollection = true;
+                        return PropertyKind.Enum;
+                    }
+                }
 
-                        // Collection properties - can be a collection of primitives, complex or entities.
-                        if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(elementType) != null)
-                        {
-                            return PropertyKind.Primitive;
-                        }
-                        else
-                        {
-                            mappedType = GetStructuralTypeOrNull(elementType);
-                            if (mappedType != null && mappedType is ComplexTypeConfiguration)
-                            {
-                                return PropertyKind.Complex;
-                            }
-                            else
-                            {
-                                // if we know nothing about this type we assume it to be an entity
-                                // and patch up later
-                                return PropertyKind.Navigation;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // if we know nothing about this type we assume it to be an entity
-                        // and patch up later
-                        isCollection = false;
-                        return PropertyKind.Navigation;
-                    }
+                underlyingType = Nullable.GetUnderlyingType(elementType) ?? elementType;
+                if (underlyingType.IsEnum)
+                {
+                    isCollection = true;
+                    mappedType = null;
+                    return PropertyKind.Enum;
                 }
+
+                // if we know nothing about this type we assume it to be an entity
+                // and patch up later
+                return PropertyKind.Navigation;
             }
+
+            // if we know nothing about this type we assume it to be an entity
+            // and patch up later
+            isCollection = false;
+            return PropertyKind.Navigation;
         }
 
         // the convention model builder MapTypes() method might have went through deep object graphs and added a bunch of types
@@ -610,12 +660,13 @@ namespace System.Web.Http.OData.Builder
                         }
                     }
 
-                    StructuralTypeConfiguration propertyType = GetStructuralTypeOrNull(property.RelatedClrType);
+                    IEdmTypeConfiguration propertyType = GetStructuralTypeOrNull(property.RelatedClrType);
                     Contract.Assert(propertyType != null, "we should already have seen this type");
 
-                    if (!visitedTypes.Contains(propertyType))
+                    var structuralTypeConfiguration = propertyType as StructuralTypeConfiguration;
+                    if (structuralTypeConfiguration != null && !visitedTypes.Contains(propertyType))
                     {
-                        reachableTypes.Enqueue(propertyType);
+                        reachableTypes.Enqueue(structuralTypeConfiguration);
                     }
                 }
 
@@ -693,9 +744,15 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private StructuralTypeConfiguration GetStructuralTypeOrNull(Type clrType)
+        private IEdmTypeConfiguration GetStructuralTypeOrNull(Type clrType)
         {
-            return StructuralTypes.Where(edmType => edmType.ClrType == clrType).SingleOrDefault();
+            IEdmTypeConfiguration configuration = StructuralTypes.SingleOrDefault(edmType => edmType.ClrType == clrType);
+            if (configuration == null)
+            {
+                Type type = Nullable.GetUnderlyingType(clrType) ?? clrType;
+                configuration = EnumTypes.SingleOrDefault(edmType => edmType.ClrType == type);
+            }
+            return configuration;
         }
 
         private static void ApplyPropertyConvention(IEdmPropertyConvention propertyConvention, StructuralTypeConfiguration edmTypeConfiguration)

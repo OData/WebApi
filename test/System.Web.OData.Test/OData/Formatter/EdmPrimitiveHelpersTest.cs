@@ -27,15 +27,7 @@ namespace System.Web.Http.OData.Formatter
                      { (long?)1 ,(ulong?)1, typeof(ulong?)},
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
                      { "<element xmlns=\"namespace\" />" ,(XElement) new XElement(XName.Get("element","namespace")), typeof(XElement)},
-                     { new byte[] {1}, new Binary(new byte[] {1}), typeof(Binary)},
-
-                     // Enums
-                     { "Second", SimpleEnum.Second, typeof(SimpleEnum) },
-                     { "Second", SimpleEnum.Second, typeof(SimpleEnum?) },
-                     { "ThirdLong" , LongEnum.ThirdLong, typeof(LongEnum) },
-                     { "ThirdLong" , LongEnum.ThirdLong, typeof(LongEnum?) },
-                     { "One, Four" , FlagsEnum.One | FlagsEnum.Four, typeof(FlagsEnum) },
-                     { "One, Four" , FlagsEnum.One | FlagsEnum.Four, typeof(FlagsEnum?) }
+                     { new byte[] {1}, new Binary(new byte[] {1}), typeof(Binary)}
                 };
             }
         }

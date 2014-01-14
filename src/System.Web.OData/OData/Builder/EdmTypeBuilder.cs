@@ -144,30 +144,7 @@ namespace System.Web.Http.OData.Builder
                         break;
 
                     case PropertyKind.Collection:
-                        CollectionPropertyConfiguration collectionProperty = property as CollectionPropertyConfiguration;
-                        IEdmTypeReference elementTypeReference = null;
-                        if (_types.ContainsKey(collectionProperty.ElementType))
-                        {
-                            IEdmComplexType elementType = _types[collectionProperty.ElementType] as IEdmComplexType;
-                            if (elementType != null)
-                            {
-                                elementTypeReference = new EdmComplexTypeReference(elementType, false);
-                            }
-                            else
-                            {
-                                IEdmEnumType enumElementType = (IEdmEnumType)_types[collectionProperty.ElementType];
-                                elementTypeReference = new EdmEnumTypeReference(enumElementType, false);
-                            }
-                        }
-                        else
-                        {
-                            elementTypeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(collectionProperty.ElementType);
-                        }
-                        edmProperty = type.AddStructuralProperty(
-                            collectionProperty.Name,
-                            new EdmCollectionTypeReference(
-                                new EdmCollectionType(elementTypeReference),
-                                collectionProperty.OptionalProperty));
+                        edmProperty = CreateStructuralTypeCollectionPropertyBody(type, (CollectionPropertyConfiguration)property);
                         break;
 
                     case PropertyKind.Enum:
@@ -178,22 +155,61 @@ namespace System.Web.Http.OData.Builder
                         break;
                 }
 
-                if (property.PropertyInfo != null && edmProperty != null)
+                if (edmProperty != null)
                 {
-                    _properties[property.PropertyInfo] = edmProperty;
-                }
+                    if (property.PropertyInfo != null)
+                    {
+                        _properties[property.PropertyInfo] = edmProperty;
+                    }
 
-                if (edmProperty != null && property.IsRestricted)
-                {
-                    _propertiesRestrictions[edmProperty] = new QueryableRestrictions(property);
+                    if (property.IsRestricted)
+                    {
+                        _propertiesRestrictions[edmProperty] = new QueryableRestrictions(property);
+                    }
                 }
             }
+        }
+
+        private IEdmProperty CreateStructuralTypeCollectionPropertyBody(EdmStructuredType type, CollectionPropertyConfiguration collectionProperty)
+        {
+            IEdmTypeReference elementTypeReference = null;
+            Type clrType = Nullable.GetUnderlyingType(collectionProperty.ElementType) ?? collectionProperty.ElementType;
+            IEdmType edmType;
+            if (clrType.IsEnum)
+            {
+                if (!_types.TryGetValue(clrType, out edmType))
+                {
+                    throw Error.InvalidOperation(SRResources.EnumTypeNotExisting, clrType.Name);
+                }
+
+                IEdmEnumType enumElementType = (IEdmEnumType)edmType;
+                elementTypeReference = new EdmEnumTypeReference(enumElementType, collectionProperty.ElementType.IsNullable());
+            }
+            else if (_types.TryGetValue(collectionProperty.ElementType, out edmType))
+            {
+                IEdmComplexType elementType = (IEdmComplexType)edmType;
+                elementTypeReference = new EdmComplexTypeReference(elementType, false);
+            }
+            else
+            {
+                elementTypeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(collectionProperty.ElementType);
+            }
+            return type.AddStructuralProperty(
+                collectionProperty.Name,
+                new EdmCollectionTypeReference(
+                    new EdmCollectionType(elementTypeReference),
+                    collectionProperty.OptionalProperty));
         }
 
         private IEdmProperty CreateStructuralTypeEnumPropertyBody(EdmStructuredType type, StructuralTypeConfiguration config, EnumPropertyConfiguration enumProperty)
         {
             Type enumPropertyType = Nullable.GetUnderlyingType(enumProperty.RelatedClrType) ?? enumProperty.RelatedClrType;
-            IEdmEnumType enumType = (IEdmEnumType)_types[enumPropertyType];
+            IEdmType edmType;
+            if (!_types.TryGetValue(enumPropertyType, out edmType))
+            {
+                throw Error.InvalidOperation(SRResources.EnumTypeNotExisting, enumPropertyType.Name);
+            }
+            IEdmEnumType enumType = (IEdmEnumType)edmType;
             IEdmTypeReference enumTypeReference = new EdmEnumTypeReference(enumType, enumProperty.OptionalProperty);
 
             // Set concurrency token if is entity type, and concurrency token is true

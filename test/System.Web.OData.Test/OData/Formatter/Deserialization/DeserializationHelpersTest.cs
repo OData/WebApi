@@ -149,10 +149,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             SampleClassWithDifferentCollectionProperties value = new SampleClassWithDifferentCollectionProperties();
             IEdmProperty edmProperty = GetMockEdmProperty("FlagsEnum", EdmPrimitiveTypeKind.String);
 
-            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<string> { "One", "Four, Two" }, propertyName: edmProperty.Name);
+            DeserializationHelpers.SetCollectionProperty(
+                value,
+                edmProperty,
+                value: new List<FlagsEnum> { FlagsEnum.One, FlagsEnum.Four | FlagsEnum.Two | (FlagsEnum)123 },
+                propertyName: edmProperty.Name);
 
             Assert.Equal(
-                new FlagsEnum[] { FlagsEnum.One, FlagsEnum.Four | FlagsEnum.Two },
+                new FlagsEnum[] { FlagsEnum.One, FlagsEnum.Four | FlagsEnum.Two | (FlagsEnum)123 },
                value.FlagsEnum);
         }
 

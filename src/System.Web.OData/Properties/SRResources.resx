@@ -228,6 +228,9 @@
   <data name="EnumValueCannotBeLong" xml:space="preserve">
     <value>The value of enum member '{0}' cannot be converted to a long type.</value>
   </data>
+  <data name="EnumTypeNotExisting" xml:space="preserve">
+    <value>The enum type '{0}' doesn't exist.</value>
+  </data>
   <data name="RecursiveComplexTypesNotAllowed" xml:space="preserve">
     <value>The complex type '{0}' has a reference to itself through the property '{1}'. A recursive loop of complex types is not allowed.</value>
   </data>
@@ -299,6 +302,12 @@
   </data>
   <data name="CannotPatchNavigationProperties" xml:space="preserve">
     <value>Cannot apply PATCH to navigation property '{0}' on entity type '{1}'.</value>
+  </data>
+  <data name="TypeMustBeEnumOrNullableEnum" xml:space="preserve">
+    <value>The type '{0}' must be an enum or Nullable&lt;T&gt; where T is an enum type.</value>
+  </data>
+  <data name="PropertyMustBeEnum" xml:space="preserve">
+    <value>The value with type '{0}' must have type '{1}'.</value>
   </data>
   <data name="PropertyMustBeString" xml:space="preserve">
     <value>The value must be a string.</value>

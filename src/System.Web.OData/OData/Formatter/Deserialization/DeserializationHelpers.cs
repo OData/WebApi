@@ -34,9 +34,16 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
             else
             {
-                if (propertyKind == EdmTypeKind.Primitive && !readContext.IsUntyped)
+                if (!readContext.IsUntyped)
                 {
-                    value = EdmPrimitiveHelpers.ConvertPrimitiveValue(value, GetPropertyType(resource, propertyName));
+                    if (propertyKind == EdmTypeKind.Primitive)
+                    {
+                        value = EdmPrimitiveHelpers.ConvertPrimitiveValue(value, GetPropertyType(resource, propertyName));
+                    }
+                    else if (propertyKind == EdmTypeKind.Enum)
+                    {
+                        value = EnumDeserializationHelpers.ConvertEnumValue(value, GetPropertyType(resource, propertyName));
+                    }
                 }
 
                 SetProperty(resource, propertyName, value);
@@ -139,7 +146,15 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return ConvertCollectionValue(collection, propertyType, deserializerProvider, readContext);
             }
 
-            typeKind = EdmTypeKind.Primitive;
+            if (oDataValue is ODataEnumValue)
+            {
+                typeKind = EdmTypeKind.Enum;   
+            }
+            else
+            {
+                typeKind = EdmTypeKind.Primitive;
+            }
+
             return oDataValue;
         }
 

@@ -70,6 +70,22 @@ namespace System.Web.Http
             }
         }
 
+        public static string EnumComplexTypeInAtom
+        {
+            get
+            {
+                return GetString("EnumComplexTypeInAtom.xml");
+            }
+        }
+
+        public static string EnumComplexTypeInJsonLight
+        {
+            get
+            {
+                return GetString("EnumComplexTypeInJsonLight.json");
+            }
+        }
+
         public static string FeedOfEmployeeInAtom
         {
             get

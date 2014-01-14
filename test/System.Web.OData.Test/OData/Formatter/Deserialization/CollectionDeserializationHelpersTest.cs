@@ -40,7 +40,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void CopyItemsToCollection_CanConvertToNonStandardEdm()
         {
-            IList source = new List<string> { SimpleEnum.First.ToString(), SimpleEnum.Second.ToString(), SimpleEnum.Third.ToString() };
+            IList source = new List<SimpleEnum> { SimpleEnum.First, SimpleEnum.Second, SimpleEnum.Third };
             IEnumerable newCollection = new CustomCollectionWithAdd<SimpleEnum>();
 
             source.AddToCollection(newCollection, typeof(SimpleEnum), typeof(CollectionDeserializationHelpersTest), "PropertyName", newCollection.GetType());

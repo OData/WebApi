@@ -40,7 +40,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     { typeof(Stream), EdmPrimitiveTypeKind.Stream },
                     { typeof(string), EdmPrimitiveTypeKind.String },
                     { typeof(TimeSpan), EdmPrimitiveTypeKind.Duration },
-                    { typeof(TestEnum), EdmPrimitiveTypeKind.String },
                 };
             }
         }

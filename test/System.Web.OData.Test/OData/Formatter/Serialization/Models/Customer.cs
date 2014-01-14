@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using Microsoft.TestCommon.Types;
 
 namespace System.Web.Http.OData.Formatter.Serialization.Models
 {
@@ -17,5 +18,6 @@ namespace System.Web.Http.OData.Formatter.Serialization.Models
         public string LastName { get; set; }
         public string City { get; set; }
         public IList<Order> Orders { get; private set; }
+        public SimpleEnum SimpleEnum { get; set; }
     }
 }

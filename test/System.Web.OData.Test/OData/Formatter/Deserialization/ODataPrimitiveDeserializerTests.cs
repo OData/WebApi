@@ -31,12 +31,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     { (UInt64)1, (long)1 },
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
                     { new XElement(XName.Get("element","namespace")), new XElement(XName.Get("element","namespace")).ToString() },
-                    { new Binary(new byte[] {1}), new byte[] {1} },
-
-                    //Enums
-                    { SimpleEnum.Second, "Second" },
-                    { LongEnum.ThirdLong, "ThirdLong" },
-                    { FlagsEnum.One | FlagsEnum.Four, "One, Four" }
+                    { new Binary(new byte[] {1}), new byte[] {1} }
                 };
             }
         }

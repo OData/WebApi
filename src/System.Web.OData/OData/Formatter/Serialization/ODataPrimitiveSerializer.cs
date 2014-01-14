@@ -171,11 +171,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                         {
                             return ((Binary)value).ToArray();
                         }
-                        else if (type.IsEnum)
-                        {
-                            // Enums are treated as strings
-                            return value.ToString();
-                        }
                         break;
                 }
             }

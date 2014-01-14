@@ -98,6 +98,8 @@
     <Compile Include="OData\EdmComplexCollectionObjectTest.cs" />
     <Compile Include="OData\EdmEntityCollectionObjectTest.cs" />
     <Compile Include="OData\EdmStructuredObjectTest.cs" />
+    <Compile Include="OData\EnumDeserializerTest.cs" />
+    <Compile Include="OData\EnumSerializerTest.cs" />
     <Compile Include="OData\FastPropertyAccessorTest.cs" />
     <Compile Include="OData\Formatter\ClrTypeCacheTest.cs" />
     <Compile Include="OData\Formatter\DefaultODataETagHandlerTests.cs" />
@@ -351,6 +353,7 @@
     <EmbeddedResource Include="Resources\DecimalInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\DoubleInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\EmployeeEntryInJsonLight.json" />
+	<EmbeddedResource Include="Resources\EnumComplexTypeInJsonLight.json" />
     <EmbeddedResource Include="Resources\FeedOfEmployeeInJsonLight.json" />
     <EmbeddedResource Include="Resources\GuidInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\Int16InJsonFullMetadata.json" />
@@ -417,6 +420,7 @@
     <EmbeddedResource Include="Resources\DecimalInXml.xml" />
     <EmbeddedResource Include="Resources\DoubleInXml.xml" />
     <EmbeddedResource Include="Resources\EmployeeEntryInAtom.xml" />
+    <EmbeddedResource Include="Resources\EnumComplexTypeInAtom.xml" />
     <EmbeddedResource Include="Resources\FeedOfEmployeeInAtom.xml" />
     <EmbeddedResource Include="Resources\GuidInXml.xml" />
     <EmbeddedResource Include="Resources\Int16InXml.xml" />

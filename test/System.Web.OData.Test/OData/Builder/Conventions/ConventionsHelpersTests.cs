@@ -61,8 +61,9 @@ namespace System.Web.Http.OData.Builder.Conventions
                     { new DateTimeOffset(1,1,1,0,0,0,TimeSpan.Zero), "0001-01-01T00:00:00Z" },
                     { TimeSpan.FromSeconds(86456), "duration'P1DT56S'" },
                     { DateTimeOffset.FromFileTime(0).ToUniversalTime(), "1601-01-01T00:00:00Z" },
-                    { SimpleEnum.First, "'First'" },
-                    { FlagsEnum.One | FlagsEnum.Two, "'One, Two'" },
+                    { SimpleEnum.First, "SimpleEnum'First'" },
+                    { FlagsEnum.One | FlagsEnum.Two, "FlagsEnum'One, Two'" },
+                    { (SimpleEnum)123, "SimpleEnum'123'" },
                 };
             }
         }

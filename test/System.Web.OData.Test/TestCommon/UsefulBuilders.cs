@@ -24,6 +24,24 @@ namespace System.Web.Http.OData
             return builder;
         }
 
+        public static ODataModelBuilder Add_SimpleEnum_EnumType(this ODataModelBuilder builder)
+        {
+            var simpleEnum = builder.EnumType<SimpleEnum>();
+            simpleEnum.Member(SimpleEnum.First);
+            simpleEnum.Member(SimpleEnum.Second);
+            simpleEnum.Member(SimpleEnum.Third);
+            return builder;
+        }
+
+        public static ODataModelBuilder Add_FlagsEnum_EnumType(this ODataModelBuilder builder)
+        {
+            var flagsEnum = builder.EnumType<FlagsEnum>();
+            flagsEnum.Member(FlagsEnum.One);
+            flagsEnum.Member(FlagsEnum.Two);
+            flagsEnum.Member(FlagsEnum.Four);
+            return builder;
+        }
+
         public static ODataModelBuilder Add_LongEnum_EnumType(this ODataModelBuilder builder)
         {
             var longEnum = builder.EnumType<LongEnum>();

@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Tracing;
@@ -15,6 +16,7 @@ using Microsoft.OData.Core;
 using Microsoft.OData.Core.Atom;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 using Moq;
 using Newtonsoft.Json.Linq;
 
@@ -383,6 +385,57 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
+        [Fact]
+        public void EnumTypeRoundTripTest()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<EnumCustomer>("EnumCustomers");
+            IEdmModel model = builder.GetEdmModel();
+
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            {
+                configuration.Routes.MapODataRoute("odata", routePrefix: null, model: model);
+                using (HttpServer host = new HttpServer(configuration))
+                using (HttpClient client = new HttpClient(host))
+                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
+                {
+                    request.Content = new StringContent(string.Format(
+@"{{'@odata.type':'#System.Web.Http.OData.Formatter.EnumCustomer','ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                    request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                    request.Headers.Accept.ParseAdd("application/json");
+                    //Act
+                    using (HttpResponseMessage response = client.SendAsync(request).Result)
+                    {
+                        // Assert
+                        response.EnsureSuccessStatusCode();
+                        var customer = response.Content.ReadAsAsync<JObject>().Result;
+                        Assert.Equal(0, customer["ID"]);
+                        Assert.Equal(Color.Green | Color.Blue, Enum.Parse(typeof(Color), customer["Color"].ToString()));
+                        var colors = customer["Colors"].Select(c => Enum.Parse(typeof(Color), c.ToString()));
+                        Assert.Equal(2, colors.Count());
+                        Assert.Contains(Color.Red, colors);
+                        Assert.Contains(Color.Red | Color.Blue, colors);
+                    }
+                }
+            }
+        }
+
+        public class EnumCustomer
+        {
+            public int ID { get; set; }
+            public Color Color { get; set; }
+            public List<Color> Colors { get; set; }
+        }
+
+        public class EnumCustomersController : ODataController
+        {
+            public IHttpActionResult Post(EnumCustomer customer)
+            {
+                return Ok(customer);
+            }
+        }
+
         private static void AddDataServiceVersionHeaders(HttpRequestMessage request)
         {
             request.Headers.Add("OData-Version", "4.0");
@@ -545,6 +598,10 @@ namespace System.Web.Http.OData.Formatter
         public int Id { get; set; }
 
         public short Int16 { get; set; }
+
+        public FlagsEnum FlagsEnum { get; set; }
+
+        public List<FlagsEnum> FlagsEnums { get; set; }
 
         public RelatedEntity Related { get; set; }
     }

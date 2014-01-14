@@ -40,12 +40,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     (UInt64)1,
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
                     new XElement(XName.Get("element","namespace")), 
-                    new Binary(new byte[] {1}),
-
-                    // Enums
-                    SimpleEnum.Second,
-                    LongEnum.ThirdLong,
-                    FlagsEnum.One | FlagsEnum.Four
+                    new Binary(new byte[] {1})
                 };
             }
         }

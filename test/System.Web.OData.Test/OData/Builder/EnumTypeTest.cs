@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -128,7 +129,7 @@ namespace System.Web.Http.OData.Builder
             var builder = new ODataModelBuilder().Add_Color_EnumType().Add_LongEnum_EnumType();
             var entityTypeConfiguration = builder.Entity<EntityTypeWithEnumTypePropertyTestModel>();
             entityTypeConfiguration.HasKey(e => e.ID);
-            entityTypeConfiguration.EnumProperty(e => e.Color);
+            entityTypeConfiguration.EnumProperty(e => e.RequiredColor);
             entityTypeConfiguration.EnumProperty(e => e.LongEnum);
 
             // Act
@@ -137,13 +138,13 @@ namespace System.Web.Http.OData.Builder
 
             // Assert
             Assert.Equal(3, entityType.Properties().Count());
-            var color = entityType.Properties().SingleOrDefault(p => p.Name == "Color");
+            var requiredColor = entityType.Properties().SingleOrDefault(p => p.Name == "RequiredColor");
             var longEnum = entityType.Properties().SingleOrDefault(p => p.Name == "LongEnum");
-            Assert.NotNull(color);
+            Assert.NotNull(requiredColor);
             Assert.NotNull(longEnum);
-            Assert.True(color.Type.IsEnum());
+            Assert.True(requiredColor.Type.IsEnum());
             Assert.True(longEnum.Type.IsEnum());
-            Assert.True(EdmCoreModel.Instance.GetInt32(false).Definition == color.Type.AsEnum().EnumDefinition().UnderlyingType);
+            Assert.True(EdmCoreModel.Instance.GetInt32(false).Definition == requiredColor.Type.AsEnum().EnumDefinition().UnderlyingType);
             Assert.True(EdmCoreModel.Instance.GetInt64(false).Definition == longEnum.Type.AsEnum().EnumDefinition().UnderlyingType);
         }
 
@@ -171,17 +172,17 @@ namespace System.Web.Http.OData.Builder
             // Arrange
             var builder = new ODataModelBuilder().Add_Color_EnumType();
             var entityTypeConfiguration = builder.Entity<EntityTypeWithEnumTypePropertyTestModel>();
-            entityTypeConfiguration.EnumProperty(c => c.Color).IsOptional().IsConcurrencyToken();
+            entityTypeConfiguration.EnumProperty(c => c.RequiredColor).IsOptional().IsConcurrencyToken();
 
             // Act
             var model = builder.GetServiceModel();
             var complexType = model.SchemaElements.OfType<IEdmStructuredType>().Single();
-            IEdmStructuralProperty color = complexType.Properties().SingleOrDefault(p => p.Name == "Color") as IEdmStructuralProperty;
+            IEdmStructuralProperty requiredColor = complexType.Properties().SingleOrDefault(p => p.Name == "RequiredColor") as IEdmStructuralProperty;
 
             // Assert
-            Assert.NotNull(color);
-            Assert.True(color.Type.IsNullable);
-            Assert.Equal(EdmConcurrencyMode.Fixed, color.ConcurrencyMode);
+            Assert.NotNull(requiredColor);
+            Assert.True(requiredColor.Type.IsNullable);
+            Assert.Equal(EdmConcurrencyMode.Fixed, requiredColor.ConcurrencyMode);
         }
 
         [Fact]
@@ -476,14 +477,14 @@ namespace System.Web.Http.OData.Builder
             var builder = new ODataModelBuilder();
             builder.ComplexType<ComplexTypeWithEnumTypePropertyTestModel>();
             StructuralTypeConfiguration structuralTypeConfiguration = builder.StructuralTypes.Single();
-            Expression<Func<EntityTypeWithEnumTypePropertyTestModel, Color>> propertyExpression = e => e.Color;
+            Expression<Func<EntityTypeWithEnumTypePropertyTestModel, Color>> propertyExpression = e => e.RequiredColor;
             PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
 
             // Act & Assert
             Assert.ThrowsArgument(
                 () => structuralTypeConfiguration.AddEnumProperty(propertyInfo),
                 "propertyInfo",
-                "The property 'Color' does not belong to the type 'System.Web.Http.OData.Builder.ComplexTypeWithEnumTypePropertyTestModel'.");
+                "The property 'RequiredColor' does not belong to the type 'System.Web.Http.OData.Builder.ComplexTypeWithEnumTypePropertyTestModel'.");
         }
 
         [Fact]
@@ -502,6 +503,135 @@ namespace System.Web.Http.OData.Builder
                 "propertyInfo",
                 "The property 'ID' on type 'System.Web.Http.OData.Builder.EntityTypeWithEnumTypePropertyTestModel' must be an Enum property.");
         }
+
+        [Fact]
+        public void ODataModelBuilder_Throws_AddEnumPropertyWithoutEnumType()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder();
+            var complexTypeConfiguration = builder.ComplexType<ComplexTypeWithEnumTypePropertyTestModel>();
+            complexTypeConfiguration.EnumProperty(c => c.RequiredColor);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => builder.GetServiceModel(),
+                "The enum type 'Color' doesn't exist.");
+        }
+
+        [Fact]
+        public void ODataModelBuilder_Throws_AddCollectionOfEnumPropertyWithoutEnumType()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder();
+            var complexTypeConfiguration = builder.ComplexType<ComplexTypeWithEnumTypePropertyTestModel>();
+            complexTypeConfiguration.CollectionProperty(c => c.Colors);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => builder.GetServiceModel(),
+                "The enum type 'Color' doesn't exist.");
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_CreateEnumTypePropertyInComplexType()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.ComplexType<ComplexTypeWithEnumTypePropertyTestModel>();
+
+            // Act & Assert
+            var model = builder.GetEdmModel();
+            var complexType = model.SchemaElements.OfType<IEdmStructuredType>().Single();
+            Assert.Equal(3, complexType.Properties().Count());
+
+            var requiredColor = complexType.Properties().SingleOrDefault(p => p.Name == "RequiredColor");
+            var nullableColor = complexType.Properties().SingleOrDefault(p => p.Name == "NullableColor");
+            var colors = complexType.Properties().SingleOrDefault(p => p.Name == "Colors");
+
+            Assert.NotNull(requiredColor);
+            Assert.NotNull(nullableColor);
+            Assert.NotNull(colors);
+            Assert.True(requiredColor.Type.IsEnum());
+            Assert.False(requiredColor.Type.IsNullable);
+            Assert.True(nullableColor.Type.IsEnum());
+            Assert.True(nullableColor.Type.IsNullable);
+            Assert.True(colors.Type.IsCollection());
+            Assert.True(((IEdmCollectionTypeReference)colors.Type).ElementType().IsEnum());
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_CreateEnumTypePropertyInEntityType()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<EntityTypeWithEnumTypePropertyTestModel>("Entities");
+
+            // Act & Assert
+            var model = builder.GetEdmModel();
+            IEdmEntitySet entitySet = model.EntityContainers().Single().FindEntitySet("Entities");
+            Assert.NotNull(entitySet);
+            IEdmEntityType entityType = entitySet.ElementType;
+            Assert.Equal(6, entityType.Properties().Count());
+
+            var requiredColor = entityType.Properties().SingleOrDefault(p => p.Name == "RequiredColor");
+            var longEnum = entityType.Properties().SingleOrDefault(p => p.Name == "LongEnum");
+            var nullableColor = entityType.Properties().SingleOrDefault(p => p.Name == "NullableColor");
+            var colors = entityType.Properties().SingleOrDefault(p => p.Name == "Colors");
+            var complexTypeProperty = entityType.Properties().SingleOrDefault(p => p.Name == "ComplexType");
+
+            Assert.NotNull(requiredColor);
+            Assert.NotNull(longEnum);
+            Assert.NotNull(nullableColor);
+            Assert.NotNull(colors);
+            Assert.NotNull(complexTypeProperty);
+            Assert.True(requiredColor.Type.IsEnum());
+            Assert.False(requiredColor.Type.IsNullable);
+            Assert.True(longEnum.Type.IsEnum());
+            Assert.False(longEnum.Type.IsNullable);
+            Assert.True(EdmCoreModel.Instance.GetInt64(false).Definition == longEnum.Type.AsEnum().EnumDefinition().UnderlyingType);
+            Assert.True(nullableColor.Type.IsEnum());
+            Assert.True(nullableColor.Type.IsNullable);
+            Assert.True(colors.Type.IsCollection());
+            Assert.True(((IEdmCollectionTypeReference)colors.Type).ElementType().IsEnum());
+            Assert.True(complexTypeProperty.Type.IsComplex());
+
+            IEdmComplexType complexType = complexTypeProperty.Type.AsComplex().ComplexDefinition();
+            Assert.Equal(3, complexType.Properties().Count());
+
+            requiredColor = complexType.Properties().SingleOrDefault(p => p.Name == "RequiredColor");
+            nullableColor = complexType.Properties().SingleOrDefault(p => p.Name == "NullableColor");
+            colors = complexType.Properties().SingleOrDefault(p => p.Name == "Colors");
+
+            Assert.NotNull(requiredColor);
+            Assert.NotNull(nullableColor);
+            Assert.NotNull(colors);
+            Assert.True(requiredColor.Type.IsEnum());
+            Assert.False(requiredColor.Type.IsNullable);
+            Assert.True(nullableColor.Type.IsEnum());
+            Assert.True(nullableColor.Type.IsNullable);
+            Assert.True(colors.Type.IsCollection());
+            Assert.True(((IEdmCollectionTypeReference)colors.Type).ElementType().IsEnum());
+        }
+
+        [Fact]
+        public void GetEdmPrimitiveTypeOrNull_ReturnNull_ForEnumType()
+        {
+            // Arrange
+            Type clrType = typeof(Color);
+
+            // Act & Act
+            Assert.Null(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(clrType));
+        }
+
+        [Fact]
+        public void GetEdmPrimitiveTypeOrNull_ReturnNull_ForNullableEnumType()
+        {
+            // Arrange
+            Type clrType = typeof(Color?);
+
+            // Act & Assert
+            Assert.Null(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(clrType));
+        }
     }
 
     public class ComplexTypeWithEnumTypePropertyTestModel
@@ -514,8 +644,11 @@ namespace System.Web.Http.OData.Builder
     public class EntityTypeWithEnumTypePropertyTestModel
     {
         public int ID { get; set; }
-        public Color Color { get; set; }
+        public Color RequiredColor { get; set; }
         public LongEnum LongEnum { get; set; }
+        public Color? NullableColor { get; set; }
+        public List<Color> Colors { get; set; }
+        public ComplexTypeWithEnumTypePropertyTestModel ComplexType { get; set; }
     }
 
     public abstract class BaseTypeWithEnumTypePropertyTestModel

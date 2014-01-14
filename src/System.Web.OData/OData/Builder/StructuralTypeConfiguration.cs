@@ -345,12 +345,16 @@ namespace System.Web.Http.OData.Builder
                         propertyConfiguration.Name);
                 }
 
-                // If the ElementType is not primitive treat as a ComplexType and Add to the model.
+                // If the ElementType is not primitive or enum treat as a ComplexType and Add to the model.
                 IEdmPrimitiveTypeReference edmType =
                     EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(propertyConfiguration.ElementType);
                 if (edmType == null)
                 {
-                    ModelBuilder.AddComplexType(propertyConfiguration.ElementType);
+                    Type type = Nullable.GetUnderlyingType(propertyConfiguration.ElementType) ?? propertyConfiguration.ElementType;
+                    if (!type.IsEnum)
+                    {
+                        ModelBuilder.AddComplexType(propertyConfiguration.ElementType);
+                    }
                 }
             }
 

@@ -85,7 +85,7 @@ namespace System.Web.Http.OData.Query
             IEdmModel model = _model.Model;
             _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
-            SelectExpandQueryOption option = new SelectExpandQueryOption("ID,Name,Orders", "Orders", context);
+            SelectExpandQueryOption option = new SelectExpandQueryOption("ID,Name,SimpleEnum,Orders", "Orders", context);
 
             // Act
             SelectExpandClause selectExpandClause = option.SelectExpandClause;
@@ -103,6 +103,7 @@ namespace System.Web.Http.OData.Query
         [InlineData("LastName,FirstName,Orders", "Orders")]
         [InlineData("LastName,FirstName,Orders", "Orders")]
         [InlineData("Orders", "Orders,Orders($expand=Customer),Orders($expand=Customer($expand=Orders))")]
+        [InlineData("SimpleEnum", "Orders")]
         public void SelectExpandClause_CanParse_ModelBuiltForQueryable(string select, string expand)
         {
             // Arrange

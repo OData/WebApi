@@ -12,6 +12,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     {
         private static readonly ODataEntityReferenceLinkDeserializer _entityReferenceLinkDeserializer = new ODataEntityReferenceLinkDeserializer();
         private static readonly ODataPrimitiveDeserializer _primitiveDeserializer = new ODataPrimitiveDeserializer();
+        private static readonly ODataEnumDeserializer _enumDeserializer = new ODataEnumDeserializer();
 
         private readonly ODataActionPayloadDeserializer _actionPayloadDeserializer;
         private readonly ODataEntityDeserializer _entityDeserializer;
@@ -56,6 +57,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 case EdmTypeKind.Entity:
                     return _entityDeserializer;
+
+                case EdmTypeKind.Enum:
+                    return _enumDeserializer;
 
                 case EdmTypeKind.Primitive:
                     return _primitiveDeserializer;

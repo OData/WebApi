@@ -6,12 +6,17 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.ModelBinding;
+using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.Conventions;
+using System.Web.Http.OData.Routing;
+using System.Web.Http.OData.TestCommon;
 using System.Web.Http.Routing;
 using System.Web.Http.ValueProviders;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 
@@ -51,12 +56,11 @@ namespace System.Web.Http.OData.Formatter
                     { (byte)1, "GetByte" },
                     { "123", "GetString" },
                     { Guid.Empty, "GetGuid" },
-                    // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+                    // TODO 1559: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
                     { TimeSpan.FromTicks(424242), "GetTimeSpan" },
                     { DateTimeOffset.MaxValue, "GetDateTimeOffset" },
                     { float.NaN, "GetFloat" },
-                    // TODO: ODataLib v4 issue on decimal handling, bug filed.
-                    //{ decimal.MaxValue, "GetDecimal" } 
+                    // TODO 1560: ODataLib v4 issue on decimal handling, bug filed.
                 };
             }
         }
@@ -68,14 +72,14 @@ namespace System.Web.Http.OData.Formatter
                 return new TheoryDataSet<object, string>
                 {
                     { "123", "GetBool" },
-                    //{ 123, "GetDateTime" }, // v4 does not support DateTime
+                    // TODO 1559: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
                     { "abc", "GetInt32" },
                     { "abc", "GetGuid" },
                     { "abc", "GetByte" },
                     { "abc", "GetFloat" },
                     { "abc", "GetDouble" },
                     { "abc", "GetDecimal" },
-                    //{ "abc", "GetDateTime" }, // v4 does not support DateTime
+                    // TODO 1559: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
                     { "abc", "GetTimeSpan" },
                     { "abc", "GetDateTimeOffset" },
                     { -1, "GetUInt16"},
@@ -201,6 +205,85 @@ namespace System.Web.Http.OData.Formatter
                 "name-2009",
                 response.Content.ReadAsAsync<string>().Result);
         }
+
+        [Theory]
+        [InlineData(SimpleEnum.First, "GetEnum", "simpleEnum")]
+        [InlineData(FlagsEnum.One | FlagsEnum.Two, "GetFlagsEnum", "flagsEnum")]
+        [InlineData((SimpleEnum)12, "GetEnum", "simpleEnum")]
+        [InlineData((FlagsEnum)23, "GetFlagsEnum", "flagsEnum")]
+        public void ODataModelBinderProvider_Works_ForEnum(object value, string action, string parameterName)
+        {
+            // Arrange
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
+            configuration.Routes.MapODataRoute("odata", "", GetEdmModel())
+                .MapODataRouteAttributes(configuration);
+
+            var controllers = new[] { typeof(ODataModelBinderProviderTestODataController) };
+            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
+            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+
+            HttpServer server = new HttpServer(configuration);
+            HttpClient client = new HttpClient(server);
+
+            // Act 
+            string url = String.Format(
+                "http://localhost/{0}({1}={2})",
+                action,
+                parameterName,
+                Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
+            HttpResponseMessage response = client.GetAsync(url).Result;
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(
+                value,
+                response.Content.ReadAsAsync(value.GetType(), configuration.Formatters).Result);
+        }
+
+        [Theory]
+        [InlineData("abc", "GetEnum", "simpleEnum")]
+        public void ODataModelBinderProvider_Throws_ForInvalidEnum(object value, string action, string parameterName)
+        {
+            // Arrange
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
+            configuration.Routes.MapODataRoute("odata", "", GetEdmModel())
+                .MapODataRouteAttributes(configuration);
+
+            var controllers = new[] { typeof(ODataModelBinderProviderTestODataController) };
+            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
+            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+
+            HttpServer server = new HttpServer(configuration);
+            HttpClient client = new HttpClient(server);
+
+            // Act 
+            string url = String.Format(
+                "http://localhost/{0}({1}={2})",
+                action,
+                parameterName,
+                Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
+            HttpResponseMessage response = client.GetAsync(url).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        private IEdmModel GetEdmModel()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+
+            FunctionConfiguration getEnum = builder.Function("GetEnum");
+            getEnum.Parameter<SimpleEnum>("simpleEnum");
+            getEnum.Returns<SimpleEnum>();
+
+            FunctionConfiguration getFlagsEnum = builder.Function("GetFlagsEnum");
+            getFlagsEnum.Parameter<FlagsEnum>("flagsEnum");
+            getFlagsEnum.Returns<FlagsEnum>();
+
+            return builder.GetEdmModel();
+        }
     }
 
     public class ODataKeyAttribute : ModelBinderAttribute
@@ -312,13 +395,8 @@ namespace System.Web.Http.OData.Formatter
             return id;
         }
 
-        // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
-        //public DateTime GetDateTime(DateTime id)
-        //{
-        //    ThrowIfInsideThrowsController();
-        //    return id;
-        //}
-
+        // TODO 1559: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+        
         public TimeSpan GetTimeSpan(TimeSpan id)
         {
             ThrowIfInsideThrowsController();
@@ -392,5 +470,23 @@ namespace System.Web.Http.OData.Formatter
         {
             return name + "-" + model;
         }
+    }
+
+    public class ODataModelBinderProviderTestODataController : ODataController
+    {
+        [HttpGet]
+        [ODataRoute("GetEnum(simpleEnum={simpleEnum})")]
+        public SimpleEnum GetEnum(SimpleEnum simpleEnum)
+        {
+            return simpleEnum;
+        }
+
+        [HttpGet]
+        [ODataRoute("GetFlagsEnum(flagsEnum={flagsEnum})")]
+        public FlagsEnum GetFlagsEnum(FlagsEnum flagsEnum)
+        {
+            return flagsEnum;
+        }
+
     }
 }

@@ -400,8 +400,7 @@ namespace System.Web.Http.OData.Query.Expressions
             }
             else
             {
-                Type sourceUnderlyingType = Nullable.GetUnderlyingType(source.Type) ?? source.Type;
-                if (sourceUnderlyingType.IsEnum)
+                if (TypeHelper.IsEnum(source.Type))
                 {
                     // we handle enum conversions ourselves
                     return source;
@@ -1045,8 +1044,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             if (isNonstandardEdmPrimitive)
             {
-                Type sourceType = source.Type;
-                sourceType = Nullable.GetUnderlyingType(sourceType) ?? sourceType;
+                Type sourceType = TypeHelper.GetUnderlyingTypeOrSelf(source.Type);
 
                 Contract.Assert(sourceType != conversionType);
 

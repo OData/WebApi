@@ -18,6 +18,7 @@ namespace System.Web.Http.OData.Builder
         private const string DefaultNamespace = "Default";
         private string _namespace;
         private string _name;
+        private NullableEnumTypeConfiguration nullableEnumTypeConfiguration = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EnumTypeConfiguration"/> class.
@@ -235,6 +236,16 @@ namespace System.Web.Http.OData.Builder
             {
                 RemovedMembers.Add(member);
             }
+        }
+
+        internal NullableEnumTypeConfiguration GetNullableEnumTypeConfiguration()
+        {
+            if (nullableEnumTypeConfiguration == null)
+            {
+                nullableEnumTypeConfiguration = new NullableEnumTypeConfiguration(this);
+            }
+
+            return nullableEnumTypeConfiguration;
         }
     }
 }

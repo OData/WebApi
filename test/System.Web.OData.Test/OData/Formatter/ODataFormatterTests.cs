@@ -11,6 +11,7 @@ using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Tracing;
+using System.Xml;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.Atom;
@@ -400,11 +401,13 @@ namespace System.Web.Http.OData.Formatter
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
                 {
-                    request.Content = new StringContent(string.Format(
-@"{{'@odata.type':'#System.Web.Http.OData.Formatter.EnumCustomer','ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                    request.Content = new StringContent(
+                        string.Format(@"{{'@odata.type':'#System.Web.Http.OData.Formatter.EnumCustomer',
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
                     request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
                     request.Headers.Accept.ParseAdd("application/json");
-                    //Act
+
+                    // Act
                     using (HttpResponseMessage response = client.SendAsync(request).Result)
                     {
                         // Assert
@@ -416,6 +419,105 @@ namespace System.Web.Http.OData.Formatter
                         Assert.Equal(2, colors.Count());
                         Assert.Contains(Color.Red, colors);
                         Assert.Contains(Color.Red | Color.Blue, colors);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void EnumSerializer_HasODataType_ForFullMetadata()
+        {
+            // Arrange & Act
+            string acceptHeader = "application/json;odata.metadata=full";
+            HttpResponseMessage response = GetEnumResponse(acceptHeader);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            JObject customer = response.Content.ReadAsAsync<JObject>().Result;
+            Assert.Equal("#System.Web.Http.OData.Builder.TestModels.Color",
+                customer.GetValue("Color@odata.type"));
+            Assert.Equal("#Collection(System.Web.Http.OData.Builder.TestModels.Color)",
+                customer.GetValue("Colors@odata.type"));
+        }
+
+        [Theory]
+        [InlineData("application/json;odata.metadata=minimal")]
+        [InlineData("application/json;odata.metadata=none")]
+        public void EnumSerializer_HasNoODataType_ForNonFullMetadata(string acceptHeader)
+        {
+            // Arrange & Act
+            HttpResponseMessage response = GetEnumResponse(acceptHeader);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            JObject customer = response.Content.ReadAsAsync<JObject>().Result;
+            Assert.False(customer.Values().Contains("Color@odata.type"));
+            Assert.False(customer.Values().Contains("Colors@odata.type"));
+        }
+
+        private HttpResponseMessage GetEnumResponse(string acceptHeader)
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<EnumCustomer>("EnumCustomers");
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Routes.MapODataRoute("odata", routePrefix: null, model: model);
+            HttpServer host = new HttpServer(configuration);
+            HttpClient client = new HttpClient(host);
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers");
+            request.Content = new StringContent(
+                string.Format(@"{{'@odata.type':'#System.Web.Http.OData.Formatter.EnumCustomer',
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request.Headers.Accept.ParseAdd(acceptHeader);
+
+            HttpResponseMessage response = client.SendAsync(request).Result;
+            return response;
+        }
+
+        [Fact]
+        public void EnumSerializer_HasMetadataType_InAtom()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<EnumCustomer>("EnumCustomers");
+            IEdmModel model = builder.GetEdmModel();
+
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            {
+                configuration.Routes.MapODataRoute("odata", routePrefix: null, model: model);
+                using (HttpServer host = new HttpServer(configuration))
+                using (HttpClient client = new HttpClient(host))
+                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
+                {
+                    request.Content = new StringContent(
+                        string.Format(@"{{'@odata.type':'#System.Web.Http.OData.Formatter.EnumCustomer',
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                    request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                    request.Headers.Accept.ParseAdd("application/atom+xml");
+
+                    // Act
+                    using (HttpResponseMessage response = client.SendAsync(request).Result)
+                    {
+                        // Assert
+                        response.EnsureSuccessStatusCode();
+                        var atomResult = response.Content.ReadAsStreamAsync().Result;
+                        var atomXmlDocument = new XmlDocument();
+                        atomXmlDocument.Load(atomResult);
+
+                        XmlNamespaceManager namespaceManager = new XmlNamespaceManager(atomXmlDocument.NameTable);
+                        namespaceManager.AddNamespace("ns", atomXmlDocument.DocumentElement.NamespaceURI);
+                        namespaceManager.AddNamespace("m", atomXmlDocument.DocumentElement.GetNamespaceOfPrefix("m"));
+                        namespaceManager.AddNamespace("d", atomXmlDocument.DocumentElement.GetNamespaceOfPrefix("d"));
+
+                        var colorMetadataType = atomXmlDocument.DocumentElement.SelectNodes(
+                            "ns:content/m:properties/d:Color/attribute::m:type", namespaceManager).Cast<XmlNode>().Select(e => e.Value);
+                        var colorsMetadataType = atomXmlDocument.DocumentElement.SelectNodes(
+                            "ns:content/m:properties/d:Colors/attribute::m:type", namespaceManager).Cast<XmlNode>().Select(e => e.Value);
+                        Assert.Equal("#System.Web.Http.OData.Builder.TestModels.Color", colorMetadataType.Single());
+                        Assert.Equal("#Collection(System.Web.Http.OData.Builder.TestModels.Color)", colorsMetadataType.Single());
                     }
                 }
             }
@@ -598,10 +700,6 @@ namespace System.Web.Http.OData.Formatter
         public int Id { get; set; }
 
         public short Int16 { get; set; }
-
-        public FlagsEnum FlagsEnum { get; set; }
-
-        public List<FlagsEnum> FlagsEnums { get; set; }
 
         public RelatedEntity Related { get; set; }
     }

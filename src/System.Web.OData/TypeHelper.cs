@@ -72,6 +72,17 @@ namespace System.Web.Http
             return false;
         }
 
+        public static Type GetUnderlyingTypeOrSelf(Type type)
+        {
+            return Nullable.GetUnderlyingType(type) ?? type;
+        }
+
+        public static bool IsEnum(Type type)
+        {
+            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
+            return underlyingTypeOrSelf.IsEnum;
+        }
+
         /// <summary>
         /// Determines whether the given type is a primitive type or
         /// is a <see cref="string"/>, <see cref="DateTime"/>, <see cref="Decimal"/>,

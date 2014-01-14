@@ -115,6 +115,7 @@
     <Compile Include="OData\Formatter\ODataRawValueMediaTypeMappingTests.cs" />
     <Compile Include="OData\Formatter\ODataValueExtensionsTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinksSerializerTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataEnumTypeSerializerTests.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataRawValueSerializerTests.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerContextTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializerTest.cs" />
@@ -354,7 +355,7 @@
     <EmbeddedResource Include="Resources\DecimalInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\DoubleInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\EmployeeEntryInJsonLight.json" />
-	<EmbeddedResource Include="Resources\EnumComplexTypeInJsonLight.json" />
+    <EmbeddedResource Include="Resources\EnumComplexTypeInJsonLight.json" />
     <EmbeddedResource Include="Resources\FeedOfEmployeeInJsonLight.json" />
     <EmbeddedResource Include="Resources\GuidInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\Int16InJsonFullMetadata.json" />

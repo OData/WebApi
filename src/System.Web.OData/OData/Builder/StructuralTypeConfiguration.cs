@@ -218,9 +218,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
-            Type enumType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
-
-            if (!enumType.IsEnum)
+            if (!TypeHelper.IsEnum(propertyInfo.PropertyType))
             {
                 throw Error.Argument("propertyInfo", SRResources.MustBeEnumProperty, propertyInfo.Name, ClrType.FullName);
             }
@@ -350,8 +348,7 @@ namespace System.Web.Http.OData.Builder
                     EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(propertyConfiguration.ElementType);
                 if (edmType == null)
                 {
-                    Type type = Nullable.GetUnderlyingType(propertyConfiguration.ElementType) ?? propertyConfiguration.ElementType;
-                    if (!type.IsEnum)
+                    if (!TypeHelper.IsEnum(propertyConfiguration.ElementType))
                     {
                         ModelBuilder.AddComplexType(propertyConfiguration.ElementType);
                     }

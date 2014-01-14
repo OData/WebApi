@@ -145,7 +145,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             Assert.Throws<InvalidOperationException>(
                 () => ODataComplexTypeDeserializer.CreateResource(_addressEdmType, new ODataDeserializerContext { Model = EdmCoreModel.Instance }),
-                "The provided mapping doesn't contain an entry for the entity type 'ODataDemo.Address'.");
+                "The provided mapping does not contain an entry for the entity type 'ODataDemo.Address'.");
         }
 
         [Fact]

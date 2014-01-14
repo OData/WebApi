@@ -19,7 +19,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("type");
             }
 
-            Type enumType = Nullable.GetUnderlyingType(type) ?? type;
+            Type enumType = TypeHelper.GetUnderlyingTypeOrSelf(type);
 
             // if value is of the requested type nothing to do here.
             if (value.GetType() == enumType)

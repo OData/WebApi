@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.OData.Core;
 
 namespace System.Web.Http.OData.Query
@@ -192,6 +193,7 @@ namespace System.Web.Http.OData.Query
         public byte[] Image { get; set; }
         public DateTimeOffset Birthday { get; set; }
         public double AmountSpent { get; set; }
+        public Color FavoriteColor { get; set; }
 
 
         public QueryCompositionAddress NavigationWithNonFilterableProperty { get; set; }

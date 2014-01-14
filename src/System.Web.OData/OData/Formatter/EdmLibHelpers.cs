@@ -134,7 +134,8 @@ namespace System.Web.Http.OData.Formatter
                     }
                 }
 
-                Type underlyingType = Nullable.GetUnderlyingType(clrType) ?? clrType;
+                Type underlyingType = TypeHelper.GetUnderlyingTypeOrSelf(clrType);
+
                 if (underlyingType.IsEnum)
                 {
                     clrType = underlyingType;

@@ -385,7 +385,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Assert.Throws<ODataException>(
                 () => _binder.CreatePropertyNameExpression(_model.Customer, specialOrdersProperty, customer),
-                "The provided mapping doesn't contain an entry for the entity type 'NS.SpecialCustomer'.");
+                "The provided mapping does not contain an entry for the entity type 'NS.SpecialCustomer'.");
         }
 
         [Fact]
@@ -421,7 +421,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Assert.Throws<ODataException>(
                 () => _binder.CreatePropertyValueExpression(_model.Customer, specialOrdersProperty, customer),
-                "The provided mapping doesn't contain an entry for the entity type 'NS.SpecialCustomer'.");
+                "The provided mapping does not contain an entry for the entity type 'NS.SpecialCustomer'.");
         }
 
         [Fact]
@@ -506,7 +506,7 @@ namespace System.Web.Http.OData.Query.Expressions
             // Act & Assert
             Assert.Throws<ODataException>(
                 () => SelectExpandBinder.CreateTypeNameExpression(source, baseType, model),
-                "The provided mapping doesn't contain an entry for the entity type 'NS.DerivedType'.");
+                "The provided mapping does not contain an entry for the entity type 'NS.DerivedType'.");
         }
 
         [Fact]

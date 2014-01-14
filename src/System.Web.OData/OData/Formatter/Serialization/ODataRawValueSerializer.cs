@@ -11,7 +11,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     public class ODataRawValueSerializer : ODataSerializer
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ODataPrimitiveSerializer"/>.
+        /// Initializes a new instance of <see cref="ODataRawValueSerializer"/>.
         /// </summary>
         public ODataRawValueSerializer()
             : base(ODataPayloadKind.Value)
@@ -30,7 +30,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("graph");
             }
 
-            messageWriter.WriteValue(ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(graph));
+            if (graph.GetType().IsEnum)
+            {
+                messageWriter.WriteValue(graph.ToString());
+            }
+            else
+            {
+                messageWriter.WriteValue(ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(graph));
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Web.Http.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Library.Values;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -26,8 +27,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     { typeof(byte[]), EdmPrimitiveTypeKind.Binary },
                     { typeof(bool), EdmPrimitiveTypeKind.Boolean },
                     { typeof(byte), EdmPrimitiveTypeKind.Byte },
-                    // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
-                    // { typeof(DateTime), EdmPrimitiveTypeKind.DateTimeOffset },
+                    // TODO 1559: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
                     { typeof(DateTimeOffset), EdmPrimitiveTypeKind.DateTimeOffset },
                     { typeof(decimal), EdmPrimitiveTypeKind.Decimal },
                     { typeof(double), EdmPrimitiveTypeKind.Double },
@@ -102,6 +102,32 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             Assert.NotNull(serializer);
             Assert.Equal(ODataPayloadKind.Value, serializer.ODataPayloadKind);
+        }
+
+        [Fact]
+        public void GetODataSerializer_Enum()
+        {
+            var serializerProvider = new DefaultODataSerializerProvider();
+            HttpRequestMessage request = new HttpRequestMessage();
+            var serializer = serializerProvider.GetODataPayloadSerializer(GetEnumModel(), typeof(TestEnum), request);
+
+            Assert.NotNull(serializer);
+            var enumSerializer = Assert.IsType<ODataEnumSerializer>(serializer);
+            Assert.Equal(ODataPayloadKind.Property, enumSerializer.ODataPayloadKind);
+        }
+
+        [Fact]
+        public void GetODataPayloadSerializer_ReturnsRawValueSerializer_ForEnumValueRequests()
+        {
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetODataPath(new ODataPath(new ValuePathSegment()));
+
+            var serializer = serializerProvider.GetODataPayloadSerializer(GetEnumModel(), typeof(TestEnum), request);
+
+            Assert.NotNull(serializer);
+            var rawValueSerializer = Assert.IsType<ODataRawValueSerializer>(serializer);
+            Assert.Equal(ODataPayloadKind.Value, rawValueSerializer.ODataPayloadKind);
         }
 
         [Fact]
@@ -229,6 +255,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
             DefaultODataSerializerProvider instance2 = DefaultODataSerializerProvider.Instance;
 
             Assert.Same(instance1, instance2);
+        }
+
+        private static IEdmModel GetEnumModel()
+        {
+            EdmModel model = new EdmModel();
+
+            EdmEnumType enumType = new EdmEnumType("TestModel", "TestEnum");
+            enumType.AddMember(new EdmEnumMember(enumType, "FirstValue", new EdmIntegerConstant(0)));
+            enumType.AddMember(new EdmEnumMember(enumType, "FirstValue", new EdmIntegerConstant(1)));
+            model.AddElement(enumType);
+
+            model.SetAnnotationValue(model.FindDeclaredType("TestModel.TestEnum"), new ClrTypeAnnotation(typeof(TestEnum)));
+
+            return model;
         }
 
         private enum TestEnum

@@ -26,6 +26,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 throw Error.ArgumentNull("messageReader");
             }
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+            if (readContext == null)
+            {
+                throw Error.ArgumentNull("readContext");
+            }
 
             IEdmTypeReference edmType = readContext.GetEdmType(type);
             Contract.Assert(edmType != null);

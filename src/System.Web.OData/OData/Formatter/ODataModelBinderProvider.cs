@@ -2,7 +2,10 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Linq;
+using System.Reflection;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.OData.Properties;
@@ -35,11 +38,19 @@ namespace System.Web.Http.OData.Formatter
                 return new ODataModelBinder();
             }
 
+            if (TypeHelper.IsEnum(modelType))
+            {
+                return new ODataModelBinder();
+            }
+
             return null;
         }
 
         internal class ODataModelBinder : IModelBinder
         {
+            private static MethodInfo enumTryParseMethod = typeof(Enum).GetMethods()
+                        .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
+
             [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to fail in model binding.")]
             public bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
             {
@@ -94,6 +105,25 @@ namespace System.Web.Http.OData.Formatter
                 if (valueString == null)
                 {
                     return null;
+                }
+
+                // TODO 1608: ODataUriUtils.ConvertFromUriLiteral doesn't support enum
+                if (TypeHelper.IsEnum(type))
+                {
+                    string[] values = valueString.Split(new[] { '\'' }, StringSplitOptions.None);
+                    Contract.Assert(values.Length == 3 && values[2] == String.Empty);
+
+                    string enumValueString = values[1];
+                    Type enumType = TypeHelper.GetUnderlyingTypeOrSelf(type);
+                    object[] parameters = new[] { enumValueString, Enum.ToObject(type, 0) };
+                    bool isSuccessful = (bool)enumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
+
+                    if (!isSuccessful)
+                    {
+                        throw Error.InvalidOperation(SRResources.ModelBinderUtil_ValueCannotBeEnum, valueString, type.Name);
+                    }
+
+                    return parameters[1];
                 }
 
                 object value = ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V4);

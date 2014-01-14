@@ -59,8 +59,13 @@ namespace System.Web.Http.OData.Query
         Not = 0x100,
 
         /// <summary>
+        /// A value that corresponds to allowing 'Has' logical operator in $filter.
+        /// </summary>  
+        Has = 0x200,
+
+        /// <summary>
         /// A value that corresponds to allowing all logical operators in $filter.
         /// </summary>
-        All = Or | And | Equal | NotEqual | GreaterThan | GreaterThanOrEqual | LessThan | LessThanOrEqual | Not
+        All = Or | And | Equal | NotEqual | GreaterThan | GreaterThanOrEqual | LessThan | LessThanOrEqual | Not | Has
     }
 }

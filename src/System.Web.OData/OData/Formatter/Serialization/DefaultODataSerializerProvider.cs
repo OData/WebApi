@@ -132,7 +132,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             if (edmType != null)
             {
-                if (edmType.IsPrimitive() && ODataRawValueMediaTypeMapping.IsRawValueRequest(request))
+                if ((edmType.IsPrimitive() || edmType.IsEnum()) && ODataRawValueMediaTypeMapping.IsRawValueRequest(request))
                 {
                     return _rawValueSerializer;
                 }

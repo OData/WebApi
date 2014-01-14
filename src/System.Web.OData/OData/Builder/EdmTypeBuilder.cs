@@ -52,7 +52,7 @@ namespace System.Web.Http.OData.Builder
 
         private void CreateEdmTypeHeader(IEdmTypeConfiguration config)
         {
-            if (!_types.ContainsKey(config.ClrType))
+            if (GetEdmType(config.ClrType) == null)
             {
                 if (config.Kind == EdmTypeKind.Complex)
                 {
@@ -68,7 +68,7 @@ namespace System.Web.Http.OData.Builder
                     if (entity.BaseType != null)
                     {
                         CreateEdmTypeHeader(entity.BaseType);
-                        baseType = _types[entity.BaseType.ClrType] as IEdmEntityType;
+                        baseType = GetEdmType(entity.BaseType.ClrType) as IEdmEntityType;
 
                         Contract.Assert(baseType != null);
                     }
@@ -89,7 +89,7 @@ namespace System.Web.Http.OData.Builder
 
         private void CreateEdmTypeBody(IEdmTypeConfiguration config)
         {
-            IEdmType edmType = _types[config.ClrType];
+            IEdmType edmType = GetEdmType(config.ClrType);
 
             if (edmType.TypeKind == EdmTypeKind.Complex)
             {
@@ -136,7 +136,7 @@ namespace System.Web.Http.OData.Builder
 
                     case PropertyKind.Complex:
                         ComplexPropertyConfiguration complexProperty = property as ComplexPropertyConfiguration;
-                        IEdmComplexType complexType = _types[complexProperty.RelatedClrType] as IEdmComplexType;
+                        IEdmComplexType complexType = GetEdmType(complexProperty.RelatedClrType) as IEdmComplexType;
 
                         edmProperty = type.AddStructuralProperty(
                             complexProperty.Name,
@@ -173,27 +173,38 @@ namespace System.Web.Http.OData.Builder
         private IEdmProperty CreateStructuralTypeCollectionPropertyBody(EdmStructuredType type, CollectionPropertyConfiguration collectionProperty)
         {
             IEdmTypeReference elementTypeReference = null;
-            Type clrType = Nullable.GetUnderlyingType(collectionProperty.ElementType) ?? collectionProperty.ElementType;
-            IEdmType edmType;
+            Type clrType = TypeHelper.GetUnderlyingTypeOrSelf(collectionProperty.ElementType);
+
             if (clrType.IsEnum)
             {
-                if (!_types.TryGetValue(clrType, out edmType))
+                IEdmType edmType = GetEdmType(clrType);
+
+                if (edmType == null)
                 {
-                    throw Error.InvalidOperation(SRResources.EnumTypeNotExisting, clrType.Name);
+                    throw Error.InvalidOperation(SRResources.EnumTypeDoesNotExist, clrType.Name);
                 }
 
                 IEdmEnumType enumElementType = (IEdmEnumType)edmType;
-                elementTypeReference = new EdmEnumTypeReference(enumElementType, collectionProperty.ElementType.IsNullable());
-            }
-            else if (_types.TryGetValue(collectionProperty.ElementType, out edmType))
-            {
-                IEdmComplexType elementType = (IEdmComplexType)edmType;
-                elementTypeReference = new EdmComplexTypeReference(elementType, false);
+                bool isNullable = collectionProperty.ElementType != clrType;
+                elementTypeReference = new EdmEnumTypeReference(enumElementType, isNullable);
             }
             else
             {
-                elementTypeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(collectionProperty.ElementType);
+                IEdmType edmType = GetEdmType(collectionProperty.ElementType);
+                if (edmType != null)
+                {
+                    IEdmComplexType elementType = edmType as IEdmComplexType;
+                    Contract.Assert(elementType != null);
+                    elementTypeReference = new EdmComplexTypeReference(elementType, false);
+                }
+                else
+                {
+                    elementTypeReference =
+                        EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(collectionProperty.ElementType);
+                    Contract.Assert(elementTypeReference != null);
+                }
             }
+
             return type.AddStructuralProperty(
                 collectionProperty.Name,
                 new EdmCollectionTypeReference(
@@ -203,12 +214,14 @@ namespace System.Web.Http.OData.Builder
 
         private IEdmProperty CreateStructuralTypeEnumPropertyBody(EdmStructuredType type, StructuralTypeConfiguration config, EnumPropertyConfiguration enumProperty)
         {
-            Type enumPropertyType = Nullable.GetUnderlyingType(enumProperty.RelatedClrType) ?? enumProperty.RelatedClrType;
-            IEdmType edmType;
-            if (!_types.TryGetValue(enumPropertyType, out edmType))
+            Type enumPropertyType = TypeHelper.GetUnderlyingTypeOrSelf(enumProperty.RelatedClrType);
+            IEdmType edmType = GetEdmType(enumPropertyType);
+
+            if (edmType == null)
             {
-                throw Error.InvalidOperation(SRResources.EnumTypeNotExisting, enumPropertyType.Name);
+                throw Error.InvalidOperation(SRResources.EnumTypeDoesNotExist, enumPropertyType.Name);
             }
+
             IEdmEnumType enumType = (IEdmEnumType)edmType;
             IEdmTypeReference enumTypeReference = new EdmEnumTypeReference(enumType, enumProperty.OptionalProperty);
 
@@ -225,6 +238,7 @@ namespace System.Web.Http.OData.Builder
                 defaultValue: null,
                 concurrencyMode: enumConcurrencyMode);
         }
+
         private void CreateComplexTypeBody(EdmComplexType type, ComplexTypeConfiguration config)
         {
             Contract.Assert(type != null);
@@ -247,7 +261,7 @@ namespace System.Web.Http.OData.Builder
                 EdmNavigationPropertyInfo info = new EdmNavigationPropertyInfo();
                 info.Name = navProp.Name;
                 info.TargetMultiplicity = navProp.Multiplicity;
-                info.Target = _types[navProp.RelatedClrType] as IEdmEntityType;
+                info.Target = GetEdmType(navProp.RelatedClrType) as IEdmEntityType;
                 //TODO: If target end has a multiplity of 1 this assumes the source end is 0..1.
                 //      I think a better default multiplicity is *
                 IEdmProperty edmProperty = type.AddUnidirectionalNavigation(info);
@@ -286,6 +300,16 @@ namespace System.Web.Http.OData.Builder
                 type.AddMember(edmMember);
                 _members[member.MemberInfo] = edmMember;
             }
+        }
+
+        private IEdmType GetEdmType(Type clrType)
+        {
+            Contract.Assert(clrType != null);
+
+            IEdmType edmType;
+            _types.TryGetValue(clrType, out edmType);
+
+            return edmType;
         }
 
         /// <summary>

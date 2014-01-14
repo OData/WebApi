@@ -108,6 +108,19 @@ namespace System.Web.Http.OData.Query.Validators
                 "Arithmetic operator 'Modulo' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on QueryableAttribute or QueryValidationSettings.");
         }
 
+        [Fact]
+        public void ValidateThrowsIfHasIsNotAllowed()
+        {
+            Assert.DoesNotThrow(() =>
+                _validator.Validate(new FilterQueryOption("FavoriteColor has System.Web.Http.OData.Builder.TestModels.Color'Red'", _context),
+                new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.All }));
+
+            Assert.Throws<ODataException>(() =>
+                   _validator.Validate(new FilterQueryOption("FavoriteColor has System.Web.Http.OData.Builder.TestModels.Color'Red'", _context),
+                 new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.Equal }),
+                "Logical operator 'Has' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on QueryableAttribute or QueryValidationSettings.");
+        }
+
         // want to test if all the virtual methods are being invoked correctly
         [Fact]
         public void ValidateVisitAll()
@@ -318,6 +331,25 @@ namespace System.Web.Http.OData.Query.Validators
             Assert.Equal(1, _validator.Times["ValidateParameterQueryNode"]); // $it
         }
 
+        [Fact]
+        public void ValidateVisitLogicalOperatorHas()
+        {
+            // Arrange
+            FilterQueryOption option = new FilterQueryOption("FavoriteColor has System.Web.Http.OData.Builder.TestModels.Color'Red'", _context);
+
+            // Act
+            _validator.Validate(option, _settings);
+
+            // Assert
+            Assert.Equal(6, _validator.Times.Keys.Count);
+            Assert.Equal(1, _validator.Times["Validate"]); // entry
+            Assert.Equal(1, _validator.Times["ValidateSingleValuePropertyAccessNode"]); // FavouriteColor
+            Assert.Equal(1, _validator.Times["ValidateLogicalOperator"]); // has
+            Assert.Equal(1, _validator.Times["ValidateEnumQueryNode"]); // Red
+            Assert.Equal(1, _validator.Times["ValidateBinaryOperatorQueryNode"]); // has
+            Assert.Equal(1, _validator.Times["ValidateParameterQueryNode"]); // $it
+        }
+
         [Theory]
         [InlineData("Id eq 1")]
         [InlineData("Id ne 1")]
@@ -353,6 +385,7 @@ namespace System.Web.Http.OData.Query.Validators
         [InlineData("Tags/all(t : t eq '1')")]
         [InlineData("System.Web.Http.OData.Query.QueryCompositionCustomerBase/Id eq 1")]
         [InlineData("Contacts/System.Web.Http.OData.Query.QueryCompositionCustomerBase/any()")]
+        [InlineData("FavoriteColor has System.Web.Http.OData.Builder.TestModels.Color'Red'")]
         public void Validator_Doesnot_Throw_For_ValidQueries(string filter)
         {
             // Arrange
@@ -428,6 +461,12 @@ namespace System.Web.Http.OData.Query.Validators
             {
                 IncrementCount("ValidateConvertQueryNode");
                 base.ValidateConvertNode(convertQueryNode, settings);
+            }
+
+            public override void ValidateEnumNode(EnumNode enumNode, ODataValidationSettings settings)
+            {
+                IncrementCount("ValidateEnumQueryNode");
+                base.ValidateEnumNode(enumNode, settings);
             }
 
             public override void ValidateLogicalOperator(BinaryOperatorNode binaryNode, ODataValidationSettings settings)

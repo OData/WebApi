@@ -133,16 +133,15 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             Contract.Assert(value != null);
 
-            // TODO: Delete enum processing when OData beta1 or later is referenced.
-            Type underlyingType = Nullable.GetUnderlyingType(value.GetType()) ?? value.GetType();
-            Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(value.GetType()) != null || underlyingType.IsEnum);
-
-            if (underlyingType.IsEnum)
+            // TODO 1608: Delete enum processing when OData beta1 or later is referenced.
+            Type type = value.GetType();
+            if (type.IsEnum)
             {
                 return String.Format(CultureInfo.InvariantCulture,
-                    "{0}'{1}'", underlyingType.Name, value);
+                    "{0}'{1}'", type.EdmFullName(), value);
             }
 
+            Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(type) != null);
             value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(value);
             return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
         }

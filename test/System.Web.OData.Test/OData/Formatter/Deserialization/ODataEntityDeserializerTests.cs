@@ -312,7 +312,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
             Assert.Throws<ODataException>(
                 () => deserializer.CreateEntityResource(_productEdmType, new ODataDeserializerContext { Model = EdmCoreModel.Instance }),
-                "The provided mapping doesn't contain an entry for the entity type 'ODataDemo.Product'.");
+                "The provided mapping does not contain an entry for the entity type 'ODataDemo.Product'.");
         }
 
         [Fact]

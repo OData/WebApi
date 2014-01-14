@@ -2,6 +2,7 @@
 
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -10,11 +11,24 @@ namespace System.Web.Http.OData.Formatter
 {
     public class ODataRawValueMediaTypeMappingTests
     {
-        [Fact]
-        public void TryMatchMediaTypeWithPrimitiveRawValueThrowsArgumentNullWhenRequestIsNull()
+        public static TheoryDataSet<ODataRawValueMediaTypeMapping> ODataRawValueMediaTypeMappings
         {
-            ODataPrimitiveValueMediaTypeMapping mapping = new ODataPrimitiveValueMediaTypeMapping();
+            get
+            {
+                return new TheoryDataSet<ODataRawValueMediaTypeMapping>
+                {
+                    new ODataPrimitiveValueMediaTypeMapping(),
+                    new ODataBinaryValueMediaTypeMapping(),
+                    new ODataEnumValueMediaTypeMapping()
+                };
+            }
+        }
 
+        [Theory]
+        [PropertyData("ODataRawValueMediaTypeMappings")]
+        public void TryMatchMediaType_ThrowsArgumentNull_WhenRequestIsNull(ODataRawValueMediaTypeMapping mapping)
+        {
+            // Arrange, Act & Assert
             Assert.ThrowsArgumentNull(() => { mapping.TryMatchMediaType(null); }, "request");
         }
 
@@ -34,14 +48,17 @@ namespace System.Web.Http.OData.Formatter
             Assert.Equal(1.0, mapResult);
         }
 
-        [Fact]
-        public void TryMatchMediaTypeWithNonODataRequestDoesntMatchRequest()
+        [Theory]
+        [PropertyData("ODataRawValueMediaTypeMappings")]
+        public void TryMatchMediaType_DoesntMatchRequest_WithNonODataRequest(ODataRawValueMediaTypeMapping mapping)
         {
-            ODataPrimitiveValueMediaTypeMapping mapping = new ODataPrimitiveValueMediaTypeMapping();
+            // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
 
+            // Act
             double mapResult = mapping.TryMatchMediaType(request);
 
+            // Assert
             Assert.Equal(0, mapResult);
         }
 
@@ -58,6 +75,44 @@ namespace System.Web.Http.OData.Formatter
 
             double mapResult = mapping.TryMatchMediaType(request);
 
+            Assert.Equal(0, mapResult);
+        }
+
+        [Fact]
+        public void TryMatchMediaType_MatchesRequest_WithEnumRawValue()
+        {
+            // Arrange
+            IEdmModel model = GetEnumModel();
+            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment((model.GetEdmType(typeof(EnumEntity)) as IEdmEntityType).FindProperty("EnumProperty"));
+            ODataPath path = new ODataPath(new EntitySetPathSegment("EnumEntity"), new KeyValuePathSegment("1"), propertySegment, new ValuePathSegment());
+            ODataEnumValueMediaTypeMapping mapping = new ODataEnumValueMediaTypeMapping();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/EnumEntity(1)/EnumProperty/$value");
+            request.SetEdmModel(model);
+            request.SetODataPath(path);
+
+            // Act
+            double mapResult = mapping.TryMatchMediaType(request);
+
+            // Assert
+            Assert.Equal(1.0, mapResult);
+        }
+
+        [Fact]
+        public void TryMatchMediaType_DoesnotMatchRequest_ODataEnumValueMediaTypeMappingWithNonRawvalueRequest()
+        {
+            // Arrange
+            IEdmModel model = GetEnumModel();
+            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment((model.GetEdmType(typeof(EnumEntity)) as IEdmEntityType).FindProperty("EnumProperty"));
+            ODataPath path = new ODataPath(new EntitySetPathSegment("EnumEntity"), new KeyValuePathSegment("1"), propertySegment);
+            ODataEnumValueMediaTypeMapping mapping = new ODataEnumValueMediaTypeMapping();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/EnumEntity(1)/EnumProperty/");
+            request.SetEdmModel(model);
+            request.SetODataPath(path);
+
+            // Act
+            double mapResult = mapping.TryMatchMediaType(request);
+
+            // Assert
             Assert.Equal(0, mapResult);
         }
 
@@ -87,6 +142,19 @@ namespace System.Web.Http.OData.Formatter
         {
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<RawValueEntity>("RawValue");
+            return builder.GetEdmModel();
+        }
+
+        private class EnumEntity
+        {
+            public int Id { get; set; }
+            public Color EnumProperty { get; set; }
+        }
+
+        private static IEdmModel GetEnumModel()
+        {
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<EnumEntity>("EnumEntity");
             return builder.GetEdmModel();
         }
     }

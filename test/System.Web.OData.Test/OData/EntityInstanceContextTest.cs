@@ -173,7 +173,7 @@ namespace System.Web.Http.OData
             EntityInstanceContext entityContext = new EntityInstanceContext { EntityType = entityType, EdmModel = model, EdmObject = instance };
 
             Assert.Throws<InvalidOperationException>(
-                () => entityContext.EntityInstance, "The provided mapping doesn't contain an entry for the entity type 'NS.Name'.");
+                () => entityContext.EntityInstance, "The provided mapping does not contain an entry for the entity type 'NS.Name'.");
         }
 
         [Fact]

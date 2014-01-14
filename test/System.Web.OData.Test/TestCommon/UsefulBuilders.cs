@@ -51,6 +51,33 @@ namespace System.Web.Http.OData
             return builder;
         }
 
+        public static ODataModelBuilder Add_ByteEnum_EnumType(this ODataModelBuilder builder)
+        {
+            EnumTypeConfiguration<ByteEnum> byteEnum = builder.EnumType<ByteEnum>();
+            byteEnum.Member(ByteEnum.FirstByte);
+            byteEnum.Member(ByteEnum.SecondByte);
+            byteEnum.Member(ByteEnum.ThirdByte);
+            return builder;
+        }
+
+        public static ODataModelBuilder Add_SByteEnum_EnumType(this ODataModelBuilder builder)
+        {
+            EnumTypeConfiguration<SByteEnum> sByteEnum = builder.EnumType<SByteEnum>();
+            sByteEnum.Member(SByteEnum.FirstSByte);
+            sByteEnum.Member(SByteEnum.SecondSByte);
+            sByteEnum.Member(SByteEnum.ThirdSByte);
+            return builder;
+        }
+
+        public static ODataModelBuilder Add_ShortEnum_EnumType(this ODataModelBuilder builder)
+        {
+            EnumTypeConfiguration<ShortEnum> shortEnum = builder.EnumType<ShortEnum>();
+            shortEnum.Member(ShortEnum.FirstShort);
+            shortEnum.Member(ShortEnum.SecondShort);
+            shortEnum.Member(ShortEnum.ThirdShort);
+            return builder;
+        }
+
         public static ODataModelBuilder Add_Address_ComplexType(this ODataModelBuilder builder)
         {
             var address = builder.ComplexType<Address>();

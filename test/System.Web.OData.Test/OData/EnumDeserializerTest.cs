@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
+using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Deserialization;
@@ -108,6 +109,34 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
+        public void ODataEnumDeserializerRead_Throws_ForNullTypeParameter()
+        {
+            // Arrange
+            ODataMessageReader messageReader = new ODataMessageReader(new Mock<IODataRequestMessage>().Object);
+            Type type = null;
+            ODataDeserializerContext readContext = new ODataDeserializerContext();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(
+                () => new ODataEnumDeserializer().Read(messageReader, type, readContext),
+                "type");
+        }
+
+        [Fact]
+        public void ODataEnumDeserializerRead_Throws_ForNullReadContextParameter()
+        {
+            // Arrange
+            ODataMessageReader messageReader = new ODataMessageReader(new Mock<IODataRequestMessage>().Object);
+            Type type = typeof(Color);
+            ODataDeserializerContext readContext = null;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(
+                () => new ODataEnumDeserializer().Read(messageReader, type, readContext),
+                "readContext");
+        }
+
+        [Fact]
         public void NullEnumValueDeserializerTest()
         {
             // Arrange
@@ -117,23 +146,21 @@ namespace System.Web.Http.OData
             {
                 Properties = new[]
                 { 
-                    new ODataProperty { Name = "RequiredColor", Value = "Red"},
                     new ODataProperty { Name = "NullableColor", Value = null}
                 },
-                TypeName = "TestModel.EnumComplex"
+                TypeName = "System.Web.Http.OData.EnumComplexWithNullableEnum"
             };
 
             IEdmModel model = GetEdmModel();
             ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = model };
-            IEdmComplexTypeReference enumComplexrTypeReference = model.GetEdmTypeReference(typeof(EnumComplex)).AsComplex();
+            IEdmComplexTypeReference enumComplexTypeReference = model.GetEdmTypeReference(typeof(EnumComplexWithNullableEnum)).AsComplex();
 
             // Act
-            var enumComplex = deserializer.ReadComplexValue(complexValue, enumComplexrTypeReference, readContext) as EnumComplex;
+            var enumComplexWithNullableEnum = deserializer.ReadComplexValue(complexValue, enumComplexTypeReference, readContext) as EnumComplexWithNullableEnum;
 
             // Assert
-            Assert.NotNull(enumComplex);
-            Assert.Equal(Color.Red, enumComplex.RequiredColor);
-            Assert.Null(enumComplex.NullableColor);
+            Assert.NotNull(enumComplexWithNullableEnum);
+            Assert.Null(enumComplexWithNullableEnum.NullableColor);
         }
 
         [Fact]
@@ -146,49 +173,69 @@ namespace System.Web.Http.OData
             {
                 Properties = new[]
                 { 
-                    new ODataProperty { Name = "RequiredColor", Value = (Color)123},
-                    new ODataProperty { Name = "NullableColor", Value = Color.Green | Color.Blue}
+                    new ODataProperty { Name = "RequiredColor", Value = (Color)123}
                 },
-                TypeName = "TestModel.EnumComplex"
+                TypeName = "System.Web.Http.OData.EnumComplexWithRequiredEnum"
             };
 
             IEdmModel model = GetEdmModel();
             ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = model };
-            IEdmComplexTypeReference enumComplexrTypeReference = model.GetEdmTypeReference(typeof(EnumComplex)).AsComplex();
+            IEdmComplexTypeReference enumComplexTypeReference = model.GetEdmTypeReference(typeof(EnumComplexWithRequiredEnum)).AsComplex();
 
             // Act
-            var enumComplex = deserializer.ReadComplexValue(complexValue, enumComplexrTypeReference, readContext) as EnumComplex;
+            var enumComplexWithRequiredEnum = deserializer.ReadComplexValue(complexValue, enumComplexTypeReference, readContext) as EnumComplexWithRequiredEnum;
 
             // Assert
-            Assert.NotNull(enumComplex);
-            Assert.Equal((Color)123, enumComplex.RequiredColor);
-            Assert.Equal(Color.Green | Color.Blue, enumComplex.NullableColor);
+            Assert.NotNull(enumComplexWithRequiredEnum);
+            Assert.Equal((Color)123, enumComplexWithRequiredEnum.RequiredColor);
+        }
+
+        [Theory]
+        [InlineData(Color.Red)]
+        [InlineData(Color.Green | Color.Blue)]
+        [InlineData((Color)1)]
+        [InlineData((Color)123)]
+        public void EnumValueDeserializerTest(Color color)
+        {
+            // Arrange
+            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
+            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
+            ODataComplexValue complexValue = new ODataComplexValue
+            {
+                Properties = new[]
+                { 
+                    new ODataProperty { Name = "RequiredColor", Value = color}
+                },
+                TypeName = "System.Web.Http.OData.EnumComplexWithRequiredEnum"
+            };
+
+            IEdmModel model = GetEdmModel();
+            ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = model };
+            IEdmComplexTypeReference enumComplexTypeReference = model.GetEdmTypeReference(typeof(EnumComplexWithRequiredEnum)).AsComplex();
+
+            // Act
+            var enumComplexWithRequiredEnum = deserializer.ReadComplexValue(complexValue, enumComplexTypeReference, readContext) as EnumComplexWithRequiredEnum;
+
+            // Assert
+            Assert.NotNull(enumComplexWithRequiredEnum);
+            Assert.Equal(color, enumComplexWithRequiredEnum.RequiredColor);
         }
 
         private IEdmModel GetEdmModel()
         {
-            EdmModel model = new EdmModel();
-
-            EdmEnumType color = new EdmEnumType("TestModel", "Color");
-            color.AddMember(new EdmEnumMember(color, "Red", new EdmIntegerConstant(1)));
-            color.AddMember(new EdmEnumMember(color, "Green", new EdmIntegerConstant(2)));
-            color.AddMember(new EdmEnumMember(color, "Blue", new EdmIntegerConstant(4)));
-            model.AddElement(color);
-
-            EdmComplexType enumComplex = new EdmComplexType("TestModel", "EnumComplex");
-            enumComplex.AddStructuralProperty("RequiredColor", color.ToEdmTypeReference(isNullable: false));
-            enumComplex.AddStructuralProperty("NullableColor", color.ToEdmTypeReference(isNullable: true));
-            model.AddElement(enumComplex);
-
-            model.SetAnnotationValue<ClrTypeAnnotation>(
-                model.FindDeclaredType("TestModel.EnumComplex"), new ClrTypeAnnotation(typeof(EnumComplex)));
-
-            return model;
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<EnumComplexWithRequiredEnum>();
+            builder.ComplexType<EnumComplexWithNullableEnum>();
+            return builder.GetEdmModel();
         }
 
-        private class EnumComplex
+        private class EnumComplexWithRequiredEnum
         {
             public Color RequiredColor { get; set; }
+        }
+
+        private class EnumComplexWithNullableEnum
+        {
             public Color? NullableColor { get; set; }
         }
     }

@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Web.Http.OData.Formatter;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -217,12 +218,7 @@ namespace System.Web.Http.OData.Builder
         internal void ReturnsImplementation<TReturnType>()
         {
             Type returnType = typeof(TReturnType);
-            IEdmTypeConfiguration configuration = ModelBuilder.GetTypeConfigurationOrNull(returnType);
-            if (configuration == null)
-            {
-                ModelBuilder.AddComplexType(returnType);
-                configuration = ModelBuilder.GetTypeConfigurationOrNull(typeof(TReturnType));
-            }
+            IEdmTypeConfiguration configuration = GetProcedureTypeConfiguration(returnType);
             ReturnType = configuration;
         }
 
@@ -239,12 +235,7 @@ namespace System.Web.Http.OData.Builder
             // You can imagine the override of this that takes a delegate using the correct CLR type for the return type.
             Type clrCollectionType = typeof(IEnumerable<TReturnElementType>);
             Type clrElementType = typeof(TReturnElementType);
-            IEdmTypeConfiguration edmElementType = ModelBuilder.GetTypeConfigurationOrNull(clrElementType);
-            if (edmElementType == null)
-            {
-                ModelBuilder.AddComplexType(clrElementType);
-                edmElementType = ModelBuilder.GetTypeConfigurationOrNull(clrElementType);
-            }
+            IEdmTypeConfiguration edmElementType = GetProcedureTypeConfiguration(clrElementType);
             ReturnType = new CollectionTypeConfiguration(edmElementType, clrCollectionType);
         }
 
@@ -273,12 +264,7 @@ namespace System.Web.Http.OData.Builder
         public ParameterConfiguration Parameter<TParameter>(string name)
         {
             Type type = typeof(TParameter);
-            IEdmTypeConfiguration parameterType = ModelBuilder.GetTypeConfigurationOrNull(type);
-            if (parameterType == null)
-            {
-                ModelBuilder.AddComplexType(type);
-                parameterType = ModelBuilder.GetTypeConfigurationOrNull(type);
-            }
+            IEdmTypeConfiguration parameterType = GetProcedureTypeConfiguration(type);
             return AddParameter(name, parameterType);
         }
 
@@ -289,12 +275,7 @@ namespace System.Web.Http.OData.Builder
         public ParameterConfiguration CollectionParameter<TElementType>(string name)
         {
             Type elementType = typeof(TElementType);
-            IEdmTypeConfiguration elementTypeConfiguration = ModelBuilder.GetTypeConfigurationOrNull(elementType);
-            if (elementTypeConfiguration == null)
-            {
-                ModelBuilder.AddComplexType(elementType);
-                elementTypeConfiguration = ModelBuilder.GetTypeConfigurationOrNull(elementType);
-            }
+            IEdmTypeConfiguration elementTypeConfiguration = GetProcedureTypeConfiguration(elementType);
             CollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration, typeof(IEnumerable<>).MakeGenericType(elementType));
             return AddParameter(name, parameterType);
         }
@@ -303,5 +284,48 @@ namespace System.Web.Http.OData.Builder
         /// Gets or sets the <see cref="ODataModelBuilder"/> used to create this configuration.
         /// </summary>
         protected ODataModelBuilder ModelBuilder { get; set; }
+
+        private IEdmTypeConfiguration GetProcedureTypeConfiguration(Type clrType)
+        {
+            Type type = TypeHelper.GetUnderlyingTypeOrSelf(clrType);
+            IEdmTypeConfiguration edmTypeConfiguration;
+
+            if (type.IsEnum)
+            {
+                edmTypeConfiguration = ModelBuilder.GetTypeConfigurationOrNull(type);
+
+                if (edmTypeConfiguration != null && EdmLibHelpers.IsNullable(clrType))
+                {
+                    edmTypeConfiguration = ((EnumTypeConfiguration)edmTypeConfiguration).GetNullableEnumTypeConfiguration();
+                }
+            }
+            else
+            {
+                edmTypeConfiguration = ModelBuilder.GetTypeConfigurationOrNull(clrType);
+            }
+
+            if (edmTypeConfiguration == null)
+            {
+                if (type.IsEnum)
+                {
+                    EnumTypeConfiguration enumTypeConfiguration = ModelBuilder.AddEnumType(type);
+
+                    if (EdmLibHelpers.IsNullable(clrType))
+                    {
+                        edmTypeConfiguration = enumTypeConfiguration.GetNullableEnumTypeConfiguration();
+                    }
+                    else
+                    {
+                        edmTypeConfiguration = enumTypeConfiguration;
+                    }
+                }
+                else
+                {
+                    edmTypeConfiguration = ModelBuilder.AddComplexType(clrType);
+                }
+            }
+
+            return edmTypeConfiguration;
+        }
     }
 }

@@ -82,7 +82,7 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void CreateODataValue_Throws_ForNotEnumTypeon()
+        public void CreateODataValue_Throws_ForNonEnumType()
         {
             // Arrange
             object graph = null;
@@ -109,6 +109,7 @@ namespace System.Web.Http.OData
 
         private void EnumTypeSerializerTestForOData(string expectedContent, bool isJson)
         {
+            // Arrange
             ODataMediaTypeFormatter formatter = GetFormatter();
             ObjectContent<EnumComplex> content = new ObjectContent<EnumComplex>(
                 new EnumComplex()
@@ -119,6 +120,8 @@ namespace System.Web.Http.OData
                 },
                 formatter,
                 GetMediaType(isJson));
+
+            // Act & Assert
             AssertEqual(isJson, expectedContent, content.ReadAsStringAsync().Result);
         }
 

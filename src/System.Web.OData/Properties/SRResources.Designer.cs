@@ -475,7 +475,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This service doesn&apos;t support OData requests in the form &apos;{0}&apos;..
+        ///   Looks up a localized string similar to This service does not support OData requests in the form &apos;{0}&apos;..
         /// </summary>
         internal static string EntitySetControllerUnmappedRequest {
             get {
@@ -655,11 +655,11 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The enum type &apos;{0}&apos; doesn&apos;t exist..
+        ///   Looks up a localized string similar to The enum type &apos;{0}&apos; does not exist..
         /// </summary>
-        internal static string EnumTypeNotExisting {
+        internal static string EnumTypeDoesNotExist {
             get {
-                return ResourceManager.GetString("EnumTypeNotExisting", resourceCulture);
+                return ResourceManager.GetString("EnumTypeDoesNotExist", resourceCulture);
             }
         }
         
@@ -925,7 +925,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The provided mapping doesn&apos;t contain an entry for the entity type &apos;{0}&apos;..
+        ///   Looks up a localized string similar to The provided mapping does not contain an entry for the entity type &apos;{0}&apos;..
         /// </summary>
         internal static string MappingDoesNotContainEntityType {
             get {
@@ -984,6 +984,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string ModelBinderUtil_ModelMetadataCannotBeNull {
             get {
                 return ResourceManager.GetString("ModelBinderUtil_ModelMetadataCannotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The binding value &apos;{0}&apos; cannot be bound to the enum type &apos;{1}&apos;..
+        /// </summary>
+        internal static string ModelBinderUtil_ValueCannotBeEnum {
+            get {
+                return ResourceManager.GetString("ModelBinderUtil_ValueCannotBeEnum", resourceCulture);
             }
         }
         

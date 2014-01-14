@@ -97,6 +97,8 @@ namespace System.Web.Http.OData.Routing
         [InlineData("RoutingCustomers(112)/GetRelatedRoutingCustomers", "~/entityset/key/action")]
         [InlineData("RoutingCustomers/System.Web.Http.OData.Routing.VIP/GetMostProfitable", "~/entityset/cast/action")]
         [InlineData("Products(1)/RoutingCustomers/System.Web.Http.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "~/entityset/key/navigation/cast/key/navigation/navigation")]
+        [InlineData("EnumCustomers(1)/Color", "~/entityset/key/property")]
+        [InlineData("EnumCustomers(1)/Color/$value", "~/entityset/key/property/$value")]
         public void Parse_ReturnsPath_WithCorrectTemplate(string odataPath, string template)
         {
             ODataPath path = _parser.Parse(_model, odataPath);

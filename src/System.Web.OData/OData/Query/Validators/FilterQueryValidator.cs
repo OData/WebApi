@@ -159,6 +159,7 @@ namespace System.Web.Http.OData.Query.Validators
                 case BinaryOperatorKind.LessThan:
                 case BinaryOperatorKind.LessThanOrEqual:
                 case BinaryOperatorKind.Or:
+                case BinaryOperatorKind.Has:
                     // binary logical operators
                     ValidateLogicalOperator(binaryOperatorNode, settings);
                     break;
@@ -286,6 +287,31 @@ namespace System.Web.Http.OData.Query.Validators
 
             // no default validation logic here
             ValidateQueryNode(convertNode.Source, settings);
+        }
+
+        /// <summary>
+        /// Override this method for the enum node.
+        /// </summary>
+        /// <remarks>
+        /// This method is intended to be called from method overrides in subclasses.
+        /// This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
+        /// <param name="enumNode"></param>
+        /// <param name="settings"></param>
+        public virtual void ValidateEnumNode(EnumNode enumNode, ODataValidationSettings settings)
+        {
+            if (enumNode == null)
+            {
+                throw Error.ArgumentNull("enumNode");
+            }
+
+            if (settings == null)
+            {
+                throw Error.ArgumentNull("settings");
+            }
+
+            // no default validation logic here
         }
 
         /// <summary>
@@ -575,6 +601,14 @@ namespace System.Web.Http.OData.Query.Validators
         /// <param name="settings"></param>
         private void ValidateSingleValueNode(SingleValueNode node, ODataValidationSettings settings)
         {
+            // TODO 1577: remove this and add it to switch, once the ODataLib v4 EnumNode.Kind bug is fixed.
+            EnumNode enumNode = node as EnumNode;
+            if (enumNode != null)
+            {
+                ValidateEnumNode(enumNode, settings);
+                return;
+            }
+
             switch (node.Kind)
             {
                 case QueryNodeKind.BinaryOperator:
@@ -777,6 +811,10 @@ namespace System.Web.Http.OData.Query.Validators
 
                 case BinaryOperatorKind.Or:
                     result = AllowedLogicalOperators.Or;
+                    break;
+
+                case BinaryOperatorKind.Has:
+                    result = AllowedLogicalOperators.Has;
                     break;
 
                 default:

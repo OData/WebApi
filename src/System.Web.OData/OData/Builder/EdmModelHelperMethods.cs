@@ -192,7 +192,10 @@ namespace System.Web.Http.OData.Builder
             Dictionary<string, EdmEntitySet> edmEntitySetMap,
             bool isAction)
         {
-            IEdmTypeReference returnReference = GetEdmTypeReference(edmTypeMap, procedure.ReturnType, nullable: true);
+            IEdmTypeReference returnReference = GetEdmTypeReference(
+                edmTypeMap, 
+                procedure.ReturnType,
+                procedure.ReturnType != null && EdmLibHelpers.IsNullable(procedure.ReturnType.ClrType));
             IEdmExpression expression = GetEdmEntitySetExpression(edmEntitySetMap, procedure);
             IEdmPathExpression pathExpression = procedure.EntitySetPath != null
                 ? new EdmPathExpression(procedure.EntitySetPath)
@@ -357,37 +360,51 @@ namespace System.Web.Http.OData.Builder
             if (kind == EdmTypeKind.Collection)
             {
                 CollectionTypeConfiguration collectionType = configuration as CollectionTypeConfiguration;
-                EdmCollectionType edmCollectionType = new EdmCollectionType(GetEdmTypeReference(availableTypes, collectionType.ElementType, false));
+                EdmCollectionType edmCollectionType = new EdmCollectionType(GetEdmTypeReference(
+                    availableTypes,
+                    collectionType.ElementType,
+                    EdmLibHelpers.IsNullable(collectionType.ElementType.ClrType)));
                 return new EdmCollectionTypeReference(edmCollectionType, nullable);
-            }
-            else if (availableTypes.ContainsKey(configuration.ClrType))
-            {
-                IEdmType type = availableTypes[configuration.ClrType];
-                if (kind == EdmTypeKind.Complex)
-                {
-                    return new EdmComplexTypeReference((IEdmComplexType)type, nullable);
-                }
-                else if (kind == EdmTypeKind.Entity)
-                {
-                    return new EdmEntityTypeReference((IEdmEntityType)type, nullable);
-                }
-                else if (kind == EdmTypeKind.Enum)
-                {
-                    return new EdmEnumTypeReference((IEdmEnumType)type, nullable);
-                }
-                else
-                {
-                    throw Error.InvalidOperation(SRResources.UnsupportedEdmTypeKind, kind.ToString());
-                }
-            }
-            else if (configuration.Kind == EdmTypeKind.Primitive)
-            {
-                PrimitiveTypeConfiguration primitiveTypeConfiguration = configuration as PrimitiveTypeConfiguration;
-                return new EdmPrimitiveTypeReference(primitiveTypeConfiguration.EdmPrimitiveType, nullable);
             }
             else
             {
-                throw Error.InvalidOperation(SRResources.NoMatchingIEdmTypeFound, configuration.FullName);
+                Type configurationClrType = TypeHelper.GetUnderlyingTypeOrSelf(configuration.ClrType);
+
+                if (!configurationClrType.IsEnum)
+                {
+                    configurationClrType = configuration.ClrType;
+                }
+
+                IEdmType type;
+
+                if (availableTypes.TryGetValue(configurationClrType, out type))
+                {
+                    if (kind == EdmTypeKind.Complex)
+                    {
+                        return new EdmComplexTypeReference((IEdmComplexType)type, nullable);
+                    }
+                    else if (kind == EdmTypeKind.Entity)
+                    {
+                        return new EdmEntityTypeReference((IEdmEntityType)type, nullable);
+                    }
+                    else if (kind == EdmTypeKind.Enum)
+                    {
+                        return new EdmEnumTypeReference((IEdmEnumType)type, nullable);
+                    }
+                    else
+                    {
+                        throw Error.InvalidOperation(SRResources.UnsupportedEdmTypeKind, kind.ToString());
+                    }
+                }
+                else if (configuration.Kind == EdmTypeKind.Primitive)
+                {
+                    PrimitiveTypeConfiguration primitiveTypeConfiguration = configuration as PrimitiveTypeConfiguration;
+                    return new EdmPrimitiveTypeReference(primitiveTypeConfiguration.EdmPrimitiveType, nullable);
+                }
+                else
+                {
+                    throw Error.InvalidOperation(SRResources.NoMatchingIEdmTypeFound, configuration.FullName);
+                }
             }
         }
 

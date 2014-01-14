@@ -493,6 +493,29 @@ namespace System.Web.Http.OData.Query
         }
 
         [Theory]
+        [InlineData("Simple has null", typeof(ODataException))]
+        [InlineData("null has Microsoft.TestCommon.Types.SimpleEnum'First'", typeof(ODataException))]
+        [InlineData("Id has Microsoft.TestCommon.Types.SimpleEnum'First'", typeof(ODataException))]
+        [InlineData("null has null", typeof(NotSupportedException))]
+        [InlineData("Simple has 23", typeof(ODataException))]
+        [InlineData("'Some string' has 0", typeof(ODataException))]
+        public void ApplyToEnums_Throws_WithInvalidFilter(string filter, Type exceptionType)
+        {
+            // Arrange
+            var model = GetEnumModel();
+            var context = new ODataQueryContext(model, typeof(EnumModel));
+            var filterOption = new FilterQueryOption(filter, context);
+            IEnumerable<EnumModel> enumModels = EnumModelTestData;
+
+            // Act & Assert
+            Assert.Throws(
+                exceptionType,
+                () => filterOption.ApplyTo(
+                    enumModels.AsQueryable(),
+                    new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }));
+        }
+
+        [Theory]
         [InlineData(
             "Simple eq Microsoft.TestCommon.Types.SimpleEnum'4'",
             "The string 'Microsoft.TestCommon.Types.SimpleEnum'4'' is not a valid enumeration type constant.")]

@@ -69,6 +69,7 @@ namespace System.Web.Http.OData.Formatter
         {
             ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(serializerProvider, deserializerProvider, ODataPayloadKind.Value);
             formatter.MediaTypeMappings.Add(new ODataPrimitiveValueMediaTypeMapping());
+            formatter.MediaTypeMappings.Add(new ODataEnumValueMediaTypeMapping());
             formatter.MediaTypeMappings.Add(new ODataBinaryValueMediaTypeMapping());
             return formatter;
         }

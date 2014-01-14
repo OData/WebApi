@@ -67,8 +67,10 @@
     <Compile Include="OData\Builder\EnumPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\EnumTypeConfiguration.cs" />
     <Compile Include="OData\Builder\EnumTypeConfigurationOfTEnumType.cs" />
+    <Compile Include="OData\Builder\NullableEnumTypeConfiguration.cs" />
     <Compile Include="OData\Formatter\Deserialization\EnumDeserializationHelpers.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEnumDeserializer.cs" />
+    <Compile Include="OData\Formatter\ODataEnumValueMediaTypeMapping.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEnumSerializer.cs" />
     <Compile Include="OData\Query\NonFilterableAttribute.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NonFilterableAttributeEdmPropertyConvention.cs" />

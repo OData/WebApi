@@ -2,7 +2,7 @@
 <m:value xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata">
   <m:element m:type="#System.Web.Http.OData.TestCommon.Models.Person">
     <Age m:type="Int32" xmlns="http://docs.oasis-open.org/odata/ns/data">20</Age>
-    <Gender xmlns="http://docs.oasis-open.org/odata/ns/data">Male</Gender>
+    <Gender m:type="#System.Web.Http.OData.TestCommon.Models.Gender" xmlns="http://docs.oasis-open.org/odata/ns/data">Male</Gender>
     <FirstName xmlns="http://docs.oasis-open.org/odata/ns/data">Frank</FirstName>
     <Alias m:type="#Collection(String)" xmlns="http://docs.oasis-open.org/odata/ns/data">
       <m:element>Alias0</m:element>
@@ -17,7 +17,7 @@
       <CountryCode m:type="Int32">1</CountryCode>
       <AreaCode m:type="Int32">425</AreaCode>
       <Number m:type="Int32">9879089</Number>
-      <PhoneType>HomePhone</PhoneType>
+      <PhoneType m:type="#System.Web.Http.OData.TestCommon.Models.PhoneType">HomePhone</PhoneType>
     </HomeNumber>
     <FavoriteHobby m:type="#System.Web.Http.OData.TestCommon.Models.IActivity" xmlns="http://docs.oasis-open.org/odata/ns/data">
       <ActivityName>Xbox Gaming</ActivityName>
@@ -25,7 +25,7 @@
   </m:element>
   <m:element m:type="#System.Web.Http.OData.TestCommon.Models.Person">
     <Age m:type="Int32" xmlns="http://docs.oasis-open.org/odata/ns/data">21</Age>
-    <Gender xmlns="http://docs.oasis-open.org/odata/ns/data">Male</Gender>
+    <Gender m:type="#System.Web.Http.OData.TestCommon.Models.Gender" xmlns="http://docs.oasis-open.org/odata/ns/data">Male</Gender>
     <FirstName xmlns="http://docs.oasis-open.org/odata/ns/data">Steve</FirstName>
     <Alias m:type="#Collection(String)" xmlns="http://docs.oasis-open.org/odata/ns/data">
       <m:element>Alias1</m:element>
@@ -40,7 +40,7 @@
       <CountryCode m:type="Int32">1</CountryCode>
       <AreaCode m:type="Int32">425</AreaCode>
       <Number m:type="Int32">9879090</Number>
-      <PhoneType>HomePhone</PhoneType>
+      <PhoneType m:type="#System.Web.Http.OData.TestCommon.Models.PhoneType">HomePhone</PhoneType>
     </HomeNumber>
     <FavoriteHobby m:type="#System.Web.Http.OData.TestCommon.Models.IActivity" xmlns="http://docs.oasis-open.org/odata/ns/data">
       <ActivityName>Xbox Gaming</ActivityName>
@@ -48,7 +48,7 @@
   </m:element>
   <m:element m:type="#System.Web.Http.OData.TestCommon.Models.Person">
     <Age m:type="Int32" xmlns="http://docs.oasis-open.org/odata/ns/data">22</Age>
-    <Gender xmlns="http://docs.oasis-open.org/odata/ns/data">Male</Gender>
+    <Gender m:type="#System.Web.Http.OData.TestCommon.Models.Gender" xmlns="http://docs.oasis-open.org/odata/ns/data">Male</Gender>
     <FirstName xmlns="http://docs.oasis-open.org/odata/ns/data">Tom</FirstName>
     <Alias m:type="#Collection(String)" xmlns="http://docs.oasis-open.org/odata/ns/data">
       <m:element>Alias2</m:element>
@@ -63,7 +63,7 @@
       <CountryCode m:type="Int32">1</CountryCode>
       <AreaCode m:type="Int32">425</AreaCode>
       <Number m:type="Int32">9879091</Number>
-      <PhoneType>HomePhone</PhoneType>
+      <PhoneType m:type="#System.Web.Http.OData.TestCommon.Models.PhoneType">HomePhone</PhoneType>
     </HomeNumber>
     <FavoriteHobby m:type="#System.Web.Http.OData.TestCommon.Models.IActivity" xmlns="http://docs.oasis-open.org/odata/ns/data">
       <ActivityName>Xbox Gaming</ActivityName>

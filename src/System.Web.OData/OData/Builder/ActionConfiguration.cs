@@ -142,12 +142,6 @@ namespace System.Web.Http.OData.Builder
                 throw Error.InvalidOperation(SRResources.ReturnEntityWithoutEntitySet, configuration.FullName);
             }
 
-            if (configuration == null)
-            {
-                ModelBuilder.AddComplexType(returnType);
-                configuration = ModelBuilder.GetTypeConfigurationOrNull(typeof(TReturnType));
-            }
-            ReturnType = configuration;
             ReturnsImplementation<TReturnType>();
             return this;
         }
@@ -172,12 +166,6 @@ namespace System.Web.Http.OData.Builder
                 throw Error.InvalidOperation(SRResources.ReturnEntityCollectionWithoutEntitySet, edmElementType.FullName);
             }
 
-            if (edmElementType == null)
-            {
-                ModelBuilder.AddComplexType(clrElementType);
-                edmElementType = ModelBuilder.GetTypeConfigurationOrNull(clrElementType);
-            }
-            ReturnType = new CollectionTypeConfiguration(edmElementType, clrCollectionType);
             ReturnsCollectionImplementation<TReturnElementType>();
             return this;
         }

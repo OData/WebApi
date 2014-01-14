@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http.OData.Builder.TestModels;
 
 namespace System.Web.Http.OData.Formatter
 {
@@ -21,7 +22,7 @@ namespace System.Web.Http.OData.Formatter
 
         public FormatterPerson GetFormatterPerson(int key)
         {
-            FormatterPerson obj = new FormatterPerson() { MyGuid = new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d"), PerId = key, Age = 10, Name = "Asha", Order = new FormatterOrder() { OrderName = "FirstOrder", OrderAmount = 235342 } };
+            FormatterPerson obj = new FormatterPerson() { MyGuid = new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d"), PerId = key, Age = 10, Name = "Asha", Order = new FormatterOrder() { OrderName = "FirstOrder", OrderAmount = 235342 }, FavoriteColor = Color.Red | Color.Green };
             return obj;
         }
 

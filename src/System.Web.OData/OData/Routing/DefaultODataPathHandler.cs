@@ -170,6 +170,9 @@ namespace System.Web.Http.OData.Routing
                     case EdmTypeKind.Primitive:
                         return ParseAtPrimitiveProperty(model, previous, previousEdmType, segment, segments);
 
+                    case EdmTypeKind.Enum:
+                        return ParseAtEnumProperty(model, previous, previousEdmType, segment, segments);
+
                     default:
                         throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
                 }
@@ -393,6 +396,39 @@ namespace System.Web.Http.OData.Routing
             }
 
             throw new ODataException(Error.Format(SRResources.NoActionFoundForCollection, segment, collectionType.ElementType));
+        }
+
+        /// <summary>
+        /// Parses the next OData path segment following an enum property.
+        /// </summary>
+        /// <param name="model">The model to use for path parsing.</param>
+        /// <param name="previous">The previous path segment.</param>
+        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
+        /// <param name="segment">The value of the segment to parse.</param>
+        /// <param name="segments">The queue of pending segments.</param>
+        /// <returns>A parsed representation of the segment.</returns>
+        protected virtual ODataPathSegment ParseAtEnumProperty(IEdmModel model, ODataPathSegment previous,
+            IEdmType previousEdmType, string segment, Queue<string> segments)
+        {
+            if (previous == null)
+            {
+                throw Error.ArgumentNull("previous");
+            }
+            if (segments == null)
+            {
+                throw Error.ArgumentNull("segments");
+            }
+            if (String.IsNullOrEmpty(segment))
+            {
+                throw Error.Argument(SRResources.SegmentNullOrEmpty);
+            }
+
+            if (segment == ODataSegmentKinds.Value)
+            {
+                return new ValuePathSegment();
+            }
+
+            throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
         }
 
         /// <summary>

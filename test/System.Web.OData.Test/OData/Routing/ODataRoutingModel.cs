@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.TestCommon;
 using Microsoft.OData.Edm;
 
@@ -22,6 +23,7 @@ namespace System.Web.Http.OData.Routing
             builder.EntitySet<SalesPerson>("SalesPeople");
             builder.EntitySet<EmailAddress>("EmailAddresses");
             builder.EntitySet<üCategory>("üCategories");
+            builder.EntitySet<EnumCustomer>("EnumCustomers");
 
             ActionConfiguration getRoutingCustomerById = builder.Action("GetRoutingCustomerById");
             getRoutingCustomerById.Parameter<int>("RoutingCustomerId");
@@ -171,6 +173,12 @@ namespace System.Web.Http.OData.Routing
         public class üCategory
         {
             public int ID { get; set; }
+        }
+
+        public class EnumCustomer
+        {
+            public int ID { get; set; }
+            public Color Color { get; set; }
         }
     }
 }

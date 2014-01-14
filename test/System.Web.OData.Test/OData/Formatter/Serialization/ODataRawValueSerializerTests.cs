@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
+using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
@@ -49,6 +50,24 @@ namespace System.Web.Http.OData.Formatter.Serialization
             TextReader reader = new StreamReader(stream);
 
             Assert.Equal(value.ToString(), reader.ReadToEnd());
+        }
+
+        [Fact]
+        public void SerializesEnumType()
+        {
+            ODataRawValueSerializer serializer = new ODataRawValueSerializer();
+            Mock<IODataRequestMessage> mockRequest = new Mock<IODataRequestMessage>();
+            Stream stream = new MemoryStream();
+            mockRequest.Setup(r => r.GetStream()).Returns(stream);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(mockRequest.Object);
+            object value = Color.Red | Color.Blue;
+
+            serializer.WriteObject(value, value.GetType(), messageWriter, null);
+            stream.Seek(0, SeekOrigin.Begin);
+            TextReader reader = new StreamReader(stream);
+            string result = reader.ReadToEnd();
+
+            Assert.Equal(value.ToString(), result, ignoreCase: true);
         }
     }
 }

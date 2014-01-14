@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <m:value xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:context="http://localhost/#System.Web.Http.OData.TestCommon.Models.Person" m:type="#System.Web.Http.OData.TestCommon.Models.Person" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata">
   <d:Age m:type="Int32">20</d:Age>
-  <d:Gender>Male</d:Gender>
+  <d:Gender m:type="#System.Web.Http.OData.TestCommon.Models.Gender">Male</d:Gender>
   <d:FirstName>Frank</d:FirstName>
   <d:Alias m:type="#Collection(String)">
     <m:element>Alias0</m:element>
@@ -16,7 +16,7 @@
     <d:CountryCode m:type="Int32">1</d:CountryCode>
     <d:AreaCode m:type="Int32">425</d:AreaCode>
     <d:Number m:type="Int32">9879089</d:Number>
-    <d:PhoneType>HomePhone</d:PhoneType>
+    <d:PhoneType m:type="#System.Web.Http.OData.TestCommon.Models.PhoneType">HomePhone</d:PhoneType>
   </d:HomeNumber>
   <d:FavoriteHobby m:type="#System.Web.Http.OData.TestCommon.Models.IActivity">
     <d:ActivityName>Xbox Gaming</d:ActivityName>

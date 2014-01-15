@@ -940,6 +940,30 @@ namespace System.Web.Http.OData.Routing
             Assert.Equal(keyValues.OrderBy(k => k), routeData.Select(d => d.Key + ":" + d.Value).OrderBy(d => d));
         }
 
+        [Theory]
+        [InlineData("Customer")] // Customer is not a correct entity set in the model
+        [InlineData("UnknowFunction(foo={newFoo})")] // UnknowFunction is not a function name in the model
+        public void ParseTemplate_ThrowODataException_InvalidODataPathSegmentTemplate(string template)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _parser.ParseTemplate(model.Model, template),
+                "The given OData path template '" + template + "' is invalid.");
+        }
+
+        [Fact]
+        public void ParseTemplate_ThrowODataException_UnResolvedPathSegment()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _parser.ParseTemplate(model.Model, "Customers(ID={key})/Order"),
+                "Found an unresolved path segment 'Order' in the OData path template 'Customers(ID={key})/Order'.");
+        }
+
         private static void AssertTypeMatchesExpectedType(string odataPath, string expectedSetName, string expectedTypeName, bool isCollection)
         {
             // Arrange

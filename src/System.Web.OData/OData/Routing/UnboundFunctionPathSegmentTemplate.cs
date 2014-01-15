@@ -9,6 +9,8 @@ namespace System.Web.Http.OData.Routing
     /// </summary>
     public class UnboundFunctionPathSegmentTemplate : ODataPathSegmentTemplate
     {
+        private string _functionName;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="UnboundFunctionPathSegmentTemplate"/> class.
         /// </summary>
@@ -20,6 +22,7 @@ namespace System.Web.Http.OData.Routing
                 throw Error.ArgumentNull("function");
             }
 
+            _functionName = function.FunctionName;
             ParameterMappings = KeyValuePathSegmentTemplate.BuildParameterMappings(function.Values, function.ToString());
         }
 
@@ -35,7 +38,10 @@ namespace System.Web.Http.OData.Routing
             if (pathSegment.SegmentKind == ODataSegmentKinds.UnboundFunction)
             {
                 UnboundFunctionPathSegment functionSegment = (UnboundFunctionPathSegment)pathSegment;
-                return KeyValuePathSegmentTemplate.TryMatch(ParameterMappings, functionSegment.Values, values);
+                if (_functionName == functionSegment.FunctionName)
+                {
+                    return KeyValuePathSegmentTemplate.TryMatch(ParameterMappings, functionSegment.Values, values);
+                }
             }
 
             return false;

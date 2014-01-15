@@ -17,7 +17,7 @@ namespace System.Web.Http.OData.Query
         [InlineData(AllowedQueryOptions.OrderBy)]
         [InlineData(AllowedQueryOptions.Skip)]
         [InlineData(AllowedQueryOptions.Top)]
-        [InlineData(AllowedQueryOptions.InlineCount)]
+        [InlineData(AllowedQueryOptions.Count)]
         [InlineData(AllowedQueryOptions.Select)]
         [InlineData(AllowedQueryOptions.Expand)]
         [InlineData(AllowedQueryOptions.Format)]

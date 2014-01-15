@@ -27,7 +27,7 @@ namespace System.Net.Http
         private const string ODataRoutingConventionsKey = "MS_ODataRoutingConventions";
         private const string ODataPathKey = "MS_ODataPath";
         private const string ODataPathHandlerKey = "MS_ODataPathHandler";
-        private const string InlineCountPropertyKey = "MS_InlineCount";
+        private const string CountValuePropertyKey = "MS_CountQueryOption";
         private const string NextPageLinkPropertyKey = "MS_NextPageLink";
         private const string MessageDetailKey = "MessageDetail";
         private const string SelectExpandClauseKey = "MS_SelectExpandClause";
@@ -297,38 +297,38 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Gets the inline count to use in the OData response.
+        /// Gets the count to use in the OData response.
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <returns>The inline count to send back, or <c>null</c> if one isn't set.</returns>
-        public static long? GetInlineCount(this HttpRequestMessage request)
+        /// <returns>The count to send back, or <c>null</c> if one isn't set.</returns>
+        public static long? GetCountValue(this HttpRequestMessage request)
         {
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
             }
 
-            object inlineCount;
-            if (request.Properties.TryGetValue(InlineCountPropertyKey, out inlineCount))
+            object countValue;
+            if (request.Properties.TryGetValue(CountValuePropertyKey, out countValue))
             {
-                return inlineCount as long?;
+                return countValue as long?;
             }
             return null;
         }
 
         /// <summary>
-        /// Sets the inline count to use in the OData response.
+        /// Sets the count to use in the OData response.
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <param name="inlineCount">The inline count to send back to the client.</param>
-        public static void SetInlineCount(this HttpRequestMessage request, long inlineCount)
+        /// <param name="count">The count to send back to the client.</param>
+        public static void SetCountValue(this HttpRequestMessage request, long count)
         {
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
             }
 
-            request.Properties[InlineCountPropertyKey] = inlineCount;
+            request.Properties[CountValuePropertyKey] = count;
         }
 
         /// <summary>

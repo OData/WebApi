@@ -44,9 +44,9 @@ namespace System.Web.Http.OData.Query
         Skip = 0x20,
 
         /// <summary>
-        /// A value that corresponds to allowing the $inlinecount query option.
+        /// A value that corresponds to allowing the $count query option.
         /// </summary>
-        InlineCount = 0x40,
+        Count = 0x40,
 
         /// <summary>
         /// A value that corresponds to allowing the $format query option.
@@ -61,11 +61,11 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// A value that corresponds to the default query options supported by <see cref="QueryableAttribute"/>.
         /// </summary>
-        Supported = Filter | OrderBy | Top | Skip | InlineCount | Select | Expand | Format,
+        Supported = Filter | OrderBy | Top | Skip | Count | Select | Expand | Format,
 
         /// <summary>
         /// A value that corresponds to allowing all query options.
         /// </summary>
-        All = Filter | Expand | Select | OrderBy | Top | Skip | InlineCount | Format | SkipToken
+        All = Filter | Expand | Select | OrderBy | Top | Skip | Count | Format | SkipToken
     }
 }

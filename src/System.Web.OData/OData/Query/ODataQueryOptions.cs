@@ -22,7 +22,7 @@ namespace System.Web.Http.OData.Query
 {
     /// <summary>
     /// This defines a composite OData query options that can be used to perform query composition.
-    /// Currently this only supports $filter, $orderby, $top, $skip, and $inlinecount.
+    /// Currently this only supports $filter, $orderby, $top, $skip, and $count.
     /// </summary>
     [ODataQueryParameterBinding]
     public class ODataQueryOptions
@@ -77,32 +77,32 @@ namespace System.Web.Http.OData.Query
                 switch (kvp.Key)
                 {
                     case "$filter":
-                        RawValues.Filter = kvp.Value;
                         ThrowIfEmpty(kvp.Value, "$filter");
+                        RawValues.Filter = kvp.Value;
                         Filter = new FilterQueryOption(kvp.Value, context);
                         break;
                     case "$orderby":
-                        RawValues.OrderBy = kvp.Value;
                         ThrowIfEmpty(kvp.Value, "$orderby");
+                        RawValues.OrderBy = kvp.Value;
                         OrderBy = new OrderByQueryOption(kvp.Value, context);
                         break;
                     case "$top":
-                        RawValues.Top = kvp.Value;
                         ThrowIfEmpty(kvp.Value, "$top");
+                        RawValues.Top = kvp.Value;
                         Top = new TopQueryOption(kvp.Value, context);
                         break;
                     case "$skip":
-                        RawValues.Skip = kvp.Value;
                         ThrowIfEmpty(kvp.Value, "$skip");
+                        RawValues.Skip = kvp.Value;
                         Skip = new SkipQueryOption(kvp.Value, context);
                         break;
                     case "$select":
                         RawValues.Select = kvp.Value;
                         break;
-                    case "$inlinecount":
-                        RawValues.InlineCount = kvp.Value;
-                        ThrowIfEmpty(kvp.Value, "$inlinecount");
-                        InlineCount = new InlineCountQueryOption(kvp.Value, context);
+                    case "$count":
+                        ThrowIfEmpty(kvp.Value, "$count");
+                        RawValues.Count = kvp.Value;
+                        Count = new CountQueryOption(kvp.Value, context);
                         break;
                     case "$expand":
                         RawValues.Expand = kvp.Value;
@@ -168,9 +168,9 @@ namespace System.Web.Http.OData.Query
         public TopQueryOption Top { get; private set; }
 
         /// <summary>
-        /// Gets the <see cref="InlineCountQueryOption"/>.
+        /// Gets the <see cref="CountQueryOption"/>.
         /// </summary>
-        public InlineCountQueryOption InlineCount { get; private set; }
+        public CountQueryOption Count { get; private set; }
 
         /// <summary>
         /// Gets or sets the query validator.
@@ -224,7 +224,7 @@ namespace System.Web.Http.OData.Query
                  queryOptionName == "$filter" ||
                  queryOptionName == "$top" ||
                  queryOptionName == "$skip" ||
-                 queryOptionName == "$inlinecount" ||
+                 queryOptionName == "$count" ||
                  queryOptionName == "$expand" ||
                  queryOptionName == "$select" ||
                  queryOptionName == "$format" ||
@@ -267,12 +267,12 @@ namespace System.Web.Http.OData.Query
                 result = Filter.ApplyTo(result, querySettings, _assembliesResolver);
             }
 
-            if (InlineCount != null && Request.GetInlineCount() == null)
+            if (Count != null && Request.GetCountValue() == null)
             {
-                long? count = InlineCount.GetEntityCount(result);
+                long? count = Count.GetEntityCount(result);
                 if (count.HasValue)
                 {
-                    Request.SetInlineCount(count.Value);
+                    Request.SetCountValue(count.Value);
                 }
             }
 
@@ -349,7 +349,7 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("querySettings");
             }
 
-            if (Filter != null || OrderBy != null || Top != null || Skip != null || InlineCount != null)
+            if (Filter != null || OrderBy != null || Top != null || Skip != null || Count != null)
             {
                 throw Error.InvalidOperation(SRResources.NonSelectExpandOnSingleEntity);
             }

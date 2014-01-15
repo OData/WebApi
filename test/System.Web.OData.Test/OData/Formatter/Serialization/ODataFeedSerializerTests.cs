@@ -272,7 +272,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteObjectInline_Sets_InlineCount_OnWriteStart()
+        public void WriteObjectInline_Sets_CountQueryOption_OnWriteStart()
         {
             // Arrange
             IEnumerable instance = new object[0];
@@ -319,20 +319,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateODataFeed_Sets_InlineCountForPageResult()
+        public void CreateODataFeed_Sets_CountValueForPageResult()
         {
             // Arrange
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
             Uri expectedNextLink = new Uri("http://nextlink.com");
-            long expectedInlineCount = 1000;
+            const long ExpectedCountValue = 1000;
 
-            var result = new PageResult<Customer>(_customers, expectedNextLink, expectedInlineCount);
+            var result = new PageResult<Customer>(_customers, expectedNextLink, ExpectedCountValue);
 
             // Act
             ODataFeed feed = serializer.CreateODataFeed(result, _customersType, new ODataSerializerContext());
 
             // Assert
-            Assert.Equal(1000, feed.Count);
+            Assert.Equal(ExpectedCountValue, feed.Count);
         }
 
         [Fact]
@@ -341,9 +341,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
             Uri expectedNextLink = new Uri("http://nextlink.com");
-            long expectedInlineCount = 1000;
+            const long ExpectedCountValue = 1000;
 
-            var result = new PageResult<Customer>(_customers, expectedNextLink, expectedInlineCount);
+            var result = new PageResult<Customer>(_customers, expectedNextLink, ExpectedCountValue);
 
             // Act
             ODataFeed feed = serializer.CreateODataFeed(result, _customersType, new ODataSerializerContext());
@@ -353,20 +353,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateODataFeed_Sets_InlineCountFromContext()
+        public void CreateODataFeed_Sets_CountValueFromContext()
         {
             // Arrange
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
-            long expectedInlineCount = 1000;
+            const long ExpectedCountValue = 1000;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetInlineCount(expectedInlineCount);
+            request.SetCountValue(ExpectedCountValue);
             var result = new object[0];
 
             // Act
             ODataFeed feed = serializer.CreateODataFeed(result, _customersType, new ODataSerializerContext { Request = request });
 
             // Assert
-            Assert.Equal(expectedInlineCount, feed.Count);
+            Assert.Equal(ExpectedCountValue, feed.Count);
         }
 
         [Fact]
@@ -442,12 +442,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateODataFeed_Ignores_InlineCount_ForInnerFeeds()
+        public void CreateODataFeed_Ignores_CountValue_ForInnerFeeds()
         {
             // Arrange
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetInlineCount(42);
+            request.SetCountValue(42);
             var result = new object[0];
             IEdmNavigationProperty navProp = new Mock<IEdmNavigationProperty>().Object;
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);

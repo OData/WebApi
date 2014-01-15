@@ -821,7 +821,7 @@ namespace System.Web.Http.OData.Query
         [Theory]
         [InlineData("$filter=ID eq 1")]
         [InlineData("$orderby=ID")]
-        [InlineData("$inlinecount=allpages")]
+        [InlineData("$count=true")]
         [InlineData("$skip=1")]
         [InlineData("$top=0")]
         public void ValidateSelectExpandOnly_ThrowsODataException_IfODataQueryOptionsHasNonSelectExpand(string parameter)
@@ -834,7 +834,7 @@ namespace System.Web.Http.OData.Query
 
             Assert.Throws<ODataException>(
                 () => QueryableAttribute.ValidateSelectExpandOnly(queryOptions),
-                "The requested resource is not a collection. Query options $filter, $orderby, $inlinecount, $skip, and $top can be applied only on collections.");
+                "The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.");
         }
 
         private void SomeAction()

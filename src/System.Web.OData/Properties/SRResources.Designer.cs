@@ -808,6 +808,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid value for $count..
+        /// </summary>
+        internal static string InvalidCountOption {
+            get {
+                return ResourceManager.GetString("InvalidCountOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid entity set name..
         /// </summary>
         internal static string InvalidEntitySetName {
@@ -822,15 +831,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string InvalidETagHandler {
             get {
                 return ResourceManager.GetString("InvalidETagHandler", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid value for $inlinecount..
-        /// </summary>
-        internal static string InvalidInlineCount {
-            get {
-                return ResourceManager.GetString("InvalidInlineCount", resourceCulture);
             }
         }
         
@@ -1195,7 +1195,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The requested resource is not a collection. Query options $filter, $orderby, $inlinecount, $skip, and $top can be applied only on collections..
+        ///   Looks up a localized string similar to The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections..
         /// </summary>
         internal static string NonSelectExpandOnSingleEntity {
             get {

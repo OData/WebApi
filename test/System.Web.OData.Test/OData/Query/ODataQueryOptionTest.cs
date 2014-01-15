@@ -63,7 +63,7 @@ namespace System.Web.Http.OData.Query
                     "$filter",
                     "$top",
                     "$skip",
-                    "$inlinecount",
+                    "$count",
                     "$expand",
                     "$select",
                     "$format",
@@ -176,6 +176,26 @@ namespace System.Web.Http.OData.Query
             );
         }
 
+        [Theory]
+        [InlineData("$filter")]
+        [InlineData("$count")]
+        [InlineData("$orderby")]
+        [InlineData("$skip")]
+        [InlineData("$top")]
+        public void ConstructorThrowsIfEmptyQueryOptionValue(string queryName)
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+            var message = new HttpRequestMessage(
+                   HttpMethod.Get,
+                   new Uri("http://server/service/Customers/?" + queryName + "=")
+               );
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message),
+                "The value for OData query '" + queryName + "' cannot be empty.");
+        }
+
         [Fact]
         public void CanExtractQueryOptionsCorrectly()
         {
@@ -183,7 +203,7 @@ namespace System.Web.Http.OData.Query
 
             var message = new HttpRequestMessage(
                 HttpMethod.Get,
-                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken")
             );
 
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
@@ -198,7 +218,7 @@ namespace System.Web.Http.OData.Query
             Assert.Equal("Expand", queryOptions.RawValues.Expand);
             Assert.Equal("Select", queryOptions.RawValues.Select);
             Assert.NotNull(queryOptions.SelectExpand);
-            Assert.Equal("allpages", queryOptions.RawValues.InlineCount);
+            Assert.Equal("true", queryOptions.RawValues.Count);
             Assert.Equal("SkipToken", queryOptions.RawValues.SkipToken);
         }
 
@@ -210,7 +230,7 @@ namespace System.Web.Http.OData.Query
 
             var message = new HttpRequestMessage(
                 HttpMethod.Get,
-                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken")
             );
 
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
@@ -227,7 +247,7 @@ namespace System.Web.Http.OData.Query
 
             var message = new HttpRequestMessage(
                 HttpMethod.Get,
-                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken")
             );
 
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
@@ -244,7 +264,7 @@ namespace System.Web.Http.OData.Query
 
             var message = new HttpRequestMessage(
                 HttpMethod.Get,
-                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken")
             );
 
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
@@ -850,20 +870,20 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void ApplyTo_IgnoresInlineCount_IfRequestAlreadyHasInlineCount()
+        public void ApplyTo_IgnoresCount_IfRequestAlreadyHasCount()
         {
             // Arrange
             long count = 42;
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$inlinecount=allpages");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$count=true");
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
             ODataQueryOptions options = new ODataQueryOptions(context, request);
-            request.SetInlineCount(count);
+            request.SetCountValue(count);
 
             // Act
             options.ApplyTo(Enumerable.Empty<int>().AsQueryable());
 
             // Assert
-            Assert.Equal(count, request.GetInlineCount());
+            Assert.Equal(count, request.GetCountValue());
         }
 
         [Fact]
@@ -880,7 +900,7 @@ namespace System.Web.Http.OData.Query
         [Theory]
         [InlineData("$filter=ID eq 1")]
         [InlineData("$orderby=ID")]
-        [InlineData("$inlinecount=allpages")]
+        [InlineData("$count=true")] // or other true or false in case-insensitive
         [InlineData("$skip=1")]
         [InlineData("$top=0")]
         public void ApplyTo_Entity_ThrowsInvalidOperation_IfNonSelectExpand(string parameter)
@@ -893,7 +913,7 @@ namespace System.Web.Http.OData.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => queryOptions.ApplyTo(42, new ODataQuerySettings()),
-                "The requested resource is not a collection. Query options $filter, $orderby, $inlinecount, $skip, and $top can be applied only on collections.");
+                "The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.");
         }
 
         [Fact]
@@ -921,7 +941,7 @@ namespace System.Web.Http.OData.Query
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
-                "http://localhost/?$filter=Id eq 42&$orderby=Id&$skip=42&$top=42&$inlinecount=allpages&$select=Id&$expand=Orders");
+                "http://localhost/?$filter=Id eq 42&$orderby=Id&$skip=42&$top=42&$count=true&$select=Id&$expand=Orders");
 
             // Act
             ODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
@@ -932,7 +952,7 @@ namespace System.Web.Http.OData.Query
             Assert.NotNull(queryOptions.Skip);
             Assert.NotNull(queryOptions.Top);
             Assert.NotNull(queryOptions.SelectExpand);
-            Assert.NotNull(queryOptions.InlineCount);
+            Assert.NotNull(queryOptions.Count);
         }
     }
 

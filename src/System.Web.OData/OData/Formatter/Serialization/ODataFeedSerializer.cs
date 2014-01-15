@@ -187,10 +187,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 {
                     feed.NextPageLink = writeContext.Request.GetNextPageLink();
 
-                    long? inlineCount = writeContext.Request.GetInlineCount();
-                    if (inlineCount.HasValue)
+                    long? countValue = writeContext.Request.GetCountValue();
+                    if (countValue.HasValue)
                     {
-                        feed.Count = inlineCount.Value;
+                        feed.Count = countValue.Value;
                     }
                 }
             }

@@ -52,9 +52,9 @@ namespace System.Web.Http.OData.Query.Validators
                 options.Filter.Validate(validationSettings);
             }
 
-            if (options.InlineCount != null)
+            if (options.Count != null)
             {
-                ValidateQueryOptionAllowed(AllowedQueryOptions.InlineCount, validationSettings.AllowedQueryOptions);
+                ValidateQueryOptionAllowed(AllowedQueryOptions.Count, validationSettings.AllowedQueryOptions);
             }
 
             if (options.RawValues.Expand != null)

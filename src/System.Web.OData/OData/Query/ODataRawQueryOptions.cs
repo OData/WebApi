@@ -38,9 +38,9 @@ namespace System.Web.Http.OData.Query
         public string Expand { get; internal set; }
 
         /// <summary>
-        ///  Gets the raw $inlineCount query value from the incoming request Uri if exists.
+        ///  Gets the raw $count query value from the incoming request Uri if exists.
         /// </summary>
-        public string InlineCount { get; internal set; }
+        public string Count { get; internal set; }
 
         /// <summary>
         ///  Gets the raw $format query value from the incoming request Uri if exists.

@@ -301,7 +301,7 @@ namespace System.Web.Http.OData.Formatter
             using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
-            using (HttpRequestMessage request = CreateRequest("People?$orderby=Name&$inlinecount=allpages",
+            using (HttpRequestMessage request = CreateRequest("People?$orderby=Name&$count=true",
                     ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
             // Act
             using (HttpResponseMessage response = client.SendAsync(request).Result)

@@ -603,7 +603,7 @@ namespace System.Web.Http
 
         internal static void ValidateSelectExpandOnly(ODataQueryOptions queryOptions)
         {
-            if (queryOptions.Filter != null || queryOptions.InlineCount != null || queryOptions.OrderBy != null || queryOptions.Skip != null
+            if (queryOptions.Filter != null || queryOptions.Count != null || queryOptions.OrderBy != null || queryOptions.Skip != null
                 || queryOptions.Top != null)
             {
                 throw new ODataException(Error.Format(SRResources.NonSelectExpandOnSingleEntity));

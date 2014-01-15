@@ -538,8 +538,8 @@
   <data name="UnableToDetermineMetadataUrl" xml:space="preserve">
     <value>The ODataMediaTypeFormatter must be able to determine the metadata URL for a request in order to serialize the response.</value>
   </data>
-  <data name="InvalidInlineCount" xml:space="preserve">
-    <value>'{0}' is not a valid value for $inlinecount.</value>
+  <data name="InvalidCountOption" xml:space="preserve">
+    <value>'{0}' is not a valid value for $count.</value>
   </data>
   <data name="ODataPathMissing" xml:space="preserve">
     <value>The operation cannot be completed because no ODataPath is available for the request.</value>
@@ -636,7 +636,7 @@
     <value>The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the '{1}' property on QueryableAttribute or ODataValidationSettings.</value>
   </data>
   <data name="NonSelectExpandOnSingleEntity" xml:space="preserve">
-    <value>The requested resource is not a collection. Query options $filter, $orderby, $inlinecount, $skip, and $top can be applied only on collections.</value>
+    <value>The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.</value>
   </data>
   <data name="SingleResultHasMoreThanOneEntity" xml:space="preserve">
     <value>The action '{0}' on controller '{1}' returned a {2} containing more than one element. {2} must have zero or one elements.</value>

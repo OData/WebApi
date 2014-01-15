@@ -227,7 +227,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeConventionTests.cs" />
     <Compile Include="OData\Builder\EdmModelAsserts.cs" />
-    <Compile Include="OData\Query\InlineCountQueryOptionTest.cs" />
+    <Compile Include="OData\Query\CountQueryOptionTest.cs" />
     <Compile Include="OData\Query\ODataValidationSettingsTest.cs" />
     <Compile Include="OData\Query\QueryableAttributeTest.cs" />
     <Compile Include="OData\Query\Expressions\ExpressionStringBuilder.cs" />

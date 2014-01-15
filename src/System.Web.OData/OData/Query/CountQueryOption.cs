@@ -9,18 +9,18 @@ using Microsoft.OData.Edm;
 namespace System.Web.Http.OData.Query
 {
     /// <summary>
-    /// Represents the value of the $inlinecount query option and exposes a way to retrieve the number of entities that satisfy a query.
+    /// Represents the value of the $count query option and exposes a way to retrieve the number of entities that satisfy a query.
     /// </summary>
-    public class InlineCountQueryOption
+    public class CountQueryOption
     {
-        private InlineCountValue? _value;
+        private bool? _value;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InlineCountQueryOption" /> class.
+        /// Initializes a new instance of the <see cref="CountQueryOption" /> class.
         /// </summary>
-        /// <param name="rawValue">The raw value for the $inlinecount query option.</param>
-        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
-        public InlineCountQueryOption(string rawValue, ODataQueryContext context)
+        /// <param name="rawValue">The raw value for the $count query option.</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the query context.</param>
+        public CountQueryOption(string rawValue, ODataQueryContext context)
         {
             if (String.IsNullOrEmpty(rawValue))
             {
@@ -38,46 +38,45 @@ namespace System.Web.Http.OData.Query
 
         /// <summary>
         /// Gets the given <see cref="ODataQueryContext"/>.
-        /// </summary>        
+        /// </summary>
         public ODataQueryContext Context { get; private set; }
 
         /// <summary>
-        /// Gets the raw $inlinecount value.
+        /// Gets the raw $count value.
         /// </summary>
         public string RawValue { get; private set; }
 
         /// <summary>
-        /// Gets the value of the $inlinecount in a parsed form.
+        /// Gets the value of the $count in a parsed form.
         /// </summary>
-        public InlineCountValue Value
+        public bool Value
         {
             get
             {
                 if (_value == null)
                 {
-                    if (RawValue.Equals("none", StringComparison.OrdinalIgnoreCase))
+                    // $count value is case-insensitive.
+                    bool result;
+                    if (Boolean.TryParse(RawValue, out result))
                     {
-                        _value = InlineCountValue.None;
-                    }
-                    else if (RawValue.Equals("allpages", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _value = InlineCountValue.AllPages;
+                        _value = result;
                     }
                     else
                     {
-                        throw new ODataException(Error.Format(SRResources.InvalidInlineCount, RawValue));
+                        throw new ODataException(Error.Format(SRResources.InvalidCountOption, RawValue));
                     }
                 }
-                Contract.Assert(_value.HasValue);
+
+                Contract.Assert(_value != null);
                 return _value.Value;
             }
         }
 
         /// <summary>
-        /// Gets the number of entities that satify the given query if the response should include an inline count, or <c>null</c> otherwise.
+        /// Gets the number of entities that satify the given query if the response should include a count query option, or <c>null</c> otherwise.
         /// </summary>
         /// <param name="query">The query to compute the count for.</param>
-        /// <returns>The number of entities that satisfy the specified query if the response should include an inline count, or <c>null</c> otherwise.</returns>
+        /// <returns>The number of entities that satisfy the specified query if the response should include a count query option, or <c>null</c> otherwise.</returns>
         public long? GetEntityCount(IQueryable query)
         {
             if (Context.ElementClrType == null)
@@ -85,7 +84,7 @@ namespace System.Web.Http.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "GetEntityCount");
             }
 
-            if (Value == InlineCountValue.AllPages)
+            if (Value)
             {
                 return ExpressionHelpers.Count(query, Context.ElementClrType);
             }

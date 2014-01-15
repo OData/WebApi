@@ -12,7 +12,7 @@ namespace System.Web.Http.OData
     /// <remarks>
     /// Currently limited to:
     /// <list type="bullet">
-    /// <item><description>The Count of all matching entities on the server (requested using $inlinecount=allpages).</description></item>
+    /// <item><description>The Count of all matching entities on the server (requested using $count=true).</description></item>
     /// <item><description>The NextLink to retrieve the next page of results (added if the server enforces Server Driven Paging).</description></item>
     /// </list>
     /// </remarks>

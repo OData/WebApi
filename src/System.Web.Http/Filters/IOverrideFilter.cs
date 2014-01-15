@@ -10,8 +10,8 @@ namespace System.Web.Http.Filters
         /// The following types of filters may be overridden:
         /// <list type="bullet">
         /// <item><description><see cref="IActionFilter"/></description></item>
-        /// <item><description><see cref="IAuthorizationFilter"/></description></item>
         /// <item><description><see cref="IAuthenticationFilter"/></description></item>
+        /// <item><description><see cref="IAuthorizationFilter"/></description></item>
         /// <item><description><see cref="IExceptionFilter"/></description></item>
         /// </list>
         /// </remarks>

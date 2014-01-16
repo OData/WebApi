@@ -111,7 +111,7 @@ namespace System.Web.Http.OData.Formatter
                 if (TypeHelper.IsEnum(type))
                 {
                     string[] values = valueString.Split(new[] { '\'' }, StringSplitOptions.None);
-                    Contract.Assert(values.Length == 3 && values[2] == String.Empty);
+                    Contract.Assert(values.Length == 3 && String.IsNullOrEmpty(values[2]));
 
                     string enumValueString = values[1];
                     Type enumType = TypeHelper.GetUnderlyingTypeOrSelf(type);

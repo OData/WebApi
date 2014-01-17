@@ -180,7 +180,6 @@ namespace System.Web.Http.OData.Formatter
                 foreach (ODataMediaTypeFormatter odataFormatter in
                     configuration.Formatters.OfType<ODataMediaTypeFormatter>())
                 {
-                    odataFormatter.SupportedMediaTypes.Remove(ODataMediaTypes.ApplicationJsonODataVerbose);
                     odataFormatter.SupportedMediaTypes.Remove(ODataMediaTypes.ApplicationJson);
                 }
 

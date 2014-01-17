@@ -109,7 +109,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
             }
 
-            // save this for later to support JSON lite streaming.
+            // save this for later to support JSON odata.streaming.
             Uri nextPageLink = feed.NextPageLink;
             feed.NextPageLink = null;
 
@@ -126,10 +126,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(feed),
-            // the next page link will be written early in a manner not compatible with streaming=true. Instead, if
+            // the next page link will be written early in a manner not compatible with odata.streaming=true. Instead, if
             // the next page link is not set when calling WriteStart(feed) but is instead set later on that feed
             // object before calling WriteEnd(), the next page link will be written at the end, as required for
-            // streaming=true support.
+            // odata.streaming=true support.
 
             if (nextPageLink != null)
             {

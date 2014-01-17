@@ -53,18 +53,17 @@ namespace System.Web.Http.OData.Formatter
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
                 MediaTypeHeaderValue.Parse("application/atomsvc+xml"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json"),
                 MediaTypeHeaderValue.Parse("application/atom+xml;type=feed"),
                 MediaTypeHeaderValue.Parse("application/atom+xml"),
@@ -93,18 +92,17 @@ namespace System.Web.Http.OData.Formatter
             // Assert
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json"),
                 MediaTypeHeaderValue.Parse("application/atom+xml;type=feed"),
                 MediaTypeHeaderValue.Parse("application/atom+xml")
@@ -130,18 +128,17 @@ namespace System.Web.Http.OData.Formatter
             // Assert
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json"),
                 MediaTypeHeaderValue.Parse("application/atom+xml;type=entry"),
                 MediaTypeHeaderValue.Parse("application/atom+xml")
@@ -167,18 +164,17 @@ namespace System.Web.Http.OData.Formatter
             // Assert
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json"),
                 MediaTypeHeaderValue.Parse("application/xml"),
                 MediaTypeHeaderValue.Parse("text/xml")
@@ -204,18 +200,17 @@ namespace System.Web.Http.OData.Formatter
             // Assert
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json"),
                 MediaTypeHeaderValue.Parse("application/xml"),
                 MediaTypeHeaderValue.Parse("text/xml")
@@ -241,18 +236,17 @@ namespace System.Web.Http.OData.Formatter
             // Assert
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json"),
                 MediaTypeHeaderValue.Parse("application/xml"),
                 MediaTypeHeaderValue.Parse("text/xml")
@@ -279,18 +273,17 @@ namespace System.Web.Http.OData.Formatter
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
                 MediaTypeHeaderValue.Parse("application/atomsvc+xml"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json"),
                 MediaTypeHeaderValue.Parse("application/xml")
             };
@@ -338,18 +331,17 @@ namespace System.Web.Http.OData.Formatter
             // Assert
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json"),
                 MediaTypeHeaderValue.Parse("application/xml")
             };
@@ -374,18 +366,17 @@ namespace System.Web.Http.OData.Formatter
             // Assert
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
             };
 
@@ -403,7 +394,7 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeHeaderValue mediaType = GetDefaultContentType(model, feedType);
 
             // Assert
-            Assert.Equal(MediaTypeHeaderValue.Parse("application/json; odata.metadata=minimal; streaming=true"), mediaType);
+            Assert.Equal(MediaTypeHeaderValue.Parse("application/json; odata.metadata=minimal; odata.streaming=true"), mediaType);
         }
 
         [Fact]
@@ -417,7 +408,7 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeHeaderValue mediaType = GetDefaultContentType(model, entryType);
 
             // Assert
-            Assert.Equal(MediaTypeHeaderValue.Parse("application/json; odata.metadata=minimal; streaming=true"), mediaType);
+            Assert.Equal(MediaTypeHeaderValue.Parse("application/json; odata.metadata=minimal; odata.streaming=true"), mediaType);
         }
 
         [Fact]
@@ -431,7 +422,7 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeHeaderValue mediaType = GetDefaultContentType(model, propertyType);
 
             // Assert
-            Assert.Equal(MediaTypeHeaderValue.Parse("application/json; odata.metadata=minimal; streaming=true"), mediaType);
+            Assert.Equal(MediaTypeHeaderValue.Parse("application/json; odata.metadata=minimal; odata.streaming=true"), mediaType);
         }
 
         [Fact]
@@ -465,22 +456,21 @@ namespace System.Web.Http.OData.Formatter
         [Theory]
         [InlineData("atom", "application/atom+xml")]
         [InlineData("json", "application/json")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dtrue", "application/json;odata.metadata=minimal;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dfalse", "application/json;odata.metadata=minimal;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dminimal", "application/json;odata.metadata=minimal")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dtrue", "application/json;odata.metadata=full;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dfalse", "application/json;odata.metadata=full;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse", "application/json;odata.metadata=full;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dfull", "application/json;odata.metadata=full")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dtrue", "application/json;odata.metadata=none;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dfalse", "application/json;odata.metadata=none;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue", "application/json;odata.metadata=none;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse", "application/json;odata.metadata=none;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dnone", "application/json;odata.metadata=none")]
-        [InlineData("application%2fjson%3bodata%3dverbose", "application/json;odata=verbose")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue", "application/json;streaming=true")]
-        [InlineData("application%2fjson%3bstreaming%3dfalse", "application/json;streaming=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue", "application/json;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fatom%2bxml%3btype%3dfeed", "application/atom+xml;type=feed")]
         [InlineData("application%2fatom%2bxml", "application/atom+xml")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue%3bodata.metadata%3dminimal", "application/json;streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
         public void TestCreate_DollarFormat_Feed(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -497,22 +487,21 @@ namespace System.Web.Http.OData.Formatter
         [Theory]
         [InlineData("atom", "application/atom+xml")]
         [InlineData("json", "application/json")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dtrue", "application/json;odata.metadata=minimal;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dfalse", "application/json;odata.metadata=minimal;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dminimal", "application/json;odata.metadata=minimal")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dtrue", "application/json;odata.metadata=full;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dfalse", "application/json;odata.metadata=full;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse", "application/json;odata.metadata=full;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dfull", "application/json;odata.metadata=full")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dtrue", "application/json;odata.metadata=none;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dfalse", "application/json;odata.metadata=none;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue", "application/json;odata.metadata=none;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse", "application/json;odata.metadata=none;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dnone", "application/json;odata.metadata=none")]
-        [InlineData("application%2fjson%3bodata%3dverbose", "application/json;odata=verbose")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue", "application/json;streaming=true")]
-        [InlineData("application%2fjson%3bstreaming%3dfalse", "application/json;streaming=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue", "application/json;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fatom%2bxml%3btype%3dentry", "application/atom+xml;type=entry")]
         [InlineData("application%2fatom%2bxml", "application/atom+xml")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue%3bodata.metadata%3dminimal", "application/json;streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
         public void TestCreate_DollarFormat_Entry(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -529,22 +518,21 @@ namespace System.Web.Http.OData.Formatter
         [Theory]
         [InlineData("json", "application/json")]
         [InlineData("xml", "application/xml")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dtrue", "application/json;odata.metadata=minimal;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dfalse", "application/json;odata.metadata=minimal;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dminimal", "application/json;odata.metadata=minimal")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dtrue", "application/json;odata.metadata=full;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dfalse", "application/json;odata.metadata=full;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse", "application/json;odata.metadata=full;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dfull", "application/json;odata.metadata=full")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dtrue", "application/json;odata.metadata=none;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dfalse", "application/json;odata.metadata=none;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue", "application/json;odata.metadata=none;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse", "application/json;odata.metadata=none;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dnone", "application/json;odata.metadata=none")]
-        [InlineData("application%2fjson%3bodata%3dverbose", "application/json;odata=verbose")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue", "application/json;streaming=true")]
-        [InlineData("application%2fjson%3bstreaming%3dfalse", "application/json;streaming=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue", "application/json;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fxml", "application/xml")]
         [InlineData("text%2fxml", "text/xml")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue%3bodata.metadata%3dminimal", "application/json;streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
         public void TestCreate_DollarFormat_Property(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -561,22 +549,21 @@ namespace System.Web.Http.OData.Formatter
         [Theory]
         [InlineData("json", "application/json")]
         [InlineData("xml", "application/xml")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dtrue", "application/json;odata.metadata=minimal;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dfalse", "application/json;odata.metadata=minimal;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dminimal", "application/json;odata.metadata=minimal")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dtrue", "application/json;odata.metadata=full;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dfalse", "application/json;odata.metadata=full;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse", "application/json;odata.metadata=full;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dfull", "application/json;odata.metadata=full")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dtrue", "application/json;odata.metadata=none;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dfalse", "application/json;odata.metadata=none;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue", "application/json;odata.metadata=none;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse", "application/json;odata.metadata=none;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dnone", "application/json;odata.metadata=none")]
-        [InlineData("application%2fjson%3bodata%3dverbose", "application/json;odata=verbose")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue", "application/json;streaming=true")]
-        [InlineData("application%2fjson%3bstreaming%3dfalse", "application/json;streaming=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue", "application/json;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fxml", "application/xml")]
         [InlineData("text%2fxml", "text/xml")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue%3bodata.metadata%3dminimal", "application/json;streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
         public void TestCreate_DollarFormat_EntityReferenceLink(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -593,22 +580,21 @@ namespace System.Web.Http.OData.Formatter
         [Theory]
         [InlineData("json", "application/json")]
         [InlineData("xml", "application/xml")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dtrue", "application/json;odata.metadata=minimal;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dfalse", "application/json;odata.metadata=minimal;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dminimal", "application/json;odata.metadata=minimal")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dtrue", "application/json;odata.metadata=full;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dfalse", "application/json;odata.metadata=full;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse", "application/json;odata.metadata=full;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dfull", "application/json;odata.metadata=full")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dtrue", "application/json;odata.metadata=none;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dfalse", "application/json;odata.metadata=none;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue", "application/json;odata.metadata=none;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse", "application/json;odata.metadata=none;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dnone", "application/json;odata.metadata=none")]
-        [InlineData("application%2fjson%3bodata%3dverbose", "application/json;odata=verbose")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue", "application/json;streaming=true")]
-        [InlineData("application%2fjson%3bstreaming%3dfalse", "application/json;streaming=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue", "application/json;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fxml", "application/xml")]
         [InlineData("text%2fxml", "text/xml")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue%3bodata.metadata%3dminimal", "application/json;streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
         public void TestCreate_DollarFormat_Collection(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -626,21 +612,20 @@ namespace System.Web.Http.OData.Formatter
         [InlineData("json", "application/json")]
         [InlineData("xml", "application/xml")]
         [InlineData("application%2fatomsvc%2bxml", "application/atomsvc+xml")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dtrue", "application/json;odata.metadata=minimal;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dfalse", "application/json;odata.metadata=minimal;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dminimal", "application/json;odata.metadata=minimal")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dtrue", "application/json;odata.metadata=full;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dfalse", "application/json;odata.metadata=full;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse", "application/json;odata.metadata=full;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dfull", "application/json;odata.metadata=full")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dtrue", "application/json;odata.metadata=none;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dfalse", "application/json;odata.metadata=none;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue", "application/json;odata.metadata=none;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse", "application/json;odata.metadata=none;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dnone", "application/json;odata.metadata=none")]
-        [InlineData("application%2fjson%3bodata%3dverbose", "application/json;odata=verbose")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue", "application/json;streaming=true")]
-        [InlineData("application%2fjson%3bstreaming%3dfalse", "application/json;streaming=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue", "application/json;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fxml", "application/xml")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue%3bodata.metadata%3dminimal", "application/json;streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
         public void TestCreate_DollarFormat_ServiceDocument(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -673,21 +658,20 @@ namespace System.Web.Http.OData.Formatter
         [Theory]
         [InlineData("json", "application/json")]
         [InlineData("xml", "application/xml")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dtrue", "application/json;odata.metadata=minimal;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bstreaming%3dfalse", "application/json;odata.metadata=minimal;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dminimal", "application/json;odata.metadata=minimal")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dtrue", "application/json;odata.metadata=full;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bstreaming%3dfalse", "application/json;odata.metadata=full;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse", "application/json;odata.metadata=full;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dfull", "application/json;odata.metadata=full")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dtrue", "application/json;odata.metadata=none;streaming=true")]
-        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bstreaming%3dfalse", "application/json;odata.metadata=none;streaming=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue", "application/json;odata.metadata=none;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse", "application/json;odata.metadata=none;odata.streaming=false")]
         [InlineData("application%2fjson%3bodata.metadata%3dnone", "application/json;odata.metadata=none")]
-        [InlineData("application%2fjson%3bodata%3dverbose", "application/json;odata=verbose")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue", "application/json;streaming=true")]
-        [InlineData("application%2fjson%3bstreaming%3dfalse", "application/json;streaming=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue", "application/json;odata.streaming=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fxml", "application/xml")]
-        [InlineData("application%2fjson%3bstreaming%3dtrue%3bodata.metadata%3dminimal", "application/json;streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
         public void TestCreate_DollarFormat_Error(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange

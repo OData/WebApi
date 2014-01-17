@@ -472,7 +472,7 @@ namespace System.Web.Http.OData
                     (f) => f.GetPerRequestFormatterInstance(typeof(Delta<DeltaModelWithAlias>), request, null));
 
                 HttpContent content = new StringContent(String.Format("{{ '{0}' : {1} }}", propertyNameAlias, propertyJsonValue));
-                content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+                content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
                 // Act
                 delta = content.ReadAsAsync<Delta<DeltaModelWithAlias>>(perRequestFormatters).Result;

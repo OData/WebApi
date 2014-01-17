@@ -23,27 +23,25 @@ namespace System.Web.Http.OData.Formatter
         private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadata =
             MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
         private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadataStreamingFalse =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=false");
+            MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false");
         private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadataStreamingTrue =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;streaming=true");
+            MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true");
         private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadata =
             MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal");
         private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadataStreamingFalse =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=false");
+            MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false");
         private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadataStreamingTrue =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;streaming=true");
+            MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true");
         private static readonly MediaTypeHeaderValue _applicationJsonODataNoMetadata =
             MediaTypeHeaderValue.Parse("application/json;odata.metadata=none");
         private static readonly MediaTypeHeaderValue _applicationJsonODataNoMetadataStreamingFalse =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=false");
+            MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false");
         private static readonly MediaTypeHeaderValue _applicationJsonODataNoMetadataStreamingTrue =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;streaming=true");
-        private static readonly MediaTypeHeaderValue _applicationJsonODataVerbose =
-            MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+            MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true");
         private static readonly MediaTypeHeaderValue _applicationJsonStreamingFalse =
-            MediaTypeHeaderValue.Parse("application/json;streaming=false");
+            MediaTypeHeaderValue.Parse("application/json;odata.streaming=false");
         private static readonly MediaTypeHeaderValue _applicationJsonStreamingTrue =
-            MediaTypeHeaderValue.Parse("application/json;streaming=true");
+            MediaTypeHeaderValue.Parse("application/json;odata.streaming=true");
         private static readonly MediaTypeHeaderValue _applicationXml = new MediaTypeHeaderValue("application/xml");
         private static readonly MediaTypeHeaderValue _textXml = new MediaTypeHeaderValue("text/xml");
 
@@ -121,11 +119,6 @@ namespace System.Web.Http.OData.Formatter
         public static MediaTypeHeaderValue ApplicationJsonODataNoMetadataStreamingTrue
         {
             get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataNoMetadataStreamingTrue).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonODataVerbose
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataVerbose).Clone(); }
         }
 
         public static MediaTypeHeaderValue ApplicationJsonStreamingFalse

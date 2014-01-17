@@ -48,7 +48,7 @@ namespace System.Web.Http.OData.Formatter
             string message = "{ \"ID\" : 42, \"" + propertyName + "\": [ 1, 2, 3 ] }";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
@@ -64,7 +64,7 @@ namespace System.Web.Http.OData.Formatter
             string message = "{ \"ID\" : 42, \"ComplexCollection\" : [  { \"A\": 1 }, { \"A\": 2 }, { \"A\": 3 } ] }";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
@@ -87,7 +87,7 @@ namespace System.Web.Http.OData.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
@@ -104,7 +104,7 @@ namespace System.Web.Http.OData.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             HttpResponseMessage response = _client.SendAsync(request).Result;
             Assert.Equal(HttpStatusCode.ExpectationFailed, response.StatusCode);

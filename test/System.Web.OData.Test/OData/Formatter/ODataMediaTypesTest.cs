@@ -84,7 +84,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataFullMetadataStreamingFalse_Value()
         {
-            Assert.Equal("application/json; odata.metadata=full; streaming=false",
+            Assert.Equal("application/json; odata.metadata=full; odata.streaming=false",
                 ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingFalse.ToString());
         }
 
@@ -98,7 +98,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataFullMetadataStreamingTrue_Value()
         {
-            Assert.Equal("application/json; odata.metadata=full; streaming=true",
+            Assert.Equal("application/json; odata.metadata=full; odata.streaming=true",
                 ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue.ToString());
         }
 
@@ -126,7 +126,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataMinimalMetadataStreamingFalse_Value()
         {
-            Assert.Equal("application/json; odata.metadata=minimal; streaming=false",
+            Assert.Equal("application/json; odata.metadata=minimal; odata.streaming=false",
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingFalse.ToString());
         }
 
@@ -140,7 +140,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataMinimalMetadataStreamingTrue_Value()
         {
-            Assert.Equal("application/json; odata.metadata=minimal; streaming=true",
+            Assert.Equal("application/json; odata.metadata=minimal; odata.streaming=true",
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingTrue.ToString());
         }
 
@@ -168,7 +168,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataNoMetadataStreamingFalse_Value()
         {
-            Assert.Equal("application/json; odata.metadata=none; streaming=false",
+            Assert.Equal("application/json; odata.metadata=none; odata.streaming=false",
                 ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingFalse.ToString());
         }
 
@@ -182,7 +182,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonODataNoMetadataStreamingTrue_Value()
         {
-            Assert.Equal("application/json; odata.metadata=none; streaming=true",
+            Assert.Equal("application/json; odata.metadata=none; odata.streaming=true",
                 ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingTrue.ToString());
         }
 
@@ -194,22 +194,9 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
-        public void ApplicationJsonODataVerbose_Value()
-        {
-            Assert.Equal("application/json; odata=verbose",
-                ODataMediaTypes.ApplicationJsonODataVerbose.ToString());
-        }
-
-        [Fact]
-        public void ApplicationJsonODataVerbose_ReturnsDifferentInstances()
-        {
-            Assert.NotSame(ODataMediaTypes.ApplicationJsonODataVerbose, ODataMediaTypes.ApplicationJsonODataVerbose);
-        }
-
-        [Fact]
         public void ApplicationJsonStreamingFalse_Value()
         {
-            Assert.Equal("application/json; streaming=false",
+            Assert.Equal("application/json; odata.streaming=false",
                 ODataMediaTypes.ApplicationJsonStreamingFalse.ToString());
         }
 
@@ -223,7 +210,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ApplicationJsonStreamingTrue_Value()
         {
-            Assert.Equal("application/json; streaming=true", ODataMediaTypes.ApplicationJsonStreamingTrue.ToString());
+            Assert.Equal("application/json; odata.streaming=true", ODataMediaTypes.ApplicationJsonStreamingTrue.ToString());
         }
 
         [Fact]

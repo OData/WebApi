@@ -46,7 +46,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("messageReader");
             }
 
-            IEdmActionImport action = GetActionImport(readContext);
+            IEdmAction action = GetAction(readContext);
 
             // Create the correct resource type;
             Dictionary<string, object> payload;
@@ -70,7 +70,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 {
                     case ODataParameterReaderState.Value:
                         parameterName = reader.Name;
-                        parameter = action.Operation.Parameters.SingleOrDefault(p => p.Name == parameterName);
+                        parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
                         // ODataLib protects against this but asserting just in case.
                         Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
                         if (parameter.Type.IsPrimitive())
@@ -86,7 +86,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
                     case ODataParameterReaderState.Collection:
                         parameterName = reader.Name;
-                        parameter = action.Operation.Parameters.SingleOrDefault(p => p.Name == parameterName);
+                        parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
                         // ODataLib protects against this but asserting just in case.
                         Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
                         IEdmCollectionTypeReference collectionType = parameter.Type as IEdmCollectionTypeReference;
@@ -104,7 +104,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return payload;
         }
 
-        internal static IEdmActionImport GetActionImport(ODataDeserializerContext readContext)
+        internal static IEdmAction GetAction(ODataDeserializerContext readContext)
         {
             if (readContext == null)
             {
@@ -117,33 +117,33 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw new SerializationException(SRResources.ODataPathMissing);
             }
 
-            IEdmActionImport actionImport = null;
-            if (path.Segments.Count == 1)
+            IEdmAction action = null;
+            if (path.PathTemplate == "~/unboundaction")
             {
                 // only one segment, it may be an unbound action
                 UnboundActionPathSegment unboundActionSegment = path.Segments.Last() as UnboundActionPathSegment;
                 if (unboundActionSegment != null)
                 {
-                    actionImport = unboundActionSegment.Action;
+                    action = unboundActionSegment.Action.Action;
                 }
             }
             else
             {
                 // otherwise, it may be a bound action
-                ActionPathSegment actionSegment = path.Segments.Last() as ActionPathSegment;
+                BoundActionPathSegment actionSegment = path.Segments.Last() as BoundActionPathSegment;
                 if (actionSegment != null)
                 {
-                    actionImport = actionSegment.Action;
+                    action = actionSegment.Action;
                 }
             }
 
-            if (actionImport == null)
+            if (action == null)
             {
                 string message = Error.Format(SRResources.RequestNotActionInvocation, path.ToString());
                 throw new SerializationException(message);
             }
 
-            return actionImport;
+            return action;
         }
     }
 }

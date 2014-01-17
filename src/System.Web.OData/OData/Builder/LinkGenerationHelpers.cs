@@ -146,7 +146,7 @@ namespace System.Web.Http.OData.Builder
                 actionPathSegments.Add(new CastPathSegment(bindingParameterType));
             }
 
-            actionPathSegments.Add(new ActionPathSegment(actionName));
+            actionPathSegments.Add(new BoundActionPathSegment(actionName));
 
             string actionLink = entityContext.Url.ODataLink(actionPathSegments);
             return actionLink == null ? null : new Uri(actionLink);
@@ -196,7 +196,7 @@ namespace System.Web.Http.OData.Builder
             {
                 parametersDictionary.Add(param, "@" + param);
             }
-            functionPathSegments.Add(new FunctionPathSegment(functionName, parametersDictionary));
+            functionPathSegments.Add(new BoundFunctionPathSegment(functionName, parametersDictionary));
 
             string functionLink = entityContext.Url.ODataLink(functionPathSegments);
             return functionLink == null ? null : new Uri(functionLink);

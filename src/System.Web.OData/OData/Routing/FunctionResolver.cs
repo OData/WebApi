@@ -2,6 +2,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Http.OData.Properties;
+using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing
@@ -16,27 +18,21 @@ namespace System.Web.Http.OData.Routing
     /// </summary>
     internal static class FunctionResolver
     {
-        public static FunctionPathSegment TryResolve(IEnumerable<IEdmFunctionImport> functions, IEdmModel model, string nextSegment)
+        public static BoundFunctionPathSegment TryResolveBound(IEnumerable<IEdmFunction> functions, IEdmModel model, string nextSegment)
         {
-            Dictionary<string, string> parameters = null;
-            IEnumerable<string> parameterNames = null;
-            if (IsEnclosedInParentheses(nextSegment))
-            {
-                string value = nextSegment.Substring(1, nextSegment.Length - 2);
-                parameters = KeyValueParser.ParseKeys(value);
-                parameterNames = parameters.Keys;
-            }
+            Dictionary<string, string> parameters = GetParameters(nextSegment);
+            IEnumerable<string> parameterNames = parameters == null ? null : parameters.Keys;
 
-            IEdmFunctionImport function = FindBestFunction(functions, parameterNames);
+            IEdmFunction function = FindBestBoundFunction(functions, parameterNames);
             if (function != null)
             {
                 if (GetNonBindingParameters(function).Any())
                 {
-                    return new FunctionPathSegment(function, model, parameters);
+                    return new BoundFunctionPathSegment(function, model, parameters);
                 }
                 else
                 {
-                    return new FunctionPathSegment(function, model, parameterValues: null);
+                    return new BoundFunctionPathSegment(function, model, parameterValues: null);
                 }
             }
 
@@ -45,19 +41,13 @@ namespace System.Web.Http.OData.Routing
 
         public static UnboundFunctionPathSegment TryResolveUnbound(IEnumerable<IEdmFunctionImport> functions, IEdmModel model, string nextSegment)
         {
-            Dictionary<string, string> parameters = null;
-            IEnumerable<string> parameterNames = null;
-            if (IsEnclosedInParentheses(nextSegment))
-            {
-                string value = nextSegment.Substring(1, nextSegment.Length - 2);
-                parameters = KeyValueParser.ParseKeys(value);
-                parameterNames = parameters.Keys;
-            }
+            Dictionary<string, string> parameters = GetParameters(nextSegment);
+            IEnumerable<string> parameterNames = parameters == null ? null : parameters.Keys;
 
-            IEdmFunctionImport function = FindBestFunction(functions, parameterNames);
+            IEdmFunctionImport function = FindBestUnboundFunction(functions, parameterNames);
             if (function != null)
             {
-                if (GetNonBindingParameters(function).Any())
+                if (GetNonBindingParameters(function.Function).Any())
                 {
                     return new UnboundFunctionPathSegment(function, model, parameters);
                 }
@@ -70,48 +60,108 @@ namespace System.Web.Http.OData.Routing
             return null;
         }
 
-        private static IEdmFunctionImport FindBestFunction(IEnumerable<IEdmFunctionImport> possibleFunctions, IEnumerable<string> parameterNames)
+        private static IEdmFunction FindBestBoundFunction(IEnumerable<IEdmFunction> possibleFunctions, IEnumerable<string> parameterNames)
         {
             if (parameterNames != null)
             {
                 // function call with parameters.
-                IEnumerable<IEdmFunctionImport> possibleFunctionsUsingParameters = possibleFunctions.Where(f => IsMatch(f, parameterNames));
-                IEdmFunctionImport[] matchedFunctions = possibleFunctionsUsingParameters.ToArray();
+                HashSet<String> parametersNameSet = new HashSet<string>(parameterNames);
+                IEnumerable<IEdmFunction> possibleFunctionsUsingParameters = possibleFunctions.Where(f => IsMatch(f, parametersNameSet));
+                IEdmFunction[] matchedFunctions = possibleFunctionsUsingParameters.ToArray();
                 if (matchedFunctions.Length == 1)
                 {
                     return matchedFunctions[0];
                 }
+                else if (matchedFunctions.Length > 1)
+                {
+                    string identifier = matchedFunctions[0].Name;
+                    throw new ODataException(Error.Format(SRResources.FunctionResolutionFailed, identifier, String.Join(",", parameterNames)));
+                }
             }
             else
             {
-                // function call with no parameters.
+                // function call without parameters.
                 possibleFunctions = possibleFunctions.Where(f => GetNonBindingParameters(f).Count() == 0);
-                IEdmFunctionImport[] matchedFunctions = possibleFunctions.ToArray();
+                IEdmFunction[] matchedFunctions = possibleFunctions.ToArray();
                 if (matchedFunctions.Length == 1)
                 {
                     return matchedFunctions[0];
+                }
+                else if (matchedFunctions.Length > 1)
+                {
+                    string identifier = matchedFunctions[0].Name;
+                    throw new ODataException(Error.Format(SRResources.FunctionResolutionFailed, identifier, String.Join(",", parameterNames)));
                 }
             }
 
             return null;
         }
 
-        private static bool IsMatch(IEdmFunctionImport function, IEnumerable<string> parameterNames)
+        private static IEdmFunctionImport FindBestUnboundFunction(IEnumerable<IEdmFunctionImport> possibleFunctions, IEnumerable<string> parameterNames)
         {
-            IEnumerable<IEdmOperationParameter> nonBindingParameters = GetNonBindingParameters(function);
-            return new HashSet<string>(parameterNames).SetEquals(nonBindingParameters.Select(p => p.Name));
+            if (parameterNames != null)
+            {
+                // function call with parameters.
+                HashSet<String> parametersNameSet = new HashSet<string>(parameterNames);
+                IEnumerable<IEdmFunctionImport> possibleFunctionsUsingParameters = possibleFunctions.Where(f => IsMatch(f.Function, parametersNameSet));
+                IEdmFunctionImport[] matchedFunctions = possibleFunctionsUsingParameters.ToArray();
+                if (matchedFunctions.Length == 1)
+                {
+                    return matchedFunctions[0];
+                }
+                else if (matchedFunctions.Length > 1)
+                {
+                    string identifier = matchedFunctions[0].Name;
+                    throw new ODataException(Error.Format(SRResources.FunctionResolutionFailed, identifier, String.Join(",", parameterNames)));
+                }
+            }
+            else
+            {
+                // function call without parameters.
+                possibleFunctions = possibleFunctions.Where(f => GetNonBindingParameters(f.Function).Count() == 0);
+                IEdmFunctionImport[] matchedFunctions = possibleFunctions.ToArray();
+                if (matchedFunctions.Length == 1)
+                {
+                    return matchedFunctions[0];
+                }
+                else if (matchedFunctions.Length > 1)
+                {
+                    string identifier = matchedFunctions[0].Name;
+                    throw new ODataException(Error.Format(SRResources.FunctionResolutionFailed, identifier, String.Join(",", parameterNames)));
+                }
+            }
+
+            return null;
         }
 
-        private static IEnumerable<IEdmOperationParameter> GetNonBindingParameters(IEdmOperationImport operation)
+        private static bool IsMatch(IEdmFunction function, HashSet<string> parameterNamesSet)
         {
-            IEnumerable<IEdmOperationParameter> functionParameters = operation.Operation.Parameters;
-            if (operation.Operation.IsBound)
+            IEnumerable<IEdmOperationParameter> nonBindingParameters = GetNonBindingParameters(function);
+            return parameterNamesSet.SetEquals(nonBindingParameters.Select(p => p.Name));
+        }
+
+        private static IEnumerable<IEdmOperationParameter> GetNonBindingParameters(IEdmFunction function)
+        {
+            IEnumerable<IEdmOperationParameter> functionParameters = function.Parameters;
+            if (function.IsBound)
             {
                 // skip the binding parameter(first one by convention) for matching.
                 functionParameters = functionParameters.Skip(1);
             }
 
             return functionParameters;
+        }
+
+        private static Dictionary<string, string> GetParameters(string nextSegment)
+        {
+            Dictionary<string, string> parameters = null;
+            if (IsEnclosedInParentheses(nextSegment))
+            {
+                string value = nextSegment.Substring(1, nextSegment.Length - 2);
+                parameters = KeyValueParser.ParseKeys(value);
+            }
+
+            return parameters;
         }
 
         internal static bool IsEnclosedInParentheses(string segment)

@@ -40,7 +40,7 @@ namespace System.Web.Http.OData.Routing
             string expectedFirstSegment = "Set";
             string expectedSecondSegment = "Action";
             ODataPath path = new ODataPath(new EntitySetPathSegment(expectedFirstSegment),
-                new ActionPathSegment(expectedSecondSegment));
+                new BoundActionPathSegment(expectedSecondSegment));
 
             // Act
             string value = path.ToString();
@@ -63,6 +63,26 @@ namespace System.Web.Http.OData.Routing
             // Assert
             string expectedValue = "(" + segment + ")";
             Assert.Equal(expectedValue, value);
+        }
+
+        [Fact]
+        public void PathTemplateWithOneUnboundActionPathSegment()
+        {
+            // Arrange
+            ODataPath path = new ODataPath(new UnboundActionPathSegment("TopAction"));
+
+            // Act & Assert
+            Assert.Equal("~/unboundaction", path.PathTemplate);
+        }
+
+        [Fact]
+        public void PathTemplateWithOneUnboundFunctionPathSegment()
+        {
+            // Arrange
+            ODataPath path = new ODataPath(new UnboundFunctionPathSegment("TopFunction", null));
+
+            // Act & Assert
+            Assert.Equal("~/unboundfunction", path.PathTemplate);
         }
     }
 }

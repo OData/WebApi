@@ -5,21 +5,22 @@ using System.Collections.Generic;
 namespace System.Web.Http.OData.Routing
 {
     /// <summary>
-    /// Represents a template that can match a <see cref="FunctionPathSegment"/>.
+    /// Represents a template that can match a <see cref="BoundFunctionPathSegment"/>.
     /// </summary>
-    public class FunctionPathSegmentTemplate : ODataPathSegmentTemplate
+    public class BoundFunctionPathSegmentTemplate : ODataPathSegmentTemplate
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FunctionPathSegmentTemplate"/> class.
+        /// Initializes a new instance of the <see cref="BoundFunctionPathSegmentTemplate"/> class.
         /// </summary>
         /// <param name="function">The function segment to be templatized</param>
-        public FunctionPathSegmentTemplate(FunctionPathSegment function)
+        public BoundFunctionPathSegmentTemplate(BoundFunctionPathSegment function)
         {
             if (function == null)
             {
                 throw Error.ArgumentNull("function");
             }
 
+            FunctionName = function.FunctionName;
             ParameterMappings = KeyValuePathSegmentTemplate.BuildParameterMappings(function.Values, function.ToString());
         }
 
@@ -29,13 +30,21 @@ namespace System.Web.Http.OData.Routing
         /// </summary>
         public IDictionary<string, string> ParameterMappings { get; private set; }
 
+        /// <summary>
+        /// Gets the name of the function.
+        /// </summary>
+        public string FunctionName { get; private set; }
+
         /// <inheritdoc />
         public override bool TryMatch(ODataPathSegment pathSegment, IDictionary<string, object> values)
         {
             if (pathSegment.SegmentKind == ODataSegmentKinds.Function)
             {
-                FunctionPathSegment functionSegment = (FunctionPathSegment)pathSegment;
-                return KeyValuePathSegmentTemplate.TryMatch(ParameterMappings, functionSegment.Values, values);
+                BoundFunctionPathSegment functionSegment = (BoundFunctionPathSegment)pathSegment;
+                if (FunctionName == functionSegment.FunctionName)
+                {
+                    return KeyValuePathSegmentTemplate.TryMatch(ParameterMappings, functionSegment.Values, values);
+                }
             }
 
             return false;

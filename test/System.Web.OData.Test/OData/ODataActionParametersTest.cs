@@ -14,18 +14,21 @@ namespace System.Web.Http.OData
     {
         [Theory]
         [InlineData("Drive", "Vehicles(6)/Drive")]
-        [InlineData("Drive", "Vehicles(6)/Container.Drive")]
-        [InlineData("Drive", "Vehicles(6)/org.odata.Container.Drive")]
+        [InlineData("Drive", "Vehicles(6)/org.odata.Drive")]
         [InlineData("Drive", "Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/Drive")]
-        [InlineData("Drive", "Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/Container.Drive")]
-        [InlineData("Drive", "Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/org.odata.Container.Drive")]
+        [InlineData("Drive", "Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/org.odata.Drive")]
         public void Can_find_action(string actionName, string url)
         {
+            // Arrange
             IEdmModel model = GetModel();
+
+            // Act
             ODataPath path = new DefaultODataPathHandler().Parse(model, url);
             Assert.NotNull(path); // Guard
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
-            IEdmActionImport action = ODataActionPayloadDeserializer.GetActionImport(context);
+            IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
+
+            // Assert
             Assert.NotNull(action);
             Assert.Equal(actionName, action.Name);
         }
@@ -33,38 +36,45 @@ namespace System.Web.Http.OData
         [Fact]
         public void Can_find_action_overload_using_bindingparameter_type()
         {
+            // Arrange
             IEdmModel model = GetModel();
             string url = "Vehicles(8)/System.Web.Http.OData.Builder.TestModels.Car/Wash";
             ODataPath path = new DefaultODataPathHandler().Parse(model, url);
             Assert.NotNull(path); // Guard
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
 
-            IEdmActionImport action = ODataActionPayloadDeserializer.GetActionImport(context);
+            // Act
+            IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
 
+            // Assert
             Assert.NotNull(action);
             Assert.Equal("Wash", action.Name);
-
         }
 
         [Fact]
         public void Throws_Serialization_WhenPathNotFound()
         {
+            // Arrange
             ODataDeserializerContext context = new ODataDeserializerContext { Path = null };
+
+            // Act & Assert
             Assert.Throws<SerializationException>(() =>
             {
-                IEdmActionImport action = ODataActionPayloadDeserializer.GetActionImport(context);
+                IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
             }, "The operation cannot be completed because no ODataPath is available for the request.");
         }
 
         [Fact]
         public void ParserThrows_InvalidArgument_when_multiple_overloads_found()
         {
+            // Arrange
             IEdmModel model = GetModel();
 
+            // Act & Assert
             Assert.ThrowsArgument(() =>
             {
                 new DefaultODataPathHandler().Parse(model, "Vehicles/System.Web.Http.OData.Builder.TestModels.Car(8)/Park");
-            }, "actionIdentifier", "Action resolution failed. Multiple actions matching the action identifier 'Park' were found. The matching actions are: org.odata.Container.Park, org.odata.Container.Park.");
+            }, "actionIdentifier", "Action resolution failed. Multiple actions matching the action identifier 'Park' were found. The matching actions are: org.odata.Park, org.odata.Park.");
         }
 
         private static IEdmModel GetModel()

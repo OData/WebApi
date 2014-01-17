@@ -51,7 +51,7 @@ namespace System.Web.Http.OData.Routing.Conventions
 
                 if (actionName != null)
                 {
-                    controllerContext.AddFunctionParameterToRouteData(odataPath.Segments.Last() as FunctionPathSegment);
+                    controllerContext.AddFunctionParameterToRouteData(odataPath.Segments.Last() as BoundFunctionPathSegment);
                     return actionName;
                 }
             }
@@ -59,11 +59,11 @@ namespace System.Web.Http.OData.Routing.Conventions
             return null;
         }
 
-        private static IEdmFunctionImport GetFunction(ODataPath odataPath)
+        private static IEdmFunction GetFunction(ODataPath odataPath)
         {
             ODataPathSegment odataSegment = odataPath.Segments.Last();
-            IEdmFunctionImport function = null;
-            FunctionPathSegment functionSegment = odataSegment as FunctionPathSegment;
+            IEdmFunction function = null;
+            BoundFunctionPathSegment functionSegment = odataSegment as BoundFunctionPathSegment;
             if (functionSegment != null)
             {
                 function = functionSegment.Function;

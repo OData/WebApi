@@ -51,11 +51,11 @@ namespace System.Web.Http.OData.Routing.Conventions
             return null;
         }
 
-        private static IEdmActionImport GetAction(ODataPath odataPath)
+        private static IEdmAction GetAction(ODataPath odataPath)
         {
             ODataPathSegment odataSegment = odataPath.Segments.Last();
-            IEdmActionImport action = null;
-            ActionPathSegment actionSegment = odataSegment as ActionPathSegment;
+            IEdmAction action = null;
+            BoundActionPathSegment actionSegment = odataSegment as BoundActionPathSegment;
             if (actionSegment != null)
             {
                 action = actionSegment.Action;

@@ -593,7 +593,7 @@ namespace System.Web.Http.OData.Formatter
                 ODataPathSegment lastSegment = path.Segments.LastOrDefault();
                 if (lastSegment != null)
                 {
-                    ActionPathSegment actionSegment = lastSegment as ActionPathSegment;
+                    BoundActionPathSegment actionSegment = lastSegment as BoundActionPathSegment;
                     if (actionSegment != null)
                     {
                         return actionSegment.Action.Name;

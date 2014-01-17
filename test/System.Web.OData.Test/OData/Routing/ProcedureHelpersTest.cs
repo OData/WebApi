@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -9,21 +10,24 @@ namespace System.Web.Http.OData.Routing
 {
     public class ProcedureHelpersTest
     {
-        private static IEdmEntityTypeReference _entityType = new EdmEntityTypeReference(new EdmEntityType("NS", "Entity"), isNullable: false);
-        private static IEdmEntityTypeReference _derivedEntityType =
-            new EdmEntityTypeReference(new EdmEntityType("NS", "DerivedEntity", _entityType.EntityDefinition()), isNullable: false);
+        private IEdmEntityTypeReference _entityType;
+        private IEdmEntityTypeReference _derivedEntityType;
+        private IEdmModel _model;
+        private IEdmEntityContainer _container;
+
+        public ProcedureHelpersTest()
+        {
+            BuildEdmModel();
+        }
 
         [Theory]
         [InlineData("NonBindableAction")]
         [InlineData("Name.NonBindableAction")]
         [InlineData("NS.Name.NonBindableAction")]
-        public void FindAction_CanFind_NonBindableAction(string segment)
+        public void FindActionImport_CanFind_NonbindableAction(string segment)
         {
-            // Arrange
-            IEdmEntityContainer container = GetEntityContainer();
-
-            // Act
-            var result = container.FindAction(segment, bindingParameterType: null);
+            // Arrange & Act
+            var result = _container.FindActionImport(segment);
 
             // Assert
             Assert.NotNull(result);
@@ -32,33 +36,27 @@ namespace System.Web.Http.OData.Routing
 
         [Theory]
         [InlineData("ActionBoundToEntity", true)]
-        [InlineData("Name.ActionBoundToEntity", true)]
-        [InlineData("NS.Name.ActionBoundToEntity", true)]
+        [InlineData("NS.ActionBoundToEntity", true)]
         [InlineData("ActionBoundToEntity", false)]
-        [InlineData("Name.ActionBoundToEntity", false)]
-        [InlineData("NS.Name.ActionBoundToEntity", false)]
+        [InlineData("NS.ActionBoundToEntity", false)]
         public void FindAction_CanFind_BindableAction_Entity(string segment, bool isDerivedType)
         {
             // Arrange
-            IEdmEntityContainer container = GetEntityContainer();
             IEdmType bindingParameterType = isDerivedType ? _derivedEntityType.Definition : _entityType.Definition;
 
             // Act
-            var result = container.FindAction(segment, bindingParameterType);
+            var result = _model.FindAction(segment, bindingParameterType);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("NS.Name.ActionBoundToEntity", result.Container.FullName() + "." + result.Name);
+            Assert.Equal("NS.ActionBoundToEntity", result.FullName());
         }
 
         [Fact]
         public void FindAction_CannotFind_BindableAction_DerivedEntity()
         {
-            // Arrange
-            IEdmEntityContainer container = GetEntityContainer();
-
             // Act & Assert
-            Assert.Null(container.FindAction("ActionBoundToDerivedEntity", bindingParameterType: _entityType.Definition));
+            Assert.Null(_model.FindAction("ActionBoundToDerivedEntity", _entityType.Definition));
         }
 
         [Fact]
@@ -66,43 +64,36 @@ namespace System.Web.Http.OData.Routing
         {
             // Arrange
             var entityCollection = new EdmCollectionType(_entityType);
-            IEdmEntityContainer container = GetEntityContainer();
 
             // Act & Assert
-            Assert.Null(container.FindAction("ActionBoundToDerivedEntityCollection", bindingParameterType: entityCollection));
+            Assert.Null(_model.FindAction("ActionBoundToDerivedEntityCollection", entityCollection));
         }
 
         [Theory]
         [InlineData("ActionBoundToEntityCollection", true)]
-        [InlineData("Name.ActionBoundToEntityCollection", true)]
-        [InlineData("NS.Name.ActionBoundToEntityCollection", true)]
+        [InlineData("NS.ActionBoundToEntityCollection", true)]
         [InlineData("ActionBoundToEntityCollection", false)]
-        [InlineData("Name.ActionBoundToEntityCollection", false)]
-        [InlineData("NS.Name.ActionBoundToEntityCollection", false)]
+        [InlineData("NS.ActionBoundToEntityCollection", false)]
         public void FindAction_CanFind_BindableAction_EntityCollection(string segment, bool isDerivedType)
         {
             // Arrange
             IEdmTypeReference entityType = isDerivedType ? _derivedEntityType : _entityType;
             var entityCollection = new EdmCollectionType(entityType);
-            IEdmEntityContainer container = GetEntityContainer();
 
             // Act
-            var result = container.FindAction(segment, bindingParameterType: entityCollection);
+            var result = _model.FindAction(segment, entityCollection);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("NS.Name.ActionBoundToEntityCollection", result.Container.FullName() + "." + result.Name);
+            Assert.Equal("NS.ActionBoundToEntityCollection", result.FullName());
         }
 
         [Fact]
-        public void FindAction_Throws_ActionResolutionFailed_AmbiguosAction()
+        public void FindActionImport_Throws_ActionResolutionFailed_AmbiguosAction()
         {
-            // Arrange
-            IEdmEntityContainer container = GetEntityContainer();
-
             // Act
             Assert.ThrowsArgument(
-                () => container.FindAction("AmbiguousAction", bindingParameterType: null),
+                () => _container.FindActionImport("AmbiguousAction"),
                 "actionIdentifier",
                 "Action resolution failed. Multiple actions matching the action identifier 'AmbiguousAction' were found. " +
                 "The matching actions are: NS.Name.AmbiguousAction, NS.Name.AmbiguousAction.");
@@ -112,13 +103,10 @@ namespace System.Web.Http.OData.Routing
         [InlineData("NonBindableFunction")]
         [InlineData("Name.NonBindableFunction")]
         [InlineData("NS.Name.NonBindableFunction")]
-        public void FindFunctions_CanFind_NonBindableFunctions(string segment)
+        public void FindMatchedOperationImports_CanFind_NonbindableFunctions(string segment)
         {
-            // Arrange
-            IEdmEntityContainer container = GetEntityContainer();
-
             // Act
-            var results = container.FindFunctions(segment, bindingParameterType: null);
+            var results = _container.FindMatchedOperationImports(segment).OfType<IEdmFunctionImport>();
 
             // Assert
             Assert.Equal(new[] { "NS.Name.NonBindableFunction" }, results.Select(f => f.Container.FullName() + "." + f.Name));
@@ -126,83 +114,77 @@ namespace System.Web.Http.OData.Routing
 
         [Theory]
         [InlineData("FunctionBoundToEntity", true)]
-        [InlineData("Name.FunctionBoundToEntity", true)]
-        [InlineData("NS.Name.FunctionBoundToEntity", true)]
+        [InlineData("NS.FunctionBoundToEntity", true)]
         [InlineData("FunctionBoundToEntity", false)]
-        [InlineData("Name.FunctionBoundToEntity", false)]
-        [InlineData("NS.Name.FunctionBoundToEntity", false)]
-        public void FindFunctions_CanFind_BindableFunctions_Entity(string segment, bool isDerivedType)
+        [InlineData("NS.FunctionBoundToEntity", false)]
+        public void FindMatchedOperations_CanFind_BindableFunctions_Entity(string segment, bool isDerivedType)
         {
             // Arrange
-            IEdmEntityContainer container = GetEntityContainer();
             IEdmType bindingParameterType = isDerivedType ? _derivedEntityType.Definition : _entityType.Definition;
 
             // Act
-            var results = container.FindFunctions(segment, bindingParameterType);
+            var results = _model.FindMatchedOperations(segment, bindingParameterType);
 
             // Assert
-            Assert.Equal(new[] { "NS.Name.FunctionBoundToEntity" }, results.Select(f => f.Container.FullName() + "." + f.Name));
+            Assert.Equal(new[] { "NS.FunctionBoundToEntity" }, results.Select(f => f.FullName()));
         }
 
         [Theory]
         [InlineData("FunctionBoundToEntityCollection", true)]
-        [InlineData("Name.FunctionBoundToEntityCollection", true)]
-        [InlineData("NS.Name.FunctionBoundToEntityCollection", true)]
+        [InlineData("NS.FunctionBoundToEntityCollection", true)]
         [InlineData("FunctionBoundToEntityCollection", false)]
-        [InlineData("Name.FunctionBoundToEntityCollection", false)]
-        [InlineData("NS.Name.FunctionBoundToEntityCollection", false)]
-        public void FindFunctions_CanFind_BindableFunctions_EntityCollection(string segment, bool isDerivedType)
+        [InlineData("NS.FunctionBoundToEntityCollection", false)]
+        public void FindMatchedOpeartions_CanFind_BindableFunctions_EntityCollection(string segment, bool isDerivedType)
         {
             // Arrange
             IEdmTypeReference entityType = isDerivedType ? _derivedEntityType : _entityType;
             var entityCollection = new EdmCollectionType(entityType);
-            IEdmEntityContainer container = GetEntityContainer();
 
             // Act
-            var results = container.FindFunctions(segment, bindingParameterType: entityCollection);
+            var results = _model.FindMatchedOperations(segment, entityCollection);
 
             // Assert
-            Assert.Equal(new[] { "NS.Name.FunctionBoundToEntityCollection" }, results.Select(f => f.Container.FullName() + "." + f.Name));
+            Assert.Equal(new[] { "NS.FunctionBoundToEntityCollection" }, results.Select(f => f.FullName()));
         }
 
         [Fact]
-        public void FindFunctions_CannotFind_BindableFunction_DerivedEntity()
+        public void FindMatchedOperations_CannotFind_BindableFunction_DerivedEntity()
         {
-            // Arrange
-            IEdmEntityContainer container = GetEntityContainer();
-
             // Act & Assert
-            Assert.Empty(container.FindFunctions("FunctionBoundToDerivedEntity", bindingParameterType: _entityType.Definition));
+            Assert.Empty(_model.FindMatchedOperations("FunctionBoundToDerivedEntity",  _entityType.Definition));
         }
 
         [Fact]
-        public void FindFunctions_CannotFind_BindableFunction_DerivedEntityCollection()
+        public void FindMatchedOperations_CannotFind_BindableFunction_DerivedEntityCollection()
         {
             // Arrange
             var entityCollection = new EdmCollectionType(_entityType);
-            IEdmEntityContainer container = GetEntityContainer();
 
             // Act & Assert
-            Assert.Empty(container.FindFunctions("FunctionBoundToDerivedEntityCollection", bindingParameterType: entityCollection));
+            Assert.Empty(_model.FindMatchedOperations("FunctionBoundToDerivedEntityCollection",  entityCollection));
         }
 
         [Fact]
-        public void FindFunctions_DoesNotReturnNonBindableFunction_IfBindingParameterSpecified()
+        public void FindMatchedOperations_DoesNotReturnNonBindableFunction_IfBindingParameterSpecified()
         {
             // Arrange
             var entityCollection = new EdmCollectionType(_entityType);
-            IEdmEntityContainer container = GetEntityContainer();
 
             // Act & Assert
-            Assert.Empty(container.FindFunctions("NonBindableAction", bindingParameterType: entityCollection));
-            Assert.Empty(container.FindFunctions("NonBindableAction", bindingParameterType: _entityType.Definition));
+            Assert.Empty(_model.FindMatchedOperations("NonBindableAction", entityCollection));
+            Assert.Empty(_model.FindMatchedOperations("NonBindableAction", _entityType.Definition));
         }
 
-        private static IEdmEntityContainer GetEntityContainer()
+        private void BuildEdmModel()
         {
+            _entityType = new EdmEntityTypeReference(new EdmEntityType("NS", "Entity"), isNullable: false);
+            _derivedEntityType = new EdmEntityTypeReference(new EdmEntityType("NS", "DerivedEntity", _entityType.EntityDefinition()), isNullable: false);
             var entityCollection = new EdmCollectionTypeReference(new EdmCollectionType(_entityType), isNullable: false);
             var derivedEntityCollection = new EdmCollectionTypeReference(new EdmCollectionType(_derivedEntityType), isNullable: false);
+
+            EdmModel model = new EdmModel();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Name");
+            model.AddElement(container);
 
             // non-bindable action
             container.AddActionImport(new EdmAction("NS", "NonBindableAction", returnType: null));
@@ -214,8 +196,8 @@ namespace System.Web.Http.OData.Routing
                 returnType: null,
                 isBound: true,
                 entitySetPathExpression: null);
-            actionBoundToEntity.AddParameter("Param", _entityType);
-            container.AddActionImport(actionBoundToEntity);
+            actionBoundToEntity.AddParameter("bindingParameter", _entityType);
+            model.AddElement(actionBoundToEntity);
 
             // action bound to derived entity
             var actionBoundToDerivedEntity = new EdmAction(
@@ -224,8 +206,8 @@ namespace System.Web.Http.OData.Routing
                 returnType: null,
                 isBound: true,
                 entitySetPathExpression: null);
-            actionBoundToDerivedEntity.AddParameter("Param", _derivedEntityType);
-            container.AddActionImport(actionBoundToDerivedEntity);
+            actionBoundToDerivedEntity.AddParameter("bindingParameter", _derivedEntityType);
+            model.AddElement(actionBoundToDerivedEntity);
 
             // action bound to entity collection
             var actionBoundToEntityCollection = new EdmAction(
@@ -234,8 +216,8 @@ namespace System.Web.Http.OData.Routing
                 returnType: null,
                 isBound: true,
                 entitySetPathExpression: null);
-            actionBoundToEntityCollection.AddParameter("Param", entityCollection);
-            container.AddActionImport(actionBoundToEntityCollection);
+            actionBoundToEntityCollection.AddParameter("bindingParameter", entityCollection);
+            model.AddElement(actionBoundToEntityCollection);
 
             // action bound to derived entity collection
             var actionBoundToDerivedEntityCollection = new EdmAction(
@@ -244,8 +226,8 @@ namespace System.Web.Http.OData.Routing
                 returnType: null,
                 isBound: true,
                 entitySetPathExpression: null);
-            actionBoundToDerivedEntityCollection.AddParameter("Param", derivedEntityCollection);
-            container.AddActionImport(actionBoundToDerivedEntityCollection);
+            actionBoundToDerivedEntityCollection.AddParameter("bindingParameter", derivedEntityCollection);
+            model.AddElement(actionBoundToDerivedEntityCollection);
 
             // ambiguos actions
             container.AddActionImport(new EdmAction("NS", "AmbiguousAction", returnType: null));
@@ -265,8 +247,8 @@ namespace System.Web.Http.OData.Routing
                 isBound: true,
                 entitySetPathExpression: null,
                 isComposable: false);
-            functionBoundToEntity.AddParameter("Param", _entityType);
-            container.AddFunctionImport(functionBoundToEntity);
+            functionBoundToEntity.AddParameter("bindingParameter", _entityType);
+            model.AddElement(functionBoundToEntity);
 
             // function bound to entity
             var functionBoundToDerivedEntity = new EdmFunction(
@@ -276,8 +258,8 @@ namespace System.Web.Http.OData.Routing
                 isBound: true,
                 entitySetPathExpression: null,
                 isComposable: false);
-            functionBoundToDerivedEntity.AddParameter("Param", _derivedEntityType);
-            container.AddFunctionImport(functionBoundToDerivedEntity);
+            functionBoundToDerivedEntity.AddParameter("bindingParameter", _derivedEntityType);
+            model.AddElement(functionBoundToDerivedEntity);
 
             // function bound to entity collection
             var functionBoundToEntityCollection = new EdmFunction(
@@ -287,8 +269,8 @@ namespace System.Web.Http.OData.Routing
                 isBound: true,
                 entitySetPathExpression: null,
                 isComposable: false);
-            functionBoundToEntityCollection.AddParameter("Param", entityCollection);
-            container.AddFunctionImport(functionBoundToEntityCollection);
+            functionBoundToEntityCollection.AddParameter("bindingParameter", entityCollection);
+            model.AddElement(functionBoundToEntityCollection);
 
             // function bound to derived entity collection
             var functionBoundToDerivedEntityCollection = new EdmFunction(
@@ -298,10 +280,11 @@ namespace System.Web.Http.OData.Routing
                 isBound: true,
                 entitySetPathExpression: null,
                 isComposable: false);
-            functionBoundToDerivedEntityCollection.AddParameter("Param", derivedEntityCollection);
-            container.AddFunctionImport(functionBoundToDerivedEntityCollection);
+            functionBoundToDerivedEntityCollection.AddParameter("bindingParameter", derivedEntityCollection);
+            model.AddElement(functionBoundToDerivedEntityCollection);
 
-            return container;
+            _model = model;
+            _container = container;
         }
     }
 }

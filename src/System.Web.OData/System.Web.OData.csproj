@@ -163,13 +163,13 @@
     <Compile Include="OData\Routing\Conventions\ODataRoutingConventions.cs" />
     <Compile Include="OData\Routing\Conventions\ProcedureRoutingConventionHelpers.cs" />
     <Compile Include="OData\Routing\Conventions\PropertyRoutingConvention.cs" />
-    <Compile Include="OData\Routing\FunctionPathSegmentTemplate.cs" />
+    <Compile Include="OData\Routing\BoundFunctionPathSegmentTemplate.cs" />
     <Compile Include="OData\Routing\IODataPathTemplateHandler.cs" />
     <Compile Include="OData\Routing\ODataRouteAttribute.cs" />
     <Compile Include="OData\Routing\ODataRoutePrefixAttribute.cs" />
     <Compile Include="OData\Routing\ProcedureHelpers.cs" />
     <Compile Include="OData\Routing\FunctionResolver.cs" />
-    <Compile Include="OData\Routing\FunctionPathSegment.cs" />
+    <Compile Include="OData\Routing\BoundFunctionPathSegment.cs" />
     <Compile Include="OData\Routing\KeyValueParser.cs" />
     <Compile Include="OData\Routing\KeyValuePathSegmentTemplate.cs" />
     <Compile Include="OData\Routing\ODataPathSegmentTemplate.cs" />
@@ -213,7 +213,7 @@
     <Compile Include="OData\Query\Validators\OrderByQueryValidator.cs" />
     <Compile Include="OData\Query\Validators\SkipQueryValidator.cs" />
     <Compile Include="OData\Query\Validators\TopQueryValidator.cs" />
-    <Compile Include="OData\Routing\ActionPathSegment.cs" />
+    <Compile Include="OData\Routing\BoundActionPathSegment.cs" />
     <Compile Include="OData\Routing\CastPathSegment.cs" />
     <Compile Include="OData\Routing\BatchPathSegment.cs" />
     <Compile Include="OData\Routing\Conventions\ActionRoutingConvention.cs" />

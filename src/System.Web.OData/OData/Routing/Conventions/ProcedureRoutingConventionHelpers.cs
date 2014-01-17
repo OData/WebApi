@@ -10,16 +10,10 @@ namespace System.Web.Http.OData.Routing.Conventions
 {
     internal static class ProcedureRoutingConventionHelpers
     {
-        public static string SelectAction(this IEdmOperationImport procedure, ILookup<string, HttpActionDescriptor> actionMap, bool isCollection)
+        public static string SelectAction(this IEdmOperation operation, ILookup<string, HttpActionDescriptor> actionMap, bool isCollection)
         {
             Contract.Assert(actionMap != null);
 
-            if (procedure == null)
-            {
-                return null;
-            }
-
-            IEdmOperation operation = procedure.Operation;
             if (operation == null)
             {
                 return null;
@@ -49,9 +43,9 @@ namespace System.Web.Http.OData.Routing.Conventions
                 }
 
                 string targetActionName = isCollection
-                    ? procedure.Name + "OnCollectionOf" + entityType.Name
-                    : procedure.Name + "On" + entityType.Name;
-                return actionMap.FindMatchingAction(targetActionName, procedure.Name);
+                    ? operation.Name + "OnCollectionOf" + entityType.Name
+                    : operation.Name + "On" + entityType.Name;
+                return actionMap.FindMatchingAction(targetActionName, operation.Name);
             }
 
             return null;
@@ -69,7 +63,7 @@ namespace System.Web.Http.OData.Routing.Conventions
             }
         }
 
-        public static void AddFunctionParameterToRouteData(this HttpControllerContext controllerContext, FunctionPathSegment functionSegment)
+        public static void AddFunctionParameterToRouteData(this HttpControllerContext controllerContext, BoundFunctionPathSegment functionSegment)
         {
             Contract.Assert(controllerContext != null);
             Contract.Assert(functionSegment != null);

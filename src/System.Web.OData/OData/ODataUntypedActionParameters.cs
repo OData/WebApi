@@ -18,7 +18,7 @@ namespace System.Web.Http.OData
         /// Initializes a new instance of the <see cref="ODataUntypedActionParameters"/> class.
         /// </summary>
         /// <param name="action">The OData action of this parameters.</param>
-        public ODataUntypedActionParameters(IEdmActionImport action)
+        public ODataUntypedActionParameters(IEdmAction action)
         {
             if (action == null)
             {
@@ -31,6 +31,6 @@ namespace System.Web.Http.OData
         /// <summary>
         /// Gets the OData action of this parameters.
         /// </summary>
-        public IEdmActionImport Action { get; private set; }
+        public IEdmAction Action { get; private set; }
     }
 }

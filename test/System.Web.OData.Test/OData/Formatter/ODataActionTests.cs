@@ -37,8 +37,9 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void Can_dispatch_actionPayload_to_action()
         {
+            // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers(1)/DoSomething");
-            request.Headers.Add("accept", "application/json;odata=verbose");
+            request.Headers.Add("accept", "application/json");
             string payload = @"{ 
                 ""p1"": 1, 
                 ""p2"": { ""StreetAddress"": ""1 Microsoft Way"", ""City"": ""Redmond"", ""State"": ""WA"", ""ZipCode"": 98052 }, 
@@ -47,28 +48,35 @@ namespace System.Web.Http.OData.Formatter
             }";
 
             request.Content = new StringContent(payload);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
+            // Act
             HttpResponseMessage response = _client.SendAsync(request).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
 
-            response.EnsureSuccessStatusCode();
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata#Edm.Boolean\",\"value\":true", responseString);
         }
 
         [Fact]
         public void Response_includes_action_link()
         {
+            // Arrange
             string editLink = "http://localhost/Customers(1)";
             string expectedTarget = editLink + "/DoSomething";
             string expectedMetadata = "#org.odata.DoSomething";
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, editLink);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+
+            // Act
             HttpResponseMessage response = _client.SendAsync(request).Result;
             string responseString = response.Content.ReadAsStringAsync().Result;
-
             dynamic result = JObject.Parse(responseString);
-
             dynamic doSomething = result[expectedMetadata];
+
+            // Assert
             Assert.NotNull(doSomething);
             Assert.Equal(expectedTarget, (string)doSomething.target);
             Assert.Equal("DoSomething", (string)doSomething.title);

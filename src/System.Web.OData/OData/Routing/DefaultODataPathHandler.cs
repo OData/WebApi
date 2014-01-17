@@ -381,15 +381,14 @@ namespace System.Web.Http.OData.Routing
             }
 
             // now look for bindable actions
-            IEdmEntityContainer container = ExtractEntityContainer(model);
-            IEdmActionImport action = container.FindAction(segment, collectionType);
+            IEdmAction action = model.FindAction(segment, collectionType);
             if (action != null)
             {
-                return new ActionPathSegment(action);
+                return new BoundActionPathSegment(action);
             }
 
             // Try to match this to a function call
-            FunctionPathSegment pathSegment = TryMatchFunctionCall(segment, segments, model, bindingType: collectionType);
+            BoundFunctionPathSegment pathSegment = TryMatchFunctionCall(segment, segments, model, bindingType: collectionType);
             if (pathSegment != null)
             {
                 return pathSegment;
@@ -525,15 +524,14 @@ namespace System.Web.Http.OData.Routing
             }
 
             // finally look for bindable procedures
-            IEdmEntityContainer container = ExtractEntityContainer(model);
-            IEdmActionImport action = container.FindAction(segment, previousType);
+            IEdmAction action = model.FindAction(segment, previousType);
             if (action != null)
             {
-                return new ActionPathSegment(action);
+                return new BoundActionPathSegment(action);
             }
 
             // Try to match this to a function call
-            FunctionPathSegment pathSegment = TryMatchFunctionCall(segment, segments, model, bindingType: previousType);
+            BoundFunctionPathSegment pathSegment = TryMatchFunctionCall(segment, segments, model, bindingType: previousType);
             if (pathSegment != null)
             {
                 return pathSegment;
@@ -566,14 +564,14 @@ namespace System.Web.Http.OData.Routing
             return path.ToString();
         }
 
-        private static FunctionPathSegment TryMatchFunctionCall(string segment, Queue<string> segments, IEdmModel model,
+        private static BoundFunctionPathSegment TryMatchFunctionCall(string segment, Queue<string> segments, IEdmModel model,
             IEdmType bindingType)
         {
-            IEdmEntityContainer container = ExtractEntityContainer(model);
             string nextSegment = segments.Count > 0 ? segments.Peek() : null;
+            IEnumerable<IEdmOperation> matchOperations = model.FindMatchedOperations(segment, bindingType);
+            IEnumerable<IEdmFunction> possibleFunctions = matchOperations.OfType<IEdmFunction>();
 
-            IEnumerable<IEdmFunctionImport> possibleFunctions = container.FindFunctions(segment, bindingType);
-            FunctionPathSegment functionSegment = FunctionResolver.TryResolve(possibleFunctions, model, nextSegment);
+            BoundFunctionPathSegment functionSegment = FunctionResolver.TryResolveBound(possibleFunctions, model, nextSegment);
             if (functionSegment != null && FunctionResolver.IsEnclosedInParentheses(nextSegment))
             {
                 segments.Dequeue();
@@ -587,7 +585,9 @@ namespace System.Web.Http.OData.Routing
             IEdmEntityContainer container = ExtractEntityContainer(model);
             string nextSegment = segments.Count > 0 ? segments.Peek() : null;
 
-            IEnumerable<IEdmFunctionImport> possibleFunctions = container.FindFunctions(segment, null);
+            IEnumerable<IEdmOperationImport> operationImports = container.FindMatchedOperationImports(segment);
+            IEnumerable<IEdmFunctionImport> possibleFunctions = operationImports.OfType<IEdmFunctionImport>();
+
             UnboundFunctionPathSegment unboundFunctionSegment = FunctionResolver.TryResolveUnbound(possibleFunctions, model, nextSegment);
             if (unboundFunctionSegment != null && FunctionResolver.IsEnclosedInParentheses(nextSegment))
             {
@@ -618,7 +618,7 @@ namespace System.Web.Http.OData.Routing
                         break;
 
                     case ODataSegmentKinds._Function:
-                        templateSegments.Add(new FunctionPathSegmentTemplate((FunctionPathSegment)pathSegment));
+                        templateSegments.Add(new BoundFunctionPathSegmentTemplate((BoundFunctionPathSegment)pathSegment));
                         break;
 
                     case ODataSegmentKinds._UnboundFunction:

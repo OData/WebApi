@@ -749,4 +749,7 @@
   <data name="NotNavigablePropertyUsedInNavigation" xml:space="preserve">
     <value>The property '{0}' cannot be used for navigation.</value>
   </data>
+  <data name="FunctionResolutionFailed" xml:space="preserve">
+    <value>Function resolution failed. Multiple functions found in the model with identifier: '{0}' and parameter names : '{1}'.</value>
+  </data>
 </root>

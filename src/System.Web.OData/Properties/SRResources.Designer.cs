@@ -754,6 +754,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Function resolution failed. Multiple functions found in the model with identifier: &apos;{0}&apos; and parameter names : &apos;{1}&apos;..
+        /// </summary>
+        internal static string FunctionResolutionFailed {
+            get {
+                return ResourceManager.GetString("FunctionResolutionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to GetEdmModel cannot be called more than once. Consider using a different instance of the model builder or reusing the model you have built earlier..
         /// </summary>
         internal static string GetEdmModelCalledMoreThanOnce {

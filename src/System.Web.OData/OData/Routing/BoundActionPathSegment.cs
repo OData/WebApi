@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing
@@ -8,13 +9,13 @@ namespace System.Web.Http.OData.Routing
     /// <summary>
     /// An <see cref="ODataPathSegment"/> implementation representing a bound action invocation.
     /// </summary>
-    public class ActionPathSegment : ODataPathSegment
+    public class BoundActionPathSegment : ODataPathSegment
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ActionPathSegment" /> class.
+        /// Initializes a new instance of the <see cref="BoundActionPathSegment" /> class.
         /// </summary>
         /// <param name="action">The action being invoked.</param>
-        public ActionPathSegment(IEdmActionImport action)
+        public BoundActionPathSegment(IEdmAction action)
         {
             if (action == null)
             {
@@ -22,19 +23,13 @@ namespace System.Web.Http.OData.Routing
             }
 
             Action = action;
-            ActionName = Action.Container.FullName() + "." + Action.Name;
+            ActionName = Action.FullName();
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ActionPathSegment" /> class.
-        /// </summary>
-        /// <param name="actionName">Name of the action.</param>
-        public ActionPathSegment(string actionName)
+        // This constructor is intended for use by unit testing only.
+        internal BoundActionPathSegment(string actionName)
         {
-            if (actionName == null)
-            {
-                throw Error.ArgumentNull("actionName");
-            }
+            Contract.Assert(!String.IsNullOrEmpty(actionName));
 
             ActionName = actionName;
         }
@@ -53,66 +48,40 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Gets the action being invoked.
         /// </summary>
-        public IEdmActionImport Action
-        {
-            get;
-            private set;
-        }
+        public IEdmAction Action { get; private set; }
 
         /// <summary>
         /// Gets the name of the action.
         /// </summary>
-        public string ActionName
-        {
-            get;
-            private set;
-        }
+        public string ActionName { get; private set; }
 
-        /// <summary>
-        /// Gets the EDM type for this segment.
-        /// </summary>
-        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
-        /// <returns>
-        /// The EDM type for this segment.
-        /// </returns>
+        /// <inheritdoc/>
         public override IEdmType GetEdmType(IEdmType previousEdmType)
         {
             if (Action != null)
             {
-                IEdmTypeReference returnType = Action.Action.ReturnType;
+                IEdmTypeReference returnType = Action.ReturnType;
                 if (returnType != null)
                 {
                     return returnType.Definition;
                 }
             }
+
             return null;
         }
 
-        /// <summary>
-        /// Gets the entity set for this segment.
-        /// </summary>
-        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
-        /// <returns>
-        /// The entity set for this segment.
-        /// </returns>
+        /// <inheritdoc/>
         public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
         {
-            if (Action != null)
-            {
-                IEdmEntitySet functionEntitySet = null;
-                if (Action.TryGetStaticEntitySet(out functionEntitySet))
-                {
-                    return functionEntitySet;
-                }
-            }
-            return null;
+            // For bound action, the previous entity set is the bounding entity set.
+            return previousEntitySet;
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// Returns a <see cref="String" /> that represents this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="String" /> that represents this instance.
         /// </returns>
         public override string ToString()
         {
@@ -124,7 +93,7 @@ namespace System.Web.Http.OData.Routing
         {
             if (pathSegment.SegmentKind == ODataSegmentKinds.Action)
             {
-                ActionPathSegment actionSegment = (ActionPathSegment)pathSegment;
+                BoundActionPathSegment actionSegment = (BoundActionPathSegment)pathSegment;
                 return actionSegment.Action == Action && actionSegment.ActionName == ActionName;
             }
 

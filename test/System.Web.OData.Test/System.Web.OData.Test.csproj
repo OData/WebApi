@@ -143,7 +143,7 @@
     <Compile Include="OData\Routing\AttributeRoutingUnboundTest.cs" />
     <Compile Include="OData\Routing\CastPathSegmentTest.cs" />
     <Compile Include="OData\Routing\Conventions\FunctionRoutingConventionTests.cs" />
-    <Compile Include="OData\Routing\ActionPathSegmentTest.cs" />
+    <Compile Include="OData\Routing\BoundActionPathSegmentTest.cs" />
     <Compile Include="OData\Routing\AttributeRoutingTest.cs" />
     <Compile Include="OData\Routing\BatchPathSegmentTest.cs" />
     <Compile Include="OData\Routing\Conventions\AttributeRoutingConventionTest.cs" />
@@ -156,8 +156,8 @@
     <Compile Include="OData\Query\SelectExpandQueryOptionTest.cs" />
     <Compile Include="OData\Query\Validators\SelectExpandQueryValidatorTest.cs" />
     <Compile Include="OData\Routing\EntitySetPathSegmentTest.cs" />
-    <Compile Include="OData\Routing\FunctionPathSegmentTemplateTest.cs" />
-    <Compile Include="OData\Routing\FunctionPathSegmentTest.cs" />
+    <Compile Include="OData\Routing\BoundFunctionPathSegmentTemplateTest.cs" />
+    <Compile Include="OData\Routing\BoundFunctionPathSegmentTest.cs" />
     <Compile Include="OData\Routing\FunctionResolverTest.cs" />
     <Compile Include="OData\Routing\KeyValueParserTest.cs" />
     <Compile Include="OData\Routing\KeyValuePathSegmentTemplateTest.cs" />

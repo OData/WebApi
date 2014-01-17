@@ -162,7 +162,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                 if (selfLinks.IdLink != null)
                 {
-                    entry.Id = selfLinks.IdLink;
+                    entry.Id = new Uri(selfLinks.IdLink);
                 }
 
                 if (selfLinks.ReadLink != null)

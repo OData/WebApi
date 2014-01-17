@@ -13,13 +13,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.OData.Core">
-      <HintPath>..\..\packages\Microsoft.OData.Core.6.0.0-alpha2\lib\net40\Microsoft.OData.Core.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.OData.Core.6.0.0-beta1\lib\portable-net40+sl5+wp8+win8\Microsoft.OData.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.OData.Edm.Portable">
-      <HintPath>..\..\packages\Microsoft.OData.Edm.6.0.0-alpha2\lib\portable-net40+sl5+wp8+win8\Microsoft.OData.Edm.Portable.dll</HintPath>
+    <Reference Include="Microsoft.OData.Edm">
+      <HintPath>..\..\packages\Microsoft.OData.Edm.6.0.0-beta1\lib\portable-net40+sl5+wp8+win8\Microsoft.OData.Edm.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Spatial.Portable">
-      <HintPath>..\..\packages\Microsoft.Spatial.6.0.0-alpha2\lib\portable-net40+sl5+wp8+win8\Microsoft.Spatial.Portable.dll</HintPath>
+    <Reference Include="Microsoft.Spatial">
+      <HintPath>..\..\packages\Microsoft.Spatial.6.0.0-beta1\lib\portable-net40+sl5+wp8+win8\Microsoft.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -364,7 +364,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataPrimitiveSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerContext.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializer.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataServiceDocumentSerializer.cs" />
     <Compile Include="Properties\SRResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

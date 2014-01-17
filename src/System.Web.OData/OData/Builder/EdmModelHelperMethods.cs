@@ -37,7 +37,6 @@ namespace System.Web.Http.OData.Builder
 
             // finish up
             model.AddElement(container);
-            model.SetIsDefaultEntityContainer(container, isDefaultContainer: true);
 
             // build the map from IEdmEntityType to IEdmFunctionImport
             model.SetAnnotationValue<BindableProcedureFinder>(model, new BindableProcedureFinder(model));
@@ -360,11 +359,10 @@ namespace System.Web.Http.OData.Builder
             if (kind == EdmTypeKind.Collection)
             {
                 CollectionTypeConfiguration collectionType = configuration as CollectionTypeConfiguration;
-                EdmCollectionType edmCollectionType = new EdmCollectionType(GetEdmTypeReference(
-                    availableTypes,
-                    collectionType.ElementType,
-                    EdmLibHelpers.IsNullable(collectionType.ElementType.ClrType)));
-                return new EdmCollectionTypeReference(edmCollectionType, nullable);
+                bool elementNullable = EdmLibHelpers.IsNullable(collectionType.ElementType.ClrType);
+                EdmCollectionType edmCollectionType =
+                    new EdmCollectionType(GetEdmTypeReference(availableTypes, collectionType.ElementType, elementNullable));
+                return new EdmCollectionTypeReference(edmCollectionType);
             }
             else
             {

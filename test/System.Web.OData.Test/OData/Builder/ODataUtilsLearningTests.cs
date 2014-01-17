@@ -13,25 +13,23 @@ namespace System.Web.Http.OData.Builder
     public class ODataUtilsLearningTests
     {
         [Fact]
-        public void EntityContainer_Is_Default_ShowsUp_In_Metadata()
+        public void EntityContainer_Is_Default_DoesNotShowUp_In_Metadata()
         {
             // Arrange
             EdmModel model = new EdmModel();
             EdmEntityContainer container = new EdmEntityContainer("Default", "SampleContainer");
             model.AddElement(container);
 
-            // Act
-            model.SetIsDefaultEntityContainer(container, isDefaultContainer: true);
-
-            // Assert
+            // Act & Assert
             MemoryStream stream = new MemoryStream();
             ODataMessageWriter writer = new ODataMessageWriter(new ODataMessageWrapper(stream) as IODataResponseMessage, new ODataMessageWriterSettings(), model);
             writer.WriteMetadataDocument();
             stream.Seek(0, SeekOrigin.Begin);
             XElement element = XElement.Load(stream);
-            var containerXml = element.Descendants().Where(n => n.Name.LocalName == "EntityContainer").SingleOrDefault();
+            var containerXml = element.Descendants().SingleOrDefault(n => n.Name.LocalName == "EntityContainer");
+            Assert.NotNull(containerXml);
             Assert.Equal("SampleContainer", containerXml.Attribute("Name").Value);
-            Assert.Equal("true", containerXml.Attributes().Where(a => a.Name.LocalName == "IsDefaultEntityContainer").Single().Value);
+            Assert.Null(containerXml.Attributes().FirstOrDefault(a => a.Name.LocalName == "IsDefaultEntityContainer"));
         }
     }
 }

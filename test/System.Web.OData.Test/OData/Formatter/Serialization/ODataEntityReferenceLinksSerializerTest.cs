@@ -125,9 +125,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = path };
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriter writer = new ODataMessageWriter(message, settings);
 
             // Act
-            serializer.WriteObject(uris, typeof(ODataEntityReferenceLinks), new ODataMessageWriter(message), writeContext);
+            serializer.WriteObject(uris, typeof(ODataEntityReferenceLinks), writer, writeContext);
 
             // Assert
             stream.Seek(0, SeekOrigin.Begin);

@@ -23,8 +23,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         private static IEdmModel _model = GetEdmModel();
         private static ODataDeserializerProvider _deserializerProvider = new DefaultODataDeserializerProvider();
         private static IEdmTypeReference _addressType = _model.GetEdmTypeReference(typeof(Address)).AsComplex();
-        private static IEdmCollectionTypeReference _addressCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(_addressType), isNullable: false);
-        private static IEdmCollectionTypeReference _intCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(_model.GetEdmTypeReference(typeof(int))), isNullable: false);
+        private static IEdmCollectionTypeReference _addressCollectionType =
+            new EdmCollectionTypeReference(new EdmCollectionType(_addressType));
+        private static IEdmCollectionTypeReference _intCollectionType =
+            new EdmCollectionTypeReference(new EdmCollectionType(_model.GetEdmTypeReference(typeof(int))));
 
         [Fact]
         public void Ctor_ThrowsArgumentNull_DeserializerProvider()
@@ -175,7 +177,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
-            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, _model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = _model };
             ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = _model };
@@ -197,7 +201,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
-            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any"));
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, _model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = _model };
             ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = _model };

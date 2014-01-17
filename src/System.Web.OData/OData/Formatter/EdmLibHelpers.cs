@@ -182,7 +182,7 @@ namespace System.Web.Http.OData.Formatter
             switch (edmType.TypeKind)
             {
                 case EdmTypeKind.Collection:
-                    return new EdmCollectionTypeReference(edmType as IEdmCollectionType, isNullable);
+                    return new EdmCollectionTypeReference(edmType as IEdmCollectionType);
                 case EdmTypeKind.Complex:
                     return new EdmComplexTypeReference(edmType as IEdmComplexType, isNullable);
                 case EdmTypeKind.Entity:
@@ -193,8 +193,6 @@ namespace System.Web.Http.OData.Formatter
                     return new EdmEnumTypeReference(edmType as IEdmEnumType, isNullable);
                 case EdmTypeKind.Primitive:
                     return _coreModel.GetPrimitive((edmType as IEdmPrimitiveType).PrimitiveKind, isNullable);
-                case EdmTypeKind.Row:
-                    return new EdmRowTypeReference(edmType as IEdmRowType, isNullable);
                 default:
                     throw Error.NotSupported(SRResources.EdmTypeNotSupported, edmType.ToTraceString());
             }

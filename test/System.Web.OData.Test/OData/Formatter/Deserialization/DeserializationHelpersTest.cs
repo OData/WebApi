@@ -233,8 +233,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             Mock<IEdmProperty> property = new Mock<IEdmProperty>();
             property.Setup(p => p.Name).Returns(name);
-            IEdmTypeReference elementTypeRefernece = EdmLibHelpers.ToEdmTypeReference(EdmCoreModel.Instance.GetPrimitiveType(elementType), isNullable: false);
-            property.Setup(p => p.Type).Returns(new EdmCollectionTypeReference(new EdmCollectionType(elementTypeRefernece), isNullable: false));
+            IEdmTypeReference elementTypeReference =
+                EdmCoreModel.Instance.GetPrimitiveType(elementType).ToEdmTypeReference(isNullable: false);
+            property.Setup(p => p.Type)
+                    .Returns(new EdmCollectionTypeReference(new EdmCollectionType(elementTypeReference)));
             return property.Object;
         }
 

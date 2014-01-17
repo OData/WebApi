@@ -3,7 +3,6 @@
   <id>http://localhost:8081/People(10)</id>
   <category term="#System.Web.Http.OData.Formatter.FormatterPerson" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
   <link rel="edit" href="http://localhost:8081/People(10)" />
-  <link rel="self" href="http://localhost:8081/People(10)" />
   <title />
   <updated>UpdatedTime</updated>
   <author>

@@ -100,7 +100,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         [Fact]
-        public void SimpleCollections_Are_NotNullable_ByDefault()
+        public void SimpleCollections_Are_Nullable_ByDefault()
         {
             var builder = new ODataModelBuilder();
 
@@ -113,7 +113,7 @@ namespace System.Web.Http.OData.Builder
 
             Assert.False(property.OptionalProperty);
             var edmCustomer = model.AssertHasEntityType(typeof(Customer));
-            Assert.False(edmCustomer.FindProperty("Aliases").Type.IsNullable);
+            Assert.True(edmCustomer.FindProperty("Aliases").Type.IsNullable);
         }
 
         [Fact]

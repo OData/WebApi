@@ -8,14 +8,14 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
-    public class ODataWorkspaceSerializerTest
+    public class ODataServiceDocumentSerializerTest
     {
-        private Type _workspaceType = typeof(ODataWorkspace);
+        private Type _workspaceType = typeof(ODataServiceDocument);
 
         [Fact]
         public void WriteObject_ThrowsArgumentNull_MessageWriter()
         {
-            ODataWorkspaceSerializer serializer = new ODataWorkspaceSerializer();
+            ODataServiceDocumentSerializer serializer = new ODataServiceDocumentSerializer();
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObject(42, _workspaceType, messageWriter: null, writeContext: null),
                 "messageWriter");
@@ -24,7 +24,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_ThrowsArgumentNull_Graph()
         {
-            ODataWorkspaceSerializer serializer = new ODataWorkspaceSerializer();
+            ODataServiceDocumentSerializer serializer = new ODataServiceDocumentSerializer();
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObject(null, type: _workspaceType, messageWriter: null, writeContext: null),
                 "messageWriter");
@@ -33,22 +33,26 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_Throws_CannotWriteType()
         {
-            ODataWorkspaceSerializer serializer = new ODataWorkspaceSerializer();
+            ODataServiceDocumentSerializer serializer = new ODataServiceDocumentSerializer();
             Assert.Throws<SerializationException>(
                 () => serializer.WriteObject(42, _workspaceType, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
-                "ODataWorkspaceSerializer cannot write an object of type 'ODataWorkspace'.");
+                "ODataServiceDocumentSerializer cannot write an object of type 'ODataServiceDocument'.");
         }
 
         [Fact]
         public void ODataWorkspaceSerializer_Works()
         {
             // Arrange
-            ODataWorkspaceSerializer serializer = new ODataWorkspaceSerializer();
+            ODataServiceDocumentSerializer serializer = new ODataServiceDocumentSerializer();
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriter writer = new ODataMessageWriter(message, settings);
 
             // Act
-            serializer.WriteObject(new ODataWorkspace(), _workspaceType, new ODataMessageWriter(message), new ODataSerializerContext());
+            serializer.WriteObject(new ODataServiceDocument(), _workspaceType, writer, new ODataSerializerContext());
 
             // Assert
             stream.Seek(0, SeekOrigin.Begin);

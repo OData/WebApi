@@ -7,14 +7,14 @@ using Microsoft.OData.Core;
 namespace System.Web.Http.OData.Formatter.Serialization
 {
     /// <summary>
-    /// Represents an <see cref="ODataSerializer"/> for serializing <see cref="ODataWorkspace" />'s for generating servicedoc's.
+    /// Represents an <see cref="ODataSerializer"/> for serializing <see cref="ODataServiceDocument" />'s for generating servicedoc's.
     /// </summary>
-    public class ODataWorkspaceSerializer : ODataSerializer
+    public class ODataServiceDocumentSerializer : ODataSerializer
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ODataWorkspaceSerializer"/>.
+        /// Initializes a new instance of <see cref="ODataServiceDocumentSerializer"/>.
         /// </summary>
-        public ODataWorkspaceSerializer()
+        public ODataServiceDocumentSerializer()
             : base(ODataPayloadKind.ServiceDocument)
         {
         }
@@ -31,13 +31,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("graph");
             }
 
-            ODataWorkspace workspace = graph as ODataWorkspace;
-            if (workspace == null)
+            ODataServiceDocument serviceDocument = graph as ODataServiceDocument;
+            if (serviceDocument == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, type.Name));
             }
 
-            messageWriter.WriteServiceDocument(workspace);
+            messageWriter.WriteServiceDocument(serviceDocument);
         }
     }
 }

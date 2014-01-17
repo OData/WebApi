@@ -471,7 +471,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void ApplyNavigationProperty_Calls_ReadInlineOnFeed()
         {
             // Arrange
-            IEdmCollectionTypeReference productsType = new EdmCollectionTypeReference(new EdmCollectionType(_productEdmType), isNullable: false);
+            IEdmCollectionTypeReference productsType = new EdmCollectionTypeReference(new EdmCollectionType(_productEdmType));
             Mock<ODataEdmTypeDeserializer> productsDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Feed);
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
             var deserializer = new ODataEntityDeserializer(deserializerProvider.Object);

@@ -12,7 +12,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// </summary>
     public class DefaultODataSerializerProvider : ODataSerializerProvider
     {
-        private static readonly ODataWorkspaceSerializer _workspaceSerializer = new ODataWorkspaceSerializer();
+        private static readonly ODataServiceDocumentSerializer _workspaceSerializer = new ODataServiceDocumentSerializer();
         private static readonly ODataEntityReferenceLinkSerializer _entityReferenceLinkSerializer = new ODataEntityReferenceLinkSerializer();
         private static readonly ODataEntityReferenceLinksSerializer _entityReferenceLinksSerializer = new ODataEntityReferenceLinksSerializer();
         private static readonly ODataErrorSerializer _errorSerializer = new ODataErrorSerializer();
@@ -105,7 +105,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             // handle the special types.
-            if (type == typeof(ODataWorkspace))
+            if (type == typeof(ODataServiceDocument))
             {
                 return _workspaceSerializer;
             }

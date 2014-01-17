@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -47,6 +46,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
 
             IEdmAction action = GetAction(readContext);
+            Contract.Assert(action != null);
 
             // Create the correct resource type;
             Dictionary<string, object> payload;

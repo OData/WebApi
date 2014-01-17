@@ -250,7 +250,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             IEdmTypeReference edmType = new EdmEntityTypeReference(new EdmEntityType("NS", "Name"), isNullable: false);
-            IEdmCollectionTypeReference feedType = new EdmCollectionTypeReference(new EdmCollectionType(edmType), isNullable: false);
+            IEdmCollectionTypeReference feedType = new EdmCollectionTypeReference(new EdmCollectionType(edmType));
             Mock<IEdmObject> edmObject = new Mock<IEdmObject>();
             edmObject.Setup(e => e.GetEdmType()).Returns(edmType);
 
@@ -469,7 +469,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            IEdmCollectionTypeReference customersType = new EdmCollectionTypeReference(new EdmCollectionType(model.Customer.AsReference()), isNullable: false);
+            IEdmCollectionTypeReference customersType = new EdmCollectionTypeReference(new EdmCollectionType(model.Customer.AsReference()));
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
             IEdmNavigationProperty ordersProperty = model.Customer.NavigationProperties().First();

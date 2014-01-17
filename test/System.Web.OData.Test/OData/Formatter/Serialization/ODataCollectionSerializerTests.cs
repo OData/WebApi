@@ -37,7 +37,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             };
 
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
-            _collectionType = new EdmCollectionTypeReference(new EdmCollectionType(_edmIntType), isNullable: false);
+            _collectionType = new EdmCollectionTypeReference(new EdmCollectionType(_edmIntType));
             _serializer = new ODataCollectionSerializer(serializerProvider);
         }
 
@@ -70,7 +70,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
-            ODataMessageWriter messageWriter = new ODataMessageWriter(message);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message, settings);
             Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(new DefaultODataSerializerProvider());
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "CollectionName", Model = _model };
             IEnumerable enumerable = new object[0];
@@ -189,7 +192,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmComplexObject[] collection = new IEdmComplexObject[] { new Mock<IEdmComplexObject>().Object };
             ODataSerializerContext serializerContext = new ODataSerializerContext();
             IEdmComplexTypeReference elementType = new EdmComplexTypeReference(new EdmComplexType("NS", "ComplexType"), isNullable: true);
-            IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType), isNullable: false);
+            IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType));
 
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
             Mock<ODataComplexTypeSerializer> elementSerializer = new Mock<ODataComplexTypeSerializer>(MockBehavior.Strict, serializerProvider.Object);

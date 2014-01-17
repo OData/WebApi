@@ -19,6 +19,7 @@ using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Formatter
@@ -440,7 +441,7 @@ namespace System.Web.Http.OData.Formatter
 
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings(MessageWriterSettings)
             {
-                BaseUri = GetBaseAddress(Request),
+                PayloadBaseUri = GetBaseAddress(Request),
                 Version = _version,
             };
 
@@ -458,11 +459,19 @@ namespace System.Web.Http.OData.Formatter
                 }
 
                 string resourcePath = path != null ? path.ToString() : String.Empty;
-                writerSettings.SetMetadataDocumentUri(
-                    new Uri(metadataLink),
+                Uri baseAddress = GetBaseAddress(Request);
+                writerSettings.SetServiceDocumentUri(
+                    baseAddress,
                     Request.GetSelectExpandClause(),
                     resourcePath,
                     isIndividualProperty: false);
+
+                writerSettings.ODataUri = new ODataUri
+                {
+                    ServiceRoot = baseAddress,
+                 
+                    // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
+                };
             }
 
             MediaTypeHeaderValue contentType = null;

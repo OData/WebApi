@@ -136,7 +136,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             var serializer = new ODataPrimitiveSerializer();
             ODataSerializerContext writecontext = new ODataSerializerContext() { RootElementName = "PropertyName", Model = EdmCoreModel.Instance };
 
-            ODataMessageWriter writer = new ODataMessageWriter(new ODataMessageWrapper(new MemoryStream()) as IODataResponseMessage);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            ODataMessageWriter writer = new ODataMessageWriter(
+                new ODataMessageWrapper(new MemoryStream()) as IODataResponseMessage,
+                settings);
 
             Assert.DoesNotThrow(() => serializer.WriteObject(graph, typeof(int), writer, writecontext));
         }

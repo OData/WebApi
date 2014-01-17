@@ -26,10 +26,10 @@ namespace System.Web.Http.OData
         public void Ctor_ThrowsArgument_UnexpectedElementType()
         {
             IEdmTypeReference elementType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: true);
-            IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType), isNullable: false);
+            IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType));
 
             Assert.ThrowsArgument(() => new EdmEntityObjectCollection(collectionType), "edmType",
-            "The element type '[Edm.Int32 Nullable=True]' of the given collection type '[Collection([Edm.Int32 Nullable=True]) Nullable=False]' " +
+            "The element type '[Edm.Int32 Nullable=True]' of the given collection type '[Collection([Edm.Int32 Nullable=True]) Nullable=True]' " +
             "is not of the type 'IEdmEntityType'.");
         }
 
@@ -37,7 +37,7 @@ namespace System.Web.Http.OData
         public void GetEdmType_Returns_EdmTypeInitializedByCtor()
         {
             IEdmTypeReference elementType = new EdmEntityTypeReference(new EdmEntityType("NS", "Entity"), isNullable: false);
-            IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType), isNullable: false);
+            IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType));
 
             var edmObject = new EdmEntityObjectCollection(collectionType);
             Assert.Same(collectionType, edmObject.GetEdmType());

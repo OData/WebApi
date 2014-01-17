@@ -61,9 +61,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
             ODataError error = new ODataError { Message = "Error!!!" };
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriter writer = new ODataMessageWriter(message, settings);
 
             // Act
-            serializer.WriteObject(error, typeof(ODataError), new ODataMessageWriter(message), new ODataSerializerContext());
+            serializer.WriteObject(error, typeof(ODataError), writer, new ODataSerializerContext());
 
             // Assert
             stream.Seek(0, SeekOrigin.Begin);

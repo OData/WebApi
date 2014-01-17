@@ -205,9 +205,11 @@ namespace System.Web.Http.OData
         {
             get
             {
+                IEdmTypeReference nonnullableDouble = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Double, isNullable: false);
                 IEdmTypeReference nullableDouble = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Double, isNullable: true);
                 IEdmTypeReference nullableEntity = new EdmEntityTypeReference(new EdmEntityType("NS", "Entity"), isNullable: true);
                 IEdmTypeReference nullableComplex = new EdmComplexTypeReference(new EdmComplexType("NS", "Complex"), isNullable: true);
+                EdmCollectionTypeReference entityCollection = new EdmCollectionTypeReference(new EdmCollectionType(nullableEntity));
 
                 return new TheoryDataSet<IEdmTypeReference, object>
                 {
@@ -217,9 +219,9 @@ namespace System.Web.Http.OData
                     { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.DateTimeOffset, isNullable: false), default(DateTimeOffset) },
                     { new EdmComplexTypeReference(new EdmComplexType("NS", "Complex"), isNullable: true), null },
                     { new EdmEntityTypeReference(new EdmEntityType("NS", "Entity"), isNullable: true), null },
-                    { new EdmCollectionTypeReference(new EdmCollectionType(nullableDouble), isNullable: false),  new List<double?>() },
-                    { new EdmCollectionTypeReference(new EdmCollectionType(nullableDouble), isNullable: true),  null },
-                    { new EdmCollectionTypeReference(new EdmCollectionType(nullableEntity), isNullable: true),  null },
+                    { new EdmCollectionTypeReference(new EdmCollectionType(nullableDouble)), new List<double?>() },
+                    { new EdmCollectionTypeReference(new EdmCollectionType(nonnullableDouble)), new List<double>() },
+                    { new EdmCollectionTypeReference(new EdmCollectionType(nullableEntity)), new EdmEntityObjectCollection(entityCollection) },
                 };
             }
         }
@@ -235,7 +237,7 @@ namespace System.Web.Http.OData
         public void GetDefaultValue_NonNullableComplexCollection()
         {
             IEdmTypeReference elementType = new EdmComplexTypeReference(new EdmComplexType("NS", "Complex"), isNullable: true);
-            IEdmCollectionTypeReference complexCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType), isNullable: false);
+            IEdmCollectionTypeReference complexCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType));
 
             var result = EdmStructuredObject.GetDefaultValue(complexCollectionType);
 
@@ -247,7 +249,7 @@ namespace System.Web.Http.OData
         public void GetDefaultValue_NonNullableEntityCollection()
         {
             IEdmTypeReference elementType = new EdmEntityTypeReference(new EdmEntityType("NS", "Entity"), isNullable: true);
-            IEdmCollectionTypeReference entityCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType), isNullable: false);
+            IEdmCollectionTypeReference entityCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType));
 
             var result = EdmStructuredObject.GetDefaultValue(entityCollectionType);
 
@@ -318,9 +320,9 @@ namespace System.Web.Http.OData
                     { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: false), typeof(string) },
                     { entity, typeof(EdmEntityObject) },
                     { complex, typeof(EdmComplexObject) },
-                    { new EdmCollectionTypeReference(new EdmCollectionType(entity), isNullable: false), typeof(EdmEntityObjectCollection) },
-                    { new EdmCollectionTypeReference(new EdmCollectionType(complex), isNullable: false), typeof(EdmComplexObjectCollection) },
-                    { new EdmCollectionTypeReference(new EdmCollectionType(nullableDouble), isNullable: false), typeof(List<double?>) }
+                    { new EdmCollectionTypeReference(new EdmCollectionType(entity)), typeof(EdmEntityObjectCollection) },
+                    { new EdmCollectionTypeReference(new EdmCollectionType(complex)), typeof(EdmComplexObjectCollection) },
+                    { new EdmCollectionTypeReference(new EdmCollectionType(nullableDouble)), typeof(List<double?>) }
                 };
             }
         }
@@ -331,16 +333,7 @@ namespace System.Web.Http.OData
         {
             Assert.Equal(expectedType, EdmStructuredObject.GetClrTypeForUntypedDelta(edmType));
         }
-
-        [Fact]
-        public void GetClrTypeForUntypedDelta_Throws_UnsupportedEdmType()
-        {
-            IEdmTypeReference edmType = new EdmRowTypeReference(new EdmRowType(), isNullable: true);
-            Assert.Throws<InvalidOperationException>(
-                () => EdmStructuredObject.GetClrTypeForUntypedDelta(edmType),
-                "The EDM type '[Row() Nullable=True]' of kind 'Row' is not supported.");
-        }
-
+        
         [Fact]
         public void GetEdmType_HasSameDefinition_AsInitializedEdmType()
         {

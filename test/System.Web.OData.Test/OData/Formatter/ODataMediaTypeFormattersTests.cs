@@ -263,7 +263,7 @@ namespace System.Web.Http.OData.Formatter
             IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
             Assert.NotNull(formatters); // Guard assertion
             IEnumerable<ODataMediaTypeFormatter> serviceDocumentFormatters = formatters.Where(
-                f => f.CanWriteType(typeof(ODataWorkspace)));
+                f => f.CanWriteType(typeof(ODataServiceDocument)));
 
             // Act
             IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = serviceDocumentFormatters.SelectMany(
@@ -430,7 +430,7 @@ namespace System.Web.Http.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModel();
-            Type serviceDocumentType = typeof(ODataWorkspace);
+            Type serviceDocumentType = typeof(ODataServiceDocument);
 
             // Act
             MediaTypeHeaderValue mediaType = GetDefaultContentType(model, serviceDocumentType);
@@ -630,10 +630,10 @@ namespace System.Web.Http.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModelWithEntity<SampleType>();
-            Type workspaceType = typeof(ODataWorkspace);
+            Type serviceDocumentType = typeof(ODataServiceDocument);
 
             // Act
-            MediaTypeHeaderValue mediaType = GetContentTypeFromQueryString(model, workspaceType, dollarFormatValue);
+            MediaTypeHeaderValue mediaType = GetContentTypeFromQueryString(model, serviceDocumentType, dollarFormatValue);
 
             // Assert
             Assert.Equal(MediaTypeHeaderValue.Parse(expectedMediaType), mediaType);

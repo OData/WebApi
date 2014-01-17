@@ -149,6 +149,7 @@ namespace System.Web.Http.OData.Formatter
                 IEdmComplexType complex = new EdmComplexType("NS", "Complex");
                 IEdmPrimitiveType primitive = EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32);
                 IEdmCollectionType collection = new EdmCollectionType(new EdmEntityTypeReference(entity, isNullable: false));
+                IEdmCollectionType collectionNullable = new EdmCollectionType(new EdmEntityTypeReference(entity, isNullable: true));
 
                 return new TheoryDataSet<IEdmType, bool, Type>
                 {
@@ -158,7 +159,7 @@ namespace System.Web.Http.OData.Formatter
                     { entity, false, typeof(IEdmEntityTypeReference) },
                     { complex, true, typeof(IEdmComplexTypeReference) },
                     { complex, false, typeof(IEdmComplexTypeReference) },
-                    { collection, true, typeof(IEdmCollectionTypeReference) },
+                    { collectionNullable, true, typeof(IEdmCollectionTypeReference) },
                     { collection, false, typeof(IEdmCollectionTypeReference) }
                 };
             }
@@ -170,7 +171,15 @@ namespace System.Web.Http.OData.Formatter
         {
             IEdmTypeReference result = EdmLibHelpers.ToEdmTypeReference(edmType, isNullable);
 
-            Assert.Equal(isNullable, result.IsNullable);
+            IEdmCollectionTypeReference collection = result as IEdmCollectionTypeReference;
+            if (collection != null)
+            {
+                Assert.Equal(isNullable, collection.ElementType().IsNullable);
+            }
+            else
+            {
+                Assert.Equal(isNullable, result.IsNullable);
+            }
             Assert.Equal(edmType, result.Definition);
             Assert.IsAssignableFrom(expectedType, result);
         }

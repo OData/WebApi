@@ -37,23 +37,25 @@ namespace System.Web.Http.OData
         /// <returns>The service document for the service.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
             Justification = "Property not appropriate")]
-        public ODataWorkspace GetServiceDocument()
+        public ODataServiceDocument GetServiceDocument()
         {
             IEdmModel model = GetModel();
-            ODataWorkspace workspace = new ODataWorkspace();
+            ODataServiceDocument serviceDocument = new ODataServiceDocument();
             IEdmEntityContainer container = model.EntityContainers().Single();
             IEnumerable<IEdmEntitySet> entitysets = container.EntitySets();
 
-            IEnumerable<ODataResourceCollectionInfo> collections = entitysets.Select(
-                e => GetODataResourceCollectionInfo(model.GetEntitySetUrl(e).ToString(), e.Name));
-            workspace.Collections = collections;
+            IEnumerable<ODataEntitySetInfo> entitySets = entitysets.Select(
+                e => GetODataEntitySetInfo(model.GetEntitySetUrl(e).ToString(), e.Name));
+            serviceDocument.EntitySets = entitySets;
 
-            return workspace;
+            // TODO: 1601 Add FunctionImports and Singletons to service document
+
+            return serviceDocument;
         }
 
-        private static ODataResourceCollectionInfo GetODataResourceCollectionInfo(string url, string name)
+        private static ODataEntitySetInfo GetODataEntitySetInfo(string url, string name)
         {
-            ODataResourceCollectionInfo info = new ODataResourceCollectionInfo
+            ODataEntitySetInfo info = new ODataEntitySetInfo
             {
                 Name = name, // Required for JSON light support
                 Url = new Uri(url, UriKind.Relative)

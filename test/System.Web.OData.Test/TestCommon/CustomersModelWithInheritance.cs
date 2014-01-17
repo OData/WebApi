@@ -130,7 +130,7 @@ namespace System.Web.Http.TestCommon
                 entitySetPathExpression: null,
                 isComposable: false);
             EdmCollectionType edmCollectionType = new EdmCollectionType(new EdmEntityTypeReference(customer, false));
-            IsAnyUpgraded.AddParameter("entityset", new EdmCollectionTypeReference(edmCollectionType, false));
+            IsAnyUpgraded.AddParameter("entityset", new EdmCollectionTypeReference(edmCollectionType));
             model.AddElement(IsAnyUpgraded);
             container.AddFunctionImport(
                 "IsAnyUpgraded",

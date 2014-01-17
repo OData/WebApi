@@ -45,7 +45,8 @@
         <Property Name="ZipCode" Type="Edm.String" />
         <Property Name="Country" Type="Edm.String" />
       </ComplexType>
-      <Function Name="GetProductsByRating" ReturnType="Collection(ODataDemo.Product)" m:HttpMethod="GET">
+      <Function Name="GetProductsByRating" m:HttpMethod="GET">
+        <ReturnType Type="Collection(ODataDemo.Product)" />
         <Parameter Name="rating" Type="Edm.Int32" Nullable="false" />
       </Function>
       <EntityContainer Name="DemoService" m:IsDefaultEntityContainer="true">

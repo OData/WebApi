@@ -179,8 +179,8 @@ namespace System.Web.Http.OData.Routing
         {
             _entityType = new EdmEntityTypeReference(new EdmEntityType("NS", "Entity"), isNullable: false);
             _derivedEntityType = new EdmEntityTypeReference(new EdmEntityType("NS", "DerivedEntity", _entityType.EntityDefinition()), isNullable: false);
-            var entityCollection = new EdmCollectionTypeReference(new EdmCollectionType(_entityType), isNullable: false);
-            var derivedEntityCollection = new EdmCollectionTypeReference(new EdmCollectionType(_derivedEntityType), isNullable: false);
+            var entityCollection = new EdmCollectionTypeReference(new EdmCollectionType(_entityType));
+            var derivedEntityCollection = new EdmCollectionTypeReference(new EdmCollectionType(_derivedEntityType));
 
             EdmModel model = new EdmModel();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Name");

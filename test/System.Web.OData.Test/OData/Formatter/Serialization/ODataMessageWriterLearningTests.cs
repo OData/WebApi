@@ -174,7 +174,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
             settings.SetContentType(ODataFormat.Json);
-            settings.SetMetadataDocumentUri(CreateFakeUri());
+            settings.SetServiceDocumentUri(CreateFakeUri());
             return settings;
         }
 

@@ -147,7 +147,7 @@ namespace System.Web.Http.OData.Builder
 
             IEdmModel model = builder.GetEdmModel();
 
-            Assert.True(model.IsDefaultEntityContainer(model.SchemaElements.OfType<IEdmEntityContainer>().Single()));
+            Assert.Same(model.EntityContainer, model.SchemaElements.OfType<IEdmEntityContainer>().Single());
         }
 
         [Theory]

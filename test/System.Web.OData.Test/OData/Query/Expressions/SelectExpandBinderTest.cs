@@ -104,7 +104,7 @@ namespace System.Web.Http.OData.Query.Expressions
             // Arrange
             _settings.HandleNullPropagation = HandleNullPropagationOption.True;
             ExpandedNavigationSelectItem expandItem = new ExpandedNavigationSelectItem(
-                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), entitySet: _model.Customers)),
+                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), navigationSource: _model.Customers)),
                 _model.Customers,
                 selectExpandOption: null);
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
@@ -126,7 +126,7 @@ namespace System.Web.Http.OData.Query.Expressions
             // Arrange
             _settings.HandleNullPropagation = HandleNullPropagationOption.False;
             ExpandedNavigationSelectItem expandItem = new ExpandedNavigationSelectItem(
-                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), entitySet: _model.Customers)),
+                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), navigationSource: _model.Customers)),
                 _model.Customers,
                 selectExpandOption: null);
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
@@ -183,7 +183,7 @@ namespace System.Web.Http.OData.Query.Expressions
             // Arrange
             Order order = new Order();
             ExpandedNavigationSelectItem expandItem = new ExpandedNavigationSelectItem(
-                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), entitySet: _model.Customers)),
+                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), navigationSource: _model.Customers)),
                 _model.Customers,
                 selectExpandOption: null);
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
@@ -204,7 +204,7 @@ namespace System.Web.Http.OData.Query.Expressions
             // Arrange
             Order order = new Order();
             ExpandedNavigationSelectItem expandItem = new ExpandedNavigationSelectItem(
-                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), entitySet: _model.Customers)),
+                new ODataExpandPath(new NavigationPropertySegment(_model.Order.NavigationProperties().Single(), navigationSource: _model.Customers)),
                 _model.Customers,
                 selectExpandOption: null);
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);

@@ -23,7 +23,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             _model = GetEdmModel();
             _customerType = _model.GetEdmTypeReference(typeof(Customer)).AsEntity();
-            _customersType = new EdmCollectionTypeReference(new EdmCollectionType(_customerType), isNullable: false);
+            _customersType = new EdmCollectionTypeReference(new EdmCollectionType(_customerType));
         }
 
         [Fact]
@@ -95,8 +95,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Mock<ODataEdmTypeDeserializer> entityDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Entry);
             ODataFeedDeserializer deserializer = new ODataFeedDeserializer(deserializerProvider.Object);
             ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataFeed());
-            feedWrapper.Entries.Add(new ODataEntryWithNavigationLinks(new ODataEntry { Id = "1" }));
-            feedWrapper.Entries.Add(new ODataEntryWithNavigationLinks(new ODataEntry { Id = "2" }));
+            feedWrapper.Entries.Add(new ODataEntryWithNavigationLinks(new ODataEntry { Id = new Uri("http://a1/") }));
+            feedWrapper.Entries.Add(new ODataEntryWithNavigationLinks(new ODataEntry { Id = new Uri("http://a2/") }));
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns(entityDeserializer.Object);

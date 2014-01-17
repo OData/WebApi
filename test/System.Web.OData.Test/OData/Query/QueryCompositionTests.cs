@@ -87,12 +87,12 @@ namespace System.Web.Http.OData.Query
             // Model 1 only has Name, Model 2 only has Age
             ODataModelBuilder builder1 = new ODataModelBuilder();
             var personType1 = builder1.Entity<FormatterPerson>().Property(p => p.Name);
-            builder1.EntitySet<FormatterPerson>("People").HasIdLink(p => "link", false);
+            builder1.EntitySet<FormatterPerson>("People").HasIdLink(p => "http://link/", false);
             var model1 = builder1.GetEdmModel();
 
             ODataModelBuilder builder2 = new ODataModelBuilder();
             builder2.Entity<FormatterPerson>().Property(p => p.Age);
-            builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => "link", false);
+            builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => "http://link/", false);
             var model2 = builder2.GetEdmModel();
 
             var config = new HttpConfiguration();

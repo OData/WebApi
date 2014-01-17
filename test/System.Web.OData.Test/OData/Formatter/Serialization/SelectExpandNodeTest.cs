@@ -169,11 +169,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [InlineData("*", null, true, "")] // select * -> select no actions
         [InlineData("NS.upgrade", null, false, "upgrade")] // select single actions -> select requested action
         [InlineData("NS.upgrade", null, true, "upgrade")] // select single actions -> select requested action
-        [InlineData("NS.specialUpgrade", null, false, "")] // select single derived action on base type -> select nothing
-        [InlineData("NS.specialUpgrade", null, true, "specialUpgrade")] // select single derived action on derived type  -> select requested action
+        [InlineData("NS.SpecialCustomer/NS.specialUpgrade", null, false, "")] // select single derived action on base type -> select nothing
+        [InlineData("NS.SpecialCustomer/NS.specialUpgrade", null, true, "specialUpgrade")] // select single derived action on derived type  -> select requested action
         [InlineData("NS.upgrade,NS.upgrade", null, false, "upgrade")] // select duplicate actions -> de-duplicate
-        [InlineData("ModelWithInheritance.*", null, false, "upgrade")] // select wild card actions -> select all
-        [InlineData("ModelWithInheritance.*", null, true, "specialUpgrade,upgrade")] // select wild card actions -> select all
+        [InlineData("NS.*", null, false, "upgrade")] // select wild card actions -> select all
+        [InlineData("NS.*", null, true, "specialUpgrade,upgrade")] // select wild card actions -> select all
         public void GetActionsToBeSelected_Selects_ExpectedActions(
             string select, string expand, bool specialCustomer, string actionsToSelect)
         {

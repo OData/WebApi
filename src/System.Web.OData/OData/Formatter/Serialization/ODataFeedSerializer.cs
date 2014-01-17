@@ -171,8 +171,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 }
             }
 
-            // TODO: Bug 467590: remove the hardcoded feed id. Get support for it from the model builder ?
-            feed.Id = "http://schemas.datacontract.org/2004/07/" + feedType.FullName();
+            feed.Id = new Uri("http://schemas.datacontract.org/2004/07/" + feedType.FullName());
 
             if (writeContext.ExpandedEntity == null)
             {

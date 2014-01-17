@@ -195,7 +195,7 @@ namespace System.Web.Http.OData.Builder
                 {
                     IEdmComplexType elementType = edmType as IEdmComplexType;
                     Contract.Assert(elementType != null);
-                    elementTypeReference = new EdmComplexTypeReference(elementType, false);
+                    elementTypeReference = new EdmComplexTypeReference(elementType, collectionProperty.OptionalProperty);
                 }
                 else
                 {
@@ -207,9 +207,7 @@ namespace System.Web.Http.OData.Builder
 
             return type.AddStructuralProperty(
                 collectionProperty.Name,
-                new EdmCollectionTypeReference(
-                    new EdmCollectionType(elementTypeReference),
-                    collectionProperty.OptionalProperty));
+                new EdmCollectionTypeReference(new EdmCollectionType(elementTypeReference)));
         }
 
         private IEdmProperty CreateStructuralTypeEnumPropertyBody(EdmStructuredType type, StructuralTypeConfiguration config, EnumPropertyConfiguration enumProperty)

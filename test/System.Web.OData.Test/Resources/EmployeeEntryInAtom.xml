@@ -3,7 +3,6 @@
   <id>http://localhost/employees(0)</id>
   <category term="#System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
   <link rel="edit" href="http://localhost/employees(0)" />
-  <link rel="self" href="http://localhost/employees(0)" />
   <link rel="http://docs.oasis-open.org/odata/ns/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(0)/Manager" />
   <link rel="http://docs.oasis-open.org/odata/ns/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(0)/DirectReports" />
   <link rel="http://docs.oasis-open.org/odata/ns/related/WorkItem" type="application/atom+xml;type=entry" title="WorkItem" href="http://localhost/employees(0)/WorkItem" />

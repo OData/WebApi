@@ -107,7 +107,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
-            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), model);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
@@ -131,7 +134,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
-            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), model);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };

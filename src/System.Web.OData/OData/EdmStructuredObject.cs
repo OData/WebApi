@@ -190,14 +190,15 @@ namespace System.Web.Http.OData
         {
             Contract.Assert(propertyType != null);
 
-            if (!propertyType.IsNullable)
+            bool isCollection = propertyType.IsCollection();
+            if (!propertyType.IsNullable || isCollection)
             {
                 Type clrType = GetClrTypeForUntypedDelta(propertyType);
 
-                // primitive or primitive collection
                 if (propertyType.IsPrimitive() ||
-                    (propertyType.IsCollection() && propertyType.AsCollection().ElementType().IsPrimitive()))
+                    (isCollection && propertyType.AsCollection().ElementType().IsPrimitive()))
                 {
+                    // primitive or primitive collection
                     return Activator.CreateInstance(clrType);
                 }
                 else

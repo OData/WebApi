@@ -45,7 +45,7 @@ namespace System.Web.Http.OData.Builder
             Assert.NotNull(orders);
             var customerOrders = customers.NavigationPropertyBindings.FirstOrDefault(nt => nt.NavigationProperty.Name == "Orders");
             Assert.NotNull(customerOrders);
-            Assert.Equal("Orders", customerOrders.TargetEntitySet.Name);
+            Assert.Equal("Orders", customerOrders.Target.Name);
         }
 
         [Fact]

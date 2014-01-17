@@ -521,7 +521,7 @@ namespace System.Web.Http.OData.Routing
                 entitySetPathExpression: null,
                 isComposable: true);
             IEdmTypeReference bindingParameterType = new EdmCollectionTypeReference(
-                new EdmCollectionType(new EdmEntityTypeReference(model.Customer, isNullable: false)), isNullable: false);
+                new EdmCollectionType(new EdmEntityTypeReference(model.Customer, isNullable: false)));
             function.AddParameter("customers", bindingParameterType);
             model.Model.AddElement(function);
 
@@ -660,7 +660,7 @@ namespace System.Web.Http.OData.Routing
             IEdmTypeReference boolType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
             IEdmTypeReference customerType = model.Customer.AsReference();
             IEdmTypeReference addressType = new EdmComplexTypeReference(model.Address, isNullable: false);
-            IEdmTypeReference customersType = new EdmCollectionTypeReference(new EdmCollectionType(customerType), isNullable: false);
+            IEdmTypeReference customersType = new EdmCollectionTypeReference(new EdmCollectionType(customerType));
 
             AddFunction(model, "unBoundWithoutParams");
 
@@ -898,8 +898,7 @@ namespace System.Web.Http.OData.Routing
             IEdmTypeReference bindingParamterType = new EdmEntityTypeReference(bindingType, isNullable: false);
             if (isCollection)
             {
-                bindingParamterType = new EdmCollectionTypeReference(
-                    new EdmCollectionType(bindingParamterType), isNullable: false);
+                bindingParamterType = new EdmCollectionTypeReference(new EdmCollectionType(bindingParamterType));
             }
 
             action.AddParameter("bindingParameter", bindingParamterType);
@@ -916,8 +915,7 @@ namespace System.Web.Http.OData.Routing
             IEdmTypeReference bindingParamterType = new EdmEntityTypeReference(bindingType, isNullable: false);
             if (isCollection)
             {
-                bindingParamterType = new EdmCollectionTypeReference(
-                    new EdmCollectionType(bindingParamterType), isNullable: false);
+                bindingParamterType = new EdmCollectionTypeReference(new EdmCollectionType(bindingParamterType));
             }
 
             action.AddParameter("bindingParameter", bindingParamterType);

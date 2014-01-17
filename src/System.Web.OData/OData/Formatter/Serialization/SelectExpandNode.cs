@@ -184,7 +184,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     continue;
                 }
 
-                ContainerQualifiedWildcardSelectItem wildCardActionSelection = selectItem as ContainerQualifiedWildcardSelectItem;
+                NamespaceQualifiedWildcardSelectItem wildCardActionSelection = selectItem as NamespaceQualifiedWildcardSelectItem;
                 if (wildCardActionSelection != null)
                 {
                     SelectedActions = allActions;

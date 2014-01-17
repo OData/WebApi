@@ -159,7 +159,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void TestReadEntityReferenceLink_InJsonLight_WithNavigationProperty_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest("{\"odata.id\":\"aa:b\"}");
+            IODataRequestMessage request = CreateJsonLightRequest("{\"@odata.id\":\"aa:b\"}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
             IEdmNavigationProperty navigationProperty =
@@ -271,8 +271,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                         new EdmCollectionType(
                             new EdmPrimitiveTypeReference(
                                 EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32),
-                                isNullable: false)),
-                        isNullable: false)));
+                                isNullable: false)))));
 
             orderSet.AddNavigationTarget(orderType.NavigationProperties().Single(np => np.Name == "Customer"),
                 customerSet);

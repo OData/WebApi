@@ -1,5 +1,5 @@
 ﻿{
-  "@odata.context":"http://localhost/#Collection(System.Web.Http.OData.TestCommon.Models.Person)","value":[
+  "@odata.context":"http://localhost/$metadata#Collection(System.Web.Http.OData.TestCommon.Models.Person)","value":[
     {
       "Age":20,"Gender":"Male","FirstName":"Frank","Alias":[
         "Alias0"

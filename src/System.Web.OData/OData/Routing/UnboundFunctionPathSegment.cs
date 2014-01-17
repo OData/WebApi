@@ -121,12 +121,12 @@ namespace System.Web.Http.OData.Routing
                 if (Function.TryGetRelativeEntitySetPath(_edmModel, out parameter, out path, out edmErrors) &&
                     !edmErrors.Any())
                 {
-                    IEdmEntitySet entitySet = previousEntitySet;
+                    IEdmNavigationSource entitySet = previousEntitySet;
                     foreach (IEdmNavigationProperty prop in path)
                     {
                         entitySet = entitySet.FindNavigationTarget(prop);
                     }
-                    return entitySet;
+                    return entitySet as IEdmEntitySet;
                 }
             }
 

@@ -3,7 +3,6 @@
   <id>http://localhost/WorkItems(25)</id>
   <category term="#System.Web.Http.OData.TestCommon.Models.WorkItem" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
   <link rel="edit" href="http://localhost/WorkItems(25)" />
-  <link rel="self" href="http://localhost/WorkItems(25)" />
   <title />
   <updated>UpdatedTime</updated>
   <author>

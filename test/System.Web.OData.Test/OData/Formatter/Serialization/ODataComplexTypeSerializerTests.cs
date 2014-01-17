@@ -77,7 +77,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
-            ODataMessageWriter messageWriter = new ODataMessageWriter(message);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message, settings);
             Mock<ODataComplexTypeSerializer> serializer = new Mock<ODataComplexTypeSerializer>(new DefaultODataSerializerProvider());
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "ComplexPropertyName", Model = _model };
             object graph = new object();

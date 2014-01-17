@@ -100,7 +100,7 @@ namespace System.Web.Http.OData.Routing
             Assert.Contains("\"@odata.context\":\"http://localhost/$metadata#ConventionOrders/$entity\"", responseString);
             Assert.Contains("\"@odata.type\":\"#System.Web.Http.OData.Routing.ConventionOrder", responseString);
             Assert.Contains("\"OrderName\":\"OrderName 5\"", responseString);
-            Assert.Contains("\"Price@odata.type\":\"Edm.Decimal\",\"Price\":13", responseString);
+            Assert.Contains("\"Price@odata.type\":\"#Decimal\",\"Price\":13", responseString);
         }
 
         [Fact]

@@ -60,7 +60,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ExpandedEntity = entity;
             SelectExpandClause = selectExpandClause;
             NavigationProperty = navigationProperty;
-            EntitySet = context.EntitySet.FindNavigationTarget(navigationProperty);
+
+            // Cast will fail in singleton / containment cases.
+            EntitySet = context.EntitySet.FindNavigationTarget(navigationProperty) as IEdmEntitySet;
         }
 
         /// <summary>

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http.OData.Formatter;
 using Microsoft.OData.Edm;
 
 namespace System.Web.Http.OData.Routing
@@ -96,7 +95,8 @@ namespace System.Web.Http.OData.Routing
         {
             if (NavigationProperty != null && previousEntitySet != null)
             {
-                return previousEntitySet.FindNavigationTarget(NavigationProperty);
+                // Cast will fail in singleton / containment cases.
+                return previousEntitySet.FindNavigationTarget(NavigationProperty) as IEdmEntitySet;
             }
             return null;
         }

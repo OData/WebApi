@@ -27,7 +27,7 @@ namespace System.Web.Http.OData.Builder
         {
             IEdmNavigationPropertyBinding navMapping = entitySet.NavigationPropertyBindings.SingleOrDefault(n => n.NavigationProperty == navigationProperty);
             Assert.NotNull(navMapping);
-            Assert.Equal(targetEntitySet, navMapping.TargetEntitySet.Name);
+            Assert.Equal(targetEntitySet, navMapping.Target.Name);
             return navMapping;
         }
 
@@ -117,7 +117,14 @@ namespace System.Web.Http.OData.Builder
                 }
             }
 
-            Assert.Equal(isNullable, property.Type.IsNullable);
+            if (property is IEdmNavigationProperty && property.Type.IsCollection())
+            {
+                Assert.True(property.Type.IsNullable);
+            }
+            else
+            {
+                Assert.Equal(isNullable, property.Type.IsNullable);
+            }
 
             return property;
         }

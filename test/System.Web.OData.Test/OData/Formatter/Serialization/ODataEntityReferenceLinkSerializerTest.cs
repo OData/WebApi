@@ -116,14 +116,18 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = path };
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriter writer = new ODataMessageWriter(message, settings);
 
             // Act
-            serializer.WriteObject(link, typeof(ODataEntityReferenceLink), new ODataMessageWriter(message), writeContext);
+            serializer.WriteObject(link, typeof(ODataEntityReferenceLink), writer, writeContext);
 
             // Assert
             stream.Seek(0, SeekOrigin.Begin);
             XElement element = XElement.Load(stream);
-            Assert.Equal("http://sampleuri/", element.FirstAttribute.Value);
+            Assert.Equal("http://sampleuri/", element.Attribute("id").Value);
         }
     }
 }

@@ -81,7 +81,7 @@ namespace System.Web.Http.OData.Query
                 if (_selectExpandClause == null)
                 {
                     ODataUriParser uriParser = new ODataUriParser(Context.Model, serviceRoot: null);
-                    _selectExpandClause = uriParser.ParseSelectAndExpand(RawSelect, RawExpand, _entityType, entitySet: null);
+                    _selectExpandClause = uriParser.ParseSelectAndExpand(RawSelect, RawExpand, _entityType, entitySetBase: null);
                 }
 
                 return _selectExpandClause;

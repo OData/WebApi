@@ -102,7 +102,7 @@ namespace System.Web.Http.OData
             object outObject = null;
             Mock<IEdmEntityObject> mock = new Mock<IEdmEntityObject>();
             mock.Setup(o => o.TryGetPropertyValue(It.IsAny<string>(), out outObject)).Returns(false).Verifiable();
-            mock.Setup(o => o.GetEdmType()).Returns<IEdmRowTypeReference>(null).Verifiable();
+            mock.Setup(o => o.GetEdmType()).Returns<IEdmTypeReference>(null).Verifiable();
             EntityInstanceContext context = new EntityInstanceContext();
             context.EdmObject = mock.Object;
 
@@ -145,7 +145,7 @@ namespace System.Web.Http.OData
             edmType.AddStructuralProperty(
                 "CollectionProperty",
                 new EdmCollectionTypeReference(
-                    new EdmCollectionType(EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false)), isNullable: false));
+                    new EdmCollectionType(EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false))));
             EdmModel model = new EdmModel();
             model.AddElement(edmType);
             model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(typeof(TestEntity)));

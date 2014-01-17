@@ -114,7 +114,7 @@ namespace System.Web.Http.OData.Formatter
             }
             else
             {
-                formatter = CreateFormatter(model, request, ODataPayloadKind.Entry);
+                formatter = CreateFormatterWithAtom(model, request, ODataPayloadKind.Entry);
             }
 
             ObjectContent<WorkItem> content = new ObjectContent<WorkItem>(
@@ -154,8 +154,8 @@ namespace System.Web.Http.OData.Formatter
             routeData.Values.Add("b", "prefix2");
             request.SetRouteData(routeData);
 
-            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.ServiceDocument);
-            var content = new ObjectContent<ODataWorkspace>(new ODataWorkspace(), formatter);
+            ODataMediaTypeFormatter formatter = CreateFormatterWithAtomSvcXml(model, request, ODataPayloadKind.ServiceDocument);
+            var content = new ObjectContent<ODataServiceDocument>(new ODataServiceDocument(), formatter);
 
             string actualContent = content.ReadAsStringAsync().Result;
             Assert.Contains("xml:base=\"" + baseUri + "\"", actualContent);
@@ -174,7 +174,7 @@ namespace System.Web.Http.OData.Formatter
             request.SetODataRouteName("OData");
 
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.ServiceDocument);
-            var content = new ObjectContent<ODataWorkspace>(new ODataWorkspace(), formatter);
+            var content = new ObjectContent<ODataServiceDocument>(new ODataServiceDocument(), formatter);
 
             Assert.Throws<SerializationException>(
                 () => content.ReadAsStringAsync().Result,
@@ -688,7 +688,7 @@ namespace System.Web.Http.OData.Formatter
             stream.Seek(0, SeekOrigin.Begin);
             string result = content.ReadAsStringAsync().Result;
             JObject obj = JObject.Parse(result);
-            Assert.Equal("http://localhost/#sampleTypes(Number)", obj["@odata.context"]);
+            Assert.Equal("http://localhost/$metadata#sampleTypes(Number)", obj["@odata.context"]);
         }
 
         [Fact]
@@ -738,7 +738,7 @@ namespace System.Web.Http.OData.Formatter
         private static string CreateFormattedContent(string value)
         {
             return string.Format(CultureInfo.InvariantCulture,
-                "{{\r\n  \"@odata.context\":\"http://dummy/#Edm.String\",\"value\":\"{0}\"\r\n}}", value);
+                "{{\r\n  \"@odata.context\":\"http://dummy/$metadata#Edm.String\",\"value\":\"{0}\"\r\n}}", value);
         }
 
         protected override ODataMediaTypeFormatter CreateFormatter()
@@ -778,6 +778,22 @@ namespace System.Web.Http.OData.Formatter
             return CreateFormatter(CreateModel());
         }
 
+        private static ODataMediaTypeFormatter CreateFormatterWithAtom(IEdmModel model, HttpRequestMessage request,
+            params ODataPayloadKind[] payloadKinds)
+        {
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, payloadKinds);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXml);
+            return formatter;
+        }
+
+        private static ODataMediaTypeFormatter CreateFormatterWithAtomSvcXml(IEdmModel model, HttpRequestMessage request,
+            params ODataPayloadKind[] payloadKinds)
+        {
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, payloadKinds);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomSvcXml);
+            return formatter;
+        }
+        
         private static ODataMediaTypeFormatter CreateFormatterWithJson(IEdmModel model, HttpRequestMessage request,
             params ODataPayloadKind[] payloadKinds)
         {

@@ -48,7 +48,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             // Arrange
             var deserializer = new ODataEntityReferenceLinkDeserializer();
             MockODataRequestMessage requestMessage = new MockODataRequestMessage();
-            ODataMessageWriter messageWriter = new ODataMessageWriter(requestMessage);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(requestMessage, settings);
             messageWriter.WriteEntityReferenceLink(new ODataEntityReferenceLink { Url = new Uri("http://localhost/samplelink") });
             ODataMessageReader messageReader = new ODataMessageReader(new MockODataRequestMessage(requestMessage));
             ODataDeserializerContext context = new ODataDeserializerContext

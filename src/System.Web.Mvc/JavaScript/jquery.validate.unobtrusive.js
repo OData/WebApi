@@ -116,8 +116,8 @@
                 },
                 attachValidation: function () {
                     $form
-                        .unbind("reset." + data_validation, onResetProxy)
-                        .bind("reset." + data_validation, onResetProxy)
+                        .off("reset." + data_validation, onResetProxy)
+                        .on("reset." + data_validation, onResetProxy)
                         .validate(this.options);
                 },
                 validate: function () {  // a validation function that is called by unobtrusive Ajax
@@ -196,8 +196,8 @@
             // $forms includes all forms in selector's DOM hierarchy (parent, children and self) that have at least one
             // element with data-val=true
             var $selector = $(selector),
-                $forms = $selector.parents("form")
-                                  .andSelf()
+                $forms = $selector.parents()
+                                  .addBack()
                                   .filter("form")
                                   .add($selector.find("form"))
                                   .has("[data-val=true]");

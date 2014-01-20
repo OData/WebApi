@@ -310,6 +310,25 @@ namespace System.Web.Mvc.Ajax.Test
             Assert.Equal("replace", attributes["data-ajax-mode"]); // Only added when UpdateTargetId is set
         }
 
+
+        [Theory]
+        [InlineData("foo.bar", "#foo\\.bar")]
+        [InlineData("baz:bar", "#baz\\:bar")]
+        [InlineData("qux[zot]", "#qux\\[zot\\]")]
+        [InlineData("foo[:zot].", "#foo\\[\\:zot\\]\\.")]
+        public void ToUnobtrusiveHtmlAttributesEscapesClientSideIdentifiers(string id, string expected)
+        {
+            // Arrange
+            AjaxOptions options = new AjaxOptions { UpdateTargetId = id, LoadingElementId = id };
+
+            // Act
+            var attributes = options.ToUnobtrusiveHtmlAttributes();
+
+            // Assert
+            Assert.Equal(expected, attributes["data-ajax-update"]);
+            Assert.Equal(expected, attributes["data-ajax-loading"]);
+        }
+
         [Fact]
         public void ToUnobtrusiveHtmlAttributesWithUpdateTargetIdAndExplicitInsertionMode()
         {

@@ -883,6 +883,49 @@ namespace System.Web.OData.Builder
             Assert.Equal(EdmPrimitiveTypeKind.Int16, returnType.AsEnum().EnumDefinition().UnderlyingType.PrimitiveKind);
         }
 
+        [Fact]
+        public void ODataConventionModelBuilder_HasCorrectEnumMember_AddUnboundFunctionAfterEntitySet()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<EntityTypeWithEnumTypePropertyTestModel>("Entities");
+            builder.Function("UnboundFunction").Returns<Color>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEnumerable<IEdmEnumType> colors = model.SchemaElements.OfType<IEdmEnumType>().Where(e => e.Name == "Color");
+            IEdmEnumType color = Assert.Single(colors);
+            Assert.Equal(3, color.Members.Count());
+            Assert.Single(color.Members.Where(m => m.Name == "Red"));
+            Assert.Single(color.Members.Where(m => m.Name == "Green"));
+            Assert.Single(color.Members.Where(m => m.Name == "Blue"));
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_HasCorrectEnumMember_AddBoundActionAfterEntitySet()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            EntityTypeConfiguration<EntityTypeWithEnumTypePropertyTestModel> entity =
+                builder.EntitySet<EntityTypeWithEnumTypePropertyTestModel>("Entities").EntityType;
+            entity.Action("BoundAction").Parameter<Color?>("Color");
+            builder.EnumTypes.Single(e => e.Name == "Color").RemoveMember(Color.Green);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEnumerable<IEdmEnumType> colors = model.SchemaElements.OfType<IEdmEnumType>().Where(e => e.Name == "Color");
+            IEdmEnumType color = Assert.Single(colors);
+            Assert.Equal(2, color.Members.Count());
+            Assert.Single(color.Members.Where(m => m.Name == "Red"));
+            Assert.Single(color.Members.Where(m => m.Name == "Blue"));
+        }
+
         private IEdmStructuredType AddComplexTypeWithODataConventionModelBuilder()
         {
             var builder = new ODataConventionModelBuilder();

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -176,6 +176,34 @@ namespace System.Web.OData.Builder
             }
 
             return entitySetConfiguration;
+        }
+
+        /// <inheritdoc />
+        public override EnumTypeConfiguration AddEnumType(Type type)
+        {
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+
+            if (!type.IsEnum)
+            {
+                throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
+            }
+
+            EnumTypeConfiguration enumTypeConfiguration = EnumTypes.SingleOrDefault(e => e.ClrType == type);
+
+            if (enumTypeConfiguration == null)
+            {
+                enumTypeConfiguration = base.AddEnumType(type);
+
+                foreach (object member in Enum.GetValues(type))
+                {
+                    enumTypeConfiguration.AddMember((Enum)member);
+                }
+            }
+
+            return enumTypeConfiguration;
         }
 
         /// <inheritdoc />
@@ -502,7 +530,7 @@ namespace System.Web.OData.Builder
                 }
                 else if (propertyKind == PropertyKind.Enum)
                 {
-                    AddEnumTypeAndMembers(property.PropertyType);
+                    AddEnumType(TypeHelper.GetUnderlyingTypeOrSelf(property.PropertyType));
                     addedEdmProperty = type.AddEnumProperty(property);
                 }
                 else
@@ -520,35 +548,18 @@ namespace System.Web.OData.Builder
                 if (property.PropertyType.IsGenericType)
                 {
                     Type elementType = property.PropertyType.GetGenericArguments().First();
-                    AddEnumTypeAndMembers(elementType);
+                    Type elementUnderlyingTypeOrSelf = TypeHelper.GetUnderlyingTypeOrSelf(elementType);
+
+                    if (elementUnderlyingTypeOrSelf.IsEnum)
+                    {
+                        AddEnumType(elementUnderlyingTypeOrSelf);
+                    }
                 }
 
                 addedEdmProperty = type.AddCollectionProperty(property);
             }
 
             addedEdmProperty.AddedExplicitly = addedExplicitly;
-        }
-
-        private void AddEnumTypeAndMembers(Type type)
-        {
-            if (type == null)
-            {
-                throw Error.ArgumentNull("type");
-            }
-
-            if (TypeHelper.IsEnum(type))
-            {
-                Type enumType = TypeHelper.GetUnderlyingTypeOrSelf(type);
-
-                if (!EnumTypes.Any(e => e.ClrType == enumType))
-                {
-                    EnumTypeConfiguration enumTypeConfiguration = AddEnumType(enumType);
-                    foreach (object member in Enum.GetValues(enumType))
-                    {
-                        enumTypeConfiguration.AddMember((Enum)member);
-                    }
-                }
-            }
         }
 
         // figures out the type of the property (primitive, complex, navigation) and the corresponding edm type if we have seen this type

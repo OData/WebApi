@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.OData.Routing;
 using System.Web.Http.ValueProviders;
+using System.Web.OData.Routing;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Defines a controller-level attribute that can be used to enable OData action selection based on routing conventions.

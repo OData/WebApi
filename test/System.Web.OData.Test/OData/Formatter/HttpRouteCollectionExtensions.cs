@@ -2,10 +2,11 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Web.Http;
 using System.Web.Http.Routing;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     internal static class HttpRouteCollectionExtensions
     {

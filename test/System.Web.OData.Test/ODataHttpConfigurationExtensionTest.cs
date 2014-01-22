@@ -4,16 +4,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http.Formatting;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Query;
 using System.Web.Http.Services;
+using System.Web.OData.Formatter;
+using System.Web.OData.Query;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class ODataHttpConfigurationExtensionTest
     {

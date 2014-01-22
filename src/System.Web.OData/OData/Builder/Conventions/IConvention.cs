@@ -2,7 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.OData.Builder.Conventions
 {
     [SuppressMessage("Microsoft.Design", "CA1040:AvoidEmptyInterfaces", Justification = "Marker interface acceptable here for derivation")]
     internal interface IConvention

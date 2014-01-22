@@ -6,7 +6,7 @@ using Microsoft.OData.Edm.Values;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class EnumNodeLearningTests
     {

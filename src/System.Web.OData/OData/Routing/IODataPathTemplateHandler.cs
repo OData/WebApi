@@ -3,7 +3,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// Exposes the ability to parse an OData path template as an <see cref="ODataPathTemplate"/>.

@@ -2,13 +2,13 @@
 
 using System.IO;
 using System.Linq;
-using System.Web.Http.OData.Formatter;
+using System.Web.OData.Formatter;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class ODataUtilsLearningTests
     {

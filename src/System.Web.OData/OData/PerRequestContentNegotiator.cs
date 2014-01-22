@@ -5,8 +5,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Content negotiator that uses per-request formatters to run the content negotiation.

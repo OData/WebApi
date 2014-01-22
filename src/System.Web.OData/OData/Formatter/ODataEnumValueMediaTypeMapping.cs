@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http.OData.Routing;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     /// <summary>
     /// Media type mapping that associates requests for the raw value of enum properties with

@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Web.Http.OData.Builder.Conventions;
+using System.Web.Http;
+using System.Web.OData.Builder.Conventions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     internal class DefaultODataETagHandler : IETagHandler
     {

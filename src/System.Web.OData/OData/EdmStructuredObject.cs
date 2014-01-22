@@ -3,12 +3,13 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Represents an <see cref="IEdmStructuredObject"/> with no backing CLR <see cref="Type"/>.

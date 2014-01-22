@@ -3,10 +3,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.OData.Query;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
+using System.Web.OData.Query;
+using System.Web.OData.Routing;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Provides a convenient starting point for a controller that exposes an OData entity set. This is the synchronous version of <see cref="AsyncEntitySetController{TEntity, TKey}"/>.

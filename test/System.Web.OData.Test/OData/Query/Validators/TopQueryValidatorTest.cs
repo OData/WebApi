@@ -3,7 +3,7 @@
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query.Validators
+namespace System.Web.OData.Query.Validators
 {
     public class TopQueryValidatorTest
     {

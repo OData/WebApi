@@ -2,10 +2,10 @@
 
 using System.Linq;
 using System.Linq.Expressions;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class PropertySelectorVisitorTest
     {

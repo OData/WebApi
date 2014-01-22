@@ -2,9 +2,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.OData.Builder.Conventions
 {
     /// <summary>
     /// <see cref="IEntitySetConvention"/> to configure the EDM association sets for the given entity set.

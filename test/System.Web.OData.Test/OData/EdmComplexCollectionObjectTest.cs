@@ -5,7 +5,7 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class EdmComplexCollectionObjectTest
     {

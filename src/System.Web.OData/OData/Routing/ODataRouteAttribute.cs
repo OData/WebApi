@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// Represents an attribute that can be placed on an action of an <see cref="ODataController"/> to specify

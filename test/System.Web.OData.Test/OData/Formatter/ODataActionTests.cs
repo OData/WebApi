@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class ODataActionTests
     {

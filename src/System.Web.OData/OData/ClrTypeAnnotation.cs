@@ -2,7 +2,7 @@
 
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Represents a mapping from an <see cref="IEdmType"/> to a CLR type.

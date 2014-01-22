@@ -3,8 +3,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Web.Http.OData.Formatter.Deserialization;
-using System.Web.Http.OData.Routing;
+using System.Web.OData.Formatter.Deserialization;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -12,7 +12,7 @@ using Microsoft.OData.Edm.Library.Values;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     public class DefaultODataSerializerProviderTests
     {

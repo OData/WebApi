@@ -2,14 +2,15 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.Http;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.OData.Builder.Conventions
 {
     public class SelfLinksGenerationConventionTest
     {
@@ -68,7 +69,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
 
-            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car", selfLinks.IdLink);
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.OData.Builder.TestModels.Car", selfLinks.IdLink);
         }
 
         [Fact]

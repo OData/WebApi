@@ -5,16 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter.Deserialization;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter.Deserialization;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class InheritanceTests
     {
@@ -193,7 +194,7 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
             AddRequestInfo(request);
-            request.Content = new StringContent("{ '@odata.type': '#System.Web.Http.OData.Builder.TestModels.Motorcycle', 'CanDoAWheelie' : false }");
+            request.Content = new StringContent("{ '@odata.type': '#System.Web.OData.Builder.TestModels.Motorcycle', 'CanDoAWheelie' : false }");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
 
             // Act
@@ -213,7 +214,7 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
             AddRequestInfo(request);
-            request.Content = new StringContent("{ '@odata.type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle', 'CanDoAWheelie' : false }");
+            request.Content = new StringContent("{ '@odata.type': 'System.Web.OData.Builder.TestModels.Motorcycle', 'CanDoAWheelie' : false }");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal");
 
             // Act
@@ -230,7 +231,7 @@ namespace System.Web.Http.OData.Formatter
         public void Posting_NonDerivedType_To_Action_Expecting_BaseType_Throws()
         {
             // Arrange
-            StringContent content = new StringContent("{ '@odata.type' : '#System.Web.Http.OData.Builder.TestModels.Motorcycle' }");
+            StringContent content = new StringContent("{ '@odata.type' : '#System.Web.OData.Builder.TestModels.Motorcycle' }");
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             IODataRequestMessage oDataRequest = new ODataMessageWrapper(content.ReadAsStreamAsync().Result, content.Headers);
             ODataMessageReader reader = new ODataMessageReader(oDataRequest, new ODataMessageReaderSettings(), _model);
@@ -249,8 +250,8 @@ namespace System.Web.Http.OData.Formatter
             // Act & Assert
             Assert.Throws<ODataException>(
                 () => new ODataEntityDeserializer(deserializerProvider).Read(reader, typeof(Car), context),
-                "An entry with type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' was found, " +
-                "but it is not assignable to the expected type 'System.Web.Http.OData.Builder.TestModels.Car'. " +
+                "An entry with type 'System.Web.OData.Builder.TestModels.Motorcycle' was found, " +
+                "but it is not assignable to the expected type 'System.Web.OData.Builder.TestModels.Car'. " +
                 "The type specified in the entry must be equal to either the expected type or a derived type.");
         }
 
@@ -268,7 +269,7 @@ namespace System.Web.Http.OData.Formatter
 
         private static void ValidateMotorcycle(dynamic result)
         {
-            Assert.Equal("#System.Web.Http.OData.Builder.TestModels.Motorcycle", (string)result["@odata.type"]);
+            Assert.Equal("#System.Web.OData.Builder.TestModels.Motorcycle", (string)result["@odata.type"]);
             Assert.Equal("sample motorcycle", (string)result.Name);
             Assert.Equal("2009", (string)result.Model);
             Assert.Equal(2, (int)result.WheelCount);
@@ -277,7 +278,7 @@ namespace System.Web.Http.OData.Formatter
 
         private static void ValidateCar(dynamic result)
         {
-            Assert.Equal("#System.Web.Http.OData.Builder.TestModels.Car", (string)result["@odata.type"]);
+            Assert.Equal("#System.Web.OData.Builder.TestModels.Car", (string)result["@odata.type"]);
             Assert.Equal("sample car", (string)result.Name);
             Assert.Equal("2009", (string)result.Model);
             Assert.Equal(4, (int)result.WheelCount);
@@ -286,7 +287,7 @@ namespace System.Web.Http.OData.Formatter
 
         private static void ValidateSportbike(dynamic result)
         {
-            Assert.Equal("#System.Web.Http.OData.Builder.TestModels.Motorcycle", (string)result["@odata.type"]);
+            Assert.Equal("#System.Web.OData.Builder.TestModels.Motorcycle", (string)result["@odata.type"]);
             Assert.Equal("sample sportsbike", (string)result.Name);
             Assert.Equal("2009", (string)result.Model);
             Assert.Equal(2, (int)result.WheelCount);

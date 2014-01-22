@@ -4,9 +4,10 @@ using System.Collections.Specialized;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     /// <summary>
     /// Class that provides <see cref="MediaTypeHeaderValue"/>s from query strings.

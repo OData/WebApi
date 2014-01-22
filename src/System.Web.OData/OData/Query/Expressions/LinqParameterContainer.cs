@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     // wraps a constant value so that EntityFramework paramterizes the constant.
     internal abstract class LinqParameterContainer

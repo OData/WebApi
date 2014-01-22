@@ -3,14 +3,14 @@
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Routing;
-using System.Web.Http.TestCommon;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
-using ODataPath = System.Web.Http.OData.Routing.ODataPath;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     public class ODataSerializerContextTest
     {

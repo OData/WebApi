@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Class that provides <see cref="MediaTypeHeaderValue"/>s for OData from query strings.

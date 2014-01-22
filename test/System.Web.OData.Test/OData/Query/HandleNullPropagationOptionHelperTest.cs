@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Web.Http.OData.Query;
+using System.Web.OData.Query;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class HandleNullPropagationOptionHelperTest : EnumHelperTestBase<HandleNullPropagationOption>
     {

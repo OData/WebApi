@@ -2,7 +2,7 @@
 
 using Microsoft.TestCommon.Types;
 
-namespace System.Web.Http.OData.Builder.TestModels
+namespace System.Web.OData.Builder.TestModels
 {
     public class EnumModel
     {

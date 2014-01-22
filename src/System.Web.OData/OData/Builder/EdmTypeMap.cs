@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     internal class EdmTypeMap
     {

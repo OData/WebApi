@@ -4,7 +4,7 @@ using Microsoft.OData.Core;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query.Validators
+namespace System.Web.OData.Query.Validators
 {
     public class OrderByQueryValidatorTest
     {

@@ -2,7 +2,7 @@
 
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     public class ODataPathTest
     {

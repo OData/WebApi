@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
+using System.Web.Http;
 
-namespace System.Web.Http
+namespace System.Web.OData
 {
     internal static class Resources
     {
@@ -281,7 +282,7 @@ namespace System.Web.Http
 
         private static string GetPath(string fileName)
         {
-            const string projectDefaultNamespace = "System.Web.Http";
+            const string projectDefaultNamespace = "System.Web.OData.Test";
             const string resourcesFolderName = "Resources";
             const string pathSeparator = ".";
             return projectDefaultNamespace + pathSeparator + resourcesFolderName + pathSeparator + fileName;

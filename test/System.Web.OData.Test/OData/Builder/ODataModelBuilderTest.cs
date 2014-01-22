@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class ODataModelBuilderTest
     {

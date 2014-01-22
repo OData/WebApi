@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// Represents a single order by expression in the $orderby clause.

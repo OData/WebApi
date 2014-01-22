@@ -5,10 +5,11 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.OData.Formatter;
+using System.Web.Http;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Batch
+namespace System.Web.OData.Batch
 {
     /// <summary>
     /// Provides extension methods for the <see cref="HttpContent"/> class.

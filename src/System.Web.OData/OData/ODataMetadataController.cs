@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.Atom;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Represents an <see cref="ApiController"/> for generating OData servicedoc and metadata document ($metadata).

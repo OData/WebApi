@@ -5,7 +5,7 @@ using System.Data.Linq;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     public class Product
     {

@@ -1,17 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Reflection;
-using System.Web.Http.Controllers;
-using System.Web.Http.Hosting;
-using System.Web.Http.ModelBinding;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.Http;
+using System.Web.OData.Routing;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class EntitySetControllerHelpersTest
     {

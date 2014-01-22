@@ -2,10 +2,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// An implementation of <see cref="IFilterProvider" /> that applies an action filter to

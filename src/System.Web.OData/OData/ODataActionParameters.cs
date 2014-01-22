@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// ActionPayload holds the Parameter names and values provided by a client in a POST request

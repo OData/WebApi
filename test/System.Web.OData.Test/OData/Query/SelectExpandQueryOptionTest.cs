@@ -1,18 +1,18 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter.Serialization.Models;
-using System.Web.Http.OData.TestCommon;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter.Serialization.Models;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class SelectExpandQueryOptionTest
     {

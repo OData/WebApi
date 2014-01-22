@@ -2,10 +2,10 @@
 
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.OData.Routing;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     /// <summary>
     /// This class encapsulates the state and settings that get passed to <see cref="ODataDeserializer"/>

@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// Parses the OData multi-key value (same for function call parameters) as a dictionary.

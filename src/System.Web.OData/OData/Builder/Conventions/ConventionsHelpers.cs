@@ -5,14 +5,15 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Serialization;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.OData.Builder.Conventions
 {
     internal static class ConventionsHelpers
     {

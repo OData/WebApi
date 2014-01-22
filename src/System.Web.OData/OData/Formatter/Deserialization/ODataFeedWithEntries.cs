@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Encapsulates an <see cref="ODataFeed"/> and the <see cref="ODataEntry"/>'s that are part of it.

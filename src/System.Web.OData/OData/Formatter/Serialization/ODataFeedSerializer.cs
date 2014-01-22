@@ -4,14 +4,15 @@ using System.Collections;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Query;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Properties;
+using System.Web.OData.Query;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.Atom;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
     /// OData serializer for serializing a collection of <see cref="IEdmEntityType" />

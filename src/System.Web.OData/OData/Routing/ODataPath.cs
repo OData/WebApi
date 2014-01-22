@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Text;
+using System.Web.Http;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// Provides an object representation for an OData path with additional information about the EDM type and entity set for the path.

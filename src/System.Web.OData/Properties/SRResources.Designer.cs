@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace System.Web.Http.OData.Properties {
+namespace System.Web.OData.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace System.Web.Http.OData.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("System.Web.Http.OData.Properties.SRResources", typeof(SRResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("System.Web.OData.Properties.SRResources", typeof(SRResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

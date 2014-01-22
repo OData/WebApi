@@ -2,10 +2,11 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Web.Http.OData.Formatter;
+using System.Web.Http;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// An <see cref="ODataPathSegment"/> implementation representing an entity set.

@@ -3,9 +3,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Web.Http.OData.Formatter;
+using System.Web.Http;
+using System.Web.OData.Formatter;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// Represents a Procedure that is exposed in the model

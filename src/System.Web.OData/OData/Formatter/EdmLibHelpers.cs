@@ -7,15 +7,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Query.Expressions;
+using System.Web.OData.Properties;
+using System.Web.OData.Query.Expressions;
 using System.Xml.Linq;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.Spatial;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     internal static class EdmLibHelpers
     {

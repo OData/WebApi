@@ -7,7 +7,7 @@ using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Routing.Conventions
+namespace System.Web.OData.Routing.Conventions
 {
     public class EntityRoutingConventionTest
     {

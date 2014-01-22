@@ -12,7 +12,7 @@ using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     public class ODataPrimitiveSerializerTests
     {

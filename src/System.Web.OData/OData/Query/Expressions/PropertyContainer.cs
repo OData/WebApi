@@ -3,8 +3,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
+using System.Web.Http;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     /// <summary>
     /// A container of property names and property values.

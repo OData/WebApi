@@ -4,10 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Linq;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using System.Xml.Linq;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     internal static class EdmPrimitiveHelpers
     {

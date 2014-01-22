@@ -8,16 +8,16 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
-using System.Web.Http.OData.Query.Controllers;
-using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
+using System.Web.OData.Query.Controllers;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class ODataQueryParameterBindingAttributeTests
     {

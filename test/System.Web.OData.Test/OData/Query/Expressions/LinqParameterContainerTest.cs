@@ -3,7 +3,7 @@
 using System.Linq.Expressions;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     public class LinqParameterContainerTest
     {

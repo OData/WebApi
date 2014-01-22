@@ -2,7 +2,7 @@
 
 using System.Runtime.Serialization;
 
-namespace System.Web.Http.OData.TestCommon.Models
+namespace System.Web.OData.TestCommon.Models
 {
     [DataContract]
     public class Person

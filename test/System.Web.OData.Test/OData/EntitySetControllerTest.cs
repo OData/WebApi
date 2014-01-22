@@ -3,16 +3,17 @@
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class EntitySetControllerTest
     {

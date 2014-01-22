@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.TestCommon;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
@@ -10,7 +10,7 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     public class DefaultODataPathHandlerTest
     {
@@ -63,11 +63,11 @@ namespace System.Web.Http.OData.Routing
         [Fact]
         public void Parse_ForInvalidCast_ThrowsODataException()
         {
-            string odataPath = "RoutingCustomers/System.Web.Http.OData.Routing.Product";
+            string odataPath = "RoutingCustomers/System.Web.OData.Routing.Product";
 
             Assert.Throws<ODataException>(
                 () => _parser.Parse(_model, odataPath),
-                "Invalid cast encountered. Cast type 'System.Web.Http.OData.Routing.Product' must be the same as or derive from the previous segment's type 'System.Web.Http.OData.Routing.RoutingCustomer'.");
+                "Invalid cast encountered. Cast type 'System.Web.OData.Routing.Product' must be the same as or derive from the previous segment's type 'System.Web.OData.Routing.RoutingCustomer'.");
         }
 
         [Fact]
@@ -86,17 +86,17 @@ namespace System.Web.Http.OData.Routing
         [InlineData("$batch", "~/$batch")]
         [InlineData("RoutingCustomers(112)", "~/entityset/key")]
         [InlineData("RoutingCustomers(112)()", "~/entityset/key")]
-        [InlineData("RoutingCustomers/System.Web.Http.OData.Routing.VIP", "~/entityset/cast")]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP", "~/entityset/cast")]
         [InlineData("RoutingCustomers(100)/Products", "~/entityset/key/navigation")]
         [InlineData("RoutingCustomers(100)/Products()", "~/entityset/key/navigation")]
-        [InlineData("RoutingCustomers(100)/System.Web.Http.OData.Routing.VIP/RelationshipManager", "~/entityset/key/cast/navigation")]
+        [InlineData("RoutingCustomers(100)/System.Web.OData.Routing.VIP/RelationshipManager", "~/entityset/key/cast/navigation")]
         [InlineData("GetRoutingCustomerById()", "~/unboundaction")]
         [InlineData("RoutingCustomers(112)/Address/Street", "~/entityset/key/property/property")]
         [InlineData("RoutingCustomers(1)/Name/$value", "~/entityset/key/property/$value")]
         [InlineData("RoutingCustomers(1)/$links/Products", "~/entityset/key/$links/navigation")]
         [InlineData("RoutingCustomers(112)/GetRelatedRoutingCustomers", "~/entityset/key/action")]
-        [InlineData("RoutingCustomers/System.Web.Http.OData.Routing.VIP/GetMostProfitable", "~/entityset/cast/action")]
-        [InlineData("Products(1)/RoutingCustomers/System.Web.Http.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "~/entityset/key/navigation/cast/key/navigation/navigation")]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/GetMostProfitable", "~/entityset/cast/action")]
+        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "~/entityset/key/navigation/cast/key/navigation/navigation")]
         [InlineData("EnumCustomers(1)/Color", "~/entityset/key/property")]
         [InlineData("EnumCustomers(1)/Color/$value", "~/entityset/key/property/$value")]
         public void Parse_ReturnsPath_WithCorrectTemplate(string odataPath, string template)
@@ -197,8 +197,8 @@ namespace System.Web.Http.OData.Routing
         public void CanParseCastCollectionSegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers/System.Web.Http.OData.Routing.VIP";
-            string expectedText = "System.Web.Http.OData.Routing.VIP";
+            string odataPath = "RoutingCustomers/System.Web.OData.Routing.VIP";
+            string expectedText = "System.Web.OData.Routing.VIP";
             IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
             IEdmEntityType expectedType = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
 
@@ -217,8 +217,8 @@ namespace System.Web.Http.OData.Routing
         public void CanParseCastEntitySegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers(100)/System.Web.Http.OData.Routing.VIP";
-            string expectedText = "System.Web.Http.OData.Routing.VIP";
+            string odataPath = "RoutingCustomers(100)/System.Web.OData.Routing.VIP";
+            string expectedText = "System.Web.OData.Routing.VIP";
             IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
             IEdmEntityType expectedType = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
 
@@ -259,7 +259,7 @@ namespace System.Web.Http.OData.Routing
         public void CanParseNavigateToSingleSegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers(100)/System.Web.Http.OData.Routing.VIP/RelationshipManager";
+            string odataPath = "RoutingCustomers(100)/System.Web.OData.Routing.VIP/RelationshipManager";
             string expectedText = "RelationshipManager";
             IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "SalesPeople");
             IEdmNavigationProperty expectedEdmElement = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP").NavigationProperties().SingleOrDefault(n => n.Name == "RelationshipManager");
@@ -432,7 +432,7 @@ namespace System.Web.Http.OData.Routing
         public void CanParseActionBoundToCollectionSegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers/System.Web.Http.OData.Routing.VIP/GetMostProfitable";
+            string odataPath = "RoutingCustomers/System.Web.OData.Routing.VIP/GetMostProfitable";
             string expectedText = "Default.GetMostProfitable";
             IEdmAction expectedEdmElement = _model.SchemaElements.OfType<IEdmAction>().SingleOrDefault(e => e.Name == "GetMostProfitable");
             Assert.NotNull(expectedEdmElement);
@@ -701,7 +701,7 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             var model = _model;
             var expectedSet = model.FindDeclaredEntityContainer("Container").FindEntitySet(expectedSetName);
-            var expectedType = model.FindDeclaredType("System.Web.Http.OData.Routing." + expectedTypeName) as IEdmEntityType;
+            var expectedType = model.FindDeclaredType("System.Web.OData.Routing." + expectedTypeName) as IEdmEntityType;
 
             // Act
             ODataPath path = _parser.Parse(_model, odataPath);
@@ -748,14 +748,14 @@ namespace System.Web.Http.OData.Routing
         }
 
         [Theory]
-        [InlineData("RoutingCustomers/System.Web.Http.OData.Routing.VIP", "VIP", "RoutingCustomers", true)]
-        [InlineData("RoutingCustomers(1)/System.Web.Http.OData.Routing.VIP", "VIP", "RoutingCustomers", false)]
-        [InlineData("Products(1)/System.Web.Http.OData.Routing.ImportantProduct", "ImportantProduct", "Products", false)]
-        [InlineData("Products(1)/RoutingCustomers/System.Web.Http.OData.Routing.VIP", "VIP", "RoutingCustomers", true)]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP", "VIP", "RoutingCustomers", true)]
+        [InlineData("RoutingCustomers(1)/System.Web.OData.Routing.VIP", "VIP", "RoutingCustomers", false)]
+        [InlineData("Products(1)/System.Web.OData.Routing.ImportantProduct", "ImportantProduct", "Products", false)]
+        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP", "VIP", "RoutingCustomers", true)]
         [InlineData("SalesPeople(1)/ManagedRoutingCustomers", "VIP", "RoutingCustomers", true)]
-        [InlineData("RoutingCustomers(1)/System.Web.Http.OData.Routing.VIP/RelationshipManager", "SalesPerson", "SalesPeople", false)]
-        [InlineData("Products/System.Web.Http.OData.Routing.ImportantProduct(1)/LeadSalesPerson", "SalesPerson", "SalesPeople", false)]
-        [InlineData("Products(1)/RoutingCustomers/System.Web.Http.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "ImportantProduct", "Products", true)]
+        [InlineData("RoutingCustomers(1)/System.Web.OData.Routing.VIP/RelationshipManager", "SalesPerson", "SalesPeople", false)]
+        [InlineData("Products/System.Web.OData.Routing.ImportantProduct(1)/LeadSalesPerson", "SalesPerson", "SalesPeople", false)]
+        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "ImportantProduct", "Products", true)]
         public void CanResolveSetAndTypeViaCastSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
@@ -773,7 +773,7 @@ namespace System.Web.Http.OData.Routing
         [Theory]
         [InlineData("RoutingCustomers(1)/GetRelatedRoutingCustomers", "RoutingCustomer", "RoutingCustomers", true)]
         [InlineData("RoutingCustomers(1)/GetBestRelatedRoutingCustomer", "VIP", "RoutingCustomers", false)]
-        [InlineData("RoutingCustomers(1)/System.Web.Http.OData.Routing.VIP/GetSalesPerson", "SalesPerson", "RoutingCustomers", false)]
+        [InlineData("RoutingCustomers(1)/System.Web.OData.Routing.VIP/GetSalesPerson", "SalesPerson", "RoutingCustomers", false)]
         [InlineData("SalesPeople(1)/GetVIPRoutingCustomers", "VIP", "SalesPeople", true)]
         public void CanResolveSetAndTypeViaEntityActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
@@ -783,9 +783,9 @@ namespace System.Web.Http.OData.Routing
         [Theory]
         [InlineData("RoutingCustomers/GetVIPs", "VIP", "RoutingCustomers", true)]
         [InlineData("RoutingCustomers/GetProducts", "Product", "RoutingCustomers", true)]
-        [InlineData("Products(1)/RoutingCustomers/System.Web.Http.OData.Routing.VIP/GetSalesPeople", "SalesPerson", "RoutingCustomers", true)]
+        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP/GetSalesPeople", "SalesPerson", "RoutingCustomers", true)]
         [InlineData("SalesPeople/GetVIPRoutingCustomers", "VIP", "SalesPeople", true)]
-        [InlineData("RoutingCustomers/System.Web.Http.OData.Routing.VIP/GetMostProfitable", "VIP", "RoutingCustomers", false)]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/GetMostProfitable", "VIP", "RoutingCustomers", false)]
         public void CanResolveSetAndTypeViaCollectionActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
@@ -978,7 +978,7 @@ namespace System.Web.Http.OData.Routing
         {
             // Arrange
             var expectedSet = _model.FindDeclaredEntityContainer("Container").FindEntitySet(expectedSetName);
-            var expectedType = _model.FindDeclaredType("System.Web.Http.OData.Routing." + expectedTypeName) as IEdmEntityType;
+            var expectedType = _model.FindDeclaredType("System.Web.OData.Routing." + expectedTypeName) as IEdmEntityType;
 
             // Act
             ODataPath path = _parser.Parse(_model, odataPath);

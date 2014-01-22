@@ -2,7 +2,7 @@
 
 using System.Diagnostics.Contracts;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     /// <summary>
     /// This class contains safe equivalents of CLR functions that

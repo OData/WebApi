@@ -3,13 +3,14 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
     /// Describes the set of structural properties and navigation properties and actions to select and navigation properties to expand while 

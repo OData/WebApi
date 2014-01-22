@@ -2,10 +2,11 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Represents an <see cref="IEdmObject"/> that is a collection of <see cref="IEdmEntityObject"/>s.

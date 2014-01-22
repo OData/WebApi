@@ -2,13 +2,14 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.Http;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.OData.Builder.Conventions
 {
     public class ActionLinkGenerationConventionTest
     {
@@ -26,10 +27,10 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             IEdmModel model = builder.GetEdmModel();
             var vehiclesEdmSet = model.EntityContainers().Single().FindEntitySet("vehicles");
-            var carEdmType = model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType;
+            var carEdmType = model.FindDeclaredType("System.Web.OData.Builder.TestModels.Car") as IEdmEntityType;
             var paintEdmAction =
                 model.GetAvailableProcedures(
-                    model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType).Single()
+                    model.FindDeclaredType("System.Web.OData.Builder.TestModels.Car") as IEdmEntityType).Single()
                 as IEdmAction;
             Assert.NotNull(paintEdmAction);
 

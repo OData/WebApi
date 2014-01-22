@@ -2,7 +2,7 @@
 
 using System.Diagnostics.Contracts;
 using System.Web.Http.Controllers;
-using System.Web.Http.OData.Builder;
+using System.Web.OData.Builder;
 using Microsoft.OData.Edm;
 
 namespace System.Web.Http

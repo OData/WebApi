@@ -4,11 +4,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
-using System.Web.Http.OData.Batch;
+using System.Web.OData.Batch;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http
+namespace System.Web.OData.Test
 {
     public class ODataBatchReaderExtensionsTest
     {

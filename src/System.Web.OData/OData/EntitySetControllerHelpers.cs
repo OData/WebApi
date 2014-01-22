@@ -5,14 +5,15 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Query;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Properties;
+using System.Web.OData.Query;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Helper class for <see cref="EntitySetController{TEntity, TKey}"/> and <see cref="AsyncEntitySetController{TEntity, TKey}"/> that contains shared logic.

@@ -3,9 +3,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// Allows configuration to be performed for a entity set in a model.

@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http.OData.Query;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
+using System.Web.OData.Query;
+using System.Web.OData.Routing;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Provides a convenient starting point for a controller that exposes an OData entity set. This is the asynchronous version of <see cref="EntitySetController{TEntity, TKey}"/>.

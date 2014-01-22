@@ -5,17 +5,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.TestCommon;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.OData.Builder;
+using System.Web.OData.Routing;
+using System.Web.OData.TestCommon;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     public class ODataActionPayloadDeserializerTest
     {

@@ -3,7 +3,7 @@
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class ODataValueExtensionsTest
     {

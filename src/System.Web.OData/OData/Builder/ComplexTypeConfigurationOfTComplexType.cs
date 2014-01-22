@@ -2,7 +2,7 @@
 
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// Represents an <see cref="IEdmComplexType"/> that can be built using <see cref="ODataModelBuilder"/>.

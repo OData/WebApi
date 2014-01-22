@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// Represents the configuration for a navigation property of an entity type.

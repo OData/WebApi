@@ -2,14 +2,15 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
+using System.Web.OData.Properties;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 using SelectExpandClause = Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
     /// Context information used by the <see cref="ODataSerializer"/> when serializing objects in OData message format.

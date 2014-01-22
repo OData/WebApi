@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <feed xml:base="http://localhost/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:context="http://localhost/$metadata#employees">
-  <id>http://schemas.datacontract.org/2004/07/Collection(System.Web.Http.OData.TestCommon.Models.Employee)</id>
+  <id>http://schemas.datacontract.org/2004/07/Collection(System.Web.OData.TestCommon.Models.Employee)</id>
   <title />
   <updated>UpdatedTime</updated>
   <link rel="self" href="http://localhost/employees" />
   <entry>
     <id>http://localhost/employees(0)</id>
-    <category term="#System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
+    <category term="#System.Web.OData.TestCommon.Models.Employee" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
     <link rel="edit" href="http://localhost/employees(0)" />
     <link rel="http://docs.oasis-open.org/odata/ns/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(0)/Manager" />
     <link rel="http://docs.oasis-open.org/odata/ns/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(0)/DirectReports" />
@@ -20,24 +20,24 @@
       <m:properties>
         <d:EmployeeId m:type="Int64">0</d:EmployeeId>
         <d:Age m:type="Int32">20</d:Age>
-        <d:Gender m:type="#System.Web.Http.OData.TestCommon.Models.Gender">Male</d:Gender>
+        <d:Gender m:type="#System.Web.OData.TestCommon.Models.Gender">Male</d:Gender>
         <d:FirstName>Frank</d:FirstName>
         <d:Alias m:type="#Collection(String)">
           <m:element>Alias0</m:element>
         </d:Alias>
-        <d:Address m:type="#System.Web.Http.OData.TestCommon.Models.Address">
+        <d:Address m:type="#System.Web.OData.TestCommon.Models.Address">
           <d:StreetAddress>StreetAddress1</d:StreetAddress>
           <d:City>City1</d:City>
           <d:State>State1</d:State>
           <d:ZipCode m:type="Int32">1</d:ZipCode>
         </d:Address>
-        <d:HomeNumber m:type="#System.Web.Http.OData.TestCommon.Models.PhoneNumber">
+        <d:HomeNumber m:type="#System.Web.OData.TestCommon.Models.PhoneNumber">
           <d:CountryCode m:type="Int32">1</d:CountryCode>
           <d:AreaCode m:type="Int32">425</d:AreaCode>
           <d:Number m:type="Int32">9879089</d:Number>
-          <d:PhoneType m:type="#System.Web.Http.OData.TestCommon.Models.PhoneType">HomePhone</d:PhoneType>
+          <d:PhoneType m:type="#System.Web.OData.TestCommon.Models.PhoneType">HomePhone</d:PhoneType>
         </d:HomeNumber>
-        <d:FavoriteHobby m:type="#System.Web.Http.OData.TestCommon.Models.IActivity">
+        <d:FavoriteHobby m:type="#System.Web.OData.TestCommon.Models.IActivity">
           <d:ActivityName>Xbox Gaming</d:ActivityName>
         </d:FavoriteHobby>
       </m:properties>
@@ -45,7 +45,7 @@
   </entry>
   <entry>
     <id>http://localhost/employees(1)</id>
-    <category term="#System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
+    <category term="#System.Web.OData.TestCommon.Models.Employee" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
     <link rel="edit" href="http://localhost/employees(1)" />
     <link rel="http://docs.oasis-open.org/odata/ns/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(1)/Manager" />
     <link rel="http://docs.oasis-open.org/odata/ns/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(1)/DirectReports" />
@@ -59,24 +59,24 @@
       <m:properties>
         <d:EmployeeId m:type="Int64">1</d:EmployeeId>
         <d:Age m:type="Int32">21</d:Age>
-        <d:Gender m:type="#System.Web.Http.OData.TestCommon.Models.Gender">Male</d:Gender>
+        <d:Gender m:type="#System.Web.OData.TestCommon.Models.Gender">Male</d:Gender>
         <d:FirstName>Steve</d:FirstName>
         <d:Alias m:type="#Collection(String)">
           <m:element>Alias1</m:element>
         </d:Alias>
-        <d:Address m:type="#System.Web.Http.OData.TestCommon.Models.Address">
+        <d:Address m:type="#System.Web.OData.TestCommon.Models.Address">
           <d:StreetAddress>StreetAddress2</d:StreetAddress>
           <d:City>City2</d:City>
           <d:State>State2</d:State>
           <d:ZipCode m:type="Int32">2</d:ZipCode>
         </d:Address>
-        <d:HomeNumber m:type="#System.Web.Http.OData.TestCommon.Models.PhoneNumber">
+        <d:HomeNumber m:type="#System.Web.OData.TestCommon.Models.PhoneNumber">
           <d:CountryCode m:type="Int32">1</d:CountryCode>
           <d:AreaCode m:type="Int32">425</d:AreaCode>
           <d:Number m:type="Int32">9879090</d:Number>
-          <d:PhoneType m:type="#System.Web.Http.OData.TestCommon.Models.PhoneType">HomePhone</d:PhoneType>
+          <d:PhoneType m:type="#System.Web.OData.TestCommon.Models.PhoneType">HomePhone</d:PhoneType>
         </d:HomeNumber>
-        <d:FavoriteHobby m:type="#System.Web.Http.OData.TestCommon.Models.IActivity">
+        <d:FavoriteHobby m:type="#System.Web.OData.TestCommon.Models.IActivity">
           <d:ActivityName>Xbox Gaming</d:ActivityName>
         </d:FavoriteHobby>
       </m:properties>

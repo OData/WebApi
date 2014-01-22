@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <entry xml:base="http://localhost:8081/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:context="http://localhost:8081/$metadata#People/$entity">
   <id>http://localhost:8081/People(10)</id>
-  <category term="#System.Web.Http.OData.Formatter.FormatterPerson" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
+  <category term="#System.Web.OData.Formatter.FormatterPerson" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
   <link rel="edit" href="http://localhost:8081/People(10)" />
   <title />
   <updated>UpdatedTime</updated>
@@ -14,8 +14,8 @@
       <d:Age m:type="Int32">10</d:Age>
       <d:MyGuid m:type="Guid">f99080c0-2f9e-472e-8c72-1a8ecd9f902d</d:MyGuid>
       <d:Name>Asha</d:Name>
-	  <d:FavoriteColor m:type="#System.Web.Http.OData.Builder.TestModels.Color">Red, Green</d:FavoriteColor>
-      <d:Order m:type="#System.Web.Http.OData.Formatter.FormatterOrder">
+	  <d:FavoriteColor m:type="#System.Web.OData.Builder.TestModels.Color">Red, Green</d:FavoriteColor>
+      <d:Order m:type="#System.Web.OData.Formatter.FormatterOrder">
         <d:OrderAmount m:type="Int32">235342</d:OrderAmount>
         <d:OrderName>FirstOrder</d:OrderName>
       </d:Order>

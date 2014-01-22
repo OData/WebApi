@@ -2,7 +2,7 @@
 
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Represents an <see cref="IEdmEntityObject"/> with no backing CLR <see cref="Type"/>.

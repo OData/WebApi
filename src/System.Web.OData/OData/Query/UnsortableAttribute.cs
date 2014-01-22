@@ -2,7 +2,7 @@
 
 using System;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// Represents an <see cref="Attribute"/> that can be placed on a property to specify that the property cannot be used in the $orderby OData query option.

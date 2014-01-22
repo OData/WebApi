@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Web.Http;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// Represents the configuration for an enum member of an enum type.

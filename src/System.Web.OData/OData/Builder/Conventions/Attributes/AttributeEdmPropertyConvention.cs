@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-namespace System.Web.Http.OData.Builder.Conventions.Attributes
+using System.Web.Http;
+
+namespace System.Web.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Base class for all attribute based <see cref="IEdmPropertyConvention"/>'s.

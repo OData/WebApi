@@ -5,7 +5,7 @@
     <ProjectGuid>{66EFD03D-95B7-4C7E-83AC-1A8BD6C12612}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>System.Web.Http</RootNamespace>
+    <RootNamespace>System.Web.OData.Test</RootNamespace>
     <AssemblyName>System.Web.OData.Test</AssemblyName>
     <OutputPath>..\..\bin\$(Configuration)\Test\</OutputPath>
   </PropertyGroup>

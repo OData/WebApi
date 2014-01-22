@@ -3,7 +3,7 @@
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     /// <summary>
     /// Represents a container that captures a named property that is a part of the select expand query.

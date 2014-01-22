@@ -3,11 +3,12 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Provides extension methods for the <see cref="IEdmModel"/> interface.

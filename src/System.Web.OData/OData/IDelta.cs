@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// <see cref="IDelta" /> allows and tracks changes to an object.

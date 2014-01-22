@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// Represents the raw query values in the string format from the incoming request.

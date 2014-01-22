@@ -1,15 +1,16 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http.OData.Batch;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.Routing.Conventions;
+using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Batch;
+using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class ODataHttpRouteCollectionExtensionTest
     {

@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http.OData.Query;
+using System.Web.Http;
+using System.Web.OData.Query;
 
-namespace System.Web.Http.OData.Builder.Conventions.Attributes
+namespace System.Web.OData.Builder.Conventions.Attributes
 {
     internal class NotNavigableAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<NavigationPropertyConfiguration>
     {

@@ -2,7 +2,7 @@
 
 using System.Data.Linq;
 using System.IO;
-using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.OData.Formatter.Serialization;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -11,7 +11,7 @@ using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     public class ODataPrimitiveDeserializerTests
     {

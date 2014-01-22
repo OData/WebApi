@@ -1,9 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
-using WebApiResources = System.Web.Http.OData.Properties.SRResources;
+using System.Web.Http;
+using WebApiResources = System.Web.OData.Properties.SRResources;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Represents a strategy for Getting and Setting a PropertyInfo on <typeparamref name="TEntityType"/>

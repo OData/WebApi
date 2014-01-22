@@ -2,10 +2,10 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Web.Http.OData.Batch;
+using System.Web.OData.Batch;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http
+namespace System.Web.OData.Test
 {
     public class ODataBatchHttpRequestMessageExtensionsTest
     {

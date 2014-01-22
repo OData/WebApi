@@ -5,10 +5,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Batch;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Batch
+namespace System.Web.OData.Batch
 {
     /// <summary>
     /// An implementation of <see cref="ODataBatchHandler"/> that doesn't buffer the request content stream.

@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Deserialization;
-using System.Web.Http.OData.Formatter.Serialization;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Deserialization;
+using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// An instance of <see cref="EntityInstanceContext{TEntityType}"/> gets passed to the self link (<see cref="M:EntitySetConfiguration.HasIdLink"/>, <see cref="M:EntitySetConfiguration.HasEditLink"/>, <see cref="M:EntitySetConfiguration.HasReadLink"/>)

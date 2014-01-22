@@ -5,13 +5,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Routing.Conventions;
 using System.Web.Http.Routing;
+using System.Web.OData.Properties;
+using System.Web.OData.Routing.Conventions;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// An implementation of <see cref="IHttpActionSelector"/> that uses the server's OData routing conventions to select an action for OData requests.

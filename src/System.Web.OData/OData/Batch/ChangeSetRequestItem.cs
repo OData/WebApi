@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 
-namespace System.Web.Http.OData.Batch
+namespace System.Web.OData.Batch
 {
     /// <summary>
     /// Represents a ChangeSet request.

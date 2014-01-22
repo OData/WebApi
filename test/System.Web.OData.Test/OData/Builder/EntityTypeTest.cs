@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.Http.OData.Builder.TestModels;
+using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class EntityTypeTest
     {
@@ -236,7 +236,7 @@ namespace System.Web.Http.OData.Builder
                         .Entity<Motorcycle>()
                         .DerivesFrom<Vehicle>()
                         .HasKey(m => m.ID),
-                "Cannot define keys on type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' deriving from 'System.Web.Http.OData.Builder.TestModels.Vehicle'. Only the root type in the entity inheritance hierarchy can contain keys.");
+                "Cannot define keys on type 'System.Web.OData.Builder.TestModels.Motorcycle' deriving from 'System.Web.OData.Builder.TestModels.Vehicle'. Only the root type in the entity inheritance hierarchy can contain keys.");
         }
 
         [Fact]
@@ -276,7 +276,7 @@ namespace System.Web.Http.OData.Builder
                         .DerivesFrom<Vehicle>()
                         .Property(m => m.WheelCount),
                 "propertyInfo",
-                "Cannot redefine property 'WheelCount' already defined on the base type 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
+                "Cannot redefine property 'WheelCount' already defined on the base type 'System.Web.OData.Builder.TestModels.Vehicle'.");
         }
 
         [Fact]
@@ -294,7 +294,7 @@ namespace System.Web.Http.OData.Builder
                         .Entity<Vehicle>()
                         .Property(v => v.Model),
                 "propertyInfo",
-                "Cannot define property 'Model' in the base entity type 'System.Web.Http.OData.Builder.TestModels.Vehicle' as the derived type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' already defines it.");
+                "Cannot define property 'Model' in the base entity type 'System.Web.OData.Builder.TestModels.Vehicle' as the derived type 'System.Web.OData.Builder.TestModels.Motorcycle' already defines it.");
         }
 
         [Fact]
@@ -307,7 +307,7 @@ namespace System.Web.Http.OData.Builder
                     .Entity<Motorcycle>()
                     .HasKey(m => m.Model)
                     .DerivesFrom<Vehicle>(),
-            "Cannot define keys on type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' deriving from 'System.Web.Http.OData.Builder.TestModels.Vehicle'. Only the root type in the entity inheritance hierarchy can contain keys.");
+            "Cannot define keys on type 'System.Web.OData.Builder.TestModels.Motorcycle' deriving from 'System.Web.OData.Builder.TestModels.Vehicle'. Only the root type in the entity inheritance hierarchy can contain keys.");
         }
 
         [Fact]
@@ -320,7 +320,7 @@ namespace System.Web.Http.OData.Builder
                         .Entity<string>()
                         .DerivesFrom<Vehicle>(),
                 "baseType",
-                "'System.String' does not inherit from 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
+                "'System.String' does not inherit from 'System.Web.OData.Builder.TestModels.Vehicle'.");
         }
 
         [Fact]
@@ -339,7 +339,7 @@ namespace System.Web.Http.OData.Builder
             Assert.ThrowsArgument(
                 () => motorcycle.DerivesFrom<Vehicle>(),
                 "propertyInfo",
-                "Cannot redefine property 'Model' already defined on the base type 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
+                "Cannot redefine property 'Model' already defined on the base type 'System.Web.OData.Builder.TestModels.Vehicle'.");
         }
 
         [Fact]
@@ -361,7 +361,7 @@ namespace System.Web.Http.OData.Builder
                     .Entity<Motorcycle>()
                     .DerivesFrom<Vehicle>(),
                 "propertyInfo",
-                "Cannot define property 'Model' in the base entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' as the derived type 'System.Web.Http.OData.Builder.TestModels.SportBike' already defines it.");
+                "Cannot define property 'Model' in the base entity type 'System.Web.OData.Builder.TestModels.Motorcycle' as the derived type 'System.Web.OData.Builder.TestModels.SportBike' already defines it.");
         }
 
         [Fact]
@@ -374,7 +374,7 @@ namespace System.Web.Http.OData.Builder
                 .Entity<Vehicle>()
                 .DerivesFrom<Vehicle>(),
             "baseType",
-            "'System.Web.Http.OData.Builder.TestModels.Vehicle' does not inherit from 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
+            "'System.Web.OData.Builder.TestModels.Vehicle' does not inherit from 'System.Web.OData.Builder.TestModels.Vehicle'.");
         }
 
         [Fact]

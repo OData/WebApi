@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     internal static class EnumDeserializationHelpers
     {

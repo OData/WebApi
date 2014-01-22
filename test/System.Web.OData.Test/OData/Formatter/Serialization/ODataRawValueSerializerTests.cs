@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
-using System.Web.Http.OData.Builder.TestModels;
+using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     public class ODataRawValueSerializerTests
     {

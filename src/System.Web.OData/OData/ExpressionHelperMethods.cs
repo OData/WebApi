@@ -7,7 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     internal class ExpressionHelperMethods
     {

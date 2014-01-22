@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class EntitySetTest
     {
@@ -114,7 +114,7 @@ namespace System.Web.Http.OData.Builder
             Assert.ThrowsArgument(
                 () => vehicles.AddBinding(navProperty, manufacturers),
                 "navigationConfiguration",
-                "The declaring entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.Http.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
+                "The declaring entity type 'System.Web.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
         }
 
         [Fact]
@@ -134,7 +134,7 @@ namespace System.Web.Http.OData.Builder
             Assert.ThrowsArgument(
                 () => vehicles.HasNavigationPropertyLink(navProperty, new NavigationLinkBuilder((ctxt, property) => new Uri("http://works/"), followsConventions: false)),
                 "navigationProperty",
-                "The declaring entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.Http.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
+                "The declaring entity type 'System.Web.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
         }
 
         [Fact]
@@ -248,7 +248,7 @@ namespace System.Web.Http.OData.Builder
 
             Assert.Throws<NotSupportedException>(
             () => builder.GetEdmModel(),
-            "Cannot automatically bind the navigation property 'Manufacturer' on entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' for the source entity set 'motorcycles2' because there are two or more matching target entity sets. " +
+            "Cannot automatically bind the navigation property 'Manufacturer' on entity type 'System.Web.OData.Builder.TestModels.Motorcycle' for the source entity set 'motorcycles2' because there are two or more matching target entity sets. " +
             "The matching entity sets are: NorthWestMotorcycleManufacturers, SouthWestMotorcycleManufacturers.");
         }
     }

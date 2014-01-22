@@ -9,12 +9,13 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Properties;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Batch
+namespace System.Web.OData.Batch
 {
     /// <summary>
     /// Provides extension methods for the <see cref="HttpRequestMessage"/> class.

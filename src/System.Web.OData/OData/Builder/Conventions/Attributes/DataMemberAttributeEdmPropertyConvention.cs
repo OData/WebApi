@@ -2,9 +2,10 @@
 
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Web.Http;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder.Conventions.Attributes
+namespace System.Web.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Configures properties that have <see cref="DataMemberAttribute"/> as optional or required on their edm type.

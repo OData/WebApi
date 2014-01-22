@@ -3,10 +3,10 @@
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Web.Http.OData.Routing;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     /// <summary>
     /// Media type mapping that associates requests for the raw value of binary properties to

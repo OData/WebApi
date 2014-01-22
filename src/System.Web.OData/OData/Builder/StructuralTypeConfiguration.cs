@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// Represents an <see cref="IEdmStructuredType"/> that can be built using <see cref="ODataModelBuilder"/>.

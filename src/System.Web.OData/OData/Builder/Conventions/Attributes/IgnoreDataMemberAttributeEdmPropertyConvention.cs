@@ -2,8 +2,9 @@
 
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Web.Http;
 
-namespace System.Web.Http.OData.Builder.Conventions.Attributes
+namespace System.Web.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Removes properties that have <see cref="IgnoreDataMemberAttribute"/> from their edm type.

@@ -4,11 +4,11 @@ using System.Collections;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter.Serialization.Models;
-using System.Web.Http.OData.Query;
 using System.Web.Http.Routing;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter.Serialization.Models;
+using System.Web.OData.Query;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.Atom;
 using Microsoft.OData.Core.UriParser.Semantic;
@@ -17,7 +17,7 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     public class ODataFeedSerializerTests
     {

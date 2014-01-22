@@ -5,12 +5,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Web.Http.OData.Formatter;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class PerRequestContentNegotiatorTest
     {

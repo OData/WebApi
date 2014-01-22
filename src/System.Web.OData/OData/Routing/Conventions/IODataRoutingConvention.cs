@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 
-namespace System.Web.Http.OData.Routing.Conventions
+namespace System.Web.OData.Routing.Conventions
 {
     /// <summary>
     /// Provides an abstraction for selecting a controller and an action for OData requests.

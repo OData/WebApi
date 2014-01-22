@@ -10,15 +10,16 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Query.Validators;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
+using System.Web.OData.Query.Validators;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// This defines a composite OData query options that can be used to perform query composition.

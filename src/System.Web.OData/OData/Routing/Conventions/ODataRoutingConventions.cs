@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace System.Web.Http.OData.Routing.Conventions
+namespace System.Web.OData.Routing.Conventions
 {
     /// <summary>
     /// Provides helper methods for creating routing conventions.

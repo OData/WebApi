@@ -2,14 +2,15 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.OData.Formatter.Serialization;
-using System.Web.Http.TestCommon;
+using System.Web.Http;
+using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class LinkGenerationHelpersTest
     {

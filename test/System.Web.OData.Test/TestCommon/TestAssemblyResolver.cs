@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Web.Http.Dispatcher;
 
-namespace System.Web.Http.OData.TestCommon
+namespace System.Web.OData.TestCommon
 {
     internal class TestAssemblyResolver : IAssembliesResolver
     {

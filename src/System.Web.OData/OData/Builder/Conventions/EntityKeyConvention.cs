@@ -2,9 +2,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.OData.Formatter;
+using System.Web.Http;
+using System.Web.OData.Formatter;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.OData.Builder.Conventions
 {
     /// <summary>
     /// <see cref="EntityTypeConvention"/> for figuring out the entity keys.

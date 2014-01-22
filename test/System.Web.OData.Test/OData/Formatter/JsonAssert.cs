@@ -3,7 +3,7 @@
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     internal static class JsonAssert
     {

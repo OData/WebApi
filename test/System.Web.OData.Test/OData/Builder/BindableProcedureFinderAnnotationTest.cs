@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class BindableProcedureFinderAnnotationTest
     {

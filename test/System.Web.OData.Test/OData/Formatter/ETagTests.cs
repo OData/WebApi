@@ -2,10 +2,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.OData.Formatter.Serialization.Models;
+using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class ETagTests
     {

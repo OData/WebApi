@@ -5,10 +5,11 @@ using System.Diagnostics.Contracts;
 using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// A special HttpParameterBinding that uses a Per Request formatter instance with access to the Request.

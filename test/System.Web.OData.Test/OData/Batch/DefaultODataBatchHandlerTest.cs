@@ -6,11 +6,12 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
-using System.Web.Http.OData.Batch;
+using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Batch;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http
+namespace System.Web.OData.Test
 {
     public class DefaultODataBatchHandlerTest
     {

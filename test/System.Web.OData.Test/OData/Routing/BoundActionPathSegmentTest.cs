@@ -7,7 +7,7 @@ using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     public class BoundActionPathSegmentTest
     {

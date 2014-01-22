@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Http;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="ODataSerializer"/> for serializing $metadata. 

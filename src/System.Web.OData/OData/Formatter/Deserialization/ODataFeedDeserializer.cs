@@ -3,11 +3,12 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Represents an <see cref="ODataDeserializer"/> that can read OData feeds.

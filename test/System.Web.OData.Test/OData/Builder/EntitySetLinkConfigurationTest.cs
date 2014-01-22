@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class EntitySetLinkConfigurationTest
     {
@@ -130,7 +130,7 @@ namespace System.Web.Http.OData.Builder
             Assert.ThrowsArgument(
                 () => linkBuilder.BuildNavigationLink(new EntityInstanceContext(), ordersProperty, ODataMetadataLevel.Default),
                 "navigationProperty",
-                "No NavigationLink factory was found for the navigation property 'Orders' from entity type 'System.Web.Http.OData.Builder.EntitySetLinkConfigurationTest_Product' on entity set 'Products'. " +
+                "No NavigationLink factory was found for the navigation property 'Orders' from entity type 'System.Web.OData.Builder.EntitySetLinkConfigurationTest_Product' on entity set 'Products'. " +
                 "Try calling HasNavigationPropertyLink on the EntitySetConfiguration.");
         }
 

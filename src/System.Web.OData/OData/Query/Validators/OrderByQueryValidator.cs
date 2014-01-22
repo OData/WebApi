@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 
-namespace System.Web.Http.OData.Query.Validators
+namespace System.Web.OData.Query.Validators
 {
     /// <summary>
     /// Represents a validator used to validate an <see cref="OrderByQueryOption"/> based on the <see cref="ODataValidationSettings"/>.

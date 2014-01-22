@@ -2,14 +2,15 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.Http;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.OData.Builder.Conventions
 {
     public class NavigationLinksGenerationConventionTest
     {
@@ -89,7 +90,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.Default);
 
-            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car/Manufacturer", uri.AbsoluteUri);
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.OData.Builder.TestModels.Car/Manufacturer", uri.AbsoluteUri);
         }
 
         [Fact]

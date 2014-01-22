@@ -6,11 +6,12 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.OData.Batch;
+using System.Web.Http;
+using System.Web.OData.Batch;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http
+namespace System.Web.OData.Test
 {
     public class ChangeSetRequestItemTest
     {

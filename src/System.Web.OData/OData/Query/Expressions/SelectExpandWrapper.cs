@@ -2,14 +2,15 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Serialization;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Newtonsoft.Json;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     /// <summary>
     /// Represents a container class that contains properties that are either selected or expanded using $select and $expand.

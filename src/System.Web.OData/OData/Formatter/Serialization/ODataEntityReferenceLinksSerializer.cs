@@ -3,12 +3,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
+using System.Web.OData.Properties;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="ODataSerializer"/> for serializing $link response for a collection navigation property.

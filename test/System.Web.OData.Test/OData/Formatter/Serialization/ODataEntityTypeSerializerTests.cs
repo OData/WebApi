@@ -5,10 +5,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
 using System.Web.Http.Routing;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.Routing;
+using System.Web.OData.Test;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
@@ -17,9 +19,9 @@ using Microsoft.OData.Edm.Annotations;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
-using ODataPath = System.Web.Http.OData.Routing.ODataPath;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     public class ODataEntityTypeSerializerTests
     {

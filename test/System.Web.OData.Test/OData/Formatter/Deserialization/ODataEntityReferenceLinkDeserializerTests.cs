@@ -3,13 +3,13 @@
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Routing;
+using System.Web.OData.Builder;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     public class ODataEntityReferenceLinkDeserializerTests
     {

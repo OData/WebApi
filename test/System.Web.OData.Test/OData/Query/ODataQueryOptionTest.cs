@@ -5,18 +5,18 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Query.Expressions;
-using System.Web.Http.OData.Query.Validators;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Query.Expressions;
+using System.Web.OData.Query.Validators;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class ODataQueryOptionTest
     {

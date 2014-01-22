@@ -5,8 +5,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 
-namespace System.Web.Http.OData.Batch
+namespace System.Web.OData.Batch
 {
     /// <summary>
     /// Represents an OData batch request.

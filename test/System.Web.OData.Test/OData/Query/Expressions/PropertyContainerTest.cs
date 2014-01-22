@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     public class PropertyContainerTest
     {

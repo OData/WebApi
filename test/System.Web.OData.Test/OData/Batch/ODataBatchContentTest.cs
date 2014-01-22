@@ -3,12 +3,12 @@
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.OData.Batch;
-using System.Web.Http.OData.Formatter;
+using System.Web.OData.Batch;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http
+namespace System.Web.OData.Test
 {
     public class ODataBatchContentTest
     {

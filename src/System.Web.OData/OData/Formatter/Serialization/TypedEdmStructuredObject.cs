@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Web.Http.Internal;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="IEdmStructuredObject"/> backed by a CLR object with a one-to-one mapping.

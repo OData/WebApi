@@ -5,17 +5,17 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Builder.Conventions.Attributes;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Query;
-using System.Web.Http.OData.TestCommon;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter;
+using System.Web.OData.Query;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.OData.Builder.Conventions
 {
     public class ODataConventionModelBuilderTests
     {

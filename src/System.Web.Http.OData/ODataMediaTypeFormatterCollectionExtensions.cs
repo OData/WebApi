@@ -23,6 +23,7 @@ namespace System.Web.Http
         /// The items collection itself cannot be <see langword="null"/>, but it can contain elements that are
         /// <see langword="null"/>.
         /// </param>
+        [Obsolete("This method is obsolete; use the AddRange method in the MediaTypeFormatterCollection class.")]
         public static void AddRange(this MediaTypeFormatterCollection collection,
             IEnumerable<MediaTypeFormatter> items)
         {
@@ -52,6 +53,7 @@ namespace System.Web.Http
         /// The items that should be inserted into the <see cref="MediaTypeFormatterCollection"/>. The items collection
         /// itself cannot be <see langword="null"/>, but it can contain elements that are <see langword="null"/>.
         /// </param>
+        [Obsolete("This method is obsolete; use the InsertRange method in the MediaTypeFormatterCollection class.")]
         public static void InsertRange(this MediaTypeFormatterCollection collection,
             int index, IEnumerable<MediaTypeFormatter> items)
         {

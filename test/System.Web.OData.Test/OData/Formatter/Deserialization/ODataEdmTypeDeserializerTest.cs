@@ -4,7 +4,7 @@ using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     public class ODataEdmTypeDeserializerTest
     {

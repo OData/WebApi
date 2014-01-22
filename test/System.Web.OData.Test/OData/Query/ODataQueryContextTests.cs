@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class ODataQueryContextTests
     {

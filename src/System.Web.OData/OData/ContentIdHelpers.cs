@@ -5,7 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     internal static class ContentIdHelpers
     {

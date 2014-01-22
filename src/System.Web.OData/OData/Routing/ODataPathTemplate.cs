@@ -2,8 +2,9 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Web.Http;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// Represents a template for an <see cref="ODataPath"/> that can be matched to an actual <see cref="ODataPath"/>.

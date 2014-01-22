@@ -2,11 +2,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// Performs function overload resolution. OData protocol mandates that functions with the same name and same binding

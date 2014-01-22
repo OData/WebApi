@@ -6,12 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Query;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class QueryableLimitationTest
     {

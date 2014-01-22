@@ -6,7 +6,7 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     public class UnboundFunctionPathSegmentTemplateTest
     {

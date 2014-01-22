@@ -3,9 +3,10 @@
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
+using System.Web.OData.Routing;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     /// <summary>
     /// Media type mapping that associates requests for the raw value of properties.
@@ -32,9 +33,9 @@ namespace System.Web.Http.OData.Formatter
         }
 
         /// <summary>
-        /// This method determines if the <see cref="System.Net.Http.HttpRequestMessage"/> is an OData Raw value request.
+        /// This method determines if the <see cref="HttpRequestMessage"/> is an OData Raw value request.
         /// </summary>
-        /// <param name="propertySegment">The <see cref="System.Web.Http.OData.Routing.PropertyAccessPathSegment"/> of the path.</param>
+        /// <param name="propertySegment">The <see cref="PropertyAccessPathSegment"/> of the path.</param>
         /// <returns>True if the request is an OData raw value request.</returns>
         protected abstract bool IsMatch(PropertyAccessPathSegment propertySegment);
 

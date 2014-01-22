@@ -7,7 +7,7 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     /// <summary>
     /// Wrapper for IODataRequestMessage and IODataResponseMessage.

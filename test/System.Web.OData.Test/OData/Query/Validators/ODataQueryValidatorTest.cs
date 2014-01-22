@@ -5,7 +5,7 @@ using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Query.Validators
+namespace System.Web.OData.Query.Validators
 {
     public class ODataQueryValidatorTest
     {

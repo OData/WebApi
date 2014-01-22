@@ -3,7 +3,7 @@
 using System.Reflection;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public sealed class MockPropertyInfo : Mock<PropertyInfo>
     {

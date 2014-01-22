@@ -6,7 +6,7 @@ using System.Xml.Linq;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class EdmPrimitiveHelpersTest
     {

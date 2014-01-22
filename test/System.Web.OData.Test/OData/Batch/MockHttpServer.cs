@@ -3,8 +3,9 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 
-namespace System.Web.Http
+namespace System.Web.OData.Test
 {
     internal class MockHttpServer : HttpServer
     {

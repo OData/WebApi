@@ -3,8 +3,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Web.Http;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     internal static class EdmTypeConfigurationExtensions
     {

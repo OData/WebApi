@@ -6,7 +6,7 @@ using System.Linq;
 using System.Web.Http.Controllers;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Routing.Conventions
+namespace System.Web.OData.Routing.Conventions
 {
     internal static class ProcedureRoutingConventionHelpers
     {

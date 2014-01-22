@@ -5,15 +5,15 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Deserialization;
 using System.Xml;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Validation;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     internal static class EdmTestHelpers
     {

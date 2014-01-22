@@ -2,9 +2,10 @@
 
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     /// <summary>
     /// OData ETag of an entity type <typeparamref name="TEntity"/>.

@@ -1,22 +1,21 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Hosting;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Serialization.Models;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Serialization.Models;
+using System.Web.OData.Routing;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
-using ODataPath = System.Web.Http.OData.Routing.ODataPath;
-using ODataPathSegment = System.Web.Http.OData.Routing.ODataPathSegment;
+using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPathSegment = System.Web.OData.Routing.ODataPathSegment;
 
 namespace System.Net.Http
 {

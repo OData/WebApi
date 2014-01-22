@@ -2,11 +2,11 @@
 
 using System.IO;
 using System.Linq;
-using System.Web.Http.OData.Builder.TestModels;
+using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class ComplexTypeTest
     {
@@ -79,7 +79,7 @@ namespace System.Web.Http.OData.Builder
             Assert.ThrowsArgument(
                 () => zipCode.ComplexProperty(z => z.Recursive),
                 "propertyInfo",
-                "The complex type 'System.Web.Http.OData.Builder.TestModels.ZipCode' has a reference to itself through the property 'Recursive'. A recursive loop of complex types is not allowed.");
+                "The complex type 'System.Web.OData.Builder.TestModels.ZipCode' has a reference to itself through the property 'Recursive'. A recursive loop of complex types is not allowed.");
         }
 
         [Fact]

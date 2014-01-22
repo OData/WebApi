@@ -10,14 +10,15 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter;
+using System.Web.OData.Routing;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class DeltaTest
     {
@@ -48,7 +49,7 @@ namespace System.Web.Http.OData
         {
             Assert.Throws<InvalidOperationException>(
                 () => new Delta<Derived>(typeof(AnotherDerived)),
-                "The actual entity type 'System.Web.Http.OData.DeltaTest+AnotherDerived' is not assignable to the expected type 'System.Web.Http.OData.DeltaTest+Derived'.");
+                "The actual entity type 'System.Web.OData.DeltaTest+AnotherDerived' is not assignable to the expected type 'System.Web.OData.DeltaTest+Derived'.");
         }
 
         [Fact]
@@ -295,7 +296,7 @@ namespace System.Web.Http.OData
             // Act & Assert
             Assert.Throws<SerializationException>(
                 () => delta.CollectionPropertyWithoutSetAndNullValue = new[] { "1" },
-                "The property 'CollectionPropertyWithoutSetAndNullValue' on type 'System.Web.Http.OData.DeltaTest+InvalidD" +
+                "The property 'CollectionPropertyWithoutSetAndNullValue' on type 'System.Web.OData.DeltaTest+InvalidD" +
                 "eltaModel' returned a null value. The input stream contains collection items which cannot be added if " +
                 "the instance is null.");
         }
@@ -310,7 +311,7 @@ namespace System.Web.Http.OData
             Assert.Throws<SerializationException>(
                 () => delta.CollectionPropertyWithoutSetAndClear = new[] { "1" },
                 "The type 'System.Int32[]' of the property 'CollectionPropertyWithoutSetAndClear' on type 'System.Web." +
-                "Http.OData.DeltaTest+InvalidDeltaModel' does not have a Clear method. Consider using a collection type" +
+                "OData.DeltaTest+InvalidDeltaModel' does not have a Clear method. Consider using a collection type" +
                 " that does have a Clear method, such as IList<T> or ICollection<T>.");
         }
 
@@ -325,7 +326,7 @@ namespace System.Web.Http.OData
             Assert.ThrowsArgument(
                 () => delta.Patch(unrelatedEntity),
                 "original",
-                "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
+                "Cannot use Delta of type 'System.Web.OData.DeltaTest+Derived' on an entity of type 'System.Web.OData.DeltaTest+AnotherDerived'.");
         }
 
         [Fact]
@@ -339,7 +340,7 @@ namespace System.Web.Http.OData
             Assert.ThrowsArgument(
                 () => delta.Put(unrelatedEntity),
                 "original",
-                "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
+                "Cannot use Delta of type 'System.Web.OData.DeltaTest+Derived' on an entity of type 'System.Web.OData.DeltaTest+AnotherDerived'.");
         }
 
         [Fact]
@@ -353,7 +354,7 @@ namespace System.Web.Http.OData
             Assert.ThrowsArgument(
                 () => delta.CopyChangedValues(unrelatedEntity),
                 "original",
-                "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
+                "Cannot use Delta of type 'System.Web.OData.DeltaTest+Derived' on an entity of type 'System.Web.OData.DeltaTest+AnotherDerived'.");
         }
 
         [Fact]
@@ -367,7 +368,7 @@ namespace System.Web.Http.OData
             Assert.ThrowsArgument(
                 () => delta.CopyUnchangedValues(unrelatedEntity),
                 "original",
-                "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
+                "Cannot use Delta of type 'System.Web.OData.DeltaTest+Derived' on an entity of type 'System.Web.OData.DeltaTest+AnotherDerived'.");
         }
 
         public static TheoryDataSet<string, string, object> ODataFormatter_Can_Read_Delta_DataSet

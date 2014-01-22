@@ -3,12 +3,13 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// <see cref="ODataModelBuilder"/> is used to map CLR classes to an EDM model.

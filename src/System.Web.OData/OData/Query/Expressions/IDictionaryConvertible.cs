@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     // SelectExpandWrapper<T> implements this interface for custom json serialization.
     internal interface IDictionaryConvertible

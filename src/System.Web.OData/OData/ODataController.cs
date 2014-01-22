@@ -1,9 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Http;
 using System.Web.Http.Description;
-using System.Web.Http.OData.Results;
+using System.Web.OData.Results;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Defines a base class for OData controllers that support writing and reading data using the OData formats.

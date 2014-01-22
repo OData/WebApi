@@ -9,9 +9,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
@@ -21,7 +22,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library.Values;
 using Microsoft.OData.Edm.Values;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     /// <summary>
     /// Translates an OData $filter parse tree represented by <see cref="FilterClause"/> to 

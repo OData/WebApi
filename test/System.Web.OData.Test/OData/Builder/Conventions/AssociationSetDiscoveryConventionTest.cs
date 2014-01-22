@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
-using System.Web.Http.OData.Builder.TestModels;
+using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.OData.Builder.Conventions
 {
     public class AssociationSetDiscoveryConventionTest
     {
@@ -62,7 +62,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => AssociationSetDiscoveryConvention.GetTargetEntitySet(config, modelBuilder.Object),
-                "Could not find the target entity type for the navigation property 'SamplePropertyName' on entity type 'System.Web.Http.OData.Builder.Conventions.AssociationSetDiscoveryConventionTest'.");
+                "Could not find the target entity type for the navigation property 'SamplePropertyName' on entity type 'System.Web.OData.Builder.Conventions.AssociationSetDiscoveryConventionTest'.");
         }
 
         [Fact]

@@ -7,16 +7,16 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter.Serialization;
-using System.Web.Http.OData.Formatter.Serialization.Models;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     public class ODataCollectionDeserializerTests
     {
@@ -161,7 +161,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     _addressCollectionType.ElementType(), new ODataDeserializerContext())
                     .GetEnumerator()
                     .MoveNext(),
-                "'System.Web.Http.OData.Formatter.Serialization.Models.Address' cannot be deserialized using the ODataMediaTypeFormatter.");
+                "'System.Web.OData.Formatter.Serialization.Models.Address' cannot be deserialized using the ODataMediaTypeFormatter.");
         }
 
         [Fact]

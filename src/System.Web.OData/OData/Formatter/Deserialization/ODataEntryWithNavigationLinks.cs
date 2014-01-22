@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Encapuslates an <see cref="ODataEntry"/> and the inner navigation links.

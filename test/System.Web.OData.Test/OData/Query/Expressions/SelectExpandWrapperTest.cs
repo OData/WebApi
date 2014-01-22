@@ -2,12 +2,12 @@
 
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Web.Http.TestCommon;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     public class SelectExpandWrapperTest
     {

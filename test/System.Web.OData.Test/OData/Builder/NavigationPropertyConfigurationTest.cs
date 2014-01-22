@@ -4,7 +4,7 @@ using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class NavigationPropertyConfigurationTest
     {

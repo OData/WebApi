@@ -2,10 +2,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.OData.Routing;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.OData.Builder.Conventions
 {
     /// <summary>
     /// The FunctionLinkGenerationConvention calls function.HasFunctionLink(..) if the function binds to a single entity and has not previously been configured.

@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     internal class PerRequestActionValueBinder : IActionValueBinder
     {

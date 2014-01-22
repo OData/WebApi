@@ -2,12 +2,12 @@
 
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.TestCommon;
-using System.Web.Http.TestCommon;
+using System.Web.OData.TestCommon;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     public class AttributeRoutingTest
     {

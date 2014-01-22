@@ -2,7 +2,7 @@
 
 using System.Reflection;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// Used to configure an enum property of an entity type or complex type.

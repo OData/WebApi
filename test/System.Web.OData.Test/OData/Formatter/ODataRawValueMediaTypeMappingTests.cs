@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Routing;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class ODataRawValueMediaTypeMappingTests
     {

@@ -2,10 +2,11 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Web.Http;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
     /// The default <see cref="ODataSerializerProvider"/>.

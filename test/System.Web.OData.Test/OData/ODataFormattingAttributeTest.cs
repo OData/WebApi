@@ -3,13 +3,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Formatting;
+using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.OData.Formatter;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class ODataFormattingAttributeTest
     {

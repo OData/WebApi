@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     class HttpRequestODataMessage : IODataRequestMessage
     {

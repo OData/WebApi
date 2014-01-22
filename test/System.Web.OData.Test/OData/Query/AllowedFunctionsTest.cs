@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class AllowedFunctionsTest
     {

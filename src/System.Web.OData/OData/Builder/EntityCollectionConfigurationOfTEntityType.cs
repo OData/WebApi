@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// EntityCollectionConfiguration represents a Collection of Entities.

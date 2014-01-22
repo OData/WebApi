@@ -3,15 +3,15 @@
 using System.Collections;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.OData.Builder;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     public class ODataFeedDeserializerTest
     {
@@ -84,7 +84,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             Assert.Throws<SerializationException>(
                 () => deserializer.ReadFeed(feedWrapper, _customerType, readContext).GetEnumerator().MoveNext(),
-                "'System.Web.Http.OData.TestCommon.Models.Customer' cannot be deserialized using the ODataMediaTypeFormatter.");
+                "'System.Web.OData.TestCommon.Models.Customer' cannot be deserialized using the ODataMediaTypeFormatter.");
         }
 
         [Fact]

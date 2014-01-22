@@ -1,5 +1,5 @@
-﻿<m:value xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:context="http://localhost/$metadata#System.Web.Http.OData.EnumComplex" m:type="#System.Web.Http.OData.EnumComplex" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata">
-  <d:RequiredColor m:type="#System.Web.Http.OData.Builder.TestModels.Color">Red, Blue</d:RequiredColor>
+﻿<m:value xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:context="http://localhost/$metadata#System.Web.OData.EnumComplex" m:type="#System.Web.OData.EnumComplex" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata">
+  <d:RequiredColor m:type="#System.Web.OData.Builder.TestModels.Color">Red, Blue</d:RequiredColor>
   <d:NullableColor m:null="true" />
-  <d:UndefinedColor m:type="#System.Web.Http.OData.Builder.TestModels.Color">123</d:UndefinedColor>
+  <d:UndefinedColor m:type="#System.Web.OData.Builder.TestModels.Color">123</d:UndefinedColor>
 </m:value>

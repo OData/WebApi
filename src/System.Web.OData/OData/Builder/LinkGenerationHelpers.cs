@@ -3,12 +3,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Web.Http.OData.Builder.Conventions;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
+using System.Web.OData.Builder.Conventions;
+using System.Web.OData.Properties;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// Contains helper methods for generating OData links that follow OData URL conventions.

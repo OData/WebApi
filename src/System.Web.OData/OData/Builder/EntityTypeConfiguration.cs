@@ -3,10 +3,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     // TODO: add support for FK properties
     // CUT: support for bi-directional properties

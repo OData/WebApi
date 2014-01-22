@@ -2,18 +2,18 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Deserialization;
-using System.Web.Http.OData.Formatter.Serialization;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Deserialization;
+using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class EnumSerializerTest
     {

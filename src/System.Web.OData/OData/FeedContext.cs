@@ -2,11 +2,10 @@
 
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Contains context information about the feed currently being serialized.

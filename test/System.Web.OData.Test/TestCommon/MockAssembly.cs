@@ -3,7 +3,7 @@
 using System.Linq;
 using System.Reflection;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     internal sealed class MockAssembly : Assembly
     {

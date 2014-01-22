@@ -7,13 +7,14 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Query;
+using System.Web.OData.Properties;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// A <see cref="ParameterBindingAttribute"/> to bind parameters of type <see cref="ODataQueryOptions"/> to the OData query from the incoming request.

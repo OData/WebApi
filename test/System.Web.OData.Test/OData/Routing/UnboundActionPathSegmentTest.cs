@@ -2,14 +2,14 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.OData.Builder;
+using System.Web.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     public class UnboundActionPathSegmentTest
     {
@@ -108,7 +108,7 @@ namespace System.Web.Http.OData.Routing
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("System.Web.Http.OData.Routing.MyCustomer", result.FullTypeName());
+            Assert.Equal("System.Web.OData.Routing.MyCustomer", result.FullTypeName());
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace System.Web.Http.OData.Routing
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("System.Web.Http.OData.Routing.MyCustomer", result.ElementType.FullName());
+            Assert.Equal("System.Web.OData.Routing.MyCustomer", result.ElementType.FullName());
         }
 
         [Fact]

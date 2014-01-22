@@ -2,11 +2,12 @@
 
 using System.Collections.Specialized;
 using System.Net.Http;
+using System.Web.Http;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// Provides an object representation for an unresolved parameter value of function.

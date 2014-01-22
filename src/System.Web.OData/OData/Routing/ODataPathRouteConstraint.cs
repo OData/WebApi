@@ -6,13 +6,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Routing.Conventions;
+using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Properties;
+using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// An implementation of <see cref="IHttpRouteConstraint"/> that only matches OData paths.

@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Serialization.Models;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Serialization.Models;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
@@ -15,7 +15,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     public class SelectExpandBinderTest
     {

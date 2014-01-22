@@ -4,9 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.Http;
+using System.Web.OData.TestCommon.Models;
 
-namespace System.Web.Http.OData.Query.Controllers
+namespace System.Web.OData.Query.Controllers
 {
     public class CustomerHighLevelController : ODataController
     {

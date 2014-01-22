@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Http;
 using System.Web.Http.ModelBinding;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http
+namespace System.Web.OData.Test
 {
     public class ODataHttpErrorExtensionsTest
     {

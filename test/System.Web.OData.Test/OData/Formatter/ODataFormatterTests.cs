@@ -6,22 +6,22 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter.Deserialization;
-using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.Http;
 using System.Web.Http.Tracing;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter.Deserialization;
+using System.Web.OData.Formatter.Serialization;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.Atom;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
-using Microsoft.TestCommon.Types;
 using Moq;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class ODataFormatterTests
     {
@@ -347,11 +347,11 @@ namespace System.Web.Http.OData.Formatter
                     XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
 
                     Assert.Equal("error", xml.Name.LocalName);
-                    Assert.Equal("The query specified in the URI is not valid. Could not find a property named 'abc' on type 'System.Web.Http.OData.Formatter.FormatterPerson'.",
+                    Assert.Equal("The query specified in the URI is not valid. Could not find a property named 'abc' on type 'System.Web.OData.Formatter.FormatterPerson'.",
                         xml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}message")).Value);
                     XElement innerErrorXml = xml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}innererror"));
                     Assert.NotNull(innerErrorXml);
-                    Assert.Equal("Could not find a property named 'abc' on type 'System.Web.Http.OData.Formatter.FormatterPerson'.",
+                    Assert.Equal("Could not find a property named 'abc' on type 'System.Web.OData.Formatter.FormatterPerson'.",
                         innerErrorXml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}message")).Value);
                     Assert.Equal("Microsoft.OData.Core.ODataException",
                         innerErrorXml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}type")).Value);
@@ -401,7 +401,7 @@ namespace System.Web.Http.OData.Formatter
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
                 {
                     request.Content = new StringContent(
-                        string.Format(@"{{'@odata.type':'#System.Web.Http.OData.Formatter.EnumCustomer',
+                        string.Format(@"{{'@odata.type':'#System.Web.OData.Formatter.EnumCustomer',
                             'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
                     request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
                     request.Headers.Accept.ParseAdd("application/json");
@@ -433,9 +433,9 @@ namespace System.Web.Http.OData.Formatter
             // Assert
             response.EnsureSuccessStatusCode();
             JObject customer = response.Content.ReadAsAsync<JObject>().Result;
-            Assert.Equal("#System.Web.Http.OData.Builder.TestModels.Color",
+            Assert.Equal("#System.Web.OData.Builder.TestModels.Color",
                 customer.GetValue("Color@odata.type"));
-            Assert.Equal("#Collection(System.Web.Http.OData.Builder.TestModels.Color)",
+            Assert.Equal("#Collection(System.Web.OData.Builder.TestModels.Color)",
                 customer.GetValue("Colors@odata.type"));
         }
 
@@ -467,7 +467,7 @@ namespace System.Web.Http.OData.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers");
             request.Content = new StringContent(
-                string.Format(@"{{'@odata.type':'#System.Web.Http.OData.Formatter.EnumCustomer',
+                string.Format(@"{{'@odata.type':'#System.Web.OData.Formatter.EnumCustomer',
                             'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             request.Headers.Accept.ParseAdd(acceptHeader);
@@ -492,7 +492,7 @@ namespace System.Web.Http.OData.Formatter
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
                 {
                     request.Content = new StringContent(
-                        string.Format(@"{{'@odata.type':'#System.Web.Http.OData.Formatter.EnumCustomer',
+                        string.Format(@"{{'@odata.type':'#System.Web.OData.Formatter.EnumCustomer',
                             'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
                     request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
                     request.Headers.Accept.ParseAdd("application/atom+xml");
@@ -515,8 +515,8 @@ namespace System.Web.Http.OData.Formatter
                             "ns:content/m:properties/d:Color/attribute::m:type", namespaceManager).Cast<XmlNode>().Select(e => e.Value);
                         var colorsMetadataType = atomXmlDocument.DocumentElement.SelectNodes(
                             "ns:content/m:properties/d:Colors/attribute::m:type", namespaceManager).Cast<XmlNode>().Select(e => e.Value);
-                        Assert.Equal("#System.Web.Http.OData.Builder.TestModels.Color", colorMetadataType.Single());
-                        Assert.Equal("#Collection(System.Web.Http.OData.Builder.TestModels.Color)", colorsMetadataType.Single());
+                        Assert.Equal("#System.Web.OData.Builder.TestModels.Color", colorMetadataType.Single());
+                        Assert.Equal("#Collection(System.Web.OData.Builder.TestModels.Color)", colorsMetadataType.Single());
                     }
                 }
             }

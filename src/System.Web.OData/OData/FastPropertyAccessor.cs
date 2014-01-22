@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
+using System.Web.Http;
 using System.Web.Http.Internal;
-using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.OData.Formatter.Deserialization;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// FastPropertyAccessor is a <see cref="PropertyAccessor{TEntityType}"/> that speeds up (compares to reflection)

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class DefaultODataETagHandlerTests
     {

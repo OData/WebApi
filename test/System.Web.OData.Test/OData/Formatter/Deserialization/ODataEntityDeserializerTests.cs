@@ -6,16 +6,16 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.Routing;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     public class ODataEntityDeserializerTests
     {
@@ -170,11 +170,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             builder.Entity<BaseType>().Abstract();
             IEdmModel model = builder.GetEdmModel();
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = "System.Web.Http.OData.Formatter.Deserialization.BaseType" });
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = "System.Web.OData.Formatter.Deserialization.BaseType" });
 
             Assert.Throws<ODataException>(
                 () => deserializer.ReadEntry(entry, _productEdmType, new ODataDeserializerContext { Model = model }),
-                "An instance of the abstract entity type 'System.Web.Http.OData.Formatter.Deserialization.BaseType' was found. Abstract entity types cannot be instantiated.");
+                "An instance of the abstract entity type 'System.Web.OData.Formatter.Deserialization.BaseType' was found. Abstract entity types cannot be instantiated.");
         }
 
         [Fact]

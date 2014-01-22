@@ -2,7 +2,7 @@
 
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     internal static class ODataValueExtensions
     {

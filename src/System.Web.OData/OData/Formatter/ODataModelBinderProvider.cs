@@ -6,14 +6,15 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
-using System.Web.Http.OData.Properties;
 using System.Web.Http.ValueProviders;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     /// <summary>
     /// Provides a <see cref="IModelBinder"/> for EDM primitive types.

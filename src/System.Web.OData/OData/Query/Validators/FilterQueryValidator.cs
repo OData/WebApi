@@ -3,16 +3,17 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Query.Expressions;
+using System.Web.Http;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
+using System.Web.OData.Query.Expressions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Query.Validators
+namespace System.Web.OData.Query.Validators
 {
     /// <summary>
     /// Represents a validator used to validate a <see cref="FilterQueryOption" /> based on the <see cref="ODataValidationSettings"/>.

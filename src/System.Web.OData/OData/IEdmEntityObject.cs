@@ -2,7 +2,7 @@
 
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// Represents an instance of an <see cref="IEdmEntityType"/>.

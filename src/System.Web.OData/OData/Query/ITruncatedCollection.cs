@@ -2,7 +2,7 @@
 
 using System.Collections;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// Represents a collection that is truncated to a given page size.

@@ -2,7 +2,7 @@
 
 using System.Collections;
 
-namespace System.Web.Http.OData.TestCommon.Models
+namespace System.Web.OData.TestCommon.Models
 {
     public class NonGenericEnumerable : IEnumerable
     {

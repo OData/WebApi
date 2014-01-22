@@ -81,6 +81,49 @@ namespace System.Net.Http.Formatting
         }
 
         /// <summary>
+        /// Adds the elements of the specified collection to the end of the <see cref="MediaTypeFormatterCollection"/>.
+        /// </summary>
+        /// <param name="items">
+        /// The items that should be added to the end of the <see cref="MediaTypeFormatterCollection"/>.
+        /// The items collection itself cannot be <see langword="null"/>, but it can contain elements that are
+        /// <see langword="null"/>.
+        /// </param>
+        public void AddRange(IEnumerable<MediaTypeFormatter> items)
+        {
+            if (items == null)
+            {
+                throw Error.ArgumentNull("items");
+            }
+
+            foreach (MediaTypeFormatter item in items)
+            {
+                Add(item);
+            }
+        }
+
+        /// <summary>
+        /// Inserts the elements of a collection into the <see cref="MediaTypeFormatterCollection"/> at the specified
+        /// index.
+        /// </summary>
+        /// <param name="index">The zero-based index at which the new elements should be inserted.</param>
+        /// <param name="items">
+        /// The items that should be inserted into the <see cref="MediaTypeFormatterCollection"/>. The items collection
+        /// itself cannot be <see langword="null"/>, but it can contain elements that are <see langword="null"/>.
+        /// </param>
+        public void InsertRange(int index, IEnumerable<MediaTypeFormatter> items)
+        {
+            if (items == null)
+            {
+                throw Error.ArgumentNull("items");
+            }
+
+            foreach (MediaTypeFormatter item in items)
+            {
+                Insert(index++, item);
+            }
+        }
+
+        /// <summary>
         /// Helper to search a collection for a formatter that can read the .NET type in the given mediaType.
         /// </summary>
         /// <param name="type">.NET type to read</param>

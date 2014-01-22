@@ -2,12 +2,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Query.Validators;
-using System.Web.Http.OData.TestCommon;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Query.Validators;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
@@ -16,7 +16,7 @@ using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class FilterQueryOptionTest
     {

@@ -6,7 +6,7 @@ using System.Reflection;
 using Moq;
 using Moq.Protected;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public sealed class MockType : Mock<Type>
     {

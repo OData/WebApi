@@ -1,9 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
+using System.Web.Http;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder.Conventions.Attributes
+namespace System.Web.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Configures properties that have the <see cref="KeyAttribute"/> as keys in the <see cref="IEdmEntityType"/>.

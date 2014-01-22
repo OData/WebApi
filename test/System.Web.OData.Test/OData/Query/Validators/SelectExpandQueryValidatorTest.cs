@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Globalization;
-using System.Web.Http.OData.Formatter.Serialization.Models;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Formatter.Serialization.Models;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query.Validators
+namespace System.Web.OData.Query.Validators
 {
     public class SelectExpandQueryValidatorTest
     {

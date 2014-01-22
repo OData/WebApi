@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace System.Web.Http.OData.Builder.TestModels
+namespace System.Web.OData.Builder.TestModels
 {
     public abstract class Vehicle
     {

@@ -2,7 +2,7 @@
 
 using System.Runtime.Serialization;
 
-namespace System.Web.Http.OData.Builder.TestModels
+namespace System.Web.OData.Builder.TestModels
 {
     [DataContract(Namespace = "com.contoso", Name = "ModelAlias2")]
     public class ModelAlias

@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http.OData.Formatter.Serialization.Models;
+using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     public class ODataDeserializerContextTest
     {

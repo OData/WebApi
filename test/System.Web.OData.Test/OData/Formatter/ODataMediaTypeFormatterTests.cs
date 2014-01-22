@@ -11,13 +11,14 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter.Deserialization;
-using System.Web.Http.OData.Formatter.Serialization;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.Http;
 using System.Web.Http.Routing;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter.Deserialization;
+using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Routing;
+using System.Web.OData.TestCommon;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
@@ -25,9 +26,9 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 using Newtonsoft.Json.Linq;
-using ODataPath = System.Web.Http.OData.Routing.ODataPath;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class ODataMediaTypeFormatterTests : MediaTypeFormatterTestBase<ODataMediaTypeFormatter>
     {

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Linq.Expressions;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class ExpressionHelpersTest
     {

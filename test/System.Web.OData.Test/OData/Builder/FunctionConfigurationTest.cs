@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class FunctionConfigurationTest
     {

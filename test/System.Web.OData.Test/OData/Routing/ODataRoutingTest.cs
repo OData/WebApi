@@ -2,9 +2,10 @@
 
 using System.Globalization;
 using System.Net.Http;
+using System.Web.Http;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     public class ODataRoutingTest
     {
@@ -41,13 +42,13 @@ namespace System.Web.Http.OData.Routing
         [InlineData("DELETE", "RoutingCustomers(10)", "DeleteRoutingCustomer(10)")]
         // navigation properties
         [InlineData("GET", "RoutingCustomers(10)/Products", "GetProducts(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Products", "GetProducts(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/RelationshipManager", "GetRelationshipManagerFromVIP(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Products", "GetProducts(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/RelationshipManager", "GetRelationshipManagerFromVIP(10)")]
         // structural properties
         [InlineData("GET", "RoutingCustomers(10)/Name", "GetName(10)")]
         [InlineData("GET", "RoutingCustomers(10)/Address", "GetAddress(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Name", "GetName(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Company", "GetCompanyFromVIP(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Name", "GetName(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Company", "GetCompanyFromVIP(10)")]
         // links
         [InlineData("PUT", "RoutingCustomers(1)/$links/Products", "CreateLink(1)(Products)")]
         [InlineData("POST", "RoutingCustomers(1)/$links/Products", "CreateLink(1)(Products)")]
@@ -55,30 +56,30 @@ namespace System.Web.Http.OData.Routing
         [InlineData("DELETE", "RoutingCustomers(1)/$links/Products(5)", "DeleteLink(1)(5)(Products)")]
         // raw value
         [InlineData("GET", "RoutingCustomers(10)/Name/$value", "GetName(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Name/$value", "GetName(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Company/$value", "GetCompanyFromVIP(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Name/$value", "GetName(10)")]
+        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Company/$value", "GetCompanyFromVIP(10)")]
         // actions on entities by key
         [InlineData("POST", "RoutingCustomers(1)/GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers(1)")]
-        [InlineData("POST", "RoutingCustomers(1)/System.Web.Http.OData.Routing.VIP/GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers(1)")]
-        [InlineData("POST", "RoutingCustomers(1)/System.Web.Http.OData.Routing.VIP/GetSalesPerson", "GetSalesPersonOnVIP(1)")]
+        [InlineData("POST", "RoutingCustomers(1)/System.Web.OData.Routing.VIP/GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers(1)")]
+        [InlineData("POST", "RoutingCustomers(1)/System.Web.OData.Routing.VIP/GetSalesPerson", "GetSalesPersonOnVIP(1)")]
         // actions on entity sets
         [InlineData("POST", "RoutingCustomers/GetProducts", "GetProducts")]
-        [InlineData("POST", "RoutingCustomers/System.Web.Http.OData.Routing.VIP/GetProducts", "GetProducts")]
-        [InlineData("POST", "RoutingCustomers/System.Web.Http.OData.Routing.VIP/GetMostProfitable", "GetMostProfitableOnCollectionOfVIP")]
+        [InlineData("POST", "RoutingCustomers/System.Web.OData.Routing.VIP/GetProducts", "GetProducts")]
+        [InlineData("POST", "RoutingCustomers/System.Web.OData.Routing.VIP/GetMostProfitable", "GetMostProfitableOnCollectionOfVIP")]
         // functions on entities by key
         [InlineData("GET", "Products(1)/TopProductId", "TopProductId(1)")]
         [InlineData("GET", "Products(1)/TopProductIdByCity(city='any')", "TopProductIdByCity(1, any)")]
         [InlineData("GET", "Products(1)/TopProductIdByCity(city=@city)?@city='any'", "TopProductIdByCity(1, any)")]
         [InlineData("GET", "Products(1)/TopProductIdByCityAndModel(city='any', model=2)", "TopProductIdByCityAndModel(1, any, 2)")]
         [InlineData("GET", "Products(1)/TopProductIdByCityAndModel(city=@city, model=@model)?@city='any'&@model=2", "TopProductIdByCityAndModel(1, any, 2)")]
-        [InlineData("GET", "Products(1)/System.Web.Http.OData.Routing.ImportantProduct/TopProductId", "TopProductId(1)")]
+        [InlineData("GET", "Products(1)/System.Web.OData.Routing.ImportantProduct/TopProductId", "TopProductId(1)")]
         // functions on entity sets
         [InlineData("GET", "Products/TopProductOfAll", "TopProductOfAll")]
         [InlineData("GET", "Products/TopProductOfAllByCity(city='any')", "TopProductOfAllByCity(any)")]
         [InlineData("GET", "Products/TopProductOfAllByCity(city=@city)?@city='any'", "TopProductOfAllByCity(any)")]
         [InlineData("GET", "Products/TopProductOfAllByCityAndModel(city='any', model=2)", "TopProductOfAllByCityAndModel(any, 2)")]
         [InlineData("GET", "Products/TopProductOfAllByCityAndModel(city=@city, model=@model)?@city='any'&@model=2", "TopProductOfAllByCityAndModel(any, 2)")]
-        [InlineData("GET", "Products/System.Web.Http.OData.Routing.ImportantProduct/TopProductOfAllByCity(city='any')", "TopProductOfAllByCity(any)")]
+        [InlineData("GET", "Products/System.Web.OData.Routing.ImportantProduct/TopProductOfAllByCity(city='any')", "TopProductOfAllByCity(any)")]
         // unmapped requests
         [InlineData("GET", "RoutingCustomers(10)/Products(1)", "~/entityset/key/navigation/key")]
         [InlineData("CUSTOM", "RoutingCustomers(10)", "~/entityset/key")]

@@ -12,17 +12,18 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.OData.Batch;
-using System.Web.Http.OData.Formatter.Deserialization;
-using System.Web.Http.OData.Formatter.Serialization;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Batch;
+using System.Web.OData.Formatter.Deserialization;
+using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Properties;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     /// <summary>
     /// <see cref="MediaTypeFormatter"/> class to handle OData.

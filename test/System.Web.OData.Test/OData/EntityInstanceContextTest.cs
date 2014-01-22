@@ -2,14 +2,14 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Routing;
+using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class EntityInstanceContextTest
     {

@@ -4,17 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
-using ODataPath = System.Web.Http.OData.Routing.ODataPath;
-using ODataPathSegment = System.Web.Http.OData.Routing.ODataPathSegment;
+using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPathSegment = System.Web.OData.Routing.ODataPathSegment;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class ODataQueryOptionsOfTEntityTest
     {
@@ -28,7 +29,7 @@ namespace System.Web.Http.OData.Query
 
             Assert.ThrowsArgument(
                 () => new ODataQueryOptions<int>(context, new HttpRequestMessage()),
-                "context", "The entity type 'System.Web.Http.OData.TestCommon.Models.Customer' does not match the expected entity type 'System.Int32' as set on the query context.");
+                "context", "The entity type 'System.Web.OData.TestCommon.Models.Customer' does not match the expected entity type 'System.Int32' as set on the query context.");
         }
 
         [Fact]
@@ -112,7 +113,7 @@ namespace System.Web.Http.OData.Query
             Assert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable()),
                 "query",
-                "Cannot apply ODataQueryOptions of 'System.Web.Http.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
+                "Cannot apply ODataQueryOptions of 'System.Web.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
         }
 
         [Fact]
@@ -156,7 +157,7 @@ namespace System.Web.Http.OData.Query
             Assert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable(), new ODataQuerySettings()),
                 "query",
-                "Cannot apply ODataQueryOptions of 'System.Web.Http.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
+                "Cannot apply ODataQueryOptions of 'System.Web.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
         }
 
         [Fact]

@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Deserialization;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -13,7 +13,7 @@ using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class EnumDeserializerTest
     {
@@ -148,7 +148,7 @@ namespace System.Web.Http.OData
                 { 
                     new ODataProperty { Name = "NullableColor", Value = null}
                 },
-                TypeName = "System.Web.Http.OData.EnumComplexWithNullableEnum"
+                TypeName = "System.Web.OData.EnumComplexWithNullableEnum"
             };
 
             IEdmModel model = GetEdmModel();
@@ -175,7 +175,7 @@ namespace System.Web.Http.OData
                 { 
                     new ODataProperty { Name = "RequiredColor", Value = (Color)123}
                 },
-                TypeName = "System.Web.Http.OData.EnumComplexWithRequiredEnum"
+                TypeName = "System.Web.OData.EnumComplexWithRequiredEnum"
             };
 
             IEdmModel model = GetEdmModel();
@@ -206,7 +206,7 @@ namespace System.Web.Http.OData
                 { 
                     new ODataProperty { Name = "RequiredColor", Value = color}
                 },
-                TypeName = "System.Web.Http.OData.EnumComplexWithRequiredEnum"
+                TypeName = "System.Web.OData.EnumComplexWithRequiredEnum"
             };
 
             IEdmModel model = GetEdmModel();

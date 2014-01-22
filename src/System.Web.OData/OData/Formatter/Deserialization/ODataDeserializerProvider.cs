@@ -3,7 +3,7 @@
 using System.Net.Http;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Represents a factory that creates an <see cref="ODataDeserializer"/>.

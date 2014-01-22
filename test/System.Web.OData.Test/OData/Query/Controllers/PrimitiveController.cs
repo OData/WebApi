@@ -2,8 +2,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Http;
 
-namespace System.Web.Http.OData.Query.Controllers
+namespace System.Web.OData.Query.Controllers
 {
     public class PrimitiveController : ODataController
     {

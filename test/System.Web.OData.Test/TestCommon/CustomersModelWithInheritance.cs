@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.OData.Edm.Library.Values;
 
-namespace System.Web.Http.TestCommon
+namespace System.Web.OData.TestCommon
 {
     public class CustomersModelWithInheritance
     {
@@ -64,7 +64,7 @@ namespace System.Web.Http.TestCommon
             model.AddElement(specialOrder);
 
             // test entity
-            EdmEntityType testEntity = new EdmEntityType("System.Web.Http.OData.Query.Expressions", "TestEntity");
+            EdmEntityType testEntity = new EdmEntityType("System.Web.OData.Query.Expressions", "TestEntity");
             testEntity.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Binary);
             model.AddElement(testEntity);
 

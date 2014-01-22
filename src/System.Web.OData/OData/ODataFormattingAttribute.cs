@@ -5,11 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Formatting;
+using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.OData.Formatter;
 using System.Web.Http.Services;
+using System.Web.OData.Formatter;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// An attribute to be placed on controllers that enables the OData formatters.

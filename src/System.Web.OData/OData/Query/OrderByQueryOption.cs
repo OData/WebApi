@@ -3,15 +3,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Query.Expressions;
-using System.Web.Http.OData.Query.Validators;
+using System.Web.Http;
+using System.Web.OData.Properties;
+using System.Web.OData.Query.Expressions;
+using System.Web.OData.Query.Validators;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// This defines a $orderby OData query option for querying.

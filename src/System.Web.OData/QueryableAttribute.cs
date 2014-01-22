@@ -9,10 +9,10 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.OData;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Query;
+using System.Web.OData;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
+using System.Web.OData.Query;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 

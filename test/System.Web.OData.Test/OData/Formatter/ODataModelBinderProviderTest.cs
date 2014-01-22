@@ -5,22 +5,23 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.ModelBinding;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.Conventions;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.TestCommon;
 using System.Web.Http.Routing;
 using System.Web.Http.ValueProviders;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.Conventions;
+using System.Web.OData.Routing;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class ODataModelBinderProviderTest
     {

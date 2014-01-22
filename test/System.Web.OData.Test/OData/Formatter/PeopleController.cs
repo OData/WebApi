@@ -3,9 +3,10 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http;
+using System.Web.OData.Builder.TestModels;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     public class PeopleController : ODataController
     {

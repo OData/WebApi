@@ -2,7 +2,7 @@
 
 using Microsoft.OData.Core.UriParser;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// Represents the order by expression '$it' in the $orderby clause.

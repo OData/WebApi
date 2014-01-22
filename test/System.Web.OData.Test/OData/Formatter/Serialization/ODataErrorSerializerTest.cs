@@ -3,12 +3,13 @@
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Web.Http;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     public class ODataErrorSerializerTest
     {

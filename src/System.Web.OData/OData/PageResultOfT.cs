@@ -4,9 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
+using System.Web.Http;
 using Newtonsoft.Json;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>Represents a feed of entities that includes additional information that OData formats support.</summary>
     /// <remarks>

@@ -2,10 +2,11 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// Represents a template that can match a <see cref="KeyValuePathSegment"/>.

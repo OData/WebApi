@@ -3,11 +3,12 @@
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// This defines a composite OData query options that can be used to perform query composition. 

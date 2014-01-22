@@ -4,10 +4,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
-using System.Web.Http.TestCommon;
+using System.Web.OData.TestCommon;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Routing.Conventions
+namespace System.Web.OData.Routing.Conventions
 {
     public class FunctionRoutingConventionTests
     {

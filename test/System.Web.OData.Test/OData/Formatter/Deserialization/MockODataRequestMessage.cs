@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     internal class MockODataRequestMessage : IODataRequestMessage
     {

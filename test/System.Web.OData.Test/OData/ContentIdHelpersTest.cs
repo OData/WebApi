@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class ContentIdHelpersTest
     {

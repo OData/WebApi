@@ -4,17 +4,18 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
 using System.Web.Http.Results;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter;
+using System.Web.OData.Routing;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Results
+namespace System.Web.OData.Results
 {
     public class CreatedODataResultTest
     {
@@ -234,7 +235,7 @@ namespace System.Web.Http.OData.Results
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
-                "Cannot find the entity type 'System.Web.Http.OData.Results.CreatedODataResultTest+TestEntity' in the model.");
+                "Cannot find the entity type 'System.Web.OData.Results.CreatedODataResultTest+TestEntity' in the model.");
         }
 
         [Fact]

@@ -5,8 +5,9 @@ using System.Data.Linq;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Builder;
+using System.Web.OData.Builder;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
@@ -14,7 +15,7 @@ using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     public class FilterBinderTests
     {
@@ -1280,7 +1281,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void NSCast_OnEnumerableEntityCollection_GeneratesExpression_WithOfTypeOnEnumerable()
         {
             var filters = VerifyQueryDeserialization(
-                "Category/EnumerableProducts/System.Web.Http.OData.Query.Expressions.DerivedProduct/any(p: p/ProductName eq 'ProductName')",
+                "Category/EnumerableProducts/System.Web.OData.Query.Expressions.DerivedProduct/any(p: p/ProductName eq 'ProductName')",
                 "$it => $it.Category.EnumerableProducts.OfType().Any(p => (p.ProductName == \"ProductName\"))",
                 NotTesting);
 
@@ -1291,7 +1292,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void NSCast_OnQueryableEntityCollection_GeneratesExpression_WithOfTypeOnQueryable()
         {
             var filters = VerifyQueryDeserialization(
-                "Category/QueryableProducts/System.Web.Http.OData.Query.Expressions.DerivedProduct/any(p: p/ProductName eq 'ProductName')",
+                "Category/QueryableProducts/System.Web.OData.Query.Expressions.DerivedProduct/any(p: p/ProductName eq 'ProductName')",
                 "$it => $it.Category.QueryableProducts.OfType().Any(p => (p.ProductName == \"ProductName\"))",
                 NotTesting);
         }
@@ -1300,7 +1301,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void NSCast_OnEntityCollection_CanAccessDerivedInstanceProperty()
         {
             var filters = VerifyQueryDeserialization(
-                "Category/Products/System.Web.Http.OData.Query.Expressions.DerivedProduct/any(p: p/DerivedProductName eq 'DerivedProductName')");
+                "Category/Products/System.Web.OData.Query.Expressions.DerivedProduct/any(p: p/DerivedProductName eq 'DerivedProductName')");
 
             RunFilters(
                 filters,
@@ -1317,16 +1318,16 @@ namespace System.Web.Http.OData.Query.Expressions
         public void NSCast_OnSingleEntity_GeneratesExpression_WithAsOperator()
         {
             var filters = VerifyQueryDeserialization(
-                "System.Web.Http.OData.Query.Expressions.Product/ProductName eq 'ProductName'",
+                "System.Web.OData.Query.Expressions.Product/ProductName eq 'ProductName'",
                 "$it => (($it As Product).ProductName == \"ProductName\")",
                 NotTesting);
         }
 
         [Theory]
-        [InlineData("System.Web.Http.OData.Query.Expressions.Product/ProductName eq 'ProductName'")]
-        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/DerivedProductName eq 'DerivedProductName'")]
-        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/Category/CategoryID eq 123")]
-        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/Category/System.Web.Http.OData.Query.Expressions.DerivedCategory/CategoryID eq 123")]
+        [InlineData("System.Web.OData.Query.Expressions.Product/ProductName eq 'ProductName'")]
+        [InlineData("System.Web.OData.Query.Expressions.DerivedProduct/DerivedProductName eq 'DerivedProductName'")]
+        [InlineData("System.Web.OData.Query.Expressions.DerivedProduct/Category/CategoryID eq 123")]
+        [InlineData("System.Web.OData.Query.Expressions.DerivedProduct/Category/System.Web.OData.Query.Expressions.DerivedCategory/CategoryID eq 123")]
         public void Inheritance_WithDerivedInstance(string filter)
         {
             var filters = VerifyQueryDeserialization<DerivedProduct>(filter);
@@ -1337,9 +1338,9 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/DerivedProductName eq 'ProductName'")]
-        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/Category/CategoryID eq 123")]
-        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/Category/System.Web.Http.OData.Query.Expressions.DerivedCategory/CategoryID eq 123")]
+        [InlineData("System.Web.OData.Query.Expressions.DerivedProduct/DerivedProductName eq 'ProductName'")]
+        [InlineData("System.Web.OData.Query.Expressions.DerivedProduct/Category/CategoryID eq 123")]
+        [InlineData("System.Web.OData.Query.Expressions.DerivedProduct/Category/System.Web.OData.Query.Expressions.DerivedCategory/CategoryID eq 123")]
         public void Inheritance_WithBaseInstance(string filter)
         {
             var filters = VerifyQueryDeserialization<Product>(filter);
@@ -1353,8 +1354,8 @@ namespace System.Web.Http.OData.Query.Expressions
         public void CastToNonDerivedType_Throws()
         {
             Assert.Throws<ODataException>(
-                () => VerifyQueryDeserialization<Product>("System.Web.Http.OData.Query.Expressions.DerivedCategory/CategoryID eq 123"),
-                "Encountered invalid type cast. 'System.Web.Http.OData.Query.Expressions.DerivedCategory' is not assignable from 'System.Web.Http.OData.Query.Expressions.Product'.");
+                () => VerifyQueryDeserialization<Product>("System.Web.OData.Query.Expressions.DerivedCategory/CategoryID eq 123"),
+                "Encountered invalid type cast. 'System.Web.OData.Query.Expressions.DerivedCategory' is not assignable from 'System.Web.OData.Query.Expressions.Product'.");
         }
 
         [Theory]

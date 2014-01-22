@@ -2,14 +2,14 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.OData.Query.Expressions;
+using System.Web.OData.Query.Expressions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query.Validators
+namespace System.Web.OData.Query.Validators
 {
     public class FilterQueryValidatorTest
     {
@@ -112,11 +112,11 @@ namespace System.Web.Http.OData.Query.Validators
         public void ValidateThrowsIfHasIsNotAllowed()
         {
             Assert.DoesNotThrow(() =>
-                _validator.Validate(new FilterQueryOption("FavoriteColor has System.Web.Http.OData.Builder.TestModels.Color'Red'", _context),
+                _validator.Validate(new FilterQueryOption("FavoriteColor has System.Web.OData.Builder.TestModels.Color'Red'", _context),
                 new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.All }));
 
             Assert.Throws<ODataException>(() =>
-                   _validator.Validate(new FilterQueryOption("FavoriteColor has System.Web.Http.OData.Builder.TestModels.Color'Red'", _context),
+                   _validator.Validate(new FilterQueryOption("FavoriteColor has System.Web.OData.Builder.TestModels.Color'Red'", _context),
                  new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.Equal }),
                 "Logical operator 'Has' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on QueryableAttribute or QueryValidationSettings.");
         }
@@ -335,7 +335,7 @@ namespace System.Web.Http.OData.Query.Validators
         public void ValidateVisitLogicalOperatorHas()
         {
             // Arrange
-            FilterQueryOption option = new FilterQueryOption("FavoriteColor has System.Web.Http.OData.Builder.TestModels.Color'Red'", _context);
+            FilterQueryOption option = new FilterQueryOption("FavoriteColor has System.Web.OData.Builder.TestModels.Color'Red'", _context);
 
             // Act
             _validator.Validate(option, _settings);
@@ -383,9 +383,9 @@ namespace System.Web.Http.OData.Query.Validators
         [InlineData("ceiling(AmountSpent) eq 0")]
         [InlineData("Tags/any()")]
         [InlineData("Tags/all(t : t eq '1')")]
-        [InlineData("System.Web.Http.OData.Query.QueryCompositionCustomerBase/Id eq 1")]
-        [InlineData("Contacts/System.Web.Http.OData.Query.QueryCompositionCustomerBase/any()")]
-        [InlineData("FavoriteColor has System.Web.Http.OData.Builder.TestModels.Color'Red'")]
+        [InlineData("System.Web.OData.Query.QueryCompositionCustomerBase/Id eq 1")]
+        [InlineData("Contacts/System.Web.OData.Query.QueryCompositionCustomerBase/any()")]
+        [InlineData("FavoriteColor has System.Web.OData.Builder.TestModels.Color'Red'")]
         public void Validator_Doesnot_Throw_For_ValidQueries(string filter)
         {
             // Arrange

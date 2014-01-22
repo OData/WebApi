@@ -5,12 +5,12 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.OData.Routing;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class ODataNullValueAttributeTests
     {

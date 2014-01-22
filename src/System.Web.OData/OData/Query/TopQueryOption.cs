@@ -3,12 +3,13 @@
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Query.Validators;
+using System.Web.Http;
+using System.Web.OData.Properties;
+using System.Web.OData.Query.Validators;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// This defines a $top OData query option for querying.

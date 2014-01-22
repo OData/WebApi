@@ -2,7 +2,7 @@
 
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// Allows configuration to be performed for a complex type in a model. A ComplexTypeConfiguration can be obtained by using the method <see cref="ODataModelBuilder.ComplexType"/>.

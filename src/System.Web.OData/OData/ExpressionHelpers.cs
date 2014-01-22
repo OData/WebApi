@@ -3,12 +3,13 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Query.Expressions;
+using System.Web.Http;
+using System.Web.OData.Formatter;
+using System.Web.OData.Query.Expressions;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     internal static class ExpressionHelpers
     {

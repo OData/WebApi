@@ -2,9 +2,10 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Web.Http;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// An <see cref="ODataPathSegment"/> implementation representing a bound action invocation.

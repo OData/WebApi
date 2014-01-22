@@ -2,8 +2,9 @@
 
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Web.Http;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     internal static class HandleNullPropagationOptionHelper
     {

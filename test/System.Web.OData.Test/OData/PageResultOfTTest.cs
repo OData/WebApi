@@ -6,7 +6,7 @@ using System.IO;
 using System.Net.Http.Formatting;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class PageResultOfTTest
     {
@@ -34,7 +34,7 @@ namespace System.Web.Http.OData
 
             ms.Position = 0;
             Assert.Equal(
-                @"<PageResultOfstring xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns=""http://schemas.datacontract.org/2004/07/System.Web.Http.OData""><Count>3</Count><NextPageLink>http://localhost/NextPage</NextPageLink><Items xmlns:d2p1=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><d2p1:string>a</d2p1:string><d2p1:string>b</d2p1:string><d2p1:string>c</d2p1:string></Items></PageResultOfstring>",
+                @"<PageResultOfstring xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns=""http://schemas.datacontract.org/2004/07/System.Web.OData""><Count>3</Count><NextPageLink>http://localhost/NextPage</NextPageLink><Items xmlns:d2p1=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><d2p1:string>a</d2p1:string><d2p1:string>b</d2p1:string><d2p1:string>c</d2p1:string></Items></PageResultOfstring>",
                 new StreamReader(ms).ReadToEnd());
         }
 

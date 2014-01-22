@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-namespace System.Web.Http.OData.Builder
+using System.Web.Http;
+
+namespace System.Web.OData.Builder
 {
     /// <summary>
     /// Encapsulates a self link factory and whether the link factory follows conventions or not.

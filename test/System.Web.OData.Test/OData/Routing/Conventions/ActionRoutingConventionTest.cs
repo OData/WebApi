@@ -8,7 +8,7 @@ using System.Web.Http.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Routing.Conventions
+namespace System.Web.OData.Routing.Conventions
 {
     public class ActionRoutingConventionTest
     {

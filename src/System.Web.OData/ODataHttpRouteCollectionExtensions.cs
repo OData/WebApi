@@ -3,9 +3,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Web.Http.OData.Batch;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.Routing.Conventions;
+using System.Web.OData.Batch;
+using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 
 namespace System.Web.Http

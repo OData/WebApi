@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-namespace System.Web.Http.OData
+using System.Web.Http;
+
+namespace System.Web.OData
 {
     /// <summary>
     /// Represents an annotation to add the queryable restrictions on an EDM property, including nonfilterable, unsortable, not navigable, not expandable.

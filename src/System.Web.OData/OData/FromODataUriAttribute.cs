@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
 using System.Web.Http.ValueProviders;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// An implementation of <see cref="ParameterBindingAttribute"/> that can bind URI parameters using OData conventions.

@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Routing;
+using System.Web.Http;
+using System.Web.OData.Properties;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="ODataSerializer"/> for serializing $links response.

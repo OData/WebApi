@@ -3,7 +3,7 @@
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     public class ODataPayloadKindHelperTests : EnumHelperTestBase<ODataPayloadKind>
     {

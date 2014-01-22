@@ -3,7 +3,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     internal class NullableEnumTypeConfiguration : IEdmTypeConfiguration
     {

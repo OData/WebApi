@@ -2,9 +2,10 @@
 
 using System.Linq;
 using System.Reflection;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 
-namespace System.Web.Http.OData.Builder.Conventions.Attributes
+namespace System.Web.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Base class for all attribute based conventions.

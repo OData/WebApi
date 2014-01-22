@@ -4,15 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class QueryCompositionTests
     {

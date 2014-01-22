@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Query.Expressions;
-using System.Web.Http.OData.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.Query.Expressions;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Query.Validators
+namespace System.Web.OData.Query.Validators
 {
     internal static class ValidationTestHelper
     {

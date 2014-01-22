@@ -3,16 +3,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Builder
+namespace System.Web.OData.Builder
 {
     public class ActionConfigurationTest
     {
@@ -480,7 +481,7 @@ namespace System.Web.Http.OData.Builder
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => action.Returns<Movie>(),
-                "The EDM type 'System.Web.Http.OData.Builder.Movie' is already declared as an entity type. Use the " +
+                "The EDM type 'System.Web.OData.Builder.Movie' is already declared as an entity type. Use the " +
                 "method 'ReturnsFromEntitySet' if the return type is an entity.");
         }
 
@@ -494,7 +495,7 @@ namespace System.Web.Http.OData.Builder
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => action.ReturnsCollection<Movie>(),
-                "The EDM type 'System.Web.Http.OData.Builder.Movie' is already declared as an entity type. Use the " +
+                "The EDM type 'System.Web.OData.Builder.Movie' is already declared as an entity type. Use the " +
                 "method 'ReturnsCollectionFromEntitySet' if the return type is an entity collection.");
         }
 

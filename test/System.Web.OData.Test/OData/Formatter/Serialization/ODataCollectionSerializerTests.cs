@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Formatter.Serialization.Models;
+using System.Web.OData.Formatter.Serialization.Models;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -13,7 +13,7 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData.Formatter.Serialization
+namespace System.Web.OData.Formatter.Serialization
 {
     public class ODataCollectionSerializerTests
     {

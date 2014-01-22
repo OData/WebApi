@@ -1,16 +1,17 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.ModelBinding;
-using System.Web.Http.OData.Formatter.Serialization.Models;
-using System.Web.Http.OData.TestCommon;
 using System.Web.Http.Tracing;
+using System.Web.OData.Formatter.Serialization.Models;
+using System.Web.OData.TestCommon;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     public class PerRequestActionValueBinderTest
     {

@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.OData.Query.Controllers;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.OData.Query.Controllers;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class HttpActionDescriptorExtensionTests
     {

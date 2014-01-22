@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Formatter;
+using System.Web.OData.Formatter;
 
 namespace System.Web.Http
 {

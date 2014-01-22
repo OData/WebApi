@@ -5,14 +5,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.TestCommon;
-using System.Web.Http.TestCommon;
+using System.Web.OData.Builder;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     public class AttributeRoutingUnboundTest
     {
@@ -98,7 +98,7 @@ namespace System.Web.Http.OData.Routing
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Contains("\"@odata.context\":\"http://localhost/$metadata#ConventionOrders/$entity\"", responseString);
-            Assert.Contains("\"@odata.type\":\"#System.Web.Http.OData.Routing.ConventionOrder", responseString);
+            Assert.Contains("\"@odata.type\":\"#System.Web.OData.Routing.ConventionOrder", responseString);
             Assert.Contains("\"OrderName\":\"OrderName 5\"", responseString);
             Assert.Contains("\"Price@odata.type\":\"#Decimal\",\"Price\":13", responseString);
         }

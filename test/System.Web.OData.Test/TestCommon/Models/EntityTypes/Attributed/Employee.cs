@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 
-namespace System.Web.Http.OData.TestCommon.Models
+namespace System.Web.OData.TestCommon.Models
 {
     [DataContract]
     public class Employee : Person

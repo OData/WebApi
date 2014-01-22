@@ -5,10 +5,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http;
+using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Core;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class QueryCompositionPrimitiveController : ApiController
     {

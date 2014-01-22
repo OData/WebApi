@@ -3,7 +3,7 @@
 using System.Linq;
 using System.Web.Http.Controllers;
 
-namespace System.Web.Http.OData.Routing.Conventions
+namespace System.Web.OData.Routing.Conventions
 {
     /// <summary>
     /// Provides helper methods for querying an action map.

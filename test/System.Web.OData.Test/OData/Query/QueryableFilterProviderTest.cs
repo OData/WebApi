@@ -3,12 +3,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.OData.TestCommon.Models;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     public class QueryableFilterProviderTest
     {

@@ -2,11 +2,12 @@
 
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Query
+namespace System.Web.OData.Query
 {
     /// <summary>
     /// Represents the value of the $count query option and exposes a way to retrieve the number of entities that satisfy a query.

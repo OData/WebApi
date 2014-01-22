@@ -4,12 +4,13 @@ using System.Collections;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Web.Http.OData.Properties;
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 
-namespace System.Web.Http.OData.Formatter.Deserialization
+namespace System.Web.OData.Formatter.Deserialization
 {
     internal static class DeserializationHelpers
     {

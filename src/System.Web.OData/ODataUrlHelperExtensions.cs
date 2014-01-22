@@ -4,11 +4,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
-using System.Text.RegularExpressions;
-using System.Web.Http.OData;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
+using System.Web.OData.Properties;
+using System.Web.OData.Routing;
 
 namespace System.Web.Http
 {

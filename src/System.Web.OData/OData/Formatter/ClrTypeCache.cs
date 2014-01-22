@@ -3,7 +3,7 @@
 using System.Collections.Concurrent;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     internal class ClrTypeCache
     {

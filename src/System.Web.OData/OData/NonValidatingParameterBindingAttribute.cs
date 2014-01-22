@@ -2,9 +2,10 @@
 
 using System.Collections.Generic;
 using System.Net.Http.Formatting;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
     /// <summary>
     /// An attribute to disable WebApi model validation for a particular type.

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <entry xml:base="http://localhost/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:context="http://localhost/$metadata#WorkItems/$entity">
   <id>http://localhost/WorkItems(25)</id>
-  <category term="#System.Web.Http.OData.TestCommon.Models.WorkItem" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
+  <category term="#System.Web.OData.TestCommon.Models.WorkItem" scheme="http://docs.oasis-open.org/odata/ns/scheme" />
   <link rel="edit" href="http://localhost/WorkItems(25)" />
   <title />
   <updated>UpdatedTime</updated>

@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using Microsoft.TestCommon.Types;
 
-namespace System.Web.Http.OData.Formatter.Serialization.Models
+namespace System.Web.OData.Formatter.Serialization.Models
 {
     public class Customer
     {

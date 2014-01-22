@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 
-namespace System.Web.Http.OData.Routing
+namespace System.Web.OData.Routing
 {
     /// <summary>
     /// Represents a template that could match an <see cref="ODataPathSegment"/>.

@@ -2,7 +2,7 @@
 
 using System.Net.Http;
 
-namespace System.Web.Http
+namespace System.Web.OData.Test
 {
     internal class ODataBatchRequestHelper
     {

@@ -2,7 +2,7 @@
 
 using System.Net.Http;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.OData.Formatter
 {
     internal static class HttpRequestMessageExtensions
     {

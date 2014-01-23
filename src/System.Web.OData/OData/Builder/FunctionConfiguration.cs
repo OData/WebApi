@@ -23,6 +23,8 @@ namespace System.Web.OData.Builder
         /// <param name="name">The name of this FunctionConfiguration.</param>
         internal FunctionConfiguration(ODataModelBuilder builder, string name) : base(builder, name)
         {
+            // By default, function import is included in service document
+            IncludeInServiceDocument = true;
         }
 
         /// <inheritdoc />
@@ -54,6 +56,12 @@ namespace System.Web.OData.Builder
         /// Gets/Sets a value indicating whether the function is supported in $orderby.
         /// </summary>
         public bool SupportedInOrderBy { get; set; }
+
+        /// <summary>
+        /// Gets/Set a value indicating whether the procedure is included in service document or not.
+        /// Meaningful only for function imports; ignore for bound functions.
+        /// </summary>
+        public bool IncludeInServiceDocument { get; set; }
 
         /// <summary>
         /// Register a factory that creates functions links.

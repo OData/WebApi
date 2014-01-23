@@ -220,8 +220,9 @@ namespace System.Web.OData.Builder
                     pathExpression,
                     procedure.IsComposable);
                 operation = function;
+                FunctionConfiguration functionConfig = (FunctionConfiguration)procedure;
                 operationImport = new EdmFunctionImport(
-                    container, procedure.Name, function, expression, includeInServiceDocument: true);
+                    container, procedure.Name, function, expression, functionConfig.IncludeInServiceDocument);
             }
 
             AddProcedureParameters(operation, procedure, edmTypeMap);
@@ -231,13 +232,16 @@ namespace System.Web.OData.Builder
                 AddProcedureLinkBuilder(model, operation, procedure);
                 ValidateProcedureEntitySetPath(model, operationImport, procedure);
             }
+            else
+            {
+                container.AddElement(operationImport);
+            }
 
             EdmModel edmModel = model as EdmModel;
             if (edmModel != null)
             {
                 edmModel.AddElement(operation);
             }
-            container.AddElement(operationImport);
         }
 
         private static Dictionary<Type, IEdmType> AddTypes(this EdmModel model, IEnumerable<StructuralTypeConfiguration> types,

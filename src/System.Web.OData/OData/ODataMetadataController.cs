@@ -43,13 +43,18 @@ namespace System.Web.OData
             IEdmModel model = GetModel();
             ODataServiceDocument serviceDocument = new ODataServiceDocument();
             IEdmEntityContainer container = model.EntityContainers().Single();
-            IEnumerable<IEdmEntitySet> entitysets = container.EntitySets();
 
-            IEnumerable<ODataEntitySetInfo> entitySets = entitysets.Select(
+            // Add Entitysets into service document
+            serviceDocument.EntitySets = container.EntitySets().Select(
                 e => GetODataEntitySetInfo(model.GetEntitySetUrl(e).ToString(), e.Name));
-            serviceDocument.EntitySets = entitySets;
 
-            // TODO: 1601 Add FunctionImports and Singletons to service document
+            // TODO: 1637 Add Singletons to service document
+
+            // Add FunctionImports into service document
+            IEnumerable<IEdmFunctionImport> functionImports = container.Elements.OfType<IEdmFunctionImport>()
+                .Where(f => f.IncludeInServiceDocument);
+            serviceDocument.FunctionImports = functionImports.Select(
+                e => GetODataFunctionImportInfo(e.Name));
 
             return serviceDocument;
         }
@@ -58,11 +63,22 @@ namespace System.Web.OData
         {
             ODataEntitySetInfo info = new ODataEntitySetInfo
             {
-                Name = name, // Required for JSON light support
+                Name = name, // Required for JSON support
                 Url = new Uri(url, UriKind.Relative)
             };
 
             info.SetAnnotation<AtomResourceCollectionMetadata>(new AtomResourceCollectionMetadata { Title = name });
+
+            return info;
+        }
+
+        private static ODataFunctionImportInfo GetODataFunctionImportInfo(string name)
+        {
+            ODataFunctionImportInfo info = new ODataFunctionImportInfo
+            {
+                Name = name,
+                Url = new Uri(name, UriKind.Relative) // Relative to the OData root
+            };
 
             return info;
         }

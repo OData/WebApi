@@ -172,9 +172,9 @@ namespace System.Web.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            IEdmActionImport actionImport =
-                model.EntityContainers().Single().Elements.OfType<IEdmActionImport>().Single();
-            ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(actionImport.Action);
+            var action = Assert.Single(model.SchemaElements.OfType<IEdmAction>());
+            ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(action);
+            Assert.NotNull(actionLinkBuilder);
             Assert.Equal(value, actionLinkBuilder.FollowsConventions);
         }
 

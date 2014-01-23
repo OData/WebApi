@@ -114,6 +114,44 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void ServiceDocument_ContainsFunctonImport()
+        {
+            // Arrange
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var responseString = client.GetStringAsync("http://localhost/").Result;
+
+            // Assert
+            Assert.Contains("<m:function-import href=\"GetPerson\">", responseString);
+        }
+
+        [Fact]
+        public void ServiceDocument_DoesNotContainFunctonImport_IfNotIncludeInServiceDocument()
+        {
+            // Arrange
+            IEdmModel model = ODataTestUtil.GetEdmModel();
+            IEdmFunctionImport function = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
+                .SingleOrDefault(f => f.Name == "GetVipPerson");
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataRoute(model);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var responseString = client.GetStringAsync("http://localhost/").Result;
+
+            // Assert
+            Assert.NotNull(function);
+            Assert.Equal("Default.GetVipPerson", function.Function.FullName());
+            Assert.False(function.IncludeInServiceDocument);
+            Assert.Contains("<service xml:base=\"http://localhost/\"", responseString);
+            Assert.DoesNotContain("<m:function-import href=\"GetVipPerson\">", responseString);
+        }
+
+        [Fact]
         public void Controller_DoesNotAppear_InApiDescriptions()
         {
             var config = new HttpConfiguration();

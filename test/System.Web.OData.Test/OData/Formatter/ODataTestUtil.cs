@@ -98,6 +98,16 @@ namespace System.Web.OData.Formatter
                 order.Property(o => o.OrderAmount);
                 order.Property(o => o.OrderName);
 
+                // Add a top level function 
+                var getPersons = model.Function("GetPerson");
+                getPersons.Parameter<Int32>("PerId");
+                getPersons.ReturnsFromEntitySet<FormatterPerson>("People");
+
+                // Add a top level function which is not included in service document
+                var getVipPerson = model.Function("GetVipPerson");
+                getVipPerson.ReturnsFromEntitySet<FormatterPerson>("People");
+                getVipPerson.IncludeInServiceDocument = false;
+
                 _model = model.GetEdmModel();
             }
 

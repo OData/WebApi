@@ -7,7 +7,8 @@ namespace System.Web.Http.WebHost
 {
     internal static class HttpResponseBaseExtensions
     {
-        private static bool _isSystemWebVersion451OrGreater = IsSystemWebVersion451OrGreater();
+        private static readonly bool _isSystemWebVersion451OrGreater = IsSystemWebVersion451OrGreater();
+        private static readonly bool _isClientDisconnectedTokenAvailable = IsClientDisconnectedTokenAvailable();
 
         public static CancellationToken GetClientDisconnectedTokenWhenFixed(this HttpResponseBase response)
         {
@@ -16,14 +17,26 @@ namespace System.Web.Http.WebHost
                 throw new ArgumentNullException("response");
             }
 
-            // On .NET 4.5 and earlier, using response.ClientDisconnectedToken can cause application crashes.
-            // Gracefully degrade to CancellationToken.None unless running .NET 4.5.1 or later.
-            if (!_isSystemWebVersion451OrGreater)
+            // On some platforms/configurations, accessing response.ClientDisconnectedToken would always throw.
+            // Also, on .NET 4.5 and earlier, using response.ClientDisconnectedToken can cause application crashes.
+            // Gracefully degrade to CancellationToken.None unless ClientDisconnectedToken is both available and
+            // reliable.
+            if (!_isClientDisconnectedTokenAvailable || !_isSystemWebVersion451OrGreater)
             {
                 return CancellationToken.None;
             }
 
             return response.ClientDisconnectedToken;
+        }
+
+        private static bool IsClientDisconnectedTokenAvailable()
+        {
+            // Accessing HttpResponse.ClientDisconnectedToken throws PlatformNotSupportedException unless both:
+            // 1) Using IIS 7.5 or newer, and
+            // 2) Using integrated pipeline
+            Version iis75 = new Version(7, 5);
+            Version iisVersion = HttpRuntime.IISVersion;
+            return iisVersion != null && iisVersion >= iis75 && HttpRuntime.UsingIntegratedPipeline;
         }
 
         private static bool IsSystemWebVersion451OrGreater()

@@ -109,25 +109,10 @@ namespace System.Web.OData.Routing
             if (Function != null)
             {
                 // entity set
-                IEdmEntitySet functionEntitySet = null;
+                IEdmEntitySet functionEntitySet;
                 if (Function.TryGetStaticEntitySet(out functionEntitySet))
                 {
                     return functionEntitySet;
-                }
-
-                // entity set path
-                IEdmOperationParameter parameter;
-                IEnumerable<IEdmNavigationProperty> path;
-                IEnumerable<EdmError> edmErrors;
-                if (Function.TryGetRelativeEntitySetPath(_edmModel, out parameter, out path, out edmErrors) &&
-                    !edmErrors.Any())
-                {
-                    IEdmNavigationSource entitySet = previousEntitySet;
-                    foreach (IEdmNavigationProperty prop in path)
-                    {
-                        entitySet = entitySet.FindNavigationTarget(prop);
-                    }
-                    return entitySet as IEdmEntitySet;
                 }
             }
 

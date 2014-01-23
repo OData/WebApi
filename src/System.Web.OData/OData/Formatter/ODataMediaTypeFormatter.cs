@@ -446,34 +446,27 @@ namespace System.Web.OData.Formatter
                 Version = _version,
             };
 
-            // The MetadataDocumentUri is never required for errors. Additionally, it sometimes won't be available
-            // for errors, such as when routing itself fails. In that case, the route data property is not
-            // available on the request, and due to a bug with HttpRoute.GetVirtualPath (bug #669) we won't be able
-            // to generate a metadata link.
-            if (serializer.ODataPayloadKind != ODataPayloadKind.Error)
+            string metadataLink = urlHelper.ODataLink(new MetadataPathSegment());
+
+            if (metadataLink == null)
             {
-                string metadataLink = urlHelper.ODataLink(new MetadataPathSegment());
-
-                if (metadataLink == null)
-                {
-                    throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
-                }
-
-                string resourcePath = path != null ? path.ToString() : String.Empty;
-                Uri baseAddress = GetBaseAddress(Request);
-                writerSettings.SetServiceDocumentUri(
-                    baseAddress,
-                    Request.GetSelectExpandClause(),
-                    resourcePath,
-                    isIndividualProperty: false);
-
-                writerSettings.ODataUri = new ODataUri
-                {
-                    ServiceRoot = baseAddress,
-                 
-                    // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
-                };
+                throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
             }
+
+            string resourcePath = path != null ? path.ToString() : String.Empty;
+            Uri baseAddress = GetBaseAddress(Request);
+            writerSettings.SetServiceDocumentUri(
+                baseAddress,
+                Request.GetSelectExpandClause(),
+                resourcePath,
+                isIndividualProperty: false);
+
+            writerSettings.ODataUri = new ODataUri
+            {
+                ServiceRoot = baseAddress,
+                 
+                // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
+            };
 
             MediaTypeHeaderValue contentType = null;
             if (contentHeaders != null && contentHeaders.ContentType != null)

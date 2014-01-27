@@ -59,8 +59,8 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Used to access a Collection of Entities throw which you can configure
-        /// actions that are bindable to EntityCollections.
+        /// Used to access a Collection of Entities through which you can configure
+        /// actions and functions that are bindable to EntityCollections.
         /// </summary>
         public EntityCollectionConfiguration<TEntityType> Collection
         {

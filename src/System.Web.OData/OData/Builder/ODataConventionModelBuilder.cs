@@ -264,7 +264,7 @@ namespace System.Web.OData.Builder
         {
             Dictionary<Type, EntityTypeConfiguration> entityMap = StructuralTypes.OfType<EntityTypeConfiguration>().ToDictionary(e => e.ClrType);
 
-            foreach (EntityTypeConfiguration entity in StructuralTypes.OfType<EntityTypeConfiguration>().Where(e => !e.BaseTypeConfigured).ToArray())
+            foreach (EntityTypeConfiguration entity in StructuralTypes.OfType<EntityTypeConfiguration>().Where(e => !e.BaseTypeConfigured))
             {
                 Type baseClrType = entity.ClrType.BaseType;
                 while (baseClrType != null)
@@ -356,7 +356,7 @@ namespace System.Web.OData.Builder
         {
             Contract.Assert(_explicitlyAddedTypes != null);
 
-            IEnumerable<EntityTypeConfiguration> misconfiguredEntityTypes = StructuralTypes
+            EntityTypeConfiguration[] misconfiguredEntityTypes = StructuralTypes
                                                                             .Except(_explicitlyAddedTypes)
                                                                             .OfType<EntityTypeConfiguration>()
                                                                             .Where(entity => !entity.Keys().Any())
@@ -365,12 +365,11 @@ namespace System.Web.OData.Builder
             ReconfigureEntityTypesAsComplexType(misconfiguredEntityTypes);
         }
 
-        private void ReconfigureEntityTypesAsComplexType(IEnumerable<EntityTypeConfiguration> misconfiguredEntityTypes)
+        private void ReconfigureEntityTypesAsComplexType(EntityTypeConfiguration[] misconfiguredEntityTypes)
         {
             IEnumerable<EntityTypeConfiguration> actualEntityTypes = StructuralTypes
                                                                             .Except(misconfiguredEntityTypes)
-                                                                            .OfType<EntityTypeConfiguration>()
-                                                                            .ToArray();
+                                                                            .OfType<EntityTypeConfiguration>();
 
             foreach (EntityTypeConfiguration misconfiguredEntityType in misconfiguredEntityTypes)
             {

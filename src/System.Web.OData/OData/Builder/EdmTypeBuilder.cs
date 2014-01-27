@@ -252,7 +252,7 @@ namespace System.Web.OData.Builder
             Contract.Assert(config != null);
 
             CreateStructuralTypeBody(type, config);
-            IEdmStructuralProperty[] keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name)).ToArray();
+            IEnumerable<IEdmStructuralProperty> keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name));
             type.AddKeys(keys);
 
             foreach (NavigationPropertyConfiguration navProp in config.NavigationProperties)
@@ -261,8 +261,6 @@ namespace System.Web.OData.Builder
                 info.Name = navProp.Name;
                 info.TargetMultiplicity = navProp.Multiplicity;
                 info.Target = GetEdmType(navProp.RelatedClrType) as IEdmEntityType;
-                //TODO: If target end has a multiplity of 1 this assumes the source end is 0..1.
-                //      I think a better default multiplicity is *
                 IEdmProperty edmProperty = type.AddUnidirectionalNavigation(info);
                 if (navProp.PropertyInfo != null && edmProperty != null)
                 {

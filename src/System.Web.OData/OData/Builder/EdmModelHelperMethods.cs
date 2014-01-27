@@ -160,7 +160,7 @@ namespace System.Web.OData.Builder
             IEnumerable<EdmError> edmErrors;
             if (procedure.EntitySetPath != null && !operationImport.TryGetRelativeEntitySetPath(model, out procedureParameter, out navPath, out edmErrors))
             {
-                throw Error.InvalidOperation(SRResources.ProcedureHasInvalidEntitySetPath, String.Join("/", procedure.EntitySetPath.ToArray()), procedure.FullName);
+                throw Error.InvalidOperation(SRResources.ProcedureHasInvalidEntitySetPath, String.Join("/", procedure.EntitySetPath), procedure.FullName);
             }
         }
 

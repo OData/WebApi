@@ -44,7 +44,6 @@
     <Compile Include="WebHostExceptionCatchBlocksTests.cs" />
     <Compile Include="WebHostExceptionHandlerTests.cs" />
     <Compile Include="WebHostHttpRequestContextTests.cs" />
-    <Compile Include="RemoteHttpControllerHandlerTest.cs" />
     <Compile Include="GlobalConfigurationTest.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />
     <Compile Include="Routing\HttpContextBaseExtensionsTest.cs" />

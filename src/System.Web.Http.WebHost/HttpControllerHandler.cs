@@ -4,6 +4,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -17,6 +18,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
+using System.Web.Http.WebHost.Properties;
 using System.Web.Http.WebHost.Routing;
 using System.Web.Routing;
 
@@ -191,8 +193,13 @@ namespace System.Web.Http.WebHost
             }
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner")]
         internal static HttpRequestMessage ConvertRequest(HttpContextBase httpContextBase)
+        {
+            return ConvertRequest(httpContextBase, _bufferPolicySelector.Value);
+        }
+
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner")]
+        internal static HttpRequestMessage ConvertRequest(HttpContextBase httpContextBase, IHostBufferPolicySelector policySelector)
         {
             Contract.Assert(httpContextBase != null);
 
@@ -202,17 +209,8 @@ namespace System.Web.Http.WebHost
             HttpRequestMessage request = new HttpRequestMessage(method, uri);
 
             // Choose a buffered or bufferless input stream based on user's policy
-            IHostBufferPolicySelector policySelector = _bufferPolicySelector.Value;
-            bool isInputBuffered = policySelector == null ? true : policySelector.UseBufferedInputStream(httpContextBase);
-
-            if (isInputBuffered)
-            {
-                request.Content = new LazyStreamContent(() => new SeekableBufferedRequestStream(requestBase));
-            }
-            else
-            {
-                request.Content = new LazyStreamContent(() => requestBase.GetBufferlessInputStream());
-            }
+            bool bufferInput = policySelector == null ? true : policySelector.UseBufferedInputStream(httpContextBase);
+            request.Content = GetStreamContent(requestBase, bufferInput);
 
             foreach (string headerName in requestBase.Headers)
             {
@@ -247,6 +245,69 @@ namespace System.Web.Http.WebHost
             request.Properties.Add(HttpPropertyKeys.IncludeErrorDetailKey, new Lazy<bool>(() => !httpContextBase.IsCustomErrorEnabled));
 
             return request;
+        }
+
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner")]
+        private static HttpContent GetStreamContent(HttpRequestBase requestBase, bool bufferInput)
+        {
+            if (bufferInput)
+            {
+                return new LazyStreamContent(() =>
+                {
+                    if (requestBase.ReadEntityBodyMode == ReadEntityBodyMode.None)
+                    {
+                        return new SeekableBufferedRequestStream(requestBase);
+                    }
+                    else if (requestBase.ReadEntityBodyMode == ReadEntityBodyMode.Classic)
+                    {
+                        requestBase.InputStream.Position = 0;
+                        return requestBase.InputStream;
+                    }
+                    else if (requestBase.ReadEntityBodyMode == ReadEntityBodyMode.Buffered)
+                    {
+                        if (requestBase.GetBufferedInputStream().Position > 0)
+                        {
+                            throw new InvalidOperationException(SRResources.RequestBodyAlreadyRead);
+                        }
+                        return new SeekableBufferedRequestStream(requestBase);
+                    }
+                    else
+                    {
+                        Contract.Assert(requestBase.ReadEntityBodyMode == ReadEntityBodyMode.Bufferless);
+                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, SRResources.RequestBodyAlreadyReadInMode, ReadEntityBodyMode.Bufferless));
+                    }
+                });
+            }
+            else
+            {
+                return new LazyStreamContent(() =>
+                {
+                    if (requestBase.ReadEntityBodyMode == ReadEntityBodyMode.None)
+                    {
+                        return requestBase.GetBufferlessInputStream();
+                    }
+                    else if (requestBase.ReadEntityBodyMode == ReadEntityBodyMode.Classic)
+                    {
+                        // The user intended that the request be read in a bufferless manner, but we are starting with a buffered stream.
+                        // To maintain compatibility with legacy behavior, we'll throw in this case.
+                        throw new InvalidOperationException(SRResources.RequestStreamCannotBeReadBufferless);
+                    }
+                    else if (requestBase.ReadEntityBodyMode == ReadEntityBodyMode.Bufferless)
+                    {
+                        Stream bufferlessInputStream = requestBase.GetBufferlessInputStream();
+                        if (bufferlessInputStream.Position > 0)
+                        {
+                            throw new InvalidOperationException(SRResources.RequestBodyAlreadyRead);
+                        }
+                        return bufferlessInputStream;
+                    }
+                    else
+                    {
+                        Contract.Assert(requestBase.ReadEntityBodyMode == ReadEntityBodyMode.Buffered);
+                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, SRResources.RequestBodyAlreadyReadInMode, ReadEntityBodyMode.Buffered));
+                    }
+                });
+            }
         }
 
         /// <summary>

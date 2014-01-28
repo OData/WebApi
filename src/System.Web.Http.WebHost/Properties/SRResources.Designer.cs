@@ -61,6 +61,33 @@ namespace System.Web.Http.WebHost.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to read the entity body. A portion of the request stream has already been read..
+        /// </summary>
+        internal static string RequestBodyAlreadyRead {
+            get {
+                return ResourceManager.GetString("RequestBodyAlreadyRead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to read the entity body. The request stream has already been read in &apos;{0}&apos; mode..
+        /// </summary>
+        internal static string RequestBodyAlreadyReadInMode {
+            get {
+                return ResourceManager.GetString("RequestBodyAlreadyReadInMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to read the entity body in Bufferless mode. The request stream has already been buffered..
+        /// </summary>
+        internal static string RequestStreamCannotBeReadBufferless {
+            get {
+                return ResourceManager.GetString("RequestStreamCannotBeReadBufferless", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The constraint entry &apos;{0}&apos; on the route with route template &apos;{1}&apos; must have a string value or be of a type which implements &apos;{2}&apos; or &apos;{3}&apos;..
         /// </summary>
         internal static string Route_ValidationMustBeStringOrCustomConstraint {

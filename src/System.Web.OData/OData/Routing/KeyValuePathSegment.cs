@@ -11,6 +11,8 @@ namespace System.Web.OData.Routing
     /// </summary>
     public class KeyValuePathSegment : ODataPathSegment
     {
+        private IDictionary<string, string> _values;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyValuePathSegment" /> class.
         /// </summary>
@@ -23,11 +25,10 @@ namespace System.Web.OData.Routing
             }
 
             Value = value;
-            Values = KeyValueParser.ParseKeys(value);
         }
 
         /// <summary>
-        /// Gets the key value to use for indexing into the collection.
+        /// The raw text of the path segment and the source of the Values collection.
         /// </summary>
         public string Value
         {
@@ -37,8 +38,15 @@ namespace System.Web.OData.Routing
 
         internal IDictionary<string, string> Values
         {
-            get;
-            private set;
+            get
+            {
+                if (_values == null)
+                {
+                    _values = KeyValueParser.ParseKeys(Value);
+                }
+
+                return _values;
+            }
         }
 
         /// <summary>

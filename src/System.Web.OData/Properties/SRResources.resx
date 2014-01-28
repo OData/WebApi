@@ -692,6 +692,15 @@
   <data name="UnterminatedStringLiteral" xml:space="preserve">
     <value>Unterminated string literal at {0} in segment '{1}'.</value>
   </data>
+  <data name="InvalidSingleQuoteCountForNonStringLiteral" xml:space="preserve">
+    <value>The count of single quotes in non-string literal '{0}' must be 0 or 2 in segment '{1}'.</value>
+  </data>
+  <data name="LiteralHasABadFormat" xml:space="preserve">
+    <value>The literal '{0}' has a bad format in segment '{1}'.</value>
+  </data>
+  <data name="NoKeyNameFoundInSegment" xml:space="preserve">
+    <value>No key name was found at {0} in segment '{1}'.</value>
+  </data>
   <data name="DuplicateKeyInSegment" xml:space="preserve">
     <value>Duplicate key '{0}' found in segment '{1}'.</value>
   </data>

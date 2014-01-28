@@ -22,7 +22,21 @@ namespace System.Web.OData.Routing
         public static BoundFunctionPathSegment TryResolveBound(IEnumerable<IEdmFunction> functions, IEdmModel model, string nextSegment)
         {
             Dictionary<string, string> parameters = GetParameters(nextSegment);
-            IEnumerable<string> parameterNames = parameters == null ? null : parameters.Keys;
+            IEnumerable<string> parameterNames;
+
+            if (parameters == null)
+            {
+                parameterNames = null;
+            }
+            else if (parameters.Keys.Contains(String.Empty))
+            {
+                // One of the function parameters has no name.
+                return null;
+            }
+            else
+            {
+                parameterNames = parameters.Keys;
+            }
 
             IEdmFunction function = FindBestBoundFunction(functions, parameterNames);
             if (function != null)
@@ -43,7 +57,21 @@ namespace System.Web.OData.Routing
         public static UnboundFunctionPathSegment TryResolveUnbound(IEnumerable<IEdmFunctionImport> functions, IEdmModel model, string nextSegment)
         {
             Dictionary<string, string> parameters = GetParameters(nextSegment);
-            IEnumerable<string> parameterNames = parameters == null ? null : parameters.Keys;
+            IEnumerable<string> parameterNames;
+
+            if (parameters == null)
+            {
+                parameterNames = null;
+            }
+            else if (parameters.Keys.Contains(String.Empty))
+            {
+                // One of the function parameters has no name.
+                return null;
+            }
+            else
+            {
+                parameterNames = parameters.Keys;
+            }
 
             IEdmFunctionImport function = FindBestUnboundFunction(functions, parameterNames);
             if (function != null)

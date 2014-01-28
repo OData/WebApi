@@ -880,6 +880,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The count of single quotes in non-string literal &apos;{0}&apos; must be 0 or 2 in segment &apos;{1}&apos;..
+        /// </summary>
+        internal static string InvalidSingleQuoteCountForNonStringLiteral {
+            get {
+                return ResourceManager.GetString("InvalidSingleQuoteCountForNonStringLiteral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Key property &apos;{0}&apos; of type &apos;{1}&apos; is null. Key properties cannot have null values..
         /// </summary>
         internal static string KeyValueCannotBeNull {
@@ -894,6 +903,15 @@ namespace System.Web.OData.Properties {
         internal static string LambdaExpressionMustHaveExactlyOneParameter {
             get {
                 return ResourceManager.GetString("LambdaExpressionMustHaveExactlyOneParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The literal &apos;{0}&apos; has a bad format in segment &apos;{1}&apos;..
+        /// </summary>
+        internal static string LiteralHasABadFormat {
+            get {
+                return ResourceManager.GetString("LiteralHasABadFormat", resourceCulture);
             }
         }
         
@@ -1155,6 +1173,15 @@ namespace System.Web.OData.Properties {
         internal static string NoIdLinkFactoryFound {
             get {
                 return ResourceManager.GetString("NoIdLinkFactoryFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No key name was found at {0} in segment &apos;{1}&apos;..
+        /// </summary>
+        internal static string NoKeyNameFoundInSegment {
+            get {
+                return ResourceManager.GetString("NoKeyNameFoundInSegment", resourceCulture);
             }
         }
         

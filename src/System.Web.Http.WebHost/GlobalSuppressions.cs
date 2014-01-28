@@ -9,3 +9,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Scope = "member", Target = "System.Web.Http.GlobalConfiguration.#.cctor()")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace", Target = "System.Web.Http.WebHost.Routing", Justification = "This is the most logical namespace for this type.")]
 [assembly: SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Scope = "member", Target = "System.Web.Http.WebHost.HttpControllerHandler.#.cctor()", Justification = "HttpServer is disposed by HttpMessageInvoker.")]
+[assembly: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "Bufferless", Scope = "resource", Target = "System.Web.Http.WebHost.Properties.SRResources.resources", Justification = "The term Bufferless comes from the API")]

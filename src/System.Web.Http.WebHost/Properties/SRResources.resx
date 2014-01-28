@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="RequestBodyAlreadyRead" xml:space="preserve">
+    <value>Unable to read the entity body. A portion of the request stream has already been read.</value>
+  </data>
+  <data name="RequestBodyAlreadyReadInMode" xml:space="preserve">
+    <value>Unable to read the entity body. The request stream has already been read in '{0}' mode.</value>
+  </data>
+  <data name="RequestStreamCannotBeReadBufferless" xml:space="preserve">
+    <value>Unable to read the entity body in Bufferless mode. The request stream has already been buffered.</value>
+  </data>
   <data name="RouteCollectionNotSupported" xml:space="preserve">
     <value>This operation is not supported by '{0}'.</value>
   </data>

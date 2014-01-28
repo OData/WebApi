@@ -11,12 +11,12 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Runtime.Remoting;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.ExceptionHandling;
+using System.Web.Http.Hosting;
 using System.Web.Http.Results;
 using System.Web.Http.WebHost.Routing;
 using System.Web.Routing;
@@ -192,12 +192,11 @@ namespace System.Web.Http.WebHost
         public void ConvertRequest_DoesLazyGetInputStream()
         {
             bool inputStreamCalled = false;
-            HttpRequestBase stubRequest = CreateStubRequestBase(() =>
+            HttpRequestBase stubRequest = CreateFakeRequestBase(() =>
             {
                 inputStreamCalled = true;
                 return new MemoryStream();
-            },
-            buffered: true);
+            }, buffered: true);
             HttpContextBase context = CreateStubContextBase(request: stubRequest, items: null);
 
             HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context);
@@ -208,32 +207,157 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
-        public void ConvertRequest_DoesLazyGetBufferlessInputStream()
+        public void ConvertRequest_UsesRequestInputStream_InClassicMode()
         {
-            // Need to run this test on different AppDomain because the buffer policy selector in 
-            // HttpControllerHandler is static and cached so it's not possible to change in the context of this test.
-            AppDomain newAppDomain = AppDomain.CreateDomain("NewTestAppDomain");
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string location = Uri.UnescapeDataString(uri.Path);
-            ObjectHandle proxy = newAppDomain.CreateInstanceFrom(location, typeof(RemoteHttpControllerHandlerTest).FullName);
-            RemoteHttpControllerHandlerTest remoteTest = proxy.Unwrap() as RemoteHttpControllerHandlerTest;
+            // Arrange
+            string input = "Hello world";
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+            HttpRequestBase fakeRequest = CreateFakeRequestBase(() => stream, buffered: true);
+            HttpContextBase context = CreateStubContextBase(request: fakeRequest, items: null);
+            Mock<HttpRequestBase> mockRequest = Mock.Get<HttpRequestBase>(fakeRequest);
 
-            ConvertRequest_DoesLazyGetBufferlessInputStream_TestResults results;
-            try
-            {
-                results = remoteTest.ConvertRequest_DoesLazyGetBufferlessInputStream();
-            }
-            finally
-            {
-                if (newAppDomain != null)
+            // Act
+            fakeRequest.InputStream.Position = 10;
+            HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context);
+            string result = actualRequest.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            // Verify that the InputStream was reset when reading the content.
+            Assert.Equal(input, result);
+            mockRequest.Verify(r => r.InputStream, Times.AtLeastOnce());
+            mockRequest.Verify(r => r.GetBufferedInputStream(), Times.Never());
+        }
+
+        [Fact]
+        public void ConvertRequest_UsesBufferedInputStream_IfReadEntityBodyModeIsNone()
+        {
+            // Arrange
+            HttpRequestBase stubRequest = CreateFakeRequestBase(() => new MemoryStream(), buffered: true);
+            HttpContextBase context = CreateStubContextBase(request: stubRequest, items: null);
+            Mock<HttpRequestBase> mockRequest = Mock.Get<HttpRequestBase>(stubRequest);
+
+            // Act
+            HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context);
+            actualRequest.Content.ReadAsStreamAsync().Wait();
+
+            // Assert
+            mockRequest.Verify(r => r.InputStream, Times.Never());
+            mockRequest.Verify(r => r.GetBufferedInputStream(), Times.AtLeastOnce());
+        }
+
+        [Fact]
+        public void ConvertRequest_WithBufferedPolicy_ThrowsIfRequestHasBeenRead()
+        {
+            // Arrange
+            var stream = new MemoryStream(new byte[16]);
+            HttpRequestBase fakeRequest = CreateFakeRequestBase(() => stream, buffered: true);
+            HttpContextBase context = CreateStubContextBase(request: fakeRequest, items: null);
+
+            // Act
+            fakeRequest.GetBufferedInputStream().Position = 4;
+            HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context);
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(() => actualRequest.Content.ReadAsStringAsync().Result,
+                 "Unable to read the entity body. A portion of the request stream has already been read.");
+        }
+
+        [Theory]
+        [InlineData(ReadEntityBodyMode.None)]
+        [InlineData(ReadEntityBodyMode.Bufferless)]
+        public void ConvertRequest_DoesLazyGetBufferlessInputStream_IfRequestStreamHasNotBeenRead(ReadEntityBodyMode readEntityBodyMode)
+        {
+            // Arrange
+            bool inputStreamCalled = false;
+            var hostBufferPolicy = new Mock<IHostBufferPolicySelector>();
+            hostBufferPolicy.Setup(c => c.UseBufferedInputStream(It.IsAny<object>()))
+                                          .Returns(false);
+            hostBufferPolicy.Setup(c => c.UseBufferedOutputStream(It.IsAny<HttpResponseMessage>()))
+                                          .Returns(true);
+
+            HttpRequestBase stubRequest = CreateFakeRequestBase(() =>
                 {
-                    AppDomain.Unload(newAppDomain);
-                }
-            }
+                    inputStreamCalled = true;
+                    return new MemoryStream();
+                }, buffered: false);
+            HttpContextBase context = HttpControllerHandlerTest.CreateStubContextBase(request: stubRequest, items: null);
 
-            Assert.False(results.inputStreamCalledBeforeContentIsRead);
-            Assert.True(results.inputStreamCalledAfterContentIsRead);
+            // Act
+            HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context, hostBufferPolicy.Object);
+
+            // Assert
+            Assert.False(inputStreamCalled);
+            Stream contentStream = actualRequest.Content.ReadAsStreamAsync().Result;
+            Assert.True(inputStreamCalled);
+        }
+
+        [Fact]
+        public void ConvertRequest_WithBufferlessPolicy_ThrowsIfRequestStreamHasBeenReadInClassicMode()
+        {
+            // Arrange
+            var hostBufferPolicy = new Mock<IHostBufferPolicySelector>();
+            hostBufferPolicy.Setup(c => c.UseBufferedInputStream(It.IsAny<object>()))
+                                          .Returns(false);
+            hostBufferPolicy.Setup(c => c.UseBufferedOutputStream(It.IsAny<HttpResponseMessage>()))
+                                          .Returns(true);
+
+            var stream = new MemoryStream(8);
+            HttpRequestBase stubRequest = CreateFakeRequestBase(() => stream, buffered: false);
+            HttpContextBase context = HttpControllerHandlerTest.CreateStubContextBase(request: stubRequest, items: null);
+
+            // Act
+            context.Request.InputStream.Position = 2;
+            HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context, hostBufferPolicy.Object);
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(() => actualRequest.Content.ReadAsStreamAsync().Result,
+                 "Unable to read the entity body in Bufferless mode. The request stream has already been buffered.");
+        }
+
+        [Fact]
+        public void ConvertRequest_WithBufferlessPolicy_ThrowsIfRequestStreamHasBeenReadInBufferedMode()
+        {
+            // Arrange
+            var hostBufferPolicy = new Mock<IHostBufferPolicySelector>();
+            hostBufferPolicy.Setup(c => c.UseBufferedInputStream(It.IsAny<object>()))
+                                          .Returns(false);
+            hostBufferPolicy.Setup(c => c.UseBufferedOutputStream(It.IsAny<HttpResponseMessage>()))
+                                          .Returns(true);
+
+            var stream = new MemoryStream(8);
+            HttpRequestBase stubRequest = CreateFakeRequestBase(() => stream, buffered: false);
+            HttpContextBase context = HttpControllerHandlerTest.CreateStubContextBase(request: stubRequest, items: null);
+
+            // Act
+            context.Request.GetBufferedInputStream();
+            HttpRequestMessage message = HttpControllerHandler.ConvertRequest(context, hostBufferPolicy.Object);
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(() => message.Content.ReadAsStringAsync().Result,
+                 "Unable to read the entity body. The request stream has already been read in 'Buffered' mode.");
+        }
+
+        [Fact]
+        public void ConvertRequest_WithBufferlessPolicy_ThrowsIfRequestStreamHasBeenRead()
+        {
+            // Arrange
+            var hostBufferPolicy = new Mock<IHostBufferPolicySelector>();
+            hostBufferPolicy.Setup(c => c.UseBufferedInputStream(It.IsAny<object>()))
+                                          .Returns(false);
+            hostBufferPolicy.Setup(c => c.UseBufferedOutputStream(It.IsAny<HttpResponseMessage>()))
+                                          .Returns(true);
+
+            var stream = new MemoryStream(new byte[16]);
+            HttpRequestBase stubRequest = CreateFakeRequestBase(() => stream, buffered: false);
+            HttpContextBase context = HttpControllerHandlerTest.CreateStubContextBase(request: stubRequest, items: null);
+
+            // Act
+            context.Request.GetBufferlessInputStream().Position = 4;
+            HttpRequestMessage message = HttpControllerHandler.ConvertRequest(context, hostBufferPolicy.Object);
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(() => message.Content.ReadAsStringAsync().Result,
+                 "Unable to read the entity body. A portion of the request stream has already been read.");
         }
 
         [Fact]
@@ -244,6 +368,7 @@ namespace System.Web.Http.WebHost
             requestBaseMock.Setup(r => r.HttpMethod).Returns("IGNORED");
             requestBaseMock.Setup(r => r.Url).Returns(new Uri("http://ignore"));
             requestBaseMock.Setup(r => r.Headers).Returns(new NameValueCollection());
+            requestBaseMock.Setup(r => r.ReadEntityBodyMode).Returns(ReadEntityBodyMode.None);
             HttpRequestBase requestBase = requestBaseMock.Object;
             Mock<HttpContextBase> contextBaseMock = new Mock<HttpContextBase>(MockBehavior.Strict);
             contextBaseMock.Setup(c => c.Request).Returns(requestBase);
@@ -1632,6 +1757,7 @@ namespace System.Web.Http.WebHost
             requestBaseMock.SetupGet(m => m.HttpMethod).Returns(httpMethod);
             requestBaseMock.SetupGet(m => m.Url).Returns(new Uri("Http://localhost"));
             requestBaseMock.SetupGet(m => m.Headers).Returns(new NameValueCollection());
+            requestBaseMock.SetupGet(m => m.ReadEntityBodyMode).Returns(ReadEntityBodyMode.None);
 
             requestBaseMock.Setup(m => m.GetBufferedInputStream()).Returns(nonSeekableStream).Verifiable();
             requestBaseMock.SetupGet(m => m.InputStream).Returns(seekableStream).Verifiable();
@@ -1641,26 +1767,44 @@ namespace System.Web.Http.WebHost
             return requestBaseMock;
         }
 
-        internal static HttpRequestBase CreateStubRequestBase(Func<Stream> getStream, bool buffered)
+        internal static HttpRequestBase CreateFakeRequestBase(Func<Stream> getStream, bool buffered)
         {
+            var readEntityBodyMode = ReadEntityBodyMode.None;
             Mock<HttpRequestBase> requestBaseMock = new Mock<HttpRequestBase>() { CallBase = true };
             requestBaseMock.SetupGet(m => m.HttpMethod).Returns("GET");
             requestBaseMock.SetupGet(m => m.Url).Returns(new Uri("Http://localhost"));
             requestBaseMock.SetupGet(m => m.Headers).Returns(new NameValueCollection());
-            if (buffered)
-            {
-                requestBaseMock.Setup(m => m.GetBufferedInputStream()).Returns(() => getStream());
-                requestBaseMock.SetupGet(m => m.InputStream).Returns(() => getStream());
+            requestBaseMock.Setup(r => r.ReadEntityBodyMode).Returns(() => readEntityBodyMode);
 
-                requestBaseMock.Setup(m => m.GetBufferlessInputStream()).Throws<InvalidOperationException>();
-            }
-            else
+            requestBaseMock.Setup(m => m.GetBufferedInputStream()).Returns(() => 
             {
-                requestBaseMock.Setup(m => m.GetBufferedInputStream()).Throws<InvalidOperationException>();
-                requestBaseMock.SetupGet(m => m.InputStream).Throws<InvalidOperationException>();
+                if (readEntityBodyMode == ReadEntityBodyMode.None || readEntityBodyMode == ReadEntityBodyMode.Buffered)   
+                {
+                    readEntityBodyMode = ReadEntityBodyMode.Buffered;
+                    return getStream();
+                }
+                throw new InvalidOperationException();
+            });
 
-                requestBaseMock.Setup(m => m.GetBufferlessInputStream()).Returns(() => getStream());
-            }
+            requestBaseMock.SetupGet(m => m.InputStream).Returns(() =>
+            {
+                if (readEntityBodyMode == ReadEntityBodyMode.None || readEntityBodyMode == ReadEntityBodyMode.Classic)
+                {
+                    readEntityBodyMode = ReadEntityBodyMode.Classic;
+                    return getStream();
+                }
+                throw new InvalidOperationException();
+            });
+
+            requestBaseMock.Setup(m => m.GetBufferlessInputStream()).Returns(() =>
+            {
+                if (readEntityBodyMode == ReadEntityBodyMode.None || readEntityBodyMode == ReadEntityBodyMode.Bufferless)
+                {
+                    readEntityBodyMode = ReadEntityBodyMode.Bufferless;
+                    return getStream();
+                }
+                throw new InvalidOperationException();
+            });
             return requestBaseMock.Object;
         }
 

@@ -3,6 +3,7 @@
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Routing;
 
 namespace System.Web.Http.OData.Formatter
@@ -32,21 +33,21 @@ namespace System.Web.Http.OData.Formatter
         }
 
         /// <summary>
-        /// This method determines if the <see cref="System.Net.Http.HttpRequestMessage"/> is an OData Raw value request.
+        /// This method determines if the <see cref="HttpRequestMessage"/> is an OData Raw value request.
         /// </summary>
-        /// <param name="propertySegment">The <see cref="System.Web.Http.OData.Routing.PropertyAccessPathSegment"/> of the path.</param>
+        /// <param name="propertySegment">The <see cref="PropertyAccessPathSegment"/> of the path.</param>
         /// <returns>True if the request is an OData raw value request.</returns>
         protected abstract bool IsMatch(PropertyAccessPathSegment propertySegment);
 
         internal static bool IsRawValueRequest(HttpRequestMessage request)
         {
-            ODataPath path = request.GetODataPath();
+            ODataPath path = request.ODataProperties().Path;
             return path != null && path.Segments.LastOrDefault() is ValuePathSegment;
         }
 
         private static PropertyAccessPathSegment GetProperty(HttpRequestMessage request)
         {
-            ODataPath odataPath = request.GetODataPath();
+            ODataPath odataPath = request.ODataProperties().Path;
             if (odataPath == null || odataPath.Segments.Count < 2)
             {
                 return null;

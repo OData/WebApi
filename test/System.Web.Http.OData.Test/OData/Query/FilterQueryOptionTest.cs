@@ -281,7 +281,7 @@ namespace System.Web.Http.OData.Query
 
             Assert.Throws<ODataException>(() =>
                 option.Validate(settings),
-                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctions' property on QueryableAttribute or QueryValidationSettings.");
+                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.");
 
             option.Validator = null;
             Assert.DoesNotThrow(() => option.Validate(settings));

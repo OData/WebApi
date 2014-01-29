@@ -3,9 +3,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.Atom;
@@ -85,7 +85,7 @@ namespace System.Web.OData
 
         private IEdmModel GetModel()
         {
-            IEdmModel model = Request.GetEdmModel();
+            IEdmModel model = Request.ODataProperties().Model;
             if (model == null)
             {
                 throw Error.InvalidOperation(SRResources.RequestMustHaveModel);

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web.Http.OData.Extensions;
 
 namespace System.Web.Http.OData.Formatter
 {
@@ -8,7 +9,7 @@ namespace System.Web.Http.OData.Formatter
     {
         public static void SetFakeODataRouteName(this HttpRequestMessage request)
         {
-            request.SetODataRouteName(HttpRouteCollectionExtensions.RouteName);
+            request.ODataProperties().RouteName = HttpRouteCollectionExtensions.RouteName;
         }
     }
 }

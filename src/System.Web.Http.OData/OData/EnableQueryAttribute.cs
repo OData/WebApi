@@ -9,23 +9,25 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.OData;
-using System.Web.OData.Formatter;
-using System.Web.OData.Properties;
-using System.Web.OData.Query;
-using Microsoft.OData.Core;
-using Microsoft.OData.Edm;
+using System.Web.Http.OData.Extensions;
+using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Query;
+using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
 
-namespace System.Web.Http
+namespace System.Web.Http.OData
 {
     /// <summary>
-    /// This class defines an attribute that can be applied to an action to enable querying using the OData query syntax.
-    /// To avoid processing unexpected or malicious queries, use the validation settings on <see cref="QueryableAttribute"/> to validate
-    /// incoming queries. For more information, visit http://go.microsoft.com/fwlink/?LinkId=279712.
+    /// This class defines an attribute that can be applied to an action to enable querying using the OData query
+    /// syntax. To avoid processing unexpected or malicious queries, use the validation settings on
+    /// <see cref="EnableQueryAttribute"/> to validate incoming queries. For more information, visit
+    /// http://go.microsoft.com/fwlink/?LinkId=279712.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "We want to be able to subclass this type.")]
+    [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes",
+        Justification = "We want to be able to subclass this type.")]
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    public class QueryableAttribute : ActionFilterAttribute
+    public class EnableQueryAttribute : ActionFilterAttribute
     {
         private const char CommaSeparator = ',';
 
@@ -39,7 +41,7 @@ namespace System.Web.Http
         /// <summary>
         /// Enables a controller action to support OData query parameters.
         /// </summary>
-        public QueryableAttribute()
+        public EnableQueryAttribute()
         {
             _validationSettings = new ODataValidationSettings();
             _querySettings = new ODataQuerySettings();
@@ -69,7 +71,7 @@ namespace System.Web.Http
 
         /// <summary>
         /// Gets or sets a value indicating how null propagation should
-        /// be handled during query composition. 
+        /// be handled during query composition.
         /// </summary>
         /// <value>
         /// The default is <see cref="HandleNullPropagationOption.Default"/>.
@@ -87,7 +89,7 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether constants should be parameterized. Parameterizing constants 
+        /// Gets or sets a value indicating whether constants should be parameterized. Parameterizing constants
         /// would result in better performance with Entity framework.
         /// </summary>
         /// <value>The default value is <c>true</c>.</value>
@@ -104,11 +106,9 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets the maximum depth of the Any or All elements nested inside the query.
+        /// Gets or sets the maximum depth of the Any or All elements nested inside the query. This limit helps prevent
+        /// Denial of Service attacks. The default value is 1.
         /// </summary>
-        /// <remarks>
-        /// This limit helps prevent Denial of Service attacks. The default value is 1.
-        /// </remarks>
         /// <value>
         /// The maxiumum depth of the Any or All elements nested inside the query.
         /// </value>
@@ -125,11 +125,8 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets the maximum number of nodes inside the $filter syntax tree.
+        /// Gets or sets the maximum number of nodes inside the $filter syntax tree. The default value is 100.
         /// </summary>
-        /// <remarks>
-        /// The default value is 100.
-        /// </remarks>
         public int MaxNodeCount
         {
             get
@@ -177,24 +174,32 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets a value that represents a list of allowed functions used in the $filter query. 
-        /// 
-        /// The allowed functions includes the following:
-        /// 
-        /// String related: substringof, endswith, startswith, length, indexof, substring, tolower, toupper, trim, concat
-        ///
-        /// e.g. ~/Customers?$filter=length(CompanyName) eq 19
-        ///
-        /// DateTime related: year, years, month, months, day, days, hour, hours, minute, minutes, second, seconds
-        ///
-        /// e.g. ~/Employees?$filter=year(BirthDate) eq 1971
-        ///
-        /// Math related: round, floor, ceiling
-        ///
-        /// Type related:isof, cast, 
-        ///
-        /// Collection related: any, all
-        ///  
+        /// Gets or sets a value that represents a list of allowed functions used in the $filter query. The allowed
+        /// functions include the following:
+        /// <list type="definition">
+        /// <item>
+        /// <term>String related</term>
+        /// <description>substringof, endswith, startswith, length, indexof, substring, tolower, toupper, trim,
+        /// concat e.g. ~/Customers?$filter=length(CompanyName) eq 19</description>
+        /// </item>
+        /// <item>
+        /// <term>DateTime related</term>
+        /// <description>year, years, month, months, day, days, hour, hours, minute, minutes, second, seconds
+        /// e.g. ~/Employees?$filter=year(BirthDate) eq 1971</description>
+        /// </item>
+        /// <item>
+        /// <term>Math related</term>
+        /// <description>round, floor, ceiling</description>
+        /// </item>
+        /// <item>
+        /// <term>Type related</term>
+        /// <description>isof, cast</description>
+        /// </item>
+        /// <item>
+        /// <term>Collection related</term>
+        /// <description>any, all</description>
+        /// </item>
+        /// </list>
         /// </summary>
         public AllowedFunctions AllowedFunctions
         {
@@ -209,7 +214,8 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets a value that represents a list of allowed arithmetic operators including 'add', 'sub', 'mul', 'div', 'mod'.
+        /// Gets or sets a value that represents a list of allowed arithmetic operators including 'add', 'sub', 'mul',
+        /// 'div', 'mod'.
         /// </summary>
         public AllowedArithmeticOperators AllowedArithmeticOperators
         {
@@ -224,7 +230,8 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets a value that represents a list of allowed logical Operators such as 'eq', 'ne', 'gt', 'ge', 'lt', 'le', 'and', 'or', 'not'.
+        /// Gets or sets a value that represents a list of allowed logical Operators such as 'eq', 'ne', 'gt', 'ge',
+        /// 'lt', 'le', 'and', 'or', 'not'.
         /// </summary>
         public AllowedLogicalOperators AllowedLogicalOperators
         {
@@ -239,13 +246,14 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets a string with comma seperated list of property names. The queryable result can only be ordered by
-        /// those properties defined in this list.
-        /// 
-        /// Note, by default this string is null, which means it can be ordered by any property.
-        /// 
-        /// For example, setting this value to null or empty string means that we allow ordering the queryable result by any properties.
-        /// Setting this value to "Name" means we only allow queryable result to be ordered by Name property.
+        /// <para>Gets or sets a string with comma seperated list of property names. The queryable result can only be
+        /// ordered by those properties defined in this list.</para>
+        ///
+        /// <para>Note, by default this string is null, which means it can be ordered by any property.</para>
+        ///
+        /// <para>For example, setting this value to null or empty string means that we allow ordering the queryable
+        /// result by any properties. Setting this value to "Name" means we only allow queryable result to be ordered
+        /// by Name property.</para>
         /// </summary>
         public string AllowedOrderByProperties
         {
@@ -304,9 +312,9 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets the max expansion depth for the $expand query option.
+        /// Gets or sets the max expansion depth for the $expand query option. To disable the maximum expansion depth
+        /// check, set this property to 0.
         /// </summary>
-        /// <remarks>To disable the maximum expansion depth check, set this property to 0.</remarks>
         public int MaxExpansionDepth
         {
             get { return _validationSettings.MaxExpansionDepth; }
@@ -329,11 +337,13 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the returning response message.
-        /// It then validates the query from uri based on the validation settings on QueryableAttribute. It finally applies the query appropriately,
-        /// and reset it back on the response message.
+        /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the
+        /// returning response message. It then validates the query from uri based on the validation settings on
+        /// <see cref="EnableQueryAttribute"/>. It finally applies the query appropriately, and reset it back on
+        /// the response message.
         /// </summary>
-        /// <param name="actionExecutedContext">The context related to this action, including the response message, request message and HttpConfiguration etc.</param>
+        /// <param name="actionExecutedContext">The context related to this action, including the response message,
+        /// request message and HttpConfiguration etc.</param>
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
             if (actionExecutedContext == null)
@@ -371,12 +381,15 @@ namespace System.Web.Http
                 ObjectContent responseContent = response.Content as ObjectContent;
                 if (responseContent == null)
                 {
-                    throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent, response.Content.GetType().FullName);
+                    throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,
+                        response.Content.GetType().FullName);
                 }
 
-                // Apply the query if there are any query options, if there is a page size set or in the case of SingleResult
+                // Apply the query if there are any query options, if there is a page size set or in the case of
+                // SingleResult.
                 if (responseContent.Value != null && request.RequestUri != null &&
-                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _querySettings.PageSize.HasValue || responseContent.Value is SingleResult))
+                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _querySettings.PageSize.HasValue
+                     || responseContent.Value is SingleResult))
                 {
                     try
                     {
@@ -403,15 +416,16 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Validates the OData query in the incoming request.
+        /// Validates the OData query in the incoming request. By default, the implementation throws an exception if
+        /// the query contains unsupported query parameters. Override this method to perform additional validation of
+        /// the query.
         /// </summary>
         /// <param name="request">The incoming request.</param>
-        /// <param name="queryOptions">The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.</param>
-        /// <remarks>
-        /// Override this method to perform additional validation of the query. By default, the implementation
-        /// throws an exception if the query contains unsupported query parameters.
-        /// </remarks>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed after being sent.")]
+        /// <param name="queryOptions">
+        /// The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.
+        /// </param>
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
+            Justification = "Response disposed after being sent.")]
         public virtual void ValidateQuery(HttpRequestMessage request, ODataQueryOptions queryOptions)
         {
             if (request == null)
@@ -440,14 +454,14 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Applies the query to the given IQueryable based on incoming query from uri and query settings.
+        /// Applies the query to the given IQueryable based on incoming query from uri and query settings. By default,
+        /// the implementation supports $top, $skip, $orderby and $filter. Override this method to perform additional
+        /// query composition of the query.
         /// </summary>
         /// <param name="queryable">The original queryable instance from the response message.</param>
-        /// <param name="queryOptions">The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.</param>
-        /// <remarks>
-        /// Override this method to perform additional query composition of the query. By default, the implementation
-        /// supports $top, $skip, $orderby and $filter.
-        /// </remarks>
+        /// <param name="queryOptions">
+        /// The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.
+        /// </param>
         public virtual IQueryable ApplyQuery(IQueryable queryable, ODataQueryOptions queryOptions)
         {
             if (queryable == null)
@@ -466,7 +480,9 @@ namespace System.Web.Http
         /// Applies the query to the given entity based on incoming query from uri and query settings.
         /// </summary>
         /// <param name="entity">The original entity from the response message.</param>
-        /// <param name="queryOptions">The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.</param>
+        /// <param name="queryOptions">
+        /// The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.
+        /// </param>
         /// <returns>The new entity after the $select and $expand query has been applied to.</returns>
         public virtual object ApplyQuery(object entity, ODataQueryOptions queryOptions)
         {
@@ -482,7 +498,8 @@ namespace System.Web.Http
             return queryOptions.ApplyTo(entity, _querySettings);
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed after being sent.")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
+            Justification = "Response disposed after being sent.")]
         private object ExecuteQuery(object response, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
         {
             Type elementClrType = GetElementType(response, actionDescriptor);
@@ -527,19 +544,18 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets the EDM model for the given type and request.
+        /// Gets the EDM model for the given type and request. Override this method to customize the EDM model used for
+        /// querying.
         /// </summary>
         /// <param name="elementClrType">The CLR type to retrieve a model for.</param>
         /// <param name="request">The request message to retrieve a model for.</param>
         /// <param name="actionDescriptor">The action descriptor for the action being queried on.</param>
         /// <returns>The EDM model for the given type and request.</returns>
-        /// <remarks>
-        /// Override this method to customize the EDM model used for querying.
-        /// </remarks>
-        public virtual IEdmModel GetModel(Type elementClrType, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
+        public virtual IEdmModel GetModel(Type elementClrType, HttpRequestMessage request,
+            HttpActionDescriptor actionDescriptor)
         {
             // Get model for the request
-            IEdmModel model = request.GetEdmModel();
+            IEdmModel model = request.ODataProperties().Model;
 
             if (model == null || model.GetEdmType(elementClrType) == null)
             {
@@ -575,7 +591,7 @@ namespace System.Web.Http
                 // is not IEnumerable<T> or IQueryable<T>.
                 throw Error.InvalidOperation(
                     SRResources.FailedToRetrieveTypeToBuildEdmModel,
-                    typeof(QueryableAttribute).Name,
+                    typeof(EnableQueryAttribute).Name,
                     actionDescriptor.ActionName,
                     actionDescriptor.ControllerDescriptor.ControllerName,
                     response.GetType().FullName);
@@ -603,8 +619,8 @@ namespace System.Web.Http
 
         internal static void ValidateSelectExpandOnly(ODataQueryOptions queryOptions)
         {
-            if (queryOptions.Filter != null || queryOptions.Count != null || queryOptions.OrderBy != null || queryOptions.Skip != null
-                || queryOptions.Top != null)
+            if (queryOptions.Filter != null || queryOptions.InlineCount != null || queryOptions.OrderBy != null
+                || queryOptions.Skip != null || queryOptions.Top != null)
             {
                 throw new ODataException(Error.Format(SRResources.NonSelectExpandOnSingleEntity));
             }

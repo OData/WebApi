@@ -1,13 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -23,7 +22,7 @@ namespace System.Web.OData
         public QueryableLimitationTest()
         {
             _configuration = new HttpConfiguration();
-            _configuration.Routes.MapODataRoute("odata", "odata", GetEdmModel());
+            _configuration.Routes.MapODataServiceRoute("odata", "odata", GetEdmModel());
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);
         }
@@ -191,7 +190,7 @@ namespace System.Web.OData
                             }).ToList()
                     }).ToList();
 
-            [Queryable(PageSize = 10, MaxExpansionDepth = 5)]
+            [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
             public IHttpActionResult Get()
             {
                 return Ok(customers);

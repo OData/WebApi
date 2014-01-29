@@ -3,9 +3,8 @@
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
@@ -28,19 +27,19 @@ namespace System.Web.Http.OData
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<EmployeesController.Employee>("Employees");
             _model = builder.GetEdmModel();
-            configuration.Routes.MapODataRoute(_model);
+            configuration.Routes.MapODataServiceRoute(_model);
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);
         }
 
         [Fact]
-        public void GetODataPath_ReturnsRequestODataPath()
+        public void ODataPath_ReturnsRequestODataPath()
         {
             var controller = new Mock<EntitySetController<FormatterPerson, int>>().Object;
             var request = new HttpRequestMessage();
             var path = new ODataPath(new EntitySetPathSegment("Customers"));
-            request.SetODataPath(path);
+            request.ODataProperties().Path = path;
             controller.Request = request;
 
             Assert.Equal(path, controller.ODataPath);
@@ -53,7 +52,7 @@ namespace System.Web.Http.OData
             var request = new HttpRequestMessage();
             var configuration = new HttpConfiguration();
             var model = ODataTestUtil.GetEdmModel();
-            request.SetEdmModel(model);
+            request.ODataProperties().Model = model;
             controller.Request = request;
             controller.Configuration = configuration;
 
@@ -229,7 +228,7 @@ namespace System.Web.Http.OData
         {
             var config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
-            config.Routes.MapODataRoute(new ODataConventionModelBuilder().GetEdmModel());
+            config.Routes.MapODataServiceRoute(new ODataConventionModelBuilder().GetEdmModel());
             var explorer = config.Services.GetApiExplorer();
 
             var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
@@ -242,11 +241,11 @@ namespace System.Web.Http.OData
             var config = new HttpConfiguration();
             IEdmModel model = ODataTestUtil.GetEdmModel();
             string routeName = "Route";
-            config.Routes.MapODataRoute(routeName, null, model);
+            config.Routes.MapODataServiceRoute(routeName, null, model);
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Mock"), "http://localhost/People");
             request.SetConfiguration(config);
-            request.SetODataPath(new DefaultODataPathHandler().Parse(model, "People"));
-            request.SetODataRouteName(routeName);
+            request.ODataProperties().Path = new DefaultODataPathHandler().Parse(model, "People");
+            request.ODataProperties().RouteName = routeName;
             controller.Request = request;
             controller.Configuration = config;
             controller.Url = new UrlHelper(request);

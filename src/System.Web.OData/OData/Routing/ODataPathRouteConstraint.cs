@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Core;
@@ -141,11 +142,11 @@ namespace System.Web.OData.Routing
                     if (path != null)
                     {
                         // Set all the properties we need for routing, querying, formatting
-                        request.SetEdmModel(EdmModel);
-                        request.SetODataPathHandler(PathHandler);
-                        request.SetODataPath(path);
-                        request.SetODataRouteName(RouteName);
-                        request.SetODataRoutingConventions(RoutingConventions);
+                        request.ODataProperties().Model = EdmModel;
+                        request.ODataProperties().PathHandler = PathHandler;
+                        request.ODataProperties().Path = path;
+                        request.ODataProperties().RouteName = RouteName;
+                        request.ODataProperties().RoutingConventions = RoutingConventions;
 
                         if (!values.ContainsKey(ODataRouteConstants.Controller))
                         {

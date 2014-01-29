@@ -3,7 +3,6 @@
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;

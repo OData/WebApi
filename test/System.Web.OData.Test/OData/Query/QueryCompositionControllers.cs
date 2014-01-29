@@ -13,7 +13,7 @@ namespace System.Web.OData.Query
 {
     public class QueryCompositionPrimitiveController : ApiController
     {
-        [Queryable]
+        [EnableQuery]
         public IQueryable<int> GET()
         {
             return Enumerable.Range(0, 100).AsQueryable();
@@ -67,14 +67,14 @@ namespace System.Web.OData.Query
         }
 
         // Most common: using high level APIs
-        [Queryable]
+        [EnableQuery]
         public IQueryable<QueryCompositionCustomer> Get()
         {
             return CustomerList.AsQueryable();
         }
     }
 
-    [Queryable]
+    [EnableQuery]
     public class QueryCompositionCustomerQueryableController : ApiController
     {
         public IQueryable<QueryCompositionCustomer> Get()
@@ -85,7 +85,7 @@ namespace System.Web.OData.Query
 
     public class QueryCompositionCustomerWithTaskOfIEnumerableController : ApiController
     {
-        [Queryable]
+        [EnableQuery]
         public Task<IEnumerable<QueryCompositionCustomer>> Get()
         {
             return Task.FromResult(QueryCompositionCustomerController.CustomerList as IEnumerable<QueryCompositionCustomer>);
@@ -102,7 +102,7 @@ namespace System.Web.OData.Query
 
     public class QueryCompositionCustomerValidationController : ApiController
     {
-        [Queryable(MaxSkip = 1, MaxTop = 2, AllowedArithmeticOperators = AllowedArithmeticOperators.Modulo, AllowedFunctions = AllowedFunctions.Length,
+        [EnableQuery(MaxSkip = 1, MaxTop = 2, AllowedArithmeticOperators = AllowedArithmeticOperators.Modulo, AllowedFunctions = AllowedFunctions.Length,
             AllowedLogicalOperators = AllowedLogicalOperators.Equal, AllowedOrderByProperties = "Id,Name")]
         public IQueryable<QueryCompositionCustomer> Get()
         {
@@ -159,7 +159,7 @@ namespace System.Web.OData.Query
 
     public class QueryCompositionCategoryController : ApiController
     {
-        [Queryable]
+        [EnableQuery]
         public IQueryable<QueryCompositionCategory> Get()
         {
             return Enumerable.Empty<QueryCompositionCategory>().AsQueryable();
@@ -168,7 +168,7 @@ namespace System.Web.OData.Query
 
     public class QueryCompositionAnonymousTypesController : ApiController
     {
-        [Queryable]
+        [EnableQuery]
         public IQueryable Get()
         {
             return

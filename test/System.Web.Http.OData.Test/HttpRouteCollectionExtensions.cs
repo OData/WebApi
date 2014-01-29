@@ -2,13 +2,13 @@
 
 using Microsoft.Data.Edm;
 
-namespace System.Web.Http.OData
+namespace System.Web.Http.OData.Extensions
 {
     internal static class HttpRouteCollectionExtensions
     {
-        public static void MapODataRoute(this HttpRouteCollection routes, IEdmModel model)
+        public static void MapODataServiceRoute(this HttpRouteCollection routes, IEdmModel model)
         {
-            routes.MapODataRoute("IgnoredRouteName", null, model);
+            routes.MapODataServiceRoute("IgnoredRouteName", null, model);
         }
     }
 }

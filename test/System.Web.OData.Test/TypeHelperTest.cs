@@ -2,7 +2,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Web.Http;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData

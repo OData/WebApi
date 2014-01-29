@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using Microsoft.OData.Edm;
@@ -72,7 +73,7 @@ namespace System.Web.OData
                 // can be different (example implementing $select or $expand).
                 Type entityClrType = GetEntityClrTypeFromParameterType(Descriptor) ?? GetEntityClrTypeFromActionReturnType(actionDescriptor);
 
-                IEdmModel model = request.GetEdmModel() ?? actionDescriptor.GetEdmModel(entityClrType);
+                IEdmModel model = request.ODataProperties().Model ?? actionDescriptor.GetEdmModel(entityClrType);
                 ODataQueryContext entitySetContext = new ODataQueryContext(model, entityClrType);
 
                 Func<ODataQueryContext, HttpRequestMessage, ODataQueryOptions> createODataQueryOptions =

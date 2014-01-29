@@ -1,27 +1,29 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http.OData.Batch;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.Routing.Conventions;
+using System.Web.Http;
 using System.Web.Http.Routing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
+using System.Web.OData.Batch;
+using System.Web.OData.Extensions;
+using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
-    public class ODataHttpRouteCollectionExtensionTest
+    public class HttpRouteCollectionExtensionsTest
     {
         [Fact]
-        public void MapODataRoute_ConfiguresARoute_WithAnODataRouteConstraint()
+        public void MapODataServiceRoute_ConfiguresARoute_WithAnODataRouteConstraint()
         {
             HttpRouteCollection routes = new HttpRouteCollection();
             IEdmModel model = new EdmModel();
             string routeName = "name";
             string routePrefix = "prefix";
 
-            routes.MapODataRoute(routeName, routePrefix, model);
+            routes.MapODataServiceRoute(routeName, routePrefix, model);
 
             IHttpRoute odataRoute = routes[routeName];
             Assert.Single(routes);
@@ -30,11 +32,11 @@ namespace System.Web.Http.OData
             var odataConstraint = Assert.IsType<ODataPathRouteConstraint>(constraint.Value);
             Assert.Same(model, odataConstraint.EdmModel);
             Assert.IsType<DefaultODataPathHandler>(odataConstraint.PathHandler);
-            Assert.IsType<List<IODataRoutingConvention>>(odataConstraint.RoutingConventions);
+            Assert.NotNull(odataConstraint.RoutingConventions);
         }
 
         [Fact]
-        public void AdvancedMapODataRoute_ConfiguresARoute_WithAnODataRouteConstraint()
+        public void AdvancedMapODataServiceRoute_ConfiguresARoute_WithAnODataRouteConstraint()
         {
             HttpRouteCollection routes = new HttpRouteCollection();
             IEdmModel model = new EdmModel();
@@ -43,7 +45,7 @@ namespace System.Web.Http.OData
             var pathHandler = new DefaultODataPathHandler();
             var conventions = new List<IODataRoutingConvention>();
 
-            routes.MapODataRoute(routeName, routePrefix, model, pathHandler, conventions);
+            routes.MapODataServiceRoute(routeName, routePrefix, model, pathHandler, conventions);
 
             IHttpRoute odataRoute = routes[routeName];
             Assert.Single(routes);
@@ -52,11 +54,11 @@ namespace System.Web.Http.OData
             var odataConstraint = Assert.IsType<ODataPathRouteConstraint>(constraint.Value);
             Assert.Same(model, odataConstraint.EdmModel);
             Assert.Same(pathHandler, odataConstraint.PathHandler);
-            Assert.Same(conventions, odataConstraint.RoutingConventions);
+            Assert.Equal(conventions, odataConstraint.RoutingConventions);
         }
 
         [Fact]
-        public void MapODataRoute_AddsBatchRoute_WhenBatchHandlerIsProvided()
+        public void MapODataServiceRoute_AddsBatchRoute_WhenBatchHandlerIsProvided()
         {
             HttpRouteCollection routes = new HttpRouteCollection();
             IEdmModel model = new EdmModel();
@@ -64,12 +66,28 @@ namespace System.Web.Http.OData
             string routePrefix = "prefix";
 
             var batchHandler = new DefaultODataBatchHandler(new HttpServer());
-            routes.MapODataRoute(routeName, routePrefix, model, batchHandler);
+            routes.MapODataServiceRoute(routeName, routePrefix, model, batchHandler);
 
             IHttpRoute batchRoute = routes["nameBatch"];
             Assert.NotNull(batchRoute);
             Assert.Same(batchHandler, batchRoute.Handler);
             Assert.Equal("prefix/$batch", batchRoute.RouteTemplate);
+        }
+
+        [Fact]
+        public void MapODataRoute_Returns_ODataRoute()
+        {
+            // Arrange
+            HttpRouteCollection routes = new HttpRouteCollection();
+            IEdmModel model = new EdmModel();
+
+            // Act
+            ODataRoute route = routes.MapODataServiceRoute("odata", "odata", model);
+
+            // Assert
+            Assert.NotNull(route);
+            Assert.Same(model, route.PathRouteConstraint.EdmModel);
+            Assert.Equal("odata", route.PathRouteConstraint.RouteName);
         }
     }
 }

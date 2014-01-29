@@ -10,6 +10,7 @@ using System.Web.Http;
 using System.Web.Http.Tracing;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Xml;
@@ -104,8 +105,8 @@ namespace System.Web.OData.Formatter
             var model2 = builder2.GetEdmModel();
 
             var config = new HttpConfiguration();
-            config.Routes.MapODataRoute("OData1", "v1", model1);
-            config.Routes.MapODataRoute("OData2", "v2", model2);
+            config.Routes.MapODataServiceRoute("OData1", "v1", model1);
+            config.Routes.MapODataServiceRoute("OData2", "v2", model2);
 
             using (HttpServer host = new HttpServer(config))
             using (HttpClient client = new HttpClient(host))
@@ -395,7 +396,7 @@ namespace System.Web.OData.Formatter
 
             using (HttpConfiguration configuration = new HttpConfiguration())
             {
-                configuration.Routes.MapODataRoute("odata", routePrefix: null, model: model);
+                configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
@@ -461,7 +462,7 @@ namespace System.Web.OData.Formatter
             IEdmModel model = builder.GetEdmModel();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute("odata", routePrefix: null, model: model);
+            configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
             HttpServer host = new HttpServer(configuration);
             HttpClient client = new HttpClient(host);
 
@@ -486,7 +487,7 @@ namespace System.Web.OData.Formatter
 
             using (HttpConfiguration configuration = new HttpConfiguration())
             {
-                configuration.Routes.MapODataRoute("odata", routePrefix: null, model: model);
+                configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
@@ -596,7 +597,7 @@ namespace System.Web.OData.Formatter
         private static HttpConfiguration CreateConfiguration(IEdmModel model)
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            configuration.Routes.MapODataServiceRoute(model);
             configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
             return configuration;
         }

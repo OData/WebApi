@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -35,7 +36,7 @@ namespace System.Web.OData.Builder.Conventions
             Assert.NotNull(paintEdmAction);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            configuration.Routes.MapODataServiceRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);

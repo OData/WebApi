@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -26,7 +27,7 @@ namespace System.Web.OData.Formatter
             _model = GetModel();
             configuration.Formatters.Clear();
             configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create());
-            configuration.Routes.MapODataRoute(_model);
+            configuration.Routes.MapODataServiceRoute(_model);
             var controllers = new[] { typeof(CustomersController) };
             var assembliesResolver = new TestAssemblyResolver(new MockAssembly(controllers));
             configuration.Services.Replace(typeof(IAssembliesResolver), assembliesResolver);

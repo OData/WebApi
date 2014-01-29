@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Tracing;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
@@ -19,7 +20,7 @@ namespace System.Web.OData.Builder
         public void DollarMetaData_Works_WithoutAcceptHeader()
         {
             HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
+            server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
 
             HttpClient client = new HttpClient(server);
             var response = client.GetAsync("http://localhost/$metadata").Result;
@@ -36,7 +37,7 @@ namespace System.Web.OData.Builder
 
             ODataMetadataController controller = new ODataMetadataController();
             controller.Request = new HttpRequestMessage();
-            controller.Request.SetEdmModel(model);
+            controller.Request.ODataProperties().Model = model;
 
             IEdmModel responseModel = controller.GetMetadata();
             Assert.Equal(model, responseModel);
@@ -49,16 +50,17 @@ namespace System.Web.OData.Builder
             ODataMetadataController controller = new ODataMetadataController();
             controller.Request = new HttpRequestMessage();
 
-            Assert.Throws<InvalidOperationException>(
-                () => controller.GetMetadata(),
-                "The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataRoute to register a route that parses the OData URI and attaches the model information.");
+            Assert.Throws<InvalidOperationException>(() => controller.GetMetadata(),
+                "The request must have an associated EDM model. Consider using the extension method " +
+                "HttpConfiguration.Routes.MapODataServiceRoute to register a route that parses the OData URI and " +
+                "attaches the model information.");
         }
 
         [Fact]
         public void DollarMetaDataWorks_AfterTracingIsEnabled()
         {
             HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
+            server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
@@ -81,8 +83,8 @@ namespace System.Web.OData.Builder
             var model2 = builder2.GetEdmModel();
 
             HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataRoute("OData1", "v1", model1);
-            server.Configuration.Routes.MapODataRoute("OData2", "v2", model2);
+            server.Configuration.Routes.MapODataServiceRoute("OData1", "v1", model1);
+            server.Configuration.Routes.MapODataServiceRoute("OData2", "v2", model2);
 
             HttpClient client = new HttpClient(server);
             AssertHasEntitySet(client, "http://localhost/v1/$metadata", "People1");
@@ -101,7 +103,7 @@ namespace System.Web.OData.Builder
         public void ServiceDocumentWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
         {
             HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
+            server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
@@ -118,7 +120,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
+            server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
             HttpClient client = new HttpClient(server);
 
             // Act
@@ -137,7 +139,7 @@ namespace System.Web.OData.Builder
                 .SingleOrDefault(f => f.Name == "GetVipPerson");
 
             HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataRoute(model);
+            server.Configuration.Routes.MapODataServiceRoute(model);
             HttpClient client = new HttpClient(server);
 
             // Act
@@ -156,7 +158,7 @@ namespace System.Web.OData.Builder
         {
             var config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
-            config.Routes.MapODataRoute(new ODataConventionModelBuilder().GetEdmModel());
+            config.Routes.MapODataServiceRoute(new ODataConventionModelBuilder().GetEdmModel());
             var explorer = config.Services.GetApiExplorer();
 
             var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
@@ -173,7 +175,7 @@ namespace System.Web.OData.Builder
 
             ODataMetadataController controller = new ODataMetadataController();
             controller.Request = new HttpRequestMessage();
-            controller.Request.SetEdmModel(model);
+            controller.Request.ODataProperties().Model = model;
 
             // Act
             IEdmModel controllerModel = controller.GetMetadata();

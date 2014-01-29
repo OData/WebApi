@@ -2,24 +2,23 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.Contracts;
 using System.Text;
-using Microsoft.OData.Core;
+using Microsoft.Data.OData;
 
-namespace System.Web.Http
+namespace System.Web.Http.OData.Extensions
 {
     /// <summary>
     /// Provides extension methods for the <see cref="HttpError"/> class.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class ODataHttpErrorExtensions
+    public static class HttpErrorExtensions
     {
         /// <summary>
         /// Converts the <paramref name="httpError"/> to an <see cref="ODataError"/>.
         /// </summary>
         /// <param name="httpError">The <see cref="HttpError"/> instance to convert.</param>
         /// <returns>The converted <see cref="ODataError"/></returns>
-        public static ODataError ToODataError(this HttpError httpError)
+        public static ODataError CreateODataError(this HttpError httpError)
         {
             if (httpError == null)
             {
@@ -31,11 +30,11 @@ namespace System.Web.Http
                 Message = httpError.GetPropertyValue<string>(HttpErrorKeys.MessageKey),
                 MessageLanguage = httpError.GetPropertyValue<string>(HttpErrorKeys.MessageLanguageKey),
                 ErrorCode = httpError.GetPropertyValue<string>(HttpErrorKeys.ErrorCodeKey),
-                InnerError = httpError.ToODataInnerError()
+                InnerError = ToODataInnerError(httpError)
             };
         }
 
-        private static ODataInnerError ToODataInnerError(this HttpError httpError)
+        private static ODataInnerError ToODataInnerError(HttpError httpError)
         {
             string innerErrorMessage = httpError.GetPropertyValue<string>(HttpErrorKeys.ExceptionMessageKey);
             if (innerErrorMessage == null)
@@ -44,7 +43,8 @@ namespace System.Web.Http
                 if (messageDetail == null)
                 {
                     HttpError modelStateError = httpError.GetPropertyValue<HttpError>(HttpErrorKeys.ModelStateKey);
-                    return modelStateError == null ? null : new ODataInnerError { Message = ConvertModelStateErrors(modelStateError) };
+                    return (modelStateError == null) ? null
+                        : new ODataInnerError { Message = ConvertModelStateErrors(modelStateError) };
                 }
                 else
                 {
@@ -60,7 +60,7 @@ namespace System.Web.Http
                 HttpError innerExceptionError = httpError.GetPropertyValue<HttpError>(HttpErrorKeys.InnerExceptionKey);
                 if (innerExceptionError != null)
                 {
-                    innerError.InnerError = innerExceptionError.ToODataInnerError();
+                    innerError.InnerError = ToODataInnerError(innerExceptionError);
                 }
                 return innerError;
             }

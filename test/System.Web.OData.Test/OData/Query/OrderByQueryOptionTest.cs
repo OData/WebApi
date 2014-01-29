@@ -275,7 +275,7 @@ namespace System.Web.OData.Query
 
             // Act & Assert
             Assert.Throws<ODataException>(() => option.Validate(settings),
-                "Order by 'Name' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings.");
+                "Order by 'Name' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on EnableQueryAttribute or QueryValidationSettings.");
 
             option.Validator = null;
             Assert.DoesNotThrow(() => option.Validate(settings));

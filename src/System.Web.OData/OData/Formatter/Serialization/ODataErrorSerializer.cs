@@ -2,6 +2,7 @@
 
 using System.Runtime.Serialization;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 
@@ -43,7 +44,7 @@ namespace System.Web.OData.Formatter.Serialization
                 }
                 else
                 {
-                    oDataError = httpError.ToODataError();
+                    oDataError = httpError.CreateODataError();
                 }
             }
 

@@ -4,24 +4,20 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http.Formatting;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Query;
-using System.Web.Http.OData.Routing;
-using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Services;
-using System.Web.Http.Tracing;
-using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
+using System.Web.OData.Extensions;
+using System.Web.OData.Formatter;
+using System.Web.OData.Query;
+using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.OData
+namespace System.Web.OData
 {
-    public class ODataHttpConfigurationExtensionTest
+    public class HttpConfigurationExtensionsTest
     {
         [Fact]
         public void SetODataFormatter_AddsFormatterToTheFormatterCollection()
@@ -86,11 +82,11 @@ namespace System.Web.Http.OData
         {
             HttpConfiguration configuration = new HttpConfiguration();
 
-            configuration.EnableQuerySupport();
+            configuration.AddODataQueryFilter();
 
             var queryFilterProviders = configuration.Services.GetFilterProviders().OfType<QueryFilterProvider>();
             Assert.Equal(1, queryFilterProviders.Count());
-            var queryAttribute = Assert.IsType<QueryableAttribute>(queryFilterProviders.First().QueryFilter);
+            var queryAttribute = Assert.IsType<EnableQueryAttribute>(queryFilterProviders.First().QueryFilter);
         }
 
         [Fact]
@@ -99,7 +95,7 @@ namespace System.Web.Http.OData
             HttpConfiguration configuration = new HttpConfiguration();
             Mock<IActionFilter> myQueryFilter = new Mock<IActionFilter>();
 
-            configuration.EnableQuerySupport(myQueryFilter.Object);
+            configuration.AddODataQueryFilter(myQueryFilter.Object);
 
             var queryFilterProviders = configuration.Services.GetFilterProviders().OfType<QueryFilterProvider>();
             Assert.Equal(1, queryFilterProviders.Count());
@@ -110,14 +106,41 @@ namespace System.Web.Http.OData
         public void AddQuerySupport_ActionFilters_TakePrecedence()
         {
             HttpConfiguration config = new HttpConfiguration();
-            config.EnableQuerySupport();
+            config.AddODataQueryFilter();
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "FilterProviderTest", typeof(FilterProviderTestController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(FilterProviderTestController).GetMethod("GetQueryableWithFilterAttribute"));
 
             Collection<FilterInfo> filters = actionDescriptor.GetFilterPipeline();
 
             Assert.Equal(1, filters.Count);
-            Assert.Equal(100, ((QueryableAttribute)filters[0].Instance).PageSize);
+            Assert.Equal(100, ((EnableQueryAttribute)filters[0].Instance).PageSize);
+        }
+
+        [Fact]
+        public void GetETagHandler_ReturnDefaultODataETagHandler_IfNotSet()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            IETagHandler etagHandler = config.GetETagHandler();
+
+            // Assert
+            Assert.IsType<DefaultODataETagHandler>(etagHandler);
+        }
+
+        [Fact]
+        public void SetETagHandler_ReturnsHandlerSet_UsingSetETagHandler()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            IETagHandler etagHandler = new Mock<IETagHandler>().Object;
+
+            // Act
+            config.SetETagHandler(etagHandler);
+
+            // Assert
+            Assert.Same(etagHandler, config.GetETagHandler());
         }
 
         private static ODataMediaTypeFormatter CreateODataFormatter()

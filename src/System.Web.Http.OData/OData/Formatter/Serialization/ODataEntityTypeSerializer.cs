@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
@@ -405,7 +406,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 return null;
             }
 
-            Uri baseUri = new Uri(entityInstanceContext.Url.ODataLink(new MetadataPathSegment()));
+            Uri baseUri = new Uri(entityInstanceContext.Url.CreateODataLink(new MetadataPathSegment()));
             Uri metadata = new Uri(baseUri, "#" + CreateMetadataFragment(action, model, metadataLevel));
 
             ODataAction odataAction = new ODataAction

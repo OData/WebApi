@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
@@ -305,9 +306,9 @@ namespace System.Web.OData.Formatter
 
         private void AddRequestInfo(HttpRequestMessage request)
         {
-            request.SetODataPath(new DefaultODataPathHandler().Parse(_model, GetODataPath(
-                request.RequestUri.AbsoluteUri)));
-            request.SetEdmModel(_model);
+            request.ODataProperties().Path = new DefaultODataPathHandler()
+                .Parse(_model, GetODataPath(request.RequestUri.AbsoluteUri));
+            request.ODataProperties().Model = _model;
             request.SetFakeODataRouteName();
         }
 

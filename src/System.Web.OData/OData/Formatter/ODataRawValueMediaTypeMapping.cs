@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 
 namespace System.Web.OData.Formatter
@@ -41,13 +42,13 @@ namespace System.Web.OData.Formatter
 
         internal static bool IsRawValueRequest(HttpRequestMessage request)
         {
-            ODataPath path = request.GetODataPath();
+            ODataPath path = request.ODataProperties().Path;
             return path != null && path.Segments.LastOrDefault() is ValuePathSegment;
         }
 
         private static PropertyAccessPathSegment GetProperty(HttpRequestMessage request)
         {
-            ODataPath odataPath = request.GetODataPath();
+            ODataPath odataPath = request.ODataProperties().Path;
             if (odataPath == null || odataPath.Segments.Count < 2)
             {
                 return null;

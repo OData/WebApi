@@ -6,9 +6,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
-using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Routing;
@@ -76,11 +76,11 @@ namespace System.Web.OData.Formatter
                 color.Member(Color.Blue);
 
                 var people = model.EntitySet<FormatterPerson>("People");
-                people.HasFeedSelfLink(context => new Uri(context.Url.ODataLink(new EntitySetPathSegment(
+                people.HasFeedSelfLink(context => new Uri(context.Url.CreateODataLink(new EntitySetPathSegment(
                     context.EntitySet))));
                 people.HasIdLink(context =>
                     {
-                        return context.Url.ODataLink(
+                        return context.Url.CreateODataLink(
                             new EntitySetPathSegment(context.EntitySet),
                             new KeyValuePathSegment(context.GetPropertyValue("PerId").ToString()));
                     },

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Dispatcher;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing.Conventions;
 using System.Web.Http.Routing;
@@ -18,6 +18,7 @@ namespace System.Web.Http.OData.Routing
     /// </summary>
     public class ODataActionSelector : IHttpActionSelector
     {
+        private const string MessageDetailKey = "MessageDetail";
         private readonly IHttpActionSelector _innerSelector;
 
         /// <summary>
@@ -63,8 +64,8 @@ namespace System.Web.Http.OData.Routing
             }
 
             HttpRequestMessage request = controllerContext.Request;
-            ODataPath odataPath = request.GetODataPath();
-            IEnumerable<IODataRoutingConvention> routingConventions = request.GetODataRoutingConventions();
+            ODataPath odataPath = request.ODataProperties().Path;
+            IEnumerable<IODataRoutingConvention> routingConventions = request.ODataProperties().RoutingConventions;
             IHttpRouteData routeData = controllerContext.RouteData;
 
             if (odataPath == null || routingConventions == null || routeData.Values.ContainsKey(ODataRouteConstants.Action))
@@ -83,10 +84,20 @@ namespace System.Web.Http.OData.Routing
                 }
             }
 
-            throw new HttpResponseException(request.CreateErrorResponse(
-                HttpStatusCode.NotFound,
+            throw new HttpResponseException(CreateErrorResponse(request, HttpStatusCode.NotFound,
                 Error.Format(SRResources.NoMatchingResource, controllerContext.Request.RequestUri),
                 Error.Format(SRResources.NoRoutingHandlerToSelectAction, odataPath.PathTemplate)));
+        }
+
+        private static HttpResponseMessage CreateErrorResponse(HttpRequestMessage request, HttpStatusCode statusCode, string message, string messageDetail)
+        {
+            HttpError error = new HttpError(message);
+            if (request.ShouldIncludeErrorDetail())
+            {
+                error.Add(MessageDetailKey, messageDetail);
+            }
+
+            return request.CreateErrorResponse(statusCode, error);
         }
     }
 }

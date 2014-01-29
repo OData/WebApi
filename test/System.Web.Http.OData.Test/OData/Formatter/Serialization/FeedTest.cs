@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
@@ -71,12 +72,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/employees");
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, null, GetSampleModel());
+            configuration.Routes.MapODataServiceRoute(routeName, null, GetSampleModel());
             request.SetConfiguration(configuration);
             IEdmEntitySet entitySet = _model.EntityContainers().Single().FindEntitySet("employees");
-            request.SetEdmModel(_model);
-            request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
-            request.SetODataRouteName(routeName);
+            request.ODataProperties().Model = _model;
+            request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet));
+            request.ODataProperties().RouteName = routeName;
             return request;
         }
 

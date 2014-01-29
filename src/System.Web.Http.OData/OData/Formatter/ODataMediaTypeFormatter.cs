@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.OData.Batch;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
@@ -201,7 +202,7 @@ namespace System.Web.Http.OData.Formatter
             }
             else
             {
-                ODataVersion version = request.GetODataVersion();
+                ODataVersion version = request.ODataProperties().Version;
                 return new ODataMediaTypeFormatter(this, version, request);
             }
         }
@@ -225,11 +226,11 @@ namespace System.Web.Http.OData.Formatter
 
             if (Request != null)
             {
-                IEdmModel model = Request.GetEdmModel();
+                IEdmModel model = Request.ODataProperties().Model;
                 if (model != null)
                 {
                     IEdmTypeReference expectedPayloadType;
-                    ODataDeserializer deserializer = GetDeserializer(type, Request.GetODataPath(), model,
+                    ODataDeserializer deserializer = GetDeserializer(type, Request.ODataProperties().Path, model,
                         _deserializerProvider, out expectedPayloadType);
                     if (deserializer != null)
                     {
@@ -251,7 +252,7 @@ namespace System.Web.Http.OData.Formatter
 
             if (Request != null)
             {
-                IEdmModel model = Request.GetEdmModel();
+                IEdmModel model = Request.ODataProperties().Model;
                 if (model != null)
                 {
                     ODataPayloadKind? payloadKind;
@@ -329,14 +330,14 @@ namespace System.Web.Http.OData.Formatter
             }
             else
             {
-                IEdmModel model = Request.GetEdmModel();
+                IEdmModel model = Request.ODataProperties().Model;
                 if (model == null)
                 {
                     throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
                 }
 
                 IEdmTypeReference expectedPayloadType;
-                ODataDeserializer deserializer = GetDeserializer(type, Request.GetODataPath(), model, _deserializerProvider, out expectedPayloadType);
+                ODataDeserializer deserializer = GetDeserializer(type, Request.ODataProperties().Path, model, _deserializerProvider, out expectedPayloadType);
                 if (deserializer == null)
                 {
                     throw Error.Argument("type", SRResources.FormatterReadIsNotSupportedForType, type.FullName, GetType().FullName);
@@ -351,7 +352,7 @@ namespace System.Web.Http.OData.Formatter
                     ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
 
                     Request.RegisterForDispose(oDataMessageReader);
-                    ODataPath path = Request.GetODataPath();
+                    ODataPath path = Request.ODataProperties().Path;
                     ODataDeserializerContext readContext = new ODataDeserializerContext
                     {
                         Path = path,
@@ -416,7 +417,7 @@ namespace System.Web.Http.OData.Formatter
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         private void WriteToStream(Type type, object value, Stream writeStream, HttpContent content, HttpContentHeaders contentHeaders)
         {
-            IEdmModel model = Request.GetEdmModel();
+            IEdmModel model = Request.ODataProperties().Model;
             if (model == null)
             {
                 throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
@@ -426,7 +427,7 @@ namespace System.Web.Http.OData.Formatter
 
             UrlHelper urlHelper = Request.GetUrlHelper() ?? new UrlHelper(Request);
 
-            ODataPath path = Request.GetODataPath();
+            ODataPath path = Request.ODataProperties().Path;
             IEdmEntitySet targetEntitySet = path == null ? null : path.EntitySet;
 
             // serialize a response
@@ -450,7 +451,7 @@ namespace System.Web.Http.OData.Formatter
             // to generate a metadata link.
             if (serializer.ODataPayloadKind != ODataPayloadKind.Error)
             {
-                string metadataLink = urlHelper.ODataLink(new MetadataPathSegment());
+                string metadataLink = urlHelper.CreateODataLink(new MetadataPathSegment());
 
                 if (metadataLink == null)
                 {
@@ -480,7 +481,7 @@ namespace System.Web.Http.OData.Formatter
                     SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                     Path = path,
                     MetadataLevel = ODataMediaTypes.GetMetadataLevel(contentType),
-                    SelectExpandClause = Request.GetSelectExpandClause()
+                    SelectExpandClause = Request.ODataProperties().SelectExpandClause
                 };
 
                 serializer.WriteObject(value, type, messageWriter, writeContext);
@@ -491,7 +492,7 @@ namespace System.Web.Http.OData.Formatter
         {
             Contract.Assert(request != null);
 
-            if (request.GetSelectExpandClause() != null)
+            if (request.ODataProperties().SelectExpandClause != null)
             {
                 // Include the $select clause only if it has been applied.
                 IEnumerable<KeyValuePair<string, string>> queryOptions = request.GetQueryNameValuePairs();
@@ -658,7 +659,7 @@ namespace System.Web.Http.OData.Formatter
         {
             UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
 
-            string baseAddress = urlHelper.ODataLink();
+            string baseAddress = urlHelper.CreateODataLink();
             if (baseAddress == null)
             {
                 throw new SerializationException(SRResources.UnableToDetermineBaseUrl);

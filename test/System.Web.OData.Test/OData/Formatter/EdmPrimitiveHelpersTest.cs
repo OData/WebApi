@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Linq;
 using System.Xml.Linq;
 using Microsoft.TestCommon;
-using Microsoft.TestCommon.Types;
 
 namespace System.Web.OData.Formatter
 {

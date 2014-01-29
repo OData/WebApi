@@ -24,11 +24,11 @@ namespace System.Web.OData.Query
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "FilterProviderTest", typeof(FilterProviderTestController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(FilterProviderTestController).GetMethod(actionName));
 
-            FilterInfo[] filters = new QueryFilterProvider(new QueryableAttribute()).GetFilters(config, actionDescriptor).ToArray();
+            FilterInfo[] filters = new QueryFilterProvider(new EnableQueryAttribute()).GetFilters(config, actionDescriptor).ToArray();
 
             Assert.Equal(1, filters.Length);
             Assert.Equal(FilterScope.Global, filters[0].Scope);
-            QueryableAttribute filter = Assert.IsType<QueryableAttribute>(filters[0].Instance);
+            EnableQueryAttribute filter = Assert.IsType<EnableQueryAttribute>(filters[0].Instance);
         }
 
         [Theory]
@@ -46,7 +46,7 @@ namespace System.Web.OData.Query
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "FilterProviderTest", typeof(FilterProviderTestController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(FilterProviderTestController).GetMethod(actionName));
 
-            FilterInfo[] filters = new QueryFilterProvider(new QueryableAttribute()).GetFilters(config, actionDescriptor).ToArray();
+            FilterInfo[] filters = new QueryFilterProvider(new EnableQueryAttribute()).GetFilters(config, actionDescriptor).ToArray();
 
             Assert.Empty(filters);
         }
@@ -118,7 +118,7 @@ namespace System.Web.OData.Query
             return null;
         }
 
-        [Queryable(PageSize = 100)]
+        [EnableQuery(PageSize = 100)]
         public IQueryable GetQueryableWithFilterAttribute()
         {
             return null;

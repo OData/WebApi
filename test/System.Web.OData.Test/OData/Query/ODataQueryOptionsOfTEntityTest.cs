@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
@@ -87,7 +88,7 @@ namespace System.Web.OData.Query
             mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.GetEdmType(typeof(Customer)));
             mockSegment.Setup(s => s.GetEntitySet(null)).Returns((IEdmEntitySet)null);
             ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
-            request.SetODataPath(odataPath);
+            request.ODataProperties().Path = odataPath;
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
 
             // Act

@@ -7,13 +7,13 @@ namespace System.Web.Http.OData.Query.Controllers
 {
     public class PrimitiveController : ODataController
     {
-        [Queryable]
+        [EnableQuery]
         public IQueryable<int> Get()
         {
             return GetIEnumerableOfInt().AsQueryable<int>();
         }
 
-        [Queryable]
+        [EnableQuery]
         public IEnumerable<int> GetIEnumerableOfInt()
         {
             return new List<int>() { 1, 2, 3, 4, 5 };

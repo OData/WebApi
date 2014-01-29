@@ -7,6 +7,7 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
@@ -92,8 +93,8 @@ namespace System.Web.OData.Formatter
                 request.SetConfiguration(configuration);
                 IEdmProperty property =
                     model.EntityContainers().Single().EntitySets().Single().ElementType.Properties().First();
-                request.SetEdmModel(model);
-                request.SetODataPath(new ODataPath(new PropertyAccessPathSegment(property)));
+                request.ODataProperties().Model = model;
+                request.ODataProperties().Path = new ODataPath(new PropertyAccessPathSegment(property));
                 request.SetFakeODataRouteName();
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);
@@ -138,10 +139,10 @@ namespace System.Web.OData.Formatter
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID"))
             {
                 HttpConfiguration config = new HttpConfiguration();
-                config.Routes.MapODataRoute("default", "", model);
+                config.Routes.MapODataServiceRoute("default", "", model);
                 request.SetConfiguration(config);
-                request.SetODataRouteName("default");
-                request.SetEdmModel(model);
+                request.ODataProperties().RouteName = "default";
+                request.ODataProperties().Model = model;
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);
                 formatter.SupportedMediaTypes.Add(mediaType);

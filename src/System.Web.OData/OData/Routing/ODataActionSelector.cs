@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Conventions;
 
@@ -18,6 +19,7 @@ namespace System.Web.OData.Routing
     /// </summary>
     public class ODataActionSelector : IHttpActionSelector
     {
+        private const string MessageDetailKey = "MessageDetail";
         private readonly IHttpActionSelector _innerSelector;
 
         /// <summary>
@@ -63,8 +65,8 @@ namespace System.Web.OData.Routing
             }
 
             HttpRequestMessage request = controllerContext.Request;
-            ODataPath odataPath = request.GetODataPath();
-            IEnumerable<IODataRoutingConvention> routingConventions = request.GetODataRoutingConventions();
+            ODataPath odataPath = request.ODataProperties().Path;
+            IEnumerable<IODataRoutingConvention> routingConventions = request.ODataProperties().RoutingConventions;
             IHttpRouteData routeData = controllerContext.RouteData;
 
             if (odataPath == null || routingConventions == null || routeData.Values.ContainsKey(ODataRouteConstants.Action))
@@ -83,10 +85,20 @@ namespace System.Web.OData.Routing
                 }
             }
 
-            throw new HttpResponseException(request.CreateErrorResponse(
-                HttpStatusCode.NotFound,
+            throw new HttpResponseException(CreateErrorResponse(request, HttpStatusCode.NotFound,
                 Error.Format(SRResources.NoMatchingResource, controllerContext.Request.RequestUri),
                 Error.Format(SRResources.NoRoutingHandlerToSelectAction, odataPath.PathTemplate)));
+        }
+
+        private static HttpResponseMessage CreateErrorResponse(HttpRequestMessage request, HttpStatusCode statusCode, string message, string messageDetail)
+        {
+            HttpError error = new HttpError(message);
+            if (request.ShouldIncludeErrorDetail())
+            {
+                error.Add(MessageDetailKey, messageDetail);
+            }
+
+            return request.CreateErrorResponse(statusCode, error);
         }
     }
 }

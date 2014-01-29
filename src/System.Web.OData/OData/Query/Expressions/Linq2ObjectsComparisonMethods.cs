@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
+
 namespace System.Web.OData.Query.Expressions
 {
     internal static class Linq2ObjectsComparisonMethods

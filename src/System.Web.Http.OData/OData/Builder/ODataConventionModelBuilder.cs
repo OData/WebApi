@@ -188,7 +188,7 @@ namespace System.Web.Http.OData.Builder
 
             DiscoverInheritanceRelationships();
 
-            // Don't RediscoverComplexTypes() and treat everything as an entity type if buidling a model for QueryableAttribute.
+            // Don't RediscoverComplexTypes() and treat everything as an entity type if buidling a model for EnableQueryAttribute.
             if (!_isQueryCompositionMode)
             {
                 RediscoverComplexTypes();

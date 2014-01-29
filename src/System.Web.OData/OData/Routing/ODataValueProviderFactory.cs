@@ -2,11 +2,11 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.ValueProviders;
 using System.Web.Http.ValueProviders.Providers;
+using System.Web.OData.Extensions;
 
 namespace System.Web.OData.Routing
 {
@@ -19,7 +19,7 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("actionContext");
             }
 
-            return new ODataValueProvider(actionContext.Request.GetRoutingConventionsDataStore());
+            return new ODataValueProvider(actionContext.Request.ODataProperties().RoutingConventionsStore);
         }
 
         private class ODataValueProvider : NameValuePairsValueProvider

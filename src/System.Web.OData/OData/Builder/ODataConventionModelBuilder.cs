@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -223,7 +222,7 @@ namespace System.Web.OData.Builder
 
             DiscoverInheritanceRelationships();
 
-            // Don't RediscoverComplexTypes() and treat everything as an entity type if buidling a model for QueryableAttribute.
+            // Don't RediscoverComplexTypes() and treat everything as an entity type if buidling a model for EnableQueryAttribute.
             if (!_isQueryCompositionMode)
             {
                 RediscoverComplexTypes();

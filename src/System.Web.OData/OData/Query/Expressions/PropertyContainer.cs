@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
-using System.Web.Http;
 
 namespace System.Web.OData.Query.Expressions
 {

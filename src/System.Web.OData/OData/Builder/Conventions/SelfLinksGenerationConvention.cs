@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 
 namespace System.Web.OData.Builder.Conventions
@@ -20,7 +21,7 @@ namespace System.Web.OData.Builder.Conventions
             {
                 configuration.HasFeedSelfLink(entitySetContext =>
                 {
-                    string selfLink = entitySetContext.Url.ODataLink(new EntitySetPathSegment(entitySetContext.EntitySet));
+                    string selfLink = entitySetContext.Url.CreateODataLink(new EntitySetPathSegment(entitySetContext.EntitySet));
 
                     if (selfLink == null)
                     {

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.Routing;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization.Models;
 using System.Web.OData.Query;
 using System.Web.OData.TestCommon;
@@ -359,7 +360,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
             const long ExpectedCountValue = 1000;
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetCountValue(ExpectedCountValue);
+            request.ODataProperties().TotalCount = ExpectedCountValue;
             var result = new object[0];
 
             // Act
@@ -376,7 +377,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
             Uri expectedNextLink = new Uri("http://nextlink.com");
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetNextPageLink(expectedNextLink);
+            request.ODataProperties().NextLink = expectedNextLink;
             var result = new object[0];
 
             // Act
@@ -424,7 +425,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
             Uri nextLink = new Uri("http://somelink");
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetNextPageLink(nextLink);
+            request.ODataProperties().NextLink = nextLink;
             var result = new object[0];
             IEdmNavigationProperty navProp = new Mock<IEdmNavigationProperty>().Object;
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
@@ -447,7 +448,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetCountValue(42);
+            request.ODataProperties().TotalCount = 42;
             var result = new object[0];
             IEdmNavigationProperty navProp = new Mock<IEdmNavigationProperty>().Object;
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);

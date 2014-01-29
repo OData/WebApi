@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -31,8 +32,8 @@ namespace System.Web.OData
                                            new PropertyAccessPathSegment("FakeProperty"),
                                            new ValuePathSegment());
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            request.SetEdmModel(model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = path;
             ODataNullValueAttribute odataNullValue = new ODataNullValueAttribute();
             HttpResponseMessage response = SetUpResponse(HttpStatusCode.OK, null, typeof(object));
             HttpActionExecutedContext context = SetUpContext(request, response);
@@ -52,8 +53,8 @@ namespace System.Web.OData
                                            new PropertyAccessPathSegment("FakeProperty"),
                                            new ValuePathSegment());
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            request.SetEdmModel(model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = path;
             ODataNullValueAttribute odataNullValue = new ODataNullValueAttribute();
             HttpResponseMessage response = SetUpResponse(HttpStatusCode.OK, 5, typeof(int));
             HttpActionExecutedContext context = SetUpContext(request, response);
@@ -72,8 +73,8 @@ namespace System.Web.OData
                                            new PropertyAccessPathSegment("FakeProperty"),
                                            new ValuePathSegment());
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            request.SetEdmModel(model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = path;
             ODataNullValueAttribute odataNullValue = new ODataNullValueAttribute();
             HttpResponseMessage response = SetUpResponse(HttpStatusCode.InternalServerError, null, typeof(object));
             HttpActionExecutedContext context = SetUpContext(request, response);
@@ -104,8 +105,8 @@ namespace System.Web.OData
                                            new KeyValuePathSegment("FakeKey"),
                                            new PropertyAccessPathSegment("FakeProperty"));
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            request.SetEdmModel(model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = path;
             ODataNullValueAttribute odataNullValue = new ODataNullValueAttribute();
             HttpResponseMessage response = SetUpResponse(HttpStatusCode.InternalServerError, null, typeof(object));
             HttpActionExecutedContext context = SetUpContext(request, response);

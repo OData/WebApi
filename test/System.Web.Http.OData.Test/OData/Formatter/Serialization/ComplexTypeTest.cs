@@ -2,6 +2,7 @@
 
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -44,7 +45,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private static HttpRequestMessage GetSampleRequest()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
-            request.SetEdmModel(GetSampleModel());
+            request.ODataProperties().Model = GetSampleModel();
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.OData.Query.Expressions;
 using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -79,7 +78,7 @@ namespace System.Web.OData.Query.Validators
             Assert.Throws<ODataException>(() =>
                  _validator.Validate(new FilterQueryOption("substring(Name,8,1) eq '7'", _context),
                 new ODataValidationSettings() { AllowedFunctions = AllowedFunctions.AllMathFunctions }),
-                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctions' property on QueryableAttribute or QueryValidationSettings.");
+                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.");
         }
 
         [Fact]
@@ -92,7 +91,7 @@ namespace System.Web.OData.Query.Validators
             Assert.Throws<ODataException>(() =>
                    _validator.Validate(new FilterQueryOption("not (Name eq 'David')", _context),
                  new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.Equal }),
-                "Logical operator 'Not' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on QueryableAttribute or QueryValidationSettings.");
+                "Logical operator 'Not' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on EnableQueryAttribute or QueryValidationSettings.");
         }
 
         [Fact]
@@ -105,7 +104,7 @@ namespace System.Web.OData.Query.Validators
             Assert.Throws<ODataException>(() =>
                    _validator.Validate(new FilterQueryOption("Id mod 2 eq 0", _context),
                  new ODataValidationSettings() { AllowedArithmeticOperators = AllowedArithmeticOperators.Add }),
-                "Arithmetic operator 'Modulo' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on QueryableAttribute or QueryValidationSettings.");
+                "Arithmetic operator 'Modulo' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on EnableQueryAttribute or QueryValidationSettings.");
         }
 
         [Fact]
@@ -118,7 +117,7 @@ namespace System.Web.OData.Query.Validators
             Assert.Throws<ODataException>(() =>
                    _validator.Validate(new FilterQueryOption("FavoriteColor has System.Web.OData.Builder.TestModels.Color'Red'", _context),
                  new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.Equal }),
-                "Logical operator 'Has' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on QueryableAttribute or QueryValidationSettings.");
+                "Logical operator 'Has' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on EnableQueryAttribute or QueryValidationSettings.");
         }
 
         // want to test if all the virtual methods are being invoked correctly
@@ -195,7 +194,7 @@ namespace System.Web.OData.Query.Validators
             settings.MaxAnyAllExpressionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(new FilterQueryOption(filter, _productContext), settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or QueryableAttribute.");
+            Assert.Throws<ODataException>(() => _validator.Validate(new FilterQueryOption(filter, _productContext), settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or EnableQueryAttribute.");
         }
 
         [Theory]
@@ -223,7 +222,7 @@ namespace System.Web.OData.Query.Validators
             FilterQueryOption option = new FilterQueryOption(filter, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), "The node count limit of '100' has been exceeded. To increase the limit, set the 'MaxNodeCount' property on QueryableAttribute or ODataValidationSettings.");
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), "The node count limit of '100' has been exceeded. To increase the limit, set the 'MaxNodeCount' property on EnableQueryAttribute or ODataValidationSettings.");
         }
 
         [Theory]
@@ -274,7 +273,7 @@ namespace System.Web.OData.Query.Validators
             // Act & Assert
             Assert.Throws<ODataException>(
                 () => _validator.Validate(option, settings),
-                "Arithmetic operator 'Modulo' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on QueryableAttribute or QueryValidationSettings.");
+                "Arithmetic operator 'Modulo' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on EnableQueryAttribute or QueryValidationSettings.");
         }
 
         [Fact]
@@ -291,7 +290,7 @@ namespace System.Web.OData.Query.Validators
             // Act & Assert
             Assert.Throws<ODataException>(
                 () => _validator.Validate(option, settings),
-                "Function 'length' is not allowed. To allow it, set the 'AllowedFunctions' property on QueryableAttribute or QueryValidationSettings.");
+                "Function 'length' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.");
 
         }
 
@@ -309,7 +308,7 @@ namespace System.Web.OData.Query.Validators
             // Act & Assert
             Assert.Throws<ODataException>(
                 () => _validator.Validate(option, settings),
-                "Logical operator 'NotEqual' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on QueryableAttribute or QueryValidationSettings.");
+                "Logical operator 'NotEqual' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on EnableQueryAttribute or QueryValidationSettings.");
         }
 
         [Fact]

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Batch;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
@@ -63,7 +64,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 if (contentIDToLocationMapping != null)
                 {
                     UrlHelper urlHelper = readContext.Request.GetUrlHelper() ?? new UrlHelper(readContext.Request);
-                    Uri baseAddress = new Uri(urlHelper.ODataLink());
+                    Uri baseAddress = new Uri(urlHelper.CreateODataLink());
                     string relativeUrl = uri.IsAbsoluteUri ? baseAddress.MakeRelativeUri(uri).OriginalString : uri.OriginalString;
                     string resolvedUrl = ContentIdHelpers.ResolveContentId(relativeUrl, contentIDToLocationMapping);
                     Uri resolvedUri = new Uri(resolvedUrl, UriKind.RelativeOrAbsolute);

@@ -3,6 +3,7 @@
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Formatter.Serialization;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -30,7 +31,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             var paintEdmAction = model.GetAvailableProcedures(model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType).Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            configuration.Routes.MapODataServiceRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);

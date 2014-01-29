@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
 using System.Web.OData.TestCommon.Models;
@@ -412,11 +413,11 @@ namespace System.Web.OData
             {
                 IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
                 HttpConfiguration config = new HttpConfiguration();
-                config.Routes.MapODataRoute("default", "", model);
-                request.SetODataRouteName("default");
+                config.Routes.MapODataServiceRoute("default", "", model);
+                request.ODataProperties().RouteName = "default";
                 request.SetConfiguration(config);
-                request.SetEdmModel(model);
-                request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
+                request.ODataProperties().Model = model;
+                request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(
                     (f) => f.GetPerRequestFormatterInstance(typeof(Delta<DeltaModel>), request, null));
 
@@ -464,11 +465,11 @@ namespace System.Web.OData
             {
                 IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
                 HttpConfiguration config = new HttpConfiguration();
-                config.Routes.MapODataRoute("default", "", model);
-                request.SetODataRouteName("default");
+                config.Routes.MapODataServiceRoute("default", "", model);
+                request.ODataProperties().RouteName = "default";
                 request.SetConfiguration(config);
-                request.SetEdmModel(model);
-                request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
+                request.ODataProperties().Model = model;
+                request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(
                     (f) => f.GetPerRequestFormatterInstance(typeof(Delta<DeltaModelWithAlias>), request, null));
 

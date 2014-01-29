@@ -2,6 +2,7 @@
 
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.TestCommon;
@@ -30,7 +31,7 @@ namespace System.Web.OData
             ApiController controller = new Mock<ApiController>().Object;
             var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers");
             controller.Configuration = new HttpConfiguration();
-            request.SetODataPath(new ODataPath(new MetadataPathSegment()));
+            request.ODataProperties().Path = new ODataPath(new MetadataPathSegment());
             controller.Request = request;
 
             Assert.Throws<InvalidOperationException>(

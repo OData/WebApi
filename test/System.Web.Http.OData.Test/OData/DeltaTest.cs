@@ -11,6 +11,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
@@ -426,11 +427,11 @@ namespace System.Web.Http.OData
             {
                 IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
                 HttpConfiguration config = new HttpConfiguration();
-                config.Routes.MapODataRoute("default", "", model);
-                request.SetODataRouteName("default");
+                config.Routes.MapODataServiceRoute("default", "", model);
+                request.ODataProperties().RouteName = "default";
                 request.SetConfiguration(config);
-                request.SetEdmModel(model);
-                request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
+                request.ODataProperties().Model = model;
+                request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(
                     (f) => f.GetPerRequestFormatterInstance(typeof(Delta<DeltaModel>), request, null));
 

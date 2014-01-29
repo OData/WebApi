@@ -7,9 +7,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
-using System.Web.OData.Formatter;
+using System.Web.Http.OData.Formatter;
 
-namespace System.Web.Http
+namespace System.Web.Http.OData
 {
     internal static class TypeHelper
     {
@@ -70,17 +70,6 @@ namespace System.Web.Http
             }
 
             return false;
-        }
-
-        public static Type GetUnderlyingTypeOrSelf(Type type)
-        {
-            return Nullable.GetUnderlyingType(type) ?? type;
-        }
-
-        public static bool IsEnum(Type type)
-        {
-            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
-            return underlyingTypeOrSelf.IsEnum;
         }
 
         /// <summary>

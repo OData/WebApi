@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Tracing;
@@ -115,8 +116,8 @@ namespace System.Web.Http.OData.Formatter
             var model2 = builder2.GetEdmModel();
 
             var config = new HttpConfiguration();
-            config.Routes.MapODataRoute("OData1", "v1", model1);
-            config.Routes.MapODataRoute("OData2", "v2", model2);
+            config.Routes.MapODataServiceRoute("OData1", "v1", model1);
+            config.Routes.MapODataServiceRoute("OData2", "v2", model2);
 
             using (HttpServer host = new HttpServer(config))
             using (HttpClient client = new HttpClient(host))
@@ -456,7 +457,7 @@ namespace System.Web.Http.OData.Formatter
         private static HttpConfiguration CreateConfiguration(IEdmModel model)
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            configuration.Routes.MapODataServiceRoute(model);
             configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
             return configuration;
         }

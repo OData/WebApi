@@ -1,13 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
-using System.Linq;
-using System.Reflection;
-using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
 
 namespace System.Web.Http.OData
 {

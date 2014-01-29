@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Web.Http;
 using System.Web.Http.Hosting;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
@@ -13,56 +14,56 @@ using Moq;
 
 namespace System.Net.Http
 {
-    public class ODataHttpRequestMessageExtensionTests
+    public class HttpRequestMessageExtensionsTest
     {
         [Fact]
-        public void GetEdmModelReturnsNullByDefault()
+        public void ModelGetter_ReturnsNullByDefault()
         {
             HttpRequestMessage request = new HttpRequestMessage();
-            IEdmModel model = request.GetEdmModel();
+            IEdmModel model = request.ODataProperties().Model;
 
             Assert.Null(model);
         }
 
         [Fact]
-        public void SetEdmModelThenGetReturnsWhatYouSet()
+        public void ModelGetter_Returns_ModelSetter()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
             IEdmModel model = new EdmModel();
 
             // Act
-            request.SetEdmModel(model);
-            IEdmModel newModel = request.GetEdmModel();
+            request.ODataProperties().Model = model;
+            IEdmModel newModel = request.ODataProperties().Model;
 
             // Assert
             Assert.Same(model, newModel);
         }
 
         [Fact]
-        public void GetODataPathHandlerReturnsDefaultPathHandlerByDefault()
+        public void PathHandlerGetter_ReturnsDefaultPathHandlerByDefault()
         {
             HttpRequestMessage request = new HttpRequestMessage();
             IEdmModel model = new EdmModel();
-            request.SetEdmModel(model);
+            request.ODataProperties().Model = model;
 
-            var pathHandler = request.GetODataPathHandler();
+            var pathHandler = request.ODataProperties().PathHandler;
 
             Assert.NotNull(pathHandler);
             Assert.IsType<DefaultODataPathHandler>(pathHandler);
         }
 
         [Fact]
-        public void SetODataPathHandlerThenGetReturnsWhatYouSet()
+        public void PathHandlerGetter_Returns_PathHandlerSetter()
         {
             HttpRequestMessage request = new HttpRequestMessage();
             IODataPathHandler parser = new Mock<IODataPathHandler>().Object;
 
             // Act
-            request.SetODataPathHandler(parser);
+            request.ODataProperties().PathHandler = parser;
 
             // Assert
-            Assert.Same(parser, request.GetODataPathHandler());
+            Assert.Same(parser, request.ODataProperties().PathHandler);
         }
 
         [Theory]
@@ -84,7 +85,7 @@ namespace System.Net.Http
         [InlineData(IncludeErrorDetailPolicy.Never, null, null, false)]
         [InlineData(IncludeErrorDetailPolicy.Never, true, false, false)]
         [InlineData(IncludeErrorDetailPolicy.Never, false, true, false)]
-        public void CreateODataError_Respects_IncludeErrorDetail(IncludeErrorDetailPolicy errorDetail, bool? isLocal, bool? includeErrorDetail, bool detailIncluded)
+        public void CreateErrorResponse_Respects_IncludeErrorDetail(IncludeErrorDetailPolicy errorDetail, bool? isLocal, bool? includeErrorDetail, bool detailIncluded)
         {
             HttpConfiguration config = new HttpConfiguration() { IncludeErrorDetailPolicy = errorDetail };
             HttpRequestMessage request = new HttpRequestMessage();
@@ -108,7 +109,7 @@ namespace System.Net.Http
                 }
             };
 
-            HttpResponseMessage response = request.CreateODataErrorResponse(HttpStatusCode.BadRequest, error);
+            HttpResponseMessage response = request.CreateErrorResponse(HttpStatusCode.BadRequest, error);
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             ODataError contentError;
@@ -128,70 +129,54 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void GetSelectExpandCaluse_ThrowsArgumentNull_Request()
+        public void ODataProperties_ThrowsArgumentNull_RequestNull()
         {
             HttpRequestMessage request = null;
             Assert.ThrowsArgumentNull(
-                () => request.GetSelectExpandClause(),
+                () => request.ODataProperties(),
                 "request");
         }
 
         [Fact]
-        public void SetSelectExpandCaluse_ThrowsArgumentNull_Request()
-        {
-            HttpRequestMessage request = null;
-            Assert.ThrowsArgumentNull(
-                () => request.SetSelectExpandClause(GetMockSelectExpandClause()),
-                "request");
-        }
-
-        [Fact]
-        public void SetSelectExpandCaluse_ThrowsArgumentNull_SelectExpandClause()
+        public void SelectExpandClauseSetter_ThrowsArgumentNull()
         {
             HttpRequestMessage request = new HttpRequestMessage();
             Assert.ThrowsArgumentNull(
-                () => request.SetSelectExpandClause(selectExpandClause: null),
-                "selectExpandClause");
+                () => request.ODataProperties().SelectExpandClause = null,
+                "value");
         }
 
         [Fact]
-        public void GetSelectExpandClause_ReturnsNullByDefault()
+        public void SelectExpandClauseGetter_ReturnsNullByDefault()
         {
             HttpRequestMessage request = new HttpRequestMessage();
 
-            Assert.Null(request.GetSelectExpandClause());
+            Assert.Null(request.ODataProperties().SelectExpandClause);
         }
 
         [Fact]
-        public void GetSelectExpandClause_Returns_SetSelectExpandClause()
+        public void SelectExpandClauseGetter_Returns_SelectExpandClauseSetter()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            SelectExpandClause selectExpandCaluse = GetMockSelectExpandClause();
+            SelectExpandClause selectExpandClause = GetMockSelectExpandClause();
 
             // Act
-            request.SetSelectExpandClause(selectExpandCaluse);
-            var result = request.GetSelectExpandClause();
+            request.ODataProperties().SelectExpandClause = selectExpandClause;
+            var result = request.ODataProperties().SelectExpandClause;
 
             // Assert
-            Assert.Same(selectExpandCaluse, result);
+            Assert.Same(selectExpandClause, result);
         }
 
         [Fact]
-        public void GetRoutingConventionsDataStore_ThrowsArgumentNull_Request()
-        {
-            HttpRequestMessage request = null;
-            Assert.ThrowsArgumentNull(() => request.GetRoutingConventionsDataStore(), "request");
-        }
-
-        [Fact]
-        public void GetRoutingConventionsDataStore_ReturnsEmptyNonNullDictionary()
+        public void RoutingConventionsStoreGetter_ReturnsEmptyNonNullDictionary()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            IDictionary<string, object> result = request.GetRoutingConventionsDataStore();
+            IDictionary<string, object> result = request.ODataProperties().RoutingConventionsStore;
 
             // Assert
             Assert.NotNull(result);
@@ -199,14 +184,14 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void GetRoutingConventionsDataStore_ReturnsSameInstance_IfCalledMultipleTimes()
+        public void RoutingConventionsStoreGetter_ReturnsSameInstance_IfCalledMultipleTimes()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            IDictionary<string, object> instance1 = request.GetRoutingConventionsDataStore();
-            IDictionary<string, object> instance2 = request.GetRoutingConventionsDataStore();
+            IDictionary<string, object> instance1 = request.ODataProperties().RoutingConventionsStore;
+            IDictionary<string, object> instance2 = request.ODataProperties().RoutingConventionsStore;
 
             // Assert
             Assert.NotNull(instance1);

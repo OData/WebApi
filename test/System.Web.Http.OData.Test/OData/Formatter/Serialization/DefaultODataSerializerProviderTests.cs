@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
@@ -96,7 +97,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetODataPath(new ODataPath(new ValuePathSegment()));
+            request.ODataProperties().Path = new ODataPath(new ValuePathSegment());
 
             var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, type, request);
 

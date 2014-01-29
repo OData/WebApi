@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;

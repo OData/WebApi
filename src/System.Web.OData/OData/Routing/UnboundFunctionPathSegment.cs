@@ -9,7 +9,6 @@ using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Validation;
 
 namespace System.Web.OData.Routing
 {

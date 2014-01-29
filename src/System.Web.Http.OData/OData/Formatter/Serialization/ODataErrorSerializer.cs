@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Runtime.Serialization;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.OData;
 
@@ -42,7 +43,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 }
                 else
                 {
-                    oDataError = httpError.ToODataError();
+                    oDataError = httpError.CreateODataError();
                 }
             }
 

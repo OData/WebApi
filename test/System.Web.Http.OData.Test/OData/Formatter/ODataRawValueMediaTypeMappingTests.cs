@@ -2,6 +2,7 @@
 
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -26,8 +27,8 @@ namespace System.Web.Http.OData.Formatter
             ODataPath path = new ODataPath(new EntitySetPathSegment("People"), new KeyValuePathSegment("1"), propertySegment, new ValuePathSegment());
             ODataPrimitiveValueMediaTypeMapping mapping = new ODataPrimitiveValueMediaTypeMapping();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/People(1)/Age/$value");
-            request.SetEdmModel(model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = path;
 
             double mapResult = mapping.TryMatchMediaType(request);
 
@@ -53,8 +54,8 @@ namespace System.Web.Http.OData.Formatter
             ODataPath path = new ODataPath(new EntitySetPathSegment("People"), new KeyValuePathSegment("1"), propertySegment);
             ODataPrimitiveValueMediaTypeMapping mapping = new ODataPrimitiveValueMediaTypeMapping();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/People(1)/Age/");
-            request.SetEdmModel(model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = path;
 
             double mapResult = mapping.TryMatchMediaType(request);
 
@@ -69,8 +70,8 @@ namespace System.Web.Http.OData.Formatter
             ODataPath path = new ODataPath(new EntitySetPathSegment("RawValue"), new KeyValuePathSegment("1"), propertySegment, new ValuePathSegment());
             ODataBinaryValueMediaTypeMapping mapping = new ODataBinaryValueMediaTypeMapping();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/RawValue(1)/BinaryProperty/$value");
-            request.SetEdmModel(model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = path;
 
             double mapResult = mapping.TryMatchMediaType(request);
 

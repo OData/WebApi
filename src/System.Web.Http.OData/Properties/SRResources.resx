@@ -262,7 +262,7 @@
     <value>Rebinding is not supported.</value>
   </data>
   <data name="MaxNodeLimitExceeded" xml:space="preserve">
-    <value>The node count limit of '{0}' has been exceeded. To increase the limit, set the '{1}' property on QueryableAttribute or ODataValidationSettings.</value>
+    <value>The node count limit of '{0}' has been exceeded. To increase the limit, set the '{1}' property on EnableQueryAttribute or ODataValidationSettings.</value>
   </data>
   <data name="NoNavigationLinkFactoryFound" xml:space="preserve">
     <value>No NavigationLink factory was found for the navigation property '{0}' from entity type '{1}' on entity set '{2}'. Try calling HasNavigationPropertyLink on the EntitySetConfiguration.</value>
@@ -382,7 +382,7 @@
     <value>Queries can not be applied to a response content of type '{0}'. The response content must be an ObjectContent.</value>
   </data>
   <data name="MaxAnyAllExpressionLimitExceeded" xml:space="preserve">
-    <value>The Any/All nesting limit of '{0}' has been exceeded. '{1}' can be configured on ODataQuerySettings or QueryableAttribute.</value>
+    <value>The Any/All nesting limit of '{0}' has been exceeded. '{1}' can be configured on ODataQuerySettings or EnableQueryAttribute.</value>
   </data>
   <data name="CannotAddToNullCollection" xml:space="preserve">
     <value>The property '{0}' on type '{1}' returned a null value. The input stream contains collection items which cannot be added if the instance is null.</value>
@@ -488,19 +488,19 @@
     <value>Replacing entities is not supported for this entity set.</value>
   </data>
   <data name="NotAllowedArithmeticOperator" xml:space="preserve">
-    <value>Arithmetic operator '{0}' is not allowed. To allow it, set the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
+    <value>Arithmetic operator '{0}' is not allowed. To allow it, set the '{1}' property on EnableQueryAttribute or QueryValidationSettings.</value>
   </data>
   <data name="NotAllowedFunction" xml:space="preserve">
-    <value>Function '{0}' is not allowed. To allow it, set the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
+    <value>Function '{0}' is not allowed. To allow it, set the '{1}' property on EnableQueryAttribute or QueryValidationSettings.</value>
   </data>
   <data name="NotAllowedLogicalOperator" xml:space="preserve">
-    <value>Logical operator '{0}' is not allowed. To allow it, set the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
+    <value>Logical operator '{0}' is not allowed. To allow it, set the '{1}' property on EnableQueryAttribute or QueryValidationSettings.</value>
   </data>
   <data name="NotAllowedOrderByProperty" xml:space="preserve">
-    <value>Order by '{0}' is not allowed. To allow it, set the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
+    <value>Order by '{0}' is not allowed. To allow it, set the '{1}' property on EnableQueryAttribute or QueryValidationSettings.</value>
   </data>
   <data name="NotAllowedQueryOption" xml:space="preserve">
-    <value>Query option '{0}' is not allowed. To allow it, set the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
+    <value>Query option '{0}' is not allowed. To allow it, set the '{1}' property on EnableQueryAttribute or QueryValidationSettings.</value>
   </data>
   <data name="SkipTopLimitExceeded" xml:space="preserve">
     <value>The limit of '{0}' for {1} query has been exceeded. The value from the incoming request is '{2}'.</value>
@@ -539,13 +539,13 @@
     <value>The related navigation property could not be found from the OData path. The related navigation property is required to deserialize the payload.</value>
   </data>
   <data name="RequestMustHaveModel" xml:space="preserve">
-    <value>The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataRoute to register a route that parses the OData URI and attaches the model information.</value>
+    <value>The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataServiceRoute to register a route that parses the OData URI and attaches the model information.</value>
   </data>
   <data name="QueryGetModelMustNotReturnNull" xml:space="preserve">
-    <value>A model is required for querying. Consider implementing the QueryableAttribute.GetModel method never to return a null value.</value>
+    <value>A model is required for querying. Consider implementing the EnableQueryAttribute.GetModel method never to return a null value.</value>
   </data>
   <data name="RequestMustHaveODataRouteName" xml:space="preserve">
-    <value>The request must have an associated OData route name. Consider using the extension method request.SetODataRouteName to set a route name.</value>
+    <value>The request must have an associated OData route name. Consider using the extension request.ODataProperties().RouteName to set a route name.</value>
   </data>
   <data name="LocationHeaderDoesNotStartWithEntitySet" xml:space="preserve">
     <value>A Location header could not be generated because the request's OData path does not start with an entity set path segment.</value>
@@ -612,7 +612,7 @@
     <value>The 'Content' property on the batch request cannot be null.</value>
   </data>
   <data name="MaxExpandDepthExceeded" xml:space="preserve">
-    <value>The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the '{1}' property on QueryableAttribute or ODataValidationSettings.</value>
+    <value>The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the '{1}' property on EnableQueryAttribute or ODataValidationSettings.</value>
   </data>
   <data name="NonSelectExpandOnSingleEntity" xml:space="preserve">
     <value>The requested resource is not a collection. Query options $filter, $orderby, $inlinecount, $skip, and $top can be applied only on collections.</value>

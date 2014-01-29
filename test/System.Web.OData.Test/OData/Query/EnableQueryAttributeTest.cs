@@ -15,6 +15,7 @@ using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.Routing;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Query.Controllers;
 using System.Web.OData.Query.Validators;
 using System.Web.OData.TestCommon;
@@ -27,7 +28,7 @@ using Moq;
 
 namespace System.Web.OData.Query
 {
-    public class QueryableAttributeTest
+    public class EnableQueryAttributeTest
     {
         public static List<Customer> CustomerList = new List<Customer>()
         {
@@ -58,7 +59,7 @@ namespace System.Web.OData.Query
         public void Ctor_Initializes_Properties()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
 
             // Act & Assert
             Assert.Equal(HandleNullPropagationOption.Default, attribute.HandleNullPropagation);
@@ -68,8 +69,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void EnsureStableOrdering_Property_RoundTrips()
         {
-            Assert.Reflection.BooleanProperty<QueryableAttribute>(
-                new QueryableAttribute(),
+            Assert.Reflection.BooleanProperty<EnableQueryAttribute>(
+                new EnableQueryAttribute(),
                 o => o.EnsureStableOrdering,
                 true);
         }
@@ -77,8 +78,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void HandleNullPropagation_Property_RoundTrips()
         {
-            Assert.Reflection.EnumProperty<QueryableAttribute, HandleNullPropagationOption>(
-                new QueryableAttribute(),
+            Assert.Reflection.EnumProperty<EnableQueryAttribute, HandleNullPropagationOption>(
+                new EnableQueryAttribute(),
                 o => o.HandleNullPropagation,
                 HandleNullPropagationOption.Default,
                 HandleNullPropagationOption.Default - 1,
@@ -88,8 +89,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void AllowedArithmeticOperators_Property_RoundTrips()
         {
-            Assert.Reflection.EnumProperty<QueryableAttribute, AllowedArithmeticOperators>(
-                new QueryableAttribute(),
+            Assert.Reflection.EnumProperty<EnableQueryAttribute, AllowedArithmeticOperators>(
+                new EnableQueryAttribute(),
                 o => o.AllowedArithmeticOperators,
                 AllowedArithmeticOperators.All,
                 AllowedArithmeticOperators.None - 1,
@@ -99,8 +100,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void AllowedFunctions_Property_RoundTrips()
         {
-            Assert.Reflection.EnumProperty<QueryableAttribute, AllowedFunctions>(
-                new QueryableAttribute(),
+            Assert.Reflection.EnumProperty<EnableQueryAttribute, AllowedFunctions>(
+                new EnableQueryAttribute(),
                 o => o.AllowedFunctions,
                 AllowedFunctions.AllFunctions,
                 AllowedFunctions.None - 1,
@@ -110,8 +111,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void AllowedLogicalOperators_Property_RoundTrips()
         {
-            Assert.Reflection.EnumProperty<QueryableAttribute, AllowedLogicalOperators>(
-                new QueryableAttribute(),
+            Assert.Reflection.EnumProperty<EnableQueryAttribute, AllowedLogicalOperators>(
+                new EnableQueryAttribute(),
                 o => o.AllowedLogicalOperators,
                 AllowedLogicalOperators.All,
                 AllowedLogicalOperators.None - 1,
@@ -122,7 +123,7 @@ namespace System.Web.OData.Query
         public void EnableConstantParameterization_Property_RoundTrips()
         {
             Assert.Reflection.BooleanProperty(
-                new QueryableAttribute(),
+                new EnableQueryAttribute(),
                 o => o.EnableConstantParameterization,
                 expectedDefaultValue: true);
         }
@@ -130,8 +131,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void AllowedQueryOptions_Property_RoundTrips()
         {
-            Assert.Reflection.EnumProperty<QueryableAttribute, AllowedQueryOptions>(
-                new QueryableAttribute(),
+            Assert.Reflection.EnumProperty<EnableQueryAttribute, AllowedQueryOptions>(
+                new EnableQueryAttribute(),
                 o => o.AllowedQueryOptions,
                 AllowedQueryOptions.Supported,
                 AllowedQueryOptions.None - 1,
@@ -141,8 +142,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void AllowedOrderByProperties_Property_RoundTrips()
         {
-            Assert.Reflection.StringProperty<QueryableAttribute>(
-                new QueryableAttribute(),
+            Assert.Reflection.StringProperty<EnableQueryAttribute>(
+                new EnableQueryAttribute(),
                 o => o.AllowedOrderByProperties,
                 expectedDefaultValue: null,
                 allowNullAndEmpty: true,
@@ -152,8 +153,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void MaxAnyAllExpressionDepth_Property_RoundTrips()
         {
-            Assert.Reflection.IntegerProperty<QueryableAttribute, int>(
-                new QueryableAttribute(),
+            Assert.Reflection.IntegerProperty<EnableQueryAttribute, int>(
+                new EnableQueryAttribute(),
                 o => o.MaxAnyAllExpressionDepth,
                 expectedDefaultValue: 1,
                 minLegalValue: 1,
@@ -166,8 +167,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void MaxNodeCount_Property_RoundTrips()
         {
-            Assert.Reflection.IntegerProperty<QueryableAttribute, int>(
-                new QueryableAttribute(),
+            Assert.Reflection.IntegerProperty<EnableQueryAttribute, int>(
+                new EnableQueryAttribute(),
                 o => o.MaxNodeCount,
                 expectedDefaultValue: 100,
                 minLegalValue: 1,
@@ -180,8 +181,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void PageSize_Property_RoundTrips()
         {
-            Assert.Reflection.IntegerProperty<QueryableAttribute, int>(
-                new QueryableAttribute(),
+            Assert.Reflection.IntegerProperty<EnableQueryAttribute, int>(
+                new EnableQueryAttribute(),
                 o => o.PageSize,
                 expectedDefaultValue: 0,
                 minLegalValue: 1,
@@ -195,7 +196,7 @@ namespace System.Web.OData.Query
         public void MaxExpansionDepth_Property_RoundTrips()
         {
             Assert.Reflection.IntegerProperty(
-                new QueryableAttribute(),
+                new EnableQueryAttribute(),
                 o => o.MaxExpansionDepth,
                 expectedDefaultValue: 2,
                 minLegalValue: 0,
@@ -209,7 +210,7 @@ namespace System.Web.OData.Query
         public void MaxOrderByNodeCount_Property_RoundTrips()
         {
             Assert.Reflection.IntegerProperty(
-                new QueryableAttribute(),
+                new EnableQueryAttribute(),
                 o => o.MaxOrderByNodeCount,
                 expectedDefaultValue: 5,
                 minLegalValue: 1,
@@ -222,14 +223,14 @@ namespace System.Web.OData.Query
         [Fact]
         public void OnActionExecuted_Throws_Null_Context()
         {
-            Assert.ThrowsArgumentNull(() => new QueryableAttribute().OnActionExecuted(null), "actionExecutedContext");
+            Assert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuted(null), "actionExecutedContext");
         }
 
         [Fact]
         public void OnActionExecuted_Throws_Null_Request()
         {
             Assert.ThrowsArgument(
-                () => new QueryableAttribute().OnActionExecuted(new HttpActionExecutedContext()),
+                () => new EnableQueryAttribute().OnActionExecuted(new HttpActionExecutedContext()),
                 "actionExecutedContext",
                 String.Format("The HttpExecutedActionContext.Request is null.{0}Parameter name: actionExecutedContext", Environment.NewLine));
         }
@@ -238,7 +239,7 @@ namespace System.Web.OData.Query
         public void OnActionExecuted_Throws_Null_Configuration()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
@@ -248,7 +249,7 @@ namespace System.Web.OData.Query
             HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
 
             Assert.ThrowsArgument(
-                () => new QueryableAttribute().OnActionExecuted(context),
+                () => new EnableQueryAttribute().OnActionExecuted(context),
                 "actionExecutedContext",
                 String.Format("Request message does not contain an HttpConfiguration object.{0}Parameter name: actionExecutedContext", Environment.NewLine));
         }
@@ -258,7 +259,7 @@ namespace System.Web.OData.Query
         public void DifferentReturnTypeWorks(string methodName, object responseObject, bool isNoOp)
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
             request.SetConfiguration(config);
@@ -282,7 +283,7 @@ namespace System.Web.OData.Query
         public void UnknownQueryNotStartingWithDollarSignWorks()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?select");
             HttpConfiguration config = new HttpConfiguration();
             request.SetConfiguration(config);
@@ -304,7 +305,7 @@ namespace System.Web.OData.Query
         public void UnknownQueryStartingWithDollarSignThrows()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$custom");
             HttpConfiguration config = new HttpConfiguration();
             request.SetConfiguration(config);
@@ -327,7 +328,7 @@ namespace System.Web.OData.Query
         public void NonGenericEnumerableReturnTypeThrows()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$skip=1");
             HttpConfiguration config = new HttpConfiguration();
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
@@ -343,14 +344,14 @@ namespace System.Web.OData.Query
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => attribute.OnActionExecuted(context),
-                "Cannot create an EDM model as the action 'QueryableAttribute' on controller 'GetNonGenericEnumerable' has a return type 'CustomerHighLevel' that does not implement IEnumerable<T>.");
+                "Cannot create an EDM model as the action 'EnableQueryAttribute' on controller 'GetNonGenericEnumerable' has a return type 'CustomerHighLevel' that does not implement IEnumerable<T>.");
         }
 
         [Fact]
         public void NonObjectContentResponse_ThrowsArgumentException()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$skip=1");
             HttpConfiguration config = new HttpConfiguration();
             request.SetConfiguration(config);
@@ -375,7 +376,7 @@ namespace System.Web.OData.Query
         public void Primitives_Can_Be_Used_For_Top_And_Skip(string filter)
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Primitive/?" + filter);
             HttpConfiguration config = new HttpConfiguration();
             request.SetConfiguration(config);
@@ -400,7 +401,7 @@ namespace System.Web.OData.Query
         public void ValidateQuery_Throws_With_Null_Request()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), new HttpRequestMessage());
 
@@ -412,7 +413,7 @@ namespace System.Web.OData.Query
         public void ValidateQuery_Throws_WithNullQueryOptions()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => attribute.ValidateQuery(new HttpRequestMessage(), null), "queryOptions");
@@ -426,7 +427,7 @@ namespace System.Web.OData.Query
         public void ValidateQuery_Accepts_All_Supported_QueryNames(string query)
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), request);
@@ -439,7 +440,7 @@ namespace System.Web.OData.Query
         public void ValidateQuery_Sends_BadRequest_For_Unrecognized_QueryNames()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$xxx");
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), request);
@@ -455,7 +456,7 @@ namespace System.Web.OData.Query
         public void ValidateQuery_Can_Override_Base()
         {
             // Arrange
-            Mock<QueryableAttribute> mockAttribute = new Mock<QueryableAttribute>();
+            Mock<EnableQueryAttribute> mockAttribute = new Mock<EnableQueryAttribute>();
             mockAttribute.Setup(m => m.ValidateQuery(It.IsAny<HttpRequestMessage>(), It.IsAny<ODataQueryOptions>())).Callback(() => { }).Verifiable();
 
             // Act & Assert
@@ -467,7 +468,7 @@ namespace System.Web.OData.Query
         public void ApplyQuery_Throws_With_Null_Queryable()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), new HttpRequestMessage());
 
@@ -479,7 +480,7 @@ namespace System.Web.OData.Query
         public void ApplyQuery_Throws_WithNullQueryOptions()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => attribute.ApplyQuery(CustomerList.AsQueryable(), null), "queryOptions");
@@ -493,7 +494,7 @@ namespace System.Web.OData.Query
         public void ApplyQuery_Accepts_All_Supported_QueryNames(string query)
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), request);
@@ -506,7 +507,7 @@ namespace System.Web.OData.Query
         public void ApplyQuery_Can_Override_Base()
         {
             // Arrange
-            Mock<QueryableAttribute> mockAttribute = new Mock<QueryableAttribute>();
+            Mock<EnableQueryAttribute> mockAttribute = new Mock<EnableQueryAttribute>();
             IQueryable result = CustomerList.AsQueryable();
             mockAttribute.Setup(m => m.ApplyQuery(It.IsAny<IQueryable>(), It.IsAny<ODataQueryOptions>()))
                          .Returns(result);
@@ -527,13 +528,13 @@ namespace System.Web.OData.Query
         [InlineData("Id, Address")]
         public void OrderByDisllowedPropertiesWithSpaces(string allowedProperties)
         {
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             attribute.AllowedOrderByProperties = allowedProperties;
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customers/?$orderby=Id,Name");
             ODataQueryOptions queryOptions = new ODataQueryOptions(ValidationTestHelper.CreateCustomerContext(), request);
 
             Assert.Throws<ODataException>(() => attribute.ValidateQuery(request, queryOptions),
-                "Order by 'Name' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings.");
+                "Order by 'Name' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on EnableQueryAttribute or QueryValidationSettings.");
         }
 
         [Theory]
@@ -545,7 +546,7 @@ namespace System.Web.OData.Query
         [InlineData(null)]
         public void OrderByAllowedPropertiesWithSpaces(string allowedProperties)
         {
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             attribute.AllowedOrderByProperties = allowedProperties;
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customers/?$orderby=Id,Name");
             ODataQueryOptions queryOptions = new ODataQueryOptions(ValidationTestHelper.CreateCustomerContext(), request);
@@ -562,10 +563,11 @@ namespace System.Web.OData.Query
             var descriptor = new ReflectedHttpActionDescriptor();
             descriptor.Configuration = config;
 
-            var queryModel = new QueryableAttribute().GetModel(entityClrType, request, descriptor);
+            var queryModel = new EnableQueryAttribute().GetModel(entityClrType, request, descriptor);
 
             Assert.NotNull(queryModel);
-            Assert.Same(descriptor.Properties["MS_EdmModelSystem.Web.OData.Query.QueryCompositionCustomer"], queryModel);
+            Assert.Same(descriptor.Properties["System.Web.OData.Model+System.Web.OData.Query.QueryCompositionCustomer"],
+                queryModel);
         }
 
         [Fact]
@@ -576,14 +578,15 @@ namespace System.Web.OData.Query
             var entityClrType = typeof(QueryCompositionCustomer);
             var config = new HttpConfiguration();
             var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            request.SetEdmModel(model);
+            request.ODataProperties().Model = model;
             var descriptor = new ReflectedHttpActionDescriptor();
             descriptor.Configuration = config;
 
-            var queryModel = new QueryableAttribute().GetModel(entityClrType, request, descriptor);
+            var queryModel = new EnableQueryAttribute().GetModel(entityClrType, request, descriptor);
 
             Assert.NotNull(queryModel);
-            Assert.Same(descriptor.Properties["MS_EdmModelSystem.Web.OData.Query.QueryCompositionCustomer"], queryModel);
+            Assert.Same(descriptor.Properties["System.Web.OData.Model+System.Web.OData.Query.QueryCompositionCustomer"],
+                queryModel);
         }
 
 
@@ -596,21 +599,22 @@ namespace System.Web.OData.Query
             var entityClrType = typeof(QueryCompositionCustomer);
             var config = new HttpConfiguration();
             var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            request.SetEdmModel(model);
+            request.ODataProperties().Model = model;
             var descriptor = new ReflectedHttpActionDescriptor();
             descriptor.Configuration = config;
 
-            var queryModel = new QueryableAttribute().GetModel(entityClrType, request, descriptor);
+            var queryModel = new EnableQueryAttribute().GetModel(entityClrType, request, descriptor);
 
             Assert.NotNull(queryModel);
             Assert.Same(model, queryModel);
-            Assert.False(descriptor.Properties.ContainsKey("MS_EdmModelSystem.Web.OData.Query.QueryCompositionCustomer"));
+            Assert.DoesNotContain("System.Web.OData.Model+System.Web.OData.Query.QueryCompositionCustomer",
+                descriptor.Properties.Keys.OfType<string>());
         }
 
         [Fact]
         public void QueryableOnActionUnknownOperatorIsAllowed()
         {
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext(
                 "http://localhost:8080/?$orderby=$it desc&unknown=12",
                 Enumerable.Range(0, 5).AsQueryable());
@@ -625,14 +629,14 @@ namespace System.Web.OData.Query
         [Fact]
         public void QueryableOnActionUnknownOperatorStartingDollarSignThrows()
         {
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext(
                 "http://localhost:8080/QueryCompositionCustomer?$orderby=Name desc&$unknown=12",
                 QueryCompositionCustomerController.CustomerList.AsQueryable());
 
             var exception = Assert.Throws<HttpResponseException>(() => attribute.OnActionExecuted(actionExecutedContext));
 
-            // QueryableAttribute will validate and throws
+            // EnableQueryAttribute will validate and throws
             Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
         }
 
@@ -640,7 +644,7 @@ namespace System.Web.OData.Query
         public virtual void QueryableUsesConfiguredAssembliesResolver_For_MappingDerivedTypes()
         {
             // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext(
                 "http://localhost:8080/QueryCompositionCustomer/?$filter=Id eq 2",
                 QueryCompositionCustomerController.CustomerList.AsQueryable());
@@ -669,7 +673,7 @@ namespace System.Web.OData.Query
         [Fact]
         public void ApplyQuery_SingleEntity_ThrowsArgumentNull_Entity()
         {
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             ODataQueryOptions options = new ODataQueryOptions(new ODataQueryContext(EdmCoreModel.Instance, typeof(int)), new HttpRequestMessage());
 
             Assert.ThrowsArgumentNull(
@@ -680,7 +684,7 @@ namespace System.Web.OData.Query
         [Fact]
         public void ApplyQuery_SingleEntity_ThrowsArgumentNull_QueryOptions()
         {
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
 
             Assert.ThrowsArgumentNull(
                 () => attribute.ApplyQuery(entity: 42, queryOptions: null),
@@ -691,7 +695,7 @@ namespace System.Web.OData.Query
         public void ApplyQuery_CallsApplyOnODataQueryOptions()
         {
             object entity = new object();
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
             HttpRequestMessage request = new HttpRequestMessage();
             Mock<ODataQueryOptions> queryOptions = new Mock<ODataQueryOptions>(context, request);
@@ -722,7 +726,7 @@ namespace System.Web.OData.Query
         public void GetElementType_Returns_ExpectedElementType(object response, Type expectedElementType)
         {
             HttpActionDescriptor actionDescriptor = new Mock<HttpActionDescriptor>().Object;
-            Assert.Equal(expectedElementType, QueryableAttribute.GetElementType(response, actionDescriptor));
+            Assert.Equal(expectedElementType, EnableQueryAttribute.GetElementType(response, actionDescriptor));
         }
 
         [Fact]
@@ -732,7 +736,7 @@ namespace System.Web.OData.Query
             IQueryable<Customer> queryable = new[] { customer }.AsQueryable();
             HttpActionDescriptor actionDescriptor = new Mock<HttpActionDescriptor>().Object;
 
-            var result = QueryableAttribute.SingleOrDefault(queryable, actionDescriptor);
+            var result = EnableQueryAttribute.SingleOrDefault(queryable, actionDescriptor);
 
             Assert.Same(customer, result);
         }
@@ -743,7 +747,7 @@ namespace System.Web.OData.Query
             IQueryable<Customer> queryable = Enumerable.Empty<Customer>().AsQueryable();
             HttpActionDescriptor actionDescriptor = new Mock<HttpActionDescriptor>().Object;
 
-            var result = QueryableAttribute.SingleOrDefault(queryable, actionDescriptor);
+            var result = EnableQueryAttribute.SingleOrDefault(queryable, actionDescriptor);
 
             Assert.Null(result);
         }
@@ -760,7 +764,7 @@ namespace System.Web.OData.Query
             };
 
             Assert.Throws<InvalidOperationException>(
-                () => QueryableAttribute.SingleOrDefault(queryable, actionDescriptor),
+                () => EnableQueryAttribute.SingleOrDefault(queryable, actionDescriptor),
                 "The action 'SomeAction' on controller 'SomeName' returned a SingleResult containing more than one element. " +
                 "SingleResult must have zero or one elements.");
         }
@@ -771,7 +775,7 @@ namespace System.Web.OData.Query
             Customer customer = new Customer();
             SingleResult singleResult = new SingleResult<Customer>(new Customer[] { customer }.AsQueryable());
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", singleResult);
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
 
             attribute.OnActionExecuted(actionExecutedContext);
 
@@ -783,7 +787,7 @@ namespace System.Web.OData.Query
         public void OnActionExecuted_SingleResult_Returns400_IfQueryContainsNonSelectExpand()
         {
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/?$top=10", new Customer());
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
 
             attribute.OnActionExecuted(actionExecutedContext);
 
@@ -797,7 +801,7 @@ namespace System.Web.OData.Query
             var customers = Enumerable.Empty<Customer>().AsQueryable();
             SingleResult result = SingleResult.Create(customers);
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", result);
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
 
             // Act
             attribute.OnActionExecuted(actionExecutedContext);
@@ -813,7 +817,7 @@ namespace System.Web.OData.Query
             var customers = CustomerList.AsQueryable();
             SingleResult result = SingleResult.Create(customers);
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", result);
-            QueryableAttribute attribute = new QueryableAttribute();
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
 
             // Act and Assert
             Assert.Throws<InvalidOperationException>(() => attribute.OnActionExecuted(actionExecutedContext));
@@ -834,7 +838,7 @@ namespace System.Web.OData.Query
             ODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
 
             Assert.Throws<ODataException>(
-                () => QueryableAttribute.ValidateSelectExpandOnly(queryOptions),
+                () => EnableQueryAttribute.ValidateSelectExpandOnly(queryOptions),
                 "The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.");
         }
 

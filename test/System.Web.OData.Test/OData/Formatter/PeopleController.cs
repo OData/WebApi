@@ -3,14 +3,13 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
 using System.Web.OData.Builder.TestModels;
 
 namespace System.Web.OData.Formatter
 {
     public class PeopleController : ODataController
     {
-        [Queryable(PageSize = 2)]
+        [EnableQuery(PageSize = 2)]
         public IEnumerable<FormatterPerson> GetPeople()
         {
             return new FormatterPerson[]

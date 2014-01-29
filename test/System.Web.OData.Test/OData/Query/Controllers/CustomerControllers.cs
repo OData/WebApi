@@ -4,57 +4,56 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Web.Http;
 using System.Web.OData.TestCommon.Models;
 
 namespace System.Web.OData.Query.Controllers
 {
     public class CustomerHighLevelController : ODataController
     {
-        [Queryable]
+        [EnableQuery]
         public IQueryable<Customer> Get()
         {
             throw new NotImplementedException();
         }
 
-        [Queryable]
+        [EnableQuery]
         public object GetObject()
         {
             // this can return Customer or BellevueCustomer
             throw new NotImplementedException();
         }
 
-        [Queryable]
+        [EnableQuery]
         public IEnumerable<BellevueCustomer> GetIEnumerableOfCustomer()
         {
             throw new NotImplementedException();
         }
 
-        [Queryable]
+        [EnableQuery]
         public Collection<SeattleCustomer> GetCollectionOfCustomer()
         {
             throw new NotImplementedException();
         }
 
-        [Queryable]
+        [EnableQuery]
         public List<RedmondCustomer> GetListOfCustomer()
         {
             throw new NotImplementedException();
         }
 
-        [Queryable]
+        [EnableQuery]
         public CustomerCollection GetStronglyTypedCustomer()
         {
             throw new NotImplementedException();
         }
 
-        [Queryable]
+        [EnableQuery]
         public Customer[] GetArrayOfCustomers()
         {
             throw new NotImplementedException();
         }
 
-        [Queryable]
+        [EnableQuery]
         public NonGenericEnumerable GetNonGenericEnumerable()
         {
             throw new NotImplementedException();

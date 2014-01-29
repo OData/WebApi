@@ -2,10 +2,10 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
-using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using Microsoft.OData.Core;
@@ -185,9 +185,9 @@ namespace System.Web.OData.Formatter.Serialization
                 }
                 else if (writeContext.Request != null)
                 {
-                    feed.NextPageLink = writeContext.Request.GetNextPageLink();
+                    feed.NextPageLink = writeContext.Request.ODataProperties().NextLink;
 
-                    long? countValue = writeContext.Request.GetCountValue();
+                    long? countValue = writeContext.Request.ODataProperties().TotalCount;
                     if (countValue.HasValue)
                     {
                         feed.Count = countValue.Value;

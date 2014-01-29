@@ -4,8 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Filters;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData
 {
@@ -37,7 +37,7 @@ namespace System.Web.Http.OData
 
         private static bool IsRawValueRequest(HttpRequestMessage request)
         {
-            ODataPath path = request.GetODataPath();
+            ODataPath path = request.ODataProperties().Path;
             return path != null && path.Segments.LastOrDefault() is ValuePathSegment;
         }
     }

@@ -15,7 +15,6 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;

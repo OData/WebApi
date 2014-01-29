@@ -58,7 +58,7 @@ namespace System.Web.Http.OData.Query.Validators
             // Act & Assert
             var exception = Assert.Throws<ODataException>(() => _validator.Validate(option, settings));
             Assert.Equal(
-                "Query option '" + queryOptionName + "' is not allowed. To allow it, set the 'AllowedQueryOptions' property on QueryableAttribute or QueryValidationSettings.",
+                "Query option '" + queryOptionName + "' is not allowed. To allow it, set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.",
                 exception.Message,
                 StringComparer.OrdinalIgnoreCase);
         }

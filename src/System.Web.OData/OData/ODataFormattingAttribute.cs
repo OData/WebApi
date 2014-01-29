@@ -54,9 +54,11 @@ namespace System.Web.OData
             MediaTypeFormatterCollection controllerFormatters = controllerSettings.Formatters;
             if (!controllerFormatters.Where(f => f != null && Decorator.GetInner(f) is ODataMediaTypeFormatter).Any())
             {
-                // Remove Xml and Json formatters to avoid media type conflicts
-                controllerFormatters.RemoveRange(
+                // Remove Xml and Json formatters to avoid media type conflicts.
+                RemoveFormatters(controllerFormatters,
                     controllerFormatters.Where(f => f is XmlMediaTypeFormatter || f is JsonMediaTypeFormatter));
+
+                // Then add our formatters.
                 controllerFormatters.InsertRange(0, CreateODataFormatters());
             }
 
@@ -82,6 +84,20 @@ namespace System.Web.OData
         public virtual IList<ODataMediaTypeFormatter> CreateODataFormatters()
         {
             return ODataMediaTypeFormatters.Create();
+        }
+
+        private static void RemoveFormatters(MediaTypeFormatterCollection formatterCollection,
+            IEnumerable<MediaTypeFormatter> formattersToRemove)
+        {
+            Contract.Assert(formatterCollection != null);
+            Contract.Assert(formattersToRemove != null);
+
+            // Instantiate a separate array to isolate enumeration from deletions. This code would otherwise throw
+            // after the first removal.
+            foreach (MediaTypeFormatter formatter in formattersToRemove.ToArray())
+            {
+                formatterCollection.Remove(formatter);
+            }
         }
     }
 }

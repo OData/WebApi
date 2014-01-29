@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
@@ -21,7 +22,7 @@ namespace System.Web.OData
             HttpConfiguration configuration = new HttpConfiguration();
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
-            configuration.Routes.MapODataRoute("odata", routePrefix: null, model: model);
+            configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(

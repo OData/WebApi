@@ -7,6 +7,7 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using Microsoft.Data.Edm;
@@ -522,7 +523,7 @@ namespace System.Web.Http.OData.Formatter
         private static IEnumerable<ODataMediaTypeFormatter> CreateProductUnderTest(IEdmModel model)
         {
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetEdmModel(model);
+            request.ODataProperties().Model = model;
             return ODataMediaTypeFormatters.Create().Select(f => f.GetPerRequestFormatterInstance(typeof(void), request, null) as ODataMediaTypeFormatter);
         }
     }

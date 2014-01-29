@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
@@ -24,7 +24,7 @@ namespace System.Web.Http.OData.Formatter
             _model = GetModel();
             configuration.Formatters.Clear();
             configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create());
-            configuration.Routes.MapODataRoute(_model);
+            configuration.Routes.MapODataServiceRoute(_model);
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);

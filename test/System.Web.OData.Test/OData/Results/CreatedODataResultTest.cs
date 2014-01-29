@@ -7,6 +7,7 @@ using System.Net.Http.Formatting;
 using System.Web.Http;
 using System.Web.Http.Results;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
@@ -194,14 +195,15 @@ namespace System.Web.OData.Results
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
                 "The request must have an associated EDM model. Consider using the extension method " +
-                "HttpConfiguration.Routes.MapODataRoute to register a route that parses the OData URI and attaches the model information.");
+                "HttpConfiguration.Routes.MapODataServiceRoute to register a route that parses the OData URI and " +
+                "attaches the model information.");
         }
 
         [Fact]
         public void GenerateLocationHeader_ThrowsODataPathMissing_IfRequestDoesNotHaveODataPath()
         {
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetEdmModel(EdmCoreModel.Instance);
+            request.ODataProperties().Model = EdmCoreModel.Instance;
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
@@ -214,8 +216,8 @@ namespace System.Web.OData.Results
         {
             ODataPath path = new ODataPath();
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetEdmModel(EdmCoreModel.Instance);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = EdmCoreModel.Instance;
+            request.ODataProperties().Path = path;
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
@@ -229,8 +231,8 @@ namespace System.Web.OData.Results
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetEdmModel(model.Model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model.Model;
+            request.ODataProperties().Path = path;
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
@@ -244,8 +246,8 @@ namespace System.Web.OData.Results
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetEdmModel(model.Model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model.Model;
+            request.ODataProperties().Path = path;
             model.Model.SetAnnotationValue(model.Address, new ClrTypeAnnotation(typeof(TestEntity)));
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
@@ -271,8 +273,8 @@ namespace System.Web.OData.Results
             model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetEdmModel(model.Model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model.Model;
+            request.ODataProperties().Path = path;
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act
@@ -292,8 +294,8 @@ namespace System.Web.OData.Results
             model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetEdmModel(model.Model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model.Model;
+            request.ODataProperties().Path = path;
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act
@@ -315,8 +317,8 @@ namespace System.Web.OData.Results
             model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetEdmModel(model.Model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model.Model;
+            request.ODataProperties().Path = path;
             TestController controller = new TestController();
             controller.Configuration = new HttpConfiguration();
             CreatedODataResult<TestEntity> createdODataResult = new CreatedODataResult<TestEntity>(_entity, controller);
@@ -343,8 +345,8 @@ namespace System.Web.OData.Results
             model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetEdmModel(model.Model);
-            request.SetODataPath(path);
+            request.ODataProperties().Model = model.Model;
+            request.ODataProperties().Path = path;
             TestController controller = new TestController { Request = request, Configuration = new HttpConfiguration() };
             CreatedODataResult<TestEntity> createdODataResult = new CreatedODataResult<TestEntity>(_entity, controller);
 

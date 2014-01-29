@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
@@ -25,8 +26,8 @@ namespace System.Web.Http.OData
             _configuration = new HttpConfiguration();
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
-            _configuration.Routes.MapODataRoute("odata", "odata", GetModel());
-            _configuration.Routes.MapODataRoute("odata-inheritance", "odata-inheritance", GetModelWithInheritance());
+            _configuration.Routes.MapODataServiceRoute("odata", "odata", GetModel());
+            _configuration.Routes.MapODataServiceRoute("odata-inheritance", "odata-inheritance", GetModelWithInheritance());
             _configuration.Routes.MapHttpRoute("api", "api", new { controller = "NonODataSelectExpandTestCustomers" });
 
             HttpServer server = new HttpServer(_configuration);
@@ -221,13 +222,13 @@ namespace System.Web.Http.OData
 
     public class SelectExpandTestCustomersController : ODataController
     {
-        [Queryable]
+        [EnableQuery]
         public IEnumerable<SelectExpandTestCustomer> Get()
         {
             return SelectExpandTestCustomer.Customers;
         }
 
-        [Queryable]
+        [EnableQuery]
         public SelectExpandTestCustomer GetSelectExpandTestCustomer([FromODataUri]int key)
         {
             return SelectExpandTestCustomer.Customers[0];
@@ -236,13 +237,13 @@ namespace System.Web.Http.OData
 
     public class NonODataSelectExpandTestCustomersController : ApiController
     {
-        [Queryable]
+        [EnableQuery]
         public IEnumerable<SelectExpandTestCustomer> Get()
         {
             return SelectExpandTestCustomer.Customers;
         }
 
-        [Queryable]
+        [EnableQuery]
         public SingleResult Get(int id)
         {
             IQueryable<SelectExpandTestCustomer> singleCustomer = SelectExpandTestCustomer.Customers.AsQueryable().Take(1);

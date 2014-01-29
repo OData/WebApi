@@ -835,7 +835,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Any/All nesting limit of &apos;{0}&apos; has been exceeded. &apos;{1}&apos; can be configured on ODataQuerySettings or QueryableAttribute..
+        ///   Looks up a localized string similar to The Any/All nesting limit of &apos;{0}&apos; has been exceeded. &apos;{1}&apos; can be configured on ODataQuerySettings or EnableQueryAttribute..
         /// </summary>
         internal static string MaxAnyAllExpressionLimitExceeded {
             get {
@@ -844,7 +844,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the &apos;{1}&apos; property on QueryableAttribute or ODataValidationSettings..
+        ///   Looks up a localized string similar to The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the &apos;{1}&apos; property on EnableQueryAttribute or ODataValidationSettings..
         /// </summary>
         internal static string MaxExpandDepthExceeded {
             get {
@@ -853,7 +853,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The node count limit of &apos;{0}&apos; has been exceeded. To increase the limit, set the &apos;{1}&apos; property on QueryableAttribute or ODataValidationSettings..
+        ///   Looks up a localized string similar to The node count limit of &apos;{0}&apos; has been exceeded. To increase the limit, set the &apos;{1}&apos; property on EnableQueryAttribute or ODataValidationSettings..
         /// </summary>
         internal static string MaxNodeLimitExceeded {
             get {
@@ -1078,7 +1078,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Arithmetic operator &apos;{0}&apos; is not allowed. To allow it, set the &apos;{1}&apos; property on QueryableAttribute or QueryValidationSettings..
+        ///   Looks up a localized string similar to Arithmetic operator &apos;{0}&apos; is not allowed. To allow it, set the &apos;{1}&apos; property on EnableQueryAttribute or QueryValidationSettings..
         /// </summary>
         internal static string NotAllowedArithmeticOperator {
             get {
@@ -1087,7 +1087,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Function &apos;{0}&apos; is not allowed. To allow it, set the &apos;{1}&apos; property on QueryableAttribute or QueryValidationSettings..
+        ///   Looks up a localized string similar to Function &apos;{0}&apos; is not allowed. To allow it, set the &apos;{1}&apos; property on EnableQueryAttribute or QueryValidationSettings..
         /// </summary>
         internal static string NotAllowedFunction {
             get {
@@ -1096,7 +1096,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Logical operator &apos;{0}&apos; is not allowed. To allow it, set the &apos;{1}&apos; property on QueryableAttribute or QueryValidationSettings..
+        ///   Looks up a localized string similar to Logical operator &apos;{0}&apos; is not allowed. To allow it, set the &apos;{1}&apos; property on EnableQueryAttribute or QueryValidationSettings..
         /// </summary>
         internal static string NotAllowedLogicalOperator {
             get {
@@ -1105,7 +1105,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Order by &apos;{0}&apos; is not allowed. To allow it, set the &apos;{1}&apos; property on QueryableAttribute or QueryValidationSettings..
+        ///   Looks up a localized string similar to Order by &apos;{0}&apos; is not allowed. To allow it, set the &apos;{1}&apos; property on EnableQueryAttribute or QueryValidationSettings..
         /// </summary>
         internal static string NotAllowedOrderByProperty {
             get {
@@ -1114,7 +1114,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Query option &apos;{0}&apos; is not allowed. To allow it, set the &apos;{1}&apos; property on QueryableAttribute or QueryValidationSettings..
+        ///   Looks up a localized string similar to Query option &apos;{0}&apos; is not allowed. To allow it, set the &apos;{1}&apos; property on EnableQueryAttribute or QueryValidationSettings..
         /// </summary>
         internal static string NotAllowedQueryOption {
             get {
@@ -1339,7 +1339,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A model is required for querying. Consider implementing the QueryableAttribute.GetModel method never to return a null value..
+        ///   Looks up a localized string similar to A model is required for querying. Consider implementing the EnableQueryAttribute.GetModel method never to return a null value..
         /// </summary>
         internal static string QueryGetModelMustNotReturnNull {
             get {
@@ -1411,7 +1411,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataRoute to register a route that parses the OData URI and attaches the model information..
+        ///   Looks up a localized string similar to The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataServiceRoute to register a route that parses the OData URI and attaches the model information..
         /// </summary>
         internal static string RequestMustHaveModel {
             get {
@@ -1420,7 +1420,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The request must have an associated OData route name. Consider using the extension method request.SetODataRouteName to set a route name..
+        ///   Looks up a localized string similar to The request must have an associated OData route name. Consider using the extension request.ODataProperties().RouteName to set a route name..
         /// </summary>
         internal static string RequestMustHaveODataRouteName {
             get {

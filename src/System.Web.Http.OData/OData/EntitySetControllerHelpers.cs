@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
@@ -26,12 +27,12 @@ namespace System.Web.Http.OData
 
         public static ODataPath GetODataPath(ApiController controller)
         {
-            return controller.Request.GetODataPath();
+            return controller.Request.ODataProperties().Path;
         }
 
         public static ODataQueryOptions<TEntity> CreateQueryOptions<TEntity>(ApiController controller)
         {
-            ODataQueryContext context = new ODataQueryContext(controller.Request.GetEdmModel(), typeof(TEntity));
+            ODataQueryContext context = new ODataQueryContext(controller.Request.ODataProperties().Model, typeof(TEntity));
             return new ODataQueryOptions<TEntity>(context, controller.Request);
         }
 
@@ -77,7 +78,7 @@ namespace System.Web.Http.OData
                 response = request.CreateResponse(HttpStatusCode.Created, createdEntity);
             }
 
-            ODataPath odataPath = request.GetODataPath();
+            ODataPath odataPath = request.ODataProperties().Path;
             if (odataPath == null)
             {
                 throw Error.InvalidOperation(SRResources.LocationHeaderMissingODataPath);
@@ -90,9 +91,8 @@ namespace System.Web.Http.OData
             }
 
             UrlHelper urlHelper = controller.Url ?? new UrlHelper(request);
-            response.Headers.Location = new Uri(urlHelper.ODataLink(
-                                                    entitySetSegment,
-                                                    new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(entityKey, ODataVersion.V3))));
+            response.Headers.Location = new Uri(urlHelper.CreateODataLink(entitySetSegment,
+                new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(entityKey, ODataVersion.V3))));
             return response;
         }
 

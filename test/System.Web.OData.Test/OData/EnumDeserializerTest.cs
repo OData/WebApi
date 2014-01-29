@@ -8,9 +8,7 @@ using System.Web.OData.Formatter.Deserialization;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Values;
 using Microsoft.TestCommon;
-using Microsoft.TestCommon.Types;
 using Moq;
 
 namespace System.Web.OData

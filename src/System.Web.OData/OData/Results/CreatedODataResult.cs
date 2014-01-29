@@ -11,6 +11,7 @@ using System.Web.Http;
 using System.Web.Http.Results;
 using System.Web.Http.Routing;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
@@ -163,13 +164,13 @@ namespace System.Web.OData.Results
 
         private static EntityInstanceContext CreateEntityInstanceContext(HttpRequestMessage request, T entity)
         {
-            IEdmModel model = request.GetEdmModel();
+            IEdmModel model = request.ODataProperties().Model;
             if (model == null)
             {
                 throw new InvalidOperationException(SRResources.RequestMustHaveModel);
             }
 
-            ODataPath path = request.GetODataPath();
+            ODataPath path = request.ODataProperties().Path;
             if (path == null)
             {
                 throw new InvalidOperationException(SRResources.ODataPathMissing);

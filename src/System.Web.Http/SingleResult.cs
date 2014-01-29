@@ -1,12 +1,15 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace System.Web.Http
 {
     /// <summary>
-    /// Represents an <see cref="IQueryable"/> containing zero or one entities.
+    /// Represents an <see cref="IQueryable"/> containing zero or one entities. Use together with an
+    /// <c>[EnableQuery]</c> from the System.Web.Http.OData or System.Web.OData namespace.
     /// </summary>
+    [TypeForwardedFrom("System.Web.Http.OData, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
     public abstract class SingleResult
     {
         /// <summary>
@@ -29,13 +32,13 @@ namespace System.Web.Http
         public IQueryable Queryable { get; private set; }
 
         /// <summary>
-        /// Creates a <see cref="SingleResult{T}"/> from an <see cref="IQueryable{T}"/>.
+        /// Creates a <see cref="SingleResult{T}"/> from an <see cref="IQueryable{T}"/>. A helper method to instantiate
+        /// a <see cref="SingleResult{T}"/> object without having to explicitly specify the type
+        /// <typeparamref name="T"/>.
         /// </summary>
         /// <typeparam name="T">The type of the data in the data source.</typeparam>
         /// <param name="queryable">The <see cref="IQueryable{T}"/> containing zero or one entities.</param>
         /// <returns>The created <see cref="SingleResult{T}"/>.</returns>
-        /// <remarks>Create is a helper method that you can call to instaniate a <see cref="SingleResult{T}"/> object without
-        /// having to explicitly specify the type <typeparamref name="T"/>.</remarks>
         public static SingleResult<T> Create<T>(IQueryable<T> queryable)
         {
             return new SingleResult<T>(queryable);

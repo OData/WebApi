@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Builder.Conventions;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
@@ -44,7 +45,7 @@ namespace System.Web.OData.Builder
                 idLinkPathSegments.Add(new CastPathSegment(entityContext.EntityType));
             }
 
-            string idLink = entityContext.Url.ODataLink(idLinkPathSegments);
+            string idLink = entityContext.Url.CreateODataLink(idLinkPathSegments);
             if (idLink == null)
             {
                 return null;
@@ -83,7 +84,7 @@ namespace System.Web.OData.Builder
 
             navigationPathSegments.Add(new NavigationPathSegment(navigationProperty));
 
-            string link = entityContext.Url.ODataLink(navigationPathSegments);
+            string link = entityContext.Url.CreateODataLink(navigationPathSegments);
             if (link == null)
             {
                 return null;
@@ -104,7 +105,7 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("feedContext");
             }
 
-            string selfLink = feedContext.Url.ODataLink(new EntitySetPathSegment(feedContext.EntitySet));
+            string selfLink = feedContext.Url.CreateODataLink(new EntitySetPathSegment(feedContext.EntitySet));
             return selfLink == null ? null : new Uri(selfLink);
         }
 
@@ -149,7 +150,7 @@ namespace System.Web.OData.Builder
 
             actionPathSegments.Add(new BoundActionPathSegment(actionName));
 
-            string actionLink = entityContext.Url.ODataLink(actionPathSegments);
+            string actionLink = entityContext.Url.CreateODataLink(actionPathSegments);
             return actionLink == null ? null : new Uri(actionLink);
         }
 
@@ -199,7 +200,7 @@ namespace System.Web.OData.Builder
             }
             functionPathSegments.Add(new BoundFunctionPathSegment(functionName, parametersDictionary));
 
-            string functionLink = entityContext.Url.ODataLink(functionPathSegments);
+            string functionLink = entityContext.Url.CreateODataLink(functionPathSegments);
             return functionLink == null ? null : new Uri(functionLink);
         }
     }

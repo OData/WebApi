@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Routing;
@@ -100,12 +101,12 @@ namespace System.Web.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)");
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, null, model);
+            configuration.Routes.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
-            request.SetEdmModel(model);
+            request.ODataProperties().Model = model;
             IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
-            request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet), new KeyValuePathSegment("10")));
-            request.SetODataRouteName(routeName);
+            request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet), new KeyValuePathSegment("10"));
+            request.ODataProperties().RouteName = routeName;
 
             ODataMediaTypeFormatter formatter;
 
@@ -145,11 +146,11 @@ namespace System.Web.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, baseUri);
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, routePrefix, model);
+            configuration.Routes.MapODataServiceRoute(routeName, routePrefix, model);
             request.SetConfiguration(configuration);
-            request.SetEdmModel(model);
-            request.SetODataPath(new ODataPath());
-            request.SetODataRouteName(routeName);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = new ODataPath();
+            request.ODataProperties().RouteName = routeName;
             HttpRouteData routeData = new HttpRouteData(new HttpRoute());
             routeData.Values.Add("a", "prefix");
             routeData.Values.Add("b", "prefix2");
@@ -170,9 +171,9 @@ namespace System.Web.OData.Formatter
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapHttpRoute("OData", "{param}");
             request.SetConfiguration(configuration);
-            request.SetEdmModel(model);
-            request.SetODataPath(new ODataPath());
-            request.SetODataRouteName("OData");
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = new ODataPath();
+            request.ODataProperties().RouteName = "OData";
 
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.ServiceDocument);
             var content = new ObjectContent<ODataServiceDocument>(new ODataServiceDocument(), formatter);
@@ -356,7 +357,7 @@ namespace System.Web.OData.Formatter
             var request = CreateFakeODataRequest(model);
             SelectExpandClause selectExpandClause =
                 new SelectExpandClause(new SelectItem[0], allSelected: true);
-            request.SetSelectExpandClause(selectExpandClause);
+            request.ODataProperties().SelectExpandClause = selectExpandClause;
 
             Mock<ODataSerializer> serializer = new Mock<ODataSerializer>(ODataPayloadKind.Property);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
@@ -519,7 +520,7 @@ namespace System.Web.OData.Formatter
             IEnumerable<ODataPayloadKind> allPayloadKinds = Enum.GetValues(typeof(ODataPayloadKind)).Cast<ODataPayloadKind>();
             var model = CreateModel();
             var request = CreateFakeODataRequest(model);
-            request.SetODataPath(path);
+            request.ODataProperties().Path = path;
 
             var formatterWithGivenPayload = new ODataMediaTypeFormatter(new[] { payloadKind }) { Request = request };
             var formatterWithoutGivenPayload = new ODataMediaTypeFormatter(allPayloadKinds.Except(new[] { payloadKind })) { Request = request };
@@ -672,13 +673,13 @@ namespace System.Web.OData.Formatter
                 ((IEdmStructuredType)entityType).FindProperty("Number") as IEdmStructuralProperty;
             HttpRequestMessage request = CreateFakeODataRequest(model);
             request.RequestUri = new Uri("http://localhost/sampleTypes?$select=Number");
-            request.SetSelectExpandClause(
+            request.ODataProperties().SelectExpandClause =
                 new SelectExpandClause(
                     new Collection<SelectItem>
                         {
                             new PathSelectItem(new ODataSelectPath(new PropertySegment(property))),
                         },
-                    allSelected: false));
+                    allSelected: false);
 
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.Entry);
 
@@ -813,12 +814,12 @@ namespace System.Web.OData.Formatter
         private static HttpRequestMessage CreateFakeODataRequest(IEdmModel model)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
-            request.SetEdmModel(model);
+            request.ODataProperties().Model = model;
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
-            request.SetODataPath(new ODataPath(new EntitySetPathSegment(
-                model.EntityContainers().Single().EntitySets().Single())));
+            request.ODataProperties().Path =
+                new ODataPath(new EntitySetPathSegment(model.EntityContainers().Single().EntitySets().Single()));
             request.SetFakeODataRouteName();
             return request;
         }

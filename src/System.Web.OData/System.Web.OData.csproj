@@ -60,6 +60,12 @@
     <Compile Include="..\Common\TypeExtensions.cs">
       <Link>Common\TypeExtensions.cs</Link>
     </Compile>
+    <Compile Include="Extensions\HttpConfigurationExtensions.cs" />
+    <Compile Include="Extensions\HttpErrorExtensions.cs" />
+    <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
+    <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
+    <Compile Include="Extensions\HttpRouteCollectionExtensions.cs" />
+    <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConvention.cs" />
@@ -88,9 +94,6 @@
     <Compile Include="OData\EdmModelExtensions.cs" />
     <Compile Include="OData\Builder\LinkGenerationHelpers.cs" />
     <Compile Include="OData\ContentIdHelpers.cs" />
-    <Compile Include="ODataHttpRouteCollectionExtensions.cs" />
-    <Compile Include="ODataHttpRequestMessageExtensions.cs" />
-    <Compile Include="ODataMediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="OData\AsyncEntitySetController.cs" />
     <Compile Include="OData\Batch\UnbufferedODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchResponseItem.cs" />
@@ -188,8 +191,6 @@
     <Compile Include="OData\EntitySetController.cs" />
     <Compile Include="OData\NonValidatingParameterBindingAttribute.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="ODataHttpErrorExtensions.cs" />
-    <Compile Include="ODataHttpConfigurationExtensions.cs" />
     <Compile Include="OData\Builder\ActionLinkBuilder.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinder.cs" />
     <Compile Include="OData\Builder\Conventions\ActionLinkGenerationConvention.cs" />
@@ -349,7 +350,7 @@
     <Compile Include="OData\Formatter\EdmLibHelpers.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinkSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEdmTypeSerializer.cs" />
-    <Compile Include="HttpActionDescriptorExtensions.cs" />
+    <Compile Include="Extensions\HttpActionDescriptorExtensions.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />
     <Compile Include="OData\TypedDelta.cs" />
@@ -370,11 +371,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SRResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="QueryableAttribute.cs" />
-    <Compile Include="ODataUrlHelperExtensions.cs" />
-    <Compile Include="SingleResult.cs" />
-    <Compile Include="SingleResultOfT.cs" />
-    <Compile Include="TypeHelper.cs" />
+    <Compile Include="OData\EnableQueryAttribute.cs" />
+    <Compile Include="OData\TypeHelper.cs" />
     <Compile Include="OData\Query\Expressions\ClrCanonicalFunctions.cs" />
     <Compile Include="OData\Query\Expressions\FilterBinder.cs" />
     <Compile Include="OData\Builder\PropertySelectorVisitor.cs" />

@@ -61,10 +61,10 @@
     <Compile Include="..\System.Web.Http.Test\Util\ContextUtil.cs">
       <Link>TestCommon\ContextUtil.cs</Link>
     </Compile>
-    <Compile Include="ODataHttpRouteCollectionExtensionsTest.cs" />
+    <Compile Include="HttpRouteCollectionExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensions.cs" />
-    <Compile Include="ODataHttpRequestMessageExtensionsTest.cs" />
-    <Compile Include="ODataHttpErrorExtensionsTest.cs" />
+    <Compile Include="HttpRequestMessageExtensionsTest.cs" />
+    <Compile Include="HttpErrorExtensionsTest.cs" />
     <Compile Include="OData\Batch\ODataHttpContentExtensionsTest.cs" />
     <Compile Include="OData\Batch\ODataBatchRequestItemTest.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensionsTest.cs" />
@@ -229,7 +229,7 @@
     <Compile Include="OData\Builder\EdmModelAsserts.cs" />
     <Compile Include="OData\Query\CountQueryOptionTest.cs" />
     <Compile Include="OData\Query\ODataValidationSettingsTest.cs" />
-    <Compile Include="OData\Query\QueryableAttributeTest.cs" />
+    <Compile Include="OData\Query\EnableQueryAttributeTest.cs" />
     <Compile Include="OData\Query\Expressions\ExpressionStringBuilder.cs" />
     <Compile Include="OData\Query\QueryableFilterProviderTest.cs" />
     <Compile Include="OData\Query\Expressions\Linq2ObjectsComparisonMethodsTest.cs" />
@@ -305,7 +305,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataPrimitiveSerializerTests.cs" />
     <Compile Include="TestCommon\EdmTestHelpers.cs" />
     <Compile Include="OData\Query\HttpActionDescriptorExtensionTests.cs" />
-    <Compile Include="ODataHttpConfigurationExtensionTest.cs" />
+    <Compile Include="HttpConfigurationExtensionsTest.cs" />
     <Compile Include="OData\Query\ODataQueryParameterBindingAttributeTests.cs" />
     <Compile Include="OData\Query\Expressions\DataModel.cs" />
     <Compile Include="OData\Query\Expressions\FilterBinderTests.cs" />

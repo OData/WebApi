@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.TestCommon;
 using Microsoft.TestCommon;
 
@@ -23,7 +24,7 @@ namespace System.Web.Http.OData.Routing
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            request.GetRoutingConventionsDataStore()["ID"] = 42;
+            request.ODataProperties().RoutingConventionsStore["ID"] = 42;
             HttpActionContext actionContext = new HttpActionContext { ControllerContext = new HttpControllerContext { Request = request } };
             ODataValueProviderFactory factory = new ODataValueProviderFactory();
 
@@ -45,12 +46,12 @@ namespace System.Web.Http.OData.Routing
 
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<TestClass>("Test");
-            server.Configuration.Routes.MapODataRoute("odata", "", builder.GetEdmModel());
+            server.Configuration.Routes.MapODataServiceRoute("odata", "", builder.GetEdmModel());
             HttpClient client = new HttpClient(server);
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Test");
-            request.GetRoutingConventionsDataStore()["test"] = new TestClass { Id = 42 };
+            request.ODataProperties().RoutingConventionsStore["test"] = new TestClass { Id = 42 };
             var response = client.SendAsync(request).Result;
 
             // Assert

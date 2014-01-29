@@ -57,6 +57,12 @@
     <Compile Include="..\Common\TypeExtensions.cs">
       <Link>Common\TypeExtensions.cs</Link>
     </Compile>
+    <Compile Include="Extensions\HttpConfigurationExtensions.cs" />
+    <Compile Include="Extensions\HttpErrorExtensions.cs" />
+    <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
+    <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
+    <Compile Include="Extensions\HttpRouteCollectionExtensions.cs" />
+    <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
     <Compile Include="OData\EdmModelExtensions.cs" />
@@ -108,6 +114,7 @@
     <Compile Include="OData\ODataRoutingAttribute.cs" />
     <Compile Include="OData\ODataUntypedActionParameters.cs" />
     <Compile Include="OData\PerRequestContentNegotiator.cs" />
+    <Compile Include="OData\EnableQueryAttribute.cs" />
     <Compile Include="OData\Query\Expressions\IDictionaryConvertible.cs" />
     <Compile Include="OData\Query\Expressions\NamedPropertyExpression.cs" />
     <Compile Include="OData\Query\Expressions\PropertyContainer.cs" />
@@ -299,7 +306,7 @@
     <Compile Include="OData\Formatter\EdmLibHelpers.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinkSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEdmTypeSerializer.cs" />
-    <Compile Include="HttpActionDescriptorExtensions.cs" />
+    <Compile Include="Extensions\HttpActionDescriptorExtensions.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />
     <Compile Include="OData\TypedDelta.cs" />
@@ -322,9 +329,7 @@
     </Compile>
     <Compile Include="QueryableAttribute.cs" />
     <Compile Include="ODataUrlHelperExtensions.cs" />
-    <Compile Include="SingleResult.cs" />
-    <Compile Include="SingleResultOfT.cs" />
-    <Compile Include="TypeHelper.cs" />
+    <Compile Include="OData\TypeHelper.cs" />
     <Compile Include="OData\Query\Expressions\ClrCanonicalFunctions.cs" />
     <Compile Include="OData\Query\Expressions\FilterBinder.cs" />
     <Compile Include="OData\Builder\PropertySelectorVisitor.cs" />

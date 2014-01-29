@@ -2,7 +2,6 @@
 
 using System.Linq;
 using Microsoft.TestCommon;
-using Moq;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {

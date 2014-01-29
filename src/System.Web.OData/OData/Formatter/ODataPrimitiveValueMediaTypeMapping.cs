@@ -1,8 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 

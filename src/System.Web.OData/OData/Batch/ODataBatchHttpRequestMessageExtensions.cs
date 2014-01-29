@@ -11,6 +11,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
@@ -26,7 +27,6 @@ namespace System.Web.OData.Batch
         private const string BatchIdKey = "BatchId";
         private const string ChangeSetIdKey = "ChangesetId";
         private const string ContentIdMappingKey = "ContentIdMapping";
-        private const string ODataMaxServiceVersion = "OData-MaxVersion";
         private const string BatchMediaType = "multipart/mixed";
         private const string Boundary = "boundary";
 
@@ -143,7 +143,7 @@ namespace System.Web.OData.Batch
         {
             Contract.Assert(request != null);
 
-            ODataVersion odataVersion = request.GetODataVersion();
+            ODataVersion odataVersion = request.ODataProperties().Version;
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
             {
                 Version = odataVersion,

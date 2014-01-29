@@ -7,6 +7,7 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Core;
@@ -763,7 +764,7 @@ namespace System.Web.OData.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage();
             request.RequestUri = new Uri("http://any");
-            request.SetEdmModel(model);
+            request.ODataProperties().Model = model;
             return ODataMediaTypeFormatters.Create().Select(f => f.GetPerRequestFormatterInstance(typeof(void), request, null) as ODataMediaTypeFormatter);
         }
     }

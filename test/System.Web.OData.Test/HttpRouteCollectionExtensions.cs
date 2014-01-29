@@ -3,13 +3,13 @@
 using System.Web.Http;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData
+namespace System.Web.OData.Extensions
 {
     internal static class HttpRouteCollectionExtensions
     {
-        public static void MapODataRoute(this HttpRouteCollection routes, IEdmModel model)
+        public static void MapODataServiceRoute(this HttpRouteCollection routes, IEdmModel model)
         {
-            routes.MapODataRoute("IgnoredRouteName", null, model);
+            routes.MapODataServiceRoute("IgnoredRouteName", null, model);
         }
     }
 }

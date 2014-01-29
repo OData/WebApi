@@ -59,7 +59,7 @@ namespace System.Web.Http.OData.Query
         SkipToken = 0x100,
 
         /// <summary>
-        /// A value that corresponds to the default query options supported by <see cref="QueryableAttribute"/>.
+        /// A value that corresponds to the default query options supported by <see cref="EnableQueryAttribute"/>.
         /// </summary>
         Supported = Filter | OrderBy | Top | Skip | InlineCount | Select | Expand,
 

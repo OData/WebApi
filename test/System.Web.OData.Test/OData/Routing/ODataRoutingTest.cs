@@ -3,6 +3,7 @@
 using System.Globalization;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Routing
@@ -15,7 +16,7 @@ namespace System.Web.OData.Routing
         public ODataRoutingTest()
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(ODataRoutingModel.GetModel());
+            configuration.Routes.MapODataServiceRoute(ODataRoutingModel.GetModel());
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);

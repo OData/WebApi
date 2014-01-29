@@ -2,15 +2,16 @@
 
 using System.Web.Http;
 using System.Web.Http.ModelBinding;
+using System.Web.OData.Extensions;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Test
 {
-    public class ODataHttpErrorExtensionsTest
+    public class HttpErrorExtensionsTest
     {
         [Fact]
-        public void ToODataError_CopiesAllErrorProperties()
+        public void CreateODataError_CopiesAllErrorProperties()
         {
             var error = new HttpError();
             error["Message"] = "error";
@@ -20,7 +21,7 @@ namespace System.Web.OData.Test
             error["ExceptionType"] = "System.ReallyBadException";
             error["StackTrace"] = "stacktrace";
 
-            ODataError oDataError = error.ToODataError();
+            ODataError oDataError = error.CreateODataError();
 
             Assert.Equal("error", oDataError.Message);
             Assert.Equal("language", oDataError.MessageLanguage);
@@ -32,13 +33,13 @@ namespace System.Web.OData.Test
         }
 
         [Fact]
-        public void ToODataError_CopiesInnerExceptionInformation()
+        public void CreateODataError_CopiesInnerExceptionInformation()
         {
             Exception innerException = new ArgumentException("innerException");
             Exception exception = new InvalidOperationException("exception", innerException);
             var error = new HttpError(exception, true);
 
-            ODataError oDataError = error.ToODataError();
+            ODataError oDataError = error.CreateODataError();
 
             Assert.Equal("An error has occurred.", oDataError.Message);
             Assert.Equal("exception", oDataError.InnerError.Message);
@@ -48,13 +49,13 @@ namespace System.Web.OData.Test
         }
 
         [Fact]
-        public void ToODataError_CopiesMessageDetailToInnerError()
+        public void CreateODataError_CopiesMessageDetailToInnerError()
         {
             var error = new HttpError();
             error["Message"] = "error";
             error["MessageDetail"] = "messagedetail";
 
-            ODataError oDataError = error.ToODataError();
+            ODataError oDataError = error.CreateODataError();
 
             Assert.Equal("error", oDataError.Message);
             Assert.Equal("messagedetail", oDataError.InnerError.Message);
@@ -62,7 +63,7 @@ namespace System.Web.OData.Test
         }
 
         [Fact]
-        public void ToODataError_CopiesModelStateErrorsToInnerError()
+        public void CreateODataError_CopiesModelStateErrorsToInnerError()
         {
             ModelStateDictionary dict = new ModelStateDictionary();
             string errorMessage1 = "Object reference not set to an instance of an object.";
@@ -74,7 +75,7 @@ namespace System.Web.OData.Test
             dict.AddModelError(parameter2Name, errorMessage2);
             var error = new HttpError(dict, includeErrorDetail: true);
 
-            ODataError oDataError = error.ToODataError();
+            ODataError oDataError = error.CreateODataError();
 
             Assert.Equal(
                 parameter1Name + " : " + errorMessage1 + Environment.NewLine +

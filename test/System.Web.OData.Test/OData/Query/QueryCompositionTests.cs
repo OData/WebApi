@@ -8,6 +8,7 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -67,7 +68,7 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
-        public void AnonymousTypes_Work_With_QueryableAttribute()
+        public void AnonymousTypes_Work_With_EnableQueryAttribute()
         {
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionAnonymousTypesController", useCustomEdmModel: false));
             HttpClient client = new HttpClient(server);
@@ -97,8 +98,8 @@ namespace System.Web.OData.Query
             var model2 = builder2.GetEdmModel();
 
             var config = new HttpConfiguration();
-            config.Routes.MapODataRoute("OData1", "v1", model1);
-            config.Routes.MapODataRoute("OData2", "v2", model2);
+            config.Routes.MapODataServiceRoute("OData1", "v1", model1);
+            config.Routes.MapODataServiceRoute("OData2", "v2", model2);
 
             using (HttpServer host = new HttpServer(config))
             using (HttpClient client = new HttpClient(host))
@@ -170,7 +171,7 @@ namespace System.Web.OData.Query
 
             if (controllerName == "QueryCompositionCustomerGlobal")
             {
-                config.Filters.Add(new QueryableAttribute());
+                config.Filters.Add(new EnableQueryAttribute());
             }
 
             if (useCustomEdmModel)
@@ -228,7 +229,7 @@ namespace System.Web.OData.Query
 
             public override void OnActionExecuting(HttpActionContext actionContext)
             {
-                actionContext.Request.SetEdmModel(_model);
+                actionContext.Request.ODataProperties().Model = _model;
             }
         }
     }

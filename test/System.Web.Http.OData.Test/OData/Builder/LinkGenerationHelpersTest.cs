@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Net.Http;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
@@ -163,11 +164,11 @@ namespace System.Web.Http.OData.Builder
         {
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, null, model);
+            configuration.Routes.MapODataServiceRoute(routeName, null, model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
-            request.SetODataRouteName(routeName);
+            request.ODataProperties().RouteName = routeName;
             return request;
         }
     }

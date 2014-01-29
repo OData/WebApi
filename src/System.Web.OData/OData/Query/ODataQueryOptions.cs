@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Text;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Validators;
@@ -268,12 +269,12 @@ namespace System.Web.OData.Query
                 result = Filter.ApplyTo(result, querySettings, _assembliesResolver);
             }
 
-            if (Count != null && Request.GetCountValue() == null)
+            if (Count != null && Request.ODataProperties().TotalCount == null)
             {
                 long? count = Count.GetEntityCount(result);
                 if (count.HasValue)
                 {
-                    Request.SetCountValue(count.Value);
+                    Request.ODataProperties().TotalCount = count.Value;
                 }
             }
 
@@ -313,7 +314,7 @@ namespace System.Web.OData.Query
 
             if (SelectExpand != null)
             {
-                Request.SetSelectExpandClause(SelectExpand.SelectExpandClause);
+                Request.ODataProperties().SelectExpandClause = SelectExpand.SelectExpandClause;
                 result = SelectExpand.ApplyTo(result, querySettings);
             }
 
@@ -321,10 +322,10 @@ namespace System.Web.OData.Query
             {
                 bool resultsLimited;
                 result = LimitResults(result, querySettings.PageSize.Value, out resultsLimited);
-                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri && Request.GetNextPageLink() == null)
+                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri && Request.ODataProperties().NextLink == null)
                 {
                     Uri nextPageLink = GetNextPageLink(Request, querySettings.PageSize.Value);
-                    Request.SetNextPageLink(nextPageLink);
+                    Request.ODataProperties().NextLink = nextPageLink;
                 }
             }
 
@@ -357,7 +358,7 @@ namespace System.Web.OData.Query
 
             if (SelectExpand != null)
             {
-                Request.SetSelectExpandClause(SelectExpand.SelectExpandClause);
+                Request.ODataProperties().SelectExpandClause = SelectExpand.SelectExpandClause;
                 return SelectExpand.ApplyTo(entity, querySettings);
             }
 

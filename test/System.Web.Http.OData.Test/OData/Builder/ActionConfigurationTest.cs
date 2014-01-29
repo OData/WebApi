@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
@@ -345,9 +346,9 @@ namespace System.Web.Http.OData.Builder
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://server/Movies");
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, null, model);
+            configuration.Routes.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
-            request.SetODataRouteName(routeName);
+            request.ODataProperties().RouteName = routeName;
             UrlHelper urlHelper = new UrlHelper(request);
 
             // Act

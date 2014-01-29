@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -24,7 +25,7 @@ namespace System.Web.OData.Routing
         {
             _configuration = new HttpConfiguration();
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            _configuration.Routes.MapODataRoute("odata", "", GetEdmModel(_configuration))
+            _configuration.Routes.MapODataServiceRoute("odata", "", GetEdmModel(_configuration))
                 .MapODataRouteAttributes(_configuration); // enable attribute routing
 
             var controllers = new[] { typeof(ConventionCustomersController) };

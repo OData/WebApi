@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Extensions;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
@@ -29,7 +29,7 @@ namespace System.Web.Http.OData.Formatter
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Formatters.Clear();
             configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create());
-            configuration.Routes.MapODataRoute(model);
+            configuration.Routes.MapODataServiceRoute(model);
 
             HttpServer server = new HttpServer(configuration);
             _client = new HttpClient(server);

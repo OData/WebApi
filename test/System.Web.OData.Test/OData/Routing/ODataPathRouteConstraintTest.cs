@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -58,10 +59,10 @@ namespace System.Web.OData.Routing
             Assert.True(constraint.Match(_request, null, null, values, HttpRouteDirection.UriResolution));
 
             Assert.Equal("ODataMetadata", values["controller"]);
-            Assert.Same(_model, _request.GetEdmModel());
-            Assert.Same(_routeName, _request.GetODataRouteName());
-            Assert.Equal(_conventions, _request.GetODataRoutingConventions());
-            Assert.Same(_pathHandler, _request.GetODataPathHandler());
+            Assert.Same(_model, _request.ODataProperties().Model);
+            Assert.Same(_routeName, _request.ODataProperties().RouteName);
+            Assert.Equal(_conventions, _request.ODataProperties().RoutingConventions);
+            Assert.Same(_pathHandler, _request.ODataProperties().PathHandler);
         }
 
         [Fact]

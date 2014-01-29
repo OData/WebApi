@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Web.Http.Controllers;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Query.Controllers;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;

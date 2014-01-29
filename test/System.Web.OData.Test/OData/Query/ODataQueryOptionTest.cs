@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Extensions;
 using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
 using System.Web.OData.TestCommon;
@@ -366,7 +367,7 @@ namespace System.Web.OData.Query
             queryOptions.ApplyTo(Enumerable.Empty<Customer>().AsQueryable());
 
             // Assert
-            Assert.NotNull(request.GetSelectExpandClause());
+            Assert.NotNull(request.ODataProperties().SelectExpandClause);
         }
 
         [Fact]
@@ -757,7 +758,7 @@ namespace System.Web.OData.Query
 
             // Act & Assert
             Assert.Throws<ODataException>(() => option.Validate(settings),
-                "Query option 'Filter' is not allowed. To allow it, set the 'AllowedQueryOptions' property on QueryableAttribute or QueryValidationSettings.");
+                "Query option 'Filter' is not allowed. To allow it, set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.");
 
             option.Validator = null;
             Assert.DoesNotThrow(() => option.Validate(settings));
@@ -877,13 +878,13 @@ namespace System.Web.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$count=true");
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
             ODataQueryOptions options = new ODataQueryOptions(context, request);
-            request.SetCountValue(count);
+            request.ODataProperties().TotalCount = count;
 
             // Act
             options.ApplyTo(Enumerable.Empty<int>().AsQueryable());
 
             // Assert
-            Assert.Equal(count, request.GetCountValue());
+            Assert.Equal(count, request.ODataProperties().TotalCount);
         }
 
         [Fact]
@@ -924,13 +925,13 @@ namespace System.Web.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
             ODataQueryOptions options = new ODataQueryOptions(context, request);
-            request.SetNextPageLink(nextPageLink);
+            request.ODataProperties().NextLink = nextPageLink;
 
             // Act
             IQueryable result = options.ApplyTo(Enumerable.Range(0, 100).AsQueryable(), new ODataQuerySettings { PageSize = 1 });
 
             // Assert
-            Assert.Equal(nextPageLink, request.GetNextPageLink());
+            Assert.Equal(nextPageLink, request.ODataProperties().NextLink);
             Assert.Equal(1, (result as IQueryable<int>).Count());
         }
 

@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Test;
 using System.Web.OData.TestCommon;

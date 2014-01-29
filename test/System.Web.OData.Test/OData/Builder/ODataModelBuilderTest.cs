@@ -2,7 +2,6 @@
 
 using System.Linq;
 using System.Web.OData.TestCommon.Models;
-using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.TestCommon;

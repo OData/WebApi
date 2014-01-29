@@ -3,7 +3,8 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Web.Http.Filters;
-using System.Web.Http.OData.Query;
+using System.Web.Http.OData;
+using Extensions = System.Web.Http.OData.Extensions;
 
 namespace System.Web.Http
 {
@@ -14,31 +15,32 @@ namespace System.Web.Http
     public static class ODataHttpConfigurationExtensions
     {
         /// <summary>
-        /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return type.
-        /// To avoid processing unexpected or malicious queries, use the validation settings on <see cref="QueryableAttribute"/> to validate
-        /// incoming queries. For more information, visit http://go.microsoft.com/fwlink/?LinkId=279712.
+        /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
+        /// type. To avoid processing unexpected or malicious queries, use the validation settings on
+        /// <see cref="EnableQueryAttribute"/> to validate incoming queries. For more information,
+        /// visit http://go.microsoft.com/fwlink/?LinkId=279712.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
+        [Obsolete("This method is obsolete; use the AddODataQueryFilter method from the " +
+            "System.Web.Http.OData.Extensions or System.Web.OData.Extensions namespace.")]
         public static void EnableQuerySupport(this HttpConfiguration configuration)
         {
-            configuration.EnableQuerySupport(new QueryableAttribute());
+            Extensions.HttpConfigurationExtensions.AddODataQueryFilter(configuration);
         }
 
         /// <summary>
-        /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return type.
-        /// To avoid processing unexpected or malicious queries, use the validation settings on <see cref="QueryableAttribute"/> to validate
-        /// incoming queries. For more information, visit http://go.microsoft.com/fwlink/?LinkId=279712.
+        /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
+        /// type. To avoid processing unexpected or malicious queries, use the validation settings on
+        /// <see cref="EnableQueryAttribute"/> to validate incoming queries. For more information,
+        /// visit http://go.microsoft.com/fwlink/?LinkId=279712.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
         /// <param name="queryFilter">The action filter that executes the query.</param>
+        [Obsolete("This method is obsolete; use the AddODataQueryFilter method from the " +
+            "System.Web.Http.OData.Extensions or System.Web.OData.Extensions namespace.")]
         public static void EnableQuerySupport(this HttpConfiguration configuration, IActionFilter queryFilter)
         {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            configuration.Services.Add(typeof(IFilterProvider), new QueryFilterProvider(queryFilter));
+            Extensions.HttpConfigurationExtensions.AddODataQueryFilter(configuration, queryFilter);
         }
     }
 }

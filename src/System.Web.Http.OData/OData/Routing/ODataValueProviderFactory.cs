@@ -2,8 +2,8 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.ValueProviders;
 using System.Web.Http.ValueProviders.Providers;
 
@@ -18,7 +18,7 @@ namespace System.Web.Http.OData.Routing
                 throw Error.ArgumentNull("actionContext");
             }
 
-            return new ODataValueProvider(actionContext.Request.GetRoutingConventionsDataStore());
+            return new ODataValueProvider(actionContext.Request.ODataProperties().RoutingConventionsStore);
         }
 
         private class ODataValueProvider : NameValuePairsValueProvider

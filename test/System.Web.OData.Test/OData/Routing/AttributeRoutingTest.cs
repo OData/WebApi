@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Extensions;
 using System.Web.OData.TestCommon;
 using Microsoft.TestCommon;
 
@@ -43,7 +44,7 @@ namespace System.Web.OData.Routing
             config.Services.Replace(typeof(IAssembliesResolver), resolver);
 
             config.Routes
-                .MapODataRoute("odata", "", model.Model)
+                .MapODataServiceRoute("odata", "", model.Model)
                 .MapODataRouteAttributes(config);
 
             HttpServer server = new HttpServer(config);

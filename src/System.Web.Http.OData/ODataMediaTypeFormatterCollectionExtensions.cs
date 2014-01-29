@@ -2,8 +2,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Net.Http.Formatting;
 
 namespace System.Web.Http
@@ -32,15 +30,7 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("collection");
             }
 
-            if (items == null)
-            {
-                throw Error.ArgumentNull("items");
-            }
-
-            foreach (MediaTypeFormatter item in items)
-            {
-                collection.Add(item);
-            }
+            collection.AddRange(items);
         }
 
         /// <summary>
@@ -62,29 +52,7 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("collection");
             }
 
-            if (items == null)
-            {
-                throw Error.ArgumentNull("items");
-            }
-
-            foreach (MediaTypeFormatter item in items)
-            {
-                collection.Insert(index++, item);
-            }
-        }
-
-        internal static void RemoveRange(this MediaTypeFormatterCollection collection,
-            IEnumerable<MediaTypeFormatter> items)
-        {
-            Contract.Assert(collection != null);
-            Contract.Assert(items != null);
-
-            // Instantiate a separate array in case items and collection are linked. Otherwise, if modifying collection
-            // itself modified items, this code would throw during enumeration.
-            foreach (MediaTypeFormatter item in items.ToArray())
-            {
-                collection.Remove(item);
-            }
+            collection.InsertRange(index, items);
         }
     }
 }

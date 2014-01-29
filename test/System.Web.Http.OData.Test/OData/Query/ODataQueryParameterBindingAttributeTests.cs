@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
-using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
 using System.Web.Http.OData.Query.Controllers;
 using System.Web.Http.OData.TestCommon.Models;

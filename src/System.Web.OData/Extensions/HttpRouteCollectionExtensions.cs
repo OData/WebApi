@@ -3,18 +3,19 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Web.Http;
 using System.Web.OData.Batch;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 
-namespace System.Web.Http
+namespace System.Web.OData.Extensions
 {
     /// <summary>
     /// Provides extension methods for the <see cref="HttpRouteCollection"/> class.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class ODataHttpRouteCollectionExtensions
+    public static class HttpRouteCollectionExtensions
     {
         /// <summary>
         /// Maps the specified OData route.
@@ -24,13 +25,15 @@ namespace System.Web.Http
         /// <param name="routePrefix">The prefix to add to the OData route's path template.</param>
         /// <param name="model">The EDM model to use for parsing OData paths.</param>
         /// <returns>The added <see cref="ODataRoute"/>.</returns>
-        public static ODataRoute MapODataRoute(this HttpRouteCollection routes, string routeName, string routePrefix, IEdmModel model)
+        public static ODataRoute MapODataServiceRoute(this HttpRouteCollection routes, string routeName,
+            string routePrefix, IEdmModel model)
         {
-            return routes.MapODataRoute(routeName, routePrefix, model, batchHandler: null);
+            return MapODataServiceRoute(routes, routeName, routePrefix, model, batchHandler: null);
         }
 
         /// <summary>
-        /// Maps the specified OData route. When the <paramref name="batchHandler"/> is provided, it will create a '$batch' endpoint to handle the batch requests.
+        /// Maps the specified OData route. When the <paramref name="batchHandler"/> is provided, it will create a
+        /// '$batch' endpoint to handle the batch requests.
         /// </summary>
         /// <param name="routes">A collection of routes for the application.</param>
         /// <param name="routeName">The name of the route to map.</param>
@@ -38,9 +41,11 @@ namespace System.Web.Http
         /// <param name="model">The EDM model to use for parsing OData paths.</param>
         /// <param name="batchHandler">The <see cref="ODataBatchHandler"/>.</param>
         /// <returns>The added <see cref="ODataRoute"/>.</returns>
-        public static ODataRoute MapODataRoute(this HttpRouteCollection routes, string routeName, string routePrefix, IEdmModel model, ODataBatchHandler batchHandler)
+        public static ODataRoute MapODataServiceRoute(this HttpRouteCollection routes, string routeName,
+            string routePrefix, IEdmModel model, ODataBatchHandler batchHandler)
         {
-            return routes.MapODataRoute(routeName, routePrefix, model, new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault(), batchHandler);
+            return MapODataServiceRoute(routes, routeName, routePrefix, model, new DefaultODataPathHandler(),
+                ODataRoutingConventions.CreateDefault(), batchHandler);
         }
 
         /// <summary>
@@ -51,28 +56,37 @@ namespace System.Web.Http
         /// <param name="routePrefix">The prefix to add to the OData route's path template.</param>
         /// <param name="model">The EDM model to use for parsing OData paths.</param>
         /// <param name="pathHandler">The <see cref="IODataPathHandler"/> to use for parsing the OData path.</param>
-        /// <param name="routingConventions">The OData routing conventions to use for controller and action selection.</param>
+        /// <param name="routingConventions">
+        /// The OData routing conventions to use for controller and action selection.
+        /// </param>
         /// <returns>The added <see cref="ODataRoute"/>.</returns>
-        public static ODataRoute MapODataRoute(this HttpRouteCollection routes, string routeName, string routePrefix, IEdmModel model,
-            IODataPathHandler pathHandler, IEnumerable<IODataRoutingConvention> routingConventions)
+        public static ODataRoute MapODataServiceRoute(this HttpRouteCollection routes, string routeName,
+            string routePrefix, IEdmModel model, IODataPathHandler pathHandler,
+            IEnumerable<IODataRoutingConvention> routingConventions)
         {
-            return routes.MapODataRoute(routeName, routePrefix, model, pathHandler, routingConventions, batchHandler: null);
+            return MapODataServiceRoute(routes, routeName, routePrefix, model, pathHandler, routingConventions,
+                batchHandler: null);
         }
 
         /// <summary>
-        /// Maps the specified OData route. When the <paramref name="batchHandler"/> is provided, it will create a '$batch' endpoint to handle the batch requests.
+        /// Maps the specified OData route. When the <paramref name="batchHandler"/> is provided, it will create a
+        /// '$batch' endpoint to handle the batch requests.
         /// </summary>
         /// <param name="routes">A collection of routes for the application.</param>
         /// <param name="routeName">The name of the route to map.</param>
         /// <param name="routePrefix">The prefix to add to the OData route's path template.</param>
         /// <param name="model">The EDM model to use for parsing OData paths.</param>
         /// <param name="pathHandler">The <see cref="IODataPathHandler" /> to use for parsing the OData path.</param>
-        /// <param name="routingConventions">The OData routing conventions to use for controller and action selection.</param>
+        /// <param name="routingConventions">
+        /// The OData routing conventions to use for controller and action selection.
+        /// </param>
         /// <param name="batchHandler">The <see cref="ODataBatchHandler"/>.</param>
         /// <returns>The added <see cref="ODataRoute"/>.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "We want the handler to be a batch handler.")]
-        public static ODataRoute MapODataRoute(this HttpRouteCollection routes, string routeName, string routePrefix, IEdmModel model,
-            IODataPathHandler pathHandler, IEnumerable<IODataRoutingConvention> routingConventions, ODataBatchHandler batchHandler)
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "We want the handler to be a batch handler.")]
+        public static ODataRoute MapODataServiceRoute(this HttpRouteCollection routes, string routeName,
+            string routePrefix, IEdmModel model, IODataPathHandler pathHandler,
+            IEnumerable<IODataRoutingConvention> routingConventions, ODataBatchHandler batchHandler)
         {
             if (routes == null)
             {
@@ -92,15 +106,16 @@ namespace System.Web.Http
             if (batchHandler != null)
             {
                 batchHandler.ODataRouteName = routeName;
-                string batchTemplate = String.IsNullOrEmpty(routePrefix) ? ODataRouteConstants.Batch : routePrefix + '/' + ODataRouteConstants.Batch;
+                string batchTemplate = String.IsNullOrEmpty(routePrefix) ? ODataRouteConstants.Batch
+                    : routePrefix + '/' + ODataRouteConstants.Batch;
                 routes.MapHttpBatchRoute(routeName + "Batch", batchTemplate, batchHandler);
             }
 
-            ODataPathRouteConstraint routeConstraint = new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);
-            ODataRoute odataRoute = new ODataRoute(routePrefix, routeConstraint);
-            routes.Add(routeName, odataRoute);
-
-            return odataRoute;
+            ODataPathRouteConstraint routeConstraint =
+                new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);
+            ODataRoute route = new ODataRoute(routePrefix, routeConstraint);
+            routes.Add(routeName, route);
+            return route;
         }
     }
 }

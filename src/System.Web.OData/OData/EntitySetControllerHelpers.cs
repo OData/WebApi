@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using System.Web.OData.Routing;
@@ -27,12 +28,12 @@ namespace System.Web.OData
 
         public static ODataPath GetODataPath(ApiController controller)
         {
-            return controller.Request.GetODataPath();
+            return controller.Request.ODataProperties().Path;
         }
 
         public static ODataQueryOptions<TEntity> CreateQueryOptions<TEntity>(ApiController controller)
         {
-            ODataQueryContext context = new ODataQueryContext(controller.Request.GetEdmModel(), typeof(TEntity));
+            ODataQueryContext context = new ODataQueryContext(controller.Request.ODataProperties().Model, typeof(TEntity));
             return new ODataQueryOptions<TEntity>(context, controller.Request);
         }
 
@@ -78,7 +79,7 @@ namespace System.Web.OData
                 response = request.CreateResponse(HttpStatusCode.Created, createdEntity);
             }
 
-            ODataPath odataPath = request.GetODataPath();
+            ODataPath odataPath = request.ODataProperties().Path;
             if (odataPath == null)
             {
                 throw Error.InvalidOperation(SRResources.LocationHeaderMissingODataPath);
@@ -91,9 +92,8 @@ namespace System.Web.OData
             }
 
             UrlHelper urlHelper = controller.Url ?? new UrlHelper(request);
-            response.Headers.Location = new Uri(urlHelper.ODataLink(
-                                                    entitySetSegment,
-                                                    new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(entityKey, ODataVersion.V4))));
+            response.Headers.Location = new Uri(urlHelper.CreateODataLink(entitySetSegment,
+                new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(entityKey, ODataVersion.V4))));
             return response;
         }
 

@@ -36,7 +36,7 @@ namespace System.Web.Http.OData.Query.Validators
             Assert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }),
                 String.Format(CultureInfo.CurrentCulture, "The request includes a $expand path which is too deep. The maximum depth allowed is {0}. " +
-                "To increase the limit, set the 'MaxExpansionDepth' property on QueryableAttribute or ODataValidationSettings.", maxExpansionDepth));
+                "To increase the limit, set the 'MaxExpansionDepth' property on EnableQueryAttribute or ODataValidationSettings.", maxExpansionDepth));
 
             Assert.DoesNotThrow(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth + 1 }));

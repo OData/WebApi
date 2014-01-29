@@ -8,8 +8,7 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Builder;
-using System.Web.OData.Builder.TestModels;
-using System.Web.OData.Query;
+using System.Web.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
@@ -29,10 +28,10 @@ namespace System.Web.OData
             _configuration = new HttpConfiguration();
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
-            _configuration.Routes.MapODataRoute("odata", "odata", GetModel());
-            _configuration.Routes.MapODataRoute("odata-inheritance", "odata-inheritance", GetModelWithInheritance());
-            _configuration.Routes.MapODataRoute("odata-alias", "odata-alias", GetModelWithCustomerAlias());
-            _configuration.Routes.MapODataRoute(
+            _configuration.Routes.MapODataServiceRoute("odata", "odata", GetModel());
+            _configuration.Routes.MapODataServiceRoute("odata-inheritance", "odata-inheritance", GetModelWithInheritance());
+            _configuration.Routes.MapODataServiceRoute("odata-alias", "odata-alias", GetModelWithCustomerAlias());
+            _configuration.Routes.MapODataServiceRoute(
                 "odata-alias2-inheritance",
                 "odata-alias2-inheritance",
                 GetModelWithCustomerAliasAndInheritance()); 
@@ -366,13 +365,13 @@ namespace System.Web.OData
 
     public class SelectExpandTestCustomersController : ODataController
     {
-        [Queryable]
+        [EnableQuery]
         public IEnumerable<SelectExpandTestCustomer> Get()
         {
             return SelectExpandTestCustomer.Customers;
         }
 
-        [Queryable]
+        [EnableQuery]
         public SelectExpandTestCustomer GetSelectExpandTestCustomer([FromODataUri]int key)
         {
             return SelectExpandTestCustomer.Customers[0];
@@ -381,13 +380,13 @@ namespace System.Web.OData
 
     public class SelectExpandTestCustomersAliasController : ODataController
     {
-        [Queryable]
+        [EnableQuery]
         public IEnumerable<SelectExpandTestCustomerWithAlias> Get()
         {
             return SelectExpandTestCustomerWithAlias.Customers;
         }
 
-        [Queryable]
+        [EnableQuery]
         public SelectExpandTestCustomerWithAlias GetSelectExpandTestCustomer([FromODataUri]int key)
         {
             return SelectExpandTestCustomerWithAlias.Customers[0];
@@ -396,13 +395,13 @@ namespace System.Web.OData
 
     public class NonODataSelectExpandTestCustomersController : ApiController
     {
-        [Queryable]
+        [EnableQuery]
         public IEnumerable<SelectExpandTestCustomer> Get()
         {
             return SelectExpandTestCustomer.Customers;
         }
 
-        [Queryable]
+        [EnableQuery]
         public SingleResult Get(int id)
         {
             IQueryable<SelectExpandTestCustomer> singleCustomer = SelectExpandTestCustomer.Customers.AsQueryable().Take(1);

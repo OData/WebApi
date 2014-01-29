@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Web.Http.OData.Builder.Conventions;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
@@ -43,7 +44,7 @@ namespace System.Web.Http.OData.Builder
                 idLinkPathSegments.Add(new CastPathSegment(entityContext.EntityType));
             }
 
-            string idLink = entityContext.Url.ODataLink(idLinkPathSegments);
+            string idLink = entityContext.Url.CreateODataLink(idLinkPathSegments);
             if (idLink == null)
             {
                 return null;
@@ -82,7 +83,7 @@ namespace System.Web.Http.OData.Builder
 
             navigationPathSegments.Add(new NavigationPathSegment(navigationProperty));
 
-            string link = entityContext.Url.ODataLink(navigationPathSegments);
+            string link = entityContext.Url.CreateODataLink(navigationPathSegments);
             if (link == null)
             {
                 return null;
@@ -103,7 +104,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("feedContext");
             }
 
-            string selfLink = feedContext.Url.ODataLink(new EntitySetPathSegment(feedContext.EntitySet));
+            string selfLink = feedContext.Url.CreateODataLink(new EntitySetPathSegment(feedContext.EntitySet));
             return selfLink == null ? null : new Uri(selfLink);
         }
 
@@ -148,7 +149,7 @@ namespace System.Web.Http.OData.Builder
 
             actionPathSegments.Add(new ActionPathSegment(actionName));
 
-            string actionLink = entityContext.Url.ODataLink(actionPathSegments);
+            string actionLink = entityContext.Url.CreateODataLink(actionPathSegments);
             return actionLink == null ? null : new Uri(actionLink);
         }
     }

@@ -1,11 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Reflection;
-using System.Web.Http.Controllers;
-using System.Web.Http.Hosting;
-using System.Web.Http.ModelBinding;
-using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.TestCommon;
@@ -34,7 +30,7 @@ namespace System.Web.Http.OData
             ApiController controller = new Mock<ApiController>().Object;
             var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers");
             controller.Configuration = new HttpConfiguration();
-            request.SetODataPath(new ODataPath(new MetadataPathSegment()));
+            request.ODataProperties().Path = new ODataPath(new MetadataPathSegment());
             controller.Request = request;
 
             Assert.Throws<InvalidOperationException>(

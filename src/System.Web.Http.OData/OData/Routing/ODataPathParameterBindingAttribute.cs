@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Properties;
 
 namespace System.Web.Http.OData.Routing
@@ -50,7 +51,7 @@ namespace System.Web.Http.OData.Routing
                     throw Error.Argument("actionContext", SRResources.ActionContextMustHaveRequest);
                 }
 
-                SetValue(actionContext, request.GetODataPath());
+                SetValue(actionContext, request.ODataProperties().Path);
 
                 return TaskHelpers.Completed();
             }

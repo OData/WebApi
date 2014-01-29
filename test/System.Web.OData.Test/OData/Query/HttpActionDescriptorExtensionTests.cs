@@ -3,6 +3,7 @@
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using System.Web.OData.Extensions;
 using System.Web.OData.Query.Controllers;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;

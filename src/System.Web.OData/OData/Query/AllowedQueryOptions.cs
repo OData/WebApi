@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http;
-
 namespace System.Web.OData.Query
 {
     /// <summary>
@@ -61,7 +59,7 @@ namespace System.Web.OData.Query
         SkipToken = 0x100,
 
         /// <summary>
-        /// A value that corresponds to the default query options supported by <see cref="QueryableAttribute"/>.
+        /// A value that corresponds to the default query options supported by <see cref="EnableQueryAttribute"/>.
         /// </summary>
         Supported = Filter | OrderBy | Top | Skip | Count | Select | Expand | Format,
 

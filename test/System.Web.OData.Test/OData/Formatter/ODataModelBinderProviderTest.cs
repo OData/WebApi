@@ -13,6 +13,7 @@ using System.Web.Http.Routing;
 using System.Web.Http.ValueProviders;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.Conventions;
+using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
@@ -217,7 +218,7 @@ namespace System.Web.OData.Formatter
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
-            configuration.Routes.MapODataRoute("odata", "", GetEdmModel())
+            configuration.Routes.MapODataServiceRoute("odata", "", GetEdmModel())
                 .MapODataRouteAttributes(configuration);
 
             var controllers = new[] { typeof(ODataModelBinderProviderTestODataController) };
@@ -249,7 +250,7 @@ namespace System.Web.OData.Formatter
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
-            configuration.Routes.MapODataRoute("odata", "", GetEdmModel())
+            configuration.Routes.MapODataServiceRoute("odata", "", GetEdmModel())
                 .MapODataRouteAttributes(configuration);
 
             var controllers = new[] { typeof(ODataModelBinderProviderTestODataController) };

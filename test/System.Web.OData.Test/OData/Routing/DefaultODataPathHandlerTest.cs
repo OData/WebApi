@@ -174,6 +174,28 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
+        public void CanParseEntitySetCastUrl()
+        {
+            // Arrange
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets()
+                .SingleOrDefault(s => s.Name == "RoutingCustomers");
+            IEdmEntityType entityType = _model.SchemaElements.OfType<IEdmEntityType>()
+                .SingleOrDefault(s => s.FullName() == "System.Web.OData.Routing.VIP");
+
+            // Act
+            ODataPath path = _parser.Parse(_model, "RoutingCustomers/System.Web.OData.Routing.VIP");
+            Assert.NotNull(path); // Guard
+            ODataPathSegment segment = path.Segments.Last();
+
+            // Assert
+            Assert.NotNull(segment);
+            Assert.Equal("~/entityset/cast", path.PathTemplate);
+            Assert.Equal("System.Web.OData.Routing.VIP", segment.ToString());
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Same(entityType, ((IEdmCollectionType)path.EdmType).ElementType.Definition);
+        }
+
+        [Fact]
         public void CanParseKeyUrl()
         {
             // Arrange

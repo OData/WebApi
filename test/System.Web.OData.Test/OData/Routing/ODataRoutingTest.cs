@@ -29,6 +29,9 @@ namespace System.Web.OData.Routing
         // entity set
         [InlineData("GET", "RoutingCustomers", "GetRoutingCustomers")]
         [InlineData("POST", "RoutingCustomers", "PostRoutingCustomer")]
+        // entity set / cast
+        [InlineData("GET", "RoutingCustomers/System.Web.OData.Routing.VIP", "GetRoutingCustomersFromVIP")]
+        [InlineData("POST", "RoutingCustomers/System.Web.OData.Routing.VIP", "PostRoutingCustomerFromVIP")]
         // entity by key defaults
         [InlineData("GET", "Products(10)", "Get(10)")]
         [InlineData("PUT", "Products(10)", "Put(10)")]
@@ -86,8 +89,10 @@ namespace System.Web.OData.Routing
         [InlineData("CUSTOM", "RoutingCustomers(10)", "~/entityset/key")]
         public void RoutesCorrectly(string httpMethod, string uri, string expectedResponse)
         {
+            // Arrange
             HttpResponseMessage response = _client.SendAsync(new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri)).Result;
 
+            // Act & Assert
             response.EnsureSuccessStatusCode();
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
@@ -103,6 +108,16 @@ namespace System.Web.OData.Routing
         public string PostRoutingCustomer()
         {
             return "PostRoutingCustomer";
+        }
+
+        public string GetRoutingCustomersFromVIP()
+        {
+            return "GetRoutingCustomersFromVIP";
+        }
+
+        public string PostRoutingCustomerFromVIP()
+        {
+            return "PostRoutingCustomerFromVIP";
         }
 
         public string GetRoutingCustomer(int key)

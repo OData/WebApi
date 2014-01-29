@@ -20,7 +20,8 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "http://localhost/Customers(42)", "GetOneCustomer_42")]
         [InlineData("GET", "http://localhost/Customers(42)/ID", "GetIDOfACustomer_42")]
         [InlineData("GET", "http://localhost/Customers(42)/Address/City", "GetCityOfACustomer_42")]
-        [InlineData("GET", "http://localhost/Customers/NS.SpecialCustomer", "GetAllSpecialCustomers")]
+        [InlineData("GET", "http://localhost/Customers/NS.SpecialCustomer", "GetCustomersFromSpecialCustomer")]
+        [InlineData("POST", "http://localhost/Customers/NS.SpecialCustomer/", "PostCustomerFromSpecialCustomer")]
         [InlineData("GET", "http://localhost/Customers(42)/Orders", "GetAllOrdersOfACustomer_42")]
         [InlineData("GET", "http://localhost/Customers(42)/Orders(24)", "GetAParticularOrder_24_OfACustomer_42")] // containment scenario
         [InlineData("POST", "http://localhost/Customers", "CreateCustomer")] // use explicit http verbs attribute on the method
@@ -78,17 +79,24 @@ namespace System.Web.OData.Routing
                 return "GetAllCustomers";
             }
 
+            [ODataRoute("Customers/NS.SpecialCustomer")]
+            public string GetCustomersFromSpecialCustomer()
+            {
+                return "GetCustomersFromSpecialCustomer";
+            }
+
+            [HttpPost]
+            [ODataRoute("Customers/NS.SpecialCustomer")]
+            public string PostCustomerFromSpecialCustomer()
+            {
+                return "PostCustomerFromSpecialCustomer";
+            }
+
             [HttpPost]
             [ODataRoute("Customers")]
             public string CreateCustomer()
             {
                 return "CreateCustomer";
-            }
-
-            [ODataRoute("Customers/NS.SpecialCustomer")]
-            public string GetAllSpecialCustomers()
-            {
-                return "GetAllSpecialCustomers";
             }
 
             [ODataRoute("Customers({customerKeyProperty})")]

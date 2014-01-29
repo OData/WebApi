@@ -70,25 +70,49 @@ namespace System.Web.OData.Routing.Conventions
 
             if (odataPath.PathTemplate == "~/entityset")
             {
-                EntitySetPathSegment entitySetSegment = odataPath.Segments[0] as EntitySetPathSegment;
+                EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
                 IEdmEntitySet entitySet = entitySetSegment.EntitySet;
                 HttpMethod httpMethod = controllerContext.Request.Method;
 
                 if (httpMethod == HttpMethod.Get)
                 {
-                    // e.g. Try GetCustomers first, then fallback on Get action name
+                    // e.g. Try GetCustomers first, then fall back to Get action name
                     return actionMap.FindMatchingAction(
                         "Get" + entitySet.Name,
                         "Get");
                 }
                 else if (httpMethod == HttpMethod.Post)
                 {
-                    // e.g. Try PostCustomer first, then fallback on Post action name
+                    // e.g. Try PostCustomer first, then fall back to Post action name
                     return actionMap.FindMatchingAction(
                         "Post" + entitySet.ElementType.Name,
                         "Post");
                 }
             }
+            else if (odataPath.PathTemplate == "~/entityset/cast")
+            {
+                EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
+                IEdmEntitySet entitySet = entitySetSegment.EntitySet;
+                IEdmCollectionType collectionType = (IEdmCollectionType)odataPath.EdmType;
+                IEdmEntityType entityType = (IEdmEntityType)collectionType.ElementType.Definition;
+                HttpMethod httpMethod = controllerContext.Request.Method;
+
+                if (httpMethod == HttpMethod.Get)
+                {
+                    // e.g. Try GetCustomersFromSpecialCustomer first, then fall back to GetFromSpecialCustomer
+                    return actionMap.FindMatchingAction(
+                        "Get" + entitySet.Name + "From" + entityType.Name,
+                        "GetFrom" + entityType.Name);
+                }
+                else if (httpMethod == HttpMethod.Post)
+                {
+                    // e.g. Try PostCustomerFromSpecialCustomer first, then fall back to PostFromSpecialCustomer
+                    return actionMap.FindMatchingAction(
+                        "Post" + entitySet.ElementType.Name + "From" + entityType.Name,
+                        "PostFrom" + entityType.Name);
+                }
+            }
+
             return null;
         }
     }

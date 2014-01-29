@@ -4,7 +4,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
+using System.Web.OData.TestCommon;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.OData.Routing.Conventions
 {
@@ -25,6 +27,31 @@ namespace System.Web.OData.Routing.Conventions
 
             Assert.Null(selectedAction);
             Assert.Empty(controllerContext.Request.GetRouteData().Values);
+        }
+
+        [Theory]
+        [InlineData("GET", "GetCustomersFromSpecialCustomer")]
+        [InlineData("POST", "PostCustomerFromSpecialCustomer")]
+        public void SelectAction_WithCast_Returns_ExpectedActionName(string method, string expected)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers),
+                new CastPathSegment(model.SpecialCustomer));
+
+            HttpControllerContext controllerContext = new HttpControllerContext()
+            {
+                Request = new HttpRequestMessage(new HttpMethod(method), "http://localhost/"),
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => expected);
+
+            // Act
+            string actionName = new EntitySetRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Equal(expected, actionName);
         }
     }
 }

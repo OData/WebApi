@@ -75,10 +75,8 @@ namespace System.Web.WebPages.Test
             // Arrange
             var anonymous = new { bar_baz2 = "foo" };
 
-            // Act
-            PropertyHelper helper = PropertyHelper.GetProperties(anonymous).Single();
-
-            // Assert
+            // Act + Assert
+            PropertyHelper helper = Assert.Single(PropertyHelper.GetProperties(anonymous));
             Assert.Equal("bar_baz2", helper.Name);
         }
 
@@ -95,29 +93,9 @@ namespace System.Web.WebPages.Test
             // Arrange
             var anonymous = new PrivateProperties();
 
-            // Act
-            PropertyHelper helper = PropertyHelper.GetProperties(anonymous).Single();
-
-            // Assert
+            // Act + Assert
+            PropertyHelper helper = Assert.Single(PropertyHelper.GetProperties(anonymous));
             Assert.Equal("Prop1", helper.Name);
-        }
-
-        private class Derived : PrivateProperties
-        {
-            public int Prop4 { get; set; }
-        }
-
-        [Fact]
-        public void PropertyHelperDoesNotFindBaseClassProperties()
-        {
-            // Arrange
-            var anonymous = new Derived();
-
-            // Act
-            PropertyHelper helper = PropertyHelper.GetProperties(anonymous).Single();
-
-            // Assert
-            Assert.Equal("Prop4", helper.Name);
         }
 
         private class Static
@@ -132,10 +110,8 @@ namespace System.Web.WebPages.Test
             // Arrange
             var anonymous = new Static();
 
-            // Act
-            PropertyHelper helper = PropertyHelper.GetProperties(anonymous).Single();
-
-            // Assert
+            // Act + Assert
+            PropertyHelper helper = Assert.Single(PropertyHelper.GetProperties(anonymous));
             Assert.Equal("Prop5", helper.Name);
         }
 
@@ -151,10 +127,8 @@ namespace System.Web.WebPages.Test
             // Arrange
             var anonymous = new SetOnly();
 
-            // Act
-            PropertyHelper helper = PropertyHelper.GetProperties(anonymous).Single();
-
-            // Assert
+            // Act + Assert
+            PropertyHelper helper = Assert.Single(PropertyHelper.GetProperties(anonymous));
             Assert.Equal("Prop6", helper.Name);
         }
 
@@ -173,13 +147,99 @@ namespace System.Web.WebPages.Test
             anonymous.IntProp = 3;
             anonymous.StringProp = "Five";
 
-            // Act
-            PropertyHelper helper1 = PropertyHelper.GetProperties(anonymous).Where(prop => prop.Name == "IntProp").Single();
-            PropertyHelper helper2 = PropertyHelper.GetProperties(anonymous).Where(prop => prop.Name == "StringProp").Single();
-
-            // Assert
+            // Act + Assert
+            PropertyHelper helper1 = Assert.Single(PropertyHelper.GetProperties(anonymous).Where(prop => prop.Name == "IntProp"));
+            PropertyHelper helper2 = Assert.Single(PropertyHelper.GetProperties(anonymous).Where(prop => prop.Name == "StringProp"));
             Assert.Equal(3, helper1.GetValue(anonymous));
             Assert.Equal("Five", helper2.GetValue(anonymous));
+        }
+
+        public class BaseClass
+        {
+            public string PropA { get; set; }
+
+            protected string PropProtected { get; set; }
+        }
+
+        public class DerivedClass : BaseClass
+        {
+            public string PropB { get; set; }
+        }
+
+        public class BaseClassWithVirtual
+        {
+            public virtual string PropA { get; set; }
+            public string PropB { get; set; }
+        }
+
+        public class DerivedClassWithNew : BaseClassWithVirtual
+        {
+            public new string PropB { get { return "Newed"; } }
+        }
+
+        public class DerivedClassWithOverride : BaseClassWithVirtual
+        {
+            public override string PropA { get { return "Overriden"; } }
+        }
+
+        [Fact]
+        public void PropertyHelperForDerivedClass()
+        {
+            // Arrange
+            object derived = new DerivedClass { PropA = "propAValue", PropB = "propBValue" };
+
+            // Act
+            PropertyHelper[] helpers = PropertyHelper.GetProperties(derived).ToArray();
+
+            // Assert
+            Assert.NotNull(helpers);
+            Assert.Equal(2, helpers.Length);
+
+            PropertyHelper propAHelper = Assert.Single(helpers.Where(h => h.Name == "PropA"));
+            PropertyHelper propBHelper = Assert.Single(helpers.Where(h => h.Name == "PropB"));
+
+            Assert.Equal("propAValue", propAHelper.GetValue(derived));
+            Assert.Equal("propBValue", propBHelper.GetValue(derived));
+        }
+
+        [Fact]
+        public void PropertyHelperForDerivedClassWithNew()
+        {
+            // Arrange
+            object derived = new DerivedClassWithNew { PropA = "propAValue" };
+
+            // Act
+            PropertyHelper[] helpers = PropertyHelper.GetProperties(derived).ToArray();
+
+            // Assert
+            Assert.NotNull(helpers);
+            Assert.Equal(2, helpers.Length);
+
+            PropertyHelper propAHelper = Assert.Single(helpers.Where(h => h.Name == "PropA"));
+            PropertyHelper propBHelper = Assert.Single(helpers.Where(h => h.Name == "PropB"));
+
+            Assert.Equal("propAValue", propAHelper.GetValue(derived));
+            Assert.Equal("Newed", propBHelper.GetValue(derived));
+        }
+
+        [Fact]
+        public void PropertyHelperForDerivedWithVirtual()
+        {
+            // Arrange
+            object derived = new DerivedClassWithOverride { PropA = "propAValue", PropB = "propBValue" };
+
+            // Act
+            PropertyHelper[] helpers = PropertyHelper.GetProperties(derived).ToArray();
+
+            // Assert
+            Assert.NotNull(helpers);
+            Assert.Equal(2, helpers.Length);
+
+            PropertyHelper propAHelper = Assert.Single(helpers.Where(h => h.Name == "PropA"));
+            PropertyHelper propBHelper = Assert.Single(helpers.Where(h => h.Name == "PropB"));
+
+            Assert.Equal("Overriden", propAHelper.GetValue(derived));
+            Assert.Equal("propBValue", propBHelper.GetValue(derived));
         }
     }
 }

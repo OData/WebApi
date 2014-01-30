@@ -167,7 +167,7 @@ namespace System.Web.WebPages
             {
                 // We avoid loading indexed properties using the where statement.
                 // Indexed properties are not useful (or valid) for grabbing properties off an anonymous object.
-                IEnumerable<PropertyInfo> properties = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
+                IEnumerable<PropertyInfo> properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                                            .Where(prop => prop.GetIndexParameters().Length == 0 &&
                                                                           prop.GetMethod != null);
 

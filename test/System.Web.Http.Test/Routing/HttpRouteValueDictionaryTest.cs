@@ -51,7 +51,7 @@ namespace System.Web.Http.Routing
 
         [Theory]
         [PropertyData("DictionaryConstructorData")]
-        public void Constructor_AcceptsDIctionaryValues(Dictionary<string, object> input, Dictionary<string, object> expectedOutput)
+        public void Constructor_AcceptsDictionaryValues(Dictionary<string, object> input, Dictionary<string, object> expectedOutput)
         {
             HttpRouteValueDictionary routeValues = new HttpRouteValueDictionary(input);
             Assert.True(expectedOutput.SequenceEqual(routeValues));

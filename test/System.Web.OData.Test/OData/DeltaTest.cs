@@ -15,6 +15,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
+using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -402,7 +403,7 @@ namespace System.Web.OData
         public void ODataFormatter_Can_Read_Delta(string propertyName, string propertyJsonValue, object expectedValue)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
             builder.Entity<DeltaModel>();
             builder.EntitySet<DeltaModel>("ignored");
             IEdmModel model = builder.GetEdmModel();
@@ -454,7 +455,8 @@ namespace System.Web.OData
         public void ODataFormatter_CanReadDelta_WithAlias(string propertyName, string propertyNameAlias, string propertyJsonValue, object expectedValue)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = true };
+            ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
+            builder.ModelAliasingEnabled = true;
             builder.Entity<DeltaModelWithAlias>();
             builder.EntitySet<DeltaModelWithAlias>("ignored");
             IEdmModel model = builder.GetEdmModel();

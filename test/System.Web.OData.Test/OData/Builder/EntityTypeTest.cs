@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Web.OData.Builder.TestModels;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
@@ -102,7 +103,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void SimpleCollections_Are_Nullable_ByDefault()
         {
-            var builder = new ODataModelBuilder();
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             var property =
                 builder
@@ -119,7 +120,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void ComplexCollections_Are_NotNullable_ByDefault()
         {
-            var builder = new ODataModelBuilder();
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             var property =
                 builder
@@ -136,7 +137,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void CanCreateAbstractEntityType()
         {
-            var builder = new ODataModelBuilder();
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             builder
                 .Entity<Vehicle>()
                 .Abstract();
@@ -201,7 +202,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void CanCreateDerivedTypesInAnyOrder()
         {
-            var builder = new ODataModelBuilder();
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             builder
                 .Entity<SportBike>()
@@ -242,7 +243,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void CanDefinePropertyOnDerivedType_NotPresentInBaseEdmType_ButPresentInBaseClrType()
         {
-            var builder = new ODataModelBuilder();
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             builder
                 .Entity<Motorcycle>()

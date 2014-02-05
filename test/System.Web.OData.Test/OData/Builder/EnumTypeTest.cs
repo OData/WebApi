@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -170,7 +171,7 @@ namespace System.Web.OData.Builder
         public void EnumPropertyLimitation()
         {
             // Arrange
-            var builder = new ODataModelBuilder().Add_Color_EnumType();
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>().Add_Color_EnumType();
             var entityTypeConfiguration = builder.Entity<EntityTypeWithEnumTypePropertyTestModel>();
             entityTypeConfiguration.EnumProperty(c => c.RequiredColor).IsOptional().IsConcurrencyToken();
 
@@ -703,7 +704,7 @@ namespace System.Web.OData.Builder
         public void BoundAction_ForEnumTypeInODataModelBuilder()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.Entity<EnumModel>();
             ActionConfiguration actionConfiguration = entityTypeConfiguration.Action("BoundAction");
             actionConfiguration.CollectionParameter<Color>("Colors");
@@ -729,7 +730,7 @@ namespace System.Web.OData.Builder
         public void BoundFunction_ForEnumTypeInODataModelBuilder()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder().Add_Color_EnumType();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>().Add_Color_EnumType();
             EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.Entity<EnumModel>();
             FunctionConfiguration functionConfiguration = entityTypeConfiguration.Function("BoundFunction");
             functionConfiguration.Parameter<Color?>("Color");
@@ -845,7 +846,7 @@ namespace System.Web.OData.Builder
         public void BoundFunction_ForEnumWithLongUnderlyingTypeInODataModelBuilder()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             builder.Add_LongEnum_EnumType();
             EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.Entity<EnumModel>();
             FunctionConfiguration functionConfiguration = entityTypeConfiguration.Function("BoundFunction");

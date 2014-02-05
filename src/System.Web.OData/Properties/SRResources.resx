@@ -761,4 +761,7 @@
   <data name="FunctionResolutionFailed" xml:space="preserve">
     <value>Function resolution failed. Multiple functions found in the model with identifier: '{0}' and parameter names : '{1}'.</value>
   </data>
+  <data name="EntityTypeDoesntHaveKeyDefined" xml:space="preserve">
+    <value>The entity '{0}' does not have a key defined.</value>
+  </data>
 </root>

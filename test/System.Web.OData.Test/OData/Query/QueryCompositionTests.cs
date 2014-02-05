@@ -10,6 +10,7 @@ using System.Web.Http.Filters;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -87,12 +88,12 @@ namespace System.Web.OData.Query
         public void Queryable_UsesRouteModel_ForMultipleModels()
         {
             // Model 1 only has Name, Model 2 only has Age
-            ODataModelBuilder builder1 = new ODataModelBuilder();
+            ODataModelBuilder builder1 = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             var personType1 = builder1.Entity<FormatterPerson>().Property(p => p.Name);
             builder1.EntitySet<FormatterPerson>("People").HasIdLink(p => "http://link/", false);
             var model1 = builder1.GetEdmModel();
 
-            ODataModelBuilder builder2 = new ODataModelBuilder();
+            ODataModelBuilder builder2 = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             builder2.Entity<FormatterPerson>().Property(p => p.Age);
             builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => "http://link/", false);
             var model2 = builder2.GetEdmModel();

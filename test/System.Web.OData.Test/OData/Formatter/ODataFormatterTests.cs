@@ -14,6 +14,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Query;
+using System.Web.OData.TestCommon;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
@@ -95,12 +96,12 @@ namespace System.Web.OData.Formatter
         public void GetEntry_UsesRouteModel_ForMultipleModels()
         {
             // Model 1 only has Name, Model 2 only has Age
-            ODataModelBuilder builder1 = new ODataModelBuilder();
+            ODataModelBuilder builder1 = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             var personType1 = builder1.Entity<FormatterPerson>().Property(p => p.Name);
             builder1.EntitySet<FormatterPerson>("People").HasIdLink(p => "http://link/", false);
             var model1 = builder1.GetEdmModel();
 
-            ODataModelBuilder builder2 = new ODataModelBuilder();
+            ODataModelBuilder builder2 = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             builder2.Entity<FormatterPerson>().Property(p => p.Age);
             builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => "http://link/", false);
             var model2 = builder2.GetEdmModel();
@@ -653,7 +654,7 @@ namespace System.Web.OData.Formatter
 
         private static IEdmModel CreateModelForFullMetadata(bool sameLinksForIdAndEdit, bool sameLinksForEditAndRead)
         {
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             EntitySetConfiguration<MainEntity> mainSet = builder.EntitySet<MainEntity>("MainEntity");
 

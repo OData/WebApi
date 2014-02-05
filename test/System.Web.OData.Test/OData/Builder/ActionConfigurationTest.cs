@@ -8,6 +8,7 @@ using System.Web.Http.Routing;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
@@ -253,7 +254,7 @@ namespace System.Web.OData.Builder
         public void CanCreateEdmModel_WithNonBindableAction()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             // Act
             ActionConfiguration actionConfiguration = builder.Action("ActionName");
@@ -364,7 +365,7 @@ namespace System.Web.OData.Builder
         public void GetEdmModel_SetsNullableIffParameterTypeIsNullable()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
             var actionBuilder = movie.Action("Watch");
             actionBuilder.Parameter<int>("int");

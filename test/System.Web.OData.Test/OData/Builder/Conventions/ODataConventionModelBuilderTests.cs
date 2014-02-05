@@ -1270,7 +1270,7 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
-            var builder = new ODataConventionModelBuilder(configuration);
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>(configuration);
 
             // Act
             var baseEntity = builder.AddEntity(baseType);

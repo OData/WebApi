@@ -251,6 +251,7 @@
     <Compile Include="OData\SelectExpandTest.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="TestCommon\CustomersModelWithInheritance.cs" />
+    <Compile Include="TestCommon\ODataModelBuilderMocks.cs" />
     <Compile Include="TestCommon\TestAssemblyResolver.cs" />
     <Compile Include="TestCommon\MockAssembly.cs" />
     <Compile Include="TestCommon\MockPropertyInfo.cs" />

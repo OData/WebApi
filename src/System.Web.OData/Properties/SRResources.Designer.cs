@@ -637,6 +637,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The entity &apos;{0}&apos; does not have a key defined..
+        /// </summary>
+        internal static string EntityTypeDoesntHaveKeyDefined {
+            get {
+                return ResourceManager.GetString("EntityTypeDoesntHaveKeyDefined", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The entity type &apos;{0}&apos; does not match the expected entity type &apos;{1}&apos; as set on the query context..
         /// </summary>
         internal static string EntityTypeMismatch {

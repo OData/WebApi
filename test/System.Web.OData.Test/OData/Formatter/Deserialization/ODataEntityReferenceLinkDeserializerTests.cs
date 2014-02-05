@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.OData.Builder;
 using System.Web.OData.Routing;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -129,7 +130,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
         private static IEdmModel CreateModel()
         {
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             EntitySetConfiguration<Entity> entities = builder.EntitySet<Entity>("entities");
             builder.EntitySet<RelatedEntity>("related");
             NavigationPropertyConfiguration entityToRelated =

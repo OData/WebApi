@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization.Models;
 using System.Web.OData.Query.Expressions;
+using System.Web.OData.TestCommon;
 using System.Xml.Linq;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -186,7 +187,7 @@ namespace System.Web.OData.Formatter
 
         private static IEdmModel GetEdmModel()
         {
-            ODataModelBuilder modelBuilder = new ODataModelBuilder();
+            ODataModelBuilder modelBuilder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             modelBuilder
                 .Entity<DerivedTypeA>()
                 .DerivesFrom<BaseType>();

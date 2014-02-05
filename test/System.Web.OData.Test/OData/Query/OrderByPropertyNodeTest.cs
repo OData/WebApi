@@ -84,7 +84,7 @@ namespace System.Web.OData.Query
         public void CreateCollection_From_OrderByNode_Succeeds()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
             builder.EntitySet<SampleClass>("entityset");
 
             IEdmModel model = builder.GetEdmModel();

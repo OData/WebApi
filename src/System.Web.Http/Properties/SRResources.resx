@@ -511,4 +511,7 @@ Duplicates:
   <data name="DirectRoute_InvalidParameter_Controller" xml:space="preserve">
     <value>A direct route cannot use the parameter 'controller'. Specify a literal path in place of this parameter to create a route to a controller.</value>
   </data>
+  <data name="CollectionParameterContainsNullElement" xml:space="preserve">
+    <value>The parameter '{0}' cannot contain a null element.</value>
+  </data>
 </root>

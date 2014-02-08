@@ -223,6 +223,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The parameter &apos;{0}&apos; cannot contain a null element..
+        /// </summary>
+        internal static string CollectionParameterContainsNullElement {
+            get {
+                return ResourceManager.GetString("CollectionParameterContainsNullElement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property {0}.{1} could not be found..
         /// </summary>
         internal static string Common_PropertyNotFound {

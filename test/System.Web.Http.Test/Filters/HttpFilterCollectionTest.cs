@@ -36,6 +36,40 @@ namespace System.Web.Http.Filters
         }
 
         [Fact]
+        public void AddRange_AddsAllFilters()
+        {
+            IFilter[] filters = { _filter, _filter };
+
+            _collection.AddRange(filters);
+
+            Assert.Equal(filters.Length, _collection.Count);
+            Assert.True(filters.All(_collection.Contains));
+        }
+
+        [Fact]
+        public void AddRange_AddsAllFiltersWithGlobalScope()
+        {
+            IFilter[] filters = { _filter, _filter };
+
+            _collection.AddRange(filters);
+
+            Assert.True(_collection.All(f => FilterScope.Global == f.Scope));
+        }
+
+        [Fact]
+        public void AddRange_ValidatesNotNull()
+        {
+            IFilter[] filters = { _filter, null };
+
+            Assert.Throws<ArgumentException>(
+                () => _collection.AddRange(filters),
+                "The parameter 'filters' cannot contain a null element." + Environment.NewLine +
+                "Parameter name: filters");
+
+            Assert.Equal(0, _collection.Count);
+        }
+
+        [Fact]
         public void Clear_EmptiesCollection()
         {
             _collection.Add(_filter);

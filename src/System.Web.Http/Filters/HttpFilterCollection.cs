@@ -2,7 +2,10 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
+using System.Web.Http.Properties;
 
 namespace System.Web.Http.Filters
 {
@@ -22,12 +25,42 @@ namespace System.Web.Http.Filters
                 throw Error.ArgumentNull("filter");
             }
 
-            AddInternal(new FilterInfo(filter, FilterScope.Global));
+            _filters.Add(CreateFilterInfo(filter));
         }
 
-        private void AddInternal(FilterInfo filter)
+        /// <summary>
+        /// Adds the elements of the specified collection to the end of the filter collection.
+        /// </summary>
+        /// <param name="filters">The collection of filters to add.</param>
+        public void AddRange(IEnumerable<IFilter> filters)
         {
-            _filters.Add(filter);
+            if (filters == null)
+            {
+                throw Error.ArgumentNull("filters");
+            }
+
+            // ToArray used here to avoid iterating the filter collection twice.
+            IFilter[] cachedFilters = filters.ToArray();
+            for (int i = 0; i < cachedFilters.Length; i++)
+            {
+                if (cachedFilters[i] == null)
+                {
+                    throw new ArgumentException(
+                        String.Format(CultureInfo.CurrentCulture, SRResources.CollectionParameterContainsNullElement, "filters"),
+                        "filters");
+                }
+            }
+
+            for (int i = 0; i < cachedFilters.Length; i++)
+            {
+                _filters.Add(CreateFilterInfo(cachedFilters[i]));
+            }
+        }
+
+        private static FilterInfo CreateFilterInfo(IFilter filter)
+        {
+            Contract.Assert(filter != null);
+            return new FilterInfo(filter, FilterScope.Global);
         }
 
         public void Clear()

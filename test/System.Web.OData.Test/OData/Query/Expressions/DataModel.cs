@@ -16,6 +16,8 @@ namespace System.Web.OData.Query.Expressions
         public int CategoryID { get; set; }
         public string QuantityPerUnit { get; set; }
         public decimal? UnitPrice { get; set; }
+        public double? Weight { get; set; }
+        public float? Width { get; set; }
         public short? UnitsInStock { get; set; }
         public short? UnitsOnOrder { get; set; }
 

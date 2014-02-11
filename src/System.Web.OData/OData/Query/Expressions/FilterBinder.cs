@@ -712,7 +712,9 @@ namespace System.Web.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            MethodInfo round = arguments[0].Type == typeof(double) ? ClrCanonicalFunctions.RoundOfDouble : ClrCanonicalFunctions.RoundOfDecimal;
+            MethodInfo round = IsType<double>(arguments[0].Type)
+                ? ClrCanonicalFunctions.RoundOfDouble
+                : ClrCanonicalFunctions.RoundOfDecimal;
             return MakeFunctionCall(round, arguments);
         }
 

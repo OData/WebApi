@@ -25,6 +25,19 @@ namespace System.Web.OData.Query.Expressions
 
         private static Dictionary<Type, IEdmModel> _modelCache = new Dictionary<Type, IEdmModel>();
 
+        public static TheoryDataSet<decimal?, bool, object> MathRoundDecimal_DataSet
+        {
+            get
+            {
+                return new TheoryDataSet<decimal?, bool, object>
+                {
+                    { null, false, typeof(InvalidOperationException) },
+                    { 5.9m, true, true },
+                    { 5.4m, false, false },
+                };
+            }
+        }
+
         #region Inequalities
         [Theory]
         [InlineData(null, true, true)]
@@ -1074,11 +1087,8 @@ namespace System.Web.OData.Query.Expressions
         #endregion
 
         #region Math Functions
-        [Theory]
-        [InlineData(null, false, typeof(InvalidOperationException))]
-        [InlineData(5.9, true, true)]
-        [InlineData(5.4, false, false)]
-        public void MathRound(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
+        [Theory, PropertyData("MathRoundDecimal_DataSet")]
+        public void MathRoundDecimal(decimal? unitPrice, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
                 "round(UnitPrice) gt 5.00m",
@@ -1087,6 +1097,38 @@ namespace System.Web.OData.Query.Expressions
 
             RunFilters(filters,
                new Product { UnitPrice = ToNullable<decimal>(unitPrice) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData(null, false, typeof(InvalidOperationException))]
+        [InlineData(5.9d, true, true)]
+        [InlineData(5.4d, false, false)]
+        public void MathRoundDouble(double? weight, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "round(Weight) gt 5d",
+                Error.Format("$it => ($it.Weight.Value.Round() > {0})", 5),
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Weight = ToNullable<double>(weight) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData(null, false, typeof(InvalidOperationException))]
+        [InlineData(5.9f, true, true)]
+        [InlineData(5.4f, false, false)]
+        public void MathRoundFloat(float? width, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "round(Width) gt 5f",
+                Error.Format("$it => (Convert($it.Width).Value.Round() > {0})", 5),
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Width = ToNullable<float>(width) },
                new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
         }
 

@@ -108,7 +108,9 @@ namespace System.Web.OData.Formatter
                     return null;
                 }
 
-                // TODO 1608: ODataUriUtils.ConvertFromUriLiteral doesn't support enum
+                // TODO 1668: ODL beta1's ODataUriUtils.ConvertFromUriLiteral does not support converting uri literal
+                // to ODataEnumValue, but beta1's ODataUriUtils.ConvertToUriLiteral supports converting ODataEnumValue
+                // to uri literal.
                 if (TypeHelper.IsEnum(type))
                 {
                     string[] values = valueString.Split(new[] { '\'' }, StringSplitOptions.None);

@@ -94,6 +94,8 @@ namespace System.Web.OData.TestCommon
 
             // functions
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
+            IEdmTypeReference stringType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: false);
+
             EdmFunction IsUpgraded = new EdmFunction(
                 "NS",
                 "IsUpgraded",
@@ -121,6 +123,26 @@ namespace System.Web.OData.TestCommon
                 "IsSpecialUpgraded",
                 IsSpecialUpgraded,
                 new EdmEntitySetReferenceExpression(customers));
+
+            EdmFunction getSalary = new EdmFunction(
+                "NS",
+                "GetSalary",
+                stringType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
+            getSalary.AddParameter("entity", new EdmEntityTypeReference(customer, false));
+            model.AddElement(getSalary);
+
+            getSalary = new EdmFunction(
+                "NS",
+                "GetSalary",
+                stringType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
+            getSalary.AddParameter("entity", new EdmEntityTypeReference(specialCustomer, false));
+            model.AddElement(getSalary);
 
             EdmFunction IsAnyUpgraded = new EdmFunction(
                 "NS",

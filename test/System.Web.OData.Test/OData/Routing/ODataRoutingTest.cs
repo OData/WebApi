@@ -84,6 +84,21 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "Products/TopProductOfAllByCityAndModel(city='any',model=2)", "TopProductOfAllByCityAndModel(any, 2)")]
         [InlineData("GET", "Products/TopProductOfAllByCityAndModel(city=@city,model=@model)?@city='any'&@model=2", "TopProductOfAllByCityAndModel(any, 2)")]
         [InlineData("GET", "Products/System.Web.OData.Routing.ImportantProduct/TopProductOfAllByCity(city='any')", "TopProductOfAllByCity(any)")]
+        // functions bound to the base and derived type
+        [InlineData("GET", "RoutingCustomers(4)/GetOrdersCount()", "GetOrdersCount_4")]
+        [InlineData("GET", "RoutingCustomers(5)/System.Web.OData.Routing.VIP/GetOrdersCount()", "GetOrdersCountOnVIP_5")]
+        [InlineData("GET", "RoutingCustomers(6)/System.Web.OData.Routing.SpecialVIP/GetOrdersCount()", "GetOrdersCountOnVIP_6")]
+        [InlineData("GET", "RoutingCustomers(7)/GetOrdersCount(factor=3)", "GetOrdersCount_(7,3)")]
+        [InlineData("GET", "RoutingCustomers(8)/System.Web.OData.Routing.VIP/GetOrdersCount(factor=4)", "GetOrdersCount_(8,4)")]
+        [InlineData("GET", "RoutingCustomers(9)/System.Web.OData.Routing.SpecialVIP/GetOrdersCount(factor=5)", "GetOrdersCount_(9,5)")]
+        // functions bound to the collection of the base and the derived type
+        [InlineData("GET", "RoutingCustomers/GetAllEmployees()", "GetAllEmployees")]
+        [InlineData("GET", "RoutingCustomers/System.Web.OData.Routing.VIP/GetAllEmployees()", "GetAllEmployeesOnCollectionOfVIP")]
+        [InlineData("GET", "RoutingCustomers/System.Web.OData.Routing.SpecialVIP/GetAllEmployees()", "GetAllEmployeesOnCollectionOfVIP")]
+        // functions only bound to derived type
+        [InlineData("GET", "RoutingCustomers(5)/GetSpecialGuid()", "~/entityset/key/unresolved")]
+        [InlineData("GET", "RoutingCustomers(5)/System.Web.OData.Routing.VIP/GetSpecialGuid()", "~/entityset/key/cast/unresolved")]
+        [InlineData("GET", "RoutingCustomers(5)/System.Web.OData.Routing.SpecialVIP/GetSpecialGuid()", "GetSpecialGuid_5")]
         // unmapped requests
         [InlineData("GET", "RoutingCustomers(10)/Products(1)", "~/entityset/key/navigation/key")]
         [InlineData("CUSTOM", "RoutingCustomers(10)", "~/entityset/key")]
@@ -210,6 +225,47 @@ namespace System.Web.OData.Routing
         public string HandleUnmappedRequest(ODataPath path)
         {
             return path.PathTemplate;
+        }
+
+        public string GetOrdersCount(int key)
+        {
+            return "GetOrdersCount_" + key;
+        }
+
+        public string GetOrdersCountOnVIP(int key)
+        {
+            return "GetOrdersCountOnVIP_" + key;
+        }
+
+        public string GetOrdersCount(int key, int factor)
+        {
+            return "GetOrdersCount_(" + key + "," + factor + ")";
+        }
+
+        // Writing this function here is used as guard. In the model, we doesn't define GetOrdersCount(int factor)
+        // function on VIP entity type. So, the following two requests:
+        // ~/RoutingCustomers(7)/System.Web.OData.Routing.VIP/GetOrdersCount(factor=2)
+        // ~/RoutingCustomers(9)/System.Web.OData.Routing.SpecialVIP/GetOrdersCount(factor=5)
+        // will never be routed into this function. Otherwise, it routes to the above function as
+        // public string GetOrdersCount(int key, int factor)
+        public string GetOrdersCountOnVIP(int key, int factor)
+        {
+            return "GetOrdersCountOnVIP_(" + key + "," + factor + ")";
+        }
+
+        public string GetSpecialGuid(int key)
+        {
+            return "GetSpecialGuid_" + key;
+        }
+
+        public string GetAllEmployees()
+        {
+            return "GetAllEmployees";
+        }
+
+        public string GetAllEmployeesOnCollectionOfVIP()
+        {
+            return "GetAllEmployeesOnCollectionOfVIP";
         }
     }
 

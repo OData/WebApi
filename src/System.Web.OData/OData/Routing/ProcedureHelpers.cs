@@ -37,6 +37,10 @@ namespace System.Web.OData.Routing
 
             IEnumerable<IEdmOperation> matchedOperations = model.FindMatchedOperations(actionIdentifier, bindingType);
             IList<IEdmAction> actions = matchedOperations.OfType<IEdmAction>().ToList();
+            if (actions.Count() == 0)
+            {
+                return null;
+            }
 
             bool isCollection = false;
             if (bindingType.TypeKind == EdmTypeKind.Collection)
@@ -99,7 +103,7 @@ namespace System.Web.OData.Routing
                 operations = operations.Where(f => f.Name == name && f.Namespace == nspace);
             }
 
-            return operations.Where(procedure => procedure.CanBindTo(bindingType));
+            return operations.Where(operation => operation.CanBindTo(bindingType));
         }
 
         private static IEnumerable<IEdmOperationImport> GetMatchedOperationImports(this IEnumerable<IEdmOperationImport> operationImports,

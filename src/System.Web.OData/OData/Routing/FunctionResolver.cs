@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Properties;
@@ -119,7 +120,7 @@ namespace System.Web.OData.Routing
                 else if (matchedFunctions.Length > 1)
                 {
                     string identifier = matchedFunctions[0].Name;
-                    throw new ODataException(Error.Format(SRResources.FunctionResolutionFailed, identifier, String.Join(",", parameterNames)));
+                    throw new ODataException(Error.Format(SRResources.FunctionResolutionFailed, identifier, String.Empty));
                 }
             }
 
@@ -198,6 +199,31 @@ namespace System.Web.OData.Routing
             return segment != null &&
                 segment.StartsWith("(", StringComparison.Ordinal) &&
                 segment.EndsWith(")", StringComparison.Ordinal);
+        }
+
+        public static bool IsBoundTo(IEdmFunction function, IEdmType type)
+        {
+            Contract.Assert(function != null);
+            Contract.Assert(type != null);
+
+            // The binding parameter is the first parameter by convention
+            IEdmOperationParameter bindingParameter = function.Parameters.FirstOrDefault();
+            if (bindingParameter == null)
+            {
+                return false;
+            }
+
+            IEdmType fromType;
+            if (bindingParameter.Type.Definition.TypeKind == EdmTypeKind.Collection)
+            {
+                fromType = ((IEdmCollectionType)bindingParameter.Type.Definition).ElementType.Definition;
+            }
+            else
+            {
+                fromType = bindingParameter.Type.Definition;
+            }
+
+            return fromType == type;
         }
     }
 }

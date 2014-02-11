@@ -88,6 +88,22 @@ namespace System.Web.OData.Routing
             topProductOfAllByCityAndModel.Parameter<int>("model");
             topProductOfAllByCityAndModel.Returns<string>();
 
+            // Function bound to the base entity type and derived entity type
+            builder.Entity<RoutingCustomer>().Function("GetOrdersCount").Returns<string>();
+            builder.Entity<VIP>().Function("GetOrdersCount").Returns<string>();
+
+            // Overloaded function only bound to the base entity type with one paramter
+            var getOrderCount = builder.Entity<RoutingCustomer>().Function("GetOrdersCount");
+            getOrderCount.Parameter<int>("factor");
+            getOrderCount.Returns<string>();
+
+            // Function only bound to the derived entity type
+            builder.Entity<SpecialVIP>().Function("GetSpecialGuid").Returns<string>();
+
+            // Function bound to the collection of the base and the derived entity type
+            builder.Entity<RoutingCustomer>().Collection.Function("GetAllEmployees").Returns<string>();
+            builder.Entity<VIP>().Collection.Function("GetAllEmployees").Returns<string>();
+
             return builder.GetEdmModel();
         }
 
@@ -164,6 +180,11 @@ namespace System.Web.OData.Routing
         {
             public virtual SalesPerson RelationshipManager { get; set; }
             public string Company { get; set; }
+        }
+
+        public class SpecialVIP : VIP
+        {
+            public Guid SpecialGuid { get; set; }
         }
 
         public class ImportantProduct : Product

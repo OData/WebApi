@@ -389,7 +389,7 @@ namespace System.Web.OData.Routing
             }
 
             // Try to match this to a function call
-            BoundFunctionPathSegment pathSegment = TryMatchFunctionCall(segment, segments, model, bindingType: collectionType);
+            BoundFunctionPathSegment pathSegment = TryMatchBoundFunctionCall(segment, segments, model, bindingType: collectionType);
             if (pathSegment != null)
             {
                 return pathSegment;
@@ -532,7 +532,7 @@ namespace System.Web.OData.Routing
             }
 
             // Try to match this to a function call
-            BoundFunctionPathSegment pathSegment = TryMatchFunctionCall(segment, segments, model, bindingType: previousType);
+            BoundFunctionPathSegment pathSegment = TryMatchBoundFunctionCall(segment, segments, model, bindingType: previousType);
             if (pathSegment != null)
             {
                 return pathSegment;
@@ -565,20 +565,48 @@ namespace System.Web.OData.Routing
             return path.ToString();
         }
 
-        private static BoundFunctionPathSegment TryMatchFunctionCall(string segment, Queue<string> segments, IEdmModel model,
+        private static BoundFunctionPathSegment TryMatchBoundFunctionCall(string segment, Queue<string> segments, IEdmModel model,
             IEdmType bindingType)
         {
-            string nextSegment = segments.Count > 0 ? segments.Peek() : null;
-            IEnumerable<IEdmOperation> matchOperations = model.FindMatchedOperations(segment, bindingType);
-            IEnumerable<IEdmFunction> possibleFunctions = matchOperations.OfType<IEdmFunction>();
+            Contract.Assert(model != null);
+            Contract.Assert(bindingType != null);
 
-            BoundFunctionPathSegment functionSegment = FunctionResolver.TryResolveBound(possibleFunctions, model, nextSegment);
-            if (functionSegment != null && FunctionResolver.IsEnclosedInParentheses(nextSegment))
+            string nextSegment = segments.Count > 0 ? segments.Peek() : null;
+            IEnumerable<IEdmOperation> matchedOperations = model.FindMatchedOperations(segment, bindingType);
+            IEnumerable<IEdmFunction> possibleFunctions = matchedOperations.OfType<IEdmFunction>();
+            if (possibleFunctions.Count() == 0)
             {
-                segments.Dequeue();
+                return null;
             }
 
-            return functionSegment;
+            IEdmEntityType currentBindingType;
+            if (bindingType.TypeKind == EdmTypeKind.Collection)
+            {
+                currentBindingType = (IEdmEntityType)(((IEdmCollectionType)bindingType).ElementType.Definition);
+            }
+            else
+            {
+               currentBindingType = (IEdmEntityType)bindingType;
+            }
+
+            while (currentBindingType != null)
+            {
+                IEnumerable<IEdmFunction> matchedFunctions = possibleFunctions.Where(f => FunctionResolver.IsBoundTo(f, currentBindingType));
+                BoundFunctionPathSegment functionSegment = FunctionResolver.TryResolveBound(matchedFunctions, model, nextSegment);
+                if (functionSegment != null)
+                {
+                    if (FunctionResolver.IsEnclosedInParentheses(nextSegment))
+                    {
+                        segments.Dequeue();
+                    }
+
+                    return functionSegment;
+                }
+
+                currentBindingType = currentBindingType.BaseEntityType();
+            }
+
+            return null;
         }
 
         private static UnboundFunctionPathSegment TryMatchUnboundFunctionCall(string segment, Queue<string> segments, IEdmModel model)

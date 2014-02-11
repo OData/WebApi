@@ -31,6 +31,8 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "http://localhost/Customers/IsAnyUpgraded", "IsAnyUpgraded")] // function bound to entity collection
         [InlineData("GET", "http://localhost/Customers/IsAnyUpgraded()", "IsAnyUpgraded")] // function bound to entity collection
         [InlineData("GET", "http://localhost/Customers(42)/NS.SpecialCustomer/IsSpecialUpgraded()", "IsSpecialUpgraded_42")] // function bound to derived entity type
+        [InlineData("GET", "http://localhost/Customers(22)/GetSalary()", "GetSalary_22")] // call function on base entity type
+        [InlineData("GET", "http://localhost/Customers(12)/NS.SpecialCustomer/GetSalary()", "GetSalaryFromSpecialCustomer_12")] // call function on derived entity type
         public async Task AttriubteRouting_SelectsExpectedControllerAndAction(string method, string requestUri,
             string expectedResult)
         {
@@ -149,6 +151,20 @@ namespace System.Web.OData.Routing
             public string IsSpecialUpgraded([FromODataUri] int id)
             {
                 return "IsSpecialUpgraded_" + id;
+            }
+
+            [HttpGet]
+            [ODataRoute("Customers({id})/GetSalary()")]
+            public string GetSalary([FromODataUri] int id)
+            {
+                return "GetSalary_" + id;
+            }
+
+            [HttpGet]
+            [ODataRoute("Customers({id})/NS.SpecialCustomer/GetSalary()")]
+            public string GetSalaryFromSpecialCustomer([FromODataUri] int id)
+            {
+                return "GetSalaryFromSpecialCustomer_" + id;
             }
         }
 

@@ -166,9 +166,18 @@ namespace System.Web.OData.Formatter.Serialization
 
                 _typeMappingCache = _typeMappingCache ?? Model.GetTypeMappingCache();
                 edmType = _typeMappingCache.GetEdmType(type, Model);
+
                 if (edmType == null)
                 {
-                    throw Error.InvalidOperation(SRResources.ClrTypeNotInModel, type);
+                    if (instance != null)
+                    {
+                        edmType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
+                    }
+
+                    if (edmType == null)
+                    {
+                        throw Error.InvalidOperation(SRResources.ClrTypeNotInModel, type);
+                    }
                 }
             }
 

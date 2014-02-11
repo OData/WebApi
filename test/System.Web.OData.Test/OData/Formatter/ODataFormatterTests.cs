@@ -13,6 +13,7 @@ using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Query;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
@@ -523,6 +524,31 @@ namespace System.Web.OData.Formatter
             }
         }
 
+        [Fact]
+        public void ODataCollectionSerializer_SerializeIQueryableOfIEdmEntityObject()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<CollectionSerializerCustomer>("CollectionSerializerCustomers");
+            IEdmModel model = builder.GetEdmModel();
+
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            {
+                configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
+                using (HttpServer host = new HttpServer(configuration))
+                using (HttpClient client = new HttpClient(host))
+                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/CollectionSerializerCustomers?$select=ID"))
+                {
+                    // Act
+                    using (HttpResponseMessage response = client.SendAsync(request).Result)
+                    {
+                        // Assert
+                        response.EnsureSuccessStatusCode();
+                    }
+                }
+            }
+        }
+
         public class EnumCustomer
         {
             public int ID { get; set; }
@@ -535,6 +561,29 @@ namespace System.Web.OData.Formatter
             public IHttpActionResult Post(EnumCustomer customer)
             {
                 return Ok(customer);
+            }
+        }
+
+        public class CollectionSerializerCustomer
+        {
+            public int ID { get; set; }
+            public string Name { get; set; }
+        }
+
+        public class CollectionSerializerCustomersController : ODataController
+        {
+            public IHttpActionResult Get(ODataQueryOptions<CollectionSerializerCustomer> options)
+            {
+                IQueryable<CollectionSerializerCustomer> customers = new[]
+                {
+                    new CollectionSerializerCustomer{ID = 1, Name = "Name 1"},
+                    new CollectionSerializerCustomer{ID = 2, Name = "Name 2"},
+                    new CollectionSerializerCustomer{ID = 3, Name = "Name 3"},
+                }.AsQueryable();
+
+                IQueryable<IEdmEntityObject> appliedCustomers = options.ApplyTo(customers) as IQueryable<IEdmEntityObject>;
+
+                return Ok(appliedCustomers);
             }
         }
 

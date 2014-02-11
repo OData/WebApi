@@ -5,6 +5,9 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Core.UriParser.TreeNodeKinds;
+using Microsoft.OData.Core.UriParser.Visitors;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Query.Validators
 {
@@ -36,47 +39,131 @@ namespace System.Web.OData.Query.Validators
                 nodeCount++;
                 if (nodeCount > validationSettings.MaxOrderByNodeCount)
                 {
-                    throw new ODataException(Error.Format(SRResources.OrderByNodeCountExceeded, validationSettings.MaxOrderByNodeCount));
+                    throw new ODataException(Error.Format(SRResources.OrderByNodeCountExceeded,
+                        validationSettings.MaxOrderByNodeCount));
                 }
             }
 
-            // need to validate only if orderby options presented
-            if (orderByOption.OrderByNodes.Count > 0)
-            {
-                foreach (OrderByNode node in orderByOption.OrderByNodes)
-                {
-                    string propertyName = null;
-                    OrderByPropertyNode propertyNode = node as OrderByPropertyNode;
-                    if (propertyNode != null)
-                    {
-                        propertyName = propertyNode.Property.Name;
+            OrderByModelLimitationsValidator validator = new OrderByModelLimitationsValidator(orderByOption.Context.Model);
+            bool explicitAllowedProperties = validationSettings.AllowedOrderByProperties.Count > 0;
 
-                        // First validate whether it's allowed or not
-                        if (propertyName != null && 
-                            validationSettings.AllowedOrderByProperties.Count > 0 && 
-                            !validationSettings.AllowedOrderByProperties.Contains(propertyName))
+            foreach (OrderByNode node in orderByOption.OrderByNodes)
+            {
+                string propertyName = null;
+                OrderByPropertyNode propertyNode = node as OrderByPropertyNode;
+                if (propertyNode != null)
+                {
+                    propertyName = propertyNode.Property.Name;
+                    bool isValidPath = !validator.TryValidate(propertyNode.OrderByClause, explicitAllowedProperties);
+                    if (propertyName != null && isValidPath && explicitAllowedProperties)
+                    {
+                        // Explicit allowed properties were specified, but this one isn't within the list of allowed 
+                        // properties.
+                        if (!IsAllowed(validationSettings, propertyName))
                         {
                             throw new ODataException(Error.Format(SRResources.NotAllowedOrderByProperty, propertyName,
                                 "AllowedOrderByProperties"));
                         }
-
-                        // Second validate whether it's limited or not
-                        if (EdmLibHelpers.IsUnsortable(propertyNode.Property, orderByOption.Context.Model))
-                        {
-                            throw new ODataException(Error.Format(SRResources.UnsortablePropertyUsedInOrderBy, propertyName));
-                        }
                     }
-                    else if (node as OrderByItNode != null)
+                    else if (propertyName != null)
                     {
-                        propertyName = "$it";
-                        if (validationSettings.AllowedOrderByProperties.Count > 0 &&
-                            !validationSettings.AllowedOrderByProperties.Contains(propertyName))
+                        // The property wasn't limited but it wasn't contained in the set of explicitly allowed 
+                        // properties.
+                        if (!IsAllowed(validationSettings, propertyName))
                         {
                             throw new ODataException(Error.Format(SRResources.NotAllowedOrderByProperty, propertyName,
                                 "AllowedOrderByProperties"));
                         }
                     }
                 }
+                else
+                {
+                    propertyName = "$it";
+                    if (!IsAllowed(validationSettings, propertyName))
+                    {
+                        throw new ODataException(Error.Format(SRResources.NotAllowedOrderByProperty, propertyName,
+                            "AllowedOrderByProperties"));
+                    }
+                }
+            }
+        }
+
+        private static bool IsAllowed(ODataValidationSettings validationSettings, string propertyName)
+        {
+            return validationSettings.AllowedOrderByProperties.Count == 0 ||
+                   validationSettings.AllowedOrderByProperties.Contains(propertyName);
+        }
+
+        private class OrderByModelLimitationsValidator : QueryNodeVisitor<SingleValueNode>
+        {
+            private readonly IEdmModel _model;
+
+            public OrderByModelLimitationsValidator(IEdmModel model)
+            {
+                _model = model;
+            }
+
+            // Visits the expression to find the first node if any, that is unsortable and throws
+            // an exception only if no explicit properties have been defined in AllowedOrderByProperties
+            // on the ODataValidationSettings instance associated with this OrderByValidator.
+            public bool TryValidate(OrderByClause orderByClause, bool explicitPropertiesDefined)
+            {
+                SingleValueNode invalidNode = orderByClause.Expression.Accept(this);
+                if (invalidNode != null && !explicitPropertiesDefined)
+                {
+                    throw new ODataException(Error.Format(SRResources.UnsortablePropertyUsedInOrderBy,
+                        GetPropertyName(invalidNode)));
+                }
+                return invalidNode == null;
+            }
+
+            public override SingleValueNode Visit(SingleValuePropertyAccessNode nodeIn)
+            {
+                if (EdmLibHelpers.IsUnsortable(nodeIn.Property, _model))
+                {
+                    return nodeIn;
+                }
+                if (nodeIn.Source != null)
+                {
+                    return nodeIn.Source.Accept(this);
+                }
+                return null;
+            }
+
+            public override SingleValueNode Visit(SingleNavigationNode nodeIn)
+            {
+                if (EdmLibHelpers.IsUnsortable(nodeIn.NavigationProperty, _model))
+                {
+                    return nodeIn;
+                }
+                if (nodeIn.Source != null)
+                {
+                    return nodeIn.Source.Accept(this);
+                }
+                return null;
+            }
+
+            public override SingleValueNode Visit(EntityRangeVariableReferenceNode nodeIn)
+            {
+                return null;
+            }
+
+            public override SingleValueNode Visit(NonentityRangeVariableReferenceNode nodeIn)
+            {
+                return null;
+            }
+
+            private static string GetPropertyName(SingleValueNode node)
+            {
+                if (node.Kind == QueryNodeKind.SingleNavigationNode)
+                {
+                    return ((SingleNavigationNode)node).NavigationProperty.Name;
+                }
+                else if (node.Kind == QueryNodeKind.SingleValuePropertyAccess)
+                {
+                    return ((SingleValuePropertyAccessNode)node).Property.Name;
+                }
+                return null;
             }
         }
     }

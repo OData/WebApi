@@ -150,6 +150,8 @@ namespace System.Web.OData.Builder
         /// </summary>
         public PropertyConfiguration IsNotNavigable()
         {
+            IsUnsortable();
+            IsNonFilterable();
             NotNavigable = true;
             return this;
         }

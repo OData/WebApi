@@ -48,5 +48,41 @@ namespace System.Web.OData.Builder
         {
             Assert.Reflection.BooleanProperty(_configuration, c => c.AddedExplicitly, true);
         }
+
+        [Fact]
+        public void Property_IsNotNavigable_SetsUnsortableAndNonFilterable()
+        {
+            // Arrange
+            StructuralTypeConfiguration structuralType = Mock.Of<StructuralTypeConfiguration>();
+            Mock<PropertyInfo> propertyInfo = new Mock<PropertyInfo>();
+            propertyInfo.SetupGet(p => p.PropertyType).Returns(typeof(int));
+            PropertyConfiguration property = new PrimitivePropertyConfiguration(propertyInfo.Object, structuralType);
+
+            // Act
+            property.IsNotNavigable();
+
+            // Assert
+            Assert.True(property.NonFilterable);
+            Assert.True(property.Unsortable);
+        }
+
+        [Fact]
+        public void Property_IsNavigable_DoesntSetSortableAndFilterable()
+        {
+            // Arrange
+            StructuralTypeConfiguration structuralType = Mock.Of<StructuralTypeConfiguration>();
+            Mock<PropertyInfo> propertyInfo = new Mock<PropertyInfo>();
+            propertyInfo.SetupGet(p => p.PropertyType).Returns(typeof(int));
+            PropertyConfiguration property = new PrimitivePropertyConfiguration(propertyInfo.Object, structuralType);
+            property.IsNonFilterable();
+            property.IsUnsortable();
+
+            // Act
+            property.IsNavigable();
+
+            // Assert
+            Assert.True(property.NonFilterable);
+            Assert.True(property.Unsortable);
+        }
     }
 }

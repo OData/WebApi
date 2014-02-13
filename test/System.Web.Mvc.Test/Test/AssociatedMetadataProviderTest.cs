@@ -103,6 +103,23 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void GetMetadataForPropertiesContainerTest()
+        {
+            // Arrange
+            PropertyModel model = new PropertyModel { LocalAttributes = 42, MetadataAttributes = "hello", MixedAttributes = 21.12 };
+            EmptyModelMetadataProvider provider = new EmptyModelMetadataProvider();
+
+            // Act
+            List<ModelMetadata> metadata = provider.GetMetadataForProperties(model, typeof(PropertyModel)).ToList();
+
+            // Assert
+            Assert.Equal(3, metadata.Count());
+            Assert.Same(model, metadata[0].Container);
+            Assert.Same(model, metadata[1].Container);
+            Assert.Same(model, metadata[2].Container);
+        }
+
+        [Fact]
         public void GetMetadataForPropertyWithNullContainerReturnsMetadataWithNullValuesForProperties()
         {
             // Arrange

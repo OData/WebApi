@@ -50,6 +50,10 @@ namespace System.Web.Mvc
                 PropertyDescriptor property = properties[i];
                 Func<object> modelAccessor = container == null ? null : GetPropertyValueAccessor(container, property);
                 ModelMetadata propertyMetadata = GetMetadataForProperty(modelAccessor, containerType, property);
+                if (propertyMetadata != null)
+                {
+                    propertyMetadata.Container = container;
+                }
                 metadata[i] = propertyMetadata;
             }
             return metadata;

@@ -520,6 +520,27 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void FromStringExpressionContainerTest()
+        {
+            // Arrange
+            Mock<ModelMetadataProvider> provider = new Mock<ModelMetadataProvider>();
+            DummyModelContainer model = new DummyModelContainer { Model = new DummyContactModel() };
+            ViewDataDictionary viewData = new ViewDataDictionary();
+            viewData["Object"] = model;
+            provider.Setup(p => p.GetMetadataForProperty(It.IsAny<Func<object>>(), It.IsAny<Type>(), It.IsAny<string>()))
+                .Returns<Func<object>, Type, string>((accessor, type, propertyName) =>
+                {
+                    return new ModelMetadata(provider.Object, model.GetType(), accessor, type, propertyName);
+                });
+
+            // Act
+            ModelMetadata metadata = ModelMetadata.FromStringExpression("Object.Model", viewData, provider.Object);
+
+            // Assert
+            Assert.Same(model, metadata.Container);
+        }
+
+        [Fact]
         public void FromStringExpressionWithNullModelButValidModelMetadataShouldReturnProperPropertyMetadata()
         {
             // Arrange
@@ -563,6 +584,7 @@ namespace System.Web.Mvc.Test
 
             // Assert
             Assert.Equal("Jim", metadata.Model);
+            Assert.Null(metadata.Container);
         }
 
         // FromLambdaExpression()
@@ -793,22 +815,55 @@ namespace System.Web.Mvc.Test
         { // Dev10 Bug #868619
             // Arrange
             Mock<ModelMetadataProvider> provider = new Mock<ModelMetadataProvider>();
+            DerivedModel derivedModel = new DerivedModel();
+            ViewDataDictionary<DerivedModel> viewData = new ViewDataDictionary<DerivedModel>(derivedModel);
+            provider.Setup(p => p.GetMetadataForProperty(It.IsAny<Func<object>>(), It.IsAny<Type>(), It.IsAny<string>()))
+                .Callback<Func<object>, Type, string>((accessor, type, propertyName) =>
+                {
+                    Assert.Null(accessor());
+                    Assert.Equal(derivedModel.GetType(), type);
+                    Assert.Equal("MyProperty", propertyName);
+                })
+                .Returns<Func<object>, Type, string>((accessor, type, propertyName) => 
+                {
+                    return new ModelMetadata(provider.Object, derivedModel.GetType(), accessor, type, propertyName);
+                })
+                .Verifiable();
+
+            // Act
+            ModelMetadata metadata = ModelMetadata.FromLambdaExpression<DerivedModel, string>(m => m.MyProperty, viewData, provider.Object);
+
+            // Assert
+            provider.Verify();
+            Assert.Same(derivedModel, metadata.Container);
+        }
+
+        [Fact]
+        public void FromLambdaExpressionSetsContainerWithoutObjectInViewData()
+        {
+            // Arrange
+            Mock<ModelMetadataProvider> provider = new Mock<ModelMetadataProvider>();
+            DerivedModel derivedModel = new DerivedModel();
             ViewDataDictionary<DerivedModel> viewData = new ViewDataDictionary<DerivedModel>();
             provider.Setup(p => p.GetMetadataForProperty(It.IsAny<Func<object>>(), It.IsAny<Type>(), It.IsAny<string>()))
                 .Callback<Func<object>, Type, string>((accessor, type, propertyName) =>
                 {
                     Assert.Null(accessor());
-                    Assert.Equal(typeof(DerivedModel), type);
+                    Assert.Equal(derivedModel.GetType(), type);
                     Assert.Equal("MyProperty", propertyName);
                 })
-                .Returns(() => null)
+                .Returns<Func<object>, Type, string>((accessor, type, propertyName) =>
+                {
+                    return new ModelMetadata(provider.Object, derivedModel.GetType(), accessor, type, propertyName);
+                })
                 .Verifiable();
 
             // Act
-            ModelMetadata.FromLambdaExpression<DerivedModel, string>(m => m.MyProperty, viewData, provider.Object);
+            ModelMetadata metadata = ModelMetadata.FromLambdaExpression<DerivedModel, string>(m => m.MyProperty, viewData, provider.Object);
 
             // Assert
             provider.Verify();
+            Assert.Null(metadata.Container);
         }
 
         private class BaseModel

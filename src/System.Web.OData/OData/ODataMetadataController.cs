@@ -51,10 +51,26 @@ namespace System.Web.OData
             // TODO: 1637 Add Singletons to service document
 
             // Add FunctionImports into service document
+            // ODL spec says:
+            // The edm:FunctionImport for a parameterless function MAY include the IncludeInServiceDocument attribute
+            // whose Boolean value indicates whether the function import is advertised in the service document.
             IEnumerable<IEdmFunctionImport> functionImports = container.Elements.OfType<IEdmFunctionImport>()
-                .Where(f => f.IncludeInServiceDocument);
-            serviceDocument.FunctionImports = functionImports.Select(
-                e => GetODataFunctionImportInfo(e.Name));
+                .Where(f => !f.Function.Parameters.Any()) // find all parameterless functions
+                .Where(f => f.IncludeInServiceDocument); // find all function with "IncludeInServiceDocument = true"
+
+            HashSet<string> functionImportsWritten = new HashSet<string>(StringComparer.Ordinal);
+            serviceDocument.FunctionImports = functionImports.Select(f =>
+                {
+                    if (!functionImportsWritten.Contains(f.Name))
+                    {
+                        functionImportsWritten.Add(f.Name);
+                        return GetODataFunctionImportInfo(f.Name);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }).Where(f => f != null).ToList(); // ToList() is necessary here.
 
             return serviceDocument;
         }

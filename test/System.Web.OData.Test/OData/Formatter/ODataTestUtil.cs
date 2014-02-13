@@ -98,15 +98,52 @@ namespace System.Web.OData.Formatter
                 order.Property(o => o.OrderAmount);
                 order.Property(o => o.OrderName);
 
-                // Add a top level function 
-                var getPersons = model.Function("GetPerson");
-                getPersons.Parameter<Int32>("PerId");
-                getPersons.ReturnsFromEntitySet<FormatterPerson>("People");
+                // Add a top level function without parameter and the "IncludeInServiceDocument = true"
+                var getPerson = model.Function("GetPerson");
+                getPerson.ReturnsFromEntitySet<FormatterPerson>("People");
+                getPerson.IncludeInServiceDocument = true;
 
-                // Add a top level function which is not included in service document
+                // Add a top level function without parameter and the "IncludeInServiceDocument = false"
+                var getAddress = model.Function("GetAddress");
+                getAddress.Returns<string>();
+                getAddress.IncludeInServiceDocument = false;
+
+                // Add an overload top level function with parameters and the "IncludeInServiceDocument = true"
+                getPerson = model.Function("GetPerson");
+                getPerson.Parameter<int>("PerId");
+                getPerson.ReturnsFromEntitySet<FormatterPerson>("People");
+                getPerson.IncludeInServiceDocument = true;
+
+                // Add an overload top level function with parameters and the "IncludeInServiceDocument = false"
+                getAddress = model.Function("GetAddress");
+                getAddress.Parameter<int>("AddressId");
+                getAddress.Returns<string>();
+                getAddress.IncludeInServiceDocument = false;
+
+                // Add a top level functions which is included in service document
                 var getVipPerson = model.Function("GetVipPerson");
                 getVipPerson.ReturnsFromEntitySet<FormatterPerson>("People");
-                getVipPerson.IncludeInServiceDocument = false;
+                getVipPerson.IncludeInServiceDocument = true;
+
+                // Add an overload top level function
+                getVipPerson = model.Function("GetVipPerson");
+                getVipPerson.Parameter<string>("name");
+                getVipPerson.ReturnsFromEntitySet<FormatterPerson>("People");
+                getVipPerson.IncludeInServiceDocument = true;
+
+                // Add an overload top level function
+                getVipPerson = model.Function("GetVipPerson");
+                getVipPerson.Parameter<int>("PerId");
+                getVipPerson.Parameter<string>("name");
+                getVipPerson.ReturnsFromEntitySet<FormatterPerson>("People");
+                getVipPerson.IncludeInServiceDocument = true;
+
+                // Add a top level function with parameters and without any overload
+                var getSalary = model.Function("GetSalary");
+                getSalary.Parameter<int>("PerId");
+                getSalary.Parameter<string>("month");
+                getSalary.Returns<int>();
+                getSalary.IncludeInServiceDocument = true;
 
                 _model = model.GetEdmModel();
             }

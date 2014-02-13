@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
@@ -128,15 +129,16 @@ namespace System.Web.OData.Builder
 
             // Assert
             Assert.Contains("<m:function-import href=\"GetPerson\">", responseString);
+            Assert.Contains("<m:function-import href=\"GetVipPerson\">", responseString);
         }
 
         [Fact]
-        public void ServiceDocument_DoesNotContainFunctonImport_IfNotIncludeInServiceDocument()
+        public void ServiceDocument_DoesNotContainFunctonImport_IfWithParameters()
         {
             // Arrange
             IEdmModel model = ODataTestUtil.GetEdmModel();
-            IEdmFunctionImport function = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
-                .SingleOrDefault(f => f.Name == "GetVipPerson");
+            IEnumerable<IEdmFunctionImport> functions = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
+                .Where(f => f.Name == "GetSalary");
 
             HttpServer server = new HttpServer();
             server.Configuration.Routes.MapODataServiceRoute(model);
@@ -146,11 +148,56 @@ namespace System.Web.OData.Builder
             var responseString = client.GetStringAsync("http://localhost/").Result;
 
             // Assert
-            Assert.NotNull(function);
-            Assert.Equal("Default.GetVipPerson", function.Function.FullName());
-            Assert.False(function.IncludeInServiceDocument);
+            Assert.Equal(1, functions.Count());
+            Assert.Equal("Default.GetSalary", functions.First().Function.FullName());
+            Assert.True(functions.First().IncludeInServiceDocument);
             Assert.Contains("<service xml:base=\"http://localhost/\"", responseString);
-            Assert.DoesNotContain("<m:function-import href=\"GetVipPerson\">", responseString);
+            Assert.DoesNotContain("<m:function-import href=\"GetSalary\">", responseString);
+        }
+
+        [Fact]
+        public void ServiceDocument_DoesNotContainFunctonImport_IfNotIncludeInServiceDocument()
+        {
+            // Arrange
+            IEdmModel model = ODataTestUtil.GetEdmModel();
+            IEnumerable<IEdmFunctionImport> functions = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
+                .Where(f => f.Name == "GetAddress");
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataServiceRoute(model);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var responseString = client.GetStringAsync("http://localhost/").Result;
+
+            // Assert
+            Assert.Equal(2, functions.Count());
+            Assert.Equal("Default.GetAddress", functions.First().Function.FullName());
+            Assert.False(functions.First().IncludeInServiceDocument);
+            Assert.Contains("<service xml:base=\"http://localhost/\"", responseString);
+            Assert.DoesNotContain("<m:function-import href=\"GetAddress\">", responseString);
+        }
+
+        [Fact]
+        public void ServiceDocument_OnlyContainOneFunctonImport_ForOverloadFunctions()
+        {
+            // Arrange
+            IEdmModel model = ODataTestUtil.GetEdmModel();
+            IEnumerable<IEdmFunctionImport> functions = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
+                .Where(f => f.Name == "GetVipPerson");
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataServiceRoute(model);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var responseString = client.GetStringAsync("http://localhost/").Result;
+
+            // Assert
+            Assert.Equal(3, functions.Count());
+            Assert.Equal("Default.GetVipPerson", functions.First().Function.FullName());
+            Assert.Contains("<service xml:base=\"http://localhost/\"", responseString);
+            Assert.Contains("<m:function-import href=\"GetVipPerson\">", responseString);
         }
 
         [Fact]

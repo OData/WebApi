@@ -68,7 +68,9 @@
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ComplexTypeAttributeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\EnumMemberConfiguration.cs" />
     <Compile Include="OData\Builder\EnumPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\EnumTypeConfiguration.cs" />

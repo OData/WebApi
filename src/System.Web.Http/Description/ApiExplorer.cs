@@ -423,9 +423,10 @@ namespace System.Web.Http.Description
                         parameter.CanConvertPropertiesFromString()) > 1;
         }
 
-        private static bool TryExpandUriParameters(IHttpRoute route, HttpParsedRoute parsedRoute, ICollection<ApiParameterDescription> parameterDescriptions, out string expandedRouteTemplate)
+        // Set as internal for the unit test.
+        internal static bool TryExpandUriParameters(IHttpRoute route, HttpParsedRoute parsedRoute, ICollection<ApiParameterDescription> parameterDescriptions, out string expandedRouteTemplate)
         {
-            Dictionary<string, object> parameterValuesForRoute = new Dictionary<string, object>();
+            Dictionary<string, object> parameterValuesForRoute = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             bool emitPrefixes = ShouldEmitPrefixes(parameterDescriptions);
             string prefix = String.Empty;
             foreach (ApiParameterDescription parameterDescriptor in parameterDescriptions)
@@ -436,7 +437,10 @@ namespace System.Web.Http.Description
                         (parameterDescriptor.ParameterDescriptor != null &&
                         TypeHelper.CanConvertFromString(parameterDescriptor.ParameterDescriptor.ParameterType)))
                     {
-                        parameterValuesForRoute.Add(parameterDescriptor.Name, "{" + parameterDescriptor.Name + "}");
+                        if (!parameterValuesForRoute.ContainsKey(parameterDescriptor.Name))
+                        {
+                            parameterValuesForRoute.Add(parameterDescriptor.Name, "{" + parameterDescriptor.Name + "}");
+                        }
                     }
                     else if (parameterDescriptor.ParameterDescriptor != null &&
                              parameterDescriptor.CanConvertPropertiesFromString())
@@ -452,7 +456,10 @@ namespace System.Web.Http.Description
                         foreach (PropertyInfo property in parameterDescriptor.GetBindableProperties())
                         {
                             string queryParameterName = prefix + property.Name;
-                            parameterValuesForRoute.Add(queryParameterName, "{" + queryParameterName + "}");
+                            if (!parameterValuesForRoute.ContainsKey(queryParameterName))
+                            {
+                                parameterValuesForRoute.Add(queryParameterName, "{" + queryParameterName + "}");
+                            }
                         }
                     }
                 }

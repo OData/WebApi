@@ -107,6 +107,73 @@ namespace System.Web.Http.Description
             Assert.Equal(action, description.ActionDescriptor);
         }
 
+        [Fact]
+        public void TryExpandUriParameters_EnsureNoKeyConflicts()
+        {
+            // This test ensures that keys adding to parameterValuesForRoute are case-insensitive
+            // and would not cause any exeception if it already has the key. So set up two
+            // ApiParameterDescription instances, one with "id" and another with "Id". Act the
+            // method and assert that no exception occurs and the output is correct.
+            // Arrange
+            string expectedExpandedRouteTemplate = "?id={id}";
+            string expandedRouteTemplate;
+            Mock<HttpParameterDescriptor> parameterDescriptorMock = new Mock<HttpParameterDescriptor>();
+            parameterDescriptorMock.SetupGet(p => p.ParameterType).Returns(typeof(ClassWithId));
+            List<ApiParameterDescription> descriptions = new List<ApiParameterDescription>()
+            {
+                new ApiParameterDescription()
+                {
+                    Source = ApiParameterSource.FromUri,
+                    Name = "id"
+                },
+                new ApiParameterDescription()
+                {
+                    Source = ApiParameterSource.FromUri,
+                    ParameterDescriptor = parameterDescriptorMock.Object
+                },
+            };
+
+            // Act
+            bool isExpanded = ApiExplorer.TryExpandUriParameters(new HttpRoute(),
+                                                     new HttpParsedRoute(new List<PathSegment>()),
+                                                     descriptions,
+                                                     out expandedRouteTemplate);
+
+            // Assert
+            Assert.True(isExpanded);
+            Assert.Equal(expectedExpandedRouteTemplate, expandedRouteTemplate);
+        }
+
+        [Fact]
+        public void Descriptions_RecognizesMixedCaseParameters()
+        {
+            // Ensure that two "Id"s, one from "api/values/{id}" and another "Id" from ClassWithId,
+            // would not cause any exception and only one of them is added.
+            var config = new HttpConfiguration();
+            var routeTemplate = "api/values/{id}";
+            var controllerDescriptor = new HttpControllerDescriptor(config, "ApiExplorerValues", typeof(DuplicatedIdController));
+            var action = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(DuplicatedIdController).GetMethod("Get"));
+            var actions = new ReflectedHttpActionDescriptor[] { action };
+            config.Routes.Add("Route", CreateDirectRoute(routeTemplate, actions));
+
+            var descriptions = new ApiExplorer(config).ApiDescriptions;
+
+            ApiDescription description = Assert.Single(descriptions);
+            Assert.Equal(HttpMethod.Get, description.HttpMethod);
+            Assert.Equal(routeTemplate, description.RelativePath, StringComparer.OrdinalIgnoreCase);
+            Assert.Equal(action, description.ActionDescriptor);
+        }
+
+        private class ClassWithId
+        {
+            public int Id { get; set; }
+        }
+
+        private class DuplicatedIdController : ApiController
+        {
+            public void Get([FromUri] ClassWithId objectWithId) { }
+        }
+
         public class AttributeApiExplorerValuesController : ApiController
         {
             [Route("")]

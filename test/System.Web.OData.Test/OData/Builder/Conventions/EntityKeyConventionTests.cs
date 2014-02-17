@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -80,7 +81,7 @@ namespace System.Web.OData.Builder.Conventions
                 new MockType("BaseType")
                 .Property(typeof(int), "ID", new NotMappedAttribute());
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
             builder.AddEntity(baseType);
 
             IEdmModel model = builder.GetEdmModel();

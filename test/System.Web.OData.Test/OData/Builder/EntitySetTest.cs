@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
@@ -51,7 +52,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void CanAddBinding_For_DerivedNavigationProperty()
         {
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             var vehicle = builder.AddEntity(typeof(Vehicle));
             var motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
@@ -74,7 +75,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void CanAddNavigationLink_For_DerivedNavigationProperty()
         {
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             var vehicle = builder.AddEntity(typeof(Vehicle));
             var motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
@@ -141,7 +142,7 @@ namespace System.Web.OData.Builder
         public void CanConfigureOptionalBinding_For_NavigationPropertiesInDerivedType()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             builder
                 .EntitySet<Vehicle>("vehicles")
                 .HasOptionalBinding((Motorcycle m) => m.Manufacturer, "manufacturers");
@@ -165,7 +166,7 @@ namespace System.Web.OData.Builder
         public void CanConfigureRequiredBinding_For_NavigationPropertiesInDerivedType()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             builder
                 .EntitySet<Vehicle>("vehicles")
                 .HasRequiredBinding((Motorcycle m) => m.Manufacturer, "manufacturers");
@@ -189,7 +190,7 @@ namespace System.Web.OData.Builder
         public void CanConfigureManyBinding_For_NavigationPropertiesInDerivedType()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             builder
                 .EntitySet<Vehicle>("vehicles")
                 .HasManyBinding((Motorcycle m) => m.Manufacturers, "manufacturers");
@@ -212,7 +213,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void CanConfigureLinks_For_NavigationPropertiesInDerivedType()
         {
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             var vehiclesSet = builder.EntitySet<Vehicle>("vehicles");
 

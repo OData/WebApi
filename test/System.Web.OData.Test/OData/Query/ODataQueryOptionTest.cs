@@ -308,7 +308,7 @@ namespace System.Web.OData.Query
         public void ApplyTo_Adds_Missing_NonKey_Properties_To_OrderBy(string oDataQuery, bool ensureStableOrdering, string expectedExpression)
         {
             // Arrange
-            var model = new ODataModelBuilder()
+            var model = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>()
                 .Add_Customers_No_Keys_EntitySet().GetEdmModel();
 
             var message = new HttpRequestMessage(
@@ -336,7 +336,7 @@ namespace System.Web.OData.Query
         public void ApplyTo_Does_Not_Replace_Original_OrderBy_With_Missing_Keys()
         {
             // Arrange
-            var model = new ODataModelBuilder()
+            var model = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>()
                             .Add_Customers_No_Keys_EntitySet().GetEdmModel();
 
             var message = new HttpRequestMessage(
@@ -545,7 +545,7 @@ namespace System.Web.OData.Query
         public void ApplyTo_Picks_DefaultOrder(string oDataQuery, Type elementType, string expectedExpression)
         {
             IQueryable query = Array.CreateInstance(elementType, 0).AsQueryable();
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
             modelBuilder.AddEntitySet("entityset", modelBuilder.AddEntity(elementType));
             var model = modelBuilder.GetEdmModel();
 
@@ -640,7 +640,7 @@ namespace System.Web.OData.Query
         [InlineData("$filter=1 eq 1", false, "Where($it => (1 == 1))")]
         public void ApplyTo_Builds_Default_OrderBy_No_Keys(string oDataQuery, bool ensureStableOrdering, string expectedExpression)
         {
-            var model = new ODataModelBuilder().Add_Customer_No_Keys_EntityType().Add_Customers_No_Keys_EntitySet().GetEdmModel();
+            var model = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>().Add_Customer_No_Keys_EntityType().Add_Customers_No_Keys_EntitySet().GetEdmModel();
 
             var message = new HttpRequestMessage(
                 HttpMethod.Get,

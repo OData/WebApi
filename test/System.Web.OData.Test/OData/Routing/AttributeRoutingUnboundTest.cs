@@ -145,7 +145,7 @@ namespace System.Web.OData.Routing
 
         private IEdmModel GetEdmModel(HttpConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
+            ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>(configuration);
             builder.EntitySet<ConventionCustomer>("ConventionCustomers");
             builder.EntitySet<ConventionOrder>("ConventionOrders");
             builder.ComplexType<ConventionPerson>();

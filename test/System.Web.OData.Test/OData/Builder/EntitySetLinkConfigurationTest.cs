@@ -3,6 +3,7 @@
 using System.Linq;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
@@ -118,7 +119,7 @@ namespace System.Web.OData.Builder
         public void FailingToConfigureNavigationLinks_Results_In_ArgumentException_When_BuildingNavigationLink()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             builder.EntitySet<EntitySetLinkConfigurationTest_Product>("Products").HasManyBinding(p => p.Orders, "Orders");
             var model = builder.GetEdmModel();
 

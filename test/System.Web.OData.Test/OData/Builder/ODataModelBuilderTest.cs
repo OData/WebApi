@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.TestCommon;
 using Moq;
+using BuilderTestModels = System.Web.OData.Builder.TestModels;
 
 namespace System.Web.OData.Builder
 {
@@ -155,7 +157,7 @@ namespace System.Web.OData.Builder
         public void ActionLink_PreservesFollowsConventions(bool value)
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             ActionConfiguration configuration = new ActionConfiguration(builder, "IgnoreAction");
             Mock<IEdmTypeConfiguration> bindingParameterTypeMock = new Mock<IEdmTypeConfiguration>();
             bindingParameterTypeMock.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
@@ -195,6 +197,32 @@ namespace System.Web.OData.Builder
             IEdmStructuralProperty property =
                 type.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
             Assert.Equal(EdmConcurrencyMode.Fixed, property.ConcurrencyMode);
+        }
+
+        [Fact]
+        public void Validate_Throws_If_Entity_Doesnt_Have_Key_Defined()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.Entity<Customer>();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(), "The entity 'Customer' does not have a key defined.");
+        }
+
+        [Fact]
+        public void Validate_Doesnt_Throw_For_Derived_Entities()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.Entity<BuilderTestModels.Car>().DerivesFrom<BuilderTestModels.Vehicle>();
+            builder.Entity<BuilderTestModels.Vehicle>().HasKey(v => v.Name);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
         }
     }
 }

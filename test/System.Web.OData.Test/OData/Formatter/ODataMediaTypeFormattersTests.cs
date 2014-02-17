@@ -10,6 +10,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -709,7 +710,7 @@ namespace System.Web.OData.Formatter
 
         private static IEdmModel CreateModelWithEntity<T>() where T : class
         {
-            ODataConventionModelBuilder model = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder model = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
             model.Entity<T>();
             return model.GetEdmModel();
         }

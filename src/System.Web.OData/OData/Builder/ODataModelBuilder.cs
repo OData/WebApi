@@ -474,7 +474,29 @@ namespace System.Web.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Property is not appropriate, method does work")]
         public virtual IEdmModel GetEdmModel()
         {
-            return EdmModelHelperMethods.BuildEdmModel(this);
+            IEdmModel model = EdmModelHelperMethods.BuildEdmModel(this);
+            ValidateModel(model);
+            return model;
+        }
+
+        /// <summary>
+        /// Validates the <see cref="IEdmModel"/> that is being created.
+        /// </summary>
+        /// <param name="model">The <see cref="IEdmModel"/> that will be validated.</param>
+        public virtual void ValidateModel(IEdmModel model)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            foreach (IEdmEntityType entity in model.SchemaElementsAcrossModels().OfType<IEdmEntityType>())
+            {
+                if (entity.BaseEntityType() == null && (entity.DeclaredKey == null || entity.DeclaredKey.Count() == 0))
+                {
+                    throw Error.InvalidOperation(SRResources.EntityTypeDoesntHaveKeyDefined, entity.Name);
+                }
+            }
         }
     }
 }

@@ -3,6 +3,7 @@
 using System.Linq;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
@@ -142,7 +143,7 @@ namespace System.Web.OData.Builder
         public void CanCreateFunctionWithEntityReturnTypeViaEntitySetPath()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
             EntityTypeConfiguration<Order> order = builder.Entity<Order>();
 
@@ -162,7 +163,7 @@ namespace System.Web.OData.Builder
         public void CanCreateFunctionWithCollectionReturnTypeViaEntitySetPath()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
             EntityTypeConfiguration<Order> order = builder.Entity<Order>();
 
@@ -292,7 +293,7 @@ namespace System.Web.OData.Builder
         public void CanCreateEdmModel_WithNonBindableFunction()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             // Act
             FunctionConfiguration functionConfiguration = builder.Function("FunctionName");
@@ -372,7 +373,7 @@ namespace System.Web.OData.Builder
         public void GetEdmModel_SetsNullableIffParameterTypeIsNullable()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
             var functionBuilder = movie.Function("Watch");
             functionBuilder.Parameter<int>("int");

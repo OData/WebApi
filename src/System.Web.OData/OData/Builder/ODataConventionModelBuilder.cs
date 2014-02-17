@@ -785,5 +785,14 @@ namespace System.Web.OData.Builder
 
             return allTypeMapping;
         }
+
+        /// <inheritdoc />
+        public override void ValidateModel(IEdmModel model)
+        {
+            if (!_isQueryCompositionMode)
+            {
+                base.ValidateModel(model);
+            }
+        }
     }
 }

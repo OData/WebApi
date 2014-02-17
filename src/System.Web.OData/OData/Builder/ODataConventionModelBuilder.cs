@@ -29,8 +29,10 @@ namespace System.Web.OData.Builder
             new DataMemberAttributeEdmPropertyConvention(),
             new RequiredAttributeEdmPropertyConvention(),
             new ConcurrencyCheckAttributeEdmPropertyConvention(),
+            new TimestampAttributeEdmPropertyConvention(),
             new EntityKeyConvention(),
             new KeyAttributeEdmPropertyConvention(),
+            new ComplexTypeAttributeConvention(), // This has to run after Key conventions, basically overrules them if there is a ComplexTypeAttribute
             new IgnoreDataMemberAttributeEdmPropertyConvention(),
             new NonFilterableAttributeEdmPropertyConvention(),
             new UnsortableAttributeEdmPropertyConvention(),

@@ -460,11 +460,10 @@ namespace System.Web.OData.Formatter.Serialization
             bool alwaysIncludeDetails = metadataLevel == ODataMetadataLevel.Default ||
                 metadataLevel == ODataMetadataLevel.FullMetadata;
 
-            // Always omit the title in minimal/no metadata modes (it isn't customizable and thus always follows
-            // conventions).
+            // Always omit the title in minimal/no metadata modes.
             if (alwaysIncludeDetails)
             {
-                odataAction.Title = action.Name;
+                EmitTitle(model, action, odataAction);
             }
 
             // Omit the target in minimal/no metadata modes unless it doesn't follow conventions.
@@ -474,6 +473,20 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             return odataAction;
+        }
+
+        internal static void EmitTitle(IEdmModel model, IEdmOperation operation, ODataOperation odataAction)
+        {
+            // The title should only be emitted in full metadata, Atom and Json Verbose.
+            OperationTitleAnnotation titleAnnotation = model.GetOperationTitleAnnotation(operation);
+            if (titleAnnotation != null)
+            {
+                odataAction.Title = titleAnnotation.Title;
+            }
+            else
+            {
+                odataAction.Title = operation.Name;
+            }
         }
 
         internal static string CreateMetadataFragment(IEdmAction action)

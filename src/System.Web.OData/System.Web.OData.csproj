@@ -68,12 +68,15 @@
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ComplexTypeAttributeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\EnumMemberConfiguration.cs" />
     <Compile Include="OData\Builder\EnumPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\EnumTypeConfiguration.cs" />
     <Compile Include="OData\Builder\EnumTypeConfigurationOfTEnumType.cs" />
     <Compile Include="OData\Builder\NullableEnumTypeConfiguration.cs" />
+    <Compile Include="OData\Builder\OperationTitleAnnotation.cs" />
     <Compile Include="OData\Formatter\Deserialization\EnumDeserializationHelpers.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEnumDeserializer.cs" />
     <Compile Include="OData\Formatter\ODataEnumValueMediaTypeMapping.cs" />

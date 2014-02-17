@@ -183,6 +183,21 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void ModelBuilder_ProductsWithCategoryComplexTypeAttribute()
+        {
+            // Arrange
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<ProductWithCategoryComplexTypeAttribute>("Products");
+
+            // Act
+            IEdmModel model = modelBuilder.GetEdmModel();
+            Assert.Equal(2, model.SchemaElements.OfType<IEdmSchemaType>().Count());
+
+            // Assert
+            IEdmComplexType category = model.AssertHasComplexType(typeof(CategoryWithComplexTypeAttribute));
+        }
+
+        [Fact]
         public void ModelBuilder_ProductsWithKeyAttribute()
         {
             var modelBuilder = new ODataConventionModelBuilder();
@@ -280,6 +295,24 @@ namespace System.Web.OData.Builder.Conventions
             IEdmStructuralProperty idProperty =
                 product.AssertHasPrimitiveProperty(model, "ID", EdmPrimitiveTypeKind.Int32, isNullable: false);
             Assert.Equal(EdmConcurrencyMode.None, idProperty.ConcurrencyMode);
+            IEdmStructuralProperty nameProperty =
+                product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
+            Assert.Equal(EdmConcurrencyMode.Fixed, nameProperty.ConcurrencyMode);
+        }
+
+        [Fact]
+        public void ModelBuilder_ProductWithTimestampAttribute()
+        {
+            // Arrange
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<ProductWithTimestampAttribute>("Products");
+
+            // Act
+            var model = modelBuilder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(model.SchemaElements.OfType<IEdmSchemaType>().Count(), 1);
+            var product = model.AssertHasEntitySet(entitySetName: "Products", mappedEntityClrType: typeof(ProductWithTimestampAttribute));
             IEdmStructuralProperty nameProperty =
                 product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
             Assert.Equal(EdmConcurrencyMode.Fixed, nameProperty.ConcurrencyMode);
@@ -1413,6 +1446,19 @@ namespace System.Web.OData.Builder.Conventions
         public ICollection<ProductWithKeyAttribute> Products { get; set; }
     }
 
+    [ComplexType]
+    public class CategoryWithComplexTypeAttribute
+    {
+        public int Id { get; set; }
+        public string Value { get; set; }
+    }
+
+    public class ProductWithCategoryComplexTypeAttribute
+    {
+        public int Id { get; set; }
+        public CategoryWithComplexTypeAttribute Category { get; set; }
+    }
+
     public class ProductWithComplexCollection
     {
         public int ID { get; set; }
@@ -1431,12 +1477,19 @@ namespace System.Web.OData.Builder.Conventions
         public string[] Aliases { get; set; }
     }
 
-
     public class ProductWithETagAttribute
     {
         public int ID { get; set; }
 
         [ConcurrencyCheck]
+        public string Name { get; set; }
+    }
+
+    public class ProductWithTimestampAttribute
+    {
+        public int ID { get; set; }
+
+        [Timestamp]
         public string Name { get; set; }
     }
 }

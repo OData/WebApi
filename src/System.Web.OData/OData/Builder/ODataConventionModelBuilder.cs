@@ -18,6 +18,7 @@ namespace System.Web.OData.Builder
     /// <summary>
     /// <see cref="ODataConventionModelBuilder"/> is used to automatically map CLR classes to an EDM model based on a set of <see cref="IConvention"/>.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Most of the referenced types are helper types needed for operation.")]
     public class ODataConventionModelBuilder : ODataModelBuilder
     {
         private static readonly List<IConvention> _conventions = new List<IConvention>

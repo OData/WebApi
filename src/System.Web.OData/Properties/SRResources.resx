@@ -701,6 +701,9 @@
   <data name="NoKeyNameFoundInSegment" xml:space="preserve">
     <value>No key name was found at {0} in segment '{1}'.</value>
   </data>
+  <data name="NoValueLiteralFoundInSegment" xml:space="preserve">
+    <value>No value for key '{0}' was found at {1} in segment '{2}'.</value>
+  </data>
   <data name="DuplicateKeyInSegment" xml:space="preserve">
     <value>Duplicate key '{0}' found in segment '{1}'.</value>
   </data>

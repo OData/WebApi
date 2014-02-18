@@ -16,7 +16,6 @@ namespace System.Web.OData.Routing
         [InlineData("'123'", new[] { ":'123'" })]
         [InlineData("@1", new[] { ":@1" })]
         [InlineData("id=1", new[] { "id:1" })]
-        [InlineData("id1=,id2=12", new[] { "id1:", "id2:12" })]
         [InlineData("id1=1,id2=2", new[] { "id1:1", "id2:2" })]
         [InlineData("id1='1',id2=2", new[] { "id1:'1'", "id2:2" })]
         [InlineData("id1='12''3',id2=2", new[] { "id1:'12''3'", "id2:2" })]
@@ -50,11 +49,23 @@ namespace System.Web.OData.Routing
             Assert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
         }
 
-        [Fact]
-        public void ParseKeys_ThrowsODataException_SegmentHasNoKeyName()
+        [Theory]
+        [InlineData("=", "No key name was found at 0 in segment '='.")]
+        [InlineData(" ='abc'", "No key name was found at 0 in segment ' ='abc''.")]
+        [InlineData("key1='a',   =123", "No key name was found at 9 in segment 'key1='a',   =123'.")]
+        [InlineData("id=1,'='", "No key name was found at 5 in segment 'id=1,'=''.")]
+        public void ParseKeys_ThrowsODataException_SegmentHasNoKeyName(string segment, string expectedError)
         {
-            Assert.Throws<ODataException>(() => KeyValueParser.ParseKeys("id=1,'='"),
-                "No key name was found at 5 in segment 'id=1,'=''.");
+            Assert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
+        }
+
+        [Theory]
+        [InlineData("key=", "No value for key 'key' was found at 4 in segment 'key='.")]
+        [InlineData("id=  ", "No value for key 'id' was found at 3 in segment 'id=  '.")]
+        [InlineData("id1=1,id2= ", "No value for key 'id2' was found at 10 in segment 'id1=1,id2= '.")]
+        public void ParseKeys_ThrowsODataException_NoValueWasFound(string segment, string expectedError)
+        {
+            Assert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
         }
 
         [Theory]

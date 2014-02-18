@@ -1339,6 +1339,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No value for key &apos;{0}&apos; was found at {1} in segment &apos;{2}&apos;..
+        /// </summary>
+        internal static string NoValueLiteralFoundInSegment {
+            get {
+                return ResourceManager.GetString("NoValueLiteralFoundInSegment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Null collections cannot be serialized..
         /// </summary>
         internal static string NullCollectionsCannotBeSerialized {

@@ -29,6 +29,12 @@ namespace System.Web.OData.Routing
                 {
                     string key = segment.Substring(startIndex, currentIndex - startIndex);
 
+                    if (String.IsNullOrWhiteSpace(key))
+                    {
+                        throw new ODataException(
+                            Error.Format(SRResources.NoKeyNameFoundInSegment, startIndex, segment));
+                    }
+
                     // Simple key which contains '='.
                     if (key.Contains("'"))
                     {
@@ -51,6 +57,13 @@ namespace System.Web.OData.Routing
                         if (currentIndex == segment.Length || segment[currentIndex] == ',')
                         {
                             string value = segment.Substring(startIndex, currentIndex - startIndex);
+
+                            if (String.IsNullOrWhiteSpace(value))
+                            {
+                                throw new ODataException(
+                                    Error.Format(SRResources.NoValueLiteralFoundInSegment, key, startIndex, segment));
+                            }
+
                             if (dictionary.ContainsKey(key))
                             {
                                 throw new ODataException(Error.Format(SRResources.DuplicateKeyInSegment, key, segment));

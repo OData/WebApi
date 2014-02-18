@@ -168,6 +168,9 @@ namespace System.Web.OData.Builder
             Dictionary<Type, IEdmType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
         {
             Contract.Assert(model != null, "Model can't be null");
+
+            ValidateActionOverload(configurations.OfType<ActionConfiguration>());
+
             foreach (ProcedureConfiguration procedure in configurations)
             {
                 IEdmTypeReference returnReference = GetEdmTypeReference(
@@ -246,6 +249,64 @@ namespace System.Web.OData.Builder
                     pathExpression,
                     function.IsComposable);
             return new EdmFunctionImport(container, function.Name, operation, expression, includeInServiceDocument: function.IncludeInServiceDocument);
+        }
+
+        // 11.5.4.2  Action Overload Resolution
+        // The same action name may be used multiple times within a schema provided there is at most one unbound overload,
+        // and each bound overload specifies a different binding parameter type. If the action is bound and the binding 
+        // parameter type is part of an inheritance hierarchy, the action overload is selected based on the type of the
+        // URL segment preceding the action name. A type-cast segment can be used to select an action defined on a
+        // particular type in the hierarchy.
+        private static void ValidateActionOverload(IEnumerable<ActionConfiguration> configurations)
+        {
+            // 1. validate at most one unbound overload
+            ActionConfiguration[] unboundActions = configurations.Where(a => !a.IsBindable).ToArray();
+            if (unboundActions.Length > 0)
+            {
+                HashSet<string> unboundActionNames = new HashSet<string>();
+                foreach (ActionConfiguration action in unboundActions)
+                {
+                    if (!unboundActionNames.Contains(action.Name))
+                    {
+                        unboundActionNames.Add(action.Name);
+                    }
+                    else
+                    {
+                        throw Error.InvalidOperation(SRResources.MoreThanOneUnboundActionFound, action.Name);
+                    }
+                }
+            }
+
+            // 2. validate each bound overload action specifies a diffrent binding parameter type
+            ActionConfiguration[] boundActions = configurations.Where(a => a.IsBindable).ToArray();
+            if (boundActions.Length > 0)
+            {
+                var actionNamesToBindingTypes = new Dictionary<string, IList<IEdmTypeConfiguration>>();
+                foreach (ActionConfiguration action in boundActions)
+                {
+                    IEdmTypeConfiguration newBindingType = action.BindingParameter.TypeConfiguration;
+                    if (actionNamesToBindingTypes.ContainsKey(action.Name))
+                    {
+                        IList<IEdmTypeConfiguration> bindingTypes = actionNamesToBindingTypes[action.Name];
+                        foreach (IEdmTypeConfiguration type in bindingTypes)
+                        {
+                            if (type == newBindingType)
+                            {
+                                throw Error.InvalidOperation(SRResources.MoreThanOneOverloadActionBoundToSameTypeFound,
+                                    action.Name, type.FullName);
+                            }
+                        }
+
+                        bindingTypes.Add(newBindingType);
+                    }
+                    else
+                    {
+                        IList<IEdmTypeConfiguration> bindingTypes = new List<IEdmTypeConfiguration>();
+                        bindingTypes.Add(newBindingType);
+                        actionNamesToBindingTypes.Add(action.Name, bindingTypes);
+                    }
+                }
+            }
         }
 
         private static Dictionary<Type, IEdmType> AddTypes(this EdmModel model, IEnumerable<StructuralTypeConfiguration> types,

@@ -298,6 +298,38 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void GetEdmModel_ThrowsException_WhenUnboundActionOverloaded()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.Action("ActionName").Parameter<int>("Param1");
+            builder.Action("ActionName").Returns<string>();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
+                "Found more than one unbound action with name 'ActionName'. " +
+                "Each unbound action must have an unique action name.");
+        }
+
+        [Fact]
+        public void GetEdmModel_ThrowsException_WhenBoundActionOverloaded()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            customer.HasKey(c => c.CustomerId);
+            customer.Property(c => c.Name);
+            customer.Action("ActionOnCustomer");
+            customer.Action("ActionOnCustomer").Returns<string>();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
+                "Found more than one action with name 'ActionOnCustomer' " +
+                "bound to the same type 'System.Web.OData.Builder.TestModels.Customer'. " +
+                "Each bound action must have a different binding type or name.");
+        }
+
+        [Fact]
         public void CanManuallyConfigureActionLinkFactory()
         {
             // Arrange

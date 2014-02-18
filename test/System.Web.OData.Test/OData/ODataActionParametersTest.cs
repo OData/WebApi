@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData
@@ -87,10 +89,33 @@ namespace System.Web.OData
             // Valid overloads of "Wash" bound to different entities
             builder.Entity<Motorcycle>().Action("Wash");
             builder.Entity<Car>().Action("Wash");
-            // Invalid overloads of "Park"
-            builder.Entity<Car>().Action("Park");
-            builder.Entity<Car>().Action("Park").Parameter<string>("mood");
-            return builder.GetEdmModel();
+
+            EdmModel model = (EdmModel)builder.GetEdmModel();
+
+            // Invalid overloads of action "Park". These two actions must have different names or binding types
+            // but differ only in that the second has a 'mood' parameter.
+            IEdmEntityType entityType = model.SchemaElements.OfType<IEdmEntityType>().Single(e => e.Name == "Car");
+            var park = new EdmAction(
+                "org.odata",
+                "Park",
+                returnType: null,
+                isBound: true,
+                entitySetPathExpression: null);
+            park.AddParameter("bindingParameter", new EdmEntityTypeReference(entityType, isNullable: false));
+            model.AddElement(park);
+
+            IEdmTypeReference stringType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: true);
+            park = new EdmAction(
+                "org.odata",
+                "Park",
+                returnType: null,
+                isBound: true,
+                entitySetPathExpression: null);
+            park.AddParameter("bindingParameter", new EdmEntityTypeReference(entityType, isNullable: false));
+            park.AddParameter("mood", stringType);
+            model.AddElement(park);
+
+            return model;
         }
     }
 }

@@ -728,6 +728,12 @@
   <data name="FunctionNotBoundToEntity" xml:space="preserve">
     <value>The function '{0}' is not bound to an entity. Only actions that are bound to entities can have function links.</value>
   </data>
+  <data name="MoreThanOneOverloadActionBoundToSameTypeFound" xml:space="preserve">
+    <value>Found more than one action with name '{0}' bound to the same type '{1}'. Each bound action must have a different binding type or name.</value>
+  </data>
+  <data name="MoreThanOneUnboundActionFound" xml:space="preserve">
+    <value>Found more than one unbound action with name '{0}'. Each unbound action must have an unique action name.</value>
+  </data>
   <data name="ProcedureHasInvalidEntitySetPath" xml:space="preserve">
     <value>Invalid EntitySetPath detected. '{0}' is not a valid entity set path for procedure '{1}'.</value>
   </data>

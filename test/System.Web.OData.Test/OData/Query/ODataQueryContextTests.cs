@@ -3,6 +3,7 @@
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -171,6 +172,48 @@ namespace System.Web.OData.Query
             // Assert
             Assert.Same(model, context.Model);
             Assert.Same(elementType, context.ElementType);
+            Assert.Null(context.ElementClrType);
+        }
+
+        [Fact]
+        public void Constructor_TakingClrTypeAndPath_SetsProperties()
+        {
+            // Arrange
+            ODataModelBuilder odataModel = new ODataModelBuilder().Add_Customer_EntityType();
+            string setName = typeof(Customer).Name;
+            odataModel.EntitySet<Customer>(setName);
+            IEdmModel model = odataModel.GetEdmModel();
+            IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet(setName);
+            IEdmEntityType entityType = entitySet.ElementType;
+            ODataPath path = new ODataPath(new EntitySetPathSegment(entitySet));
+
+            // Act
+            ODataQueryContext context = new ODataQueryContext(model, typeof(Customer), path);
+
+            // Assert
+            Assert.Same(model, context.Model);
+            Assert.Same(entityType, context.ElementType);
+            Assert.Same(entitySet, context.NavigationSource);
+            Assert.Same(typeof(Customer), context.ElementClrType);
+        }
+
+        [Fact]
+        public void Constructor_TakingEdmTypeAndPath_SetsProperties()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+            IEdmEntityType entityType = new Mock<IEdmEntityType>().Object;
+            IEdmEntityContainer entityContiner = new Mock<IEdmEntityContainer>().Object;
+            EdmEntitySet entitySet = new EdmEntitySet(entityContiner, "entitySet", entityType);
+            ODataPath path = new ODataPath(new EntitySetPathSegment(entitySet)); 
+
+            // Act
+            ODataQueryContext context = new ODataQueryContext(model, entityType, path);
+
+            // Assert
+            Assert.Same(model, context.Model);
+            Assert.Same(entityType, context.ElementType);
+            Assert.Same(entitySet, context.NavigationSource);
             Assert.Null(context.ElementClrType);
         }
     }

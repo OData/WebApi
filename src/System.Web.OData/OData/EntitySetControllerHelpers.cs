@@ -33,7 +33,10 @@ namespace System.Web.OData
 
         public static ODataQueryOptions<TEntity> CreateQueryOptions<TEntity>(ApiController controller)
         {
-            ODataQueryContext context = new ODataQueryContext(controller.Request.ODataProperties().Model, typeof(TEntity));
+            ODataQueryContext context = new ODataQueryContext(
+                controller.Request.ODataProperties().Model,
+                typeof(TEntity),
+                controller.Request.ODataProperties().Path);
             return new ODataQueryOptions<TEntity>(context, controller.Request);
         }
 

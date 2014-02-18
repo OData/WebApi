@@ -12,8 +12,12 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 using System.Web.Http.Routing;
+using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Query.Controllers;
+using System.Web.OData.Routing;
 using System.Web.OData.TestCommon.Models;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -163,6 +167,58 @@ namespace System.Web.OData.Query
             Assert.Equal(
                 elementType,
                 ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.GetEntityClrTypeFromParameterType(parameter.Object));
+        }
+
+        [Theory]
+        [PropertyData("GoodMethodNames")]
+        public void ExecuteBindingAsync_Works_WithPath(string methodName, Type entityClrType)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "http://localhost/Customer/?$orderby=Name");
+            HttpConfiguration config = new HttpConfiguration();
+            request.SetConfiguration(config);
+
+            // Get EDM model, and set path to request.
+            ODataModelBuilder odataModel = new ODataModelBuilder();
+            string setName = typeof(Customer).Name;
+            odataModel.Entity<Customer>().HasKey(c => c.Id);
+            odataModel.EntitySet<Customer>(setName);
+            IEdmModel model = odataModel.GetEdmModel();
+            IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet(setName);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet));
+
+            // Setup action context and parameter descriptor.
+            HttpControllerContext controllerContext = new HttpControllerContext(
+                config,
+                new HttpRouteData(new HttpRoute()),
+                request);
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(
+                config,
+                "CustomerLowLevel",
+                typeof(CustomerHighLevelController));
+            MethodInfo methodInfo = typeof(CustomerLowLevelController).GetMethod(methodName);
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, methodInfo);
+            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
+            HttpParameterDescriptor parameterDescriptor = new ReflectedHttpParameterDescriptor(
+                actionDescriptor,
+                methodInfo.GetParameters().First());
+
+            // Act
+            new ODataQueryParameterBindingAttribute().GetBinding(parameterDescriptor)
+                .ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None)
+                .Wait();
+
+            // Assert
+            Assert.Equal(1, actionContext.ActionArguments.Count);
+            ODataQueryOptions options =
+                actionContext.ActionArguments[parameterDescriptor.ParameterName] as ODataQueryOptions;
+            Assert.NotNull(options);
+            Assert.Same(model, options.Context.Model);
+            Assert.Same(entitySet, options.Context.NavigationSource);
+            Assert.Same(entityClrType, options.Context.ElementClrType);
         }
     }
 

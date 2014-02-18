@@ -18,6 +18,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query.Controllers;
 using System.Web.OData.Query.Validators;
+using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
@@ -840,6 +841,25 @@ namespace System.Web.OData.Query
             Assert.Throws<ODataException>(
                 () => EnableQueryAttribute.ValidateSelectExpandOnly(queryOptions),
                 "The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.");
+        }
+
+        [Fact]
+        public void OnActionExecuted_Works_WithPath()
+        {
+            // Arrange
+            Customer customer = new Customer();
+            SingleResult singleResult = new SingleResult<Customer>(new[] { customer }.AsQueryable());
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", singleResult);
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
+            HttpRequestMessage request = actionExecutedContext.Request;
+            request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment("Customer"));
+
+            // Act
+            attribute.OnActionExecuted(actionExecutedContext);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, actionExecutedContext.Response.StatusCode);
+            Assert.Equal(customer, ((ObjectContent)actionExecutedContext.Response.Content).Value);
         }
 
         private void SomeAction()

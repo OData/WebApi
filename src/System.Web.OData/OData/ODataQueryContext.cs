@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData
@@ -13,11 +17,14 @@ namespace System.Web.OData
     public class ODataQueryContext
     {
         /// <summary>
-        /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" /> and element CLR type. 
+        /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element CLR type,
+        /// and <see cref="ODataPath" />.
         /// </summary>
-        /// <param name="model">The EdmModel that includes the <see cref="IEdmType"/> corresponding to the given <paramref name="elementClrType"/>.</param>
+        /// <param name="model">The EdmModel that includes the <see cref="IEdmType"/> corresponding to
+        /// the given <paramref name="elementClrType"/>.</param>
         /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
-        public ODataQueryContext(IEdmModel model, Type elementClrType)
+        /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
+        public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path)
         {
             if (model == null)
             {
@@ -38,14 +45,17 @@ namespace System.Web.OData
 
             ElementClrType = elementClrType;
             Model = model;
+            NavigationSource = GetNavigationSource(Model, ElementType, path);
         }
-
+        
         /// <summary>
-        /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" /> and element CLR type.
+        /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element EDM type,
+        /// and <see cref="ODataPath" />.
         /// </summary>
         /// <param name="model">The EDM model the given EDM type belongs to.</param>
         /// <param name="elementType">The EDM type of the element of the collection being queried.</param>
-        public ODataQueryContext(IEdmModel model, IEdmType elementType)
+        /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
+        public ODataQueryContext(IEdmModel model, IEdmType elementType, ODataPath path)
         {
             if (model == null)
             {
@@ -58,6 +68,17 @@ namespace System.Web.OData
 
             Model = model;
             ElementType = elementType;
+            NavigationSource = GetNavigationSource(Model, ElementType, path);
+        }
+
+        internal ODataQueryContext(IEdmModel model, Type elementClrType)
+            : this(model, elementClrType, path: null)
+        {
+        }
+
+        internal ODataQueryContext(IEdmModel model, IEdmType elementType)
+            : this(model, elementType, path: null)
+        {
         }
 
         /// <summary>
@@ -71,8 +92,36 @@ namespace System.Web.OData
         public IEdmType ElementType { get; private set; }
 
         /// <summary>
+        /// Gets the <see cref="IEdmNavigationSource"/> that contains the element.
+        /// </summary>
+        public IEdmNavigationSource NavigationSource { get; private set; }
+        
+        /// <summary>
         /// Gets the CLR type of the element.
         /// </summary>
         public Type ElementClrType { get; private set; }
+
+        private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
+        {
+            Contract.Assert(model != null);
+            Contract.Assert(elementType != null);
+
+            IEdmNavigationSource navigationSource = (odataPath != null) ? odataPath.EntitySet : null;
+            if (navigationSource != null)
+            {
+                return navigationSource;
+            }
+
+            IEdmEntityContainer entityContainer = model.EntityContainer;
+            if (entityContainer == null)
+            {
+                return null;
+            }
+
+            List<IEdmEntitySet> matchedNavigationSources =
+                entityContainer.EntitySets().Where(e => e.ElementType == elementType).ToList();
+
+            return (matchedNavigationSources.Count != 1) ? null : matchedNavigationSources[0];
+        }
     }
 }

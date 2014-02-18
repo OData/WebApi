@@ -5,12 +5,14 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization.Models;
+using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Query
 {
@@ -95,6 +97,42 @@ namespace System.Web.OData.Query
             Assert.NotEmpty(selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>());
         }
 
+        [Fact]
+        public void SelectExpandClause_Property_ParsesWithNavigationSource()
+        {
+            // Arrange
+            IEdmModel model = _model.Model;
+            _model.Model.SetAnnotationValue(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
+            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(_model.Customers));
+            ODataQueryContext context = new ODataQueryContext(model, typeof(Customer), odataPath);
+            SelectExpandQueryOption option = new SelectExpandQueryOption("ID,Name,SimpleEnum,Orders", "Orders", context);
+
+            // Act
+            SelectExpandClause selectExpandClause = option.SelectExpandClause;
+
+            // Assert
+            Assert.NotEmpty(selectExpandClause.SelectedItems.OfType<PathSelectItem>());
+            Assert.NotEmpty(selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>());
+        }
+
+        [Fact]
+        public void SelectExpandClause_Property_ParsesWithEdmTypeAndNavigationSource()
+        {
+            // Arrange
+            IEdmModel model = _model.Model;
+            _model.Model.SetAnnotationValue(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
+            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(_model.Customers));
+            ODataQueryContext context = new ODataQueryContext(model, _model.Customer, odataPath);
+            SelectExpandQueryOption option = new SelectExpandQueryOption("ID,Name,SimpleEnum,Orders", "Orders", context);
+
+            // Act
+            SelectExpandClause selectExpandClause = option.SelectExpandClause;
+
+            // Assert
+            Assert.NotEmpty(selectExpandClause.SelectedItems.OfType<PathSelectItem>());
+            Assert.NotEmpty(selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>());
+        }
+        
         [Theory]
         [InlineData("ID", null)]
         [InlineData("LastName,FirstName", null)]

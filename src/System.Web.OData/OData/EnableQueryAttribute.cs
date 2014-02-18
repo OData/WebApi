@@ -513,7 +513,10 @@ namespace System.Web.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            ODataQueryContext queryContext = new ODataQueryContext(model, elementClrType);
+            ODataQueryContext queryContext = new ODataQueryContext(
+                model,
+                elementClrType,
+                request.ODataProperties().Path);
             ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
             ValidateQuery(request, queryOptions);
 

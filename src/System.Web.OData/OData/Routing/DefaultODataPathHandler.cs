@@ -381,6 +381,12 @@ namespace System.Web.OData.Routing
                 return new CastPathSegment(castType);
             }
 
+            // look for $ref
+            if (segment == ODataSegmentKinds.Ref)
+            {
+                return new RefPathSegment();
+            }
+
             // now look for bindable actions
             IEdmAction action = model.FindAction(segment, collectionType);
             if (action != null)
@@ -494,11 +500,6 @@ namespace System.Web.OData.Routing
                 throw Error.Argument(SRResources.PreviousSegmentMustBeEntityType, previousEdmType);
             }
 
-            if (segment == ODataSegmentKinds.Links)
-            {
-                return new LinksPathSegment();
-            }
-
             // first look for navigation properties
             IEdmNavigationProperty navigation = previousType.NavigationProperties().SingleOrDefault(np => np.Name == segment);
             if (navigation != null)
@@ -522,6 +523,12 @@ namespace System.Web.OData.Routing
                     throw new ODataException(Error.Format(SRResources.InvalidCastInPath, castType, previousType));
                 }
                 return new CastPathSegment(castType);
+            }
+
+            // look for $ref
+            if (segment == ODataSegmentKinds.Ref)
+            {
+                return new RefPathSegment();
             }
 
             // finally look for bindable procedures

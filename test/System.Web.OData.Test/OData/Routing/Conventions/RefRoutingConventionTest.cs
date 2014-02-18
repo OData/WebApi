@@ -11,19 +11,19 @@ using Moq;
 
 namespace System.Web.OData.Routing.Conventions
 {
-    public class LinksRoutingConventionTest
+    public class RefRoutingConventionTest
     {
         [Theory]
         [InlineData("DELETE", new string[] { }, null)]
         [InlineData("DELETE", new[] { "UnrelatedAction" }, null)]
-        [InlineData("DELETE", new[] { "DeleteLinkToOrders" }, "DeleteLinkToOrders")]
-        [InlineData("DELETE", new[] { "DeleteLinkToOrders", "DeleteLink" }, "DeleteLinkToOrders")]
-        [InlineData("DELETE", new[] { "DeleteLinkToOrdersFromCustomer", "DeleteLinkToOrders" }, "DeleteLinkToOrdersFromCustomer")]
+        [InlineData("DELETE", new[] { "DeleteRefToOrders" }, "DeleteRefToOrders")]
+        [InlineData("DELETE", new[] { "DeleteRefToOrders", "DeleteRef" }, "DeleteRefToOrders")]
+        [InlineData("DELETE", new[] { "DeleteRefToOrdersFromCustomer", "DeleteRefToOrders" }, "DeleteRefToOrdersFromCustomer")]
         [InlineData("POST", new string[] { }, null)]
         [InlineData("POST", new[] { "UnrelatedAction" }, null)]
-        [InlineData("POST", new[] { "CreateLinkToOrders" }, "CreateLinkToOrders")]
-        [InlineData("POST", new[] { "CreateLinkToOrders", "CreateLink" }, "CreateLinkToOrders")]
-        [InlineData("POST", new[] { "CreateLinkToOrders", "CreateLinkToOrdersFromCustomer" }, "CreateLinkToOrdersFromCustomer")]
+        [InlineData("POST", new[] { "CreateRefToOrders" }, "CreateRefToOrders")]
+        [InlineData("POST", new[] { "CreateRefToOrders", "CreateRef" }, "CreateRefToOrders")]
+        [InlineData("POST", new[] { "CreateRefToOrders", "CreateRefToOrdersFromCustomer" }, "CreateRefToOrdersFromCustomer")]
         public void SelectAction_Returns_ExpectedMethodOnBaseType(string method, string[] methodsInController,
             string expectedSelectedAction)
         {
@@ -33,13 +33,13 @@ namespace System.Web.OData.Routing.Conventions
             var ordersProperty = model.Customer.FindProperty("Orders") as IEdmNavigationProperty;
 
             ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
-                new LinksPathSegment(), new NavigationPathSegment(ordersProperty));
+                new NavigationPathSegment(ordersProperty), new RefPathSegment());
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
 
             // Act
-            string selectedAction = new LinksRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
@@ -58,14 +58,14 @@ namespace System.Web.OData.Routing.Conventions
         [Theory]
         [InlineData("DELETE", new string[] { }, null)]
         [InlineData("DELETE", new[] { "UnrelatedAction" }, null)]
-        [InlineData("DELETE", new[] { "DeleteLinkToSpecialOrders" }, "DeleteLinkToSpecialOrders")]
-        [InlineData("DELETE", new[] { "DeleteLinkToSpecialOrders", "DeleteLinkToOrders" }, "DeleteLinkToSpecialOrders")]
-        [InlineData("DELETE", new[] { "DeleteLinkToSpecialOrders", "DeleteLinkToSpecialOrdersFromSpecialCustomer" }, "DeleteLinkToSpecialOrdersFromSpecialCustomer")]
+        [InlineData("DELETE", new[] { "DeleteRefToSpecialOrders" }, "DeleteRefToSpecialOrders")]
+        [InlineData("DELETE", new[] { "DeleteRefToSpecialOrders", "DeleteRefToOrders" }, "DeleteRefToSpecialOrders")]
+        [InlineData("DELETE", new[] { "DeleteRefToSpecialOrders", "DeleteRefToSpecialOrdersFromSpecialCustomer" }, "DeleteRefToSpecialOrdersFromSpecialCustomer")]
         [InlineData("POST", new string[] { }, null)]
         [InlineData("POST", new[] { "UnrelatedAction" }, null)]
-        [InlineData("POST", new[] { "CreateLinkToSpecialOrders" }, "CreateLinkToSpecialOrders")]
-        [InlineData("POST", new[] { "CreateLinkToSpecialOrders", "CreateLinkToOrders" }, "CreateLinkToSpecialOrders")]
-        [InlineData("POST", new[] { "CreateLinkToSpecialOrders", "CreateLinkToSpecialOrdersFromSpecialCustomer" }, "CreateLinkToSpecialOrdersFromSpecialCustomer")]
+        [InlineData("POST", new[] { "CreateRefToSpecialOrders" }, "CreateRefToSpecialOrders")]
+        [InlineData("POST", new[] { "CreateRefToSpecialOrders", "CreateRefToOrders" }, "CreateRefToSpecialOrders")]
+        [InlineData("POST", new[] { "CreateRefToSpecialOrders", "CreateRefToSpecialOrdersFromSpecialCustomer" }, "CreateRefToSpecialOrdersFromSpecialCustomer")]
         public void SelectAction_Returns_ExpectedMethodOnDerivedType(string method, string[] methodsInController,
             string expectedSelectedAction)
         {
@@ -74,14 +74,18 @@ namespace System.Web.OData.Routing.Conventions
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
 
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
-                new CastPathSegment(model.SpecialCustomer), new LinksPathSegment(), new NavigationPathSegment(specialOrdersProperty));
+            ODataPath odataPath = new ODataPath(
+                new EntitySetPathSegment(model.Customers),
+                new KeyValuePathSegment(key),
+                new CastPathSegment(model.SpecialCustomer),
+                new NavigationPathSegment(specialOrdersProperty),
+                new RefPathSegment());
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
 
             // Act
-            string selectedAction = new LinksRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
@@ -98,7 +102,7 @@ namespace System.Web.OData.Routing.Conventions
         }
 
         [Fact]
-        public void SelectAction_SetsRelatedKey_ForDeleteLinkRequests()
+        public void SelectAction_SetsRelatedKey_ForDeleteRefRequests()
         {
             // Arrange
             string key = "42";
@@ -106,15 +110,19 @@ namespace System.Web.OData.Routing.Conventions
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
 
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
-                new CastPathSegment(model.SpecialCustomer), new LinksPathSegment(), new NavigationPathSegment(specialOrdersProperty),
-                new KeyValuePathSegment(relatedKey));
+            ODataPath odataPath = new ODataPath(
+                new EntitySetPathSegment(model.Customers),
+                new KeyValuePathSegment(key),
+                new CastPathSegment(model.SpecialCustomer),
+                new NavigationPathSegment(specialOrdersProperty),
+                new KeyValuePathSegment(relatedKey),
+                new RefPathSegment());
 
             HttpControllerContext controllerContext = CreateControllerContext("DELETE");
-            var actionMap = GetMockActionMap("DeleteLink");
+            var actionMap = GetMockActionMap("DeleteRef");
 
             // Act
-            new LinksRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
             var routeData = controllerContext.RouteData;
 
             // Assert
@@ -124,21 +132,25 @@ namespace System.Web.OData.Routing.Conventions
         }
 
         [Fact]
-        public void SelectAction_SetsRouteData_ForCreateLinkRequests()
+        public void SelectAction_SetsRouteData_ForCreateRefRequests()
         {
             // Arrange
             string key = "42";
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
 
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
-                new CastPathSegment(model.SpecialCustomer), new LinksPathSegment(), new NavigationPathSegment(specialOrdersProperty));
+            ODataPath odataPath = new ODataPath(
+                new EntitySetPathSegment(model.Customers),
+                new KeyValuePathSegment(key),
+                new CastPathSegment(model.SpecialCustomer),
+                new NavigationPathSegment(specialOrdersProperty),
+                new RefPathSegment());
 
             HttpControllerContext controllerContext = CreateControllerContext("POST");
-            var actionMap = new[] { GetMockActionDescriptor("CreateLink") }.ToLookup(a => a.ActionName);
+            var actionMap = new[] { GetMockActionDescriptor("CreateRef") }.ToLookup(a => a.ActionName);
 
             // Act
-            new LinksRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
             var routeData = controllerContext.RouteData;
 
             // Assert

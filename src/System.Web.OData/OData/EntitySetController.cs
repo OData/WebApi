@@ -110,15 +110,15 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// This method should be overridden to handle POST and PUT requests that attempt to create a link between two entities.
+        /// This method should be overridden to handle POST and PUT requests that attempt to create a reference between two entities.
         /// </summary>
         /// <param name="key">The key of the entity with the navigation property.</param>
         /// <param name="navigationProperty">The name of the navigation property.</param>
-        /// <param name="link">The URI of the entity to link.</param>
+        /// <param name="reference">The URI of the entity to reference.</param>
         [AcceptVerbs("POST", "PUT")]
-        public virtual void CreateLink([FromODataUri] TKey key, string navigationProperty, [FromBody] Uri link)
+        public virtual void CreateRef([FromODataUri] TKey key, string navigationProperty, [FromBody] Uri reference)
         {
-            throw EntitySetControllerHelpers.CreateLinkNotImplementedResponse(Request, navigationProperty);
+            throw EntitySetControllerHelpers.CreateRefNotImplementedResponse(Request, navigationProperty);
         }
 
         /// <summary>
@@ -126,10 +126,10 @@ namespace System.Web.OData
         /// </summary>
         /// <param name="key">The key of the entity with the navigation property.</param>
         /// <param name="navigationProperty">The name of the navigation property.</param>
-        /// <param name="link">The URI of the entity to remove from the navigation property.</param>
-        public virtual void DeleteLink([FromODataUri] TKey key, string navigationProperty, [FromBody] Uri link)
+        /// <param name="reference">The URI of the entity to remove from the navigation property.</param>
+        public virtual void DeleteRef([FromODataUri] TKey key, string navigationProperty, [FromBody] Uri reference)
         {
-            throw EntitySetControllerHelpers.DeleteLinkNotImplementedResponse(Request, navigationProperty);
+            throw EntitySetControllerHelpers.DeleteRefNotImplementedResponse(Request, navigationProperty);
         }
 
         /// <summary>
@@ -138,9 +138,9 @@ namespace System.Web.OData
         /// <param name="key">The key of the entity with the navigation property.</param>
         /// <param name="relatedKey">The key of the related entity.</param>
         /// <param name="navigationProperty">The name of the navigation property.</param>
-        public virtual void DeleteLink([FromODataUri] TKey key, string relatedKey, string navigationProperty)
+        public virtual void DeleteRef([FromODataUri] TKey key, string relatedKey, string navigationProperty)
         {
-            throw EntitySetControllerHelpers.DeleteLinkNotImplementedResponse(Request, navigationProperty);
+            throw EntitySetControllerHelpers.DeleteRefNotImplementedResponse(Request, navigationProperty);
         }
 
         /// <summary>

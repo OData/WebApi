@@ -212,15 +212,15 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void NotImplementedDeleteLink_ThrowsHttpResponseException()
+        public void NotImplementedDeleteRef_ThrowsHttpResponseException()
         {
             var controllerMock = new Mock<EntitySetController<FormatterPerson, int>>();
             controllerMock.CallBase = true;
             var controller = controllerMock.Object;
             SetupController(controller);
 
-            var exception = Assert.Throws<HttpResponseException>(() => controller.DeleteLink(5, "6", "Products"));
-            Assert.Equal("Deleting a 'Products' link is not supported for this entity set.",
+            var exception = Assert.Throws<HttpResponseException>(() => controller.DeleteRef(5, "6", "Products"));
+            Assert.Equal("Deleting a 'Products' reference is not supported for this entity set.",
                 ((ODataError)((ObjectContent)exception.Response.Content).Value).Message);
         }
 

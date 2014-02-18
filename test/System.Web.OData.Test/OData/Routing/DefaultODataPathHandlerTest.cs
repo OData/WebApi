@@ -93,7 +93,7 @@ namespace System.Web.OData.Routing
         [InlineData("GetRoutingCustomerById()", "~/unboundaction")]
         [InlineData("RoutingCustomers(112)/Address/Street", "~/entityset/key/property/property")]
         [InlineData("RoutingCustomers(1)/Name/$value", "~/entityset/key/property/$value")]
-        [InlineData("RoutingCustomers(1)/$links/Products", "~/entityset/key/$links/navigation")]
+        [InlineData("RoutingCustomers(1)/Products/$ref", "~/entityset/key/navigation/$ref")]
         [InlineData("RoutingCustomers(112)/GetRelatedRoutingCustomers", "~/entityset/key/action")]
         [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/GetMostProfitable", "~/entityset/cast/action")]
         [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "~/entityset/key/navigation/cast/key/navigation/navigation")]
@@ -411,7 +411,7 @@ namespace System.Web.OData.Routing
         public void CanParseEntityLinksSegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers(1)/$links/Products";
+            string odataPath = "RoutingCustomers(1)/Products/$ref";
             IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Products");
             IEdmEntityType expectedType = expectedSet.ElementType;
 
@@ -423,7 +423,7 @@ namespace System.Web.OData.Routing
             Assert.NotNull(segment);
             Assert.Same(expectedType, (path.EdmType as IEdmCollectionType).ElementType.Definition);
             Assert.Same(expectedSet, path.EntitySet);
-            Assert.Same("$links", path.Segments[2].ToString());
+            Assert.Same("$ref", path.Segments[3].ToString());
         }
 
         [Fact]

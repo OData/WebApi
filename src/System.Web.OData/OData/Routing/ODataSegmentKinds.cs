@@ -10,7 +10,7 @@ namespace System.Web.OData.Routing
         // need these as consts for using them in switch/case blocks.
         internal const string _ServiceBase = "~";
         internal const string _Batch = "$batch";
-        internal const string _Links = "$links";
+        internal const string _Ref = "$ref";
         internal const string _Metadata = "$metadata";
         internal const string _Value = "$value";
         internal const string _Action = "action";
@@ -35,9 +35,9 @@ namespace System.Web.OData.Routing
         public static readonly string Batch = _Batch;
 
         /// <summary>
-        /// Represents the OData $links segment.
+        /// Represents the OData $ref segment.
         /// </summary>
-        public static readonly string Links = _Links;
+        public static readonly string Ref = _Ref;
 
         /// <summary>
         /// Represents the OData $metadata segment.

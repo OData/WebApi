@@ -187,7 +187,7 @@
     <Compile Include="OData\PerRequestActionValueBinderTest.cs" />
     <Compile Include="OData\Query\Expressions\LinqParameterContainerTest.cs" />
     <Compile Include="OData\Routing\Conventions\ActionRoutingConventionTest.cs" />
-    <Compile Include="OData\Routing\Conventions\LinksRoutingConventionTest.cs" />
+    <Compile Include="OData\Routing\Conventions\RefRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\Conventions\NavigationRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\Conventions\EntityRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\Conventions\EntitySetRoutingConventionTest.cs" />

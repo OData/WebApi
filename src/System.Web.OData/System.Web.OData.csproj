@@ -222,7 +222,7 @@
     <Compile Include="OData\Routing\CastPathSegment.cs" />
     <Compile Include="OData\Routing\BatchPathSegment.cs" />
     <Compile Include="OData\Routing\Conventions\ActionRoutingConvention.cs" />
-    <Compile Include="OData\Routing\Conventions\LinksRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\RefRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\NavigationRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\UnmappedRequestRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\MetadataRoutingConvention.cs" />
@@ -236,7 +236,7 @@
     <Compile Include="OData\Routing\ODataPathParameterBindingAttribute.cs" />
     <Compile Include="OData\Routing\ODataSegmentKinds.cs" />
     <Compile Include="OData\Routing\KeyValuePathSegment.cs" />
-    <Compile Include="OData\Routing\LinksPathSegment.cs" />
+    <Compile Include="OData\Routing\RefPathSegment.cs" />
     <Compile Include="OData\Routing\UnresolvedParameterValue.cs" />
     <Compile Include="OData\Routing\ODataValueProviderFactory.cs" />
     <Compile Include="OData\Routing\UnresolvedPathSegment.cs" />

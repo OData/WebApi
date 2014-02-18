@@ -10,9 +10,9 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
-    /// Represents an <see cref="ODataSerializer"/> for serializing $links response.
+    /// Represents an <see cref="ODataSerializer"/> for serializing $ref response.
     /// </summary>
-    /// <remarks>For example, the response to the url http://localhost/Products(10)/$links/Category gets serialized using this.</remarks>
+    // For example, the response to the url http://localhost/Products(10)/Category/$ref gets serialized using this.</remarks>
     public class ODataEntityReferenceLinkSerializer : ODataSerializer
     {
         /// <summary>

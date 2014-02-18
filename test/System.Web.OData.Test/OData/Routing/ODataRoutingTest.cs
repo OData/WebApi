@@ -54,10 +54,10 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Name", "GetName(10)")]
         [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Company", "GetCompanyFromVIP(10)")]
         // links
-        [InlineData("PUT", "RoutingCustomers(1)/$links/Products", "CreateLink(1)(Products)")]
-        [InlineData("POST", "RoutingCustomers(1)/$links/Products", "CreateLink(1)(Products)")]
-        [InlineData("DELETE", "RoutingCustomers(1)/$links/Products", "DeleteLink(1)(Products)")]
-        [InlineData("DELETE", "RoutingCustomers(1)/$links/Products(5)", "DeleteLink(1)(5)(Products)")]
+        [InlineData("PUT", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)")]
+        [InlineData("POST", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)")]
+        [InlineData("DELETE", "RoutingCustomers(1)/Products/$ref", "DeleteRef(1)(Products)")]
+        [InlineData("DELETE", "RoutingCustomers(1)/Products(5)/$ref", "DeleteRef(1)(5)(Products)")]
         // raw value
         [InlineData("GET", "RoutingCustomers(10)/Name/$value", "GetName(10)")]
         [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Name/$value", "GetName(10)")]
@@ -182,19 +182,19 @@ namespace System.Web.OData.Routing
         }
 
         [AcceptVerbs("POST", "PUT")]
-        public string CreateLink(int key, string navigationProperty)
+        public string CreateRef(int key, string navigationProperty)
         {
-            return String.Format(CultureInfo.InvariantCulture, "CreateLink({0})({1})", key, navigationProperty);
+            return String.Format(CultureInfo.InvariantCulture, "CreateRef({0})({1})", key, navigationProperty);
         }
 
-        public string DeleteLink(int key, string navigationProperty)
+        public string DeleteRef(int key, string navigationProperty)
         {
-            return String.Format(CultureInfo.InvariantCulture, "DeleteLink({0})({1})", key, navigationProperty);
+            return String.Format(CultureInfo.InvariantCulture, "DeleteRef({0})({1})", key, navigationProperty);
         }
 
-        public string DeleteLink(int key, int relatedKey, string navigationProperty)
+        public string DeleteRef(int key, int relatedKey, string navigationProperty)
         {
-            return String.Format(CultureInfo.InvariantCulture, "DeleteLink({0})({1})({2})", key, relatedKey, navigationProperty);
+            return String.Format(CultureInfo.InvariantCulture, "DeleteRef({0})({1})({2})", key, relatedKey, navigationProperty);
         }
 
         [AcceptVerbs("POST")]

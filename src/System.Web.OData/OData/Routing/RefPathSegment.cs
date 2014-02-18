@@ -6,42 +6,31 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData.Routing
 {
     /// <summary>
-    /// An <see cref="ODataPathSegment"/> implementation representing a $links segment.
+    /// An <see cref="ODataPathSegment"/> implementation representing a $ref segment.
     /// </summary>
-    public class LinksPathSegment : ODataPathSegment
+    // TODO: 1681 enforce $ref and $value be the last segment.
+    public class RefPathSegment : ODataPathSegment
     {
-        /// <summary>
-        /// Gets the segment kind for the current segment.
-        /// </summary>
+        /// <inheritdoc/>
         public override string SegmentKind
         {
             get
             {
-                return ODataSegmentKinds.Links;
+                return ODataSegmentKinds.Ref;
             }
         }
 
-        /// <summary>
-        /// Gets the EDM type for this segment.
-        /// </summary>
-        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
-        /// <returns>
-        /// The EDM type for this segment.
-        /// </returns>
+        /// <inheritdoc/>
         public override IEdmType GetEdmType(IEdmType previousEdmType)
         {
+            // $ref is the last path segment.  It uses previous segment's EDM type.
             return previousEdmType;
         }
 
-        /// <summary>
-        /// Gets the entity set for this segment.
-        /// </summary>
-        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
-        /// <returns>
-        /// The entity set for this segment.
-        /// </returns>
+        /// <inheritdoc/>
         public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
         {
+            // $ref is the last path segment.  It uses previous segment's entity set.
             return previousEntitySet;
         }
 
@@ -53,13 +42,13 @@ namespace System.Web.OData.Routing
         /// </returns>
         public override string ToString()
         {
-            return ODataSegmentKinds.Links;
+            return ODataSegmentKinds.Ref;
         }
 
         /// <inheritdoc/>
         public override bool TryMatch(ODataPathSegment pathSegment, IDictionary<string, object> values)
         {
-            return pathSegment.SegmentKind == ODataSegmentKinds.Links;
+            return pathSegment.SegmentKind == ODataSegmentKinds.Ref;
         }
     }
 }

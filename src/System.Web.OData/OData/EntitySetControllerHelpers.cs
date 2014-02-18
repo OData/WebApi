@@ -130,30 +130,30 @@ namespace System.Web.OData
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public static HttpResponseException CreateLinkNotImplementedResponse(HttpRequestMessage request, string navigationProperty)
+        public static HttpResponseException CreateRefNotImplementedResponse(HttpRequestMessage request, string navigationProperty)
         {
             return new HttpResponseException(
                     request.CreateResponse(
                         HttpStatusCode.NotImplemented,
                         new ODataError
                         {
-                            Message = Error.Format(SRResources.EntitySetControllerUnsupportedCreateLink, navigationProperty),
+                            Message = Error.Format(SRResources.EntitySetControllerUnsupportedCreateRef, navigationProperty),
                             MessageLanguage = SRResources.EntitySetControllerErrorMessageLanguage,
-                            ErrorCode = SRResources.EntitySetControllerUnsupportedCreateLinkErrorCode
+                            ErrorCode = SRResources.EntitySetControllerUnsupportedCreateRefErrorCode
                         }));
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public static HttpResponseException DeleteLinkNotImplementedResponse(HttpRequestMessage request, string navigationProperty)
+        public static HttpResponseException DeleteRefNotImplementedResponse(HttpRequestMessage request, string navigationProperty)
         {
             return new HttpResponseException(
                     request.CreateResponse(
                         HttpStatusCode.NotImplemented,
                         new ODataError
                         {
-                            Message = Error.Format(SRResources.EntitySetControllerUnsupportedDeleteLink, navigationProperty),
+                            Message = Error.Format(SRResources.EntitySetControllerUnsupportedDeleteRef, navigationProperty),
                             MessageLanguage = SRResources.EntitySetControllerErrorMessageLanguage,
-                            ErrorCode = SRResources.EntitySetControllerUnsupportedDeleteLinkErrorCode
+                            ErrorCode = SRResources.EntitySetControllerUnsupportedDeleteRefErrorCode
                         }));
         }
 

@@ -54,23 +54,14 @@ namespace System.Web.OData
             // ODL spec says:
             // The edm:FunctionImport for a parameterless function MAY include the IncludeInServiceDocument attribute
             // whose Boolean value indicates whether the function import is advertised in the service document.
-            IEnumerable<IEdmFunctionImport> functionImports = container.Elements.OfType<IEdmFunctionImport>()
-                .Where(f => !f.Function.Parameters.Any()) // find all parameterless functions
-                .Where(f => f.IncludeInServiceDocument); // find all function with "IncludeInServiceDocument = true"
+            // If no value is specified for this attribute, its value defaults to false.
 
-            HashSet<string> functionImportsWritten = new HashSet<string>(StringComparer.Ordinal);
-            serviceDocument.FunctionImports = functionImports.Select(f =>
-                {
-                    if (!functionImportsWritten.Contains(f.Name))
-                    {
-                        functionImportsWritten.Add(f.Name);
-                        return GetODataFunctionImportInfo(f.Name);
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }).Where(f => f != null).ToList(); // ToList() is necessary here.
+            // Find all parameterless functions with "IncludeInServiceDocument = true"
+            IEnumerable<IEdmFunctionImport> functionImports = container.Elements.OfType<IEdmFunctionImport>()
+                .Where(f => !f.Function.Parameters.Any() && f.IncludeInServiceDocument);
+
+            serviceDocument.FunctionImports = functionImports.Distinct(new FunctionImportComparer())
+                .Select(f => GetODataFunctionImportInfo(f.Name));
 
             return serviceDocument;
         }

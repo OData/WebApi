@@ -137,7 +137,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             IEdmModel model = ODataTestUtil.GetEdmModel();
-            IEnumerable<IEdmFunctionImport> functions = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
+            IEnumerable<IEdmFunctionImport> functionImports = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
                 .Where(f => f.Name == "GetSalary");
 
             HttpServer server = new HttpServer();
@@ -148,9 +148,9 @@ namespace System.Web.OData.Builder
             var responseString = client.GetStringAsync("http://localhost/").Result;
 
             // Assert
-            Assert.Equal(1, functions.Count());
-            Assert.Equal("Default.GetSalary", functions.First().Function.FullName());
-            Assert.True(functions.First().IncludeInServiceDocument);
+            var functionImport = Assert.Single(functionImports);
+            Assert.Equal("Default.GetSalary", functionImport.Function.FullName());
+            Assert.True(functionImport.IncludeInServiceDocument);
             Assert.Contains("<service xml:base=\"http://localhost/\"", responseString);
             Assert.DoesNotContain("<m:function-import href=\"GetSalary\">", responseString);
         }
@@ -160,8 +160,8 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             IEdmModel model = ODataTestUtil.GetEdmModel();
-            IEnumerable<IEdmFunctionImport> functions = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
-                .Where(f => f.Name == "GetAddress");
+            IEdmFunctionImport[] functionImports = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
+                .Where(f => f.Name == "GetAddress").ToArray();
 
             HttpServer server = new HttpServer();
             server.Configuration.Routes.MapODataServiceRoute(model);
@@ -171,9 +171,17 @@ namespace System.Web.OData.Builder
             var responseString = client.GetStringAsync("http://localhost/").Result;
 
             // Assert
-            Assert.Equal(2, functions.Count());
-            Assert.Equal("Default.GetAddress", functions.First().Function.FullName());
-            Assert.False(functions.First().IncludeInServiceDocument);
+            Assert.Equal(2, functionImports.Length);
+
+            Assert.Equal("Default.GetAddress", functionImports[0].Function.FullName());
+            Assert.Equal("Default.GetAddress", functionImports[1].Function.FullName());
+
+            Assert.False(functionImports[0].IncludeInServiceDocument);
+            Assert.False(functionImports[1].IncludeInServiceDocument);
+
+            Assert.Empty(functionImports[0].Function.Parameters);
+            Assert.Equal("AddressId", functionImports[1].Function.Parameters.First().Name);
+
             Assert.Contains("<service xml:base=\"http://localhost/\"", responseString);
             Assert.DoesNotContain("<m:function-import href=\"GetAddress\">", responseString);
         }
@@ -183,8 +191,8 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             IEdmModel model = ODataTestUtil.GetEdmModel();
-            IEnumerable<IEdmFunctionImport> functions = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
-                .Where(f => f.Name == "GetVipPerson");
+            IEdmFunctionImport[] functionImports = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
+                .Where(f => f.Name == "GetVipPerson").ToArray();
 
             HttpServer server = new HttpServer();
             server.Configuration.Routes.MapODataServiceRoute(model);
@@ -194,8 +202,16 @@ namespace System.Web.OData.Builder
             var responseString = client.GetStringAsync("http://localhost/").Result;
 
             // Assert
-            Assert.Equal(3, functions.Count());
-            Assert.Equal("Default.GetVipPerson", functions.First().Function.FullName());
+            Assert.Equal(3, functionImports.Length);
+
+            Assert.Equal("Default.GetVipPerson", functionImports[0].Function.FullName());
+            Assert.Equal("Default.GetVipPerson", functionImports[1].Function.FullName());
+            Assert.Equal("Default.GetVipPerson", functionImports[2].Function.FullName());
+
+            Assert.Single(functionImports[0].Function.Parameters);
+            Assert.Empty(functionImports[1].Function.Parameters);
+            Assert.Equal(2, functionImports[2].Function.Parameters.Count());
+
             Assert.Contains("<service xml:base=\"http://localhost/\"", responseString);
             Assert.Contains("<m:function-import href=\"GetVipPerson\">", responseString);
         }

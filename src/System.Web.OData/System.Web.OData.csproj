@@ -77,6 +77,7 @@
     <Compile Include="OData\Builder\EnumTypeConfigurationOfTEnumType.cs" />
     <Compile Include="OData\Builder\NullableEnumTypeConfiguration.cs" />
     <Compile Include="OData\Builder\OperationTitleAnnotation.cs" />
+    <Compile Include="OData\FunctionImportComparer.cs" />
     <Compile Include="OData\Formatter\Deserialization\EnumDeserializationHelpers.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEnumDeserializer.cs" />
     <Compile Include="OData\Formatter\ODataEnumValueMediaTypeMapping.cs" />

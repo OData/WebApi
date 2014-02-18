@@ -120,14 +120,14 @@ namespace System.Web.OData.Formatter
                 getAddress.Returns<string>();
                 getAddress.IncludeInServiceDocument = false;
 
-                // Add a top level functions which is included in service document
+                // Add an overload top level function
                 var getVipPerson = model.Function("GetVipPerson");
+                getVipPerson.Parameter<string>("name");
                 getVipPerson.ReturnsFromEntitySet<FormatterPerson>("People");
                 getVipPerson.IncludeInServiceDocument = true;
 
-                // Add an overload top level function
+                // Add a top level function which is included in service document
                 getVipPerson = model.Function("GetVipPerson");
-                getVipPerson.Parameter<string>("name");
                 getVipPerson.ReturnsFromEntitySet<FormatterPerson>("People");
                 getVipPerson.IncludeInServiceDocument = true;
 

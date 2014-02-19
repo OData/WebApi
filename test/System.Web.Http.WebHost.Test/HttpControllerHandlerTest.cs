@@ -246,7 +246,7 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
-        public void ConvertRequest_WithBufferedPolicy_ThrowsIfRequestHasBeenRead()
+        public void ConvertRequest_WithBufferedPolicy_ThrowsIfRequestHasBeenPartiallyRead()
         {
             // Arrange
             var stream = new MemoryStream(new byte[16]);
@@ -258,8 +258,31 @@ namespace System.Web.Http.WebHost
             HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context);
 
             // Assert
-            Assert.Throws<InvalidOperationException>(() => actualRequest.Content.ReadAsStringAsync().Result,
-                 "Unable to read the entity body. A portion of the request stream has already been read.");
+            Assert.Throws<InvalidOperationException>(() => actualRequest.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void ConvertRequest_WithBufferedPolicy_ReturnsInputStreamIfBufferedStreamWasFullyRead()
+        {
+            // Arrange
+            string inputStreamMessage = "This is from input stream";
+            var bufferedStream = new MemoryStream(new byte[16]);
+            var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(inputStreamMessage));
+            HttpRequestBase fakeRequest = CreateFakeRequestBase(() => bufferedStream, buffered: true);
+            HttpContextBase context = CreateStubContextBase(request: fakeRequest, items: null);
+            Mock<HttpRequestBase> mockRequest = Mock.Get<HttpRequestBase>(fakeRequest);
+            mockRequest.SetupGet(f => f.InputStream)
+                       .Returns(inputStream)
+                       .Verifiable();
+
+            // Act
+            bufferedStream.Seek(0, SeekOrigin.End);
+            new StreamReader(fakeRequest.GetBufferedInputStream()).ReadToEnd();
+            HttpRequestMessage actualRequest = HttpControllerHandler.ConvertRequest(context);
+            string result = actualRequest.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(inputStreamMessage, result);
         }
 
         [Theory]
@@ -1792,6 +1815,14 @@ namespace System.Web.Http.WebHost
                 {
                     readEntityBodyMode = ReadEntityBodyMode.Classic;
                     return getStream();
+                }
+                else if (readEntityBodyMode == ReadEntityBodyMode.Buffered)
+                {
+                    Stream stream = getStream();
+                    if (stream.Position == stream.Length)
+                    {
+                        return stream;
+                    }
                 }
                 throw new InvalidOperationException();
             });

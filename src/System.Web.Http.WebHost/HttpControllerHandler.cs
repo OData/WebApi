@@ -267,14 +267,20 @@ namespace System.Web.Http.WebHost
                     {
                         if (requestBase.GetBufferedInputStream().Position > 0)
                         {
-                            throw new InvalidOperationException(SRResources.RequestBodyAlreadyRead);
+                            // If GetBufferedInputStream() was completely read, we can continue accessing it via Request.InputStream.
+                            // If it was partially read, accessing InputStream will throw, but at that point we have no
+                            // way of recovering.
+                            requestBase.InputStream.Position = 0;
+                            return requestBase.InputStream;
                         }
                         return new SeekableBufferedRequestStream(requestBase);
                     }
                     else
                     {
                         Contract.Assert(requestBase.ReadEntityBodyMode == ReadEntityBodyMode.Bufferless);
-                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, SRResources.RequestBodyAlreadyReadInMode, ReadEntityBodyMode.Bufferless));
+                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, 
+                                                                          SRResources.RequestBodyAlreadyReadInMode, 
+                                                                          ReadEntityBodyMode.Bufferless));
                     }
                 });
             }

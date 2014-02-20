@@ -37,7 +37,7 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void Can_dispatch_actionPayload_to_action()
+        public void CanDispatch_ActionPayload_ToBoundAction()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers(1)/DoSomething");
@@ -62,11 +62,11 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void Response_includes_action_link()
+        public void Response_Includes_ActionLink_WithAcceptHeader()
         {
             // Arrange
             string editLink = "http://localhost/Customers(1)";
-            string expectedTarget = editLink + "/DoSomething";
+            string expectedTarget = editLink + "/org.odata.DoSomething";
             string expectedMetadata = "#org.odata.DoSomething";
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, editLink);
@@ -82,6 +82,20 @@ namespace System.Web.OData.Formatter
             Assert.NotNull(doSomething);
             Assert.Equal(expectedTarget, (string)doSomething.target);
             Assert.Equal("DoSomething", (string)doSomething.title);
+        }
+
+        [Fact]
+        public void Response_Includes_ActionLink_WithDollarFormat()
+        {
+            // Arrange
+            string requestUri = "http://localhost/Customers?$format=application/json;odata.metadata=full";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync(requestUri).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Contains("\"target\":\"http://localhost/Customers(4)/org.odata.DoSomething\"", responseString);
         }
 
         private IEdmModel GetModel()
@@ -116,6 +130,18 @@ namespace System.Web.OData.Formatter
     public class CustomersController : ODataController
     {
         [HttpGet]
+        public IHttpActionResult Get()
+        {
+            var customers = Enumerable.Range(1, 6).Select(i => new ODataActionTests.Customer
+                    {
+                        ID = i,
+                        Name = "Name " + i
+                    }).ToList();
+
+            return Ok(customers);
+        }
+
+        [HttpGet]
         public ODataActionTests.Customer Get(int key)
         {
             return new ODataActionTests.Customer { ID = key, Name = "Name" + key.ToString() };
@@ -140,6 +166,7 @@ namespace System.Web.OData.Formatter
             Assert.Equal("WA", address.State);
             Assert.Equal(98052, address.ZipCode);
         }
+
         private void ValidateNumbers(IList<string> numbers)
         {
             Assert.NotNull(numbers);
@@ -147,6 +174,7 @@ namespace System.Web.OData.Formatter
             Assert.Equal("one", numbers[0]);
             Assert.Equal("two", numbers[1]);
         }
+
         private void ValidateAddresses(IList<ODataActionTests.Address> addresses)
         {
             Assert.NotNull(addresses);

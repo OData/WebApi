@@ -77,12 +77,11 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// The FullyQualifiedName is the ContainerQualifiedName further qualified using the Namespace.
-        /// Typically this is not required, because most services have at most one container with the same name.
+        /// The FullyQualifiedName is the Name further qualified using the Namespace.
         /// </summary>
         public string FullyQualifiedName
         {
-            get { return ModelBuilder.Namespace + "." + ContainerQualifiedName; }
+            get { return ModelBuilder.Namespace + "." + Name; }
         }
 
         /// <summary>

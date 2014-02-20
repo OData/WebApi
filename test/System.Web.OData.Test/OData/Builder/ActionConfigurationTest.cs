@@ -40,7 +40,7 @@ namespace System.Web.OData.Builder
             Assert.False(action.IsBindable);
             Assert.Equal("MyContainer.Format", action.ContainerQualifiedName);
             Assert.Equal("MyContainer.Format", action.FullName);
-            Assert.Equal("MyNamespace.MyContainer.Format", action.FullyQualifiedName);
+            Assert.Equal("MyNamespace.Format", action.FullyQualifiedName);
             Assert.NotNull(builder.Procedures);
             Assert.Equal(1, builder.Procedures.Count());
         }
@@ -362,7 +362,7 @@ namespace System.Web.OData.Builder
         public void WhenActionLinksNotManuallyConfigured_ConventionBasedBuilderUsesConventions()
         {
             // Arrange
-            string uriTemplate = "http://server/Movies({0})/Watch";
+            string uriTemplate = "http://server/Movies({0})/Default.Watch";
             Uri expectedUri = new Uri(string.Format(uriTemplate, 1));
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;

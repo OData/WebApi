@@ -17,7 +17,7 @@ namespace System.Web.OData.Builder.Conventions
             if (action != null && action.IsBindable && action.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity && action.GetActionLink() == null)
             {
                 string bindingParamterType = action.BindingParameter.TypeConfiguration.FullName;
-                action.HasActionLink(entityContext => entityContext.GenerateActionLink(bindingParamterType, action.Name), followsConventions: true);
+                action.HasActionLink(entityContext => entityContext.GenerateActionLink(bindingParamterType, action.FullyQualifiedName), followsConventions: true);
             }
         }
     }

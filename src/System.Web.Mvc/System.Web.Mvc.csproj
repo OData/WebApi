@@ -155,6 +155,7 @@
     <Compile Include="ActionMethodSelectorBase.cs" />
     <Compile Include="ActionNameSelector.cs" />
     <Compile Include="ControllerDescriptorExtensions.cs" />
+    <Compile Include="SelectListGroup.cs" />
     <Compile Include="Html\EnumHelper.cs" />
     <Compile Include="MaxLengthAttributeAdapter.cs" />
     <Compile Include="MinLengthAttributeAdapter.cs" />

@@ -408,19 +408,8 @@ namespace System.Web.Mvc.Html
                 selectList = GetSelectListWithDefaultValue(selectList, defaultValue, allowMultiple);
             }
 
-            // Convert each ListItem to an <option> tag
-            StringBuilder listItemBuilder = new StringBuilder();
-
-            // Make optionLabel the first item that gets rendered.
-            if (optionLabel != null)
-            {
-                listItemBuilder.AppendLine(ListItemToOption(new SelectListItem() { Text = optionLabel, Value = String.Empty, Selected = false }));
-            }
-
-            foreach (SelectListItem item in selectList)
-            {
-                listItemBuilder.AppendLine(ListItemToOption(item));
-            }
+            // Convert each ListItem to an <option> tag and wrap them with <optgroup> if requested.
+            StringBuilder listItemBuilder = BuildItems(optionLabel, selectList);
 
             TagBuilder tagBuilder = new TagBuilder("select")
             {
@@ -447,6 +436,56 @@ namespace System.Web.Mvc.Html
             tagBuilder.MergeAttributes(htmlHelper.GetUnobtrusiveValidationAttributes(name, metadata));
 
             return tagBuilder.ToMvcHtmlString(TagRenderMode.Normal);
+        }
+
+        private static StringBuilder BuildItems(string optionLabel, IEnumerable<SelectListItem> selectList)
+        {
+            StringBuilder listItemBuilder = new StringBuilder();
+
+            // Make optionLabel the first item that gets rendered.
+            if (optionLabel != null)
+            {
+                listItemBuilder.AppendLine(ListItemToOption(new SelectListItem()
+                {
+                    Text = optionLabel,
+                    Value = String.Empty,
+                    Selected = false
+                }));
+            }
+
+            // Group items in the SelectList if requested.
+            // Treat each item with Group == null as a member of a unique group
+            // so they are added according to the original order.
+            IEnumerable<IGrouping<int, SelectListItem>> groupedSelectList = selectList.GroupBy<SelectListItem, int>(
+                i => (i.Group == null) ? i.GetHashCode() : i.Group.GetHashCode());
+            foreach (IGrouping<int, SelectListItem> group in groupedSelectList)
+            {
+                SelectListGroup optGroup = group.First().Group;
+
+                // Wrap if requested.
+                TagBuilder groupBuilder = null;
+                if (optGroup != null)
+                {
+                    groupBuilder = new TagBuilder("optgroup");
+                    if (optGroup.Name != null)
+                    {
+                        groupBuilder.MergeAttribute("label", optGroup.Name);
+                    }
+                    listItemBuilder.AppendLine(groupBuilder.ToString(TagRenderMode.StartTag));
+                }
+
+                foreach (SelectListItem item in group)
+                {
+                    listItemBuilder.AppendLine(ListItemToOption(item));
+                }
+
+                if (optGroup != null)
+                {
+                    listItemBuilder.AppendLine(groupBuilder.ToString(TagRenderMode.EndTag));
+                }
+            }
+
+            return listItemBuilder;
         }
     }
 }

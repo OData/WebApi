@@ -36,6 +36,59 @@ namespace System.Web.Mvc.Html.Test
 
         // DropDownList
 
+        private static List<SelectListItem> GroupedItems
+        {
+            get
+            {
+                List<SelectListItem> items = new List<SelectListItem>();
+                SelectListGroup swedish = new SelectListGroup { Name = "Swedish Cars" };
+                SelectListGroup german = new SelectListGroup { Name = "German Cars" };
+                SelectListGroup unnamed = new SelectListGroup();
+                items.Add(new SelectListItem() { Text = "other1", Value = "other1" });
+                items.Add(new SelectListItem() { Text = "other2", Value = "other2" });
+                items.Add(new SelectListItem() { Group = swedish, Text = "Volvo", Value = "volvo" });
+                items.Add(new SelectListItem() { Text = "other3", Value = "other3" });
+                items.Add(new SelectListItem() { Group = unnamed, Text = "other4", Value = "other4" });
+                items.Add(new SelectListItem() { Group = unnamed, Text = "other5", Value = "other5" });
+                items.Add(new SelectListItem() { Group = german, Text = "Mercedes-Benz", Value = "mercedes-benz" });
+                items.Add(new SelectListItem() { Group = swedish, Text = "Saab", Value = "saab", Selected = true });
+                items.Add(new SelectListItem() { Group = german, Text = "Audi", Value = "audi" });
+                items.Add(new SelectListItem() { Text = "other6", Value = "other6" });
+
+                return items;
+            }
+        }
+
+        [Fact]
+        void DropDownList_WithGroups()
+        {
+            // Arrange
+            HtmlHelper helper = MvcHelper.GetHtmlHelper();
+            string dropdownList = @"<select id=""List"" name=""List""><option value=""other1"">other1</option>
+<option value=""other2"">other2</option>
+<optgroup label=""Swedish Cars"">
+<option value=""volvo"">Volvo</option>
+<option selected=""selected"" value=""saab"">Saab</option>
+</optgroup>
+<option value=""other3"">other3</option>
+<optgroup>
+<option value=""other4"">other4</option>
+<option value=""other5"">other5</option>
+</optgroup>
+<optgroup label=""German Cars"">
+<option value=""mercedes-benz"">Mercedes-Benz</option>
+<option value=""audi"">Audi</option>
+</optgroup>
+<option value=""other6"">other6</option>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.DropDownList("List", GroupedItems);
+
+            // Assert
+            Assert.Equal(dropdownList, html.ToHtmlString());
+        }
+
         [Fact]
         public void DropDownListUsesExplicitValueIfNotProvidedInViewData()
         {
@@ -641,6 +694,39 @@ namespace System.Web.Mvc.Html.Test
         }
 
         // DropDownListFor
+
+        [Fact]
+        void DropDownListFor_WithGroups()
+        {
+            // Arrange
+            ViewDataDictionary<FooModel> dict = new ViewDataDictionary<FooModel>();
+            dict.Add("foo", "volvo");
+            HtmlHelper<FooModel> helper = MvcHelper.GetHtmlHelper(dict);
+            string listBox = @"<select id=""foo"" name=""foo""><option value="""">Cars</option>
+<option value=""other1"">other1</option>
+<option value=""other2"">other2</option>
+<optgroup label=""Swedish Cars"">
+<option selected=""selected"" value=""volvo"">Volvo</option>
+<option value=""saab"">Saab</option>
+</optgroup>
+<option value=""other3"">other3</option>
+<optgroup>
+<option value=""other4"">other4</option>
+<option value=""other5"">other5</option>
+</optgroup>
+<optgroup label=""German Cars"">
+<option value=""mercedes-benz"">Mercedes-Benz</option>
+<option value=""audi"">Audi</option>
+</optgroup>
+<option value=""other6"">other6</option>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.DropDownListFor(m => m.foo, GroupedItems, optionLabel: "Cars");
+
+            // Assert
+            Assert.Equal(listBox, html.ToHtmlString());
+        }
 
         [Fact]
         public void DropDownListForWithNullExpressionThrows()
@@ -1792,6 +1878,36 @@ namespace System.Web.Mvc.Html.Test
         // ListBox
 
         [Fact]
+        void ListBox_WithGroups()
+        {
+            // Arrange
+            HtmlHelper helper = MvcHelper.GetHtmlHelper();
+            string listBox = @"<select id=""List"" multiple=""multiple"" name=""List""><option value=""other1"">other1</option>
+<option value=""other2"">other2</option>
+<optgroup label=""Swedish Cars"">
+<option value=""volvo"">Volvo</option>
+<option selected=""selected"" value=""saab"">Saab</option>
+</optgroup>
+<option value=""other3"">other3</option>
+<optgroup>
+<option value=""other4"">other4</option>
+<option value=""other5"">other5</option>
+</optgroup>
+<optgroup label=""German Cars"">
+<option value=""mercedes-benz"">Mercedes-Benz</option>
+<option value=""audi"">Audi</option>
+</optgroup>
+<option value=""other6"">other6</option>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.ListBox("List", GroupedItems);
+
+            // Assert
+            Assert.Equal(listBox, html.ToHtmlString());
+        }
+
+        [Fact]
         public void ListBoxUsesExplicitValueIfNotProvidedInViewData()
         {
             // Arrange
@@ -2253,6 +2369,38 @@ namespace System.Web.Mvc.Html.Test
         }
 
         // ListBoxFor
+
+        [Fact]
+        void ListBoxFor_WithGroups()
+        {
+            // Arrange
+            ViewDataDictionary<FooArrayModel> dict = new ViewDataDictionary<FooArrayModel>();
+            dict.Add("foo", new[] { "volvo", "audi" });
+            HtmlHelper<FooArrayModel> helper = MvcHelper.GetHtmlHelper(dict);
+            string listBox = @"<select id=""foo"" multiple=""multiple"" name=""foo""><option value=""other1"">other1</option>
+<option value=""other2"">other2</option>
+<optgroup label=""Swedish Cars"">
+<option selected=""selected"" value=""volvo"">Volvo</option>
+<option value=""saab"">Saab</option>
+</optgroup>
+<option value=""other3"">other3</option>
+<optgroup>
+<option value=""other4"">other4</option>
+<option value=""other5"">other5</option>
+</optgroup>
+<optgroup label=""German Cars"">
+<option value=""mercedes-benz"">Mercedes-Benz</option>
+<option selected=""selected"" value=""audi"">Audi</option>
+</optgroup>
+<option value=""other6"">other6</option>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.ListBoxFor(m => m.foo, GroupedItems);
+
+            // Assert
+            Assert.Equal(listBox, html.ToHtmlString());
+        }
 
         [Fact]
         public void ListBoxForWithNullExpressionThrows()

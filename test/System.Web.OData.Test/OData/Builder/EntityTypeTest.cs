@@ -55,7 +55,7 @@ namespace System.Web.OData.Builder
         public void CanCreateEntityWithCompoundKey()
         {
             var builder = new ODataModelBuilder();
-            var customer = builder.Entity<Customer>();
+            var customer = builder.EntityType<Customer>();
             customer.HasKey(c => new { c.CustomerId, c.Name });
             customer.Property(c => c.SharePrice);
             customer.Property(c => c.ShareSymbol);
@@ -73,7 +73,7 @@ namespace System.Web.OData.Builder
         public void CanCreateEntityWithCollectionProperties()
         {
             var builder = new ODataModelBuilder();
-            var customer = builder.Entity<Customer>();
+            var customer = builder.EntityType<Customer>();
             customer.HasKey(c => c.CustomerId);
             customer.CollectionProperty(c => c.Aliases);
             customer.CollectionProperty(c => c.Addresses);
@@ -107,7 +107,7 @@ namespace System.Web.OData.Builder
 
             var property =
                 builder
-                .Entity<Customer>()
+                .EntityType<Customer>()
                 .CollectionProperty(c => c.Aliases);
 
             var model = builder.GetEdmModel();
@@ -124,7 +124,7 @@ namespace System.Web.OData.Builder
 
             var property =
                 builder
-                .Entity<Customer>()
+                .EntityType<Customer>()
                 .CollectionProperty(c => c.Addresses);
 
             var model = builder.GetEdmModel();
@@ -139,7 +139,7 @@ namespace System.Web.OData.Builder
         {
             var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             builder
-                .Entity<Vehicle>()
+                .EntityType<Vehicle>()
                 .Abstract();
 
             var model = builder.GetEdmModel();
@@ -154,19 +154,19 @@ namespace System.Web.OData.Builder
             var builder = new ODataModelBuilder();
 
             builder
-                .Entity<Vehicle>()
+                .EntityType<Vehicle>()
                 .Abstract()
                 .HasKey(v => v.Model)
                 .HasKey(v => v.Name)
                 .Property(v => v.WheelCount);
 
             builder
-                .Entity<Motorcycle>()
+                .EntityType<Motorcycle>()
                 .DerivesFrom<Vehicle>()
                 .Property(m => m.CanDoAWheelie);
 
             builder
-                .Entity<Car>()
+                .EntityType<Car>()
                 .DerivesFrom<Vehicle>()
                 .Property(c => c.SeatingCapacity);
 
@@ -205,18 +205,18 @@ namespace System.Web.OData.Builder
             var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             builder
-                .Entity<SportBike>()
+                .EntityType<SportBike>()
                 .DerivesFrom<Motorcycle>();
 
             builder
-                .Entity<Car>()
+                .EntityType<Car>()
                 .DerivesFrom<Vehicle>();
 
             builder
-                .Entity<Vehicle>();
+                .EntityType<Vehicle>();
 
             builder
-                .Entity<Motorcycle>()
+                .EntityType<Motorcycle>()
                 .DerivesFrom<Vehicle>();
 
             IEdmModel model = builder.GetEdmModel();
@@ -234,7 +234,7 @@ namespace System.Web.OData.Builder
 
             Assert.Throws<InvalidOperationException>(
                 () => builder
-                        .Entity<Motorcycle>()
+                        .EntityType<Motorcycle>()
                         .DerivesFrom<Vehicle>()
                         .HasKey(m => m.ID),
                 "Cannot define keys on type 'System.Web.OData.Builder.TestModels.Motorcycle' deriving from 'System.Web.OData.Builder.TestModels.Vehicle'. Only the root type in the entity inheritance hierarchy can contain keys.");
@@ -246,7 +246,7 @@ namespace System.Web.OData.Builder
             var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
             builder
-                .Entity<Motorcycle>()
+                .EntityType<Motorcycle>()
                 .DerivesFrom<Vehicle>()
                 .Property(m => m.Model);
 
@@ -268,12 +268,12 @@ namespace System.Web.OData.Builder
             var builder = new ODataModelBuilder();
 
             builder
-                .Entity<Vehicle>()
+                .EntityType<Vehicle>()
                 .Property(v => v.WheelCount);
 
             Assert.ThrowsArgument(
                 () => builder
-                        .Entity<Motorcycle>()
+                        .EntityType<Motorcycle>()
                         .DerivesFrom<Vehicle>()
                         .Property(m => m.WheelCount),
                 "propertyInfo",
@@ -286,13 +286,13 @@ namespace System.Web.OData.Builder
             var builder = new ODataModelBuilder();
 
             builder
-                .Entity<Motorcycle>()
+                .EntityType<Motorcycle>()
                 .DerivesFrom<Vehicle>()
                 .Property(m => m.Model);
 
             Assert.ThrowsArgument(
                 () => builder
-                        .Entity<Vehicle>()
+                        .EntityType<Vehicle>()
                         .Property(v => v.Model),
                 "propertyInfo",
                 "Cannot define property 'Model' in the base entity type 'System.Web.OData.Builder.TestModels.Vehicle' as the derived type 'System.Web.OData.Builder.TestModels.Motorcycle' already defines it.");
@@ -305,7 +305,7 @@ namespace System.Web.OData.Builder
 
             Assert.Throws<InvalidOperationException>(
             () => builder
-                    .Entity<Motorcycle>()
+                    .EntityType<Motorcycle>()
                     .HasKey(m => m.Model)
                     .DerivesFrom<Vehicle>(),
             "Cannot define keys on type 'System.Web.OData.Builder.TestModels.Motorcycle' deriving from 'System.Web.OData.Builder.TestModels.Vehicle'. Only the root type in the entity inheritance hierarchy can contain keys.");
@@ -318,7 +318,7 @@ namespace System.Web.OData.Builder
 
             Assert.ThrowsArgument(
                 () => builder
-                        .Entity<string>()
+                        .EntityType<string>()
                         .DerivesFrom<Vehicle>(),
                 "baseType",
                 "'System.String' does not inherit from 'System.Web.OData.Builder.TestModels.Vehicle'.");
@@ -330,11 +330,11 @@ namespace System.Web.OData.Builder
             var builder = new ODataModelBuilder();
 
             builder
-                .Entity<Vehicle>()
+                .EntityType<Vehicle>()
                 .Property(v => v.Model);
 
             var motorcycle = builder
-                            .Entity<Motorcycle>();
+                            .EntityType<Motorcycle>();
             motorcycle.Property(m => m.Model);
 
             Assert.ThrowsArgument(
@@ -349,17 +349,17 @@ namespace System.Web.OData.Builder
             var builder = new ODataModelBuilder();
 
             builder
-                .Entity<Vehicle>()
+                .EntityType<Vehicle>()
                 .Property(v => v.Model);
 
             builder
-                .Entity<SportBike>()
+                .EntityType<SportBike>()
                 .DerivesFrom<Motorcycle>()
                 .Property(c => c.Model);
 
             Assert.ThrowsArgument(
                 () => builder
-                    .Entity<Motorcycle>()
+                    .EntityType<Motorcycle>()
                     .DerivesFrom<Vehicle>(),
                 "propertyInfo",
                 "Cannot define property 'Model' in the base entity type 'System.Web.OData.Builder.TestModels.Motorcycle' as the derived type 'System.Web.OData.Builder.TestModels.SportBike' already defines it.");
@@ -372,7 +372,7 @@ namespace System.Web.OData.Builder
 
             Assert.ThrowsArgument(
             () => builder
-                .Entity<Vehicle>()
+                .EntityType<Vehicle>()
                 .DerivesFrom<Vehicle>(),
             "baseType",
             "'System.Web.OData.Builder.TestModels.Vehicle' does not inherit from 'System.Web.OData.Builder.TestModels.Vehicle'.");
@@ -382,7 +382,7 @@ namespace System.Web.OData.Builder
         public void DerivesFrom_SetsBaseType()
         {
             var builder = new ODataModelBuilder();
-            var motorcycle = builder.Entity<Motorcycle>();
+            var motorcycle = builder.EntityType<Motorcycle>();
 
             motorcycle.DerivesFrom<Vehicle>();
 
@@ -394,7 +394,7 @@ namespace System.Web.OData.Builder
         public void CanDeriveFromNull()
         {
             var builder = new ODataModelBuilder();
-            var motorcycle = builder.Entity<Motorcycle>();
+            var motorcycle = builder.EntityType<Motorcycle>();
 
             motorcycle.DerivesFromNothing();
             Assert.Null(motorcycle.BaseType);
@@ -404,7 +404,7 @@ namespace System.Web.OData.Builder
         public void BaseTypeConfigured_IsFalseByDefault()
         {
             var builder = new ODataModelBuilder();
-            var motorcycle = builder.AddEntity(typeof(Motorcycle));
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle));
 
             Assert.False(motorcycle.BaseTypeConfigured);
         }
@@ -413,8 +413,8 @@ namespace System.Web.OData.Builder
         public void SettingBaseType_UpdatesBaseTypeConfigured()
         {
             var builder = new ODataModelBuilder();
-            var motorcycle = builder.AddEntity(typeof(Motorcycle));
-            var vehicle = builder.AddEntity(typeof(Vehicle));
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle));
+            var vehicle = builder.AddEntityType(typeof(Vehicle));
 
             motorcycle.DerivesFrom(vehicle);
 
@@ -425,8 +425,8 @@ namespace System.Web.OData.Builder
         public void SettingBaseTypeToNull_AlsoUpdatesBaseTypeConfigured()
         {
             var builder = new ODataModelBuilder();
-            var motorcycle = builder.AddEntity(typeof(Motorcycle));
-            var vehicle = builder.AddEntity(typeof(Vehicle));
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle));
+            var vehicle = builder.AddEntityType(typeof(Vehicle));
 
             motorcycle.DerivesFromNothing();
 
@@ -438,7 +438,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             var builder = new ODataModelBuilder();
-            var motorcycle = builder.AddEntity(typeof(Motorcycle));
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle));
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
@@ -451,7 +451,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             var builder = new ODataModelBuilder();
-            var motorcycle = builder.AddEntity(typeof(Motorcycle));
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle));
             PrimitivePropertyConfiguration modelProperty = motorcycle.AddProperty(typeof(Motorcycle).GetProperty("Model"));
             motorcycle.HasKey(typeof(Motorcycle).GetProperty("Model"));
             Assert.Equal(new[] { modelProperty }, motorcycle.Keys);

@@ -13,7 +13,7 @@ namespace System.Web.OData.Builder
         public void CreateByteArrayPrimitiveProperty()
         {
             ODataModelBuilder builder = new ODataModelBuilder();
-            var file = builder.Entity<File>();
+            var file = builder.EntityType<File>();
             var data = file.Property(f => f.Data);
 
             var model = builder.GetServiceModel();
@@ -30,7 +30,7 @@ namespace System.Web.OData.Builder
         public void CreateStreamPrimitiveProperty()
         {
             ODataModelBuilder builder = new ODataModelBuilder();
-            var file = builder.Entity<File>();
+            var file = builder.EntityType<File>();
             var data = file.Property(f => f.StreamData);
 
             var model = builder.GetServiceModel();

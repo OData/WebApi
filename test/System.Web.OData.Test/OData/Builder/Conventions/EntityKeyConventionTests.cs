@@ -42,7 +42,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property<uint>("ID");
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(baseType);
+            builder.AddEntityType(baseType);
 
             IEdmModel model = builder.GetEdmModel();
 
@@ -63,7 +63,7 @@ namespace System.Web.OData.Builder.Conventions
                 .BaseType(baseType);
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(derivedType).DerivesFrom(builder.AddEntity(baseType));
+            builder.AddEntityType(derivedType).DerivesFrom(builder.AddEntityType(baseType));
 
             IEdmModel model = builder.GetEdmModel();
 
@@ -82,7 +82,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property(typeof(int), "ID", new NotMappedAttribute());
 
             ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
-            builder.AddEntity(baseType);
+            builder.AddEntityType(baseType);
 
             IEdmModel model = builder.GetEdmModel();
 

@@ -189,11 +189,11 @@ namespace System.Web.OData.Formatter
         {
             ODataModelBuilder modelBuilder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             modelBuilder
-                .Entity<DerivedTypeA>()
+                .EntityType<DerivedTypeA>()
                 .DerivesFrom<BaseType>();
 
             modelBuilder
-                .Entity<DerivedTypeB>()
+                .EntityType<DerivedTypeB>()
                 .DerivesFrom<BaseType>();
 
             return modelBuilder.GetEdmModel();

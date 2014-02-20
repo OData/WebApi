@@ -183,7 +183,7 @@ namespace System.Web.OData.Query
             // Get EDM model, and set path to request.
             ODataModelBuilder odataModel = new ODataModelBuilder();
             string setName = typeof(Customer).Name;
-            odataModel.Entity<Customer>().HasKey(c => c.Id);
+            odataModel.EntityType<Customer>().HasKey(c => c.Id);
             odataModel.EntitySet<Customer>(setName);
             IEdmModel model = odataModel.GetEdmModel();
             IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet(setName);

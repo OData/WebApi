@@ -69,7 +69,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
             PropertyInfo propertyInfo = typeof(TestEntity).GetProperty("ExplicitlyAddedProperty");
-            EntityTypeConfiguration entity = builder.AddEntity(typeof(TestEntity));
+            EntityTypeConfiguration entity = builder.AddEntityType(typeof(TestEntity));
             PropertyConfiguration property = entity.AddProperty(propertyInfo);
 
             // Act

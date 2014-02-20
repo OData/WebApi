@@ -17,7 +17,7 @@ namespace System.Web.OData.Routing
         public UnboundFunctionPathSegmentTest()
         {
             ODataModelBuilder builder = new ODataModelBuilder();
-            builder.Entity<MyCustomer>().HasKey(c => c.Id).Property(c => c.Name);
+            builder.EntityType<MyCustomer>().HasKey(c => c.Id).Property(c => c.Name);
             builder.EntitySet<MyCustomer>("Customers");
             FunctionConfiguration function = builder.Function("TopCustomer");
             function.ReturnsFromEntitySet<MyCustomer>("Customers");

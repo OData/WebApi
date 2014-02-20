@@ -128,7 +128,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             var builder = new ODataModelBuilder().Add_Color_EnumType().Add_LongEnum_EnumType();
-            var entityTypeConfiguration = builder.Entity<EntityTypeWithEnumTypePropertyTestModel>();
+            var entityTypeConfiguration = builder.EntityType<EntityTypeWithEnumTypePropertyTestModel>();
             entityTypeConfiguration.HasKey(e => e.ID);
             entityTypeConfiguration.EnumProperty(e => e.RequiredColor);
             entityTypeConfiguration.EnumProperty(e => e.LongEnum);
@@ -172,7 +172,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>().Add_Color_EnumType();
-            var entityTypeConfiguration = builder.Entity<EntityTypeWithEnumTypePropertyTestModel>();
+            var entityTypeConfiguration = builder.EntityType<EntityTypeWithEnumTypePropertyTestModel>();
             entityTypeConfiguration.EnumProperty(c => c.RequiredColor).IsOptional().IsConcurrencyToken();
 
             // Act
@@ -237,12 +237,12 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             var builder = new ODataModelBuilder();
-            builder.Entity<BaseTypeWithEnumTypePropertyTestModel>()
+            builder.EntityType<BaseTypeWithEnumTypePropertyTestModel>()
                 .Property(b => b.Color);
 
             // Act & Assert
             Assert.ThrowsArgument(
-                () => builder.Entity<DerivedTypeWithEnumTypePropertyTestModel>()
+                () => builder.EntityType<DerivedTypeWithEnumTypePropertyTestModel>()
                     .DerivesFrom<BaseTypeWithEnumTypePropertyTestModel>()
                     .Property(d => d.Color),
                 "propertyInfo",
@@ -254,13 +254,13 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             var builder = new ODataModelBuilder();
-            builder.Entity<DerivedTypeWithEnumTypePropertyTestModel>()
+            builder.EntityType<DerivedTypeWithEnumTypePropertyTestModel>()
                 .DerivesFrom<BaseTypeWithEnumTypePropertyTestModel>()
                 .Property(d => d.Color);
 
             // Act & Assert
             Assert.ThrowsArgument(
-                () => builder.Entity<BaseTypeWithEnumTypePropertyTestModel>()
+                () => builder.EntityType<BaseTypeWithEnumTypePropertyTestModel>()
                     .Property(b => b.Color),
                 "propertyInfo",
                 "Cannot define property 'Color' in the base entity type 'System.Web.OData.Builder.BaseTypeWithEnumTypePropertyTestModel' as the derived type 'System.Web.OData.Builder.DerivedTypeWithEnumTypePropertyTestModel' already defines it.");
@@ -705,7 +705,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
-            EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.Entity<EnumModel>();
+            EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.EntityType<EnumModel>();
             ActionConfiguration actionConfiguration = entityTypeConfiguration.Action("BoundAction");
             actionConfiguration.CollectionParameter<Color>("Colors");
             actionConfiguration.ReturnsCollection<Color?>();
@@ -731,7 +731,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>().Add_Color_EnumType();
-            EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.Entity<EnumModel>();
+            EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.EntityType<EnumModel>();
             FunctionConfiguration functionConfiguration = entityTypeConfiguration.Function("BoundFunction");
             functionConfiguration.Parameter<Color?>("Color");
             functionConfiguration.Returns<Color>();
@@ -800,7 +800,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.Entity<EnumModel>();
+            EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.EntityType<EnumModel>();
             ActionConfiguration actionConfiguration = entityTypeConfiguration.Action("BoundAction");
             actionConfiguration.Parameter<Color>("Color");
             actionConfiguration.ReturnsCollection<Color>();
@@ -823,7 +823,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.Entity<EnumModel>();
+            EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.EntityType<EnumModel>();
             FunctionConfiguration functionConfiguration = entityTypeConfiguration.Function("BoundFunction");
             functionConfiguration.CollectionParameter<Color?>("Colors");
             functionConfiguration.Returns<Color>();
@@ -848,7 +848,7 @@ namespace System.Web.OData.Builder
             // Arrange
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             builder.Add_LongEnum_EnumType();
-            EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.Entity<EnumModel>();
+            EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.EntityType<EnumModel>();
             FunctionConfiguration functionConfiguration = entityTypeConfiguration.Function("BoundFunction");
             functionConfiguration.Parameter<LongEnum>("LongEnum");
             functionConfiguration.Returns<int>();

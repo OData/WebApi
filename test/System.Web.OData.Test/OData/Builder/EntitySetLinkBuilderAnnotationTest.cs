@@ -36,7 +36,7 @@ namespace System.Web.OData.Builder
         public EntitySetLinkBuilderAnnotationTest()
         {
             _modelBuilder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
-            _entitySet = _modelBuilder.AddEntitySet("Customers", _modelBuilder.AddEntity(typeof(Customer)));
+            _entitySet = _modelBuilder.AddEntitySet("Customers", _modelBuilder.AddEntityType(typeof(Customer)));
         }
 
         [Fact]

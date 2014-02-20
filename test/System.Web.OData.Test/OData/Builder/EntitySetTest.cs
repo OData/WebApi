@@ -54,9 +54,9 @@ namespace System.Web.OData.Builder
         {
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
-            var vehicle = builder.AddEntity(typeof(Vehicle));
-            var motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
-            var manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            var vehicle = builder.AddEntityType(typeof(Vehicle));
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle)).DerivesFrom(vehicle);
+            var manufacturer = builder.AddEntityType(typeof(MotorcycleManufacturer));
             var manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
             var navProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.One);
 
@@ -77,9 +77,9 @@ namespace System.Web.OData.Builder
         {
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
 
-            var vehicle = builder.AddEntity(typeof(Vehicle));
-            var motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
-            var manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            var vehicle = builder.AddEntityType(typeof(Vehicle));
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle)).DerivesFrom(vehicle);
+            var manufacturer = builder.AddEntityType(typeof(MotorcycleManufacturer));
             var manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
             var navProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.One);
 
@@ -103,9 +103,9 @@ namespace System.Web.OData.Builder
         {
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            var vehicle = builder.AddEntity(typeof(Vehicle));
-            var motorcycle = builder.AddEntity(typeof(Motorcycle));
-            var manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            var vehicle = builder.AddEntityType(typeof(Vehicle));
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle));
+            var manufacturer = builder.AddEntityType(typeof(MotorcycleManufacturer));
             var manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
             var navProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.One);
@@ -123,9 +123,9 @@ namespace System.Web.OData.Builder
         {
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            var vehicle = builder.AddEntity(typeof(Vehicle));
-            var motorcycle = builder.AddEntity(typeof(Motorcycle));
-            var manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            var vehicle = builder.AddEntityType(typeof(Vehicle));
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle));
+            var manufacturer = builder.AddEntityType(typeof(MotorcycleManufacturer));
             var manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
             var navProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.One);

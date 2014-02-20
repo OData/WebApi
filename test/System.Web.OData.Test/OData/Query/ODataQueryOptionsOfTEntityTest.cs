@@ -78,7 +78,7 @@ namespace System.Web.OData.Query
             }
 
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             customer.HasKey(c => c.Id);
             customer.Property(c => c.Id);
             customer.Property(c => c.Name).IsConcurrencyToken();

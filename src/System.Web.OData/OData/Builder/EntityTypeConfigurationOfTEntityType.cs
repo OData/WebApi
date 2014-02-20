@@ -96,7 +96,7 @@ namespace System.Web.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "typeof(TBaseType) is used and getting it as a generic argument is cleaner")]
         public EntityTypeConfiguration<TEntityType> DerivesFrom<TBaseType>() where TBaseType : class
         {
-            EntityTypeConfiguration<TBaseType> baseEntityType = _modelBuilder.Entity<TBaseType>();
+            EntityTypeConfiguration<TBaseType> baseEntityType = _modelBuilder.EntityType<TBaseType>();
             _configuration.DerivesFrom(baseEntityType._configuration);
             return this;
         }

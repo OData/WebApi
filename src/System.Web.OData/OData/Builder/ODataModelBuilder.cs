@@ -132,9 +132,9 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <typeparam name="TEntityType">The type to be registered or configured.</typeparam>
         /// <returns>The configuration object for the specified entity type.</returns>
-        public EntityTypeConfiguration<TEntityType> Entity<TEntityType>() where TEntityType : class
+        public EntityTypeConfiguration<TEntityType> EntityType<TEntityType>() where TEntityType : class
         {
-            return new EntityTypeConfiguration<TEntityType>(this, AddEntity(typeof(TEntityType)));
+            return new EntityTypeConfiguration<TEntityType>(this, AddEntityType(typeof(TEntityType)));
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace System.Web.OData.Builder
         /// <returns>The configuration object for the specified entity set.</returns>
         public EntitySetConfiguration<TEntityType> EntitySet<TEntityType>(string name) where TEntityType : class
         {
-            EntityTypeConfiguration entity = AddEntity(typeof(TEntityType));
+            EntityTypeConfiguration entity = AddEntityType(typeof(TEntityType));
             return new EntitySetConfiguration<TEntityType>(this, AddEntitySet(name, entity));
         }
 
@@ -202,7 +202,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="type">The type to be registered or configured.</param>
         /// <returns>The configuration object for the specified entity type.</returns>
-        public virtual EntityTypeConfiguration AddEntity(Type type)
+        public virtual EntityTypeConfiguration AddEntityType(Type type)
         {
             if (type == null)
             {

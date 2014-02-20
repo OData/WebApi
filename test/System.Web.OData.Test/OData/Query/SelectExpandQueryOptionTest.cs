@@ -148,7 +148,7 @@ namespace System.Web.OData.Query
             HttpConfiguration config = new HttpConfiguration();
             config.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver());
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder(new HttpConfiguration(), isQueryCompositionMode: true);
-            builder.Entity<Customer>();
+            builder.EntityType<Customer>();
             IEdmModel model = builder.GetEdmModel();
 
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));

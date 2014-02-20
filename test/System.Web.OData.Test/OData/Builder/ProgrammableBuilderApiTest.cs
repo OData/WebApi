@@ -14,12 +14,12 @@ namespace System.Web.OData.Builder
         public void CreateModelUsingProgrammableApi()
         {
             var builder = new ODataModelBuilder();
-            var customerConfig = builder.AddEntity(typeof(Customer));
+            var customerConfig = builder.AddEntityType(typeof(Customer));
             customerConfig.HasKey(typeof(Customer).GetProperty("CustomerId"));
             customerConfig.AddProperty(typeof(Customer).GetProperty("Name"));
             var ordersPropertyConfig = customerConfig.AddNavigationProperty(typeof(Customer).GetProperty("Orders"), EdmMultiplicity.Many);
 
-            var orderConfig = builder.AddEntity(typeof(Order));
+            var orderConfig = builder.AddEntityType(typeof(Order));
             orderConfig.HasKey(typeof(Order).GetProperty("OrderId"));
             orderConfig.AddProperty(typeof(Order).GetProperty("Cost"));
 

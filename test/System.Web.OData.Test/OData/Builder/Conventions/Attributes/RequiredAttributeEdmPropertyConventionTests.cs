@@ -45,7 +45,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .Property(typeof(int?), "Count", new RequiredAttribute());
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type);
+            builder.AddEntityType(type);
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type);
@@ -65,7 +65,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .Property(anotherType, "RelatedEntity", new RequiredAttribute());
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type);
+            builder.AddEntityType(type);
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type);
@@ -81,7 +81,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "Count", new RequiredAttribute());
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type).AddProperty(type.GetProperty("Count")).IsOptional();
+            builder.AddEntityType(type).AddProperty(type.GetProperty("Count")).IsOptional();
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type);
@@ -101,7 +101,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .Property(anotherType, "RelatedEntity", new RequiredAttribute());
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type).AddNavigationProperty(type.GetProperty("RelatedEntity"), EdmMultiplicity.ZeroOrOne);
+            builder.AddEntityType(type).AddNavigationProperty(type.GetProperty("RelatedEntity"), EdmMultiplicity.ZeroOrOne);
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type);

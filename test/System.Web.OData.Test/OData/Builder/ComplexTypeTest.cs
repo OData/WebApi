@@ -40,7 +40,7 @@ namespace System.Web.OData.Builder
         public void CreateComplexTypeProperty()
         {
             var builder = new ODataModelBuilder().Add_Customer_EntityType().Add_Address_ComplexType();
-            builder.Entity<Customer>().ComplexProperty(c => c.Address);
+            builder.EntityType<Customer>().ComplexProperty(c => c.Address);
             var model = builder.GetServiceModel();
             var customerType = model.SchemaElements.OfType<IEdmEntityType>().Single();
             var addressProperty = customerType.FindProperty("Address");

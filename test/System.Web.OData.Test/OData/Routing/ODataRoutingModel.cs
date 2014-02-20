@@ -37,72 +37,72 @@ namespace System.Web.OData.Routing
             ActionConfiguration getAllVIPs = builder.Action("GetAllVIPs");
             ActionReturnsCollectionFromEntitySet<VIP>(builder, getAllVIPs, "RoutingCustomers");
 
-            builder.Entity<RoutingCustomer>().ComplexProperty<Address>(c => c.Address);
-            builder.Entity<RoutingCustomer>().Action("GetRelatedRoutingCustomers").ReturnsCollectionFromEntitySet<RoutingCustomer>("RoutingCustomers");
+            builder.EntityType<RoutingCustomer>().ComplexProperty<Address>(c => c.Address);
+            builder.EntityType<RoutingCustomer>().Action("GetRelatedRoutingCustomers").ReturnsCollectionFromEntitySet<RoutingCustomer>("RoutingCustomers");
 
-            ActionConfiguration getBestRelatedRoutingCustomer = builder.Entity<RoutingCustomer>().Action("GetBestRelatedRoutingCustomer");
+            ActionConfiguration getBestRelatedRoutingCustomer = builder.EntityType<RoutingCustomer>().Action("GetBestRelatedRoutingCustomer");
             ActionReturnsFromEntitySet<VIP>(builder, getBestRelatedRoutingCustomer, "RoutingCustomers");
 
-            ActionConfiguration getVIPS = builder.Entity<RoutingCustomer>().Collection.Action("GetVIPs");
+            ActionConfiguration getVIPS = builder.EntityType<RoutingCustomer>().Collection.Action("GetVIPs");
             ActionReturnsCollectionFromEntitySet<VIP>(builder, getVIPS, "RoutingCustomers");
 
-            builder.Entity<RoutingCustomer>().Collection.Action("GetProducts").ReturnsCollectionFromEntitySet<Product>("Products");
-            builder.Entity<VIP>().Action("GetSalesPerson").ReturnsFromEntitySet<SalesPerson>("SalesPeople");
-            builder.Entity<VIP>().Collection.Action("GetSalesPeople").ReturnsCollectionFromEntitySet<SalesPerson>("SalesPeople");
+            builder.EntityType<RoutingCustomer>().Collection.Action("GetProducts").ReturnsCollectionFromEntitySet<Product>("Products");
+            builder.EntityType<VIP>().Action("GetSalesPerson").ReturnsFromEntitySet<SalesPerson>("SalesPeople");
+            builder.EntityType<VIP>().Collection.Action("GetSalesPeople").ReturnsCollectionFromEntitySet<SalesPerson>("SalesPeople");
 
-            ActionConfiguration getMostProfitable = builder.Entity<VIP>().Collection.Action("GetMostProfitable");
+            ActionConfiguration getMostProfitable = builder.EntityType<VIP>().Collection.Action("GetMostProfitable");
             ActionReturnsFromEntitySet<VIP>(builder, getMostProfitable, "RoutingCustomers");
 
-            ActionConfiguration getVIPRoutingCustomers = builder.Entity<SalesPerson>().Action("GetVIPRoutingCustomers");
+            ActionConfiguration getVIPRoutingCustomers = builder.EntityType<SalesPerson>().Action("GetVIPRoutingCustomers");
             ActionReturnsCollectionFromEntitySet<VIP>(builder, getVIPRoutingCustomers, "RoutingCustomers");
 
-            ActionConfiguration getVIPRoutingCustomersOnCollection = builder.Entity<SalesPerson>().Collection.Action("GetVIPRoutingCustomers");
+            ActionConfiguration getVIPRoutingCustomersOnCollection = builder.EntityType<SalesPerson>().Collection.Action("GetVIPRoutingCustomers");
             ActionReturnsCollectionFromEntitySet<VIP>(builder, getVIPRoutingCustomersOnCollection, "RoutingCustomers");
 
-            builder.Entity<VIP>().HasRequired(v => v.RelationshipManager);
-            builder.Entity<ImportantProduct>().HasRequired(ip => ip.LeadSalesPerson);
+            builder.EntityType<VIP>().HasRequired(v => v.RelationshipManager);
+            builder.EntityType<ImportantProduct>().HasRequired(ip => ip.LeadSalesPerson);
 
             // function bound to an entity
-            FunctionConfiguration topProductId = builder.Entity<Product>().Function("TopProductId");
+            FunctionConfiguration topProductId = builder.EntityType<Product>().Function("TopProductId");
             topProductId.Returns<int>();
 
-            FunctionConfiguration topProductIdByCity = builder.Entity<Product>().Function("TopProductIdByCity");
+            FunctionConfiguration topProductIdByCity = builder.EntityType<Product>().Function("TopProductIdByCity");
             topProductIdByCity.Parameter<string>("city");
             topProductIdByCity.Returns<string>();
 
-            FunctionConfiguration topProductIdByCityAndModel = builder.Entity<Product>().Function("TopProductIdByCityAndModel");
+            FunctionConfiguration topProductIdByCityAndModel = builder.EntityType<Product>().Function("TopProductIdByCityAndModel");
             topProductIdByCityAndModel.Parameter<string>("city");
             topProductIdByCityAndModel.Parameter<int>("model");
             topProductIdByCityAndModel.Returns<string>();
 
             // function bound to a collection of entities
-            FunctionConfiguration topProductOfAll = builder.Entity<Product>().Collection.Function("TopProductOfAll");
+            FunctionConfiguration topProductOfAll = builder.EntityType<Product>().Collection.Function("TopProductOfAll");
             topProductOfAll.Returns<string>();
 
-            FunctionConfiguration topProductOfAllByCity = builder.Entity<Product>().Collection.Function("TopProductOfAllByCity");
+            FunctionConfiguration topProductOfAllByCity = builder.EntityType<Product>().Collection.Function("TopProductOfAllByCity");
             topProductOfAllByCity.Parameter<string>("city");
             topProductOfAllByCity.Returns<string>();
 
-            FunctionConfiguration topProductOfAllByCityAndModel = builder.Entity<Product>().Collection.Function("TopProductOfAllByCityAndModel");
+            FunctionConfiguration topProductOfAllByCityAndModel = builder.EntityType<Product>().Collection.Function("TopProductOfAllByCityAndModel");
             topProductOfAllByCityAndModel.Parameter<string>("city");
             topProductOfAllByCityAndModel.Parameter<int>("model");
             topProductOfAllByCityAndModel.Returns<string>();
 
             // Function bound to the base entity type and derived entity type
-            builder.Entity<RoutingCustomer>().Function("GetOrdersCount").Returns<string>();
-            builder.Entity<VIP>().Function("GetOrdersCount").Returns<string>();
+            builder.EntityType<RoutingCustomer>().Function("GetOrdersCount").Returns<string>();
+            builder.EntityType<VIP>().Function("GetOrdersCount").Returns<string>();
 
             // Overloaded function only bound to the base entity type with one paramter
-            var getOrderCount = builder.Entity<RoutingCustomer>().Function("GetOrdersCount");
+            var getOrderCount = builder.EntityType<RoutingCustomer>().Function("GetOrdersCount");
             getOrderCount.Parameter<int>("factor");
             getOrderCount.Returns<string>();
 
             // Function only bound to the derived entity type
-            builder.Entity<SpecialVIP>().Function("GetSpecialGuid").Returns<string>();
+            builder.EntityType<SpecialVIP>().Function("GetSpecialGuid").Returns<string>();
 
             // Function bound to the collection of the base and the derived entity type
-            builder.Entity<RoutingCustomer>().Collection.Function("GetAllEmployees").Returns<string>();
-            builder.Entity<VIP>().Collection.Function("GetAllEmployees").Returns<string>();
+            builder.EntityType<RoutingCustomer>().Collection.Function("GetAllEmployees").Returns<string>();
+            builder.EntityType<VIP>().Collection.Function("GetAllEmployees").Returns<string>();
 
             return builder.GetEdmModel();
         }
@@ -134,7 +134,7 @@ namespace System.Web.OData.Routing
             }
             else
             {
-                builder.Entity<TElementEntityType>();
+                builder.EntityType<TElementEntityType>();
             }
             return entitySet;
         }

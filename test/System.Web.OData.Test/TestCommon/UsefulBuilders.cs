@@ -96,7 +96,7 @@ namespace System.Web.OData
         }
         public static ODataModelBuilder Add_Customer_EntityType(this ODataModelBuilder builder)
         {
-            var customer = builder.Entity<Customer>();
+            var customer = builder.EntityType<Customer>();
             customer.HasKey(c => c.CustomerId);
             customer.Property(c => c.CustomerId);
             customer.Property(c => c.Name).IsConcurrencyToken();
@@ -110,7 +110,7 @@ namespace System.Web.OData
         {
             builder.Add_Customer_EntityType();
             builder.Add_Address_ComplexType();
-            var customer = builder.Entity<Customer>();
+            var customer = builder.EntityType<Customer>();
             customer.ComplexProperty(c => c.Address);
             return builder;
         }
@@ -118,15 +118,15 @@ namespace System.Web.OData
         public static ODataModelBuilder Add_Customer_EntityType_With_CollectionProperties(this ODataModelBuilder builder)
         {
             builder.Add_Customer_EntityType();
-            builder.Entity<Customer>().CollectionProperty(c => c.Aliases);
-            builder.Entity<Customer>().CollectionProperty(c => c.Addresses);
+            builder.EntityType<Customer>().CollectionProperty(c => c.Aliases);
+            builder.EntityType<Customer>().CollectionProperty(c => c.Addresses);
             return builder;
         }
 
         // Adds a Customer EntityType but allows caller to configure Keys()
         public static ODataModelBuilder Add_Customer_With_Keys_EntityType<TKey>(this ODataModelBuilder builder, Expression<Func<Customer, TKey>> keyDefinitionExpression)
         {
-            var customer = builder.Entity<Customer>();
+            var customer = builder.EntityType<Customer>();
             customer.HasKey(keyDefinitionExpression);
             customer.Property(c => c.CustomerId);
             customer.Property(c => c.Name);
@@ -139,7 +139,7 @@ namespace System.Web.OData
         // Adds a Customer EntityType that has no key properties
         public static ODataModelBuilder Add_Customer_No_Keys_EntityType(this ODataModelBuilder builder)
         {
-            var customer = builder.Entity<Customer>();
+            var customer = builder.EntityType<Customer>();
             customer.Property(c => c.CustomerId);
             customer.Property(c => c.Name);
             customer.Property(c => c.Website);
@@ -150,7 +150,7 @@ namespace System.Web.OData
 
         public static ODataModelBuilder Add_Order_EntityType(this ODataModelBuilder builder)
         {
-            var order = builder.Entity<Order>();
+            var order = builder.EntityType<Order>();
             order.HasKey(o => o.OrderId);
             order.Property(o => o.OrderDate);
             order.Property(o => o.Price);
@@ -161,12 +161,12 @@ namespace System.Web.OData
         }
         public static ODataModelBuilder Add_CustomerOrders_Relationship(this ODataModelBuilder builder)
         {
-            builder.Entity<Customer>().HasMany(c => c.Orders);
+            builder.EntityType<Customer>().HasMany(c => c.Orders);
             return builder;
         }
         public static ODataModelBuilder Add_OrderCustomer_Relationship(this ODataModelBuilder builder)
         {
-            builder.Entity<Order>().HasRequired(o => o.Customer);
+            builder.EntityType<Order>().HasRequired(o => o.Customer);
             return builder;
         }
         public static ODataModelBuilder Add_Customers_EntitySet(this ODataModelBuilder builder)

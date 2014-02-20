@@ -18,17 +18,17 @@ namespace System.Web.OData.Builder.Conventions
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            EntityTypeConfiguration vehicle = builder.AddEntity(typeof(Vehicle));
+            EntityTypeConfiguration vehicle = builder.AddEntityType(typeof(Vehicle));
 
-            EntityTypeConfiguration car = builder.AddEntity(typeof(Car)).DerivesFrom(vehicle);
+            EntityTypeConfiguration car = builder.AddEntityType(typeof(Car)).DerivesFrom(vehicle);
             NavigationPropertyConfiguration carNavigationProperty = car.AddNavigationProperty(typeof(Car).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
 
-            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
+            EntityTypeConfiguration motorcycle = builder.AddEntityType(typeof(Motorcycle)).DerivesFrom(vehicle);
             NavigationPropertyConfiguration motorcycleNavigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
 
-            EntityTypeConfiguration manufacturer = builder.AddEntity(typeof(Manufacturer));
-            EntityTypeConfiguration motorcycleManufacturer = builder.AddEntity(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
-            EntityTypeConfiguration carManufacturer = builder.AddEntity(typeof(CarManufacturer)).DerivesFrom(manufacturer);
+            EntityTypeConfiguration manufacturer = builder.AddEntityType(typeof(Manufacturer));
+            EntityTypeConfiguration motorcycleManufacturer = builder.AddEntityType(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
+            EntityTypeConfiguration carManufacturer = builder.AddEntityType(typeof(CarManufacturer)).DerivesFrom(manufacturer);
 
             EntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
@@ -70,7 +70,7 @@ namespace System.Web.OData.Builder.Conventions
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
+            EntityTypeConfiguration motorcycle = builder.AddEntityType(typeof(Motorcycle));
             NavigationPropertyConfiguration navigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
 
             // Act
@@ -85,8 +85,8 @@ namespace System.Web.OData.Builder.Conventions
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
-            EntityTypeConfiguration manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            EntityTypeConfiguration motorcycle = builder.AddEntityType(typeof(Motorcycle));
+            EntityTypeConfiguration manufacturer = builder.AddEntityType(typeof(MotorcycleManufacturer));
             NavigationPropertyConfiguration navigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
             EntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
@@ -102,8 +102,8 @@ namespace System.Web.OData.Builder.Conventions
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
-            EntityTypeConfiguration manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            EntityTypeConfiguration motorcycle = builder.AddEntityType(typeof(Motorcycle));
+            EntityTypeConfiguration manufacturer = builder.AddEntityType(typeof(MotorcycleManufacturer));
             NavigationPropertyConfiguration navigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
             EntitySetConfiguration manufacturers1 = builder.AddEntitySet("manufacturers1", manufacturer);
             EntitySetConfiguration manufacturers2 = builder.AddEntitySet("manufacturers2", manufacturer);
@@ -120,9 +120,9 @@ namespace System.Web.OData.Builder.Conventions
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
-            EntityTypeConfiguration manufacturer = builder.AddEntity(typeof(Manufacturer));
-            EntityTypeConfiguration motorcycleManufacturer = builder.AddEntity(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
+            EntityTypeConfiguration motorcycle = builder.AddEntityType(typeof(Motorcycle));
+            EntityTypeConfiguration manufacturer = builder.AddEntityType(typeof(Manufacturer));
+            EntityTypeConfiguration motorcycleManufacturer = builder.AddEntityType(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
 
             NavigationPropertyConfiguration navigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
             EntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);

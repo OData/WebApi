@@ -19,7 +19,7 @@ namespace System.Web.OData.Builder.Conventions
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             var vehicles = builder.EntitySet<Vehicle>("vehicles");
-            var car = builder.AddEntity(typeof(Car));
+            var car = builder.AddEntityType(typeof(Car));
             var paintAction = vehicles.EntityType.Action("Paint");
             paintAction.HasActionLink(ctxt => new Uri("http://localhost/ActionTestWorks"), followsConventions: false);
             ActionLinkGenerationConvention convention = new ActionLinkGenerationConvention();

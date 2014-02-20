@@ -34,7 +34,7 @@ namespace System.Web.OData.Extensions
                 {
                     ODataConventionModelBuilder builder =
                         new ODataConventionModelBuilder(actionDescriptor.Configuration, isQueryCompositionMode: true);
-                    EntityTypeConfiguration entityTypeConfiguration = builder.AddEntity(entityClrType);
+                    EntityTypeConfiguration entityTypeConfiguration = builder.AddEntityType(entityClrType);
                     builder.AddEntitySet(entityClrType.Name, entityTypeConfiguration);
                     IEdmModel edmModel = builder.GetEdmModel();
                     Contract.Assert(edmModel != null);

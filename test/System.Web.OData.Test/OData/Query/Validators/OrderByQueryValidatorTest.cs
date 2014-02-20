@@ -272,7 +272,7 @@ namespace System.Web.OData.Query.Validators
 
             // Configure SpecializedEntity
             EntityTypeConfiguration<LimitedSpecializedEntity> specializedEntity =
-                builder.Entity<LimitedSpecializedEntity>().DerivesFrom<LimitedRelatedEntity>();
+                builder.EntityType<LimitedSpecializedEntity>().DerivesFrom<LimitedRelatedEntity>();
             specializedEntity.Namespace = "NS";
             specializedEntity.ComplexProperty(p => p.SpecializedComplexProperty).IsUnsortable();
 

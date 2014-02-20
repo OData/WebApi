@@ -145,9 +145,9 @@ namespace System.Web.OData.Builder
         }
 
         /// <inheritdoc />
-        public override EntityTypeConfiguration AddEntity(Type type)
+        public override EntityTypeConfiguration AddEntityType(Type type)
         {
-            EntityTypeConfiguration entityTypeConfiguration = base.AddEntity(type);
+            EntityTypeConfiguration entityTypeConfiguration = base.AddEntityType(type);
             if (_isModelBeingBuilt)
             {
                 MapType(entityTypeConfiguration);
@@ -316,7 +316,7 @@ namespace System.Web.OData.Builder
                     {
                         if (!visitedEntities.Contains(derivedType) && !IsIgnoredType(derivedType))
                         {
-                            EntityTypeConfiguration derivedEntity = AddEntity(derivedType);
+                            EntityTypeConfiguration derivedEntity = AddEntityType(derivedType);
                             entitiesToBeVisited.Enqueue(derivedEntity);
                         }
                     }

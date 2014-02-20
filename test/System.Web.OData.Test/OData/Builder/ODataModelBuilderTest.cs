@@ -29,7 +29,7 @@ namespace System.Web.OData.Builder
         public void RemoveStructuralType_RemovesEntityType()
         {
             ODataModelBuilder builder = new ODataModelBuilder();
-            builder.AddEntity(typeof(Customer));
+            builder.AddEntityType(typeof(Customer));
 
             Assert.NotEmpty(builder.StructuralTypes);
 
@@ -167,7 +167,7 @@ namespace System.Web.OData.Builder
                 alwaysBindable: false);
             configuration.HasActionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);
             builder.AddProcedure(configuration);
-            builder.AddEntity(entityType);
+            builder.AddEntityType(entityType);
 
             // Act
             IEdmModel model = builder.GetEdmModel();
@@ -184,7 +184,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             customer.HasKey(c => c.Id);
             customer.Property(c => c.Id);
             customer.Property(c => c.Name).IsConcurrencyToken();
@@ -204,7 +204,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            builder.Entity<Customer>();
+            builder.EntityType<Customer>();
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(), "The entity 'Customer' does not have a key defined.");
@@ -215,8 +215,8 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            builder.Entity<BuilderTestModels.Car>().DerivesFrom<BuilderTestModels.Vehicle>();
-            builder.Entity<BuilderTestModels.Vehicle>().HasKey(v => v.Name);
+            builder.EntityType<BuilderTestModels.Car>().DerivesFrom<BuilderTestModels.Vehicle>();
+            builder.EntityType<BuilderTestModels.Vehicle>().HasKey(v => v.Name);
 
             // Act
             IEdmModel model = builder.GetEdmModel();

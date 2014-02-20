@@ -21,7 +21,7 @@ namespace System.Web.OData.Builder
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
             movie.HasKey(m => m.ID);
             movie.HasKey(m => m.Name);
-            EntityTypeConfiguration<Blockbuster> blockBuster = builder.Entity<Blockbuster>().DerivesFrom<Movie>();
+            EntityTypeConfiguration<Blockbuster> blockBuster = builder.EntityType<Blockbuster>().DerivesFrom<Movie>();
             EntityTypeConfiguration movieConfiguration = builder.StructuralTypes.OfType<EntityTypeConfiguration>().Single(t => t.Name == "Movie");
 
             // build actions that are bindable to a single entity

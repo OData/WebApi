@@ -174,7 +174,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type);
+            builder.AddEntityType(type);
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type);
@@ -197,7 +197,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type);
+            builder.AddEntityType(type);
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type);
@@ -215,7 +215,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type);
+            builder.AddEntityType(type);
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type);
@@ -233,7 +233,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type).AddProperty(type.GetProperty("Count")).IsOptional();
+            builder.AddEntityType(type).AddProperty(type.GetProperty("Count")).IsOptional();
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type);
@@ -306,7 +306,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             // Act
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = modelAliasing };
-            builder.AddEntity(type);
+            builder.AddEntityType(type);
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
@@ -344,7 +344,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             // Act
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = modelAliasing };
-            builder.AddEntity(derivedType);
+            builder.AddEntityType(derivedType);
             IEdmModel model = builder.GetEdmModel();
 
             // Assert

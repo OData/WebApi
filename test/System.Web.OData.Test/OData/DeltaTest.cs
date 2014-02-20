@@ -404,7 +404,7 @@ namespace System.Web.OData
         {
             // Arrange
             ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
-            builder.Entity<DeltaModel>();
+            builder.EntityType<DeltaModel>();
             builder.EntitySet<DeltaModel>("ignored");
             IEdmModel model = builder.GetEdmModel();
             IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create();
@@ -457,7 +457,7 @@ namespace System.Web.OData
             // Arrange
             ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
             builder.ModelAliasingEnabled = true;
-            builder.Entity<DeltaModelWithAlias>();
+            builder.EntityType<DeltaModelWithAlias>();
             builder.EntitySet<DeltaModelWithAlias>("ignored");
             IEdmModel model = builder.GetEdmModel();
             IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create();

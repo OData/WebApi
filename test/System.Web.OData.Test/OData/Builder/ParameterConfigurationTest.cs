@@ -28,7 +28,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            builder.Entity<Customer>();
+            builder.EntityType<Customer>();
 
             // Act & Assert
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>

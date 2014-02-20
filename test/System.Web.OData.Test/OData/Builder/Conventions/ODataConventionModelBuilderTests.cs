@@ -69,8 +69,8 @@ namespace System.Web.OData.Builder.Conventions
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
             var builder = new ODataConventionModelBuilder(configuration);
 
-            var entity1 = builder.AddEntity(mockType1);
-            var entity2 = builder.AddEntity(mockType2);
+            var entity1 = builder.AddEntityType(mockType1);
+            var entity2 = builder.AddEntityType(mockType2);
 
             builder.DiscoverInheritanceRelationships();
 
@@ -90,8 +90,8 @@ namespace System.Web.OData.Builder.Conventions
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
             var builder = new ODataConventionModelBuilder(configuration);
 
-            var entity1 = builder.AddEntity(mockType1);
-            var entity3 = builder.AddEntity(mockType3);
+            var entity1 = builder.AddEntityType(mockType1);
+            var entity3 = builder.AddEntityType(mockType3);
 
             builder.DiscoverInheritanceRelationships();
 
@@ -111,13 +111,13 @@ namespace System.Web.OData.Builder.Conventions
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
             var builder = new ODataConventionModelBuilder(configuration);
 
-            var entity1 = builder.AddEntity(mockType1);
+            var entity1 = builder.AddEntityType(mockType1);
             entity1.AddProperty(mockType1.GetProperty("P1"));
 
-            var entity2 = builder.AddEntity(mockType2).DerivesFrom(entity1);
+            var entity2 = builder.AddEntityType(mockType2).DerivesFrom(entity1);
             entity2.AddProperty(mockType2.GetProperty("P2"));
 
-            var entity3 = builder.AddEntity(mockType3);
+            var entity3 = builder.AddEntityType(mockType3);
             entity3.AddProperty(mockType3.GetProperty("P1"));
             entity3.AddProperty(mockType3.GetProperty("P2"));
 
@@ -140,7 +140,7 @@ namespace System.Web.OData.Builder.Conventions
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
             var builder = new ODataConventionModelBuilder(configuration);
 
-            var entity1 = builder.AddEntity(mockType1);
+            var entity1 = builder.AddEntityType(mockType1);
             builder.MapDerivedTypes(entity1);
 
             Assert.Equal(
@@ -235,7 +235,7 @@ namespace System.Web.OData.Builder.Conventions
         public void ModelBuilder_ProductsWithFilterSortable()
         {
             var modelBuilder = new ODataConventionModelBuilder();
-            var entityTypeConf = modelBuilder.Entity<ProductWithFilterSortable>();
+            var entityTypeConf = modelBuilder.EntityType<ProductWithFilterSortable>();
             modelBuilder.EntitySet<ProductWithFilterSortable>("Products");
             var model = modelBuilder.GetEdmModel();
 
@@ -257,7 +257,7 @@ namespace System.Web.OData.Builder.Conventions
         public void ModelBuilder_ProductsWithFilterSortableExplicitly()
         {
             var modelBuilder = new ODataConventionModelBuilder();
-            var entityTypeConf = modelBuilder.AddEntity(typeof(ProductWithFilterSortable));
+            var entityTypeConf = modelBuilder.AddEntityType(typeof(ProductWithFilterSortable));
             entityTypeConf.AddProperty(typeof(ProductWithFilterSortable).GetProperty("NonFilterableProperty"));
             entityTypeConf.AddProperty(typeof(ProductWithFilterSortable).GetProperty("UnsortableProperty"));
             entityTypeConf.AddNavigationProperty(typeof(ProductWithFilterSortable).GetProperty("Category"), EdmMultiplicity.One);
@@ -330,7 +330,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property<int>("ID")
                 .Property(complexCollectionPropertyType, "Property1");
 
-            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddEntityType(entityType);
             IEdmModel model = modelBuilder.GetEdmModel();
             IEdmEntityType entity = model.GetEdmType(entityType) as IEdmEntityType;
 
@@ -355,7 +355,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property<int>("ID")
                 .Property(complexCollectionPropertyType, "Property1");
 
-            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddEntityType(entityType);
             modelBuilder.AddComplexType(typeof(Version));
             IEdmModel model = modelBuilder.GetEdmModel();
             IEdmEntityType entity = model.GetEdmType(entityType) as IEdmEntityType;
@@ -380,7 +380,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property<int>("ID")
                 .Property(primitiveCollectionPropertyType, "Property1");
 
-            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddEntityType(entityType);
             IEdmModel model = modelBuilder.GetEdmModel();
             IEdmEntityType entity = model.GetEdmType(entityType) as IEdmEntityType;
 
@@ -405,7 +405,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property<int>("ID")
                 .Property(collectionType, "Products");
 
-            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddEntityType(entityType);
 
             Assert.DoesNotThrow(
                () => modelBuilder.GetEdmModel());
@@ -457,9 +457,9 @@ namespace System.Web.OData.Builder.Conventions
         public void ModelBuilder_CanAddEntitiesInAnyOrder()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.Entity<SportBike>();
-            builder.Entity<Car>();
-            builder.Entity<Vehicle>();
+            builder.EntityType<SportBike>();
+            builder.EntityType<Car>();
+            builder.EntityType<Vehicle>();
 
             IEdmModel model = builder.GetEdmModel();
 
@@ -501,7 +501,7 @@ namespace System.Web.OData.Builder.Conventions
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<Vehicle>("Vehicles");
             builder.Ignore<Motorcycle>();
-            builder.Entity<SportBike>();
+            builder.EntityType<SportBike>();
 
             IEdmModel model = builder.GetEdmModel();
 
@@ -534,10 +534,10 @@ namespace System.Web.OData.Builder.Conventions
         public void ModelBuilder_Patches_BaseType_IfBaseTypeIsNotExplicitlySet()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.Entity<Vehicle>();
-            builder.Entity<Car>();
-            builder.Entity<Motorcycle>();
-            builder.Entity<SportBike>();
+            builder.EntityType<Vehicle>();
+            builder.EntityType<Car>();
+            builder.EntityType<Motorcycle>();
+            builder.EntityType<SportBike>();
 
             IEdmModel model = builder.GetEdmModel();
 
@@ -566,10 +566,10 @@ namespace System.Web.OData.Builder.Conventions
         public void ModelBuilder_DoesnotPatch_BaseType_IfBaseTypeIsExplicitlySet()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.Entity<Vehicle>();
-            builder.Entity<Car>().DerivesFromNothing();
-            builder.Entity<Motorcycle>().DerivesFromNothing();
-            builder.Entity<SportBike>();
+            builder.EntityType<Vehicle>();
+            builder.EntityType<Car>().DerivesFromNothing();
+            builder.EntityType<Motorcycle>().DerivesFromNothing();
+            builder.EntityType<SportBike>();
 
             IEdmModel model = builder.GetEdmModel();
 
@@ -599,7 +599,7 @@ namespace System.Web.OData.Builder.Conventions
         public void ModelBuilder_Figures_AbstractnessOfEntityTypes()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.Entity<Vehicle>();
+            builder.EntityType<Vehicle>();
 
             IEdmModel model = builder.GetEdmModel();
 
@@ -616,8 +616,8 @@ namespace System.Web.OData.Builder.Conventions
         public void ModelBuilder_Doesnot_Override_AbstractnessOfEntityTypes_IfSet()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.Entity<Vehicle>();
-            builder.Entity<Motorcycle>().Abstract();
+            builder.EntityType<Vehicle>();
+            builder.EntityType<Motorcycle>().Abstract();
 
             IEdmModel model = builder.GetEdmModel();
 
@@ -630,8 +630,8 @@ namespace System.Web.OData.Builder.Conventions
         public void ModelBuilder_CanHaveAnAbstractDerivedTypeOfConcreteBaseType()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.Entity<Vehicle>();
-            builder.Entity<SportBike>().Abstract();
+            builder.EntityType<Vehicle>();
+            builder.EntityType<SportBike>().Abstract();
 
             IEdmModel model = builder.GetEdmModel();
 
@@ -742,7 +742,7 @@ namespace System.Web.OData.Builder.Conventions
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = true };
-            EntityTypeConfiguration<PropertyAliasDerived> derived = builder.Entity<PropertyAliasDerived>()
+            EntityTypeConfiguration<PropertyAliasDerived> derived = builder.EntityType<PropertyAliasDerived>()
                 .DerivesFrom<PropertyAlias>();
             derived.Property(p => p.LastName).Name = "FamilyName";
             derived.Property(p => p.Age).Name = "CurrentAge";
@@ -871,7 +871,7 @@ namespace System.Web.OData.Builder.Conventions
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
             var builder = new ODataConventionModelBuilder(configuration);
 
-            builder.AddEntitySet("bases", builder.AddEntity(baseType));
+            builder.AddEntitySet("bases", builder.AddEntityType(baseType));
 
             Assert.Throws<InvalidOperationException>(
                 () => builder.GetEdmModel(),
@@ -897,7 +897,7 @@ namespace System.Web.OData.Builder.Conventions
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
             var builder = new ODataConventionModelBuilder(configuration, isQueryCompositionMode: true);
 
-            builder.AddEntitySet("bases", builder.AddEntity(baseType));
+            builder.AddEntitySet("bases", builder.AddEntityType(baseType));
 
             // Act
             IEdmModel model = builder.GetEdmModel();
@@ -931,7 +931,7 @@ namespace System.Web.OData.Builder.Conventions
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
             var builder = new ODataConventionModelBuilder(configuration);
 
-            builder.AddEntitySet("entities", builder.AddEntity(entityType));
+            builder.AddEntitySet("entities", builder.AddEntityType(entityType));
 
             Assert.Throws<InvalidOperationException>(
                 () => builder.GetEdmModel(),
@@ -959,7 +959,7 @@ namespace System.Web.OData.Builder.Conventions
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
             var builder = new ODataConventionModelBuilder(configuration);
 
-            builder.AddEntitySet("entities", builder.AddEntity(entityType));
+            builder.AddEntitySet("entities", builder.AddEntityType(entityType));
             builder.AddComplexType(baseComplexType);
 
             IEdmModel model = builder.GetEdmModel();
@@ -1004,7 +1004,7 @@ namespace System.Web.OData.Builder.Conventions
         public void ModelBuilder_PrunesUnReachableTypes(MockType type)
         {
             var modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.AddEntity(type);
+            modelBuilder.AddEntityType(type);
 
             var model = modelBuilder.GetEdmModel();
             Assert.True(model.FindType("DefaultNamespace.IgnoredType") == null);
@@ -1029,7 +1029,7 @@ namespace System.Web.OData.Builder.Conventions
                         "Property"),
                     "Property");
 
-            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddEntityType(entityType);
 
             var model = modelBuilder.GetEdmModel();
             Assert.NotNull(model.FindType("DefaultNamespace.SampleType") as IEdmEntityType);
@@ -1048,7 +1048,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property(entityType.AsCollection(), "CollectionProperty");
 
             var modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddEntityType(entityType);
             modelBuilder.AddComplexType(complexType);
 
             Assert.Throws<InvalidOperationException>(
@@ -1085,7 +1085,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property<Version[]>("CollectionProperty");
 
             var modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddEntityType(entityType);
 
             var model = modelBuilder.GetEdmModel();
 
@@ -1110,7 +1110,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property(complexTypeWithComplexCollection, "ComplexProperty");
 
             var modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddEntityType(entityType);
 
             var model = modelBuilder.GetEdmModel();
 
@@ -1137,7 +1137,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property(type1, "Relation");
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type2).AddNavigationProperty(type2.GetProperty("Relation"), EdmMultiplicity.One);
+            builder.AddEntityType(type2).AddNavigationProperty(type2.GetProperty("Relation"), EdmMultiplicity.One);
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type2);
@@ -1176,7 +1176,7 @@ namespace System.Web.OData.Builder.Conventions
             }.GetType();
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder(new HttpConfiguration(), isQueryCompositionMode: true);
-            builder.AddEntitySet("entityset", builder.AddEntity(entityType));
+            builder.AddEntitySet("entityset", builder.AddEntityType(entityType));
 
             IEdmModel model = builder.GetEdmModel();
 
@@ -1197,7 +1197,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property(propertyType, "Collection");
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            var entityType = builder.AddEntity(type);
+            var entityType = builder.AddEntityType(type);
             builder.AddEntitySet("entityset", entityType);
 
             IEdmModel model = builder.GetEdmModel();
@@ -1214,7 +1214,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property<object[]>("Collection");
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            var entityType = builder.AddEntity(type);
+            var entityType = builder.AddEntityType(type);
             entityType.AddCollectionProperty(type.GetProperty("Collection"));
             builder.AddEntitySet("entityset", entityType);
 
@@ -1244,7 +1244,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property(complexDerived, "ComplexDerived");
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            var entityType = builder.AddEntity(entity);
+            var entityType = builder.AddEntityType(entity);
 
             IEdmModel model = builder.GetEdmModel();
             Assert.Equal(4, model.SchemaElements.Count());
@@ -1267,7 +1267,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property<int>("ID");
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntitySet("entities", builder.AddEntity(entity));
+            builder.AddEntitySet("entities", builder.AddEntityType(entity));
             builder.OnModelCreating = (modelBuilder) =>
                 {
                     var entityConfiguration = modelBuilder.StructuralTypes.OfType<EntityTypeConfiguration>().Single();
@@ -1306,7 +1306,7 @@ namespace System.Web.OData.Builder.Conventions
             var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>(configuration);
 
             // Act
-            var baseEntity = builder.AddEntity(baseType);
+            var baseEntity = builder.AddEntityType(baseType);
             baseEntity.RemoveProperty(baseType.GetProperty("BaseTypeProperty"));
             IEdmModel model = builder.GetEdmModel();
 
@@ -1343,7 +1343,7 @@ namespace System.Web.OData.Builder.Conventions
                 .Property(relatedEntity.AsCollection(), "InferredNavigationCollection");
 
             var builder = new ODataConventionModelBuilder();
-            var entity = builder.AddEntity(type);
+            var entity = builder.AddEntityType(type);
             entity.AddProperty(type.GetProperty("ExplicitlyAddedPrimitive"));
             entity.AddCollectionProperty(type.GetProperty("ExplicitlyAddedPrimitiveCollection"));
             entity.AddComplexProperty(type.GetProperty("ExplicitlyAddedComplex"));

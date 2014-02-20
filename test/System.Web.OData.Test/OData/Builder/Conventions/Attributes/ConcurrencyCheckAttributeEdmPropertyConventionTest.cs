@@ -46,7 +46,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .Property(typeof(int?), "Count", new ConcurrencyCheckAttribute());
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type);
+            builder.AddEntityType(type);
 
             // Act
             IEdmModel model = builder.GetEdmModel();
@@ -70,7 +70,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "Count", new ConcurrencyCheckAttribute());
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntity(type).AddProperty(type.GetProperty("Count")).IsOptional();
+            builder.AddEntityType(type).AddProperty(type.GetProperty("Count")).IsOptional();
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type);

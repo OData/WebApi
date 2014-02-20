@@ -167,7 +167,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadEntry_ThrowsODataException_CannotInstantiateAbstractEntityType()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.Entity<BaseType>().Abstract();
+            builder.EntityType<BaseType>().Abstract();
             IEdmModel model = builder.GetEdmModel();
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
             ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = "System.Web.OData.Formatter.Deserialization.BaseType" });

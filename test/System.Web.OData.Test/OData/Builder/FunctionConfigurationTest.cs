@@ -144,8 +144,8 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
-            EntityTypeConfiguration<Order> order = builder.Entity<Order>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
+            EntityTypeConfiguration<Order> order = builder.EntityType<Order>();
 
             order.HasRequired<Customer>(o => o.Customer);
             FunctionConfiguration getOrderCustomer = order.Function("GetOrderCustomer").ReturnsEntityViaEntitySetPath<Customer>("bindingParameter/Customer");
@@ -164,8 +164,8 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
-            EntityTypeConfiguration<Order> order = builder.Entity<Order>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
+            EntityTypeConfiguration<Order> order = builder.EntityType<Order>();
 
             customer.HasMany<Order>(c => c.Orders);
             FunctionConfiguration getOrders = customer.Function("GetOrders").ReturnsCollectionViaEntitySetPath<Order>("bindingParameter/Orders");
@@ -185,7 +185,7 @@ namespace System.Web.OData.Builder
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             FunctionConfiguration sendEmail = customer.Function("SendEmail");
 
             // Assert
@@ -203,7 +203,7 @@ namespace System.Web.OData.Builder
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             FunctionConfiguration sendEmail = customer.Collection.Function("SendEmail");
 
             // Assert
@@ -219,7 +219,7 @@ namespace System.Web.OData.Builder
         public void CanCreateTransientFunction()
         {
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             customer.TransientFunction("Reward");
 
             ProcedureConfiguration function = builder.Procedures.SingleOrDefault();
@@ -268,7 +268,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             customer.HasKey(c => c.CustomerId);
             customer.Property(c => c.Name);
             // Act
@@ -323,7 +323,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             customer.HasKey(c => c.CustomerId);
             customer.Property(c => c.Name);
 

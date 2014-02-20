@@ -317,18 +317,18 @@ namespace System.Web.OData.Formatter
             ODataModelBuilder builder = new ODataModelBuilder();
 
             builder
-                .Entity<Vehicle>()
+                .EntityType<Vehicle>()
                 .HasKey(v => v.Name)
                 .HasKey(v => v.Model)
                 .Property(v => v.WheelCount);
 
             builder
-                .Entity<Motorcycle>()
+                .EntityType<Motorcycle>()
                 .DerivesFrom<Vehicle>()
                 .Property(m => m.CanDoAWheelie);
 
             builder
-                .Entity<Car>()
+                .EntityType<Car>()
                 .DerivesFrom<Vehicle>()
                 .Property(c => c.SeatingCapacity);
 

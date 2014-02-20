@@ -149,7 +149,7 @@ namespace System.Web.OData.Routing
             builder.EntitySet<ConventionCustomer>("ConventionCustomers");
             builder.EntitySet<ConventionOrder>("ConventionOrders");
             builder.ComplexType<ConventionPerson>();
-            builder.Entity<ConventionCustomer>().ComplexProperty<ConventionAddress>(c => c.Address);
+            builder.EntityType<ConventionCustomer>().ComplexProperty<ConventionAddress>(c => c.Address);
 
             // Top level action import
             ActionConfiguration createConventionCustomerById = builder.Action("CreateConventionCustomerById");

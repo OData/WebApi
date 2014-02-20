@@ -103,8 +103,8 @@ namespace System.Web.OData
             // Action with no overloads
             builder.EntitySet<Vehicle>("Vehicles").EntityType.Action("Drive");
             // Valid overloads of "Wash" bound to different entities
-            builder.Entity<Motorcycle>().Action("Wash");
-            builder.Entity<Car>().Action("Wash");
+            builder.EntityType<Motorcycle>().Action("Wash");
+            builder.EntityType<Car>().Action("Wash");
 
             EdmModel model = (EdmModel)builder.GetEdmModel();
 

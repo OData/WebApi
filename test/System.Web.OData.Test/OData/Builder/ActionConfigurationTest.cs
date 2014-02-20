@@ -148,7 +148,7 @@ namespace System.Web.OData.Builder
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             ActionConfiguration sendEmail = customer.Action("SendEmail");
 
             // Assert
@@ -166,7 +166,7 @@ namespace System.Web.OData.Builder
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             ActionConfiguration sendEmail = customer.Collection.Action("SendEmail");
 
             // Assert
@@ -182,7 +182,7 @@ namespace System.Web.OData.Builder
         public void CanCreateTransientAction()
         {
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             customer.TransientAction("Reward");
 
             ProcedureConfiguration action = builder.Procedures.SingleOrDefault();
@@ -231,7 +231,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             customer.HasKey(c => c.CustomerId);
             customer.Property(c => c.Name);
 
@@ -283,7 +283,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             customer.HasKey(c => c.CustomerId);
             customer.Property(c => c.Name);
 
@@ -316,7 +316,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
             customer.HasKey(c => c.CustomerId);
             customer.Property(c => c.Name);
             customer.Action("ActionOnCustomer");
@@ -499,7 +499,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            builder.Entity<Movie>();
+            builder.EntityType<Movie>();
             var action = builder.Action("action");
 
             // Act & Assert
@@ -513,7 +513,7 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            builder.Entity<Movie>();
+            builder.EntityType<Movie>();
             var action = builder.Action("action");
 
             // Act & Assert

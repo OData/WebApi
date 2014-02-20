@@ -18,7 +18,7 @@ namespace System.Web.OData.Routing
         public UnboundActionPathSegmentTest()
         {
             ODataModelBuilder builder = new ODataModelBuilder();
-            builder.Entity<MyCustomer>().HasKey(c => c.Id).Property(c => c.Name);
+            builder.EntityType<MyCustomer>().HasKey(c => c.Id).Property(c => c.Name);
             builder.EntitySet<MyCustomer>("Customers");
             ActionConfiguration action = builder.Action("CreateCustomer");
             action.ReturnsFromEntitySet<MyCustomer>("Customers");

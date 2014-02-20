@@ -546,7 +546,7 @@ namespace System.Web.OData.Query
         {
             IQueryable query = Array.CreateInstance(elementType, 0).AsQueryable();
             var modelBuilder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
-            modelBuilder.AddEntitySet("entityset", modelBuilder.AddEntity(elementType));
+            modelBuilder.AddEntitySet("entityset", modelBuilder.AddEntityType(elementType));
             var model = modelBuilder.GetEdmModel();
 
             var message = new HttpRequestMessage(

@@ -27,7 +27,7 @@ namespace System.Web.OData.Query.Validators
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(QueryCompositionCustomer)));
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
             builder.EntitySet<QueryCompositionCustomer>("Customer");
-            builder.Entity<QueryCompositionCustomerBase>();
+            builder.EntityType<QueryCompositionCustomerBase>();
             return builder.GetEdmModel();
         }
 

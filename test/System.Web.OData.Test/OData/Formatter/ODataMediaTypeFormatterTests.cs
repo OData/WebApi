@@ -827,7 +827,7 @@ namespace System.Web.OData.Formatter
         private static IEdmModel CreateModel()
         {
             ODataConventionModelBuilder model = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
-            model.Entity<SampleType>();
+            model.EntityType<SampleType>();
             model.EntitySet<SampleType>("sampleTypes");
             return model.GetEdmModel();
         }

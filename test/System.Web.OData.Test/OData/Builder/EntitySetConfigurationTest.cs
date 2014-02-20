@@ -200,7 +200,7 @@ namespace System.Web.OData.Builder
         public void HasNavigationPropertyLink_CanReplaceExistingLinks()
         {
             // Arrange
-            var entity = _builder.AddEntity(typeof(Motorcycle));
+            var entity = _builder.AddEntityType(typeof(Motorcycle));
             var navigationProperty = entity.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.One);
             var entityset = _builder.AddEntitySet("vehicles", entity);
             Uri link1 = new Uri("http://link1");

@@ -77,7 +77,7 @@ namespace System.Web.OData.Builder
             }
 
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
-                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+                _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             return _configuration.AddBinding(derivedEntityType.HasMany(navigationExpression), _modelBuilder.EntitySet<TTargetType>(entitySetName)._configuration);
         }
@@ -156,7 +156,7 @@ namespace System.Web.OData.Builder
             }
 
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
-                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+                _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             return _configuration.AddBinding(derivedEntityType.HasMany(navigationExpression), targetSet._configuration);
         }
@@ -203,7 +203,7 @@ namespace System.Web.OData.Builder
             }
 
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
-                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+                _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             return _configuration.AddBinding(derivedEntityType.HasRequired(navigationExpression), _modelBuilder.EntitySet<TTargetType>(entitySetName)._configuration);
         }
@@ -261,7 +261,7 @@ namespace System.Web.OData.Builder
             }
 
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
-                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+                _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             return _configuration.AddBinding(derivedEntityType.HasRequired(navigationExpression), targetSet._configuration);
         }
@@ -308,7 +308,7 @@ namespace System.Web.OData.Builder
             }
 
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
-                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+                _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             return _configuration.AddBinding(derivedEntityType.HasOptional(navigationExpression), _modelBuilder.EntitySet<TTargetType>(entitySetName)._configuration);
         }
@@ -366,7 +366,7 @@ namespace System.Web.OData.Builder
             }
 
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
-                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+                _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             return _configuration.AddBinding(derivedEntityType.HasOptional(navigationExpression), targetSet._configuration);
         }

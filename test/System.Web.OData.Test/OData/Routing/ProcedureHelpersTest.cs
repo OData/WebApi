@@ -21,8 +21,6 @@ namespace System.Web.OData.Routing
 
         [Theory]
         [InlineData("NonBindableAction")]
-        [InlineData("Name.NonBindableAction")]
-        [InlineData("NS.Name.NonBindableAction")]
         public void FindActionImport_CanFind_NonbindableAction(string segment)
         {
             // Arrange & Act
@@ -34,9 +32,7 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("ActionBoundToEntity", true)]
         [InlineData("NS.ActionBoundToEntity", true)]
-        [InlineData("ActionBoundToEntity", false)]
         [InlineData("NS.ActionBoundToEntity", false)]
         public void FindAction_CanFind_BindableAction_Entity(string segment, bool isDerivedType)
         {
@@ -55,7 +51,7 @@ namespace System.Web.OData.Routing
         public void FindAction_CannotFind_BindableAction_DerivedEntity()
         {
             // Act & Assert
-            Assert.Null(_model.FindAction("ActionBoundToDerivedEntity", _entityType.Definition));
+            Assert.Null(_model.FindAction("NS.ActionBoundToDerivedEntity", _entityType.Definition));
         }
 
         [Fact]
@@ -65,13 +61,11 @@ namespace System.Web.OData.Routing
             var entityCollection = new EdmCollectionType(_entityType);
 
             // Act & Assert
-            Assert.Null(_model.FindAction("ActionBoundToDerivedEntityCollection", entityCollection));
+            Assert.Null(_model.FindAction("NS.ActionBoundToDerivedEntityCollection", entityCollection));
         }
 
         [Theory]
-        [InlineData("ActionBoundToEntityCollection", true)]
         [InlineData("NS.ActionBoundToEntityCollection", true)]
-        [InlineData("ActionBoundToEntityCollection", false)]
         [InlineData("NS.ActionBoundToEntityCollection", false)]
         public void FindAction_CanFind_BindableAction_EntityCollection(string segment, bool isDerivedType)
         {
@@ -100,8 +94,6 @@ namespace System.Web.OData.Routing
 
         [Theory]
         [InlineData("NonBindableFunction")]
-        [InlineData("Name.NonBindableFunction")]
-        [InlineData("NS.Name.NonBindableFunction")]
         public void FindMatchedOperationImports_CanFind_NonbindableFunctions(string segment)
         {
             // Act
@@ -112,9 +104,7 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("FunctionBoundToEntity", true)]
         [InlineData("NS.FunctionBoundToEntity", true)]
-        [InlineData("FunctionBoundToEntity", false)]
         [InlineData("NS.FunctionBoundToEntity", false)]
         public void FindMatchedOperations_CanFind_BindableFunctions_Entity(string segment, bool isDerivedType)
         {
@@ -129,9 +119,7 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("FunctionBoundToEntityCollection", true)]
         [InlineData("NS.FunctionBoundToEntityCollection", true)]
-        [InlineData("FunctionBoundToEntityCollection", false)]
         [InlineData("NS.FunctionBoundToEntityCollection", false)]
         public void FindMatchedOpeartions_CanFind_BindableFunctions_EntityCollection(string segment, bool isDerivedType)
         {
@@ -150,7 +138,7 @@ namespace System.Web.OData.Routing
         public void FindMatchedOperations_CannotFind_BindableFunction_DerivedEntity()
         {
             // Act & Assert
-            Assert.Empty(_model.FindMatchedOperations("FunctionBoundToDerivedEntity",  _entityType.Definition));
+            Assert.Empty(_model.FindMatchedOperations("NS.FunctionBoundToDerivedEntity",  _entityType.Definition));
         }
 
         [Fact]
@@ -160,7 +148,7 @@ namespace System.Web.OData.Routing
             var entityCollection = new EdmCollectionType(_entityType);
 
             // Act & Assert
-            Assert.Empty(_model.FindMatchedOperations("FunctionBoundToDerivedEntityCollection",  entityCollection));
+            Assert.Empty(_model.FindMatchedOperations("NS.FunctionBoundToDerivedEntityCollection",  entityCollection));
         }
 
         [Fact]
@@ -170,8 +158,8 @@ namespace System.Web.OData.Routing
             var entityCollection = new EdmCollectionType(_entityType);
 
             // Act & Assert
-            Assert.Empty(_model.FindMatchedOperations("NonBindableAction", entityCollection));
-            Assert.Empty(_model.FindMatchedOperations("NonBindableAction", _entityType.Definition));
+            Assert.Empty(_model.FindMatchedOperations("NS.NonBindableAction", entityCollection));
+            Assert.Empty(_model.FindMatchedOperations("NS.NonBindableAction", _entityType.Definition));
         }
 
         private void BuildEdmModel()

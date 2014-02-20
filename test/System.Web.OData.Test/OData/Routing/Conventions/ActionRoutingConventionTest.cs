@@ -78,7 +78,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             ActionRoutingConvention actionConvention = new ActionRoutingConvention();
             IEdmModel model = ODataRoutingModel.GetModel();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, "RoutingCustomers/GetVIPs");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, "RoutingCustomers/Default.GetVIPs");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
             {
@@ -98,8 +98,8 @@ namespace System.Web.OData.Routing.Conventions
         }
 
         [Theory]
-        [InlineData("RoutingCustomers(1)/GetRelatedRoutingCustomers")]
-        [InlineData("RoutingCustomers/GetProducts")]
+        [InlineData("RoutingCustomers(1)/Default.GetRelatedRoutingCustomers")]
+        [InlineData("RoutingCustomers/Default.GetProducts")]
         public void SelectAction_ReturnsNull_IfActionIsMissing(string path)
         {
             ODataPath odataPath = new DefaultODataPathHandler().Parse(ODataRoutingModel.GetModel(), path);

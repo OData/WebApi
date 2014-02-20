@@ -40,7 +40,7 @@ namespace System.Web.OData.Formatter
         public void CanDispatch_ActionPayload_ToBoundAction()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers(1)/DoSomething");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers(1)/org.odata.DoSomething");
             request.Headers.Add("accept", "application/json");
             string payload = @"{ 
                 ""p1"": 1, 

@@ -79,6 +79,10 @@ namespace System.Web.OData.Routing
             }
         }
 
+        // ODL Spec says:
+        // To invoke a function bound to a resource, ... constructed by appending the namespace- or alias-qualified function name
+        // to a URL that identifies a resource whose type is the same as, or derived from, the type of the binding parameter 
+        // of the function. 
         private static IEnumerable<IEdmOperation> GetMatchedOperations(this IEnumerable<IEdmOperation> operations,
             string operationIdentifier, IEdmType bindingType)
         {
@@ -89,21 +93,17 @@ namespace System.Web.OData.Routing
             string[] nameParts = operationIdentifier.Split('.');
             Contract.Assert(nameParts.Length != 0);
 
-            if (nameParts.Length == 1)
-            {
-                // Name
-                string name = nameParts[0];
-                operations = operations.Where(f => f.Name == name);
-            }
-            else
+            if (nameParts.Length > 1)
             {
                 // Namespace.Name
                 string name = nameParts[nameParts.Length - 1];
                 string nspace = String.Join(".", nameParts.Take(nameParts.Length - 1));
-                operations = operations.Where(f => f.Name == name && f.Namespace == nspace);
+                return operations.Where(f => f.Name == name && f.Namespace == nspace && f.CanBindTo(bindingType));
             }
-
-            return operations.Where(operation => operation.CanBindTo(bindingType));
+            else
+            {
+                return Enumerable.Empty<IEdmOperation>();
+            }
         }
 
         private static IEnumerable<IEdmOperationImport> GetMatchedOperationImports(this IEnumerable<IEdmOperationImport> operationImports,

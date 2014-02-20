@@ -78,7 +78,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(1)/IsUpgraded");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(1)/NS.IsUpgraded");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
                 {
@@ -104,7 +104,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers/IsAnyUpgraded");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers/NS.IsAnyUpgraded");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
                 {
@@ -129,7 +129,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(1)/IsUpgradedWithParam(city='any')");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(1)/NS.IsUpgradedWithParam(city='any')");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
                 {

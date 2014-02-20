@@ -94,8 +94,8 @@ namespace System.Web.OData.Routing
         [InlineData("RoutingCustomers(112)/Address/Street", "~/entityset/key/property/property")]
         [InlineData("RoutingCustomers(1)/Name/$value", "~/entityset/key/property/$value")]
         [InlineData("RoutingCustomers(1)/Products/$ref", "~/entityset/key/navigation/$ref")]
-        [InlineData("RoutingCustomers(112)/GetRelatedRoutingCustomers", "~/entityset/key/action")]
-        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/GetMostProfitable", "~/entityset/cast/action")]
+        [InlineData("RoutingCustomers(112)/Default.GetRelatedRoutingCustomers", "~/entityset/key/action")]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetMostProfitable", "~/entityset/cast/action")]
         [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "~/entityset/key/navigation/cast/key/navigation/navigation")]
         [InlineData("EnumCustomers(1)/Color", "~/entityset/key/property")]
         [InlineData("EnumCustomers(1)/Color/$value", "~/entityset/key/property/$value")]
@@ -426,11 +426,25 @@ namespace System.Web.OData.Routing
             Assert.Same("$ref", path.Segments[3].ToString());
         }
 
+        [Theory]
+        [InlineData("RoutingCustomers(1)/GetRelatedRoutingCustomers", "~/entityset/key/unresolved")]
+        [InlineData("RoutingCustomers(2)/System.Web.OData.Routing.VIP/GetMostProfitable", "~/entityset/key/cast/unresolved")]
+        [InlineData("Products(7)/TopProductId", "~/entityset/key/unresolved")]
+        [InlineData("Products(7)/System.Web.OData.Routing.ImportantProduct/TopProductId", "~/entityset/key/cast/unresolved")]
+        public void CannotParseUnqualifiedOperationPath(string odataPath, string expect)
+        {
+            // Arrange & Act
+            ODataPath path = _parser.Parse(_model, odataPath);
+
+            // Assert
+            Assert.Equal(expect, path.PathTemplate);
+        }
+
         [Fact]
         public void CanParseActionBoundToEntitySegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers(112)/GetRelatedRoutingCustomers";
+            string odataPath = "RoutingCustomers(112)/Default.GetRelatedRoutingCustomers";
             string expectedText = "Default.GetRelatedRoutingCustomers";
  
             IEdmAction expectedEdmElement = _model.SchemaElements.OfType<IEdmAction>().SingleOrDefault(e => e.Name == "GetRelatedRoutingCustomers");
@@ -454,7 +468,7 @@ namespace System.Web.OData.Routing
         public void CanParseActionBoundToCollectionSegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers/System.Web.OData.Routing.VIP/GetMostProfitable";
+            string odataPath = "RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetMostProfitable";
             string expectedText = "Default.GetMostProfitable";
             IEdmAction expectedEdmElement = _model.SchemaElements.OfType<IEdmAction>().SingleOrDefault(e => e.Name == "GetMostProfitable");
             Assert.NotNull(expectedEdmElement);
@@ -518,7 +532,7 @@ namespace System.Web.OData.Routing
             model.Model.AddElement(function);
 
             // Act
-            ODataPath path = _parser.Parse(model.Model, "Customers(42)/IsSpecial");
+            ODataPath path = _parser.Parse(model.Model, "Customers(42)/NS.IsSpecial");
 
             // Assert
             Assert.NotNull(path);
@@ -548,7 +562,7 @@ namespace System.Web.OData.Routing
             model.Model.AddElement(function);
 
             // Act
-            ODataPath path = _parser.Parse(model.Model, "Customers/Count");
+            ODataPath path = _parser.Parse(model.Model, "Customers/NS.Count");
 
             // Assert
             Assert.NotNull(path);
@@ -614,19 +628,19 @@ namespace System.Web.OData.Routing
         [InlineData("unBoundWithoutParams()", 1, "Edm.Boolean", "~/unboundfunction")]
         [InlineData("unBoundWithOneParam(Param=false)", 1, "Edm.Boolean", "~/unboundfunction")]
         [InlineData("unBoundWithMultipleParams(Param1=false,Param2=false,Param3='')", 1, "Edm.Boolean", "~/unboundfunction")]
-        [InlineData("Customers(42)/BoundToEntityNoParams()", 3, "Edm.Boolean", "~/entityset/key/function")]
-        [InlineData("Customers(42)/BoundToEntityNoParams", 3, "Edm.Boolean", "~/entityset/key/function")]
-        [InlineData("Customers(42)/BoundToEntity(Param=something)", 3, "Edm.Boolean", "~/entityset/key/function")]
-        [InlineData("Customers(42)/BoundToEntityReturnsEntityNoParams()", 3, "NS.Customer", "~/entityset/key/function")]
-        [InlineData("Customers(42)/BoundToEntityReturnsEntityNoParams()/ID", 4, "Edm.Int32", "~/entityset/key/function/property")]
-        [InlineData("Customers(42)/BoundToEntityReturnsEntityNoParams()/Orders(42)", 5, "NS.Order", "~/entityset/key/function/navigation/key")]
-        [InlineData("Customers(42)/BoundToEntityReturnsEntityNoParams()/BoundToEntityReturnsEntityNoParams", 4, "NS.Customer", "~/entityset/key/function/function")]
-        [InlineData("Customers(42)/BoundToEntityReturnsEntityCollectionNoParams()", 3, "Collection([NS.Customer Nullable=False])", "~/entityset/key/function")]
-        [InlineData("Customers(42)/BoundToEntityReturnsEntityCollectionNoParams()(42)", 4, "NS.Customer", "~/entityset/key/function/key")]
-        [InlineData("Customers/BoundToEntityCollection", 2, "Edm.Boolean", "~/entityset/function")]
-        [InlineData("Customers/BoundToEntityCollection()", 2, "Edm.Boolean", "~/entityset/function")]
-        [InlineData("Customers/BoundToEntityCollectionReturnsComplex()", 2, "NS.Address", "~/entityset/function")]
-        [InlineData("Customers/BoundToEntityCollectionReturnsComplex()/City", 3, "Edm.String", "~/entityset/function/property")]
+        [InlineData("Customers(42)/NS.BoundToEntityNoParams()", 3, "Edm.Boolean", "~/entityset/key/function")]
+        [InlineData("Customers(42)/NS.BoundToEntityNoParams", 3, "Edm.Boolean", "~/entityset/key/function")]
+        [InlineData("Customers(42)/NS.BoundToEntity(Param=something)", 3, "Edm.Boolean", "~/entityset/key/function")]
+        [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityNoParams()", 3, "NS.Customer", "~/entityset/key/function")]
+        [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityNoParams()/ID", 4, "Edm.Int32", "~/entityset/key/function/property")]
+        [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityNoParams()/Orders(42)", 5, "NS.Order", "~/entityset/key/function/navigation/key")]
+        [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityNoParams()/NS.BoundToEntityReturnsEntityNoParams", 4, "NS.Customer", "~/entityset/key/function/function")]
+        [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityCollectionNoParams()", 3, "Collection([NS.Customer Nullable=False])", "~/entityset/key/function")]
+        [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityCollectionNoParams()(42)", 4, "NS.Customer", "~/entityset/key/function/key")]
+        [InlineData("Customers/NS.BoundToEntityCollection", 2, "Edm.Boolean", "~/entityset/function")]
+        [InlineData("Customers/NS.BoundToEntityCollection()", 2, "Edm.Boolean", "~/entityset/function")]
+        [InlineData("Customers/NS.BoundToEntityCollectionReturnsComplex()", 2, "NS.Address", "~/entityset/function")]
+        [InlineData("Customers/NS.BoundToEntityCollectionReturnsComplex()/City", 3, "Edm.String", "~/entityset/function/property")]
         public void CanParse_Functions(string odataPath, int expectedCount, string expectedTypeName, string expectedTemplate)
         {
             // Arrange
@@ -793,21 +807,21 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("RoutingCustomers(1)/GetRelatedRoutingCustomers", "RoutingCustomer", "RoutingCustomers", true)]
-        [InlineData("RoutingCustomers(1)/GetBestRelatedRoutingCustomer", "VIP", "RoutingCustomers", false)]
-        [InlineData("RoutingCustomers(1)/System.Web.OData.Routing.VIP/GetSalesPerson", "SalesPerson", "RoutingCustomers", false)]
-        [InlineData("SalesPeople(1)/GetVIPRoutingCustomers", "VIP", "SalesPeople", true)]
+        [InlineData("RoutingCustomers(1)/Default.GetRelatedRoutingCustomers", "RoutingCustomer", "RoutingCustomers", true)]
+        [InlineData("RoutingCustomers(1)/Default.GetBestRelatedRoutingCustomer", "VIP", "RoutingCustomers", false)]
+        [InlineData("RoutingCustomers(1)/System.Web.OData.Routing.VIP/Default.GetSalesPerson", "SalesPerson", "RoutingCustomers", false)]
+        [InlineData("SalesPeople(1)/Default.GetVIPRoutingCustomers", "VIP", "SalesPeople", true)]
         public void CanResolveSetAndTypeViaEntityActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
         }
 
         [Theory]
-        [InlineData("RoutingCustomers/GetVIPs", "VIP", "RoutingCustomers", true)]
-        [InlineData("RoutingCustomers/GetProducts", "Product", "RoutingCustomers", true)]
-        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP/GetSalesPeople", "SalesPerson", "RoutingCustomers", true)]
-        [InlineData("SalesPeople/GetVIPRoutingCustomers", "VIP", "SalesPeople", true)]
-        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/GetMostProfitable", "VIP", "RoutingCustomers", false)]
+        [InlineData("RoutingCustomers/Default.GetVIPs", "VIP", "RoutingCustomers", true)]
+        [InlineData("RoutingCustomers/Default.GetProducts", "Product", "RoutingCustomers", true)]
+        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "RoutingCustomers", true)]
+        [InlineData("SalesPeople/Default.GetVIPRoutingCustomers", "VIP", "SalesPeople", true)]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetMostProfitable", "VIP", "RoutingCustomers", false)]
         public void CanResolveSetAndTypeViaCollectionActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
@@ -875,14 +889,14 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("Vehicles(42)/Wash", "Wash", "NS.Vehicle")]
-        [InlineData("Vehicles(42)/NS.Car/Wash", "Wash", "NS.Car")] // upcast
-        [InlineData("Vehicles(42)/NS.Motorcycle/Wash", "Wash", "NS.Vehicle")]
-        [InlineData("Cars(42)/NS.Vehicle/Wash", "Wash", "NS.Vehicle")] // downcast
-        [InlineData("Vehicles/WashMultiple", "WashMultiple", "Collection([NS.Vehicle Nullable=False])")]
-        [InlineData("Vehicles/NS.Car/WashMultiple", "WashMultiple", "Collection([NS.Car Nullable=False])")] // upcast
-        [InlineData("Vehicles/NS.Motorcycle/WashMultiple", "WashMultiple", "Collection([NS.Vehicle Nullable=False])")]
-        [InlineData("Cars/NS.Vehicle/WashMultiple", "WashMultiple", "Collection([NS.Vehicle Nullable=False])")] // downcast
+        [InlineData("Vehicles(42)/NS.Wash", "Wash", "NS.Vehicle")]
+        [InlineData("Vehicles(42)/NS.Car/NS.Wash", "Wash", "NS.Car")] // upcast
+        [InlineData("Vehicles(42)/NS.Motorcycle/NS.Wash", "Wash", "NS.Vehicle")]
+        [InlineData("Cars(42)/NS.Vehicle/NS.Wash", "Wash", "NS.Vehicle")] // downcast
+        [InlineData("Vehicles/NS.WashMultiple", "WashMultiple", "Collection([NS.Vehicle Nullable=False])")]
+        [InlineData("Vehicles/NS.Car/NS.WashMultiple", "WashMultiple", "Collection([NS.Car Nullable=False])")] // upcast
+        [InlineData("Vehicles/NS.Motorcycle/NS.WashMultiple", "WashMultiple", "Collection([NS.Vehicle Nullable=False])")]
+        [InlineData("Cars/NS.Vehicle/NS.WashMultiple", "WashMultiple", "Collection([NS.Vehicle Nullable=False])")] // downcast
         public void ActionOverloadResoultionTests(string path, string actionName, string expectedEntityBound)
         {
             // Arrange

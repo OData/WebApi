@@ -26,13 +26,13 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "http://localhost/Customers(42)/Orders(24)", "GetAParticularOrder_24_OfACustomer_42")] // containment scenario
         [InlineData("POST", "http://localhost/Customers", "CreateCustomer")] // use explicit http verbs attribute on the method
         [InlineData("PATCH", "http://localhost/Customers(42)", "PatchCustomer_42")] // use implicit http verb through method name convention
-        [InlineData("POST", "http://localhost/Customers(42)/upgrade", "InvokeODataAction_Upgrade_42")] // action bound to entity
-        [InlineData("GET", "http://localhost/Customers(42)/IsUpgradedWithParam(city='Redmond')", "IsUpgradedWithParam_Redmond")] // function bound to entity
-        [InlineData("GET", "http://localhost/Customers/IsAnyUpgraded", "IsAnyUpgraded")] // function bound to entity collection
-        [InlineData("GET", "http://localhost/Customers/IsAnyUpgraded()", "IsAnyUpgraded")] // function bound to entity collection
-        [InlineData("GET", "http://localhost/Customers(42)/NS.SpecialCustomer/IsSpecialUpgraded()", "IsSpecialUpgraded_42")] // function bound to derived entity type
-        [InlineData("GET", "http://localhost/Customers(22)/GetSalary()", "GetSalary_22")] // call function on base entity type
-        [InlineData("GET", "http://localhost/Customers(12)/NS.SpecialCustomer/GetSalary()", "GetSalaryFromSpecialCustomer_12")] // call function on derived entity type
+        [InlineData("POST", "http://localhost/Customers(42)/NS.upgrade", "InvokeODataAction_Upgrade_42")] // action bound to entity
+        [InlineData("GET", "http://localhost/Customers(42)/NS.IsUpgradedWithParam(city='Redmond')", "IsUpgradedWithParam_Redmond")] // function bound to entity
+        [InlineData("GET", "http://localhost/Customers/NS.IsAnyUpgraded", "IsAnyUpgraded")] // function bound to entity collection
+        [InlineData("GET", "http://localhost/Customers/NS.IsAnyUpgraded()", "IsAnyUpgraded")] // function bound to entity collection
+        [InlineData("GET", "http://localhost/Customers(42)/NS.SpecialCustomer/NS.IsSpecialUpgraded()", "IsSpecialUpgraded_42")] // function bound to derived entity type
+        [InlineData("GET", "http://localhost/Customers(22)/NS.GetSalary()", "GetSalary_22")] // call function on base entity type
+        [InlineData("GET", "http://localhost/Customers(12)/NS.SpecialCustomer/NS.GetSalary()", "GetSalaryFromSpecialCustomer_12")] // call function on derived entity type
         public async Task AttriubteRouting_SelectsExpectedControllerAndAction(string method, string requestUri,
             string expectedResult)
         {
@@ -126,42 +126,42 @@ namespace System.Web.OData.Routing
             }
 
             [HttpPost]
-            [ODataRoute("Customers({id})/upgrade")]
+            [ODataRoute("Customers({id})/NS.upgrade")]
             public string InvokeODataAction_Upgrade([FromODataUri]int id)
             {
                 return "InvokeODataAction_Upgrade_" + id;
             }
 
             [HttpGet]
-            [ODataRoute("Customers({id})/IsUpgradedWithParam(city={city})")]
+            [ODataRoute("Customers({id})/NS.IsUpgradedWithParam(city={city})")]
             public string IsUpgradedWithParam([FromODataUri] int id, [FromODataUri]string city)
             {
                 return "IsUpgradedWithParam_" + city;
             }
 
             [HttpGet]
-            [ODataRoute("Customers/IsAnyUpgraded()")]
+            [ODataRoute("Customers/NS.IsAnyUpgraded()")]
             public string IsAnyUpgraded()
             {
                 return "IsAnyUpgraded";
             }
 
             [HttpGet]
-            [ODataRoute("Customers({id})/NS.SpecialCustomer/IsSpecialUpgraded()")]
+            [ODataRoute("Customers({id})/NS.SpecialCustomer/NS.IsSpecialUpgraded()")]
             public string IsSpecialUpgraded([FromODataUri] int id)
             {
                 return "IsSpecialUpgraded_" + id;
             }
 
             [HttpGet]
-            [ODataRoute("Customers({id})/GetSalary()")]
+            [ODataRoute("Customers({id})/NS.GetSalary()")]
             public string GetSalary([FromODataUri] int id)
             {
                 return "GetSalary_" + id;
             }
 
             [HttpGet]
-            [ODataRoute("Customers({id})/NS.SpecialCustomer/GetSalary()")]
+            [ODataRoute("Customers({id})/NS.SpecialCustomer/NS.GetSalary()")]
             public string GetSalaryFromSpecialCustomer([FromODataUri] int id)
             {
                 return "GetSalaryFromSpecialCustomer_" + id;

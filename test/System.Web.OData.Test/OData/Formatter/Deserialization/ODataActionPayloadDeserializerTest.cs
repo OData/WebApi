@@ -376,7 +376,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
         private static ODataPath CreateBoundPath(string actionName)
         {
-            string path = String.Format("Customers(1)/{0}", actionName);
+            string path = String.Format("Customers(1)/A.B.{0}", actionName);
             ODataPath odataPath = new DefaultODataPathHandler().Parse(_model, path);
             Assert.NotNull(odataPath); // Guard
             return odataPath;

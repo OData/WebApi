@@ -15,9 +15,7 @@ namespace System.Web.OData
     public class ODataActionParametersTest
     {
         [Theory]
-        [InlineData("Drive", "Vehicles(6)/Drive")]
         [InlineData("Drive", "Vehicles(6)/org.odata.Drive")]
-        [InlineData("Drive", "Vehicles(6)/System.Web.OData.Builder.TestModels.Car/Drive")]
         [InlineData("Drive", "Vehicles(6)/System.Web.OData.Builder.TestModels.Car/org.odata.Drive")]
         public void Can_find_action(string actionName, string url)
         {
@@ -35,12 +33,30 @@ namespace System.Web.OData
             Assert.Equal(actionName, action.Name);
         }
 
+        [Theory]
+        [InlineData("Vehicles(6)/Drive")]
+        [InlineData("Vehicles(6)/System.Web.OData.Builder.TestModels.Car/Drive")]
+        public void ParserThrows_SerializationException_UnqualifiedBoundAction(string url)
+        {
+            // Arrange
+            IEdmModel model = GetModel();
+
+            // Act
+            ODataPath path = new DefaultODataPathHandler().Parse(model, url);
+            Assert.NotNull(path); // Guard
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
+
+            // Assert
+            Assert.Throws<SerializationException>(() => ODataActionPayloadDeserializer.GetAction(context),
+            "The last segment of the request URI '" + url + "' was not recognized as an OData action.");
+        }
+
         [Fact]
         public void Can_find_action_overload_using_bindingparameter_type()
         {
             // Arrange
             IEdmModel model = GetModel();
-            string url = "Vehicles(8)/System.Web.OData.Builder.TestModels.Car/Wash";
+            string url = "Vehicles(8)/System.Web.OData.Builder.TestModels.Car/org.odata.Wash";
             ODataPath path = new DefaultODataPathHandler().Parse(model, url);
             Assert.NotNull(path); // Guard
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
@@ -75,8 +91,8 @@ namespace System.Web.OData
             // Act & Assert
             Assert.ThrowsArgument(() =>
             {
-                new DefaultODataPathHandler().Parse(model, "Vehicles/System.Web.OData.Builder.TestModels.Car(8)/Park");
-            }, "actionIdentifier", "Action resolution failed. Multiple actions matching the action identifier 'Park' were found. The matching actions are: org.odata.Park, org.odata.Park.");
+                new DefaultODataPathHandler().Parse(model, "Vehicles/System.Web.OData.Builder.TestModels.Car(8)/org.odata.Park");
+            }, "actionIdentifier", "Action resolution failed. Multiple actions matching the action identifier 'org.odata.Park' were found. The matching actions are: org.odata.Park, org.odata.Park.");
         }
 
         private static IEdmModel GetModel()

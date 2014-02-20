@@ -213,7 +213,10 @@ namespace System.Web.OData.Builder
                     AddProcedureLinkBuilder(model, operation, procedure);
                     ValidateProcedureEntitySetPath(model, operationImport, procedure);
                 }
-                container.AddElement(operationImport);
+                else
+                {
+                    container.AddElement(operationImport);
+                }
                 model.AddElement(operation);
             }
         }

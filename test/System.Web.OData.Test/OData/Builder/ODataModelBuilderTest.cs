@@ -200,6 +200,40 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void GetEdmModel_DoesntCreateOperationImport_For_BoundedOperations()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntitySetConfiguration<Customer> customers = builder.EntitySet<Customer>("Customers");
+            customers.EntityType.HasKey(c => c.Id);
+            customers.EntityType.Action("Action").Returns<bool>();
+            customers.EntityType.Collection.Action("CollectionAction").Returns<bool>();
+            customers.EntityType.Function("Function").Returns<bool>();
+            customers.EntityType.Collection.Function("Function").Returns<bool>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(0, model.EntityContainer.OperationImports().Count());
+        }
+
+        [Fact]
+        public void GetEdmModel_CreatesOperationImports_For_UnboundedOperations()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.Function("Function").Returns<bool>();
+            builder.Action("Action").Returns<bool>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(2, model.EntityContainer.OperationImports().Count());
+        }
+
+        [Fact]
         public void Validate_Throws_If_Entity_Doesnt_Have_Key_Defined()
         {
             // Arrange

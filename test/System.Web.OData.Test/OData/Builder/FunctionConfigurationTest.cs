@@ -414,7 +414,7 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void Cant_SetActionTile_OnNonBindableFunctions()
+        public void Cant_SetFunctionTitle_OnNonBindableFunctions()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -433,7 +433,7 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void Can_SetActionTitle_OnBindable_Functions()
+        public void Can_SetFunctionTitle_OnBindable_Functions()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -448,10 +448,10 @@ namespace System.Web.OData.Builder
 
             // Act
             IEdmModel model = builder.GetEdmModel();
-            IEdmOperationImport checkout = model.EntityContainers().First().OperationImports().Single(f => f.Name == "Checkout");
-            IEdmOperationImport removeOld = model.EntityContainers().First().OperationImports().Single(f => f.Name == "RemoveOld");
-            OperationTitleAnnotation checkoutTitle = model.GetOperationTitleAnnotation(checkout.Operation);
-            OperationTitleAnnotation removeOldTitle = model.GetOperationTitleAnnotation(removeOld.Operation);
+            IEdmOperation checkout = model.FindOperations("Default.Checkout").Single();
+            IEdmOperation removeOld = model.FindOperations("Default.RemoveOld").Single();
+            OperationTitleAnnotation checkoutTitle = model.GetOperationTitleAnnotation(checkout);
+            OperationTitleAnnotation removeOldTitle = model.GetOperationTitleAnnotation(removeOld);
 
             // Assert
             Assert.NotNull(checkoutTitle);

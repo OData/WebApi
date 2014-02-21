@@ -38,7 +38,7 @@ namespace System.Web.OData.Routing
             }
 
             Function = function;
-            FunctionName = Function.Container.FullName() + "." + Function.Name;
+            FunctionName = Function.Name;
             _edmModel = model;
             Values = parameterValues ?? new Dictionary<string, string>();
         }

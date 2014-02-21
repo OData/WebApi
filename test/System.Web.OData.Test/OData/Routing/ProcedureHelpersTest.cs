@@ -89,7 +89,7 @@ namespace System.Web.OData.Routing
                 () => _container.FindActionImport("AmbiguousAction"),
                 "actionIdentifier",
                 "Action resolution failed. Multiple actions matching the action identifier 'AmbiguousAction' were found. " +
-                "The matching actions are: NS.Name.AmbiguousAction, NS.Name.AmbiguousAction.");
+                "The matching actions are: AmbiguousAction, AmbiguousAction.");
         }
 
         [Theory]

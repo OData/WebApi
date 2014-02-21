@@ -66,7 +66,7 @@ namespace System.Web.OData.Routing
             // and each bound overload specifies a different binding parameter type.
             if (matchesArray.Length > 1)
             {
-                string message = String.Join(", ", matchesArray.Select(match => match.Container.FullName() + "." + match.Name));
+                string message = String.Join(", ", matchesArray.Select(match => match.Name));
                 throw Error.Argument("actionIdentifier", SRResources.ActionResolutionFailed, actionIdentifier, message);
             }
             else if (matchesArray.Length == 1)
@@ -106,6 +106,14 @@ namespace System.Web.OData.Routing
             }
         }
 
+        // ODL Spec:
+        // 11.5.3.1 Invoking a Function
+        // To invoke a function through a function import the client issues a GET request to a URL identifying the function 
+        // import and passing parameter values using inline parameter syntax. The canonical URL for a function import is 
+        // the service root, followed by the name of the function import.
+        // 11.5.4.1 Invoking an Action
+        // To invoke an action through an action import, the client issues a POST request to a URL identifying the action import.
+        // The canonical URL for an action import is the service root, followed by the name of the action import. 
         private static IEnumerable<IEdmOperationImport> GetMatchedOperationImports(this IEnumerable<IEdmOperationImport> operationImports,
             string operationIdentifier)
         {
@@ -117,27 +125,14 @@ namespace System.Web.OData.Routing
 
             if (nameParts.Length == 1)
             {
-                // Name
+                // Procedure (Function/Action) Import Name
                 string name = nameParts[0];
-                operationImports = operationImports.Where(f => f.Name == name);
-            }
-            else if (nameParts.Length == 2)
-            {
-                // Container.Name
-                string name = nameParts[nameParts.Length - 1];
-                string container = nameParts[nameParts.Length - 2];
-                operationImports = operationImports.Where(f => f.Name == name && f.Container.Name == container);
+                return operationImports.Where(f => f.Name == name && !f.Operation.IsBound);
             }
             else
             {
-                // Namespace.Container.Name
-                string name = nameParts[nameParts.Length - 1];
-                string container = nameParts[nameParts.Length - 2];
-                string nspace = String.Join(".", nameParts.Take(nameParts.Length - 2));
-                operationImports = operationImports.Where(f => f.Name == name && f.Container.Name == container && f.Container.Namespace == nspace);
+                return Enumerable.Empty<IEdmOperationImport>();
             }
-
-            return operationImports.Where(p => !p.Operation.IsBound);
         }
 
         private static bool CanBindTo(this IEdmOperation operation, IEdmType type)

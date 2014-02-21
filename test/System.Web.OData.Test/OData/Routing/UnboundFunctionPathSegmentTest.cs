@@ -55,7 +55,6 @@ namespace System.Web.OData.Routing
             // Arrange
             Mock<IEdmFunctionImport> edmFunction = new Mock<IEdmFunctionImport>();
             edmFunction.Setup(a => a.Name).Returns("Function");
-            edmFunction.Setup(a => a.Container).Returns(_container);
 
             // Act
             UnboundFunctionPathSegment functionPathSegment = new UnboundFunctionPathSegment(edmFunction.Object, _model, null);
@@ -74,7 +73,7 @@ namespace System.Web.OData.Routing
             UnboundFunctionPathSegment functionPathSegment = new UnboundFunctionPathSegment(function, _model, null);
 
             // Assert
-            Assert.Equal("Default.Container.MyFunction", functionPathSegment.FunctionName);
+            Assert.Equal("MyFunction", functionPathSegment.FunctionName);
         }
 
         [Fact]

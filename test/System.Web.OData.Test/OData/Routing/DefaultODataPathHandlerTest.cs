@@ -304,7 +304,7 @@ namespace System.Web.OData.Routing
         {
             // Arrange
             string odataPath = "GetRoutingCustomerById()";
-            string expectedText = "Default.Container.GetRoutingCustomerById";
+            string expectedText = "GetRoutingCustomerById";
             IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
             IEdmActionImport expectedEdmElement = _model.EntityContainers()
                 .First()
@@ -486,6 +486,29 @@ namespace System.Web.OData.Routing
             Assert.Same(expectedType, path.EdmType);
             BoundActionPathSegment action = Assert.IsType<BoundActionPathSegment>(segment);
             Assert.Same(expectedEdmElement, action.Action);
+        }
+
+        [Theory]
+        [InlineData("Default.FunctionAtRoot()")]
+        [InlineData("Default.Container.FunctionAtRoot()")]
+        [InlineData("Default.ActionAtRoot")]
+        [InlineData("Default.Container.ActionAtRoot")]
+        public void CannotParseQualifiedUnboundOperation(string odataPath)
+        {
+            // Arrange
+            var model = new CustomersModelWithInheritance();
+            IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
+
+            model.Container.AddFunctionImport(new EdmFunction(model.Container.Namespace, "FunctionAtRoot",
+                    returnType, isBound: false, entitySetPathExpression: null, isComposable: true));
+
+            model.Container.AddActionImport(new EdmAction(model.Container.Namespace, "ActionAtRoot", returnType));
+
+            // Act
+            ODataPath path = _parser.Parse(model.Model, odataPath);
+
+            // Assert
+            Assert.Null(path);
         }
 
         [Fact]

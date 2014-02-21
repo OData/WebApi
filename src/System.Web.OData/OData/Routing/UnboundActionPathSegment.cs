@@ -24,7 +24,7 @@ namespace System.Web.OData.Routing
             }
 
             Action = action;
-            ActionName = Action.Container.FullName() + "." + Action.Name;
+            ActionName = Action.Name;
         }
 
         // This constructor is intended for use by unit testing only.

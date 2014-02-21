@@ -38,10 +38,8 @@ namespace System.Web.OData.Routing
         public void Ctor_TakingAction_InitializesActionProperty()
         {
             // Arrange
-            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
             Mock<IEdmActionImport> edmAction = new Mock<IEdmActionImport>();
             edmAction.Setup(a => a.Name).Returns("SomeAction");
-            edmAction.Setup(a => a.Container).Returns(container);
 
             // Act
             UnboundActionPathSegment actionPathSegment = new UnboundActionPathSegment(edmAction.Object);
@@ -60,7 +58,7 @@ namespace System.Web.OData.Routing
             UnboundActionPathSegment actionPathSegment = new UnboundActionPathSegment(action);
 
             // Assert
-            Assert.Equal("Default.Container.CreateCustomer", actionPathSegment.ActionName);
+            Assert.Equal("CreateCustomer", actionPathSegment.ActionName);
         }
 
         [Fact]
@@ -179,7 +177,7 @@ namespace System.Web.OData.Routing
             var result = segment.ToString();
 
             // Assert
-            Assert.Equal("Default.Container.CreateCustomer", result);
+            Assert.Equal("CreateCustomer", result);
         }
 
         [Fact]

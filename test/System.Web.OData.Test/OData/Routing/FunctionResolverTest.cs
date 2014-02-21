@@ -83,19 +83,19 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("FunctionWithoutParams", "()", "NS.Name.FunctionWithoutParams()")] // function without params using explicit empty parameter list
-        [InlineData("FunctionWithoutParams", null, "NS.Name.FunctionWithoutParams()")] // function without params concise invocation
-        [InlineData("FunctionWithoutParams", "non parameter list", "NS.Name.FunctionWithoutParams()")] // function without params concise invocation
-        [InlineData("FunctionWithOneParam", "(Parameter=1)", "NS.Name.FunctionWithOneParam(Parameter=1)")] // function with one param
-        [InlineData("FunctionWithOneParam", "(Parameter=@1)", "NS.Name.FunctionWithOneParam(Parameter=@1)")] // function with one param and aliased value
-        [InlineData("FunctionWithOneParam", "(Parameter='1')", "NS.Name.FunctionWithOneParam(Parameter='1')")] // function with one param string value
-        [InlineData("FunctionWithMultipleParams", "(Parameter1=1,Parameter2=2,Parameter3=3)", "NS.Name.FunctionWithMultipleParams(Parameter1=1,Parameter2=2,Parameter3=3)")] // function with multiple params
-        [InlineData("FunctionWithMultipleParams", "(Parameter2=1,Parameter3=2,Parameter1=3)", "NS.Name.FunctionWithMultipleParams(Parameter2=1,Parameter3=2,Parameter1=3)")] // function with multiple params, different order
-        [InlineData("FunctionWithOverloads", "()", "NS.Name.FunctionWithOverloads()")] // overloaded function, empty parameter overload
-        [InlineData("FunctionWithOverloads", null, "NS.Name.FunctionWithOverloads()")] // overloaded function, empty parameter overload, concise notation
-        [InlineData("FunctionWithOverloads", "(Parameter=1)", "NS.Name.FunctionWithOverloads(Parameter=1)")] // overloaded function, one param
-        [InlineData("FunctionWithOverloads", "(Parameter1=1,Parameter2=2,Parameter3=3)", "NS.Name.FunctionWithOverloads(Parameter1=1,Parameter2=2,Parameter3=3)")] // overloaded function, multiple params
-        [InlineData("FunctionWithOverloads", "(Parameter2=2,Parameter1=1,Parameter3=3)", "NS.Name.FunctionWithOverloads(Parameter2=2,Parameter1=1,Parameter3=3)")] // overloaded function, multiple params - random order
+        [InlineData("FunctionWithoutParams", "()", "FunctionWithoutParams()")] // function without params using explicit empty parameter list
+        [InlineData("FunctionWithoutParams", null, "FunctionWithoutParams()")] // function without params concise invocation
+        [InlineData("FunctionWithoutParams", "non parameter list", "FunctionWithoutParams()")] // function without params concise invocation
+        [InlineData("FunctionWithOneParam", "(Parameter=1)", "FunctionWithOneParam(Parameter=1)")] // function with one param
+        [InlineData("FunctionWithOneParam", "(Parameter=@1)", "FunctionWithOneParam(Parameter=@1)")] // function with one param and aliased value
+        [InlineData("FunctionWithOneParam", "(Parameter='1')", "FunctionWithOneParam(Parameter='1')")] // function with one param string value
+        [InlineData("FunctionWithMultipleParams", "(Parameter1=1,Parameter2=2,Parameter3=3)", "FunctionWithMultipleParams(Parameter1=1,Parameter2=2,Parameter3=3)")] // function with multiple params
+        [InlineData("FunctionWithMultipleParams", "(Parameter2=1,Parameter3=2,Parameter1=3)", "FunctionWithMultipleParams(Parameter2=1,Parameter3=2,Parameter1=3)")] // function with multiple params, different order
+        [InlineData("FunctionWithOverloads", "()", "FunctionWithOverloads()")] // overloaded function, empty parameter overload
+        [InlineData("FunctionWithOverloads", null, "FunctionWithOverloads()")] // overloaded function, empty parameter overload, concise notation
+        [InlineData("FunctionWithOverloads", "(Parameter=1)", "FunctionWithOverloads(Parameter=1)")] // overloaded function, one param
+        [InlineData("FunctionWithOverloads", "(Parameter1=1,Parameter2=2,Parameter3=3)", "FunctionWithOverloads(Parameter1=1,Parameter2=2,Parameter3=3)")] // overloaded function, multiple params
+        [InlineData("FunctionWithOverloads", "(Parameter2=2,Parameter1=1,Parameter3=3)", "FunctionWithOverloads(Parameter2=2,Parameter1=1,Parameter3=3)")] // overloaded function, multiple params - random order
         public void TryResolveUnbound(string functionName, string nextSegment, string expectedResult)
         {
             // Arrange

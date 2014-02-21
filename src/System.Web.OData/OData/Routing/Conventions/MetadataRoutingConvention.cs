@@ -35,7 +35,7 @@ namespace System.Web.OData.Routing.Conventions
             if (odataPath.PathTemplate == "~" ||
                 odataPath.PathTemplate == "~/$metadata")
             {
-                return "ODataMetadata";
+                return "Metadata";
             }
 
             return null;

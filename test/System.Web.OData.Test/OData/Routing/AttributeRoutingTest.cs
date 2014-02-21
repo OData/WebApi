@@ -39,7 +39,7 @@ namespace System.Web.OData.Routing
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
 
-            var controllers = new[] { typeof(CustomersController), typeof(MetadataController), typeof(OrdersController) };
+            var controllers = new[] { typeof(CustomersController), typeof(MetadataAndServiceController), typeof(OrdersController) };
             TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
 
             HttpConfiguration config = new HttpConfiguration();
@@ -184,7 +184,7 @@ namespace System.Web.OData.Routing
             }
         }
 
-        public class MetadataController : ODataController
+        public class MetadataAndServiceController : ODataController
         {
             [ODataRoute("$metadata")]
             public string GetMetadata()

@@ -286,7 +286,7 @@
     <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkDeserializerTests.cs" />
     <Compile Include="TestCommon\Models\TestDataModels.cs" />
     <Compile Include="OData\Formatter\ODataFormatterTests.cs" />
-    <Compile Include="OData\ODataMetaDataControllerTests.cs" />
+    <Compile Include="OData\MetadataControllerTest.cs" />
     <Compile Include="OData\Query\Controllers\CustomerControllers.cs" />
     <Compile Include="OData\Query\FilterQueryOptionTest.cs" />
     <Compile Include="OData\Query\ODataQueryContextTests.cs" />

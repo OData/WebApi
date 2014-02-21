@@ -15,7 +15,7 @@ using Moq;
 
 namespace System.Web.OData.Builder
 {
-    public class ODataMetaDataControllerTests
+    public class MetadataControllerTest
     {
         [Fact]
         public void DollarMetaData_Works_WithoutAcceptHeader()
@@ -36,7 +36,7 @@ namespace System.Web.OData.Builder
         {
             IEdmModel model = new EdmModel();
 
-            ODataMetadataController controller = new ODataMetadataController();
+            MetadataController controller = new MetadataController();
             controller.Request = new HttpRequestMessage();
             controller.Request.ODataProperties().Model = model;
 
@@ -48,7 +48,7 @@ namespace System.Web.OData.Builder
         public void GetMetadata_Throws_IfModelIsNotSetOnRequest()
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            ODataMetadataController controller = new ODataMetadataController();
+            MetadataController controller = new MetadataController();
             controller.Request = new HttpRequestMessage();
 
             Assert.Throws<InvalidOperationException>(() => controller.GetMetadata(),
@@ -236,7 +236,7 @@ namespace System.Web.OData.Builder
             IEdmModel model = new EdmModel();
             model.SetDataServiceVersion(new Version(0, 42));
 
-            ODataMetadataController controller = new ODataMetadataController();
+            MetadataController controller = new MetadataController();
             controller.Request = new HttpRequestMessage();
             controller.Request.ODataProperties().Model = model;
 

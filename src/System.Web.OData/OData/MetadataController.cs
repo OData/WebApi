@@ -17,7 +17,7 @@ namespace System.Web.OData
     /// <summary>
     /// Represents an <see cref="ApiController"/> for generating OData servicedoc and metadata document ($metadata).
     /// </summary>
-    public class ODataMetadataController : ODataController
+    public class MetadataController : ODataController
     {
         private static readonly Version _defaultEdmxVersion = new Version(4, 0);
 

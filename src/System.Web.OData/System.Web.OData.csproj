@@ -331,7 +331,7 @@
     <Compile Include="OData\Query\FilterQueryOption.cs" />
     <Compile Include="OData\IDelta.cs" />
     <Compile Include="OData\ODataQueryContext.cs" />
-    <Compile Include="OData\ODataMetadataController.cs" />
+    <Compile Include="OData\MetadataController.cs" />
     <Compile Include="OData\Query\ODataQueryOptions.cs" />
     <Compile Include="OData\ODataQueryParameterBindingAttribute.cs" />
     <Compile Include="OData\Query\OrderByPropertyNode.cs" />

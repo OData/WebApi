@@ -58,7 +58,7 @@ namespace System.Web.OData.Routing
             var constraint = new ODataPathRouteConstraint(_pathHandler, _model, _routeName, _conventions);
             Assert.True(constraint.Match(_request, null, null, values, HttpRouteDirection.UriResolution));
 
-            Assert.Equal("ODataMetadata", values["controller"]);
+            Assert.Equal("Metadata", values["controller"]);
             Assert.Same(_model, _request.ODataProperties().Model);
             Assert.Same(_routeName, _request.ODataProperties().RouteName);
             Assert.Equal(_conventions, _request.ODataProperties().RoutingConventions);

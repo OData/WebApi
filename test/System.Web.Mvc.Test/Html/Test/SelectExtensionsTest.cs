@@ -64,7 +64,7 @@ namespace System.Web.Mvc.Html.Test
         {
             // Arrange
             HtmlHelper helper = MvcHelper.GetHtmlHelper();
-            string dropdownList = @"<select id=""List"" name=""List""><option value=""other1"">other1</option>
+            const string expectedDropDownListHtml = @"<select id=""List"" name=""List""><option value=""other1"">other1</option>
 <option value=""other2"">other2</option>
 <optgroup label=""Swedish Cars"">
 <option value=""volvo"">Volvo</option>
@@ -86,7 +86,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = helper.DropDownList("List", GroupedItems);
 
             // Assert
-            Assert.Equal(dropdownList, html.ToHtmlString());
+            Assert.Equal(expectedDropDownListHtml, html.ToHtmlString());
         }
 
         [Fact]
@@ -702,7 +702,7 @@ namespace System.Web.Mvc.Html.Test
             ViewDataDictionary<FooModel> dict = new ViewDataDictionary<FooModel>();
             dict.Add("foo", "volvo");
             HtmlHelper<FooModel> helper = MvcHelper.GetHtmlHelper(dict);
-            string listBox = @"<select id=""foo"" name=""foo""><option value="""">Cars</option>
+            const string expectedListBox = @"<select id=""foo"" name=""foo""><option value="""">Cars</option>
 <option value=""other1"">other1</option>
 <option value=""other2"">other2</option>
 <optgroup label=""Swedish Cars"">
@@ -725,7 +725,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = helper.DropDownListFor(m => m.foo, GroupedItems, optionLabel: "Cars");
 
             // Assert
-            Assert.Equal(listBox, html.ToHtmlString());
+            Assert.Equal(expectedListBox, html.ToHtmlString());
         }
 
         [Fact]
@@ -1882,7 +1882,7 @@ namespace System.Web.Mvc.Html.Test
         {
             // Arrange
             HtmlHelper helper = MvcHelper.GetHtmlHelper();
-            string listBox = @"<select id=""List"" multiple=""multiple"" name=""List""><option value=""other1"">other1</option>
+            const string expectedListBox = @"<select id=""List"" multiple=""multiple"" name=""List""><option value=""other1"">other1</option>
 <option value=""other2"">other2</option>
 <optgroup label=""Swedish Cars"">
 <option value=""volvo"">Volvo</option>
@@ -1904,7 +1904,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = helper.ListBox("List", GroupedItems);
 
             // Assert
-            Assert.Equal(listBox, html.ToHtmlString());
+            Assert.Equal(expectedListBox, html.ToHtmlString());
         }
 
         [Fact]
@@ -2377,7 +2377,7 @@ namespace System.Web.Mvc.Html.Test
             ViewDataDictionary<FooArrayModel> dict = new ViewDataDictionary<FooArrayModel>();
             dict.Add("foo", new[] { "volvo", "audi" });
             HtmlHelper<FooArrayModel> helper = MvcHelper.GetHtmlHelper(dict);
-            string listBox = @"<select id=""foo"" multiple=""multiple"" name=""foo""><option value=""other1"">other1</option>
+            const string expectedListBox = @"<select id=""foo"" multiple=""multiple"" name=""foo""><option value=""other1"">other1</option>
 <option value=""other2"">other2</option>
 <optgroup label=""Swedish Cars"">
 <option selected=""selected"" value=""volvo"">Volvo</option>
@@ -2399,7 +2399,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = helper.ListBoxFor(m => m.foo, GroupedItems);
 
             // Assert
-            Assert.Equal(listBox, html.ToHtmlString());
+            Assert.Equal(expectedListBox, html.ToHtmlString());
         }
 
         [Fact]

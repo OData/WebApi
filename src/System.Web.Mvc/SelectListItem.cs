@@ -5,7 +5,7 @@ namespace System.Web.Mvc
     public class SelectListItem
     {
         /// <summary>
-        /// Represents the optgroup HTML element this item wrapped into.
+        /// Represents the optgroup HTML element this item is wrapped into.
         /// In a select list, multiple groups with the same name are supported.
         /// They are compared with reference equality.
         /// </summary>

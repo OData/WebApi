@@ -54,6 +54,14 @@ namespace System.Web.Mvc.Routing
             _entries.Add(entry);
         }
 
+        public void AddRange(IEnumerable<TRouteEntry> entries)
+        {
+            foreach (RouteEntry entry in entries)
+            {
+                Add(entry);
+            }
+        }
+
         public int Count
         {
             get { return _entries.Count; }

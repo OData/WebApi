@@ -172,7 +172,7 @@ namespace System.Net.Http
         {
             bool called = false;
             HttpConfiguration config = new HttpConfiguration();
-            
+
             config.Initializer = _ => called = true;
             config.Services.Clear(typeof(IHttpControllerSelector));
             config.Services.Clear(typeof(IHttpActionSelector));
@@ -223,26 +223,27 @@ namespace System.Net.Http
         {
             // Arrange
             var globalConfiguration = new HttpConfiguration();
-            var _controllerDescriptor = new HttpControllerDescriptor(globalConfiguration, "PerControllerActionSelector", typeof(PerControllerActionSelectorController));
+            var controllerDescriptor = new HttpControllerDescriptor(globalConfiguration, "PerControllerActionSelector", typeof(PerControllerActionSelectorController));
 
             // Set up the global action selector and controller selector
-            var controllerSelector = CreateControllerSelector(new HttpControllerDescriptor[] { _controllerDescriptor });
+            var controllerSelector = CreateControllerSelector(new[] { controllerDescriptor });
             globalConfiguration.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
 
-            var globalAction = CreateActionDescriptor("Global", new Collection<RouteAttribute>() { new RouteAttribute("Global") });
+            var globalAction = CreateActionDescriptor(controllerDescriptor, "Global", new Collection<RouteAttribute>() { new RouteAttribute("Global") });
             var globalActionSelector = CreateActionSelector(
                 new Dictionary<HttpControllerDescriptor, IEnumerable<HttpActionDescriptor>>()
                     {
-                        { _controllerDescriptor, new HttpActionDescriptor[] { globalAction } }
+                        { controllerDescriptor, new HttpActionDescriptor[] { globalAction } }
                     });
             globalConfiguration.Services.Replace(typeof(IHttpActionSelector), globalActionSelector);
 
             // Configure the per controller action selector to return the action with route "PerController"
             var perControllerAction = CreateActionDescriptor(
+                controllerDescriptor,
                 "PerController",
                 new Collection<RouteAttribute>() { new RouteAttribute("PerController") });
             ActionSelectorConfigurationAttribute.PerControllerActionSelectorMock
-                .Setup(a => a.GetActionMapping(_controllerDescriptor))
+                .Setup(a => a.GetActionMapping(controllerDescriptor))
                 .Returns(new HttpActionDescriptor[] { perControllerAction }.ToLookup(ad => ad.ActionName));
 
             // Act
@@ -284,7 +285,7 @@ namespace System.Net.Http
         private static void SetUpConfiguration(HttpConfiguration config, Collection<IRoutePrefix> routePrefixes, IEnumerable<RouteAttribute> routeAttributes)
         {
             HttpControllerDescriptor controllerDescriptor = CreateControllerDescriptor(config, "Controller", routePrefixes);
-            HttpActionDescriptor actionDescriptor = CreateActionDescriptor("Action", routeAttributes);
+            HttpActionDescriptor actionDescriptor = CreateActionDescriptor(controllerDescriptor, "Action", routeAttributes);
 
             var controllerSelector = CreateControllerSelector(new[] { controllerDescriptor });
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
@@ -308,7 +309,10 @@ namespace System.Net.Http
             return controllerDescriptor.Object;
         }
 
-        private static HttpActionDescriptor CreateActionDescriptor(string actionName, IEnumerable<RouteAttribute> routeAttributes)
+        private static HttpActionDescriptor CreateActionDescriptor(
+            HttpControllerDescriptor controllerDescriptor,
+            string actionName, IEnumerable<RouteAttribute>
+            routeAttributes)
         {
             Collection<IDirectRouteFactory> newProviders = new Collection<IDirectRouteFactory>(new List<IDirectRouteFactory>(routeAttributes));
             Collection<IHttpRouteInfoProvider> oldProviders = new Collection<IHttpRouteInfoProvider>(new List<IHttpRouteInfoProvider>(routeAttributes));
@@ -318,6 +322,9 @@ namespace System.Net.Http
             actionDescriptor.Setup(ad => ad.GetCustomAttributes<IHttpRouteInfoProvider>(false)).Returns(oldProviders);
             actionDescriptor.Setup(ad => ad.SupportedHttpMethods).Returns(new Collection<HttpMethod>());
             actionDescriptor.CallBase = true;
+
+            actionDescriptor.Object.ControllerDescriptor = controllerDescriptor;
+
             return actionDescriptor.Object;
         }
 
@@ -341,7 +348,7 @@ namespace System.Net.Http
         public class TestParameter
         {
         }
-        
+
         [ActionSelectorConfiguration]
         public class PerControllerActionSelectorController : ApiController { }
 

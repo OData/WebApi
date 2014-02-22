@@ -67,6 +67,9 @@
     <Compile Include="..\Common\Routing\IDirectRouteFactory.cs">
       <Link>Routing\IDirectRouteFactory.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Routing\IDirectRouteProvider.cs">
+      <Link>Routing\IDirectRouteProvider.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Routing\IInlineConstraintResolver.cs">
       <Link>Routing\IInlineConstraintResolver.cs</Link>
     </Compile>
@@ -178,6 +181,7 @@
     <Compile Include="RouteAttribute.cs" />
     <Compile Include="Controllers\CandidateAction.cs" />
     <Compile Include="Routing\AttributeRoutingMapper.cs" />
+    <Compile Include="Routing\DefaultDirectRouteProvider.cs" />
     <Compile Include="Routing\RouteValueKeys.cs" />
     <Compile Include="Routing\RouteCollectionRoute.cs" />
     <Compile Include="Routing\LinkGenerationRoute.cs" />

@@ -1,9 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Threading;
+using System.Web.Http.Controllers;
+using System.Web.UI;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.Routing
@@ -38,7 +42,7 @@ namespace System.Web.Http.Routing
         [InlineData("GET", "prefix", "PrefixedGet")]
         [InlineData("GET", "prefix/123", "PrefixedGetById123")]
         [InlineData("PUT", "prefix", "PrefixedPut")]
-        // Test multiple routes to same action
+        // Test multiple controllerRouteFactories to same action
         [InlineData("DELETE", "multi1", "multi")]
         [InlineData("DELETE", "multi2", "multi")]
         // Test multiple verbs on the same route
@@ -103,7 +107,7 @@ namespace System.Web.Http.Routing
         }
 
         [Theory]
-        // default routes 
+        // default controllerRouteFactories 
         [InlineData("GET", "prefix2/defaultroute/name", HttpStatusCode.NotFound)] // miss route constraint
         [InlineData("PUT", "prefix2/defaultroute/12", HttpStatusCode.MethodNotAllowed)] // override, different url
         [InlineData("POST", "prefix", HttpStatusCode.MethodNotAllowed)]
@@ -119,7 +123,7 @@ namespace System.Web.Http.Routing
         // Ambiguous match
         [InlineData("GET", "apioverload/Fred?score=12&age=23", HttpStatusCode.InternalServerError)]
         [InlineData("GET", "apiactionstress/ActionY/ActionX?useY=7&useX=8", HttpStatusCode.InternalServerError)]
-        // Unreachable inherited routes
+        // Unreachable inherited controllerRouteFactories
         [InlineData("GET", "api/subclassroute", HttpStatusCode.NotFound)]
         [InlineData("GET", "api/subclassroute?id=9", HttpStatusCode.NotFound)]
         [InlineData("POST", "api/subclassroute?name=foo", HttpStatusCode.NotFound)]
@@ -160,7 +164,7 @@ namespace System.Web.Http.Routing
 
             Assert.Equal(AttributeTargets.Class, usage.ValidOn);
             Assert.False(usage.AllowMultiple); // only 1 per class
-            Assert.False(usage.Inherited); // RoutePrefix is not inherited. 
+            Assert.True(usage.Inherited); // RoutePrefix is not inherited. 
         }
 
         [Theory]
@@ -177,11 +181,75 @@ namespace System.Web.Http.Routing
             Assert.Equal(responseBody, GetContentValue<string>(response));
         }
 
-        private static HttpResponseMessage SubmitRequest(HttpRequestMessage request)
+        [Fact]
+        public void AttributeRouting_DirectRouteProvider_ControllerRoute()
+        {
+            var controllerRoutes = new Dictionary<Type, IEnumerable<IDirectRouteFactory>>()
+            {
+                { typeof(DirectRouteProviderController), new[] { new RouteAttribute("CoolRouteBro") } }
+            };
+
+            var routeProvider = new DirectRouteProvider(controllerRoutes, null);
+
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/CoolRouteBro");
+
+            var response = SubmitRequest(request, routeProvider);
+
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("DirectRouteProviderController.Get239303030()", GetContentValue<string>(response));
+        }
+
+        [Fact]
+        public void AttributeRouting_DirectRouteProvider_ControllerRoute_TraditionalRouteDoesntMatch()
+        {
+            var controllerRoutes = new Dictionary<Type, IEnumerable<IDirectRouteFactory>>()
+            {
+                { typeof(DirectRouteProviderController), new[] { new RouteAttribute("CoolRouteBro") } }
+            };
+
+            var routeProvider = new DirectRouteProvider(controllerRoutes, null);
+
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/DirectRouteProvider");
+
+            var response = SubmitRequest(request, routeProvider);
+
+            Assert.False(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public void AttributeRouting_DirectRouteProvider_ActionRoute()
+        {
+            var actionRoutes = new Dictionary<string, IEnumerable<IDirectRouteFactory>>()
+            {
+                { "Get239303030", new[] { new RouteAttribute("CoolRouteBro") } }
+            };
+
+            var routeProvider = new DirectRouteProvider(null, actionRoutes);
+
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/CoolRouteBro");
+
+            var response = SubmitRequest(request, routeProvider);
+
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("DirectRouteProviderController.Get239303030()", GetContentValue<string>(response));
+        }
+
+        private static HttpResponseMessage SubmitRequest(HttpRequestMessage request, IDirectRouteProvider routeProvider = null)
         {
             HttpConfiguration config = new HttpConfiguration();
             config.Routes.MapHttpRoute("DefaultApi", "api/{controller}");
-            config.MapHttpAttributeRoutes();
+            if (routeProvider == null)
+            {
+                config.MapHttpAttributeRoutes();
+            }
+            else
+            {
+                config.MapHttpAttributeRoutes(routeProvider);
+            }
 
             HttpServer server = new HttpServer(config);
             using (HttpMessageInvoker client = new HttpMessageInvoker(server))
@@ -195,6 +263,42 @@ namespace System.Web.Http.Routing
             T value;
             response.TryGetContentValue<T>(out value);
             return value;
+        }
+
+        private class DirectRouteProvider : DefaultDirectRouteProvider
+        {
+            private readonly IDictionary<Type, IEnumerable<IDirectRouteFactory>> _controllerRouteFactories;
+            private readonly IDictionary<string, IEnumerable<IDirectRouteFactory>> _actionRouteFactories;
+
+            public DirectRouteProvider(
+                IDictionary<Type, IEnumerable<IDirectRouteFactory>> controllerRouteFactories,
+                IDictionary<string, IEnumerable<IDirectRouteFactory>> actionRouteFactories)
+            {
+                _controllerRouteFactories = controllerRouteFactories ?? new Dictionary<Type, IEnumerable<IDirectRouteFactory>>();
+                _actionRouteFactories = actionRouteFactories ?? new Dictionary<string, IEnumerable<IDirectRouteFactory>>();
+            }
+
+            protected override IReadOnlyCollection<IDirectRouteFactory> GetControllerRouteFactories(HttpControllerDescriptor controllerDescriptor)
+            {
+                IEnumerable<IDirectRouteFactory> factories;
+                _controllerRouteFactories.TryGetValue(controllerDescriptor.ControllerType, out factories);
+                return factories == null ? null : factories.ToList();
+            }
+
+            protected override IReadOnlyCollection<IDirectRouteFactory> GetActionRouteFactories(HttpActionDescriptor actionDescriptor)
+            {
+                IEnumerable<IDirectRouteFactory> factories;
+                _actionRouteFactories.TryGetValue(actionDescriptor.ActionName, out factories);
+                return factories == null ? null : factories.ToList();
+            }
+        }
+    }
+
+    public class DirectRouteProviderController : ApiController
+    {
+        public string Get239303030()
+        {
+            return "DirectRouteProviderController.Get239303030()";
         }
     }
 

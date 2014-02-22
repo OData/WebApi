@@ -6,6 +6,10 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 #if ASPNETWEBAPI
 using System.Net.Http;
+using System.Web.Http.Controllers;
+using System.Web.Http.Properties;
+#else
+using System.Web.Routing;
 #endif
 
 #if ASPNETWEBAPI
@@ -14,8 +18,9 @@ using TParsedRoute = System.Web.Http.Routing.HttpParsedRoute;
 using TResources = System.Web.Http.Properties.SRResources;
 using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
 using TRouteDictionaryConcrete = System.Web.Http.Routing.HttpRouteValueDictionary;
+
 #else
-using System.Web.Routing;
+
 using TActionDescriptor = System.Web.Mvc.ActionDescriptor;
 using TParsedRoute = System.Web.Mvc.Routing.ParsedRoute;
 using TResources = System.Web.Mvc.Properties.MvcResources;
@@ -127,6 +132,13 @@ namespace System.Web.Mvc.Routing
 
             dataTokens[RouteDataTokenKeys.Actions] = _actions;
 
+#if ASPNETWEBAPI
+            if (!TargetIsAction)
+            {
+                dataTokens[RouteDataTokenKeys.Controller] = _actions[0].ControllerDescriptor;
+            }
+#endif
+
             int order = Order;
 
             if (order != default(int))
@@ -221,6 +233,28 @@ namespace System.Web.Mvc.Routing
                 }
             }
         }
+
+#if ASPNETWEBAPI
+        internal static void ValidateRouteEntry(RouteEntry entry)
+        {
+            Contract.Assert(entry != null);
+
+            IHttpRoute route = entry.Route;
+            Contract.Assert(route != null);
+
+            HttpActionDescriptor[] targetActions = route.GetTargetActionDescriptors();
+
+            if (targetActions == null || targetActions.Length == 0)
+            {
+                throw new InvalidOperationException(SRResources.DirectRoute_MissingActionDescriptors);
+            }
+
+            if (route.Handler != null)
+            {
+                throw new InvalidOperationException(SRResources.DirectRoute_HandlerNotSupported);
+            }
+        }
+#endif
 
         private static TRouteDictionaryConcrete Copy(TRouteDictionary routeDictionary)
         {

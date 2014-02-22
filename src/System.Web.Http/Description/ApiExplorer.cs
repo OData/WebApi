@@ -284,7 +284,7 @@ namespace System.Web.Http.Description
         private void ExploreRouteActions(IHttpRoute route, string localPath, HttpControllerDescriptor controllerDescriptor, Collection<ApiDescription> apiDescriptions)
         {
             // exclude controllers that are marked with route attributes.
-            if (!controllerDescriptor.HasRoutingAttribute())
+            if (!controllerDescriptor.IsAttributeRouted())
             {
                 ServicesContainer controllerServices = controllerDescriptor.Configuration.Services;
                 ILookup<string, HttpActionDescriptor> actionMappings = controllerServices.GetActionSelector().GetActionMapping(controllerDescriptor);
@@ -299,37 +299,34 @@ namespace System.Web.Http.Description
                             // expand {action} variable
                             actionVariableValue = actionMapping.Key;
                             string expandedLocalPath = _actionVariableRegex.Replace(localPath, actionVariableValue);
-                            PopulateActionDescriptions(actionMapping, actionVariableValue, route, expandedLocalPath, apiDescriptions, controllerDescriptor);
+                            PopulateActionDescriptions(actionMapping, actionVariableValue, route, expandedLocalPath, apiDescriptions);
                         }
                     }
                     else if (route.Defaults.TryGetValue(RouteValueKeys.Action, out actionVariableValue))
                     {
                         // bound action variable, { action = "actionName" }
-                        PopulateActionDescriptions(actionMappings[actionVariableValue], actionVariableValue, route, localPath, apiDescriptions, controllerDescriptor);
+                        PopulateActionDescriptions(actionMappings[actionVariableValue], actionVariableValue, route, localPath, apiDescriptions);
                     }
                     else
                     {
                         // no {action} specified, e.g. {controller}/{id}
                         foreach (IGrouping<string, HttpActionDescriptor> actionMapping in actionMappings)
                         {
-                            PopulateActionDescriptions(actionMapping, null, route, localPath, apiDescriptions, controllerDescriptor);
+                            PopulateActionDescriptions(actionMapping, null, route, localPath, apiDescriptions);
                         }
                     }
                 }
             }
         }
 
-        private void PopulateActionDescriptions(IEnumerable<HttpActionDescriptor> actionDescriptors, string actionVariableValue, IHttpRoute route, string localPath, Collection<ApiDescription> apiDescriptions, HttpControllerDescriptor controllerDescriptor)
+        private void PopulateActionDescriptions(IEnumerable<HttpActionDescriptor> actionDescriptors, string actionVariableValue, IHttpRoute route, string localPath, Collection<ApiDescription> apiDescriptions)
         {
             foreach (HttpActionDescriptor actionDescriptor in actionDescriptors)
             {
                 if (ShouldExploreAction(actionVariableValue, actionDescriptor, route))
                 {
-                    ReflectedHttpActionDescriptor reflectedAction = actionDescriptor as ReflectedHttpActionDescriptor;
-
                     // exclude actions that are marked with route attributes except for the inherited actions.
-                    if (!actionDescriptor.HasRoutingAttribute() ||
-                        (reflectedAction != null && reflectedAction.MethodInfo.DeclaringType != controllerDescriptor.ControllerType))
+                    if (!actionDescriptor.IsAttributeRouted())
                     {
                         PopulateActionDescriptions(actionDescriptor, route, localPath, apiDescriptions);
                     }

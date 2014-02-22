@@ -180,7 +180,6 @@
     </Compile>
     <Compile Include="ModelBinding\FormDataCollectionExtensionsTest.cs" />
     <Compile Include="ModelBinding\ModelBinderAttributeTest.cs" />
-    <Compile Include="Routing\AttributeRoutingMapperTests.cs" />
     <Compile Include="Routing\AttributeRoutingTest.cs" />
     <Compile Include="..\Common\Routing\RouteConstraintsTests.cs">
       <Link>Routing\RouteConstraintsTests.cs</Link>
@@ -194,6 +193,7 @@
     <Compile Include="..\Common\Routing\DirectRouteBuilderTests.cs">
       <Link>Routing\DirectRouteBuilderTests.cs</Link>
     </Compile>
+    <Compile Include="Routing\DefaultDirectRouteProviderTests.cs" />
     <Compile Include="Routing\LinkGenerationRouteTests.cs" />
     <Compile Include="Routing\DirectRouteProviderContextTests.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />

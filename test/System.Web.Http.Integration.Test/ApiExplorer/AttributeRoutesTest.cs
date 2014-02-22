@@ -2,7 +2,9 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Routing;
@@ -215,31 +217,33 @@ namespace System.Web.Http.ApiExplorer
         }
 
         [Fact]
-        public void EmptyDescription_OnAttributeRoutedController_UsingStandardRoute()
+        public void NoDescription_OnAttributeRoutedAction_UsingStandardControllerRoute()
         {
             HttpConfiguration config = new HttpConfiguration();
-            config.Routes.MapHttpRoute("Default", "api/someController", new { controller = "DefaultRoute" });
+            var route = config.Routes.MapHttpRoute("Default", "api/someController", new { controller = "DefaultRoute" });
+            config.MapHttpAttributeRoutes();
 
             DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(DefaultRouteController));
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
             config.EnsureInitialized();
 
             IApiExplorer explorer = config.Services.GetApiExplorer();
-            Assert.Empty(explorer.ApiDescriptions);
+            Assert.True(explorer.ApiDescriptions.All(d => d.Route != route));
         }
 
         [Fact]
-        public void EmptyDescription_OnAttributeRoutedAction_UsingStandardRoute()
+        public void NoDescription_OnAttributeRoutedAction_UsingStandardRoute()
         {
             HttpConfiguration config = new HttpConfiguration();
-            config.Routes.MapHttpRoute("Default", "api/someAction/{id}", new { controller = "Attributed", action = "Get" });
+            var route = config.Routes.MapHttpRoute("Default", "api/someAction/{id}", new { controller = "Attributed", action = "Get" });
+            config.MapHttpAttributeRoutes();
 
             DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(AttributedController));
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
             config.EnsureInitialized();
 
             IApiExplorer explorer = config.Services.GetApiExplorer();
-            Assert.Empty(explorer.ApiDescriptions);
+            Assert.True(explorer.ApiDescriptions.All(d => d.Route != route));
         }
     }
 }

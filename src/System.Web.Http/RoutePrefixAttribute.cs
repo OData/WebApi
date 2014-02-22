@@ -9,7 +9,7 @@ namespace System.Web.Http
     /// Annotates a controller with a route prefix that applies to actions that have any <see cref="RouteAttribute"/>s on them.
     /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "This attribute is intended to be extended by the user.")]
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class RoutePrefixAttribute : Attribute, IRoutePrefix
     {
         /// <summary>

@@ -52,7 +52,7 @@ namespace System.Web.Http.Routing
                 precedence = possiblePrecedence;
             }
 
-            foreach (ReflectedHttpActionDescriptor actionDescriptor in directRouteActions)
+            foreach (HttpActionDescriptor actionDescriptor in directRouteActions)
             {
                 candidates.Add(new CandidateAction
                 {
@@ -63,6 +63,46 @@ namespace System.Web.Http.Routing
             }
 
             return candidates.ToArray();
+        }
+
+        public static HttpActionDescriptor[] GetTargetActionDescriptors(this IHttpRoute route)
+        {
+            Contract.Assert(route != null);
+            IDictionary<string, object> dataTokens = route.DataTokens;
+
+            if (dataTokens == null)
+            {
+                return null;
+            }
+
+            HttpActionDescriptor[] actions;
+
+            if (!dataTokens.TryGetValue<HttpActionDescriptor[]>(RouteDataTokenKeys.Actions, out actions))
+            {
+                return null;
+            }
+
+            return actions;
+        }
+
+        public static HttpControllerDescriptor GetTargetControllerDescriptor(this IHttpRoute route)
+        {
+            Contract.Assert(route != null);
+            IDictionary<string, object> dataTokens = route.DataTokens;
+
+            if (dataTokens == null)
+            {
+                return null;
+            }
+
+            HttpControllerDescriptor controller;
+
+            if (!dataTokens.TryGetValue<HttpControllerDescriptor>(RouteDataTokenKeys.Controller, out controller))
+            {
+                return null;
+            }
+
+            return controller;
         }
     }
 }

@@ -144,7 +144,21 @@ namespace System.Web.Mvc.Html
             }
 
             object htmlAttributesObject = viewData[HtmlAttributeKey];
-            result += html.Hidden(String.Empty, model, htmlAttributesObject).ToHtmlString();
+            IDictionary<string, object> htmlAttributesDict = htmlAttributesObject as IDictionary<string, object>;
+
+            MvcHtmlString hiddenResult;
+
+            if (htmlAttributesDict != null) 
+            {
+                hiddenResult = html.Hidden(String.Empty, model, htmlAttributesDict);
+            } 
+            else 
+            {
+                hiddenResult = html.Hidden(String.Empty, model, htmlAttributesObject);
+            }
+
+            result += hiddenResult.ToHtmlString();
+
             return result;
         }
 
@@ -177,7 +191,11 @@ namespace System.Web.Mvc.Html
 
         private static IDictionary<string, object> MergeHtmlAttributes(object htmlAttributesObject, string className, string inputType)
         {
-            RouteValueDictionary htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributesObject);
+            IDictionary<string, object> htmlAttributesDict = htmlAttributesObject as IDictionary<string, object>;
+
+            RouteValueDictionary htmlAttributes = (htmlAttributesDict != null) ? new RouteValueDictionary(htmlAttributesDict)
+                : HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributesObject);
+
             string htmlClassName;
             if (htmlAttributes.TryGetValue("class", out htmlClassName))
             {

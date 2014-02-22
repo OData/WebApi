@@ -89,6 +89,17 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.BooleanTemplate(htmlHelper));
         }
 
+        [Theory]
+        [PropertyData("BooleanTemplateHtmlAttributeData")]
+        public void BooleanTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml) 
+        {
+            var htmlHelper = MakeHtmlHelper<bool>(true);
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.BooleanTemplate(htmlHelper));
+        }
+
         // CollectionTemplate
 
         private static string CollectionSpyCallback(HtmlHelper html, ModelMetadata metadata, string htmlFieldName, string templateName, DataBoundControlMode mode, object additionalViewData)
@@ -327,6 +338,18 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.DecimalTemplate(htmlHelper));
         }
 
+        [Theory]
+        [ReplaceCulture]
+        [PropertyData("DecimalTemplateHtmlAttributeData")]
+        public void DecimalTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<decimal>(12.30);
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.DecimalTemplate(htmlHelper));
+        }
+
         // HiddenInputTemplate
 
         [Fact]
@@ -386,6 +409,17 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.HiddenInputTemplate(htmlHelper));
         }
 
+        [Theory]
+        [PropertyData("HiddenInputTemplateHtmlAttributeData")]
+        public void HiddenInputTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Hidden Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.HiddenInputTemplate(htmlHelper));
+        }
+
         // MultilineText
 
         [Fact]
@@ -434,6 +468,17 @@ namespace System.Web.Mvc.Html.Test
         {
             var htmlHelper = MakeHtmlHelper<string>("", "Multiple" + Environment.NewLine + "Line" + Environment.NewLine + "Value!");
             htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.MultilineTextTemplate(htmlHelper));
+        }
+
+        [Theory]
+        [PropertyData("MultilineTextTemplateHtmlAttributeData")]
+        public void MultilineTextTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("", "Multiple" + Environment.NewLine + "Line" + Environment.NewLine + "Value!");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.MultilineTextTemplate(htmlHelper));
@@ -715,6 +760,17 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.PasswordTemplate(htmlHelper));
         }
 
+        [Theory]
+        [PropertyData("PasswordTemplateHtmlAttributeData")]
+        public void PasswordTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.PasswordTemplate(htmlHelper));
+        }
+
         [Fact]
         public void ObjectTemplateWithHiddenHtml()
         {
@@ -797,6 +853,17 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.StringTemplate(htmlHelper));
         }
 
+        [Theory]
+        [PropertyData("StringTemplateHtmlAttributeData")]
+        public void StringTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.StringTemplate(htmlHelper));
+        }
+
         // PhoneNumberInputTemplate
 
         [Fact]
@@ -835,6 +902,17 @@ namespace System.Web.Mvc.Html.Test
         {
             var htmlHelper = MakeHtmlHelper<string>("Value");
             htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.PhoneNumberInputTemplate(htmlHelper));
+        }
+
+        [Theory]
+        [PropertyData("PhoneNumberInputTemplateHtmlAttributeData")]
+        public void PhoneNumberInputTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.PhoneNumberInputTemplate(htmlHelper));
@@ -883,6 +961,17 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.UrlInputTemplate(htmlHelper));
         }
 
+        [Theory]
+        [PropertyData("UrlInputTemplateHtmlAttributeData")]
+        public void UrlInputTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.UrlInputTemplate(htmlHelper));
+        }
+
         // EmailAddressInputTemplate
 
         [Fact]
@@ -921,6 +1010,17 @@ namespace System.Web.Mvc.Html.Test
         {
             var htmlHelper = MakeHtmlHelper<string>("Value");
             htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.EmailAddressInputTemplate(htmlHelper));
+        }
+
+        [Theory]
+        [PropertyData("EmailAddressInputTemplateHtmlAttributeData")]
+        public void EmailAddressInputTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<string>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.EmailAddressInputTemplate(htmlHelper));
@@ -996,6 +1096,17 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.DateTimeInputTemplate(htmlHelper));
         }
 
+        [Theory]
+        [PropertyData("DateTimeInputTemplateHtmlAttributeData")]
+        public void DateTimeInputTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<DateTime>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.DateTimeInputTemplate(htmlHelper));
+        }
+
         [Fact]
         public void DateTimeLocalInputTemplateTests()
         {
@@ -1061,6 +1172,17 @@ namespace System.Web.Mvc.Html.Test
         {
             var htmlHelper = MakeHtmlHelper<DateTime>("Value");
             htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.DateTimeLocalInputTemplate(htmlHelper));
+        }
+
+        [Theory]
+        [PropertyData("DateTimeLocalInputTemplateHtmlAttributeData")]
+        public void DateTimeLocalInputTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<DateTime>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.DateTimeLocalInputTemplate(htmlHelper));
@@ -1136,6 +1258,17 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.DateInputTemplate(htmlHelper));
         }
 
+        [Theory]
+        [PropertyData("DateInputTemplateHtmlAttributeData")]
+        public void DateInputTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<DateTime>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.DateInputTemplate(htmlHelper));
+        }
+
         [Fact]
         public void TimeInputTemplateTests()
         {
@@ -1206,6 +1339,17 @@ namespace System.Web.Mvc.Html.Test
                 DefaultEditorTemplates.TimeInputTemplate(htmlHelper));
         }
 
+        [Theory]
+        [PropertyData("TimeInputTemplateHtmlAttributeData")]
+        public void TimeInputTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<DateTime>("Value");
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.TimeInputTemplate(htmlHelper));
+        }
+
         // NumberInputTemplate
 
         [Fact]
@@ -1244,6 +1388,17 @@ namespace System.Web.Mvc.Html.Test
         {
             var htmlHelper = MakeHtmlHelper<int>(10);
             htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.NumberInputTemplate(htmlHelper));
+        }
+
+        [Theory]
+        [PropertyData("NumberInputTemplateHtmlAttributeData")]
+        public void NumberInputTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var htmlHelper = MakeHtmlHelper<int>(10);
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.NumberInputTemplate(htmlHelper));
@@ -1293,6 +1448,18 @@ namespace System.Web.Mvc.Html.Test
             var color = Color.FromArgb(0x33, 0xf4, 0xcc);
             var htmlHelper = MakeHtmlHelper<Color>(color);
             htmlHelper.ViewContext.ViewBag.htmlAttributes = htmlAttributes;
+            Assert.Equal(
+                expectedHtml,
+                DefaultEditorTemplates.ColorInputTemplate(htmlHelper));
+        }
+
+        [Theory]
+        [PropertyData("ColorInputTemplateHtmlAttributeData")]
+        public void ColorInputTemplate_AddsHtmlAttributesDictionary(object htmlAttributes, string expectedHtml)
+        {
+            var color = Color.FromArgb(0x33, 0xf4, 0xcc);
+            var htmlHelper = MakeHtmlHelper<Color>(color);
+            htmlHelper.ViewContext.ViewBag.htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
             Assert.Equal(
                 expectedHtml,
                 DefaultEditorTemplates.ColorInputTemplate(htmlHelper));

@@ -514,4 +514,16 @@ Duplicates:
   <data name="CollectionParameterContainsNullElement" xml:space="preserve">
     <value>The parameter '{0}' cannot contain a null element.</value>
   </data>
+  <data name="AuthenticationFilterErrorResult" xml:space="preserve">
+    <value>The authentication filter encountered an error. ErrorResult='{0}'.</value>
+  </data>
+  <data name="AuthenticationFilterSetPrincipalToKnownIdentity" xml:space="preserve">
+    <value>The authentication filter successfully set a principal to a known identity. Identity.Name='{0}'. Identity.AuthenticationType='{1}'.</value>
+  </data>
+  <data name="AuthenticationFilterDidNothing" xml:space="preserve">
+    <value>The authentication filter did not encounter an error or set a principal.</value>
+  </data>
+  <data name="AuthenticationFilterSetPrincipalToUnknownIdentity" xml:space="preserve">
+    <value>The authentication filter set a principal to an unknown identity.</value>
+  </data>
 </root>

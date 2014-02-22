@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Properties;
 using System.Web.Http.Services;
 
 namespace System.Web.Http.Tracing.Tracers
@@ -37,7 +39,36 @@ namespace System.Web.Http.Tracing.Tracers
                 operationName: AuthenticateAsyncMethodName,
                 beginTrace: null,
                 execute: () => _innerFilter.AuthenticateAsync(context, cancellationToken),
-                endTrace: null,
+                endTrace: (tr) =>
+                {
+                    if (context != null)
+                    {
+                        if (context.ErrorResult != null)
+                        {
+                            tr.Message = String.Format(CultureInfo.CurrentCulture,
+                                SRResources.AuthenticationFilterErrorResult,
+                                context.ErrorResult);
+                        }
+                        else if (context.Principal != null)
+                        {
+                            if (context.Principal.Identity == null)
+                            {
+                                tr.Message = SRResources.AuthenticationFilterSetPrincipalToUnknownIdentity;
+                            }
+                            else
+                            {
+                                tr.Message = String.Format(CultureInfo.CurrentCulture,
+                                    SRResources.AuthenticationFilterSetPrincipalToKnownIdentity,
+                                    context.Principal.Identity.Name,
+                                    context.Principal.Identity.AuthenticationType);
+                            }
+                        }
+                        else
+                        {
+                            tr.Message = SRResources.AuthenticationFilterDidNothing;
+                        }
+                    }
+                },
                 errorTrace: null);
         }
 

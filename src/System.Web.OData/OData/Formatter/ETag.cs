@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http;
 using System.Web.OData.Properties;
+using System.Web.OData.Query.Expressions;
 
 namespace System.Web.OData.Formatter
 {
@@ -53,6 +54,8 @@ namespace System.Web.OData.Formatter
         /// Gets or sets an entity type of the ETag.
         /// </summary>
         public Type EntityType { get; set; }
+
+        internal bool IsIfNoneMatch { get; set; }
 
         internal IDictionary<string, object> ConcurrencyProperties
         {
@@ -108,11 +111,14 @@ namespace System.Web.OData.Formatter
         {
             Type type = EntityType;
             ParameterExpression param = Expression.Parameter(type);
-            BinaryExpression where = null;
+            Expression where = null;
             foreach (KeyValuePair<string, object> item in ConcurrencyProperties)
             {
                 MemberExpression name = Expression.Property(param, item.Key);
-                ConstantExpression value = Expression.Constant(item.Value);
+                object itemValue = item.Value;
+                Expression value = itemValue != null
+                    ? LinqParameterContainer.Parameterize(itemValue.GetType(), itemValue)
+                    : Expression.Constant(value: null);
                 BinaryExpression equal = Expression.Equal(name, value);
                 where = where == null ? equal : Expression.AndAlso(where, equal);
             }
@@ -120,6 +126,11 @@ namespace System.Web.OData.Formatter
             if (where == null)
             {
                 return query;
+            }
+
+            if (IsIfNoneMatch)
+            {
+                where = Expression.Not(where);
             }
 
             Expression whereLambda = Expression.Lambda(where, param);

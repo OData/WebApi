@@ -208,6 +208,10 @@ namespace System.Web.OData.Query
                 {
                     EntityTagHeaderValue etagHeaderValue = Request.Headers.IfNoneMatch.SingleOrDefault();
                     _etagIfNoneMatch = GetETag(etagHeaderValue);
+                    if (_etagIfNoneMatch != null)
+                    {
+                        _etagIfNoneMatch.IsIfNoneMatch = true;
+                    }
                     _etagIfNoneMatchChecked = true;
                 }
 

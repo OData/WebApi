@@ -101,6 +101,27 @@ namespace System.Web.OData.Query
             Assert.Equal("Foo", dynamicResult.Name);
         }
 
+        [Theory]
+        [InlineData("IfMatch")]
+        [InlineData("IfNoneMatch")]
+        public void GetIfMatchOrNoneMatch_ETagIsNull_IfETagHeaderValueNotSet(string header)
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
+            customer.HasKey(c => c.Id);
+            customer.Property(c => c.Id);
+            IEdmModel model = builder.GetEdmModel();
+            ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
+
+            // Act
+            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, new HttpRequestMessage());
+            ETag result = header.Equals("IfMatch") ? query.IfMatch : query.IfNoneMatch;
+
+            // Assert
+            Assert.Null(result);
+        }
+
         [Fact]
         public void ApplyTo_ThrowsArgument_If_QueryTypeDoesnotMatch()
         {

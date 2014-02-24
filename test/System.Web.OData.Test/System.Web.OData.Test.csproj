@@ -131,7 +131,6 @@
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />
     <Compile Include="OData\ODataRoutingAttributeTest.cs" />
     <Compile Include="OData\Formatter\HttpRequestMessageExtensions.cs" />
-    <Compile Include="OData\EntitySetControllerHelpersTest.cs" />
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="OData\PerRequestParameterBindingTest.cs" />
     <Compile Include="OData\QueryableLimitationTest.cs" />
@@ -180,7 +179,6 @@
     <Compile Include="OData\Builder\ParameterConfigurationTest.cs" />
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />
-    <Compile Include="OData\AsyncEntitySetControllerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\EdmDirectValueAnnotationsManagerExtensions.cs" />
     <Compile Include="OData\Formatter\Serialization\TestODataMetadataLevel.cs" />
     <Compile Include="OData\ODataFormattingAttributeTest.cs" />
@@ -192,7 +190,6 @@
     <Compile Include="OData\Routing\Conventions\EntityRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\Conventions\EntitySetRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\ODataPathTest.cs" />
-    <Compile Include="OData\EntitySetControllerTest.cs" />
     <Compile Include="OData\Formatter\JsonAssert.cs" />
     <Compile Include="OData\FromODataUriTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataMessageReaderLearningTests.cs" />

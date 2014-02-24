@@ -134,7 +134,7 @@ namespace System.Web.OData.Results
 
         internal IHttpActionResult GetInnerActionResult()
         {
-            if (EntitySetControllerHelpers.RequestPrefersReturnNoContent(Request))
+            if (RequestPreferenceHelpers.RequestPrefersReturnNoContent(Request))
             {
                 return new StatusCodeResult(HttpStatusCode.NoContent, Request);
             }

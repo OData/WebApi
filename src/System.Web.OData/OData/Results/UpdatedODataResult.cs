@@ -102,7 +102,7 @@ namespace System.Web.OData.Results
 
         internal IHttpActionResult GetInnerActionResult()
         {
-            if (EntitySetControllerHelpers.RequestPrefersReturnContent(_innerResult.Request))
+            if (RequestPreferenceHelpers.RequestPrefersReturnContent(_innerResult.Request))
             {
                 return _innerResult;
             }

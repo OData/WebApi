@@ -459,55 +459,6 @@
   <data name="DeltaEntityTypeNotAssignable" xml:space="preserve">
     <value>The actual entity type '{0}' is not assignable to the expected type '{1}'.</value>
   </data>
-  <data name="EntitySetControllerErrorMessageLanguage" xml:space="preserve">
-    <value>en-US</value>
-    <comment>Language tag of the error messages according to RFC4646.</comment>
-  </data>
-  <data name="EntitySetControllerUnmappedRequest" xml:space="preserve">
-    <value>This service does not support OData requests in the form '{0}'.</value>
-  </data>
-  <data name="EntitySetControllerUnmappedRequestErrorCode" xml:space="preserve">
-    <value>Not implemented.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedCreate" xml:space="preserve">
-    <value>Creating entities is not supported for this entity set.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedCreateRef" xml:space="preserve">
-    <value>Creating a '{0}' reference is not supported for this entity set.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedCreateRefErrorCode" xml:space="preserve">
-    <value>Creating reference failed.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedDelete" xml:space="preserve">
-    <value>Deleting entities is not supported for this entity set.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedDeleteRef" xml:space="preserve">
-    <value>Deleting a '{0}' reference is not supported for this entity set.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedDeleteRefErrorCode" xml:space="preserve">
-    <value>Deleting reference failed.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedGet" xml:space="preserve">
-    <value>Getting entities is not supported for this entity set.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedGetByKey" xml:space="preserve">
-    <value>Getting entities by key is not supported for this entity set.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedGetByKeyErrorCode" xml:space="preserve">
-    <value>GET requests by key are not supported.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedMethodErrorCode" xml:space="preserve">
-    <value>{0} requests are not supported.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedGetKey" xml:space="preserve">
-    <value>Extracting the key from entity instances is not supported for this entity set.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedPatch" xml:space="preserve">
-    <value>Patching entities is not supported for this entity set.</value>
-  </data>
-  <data name="EntitySetControllerUnsupportedUpdate" xml:space="preserve">
-    <value>Replacing entities is not supported for this entity set.</value>
-  </data>
   <data name="NotAllowedArithmeticOperator" xml:space="preserve">
     <value>Arithmetic operator '{0}' is not allowed. To allow it, set the '{1}' property on EnableQueryAttribute or QueryValidationSettings.</value>
   </data>
@@ -567,12 +518,6 @@
   </data>
   <data name="RequestMustHaveODataRouteName" xml:space="preserve">
     <value>The request must have an associated OData route name. Consider using the extension request.ODataProperties().RouteName to set a route name.</value>
-  </data>
-  <data name="LocationHeaderDoesNotStartWithEntitySet" xml:space="preserve">
-    <value>A Location header could not be generated because the request's OData path does not start with an entity set path segment.</value>
-  </data>
-  <data name="LocationHeaderMissingODataPath" xml:space="preserve">
-    <value>A Location header could not be generated because the request does not have an associated OData path.</value>
   </data>
   <data name="ManyNavigationPropertiesCannotBeChanged" xml:space="preserve">
     <value>Cannot change multiplicity of the collection navigation property '{0}'.</value>

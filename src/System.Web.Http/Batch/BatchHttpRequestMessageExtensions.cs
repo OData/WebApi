@@ -24,6 +24,7 @@ namespace System.Web.Http.Batch
             HttpPropertyKeys.DisposableRequestResourcesKey,
             HttpPropertyKeys.SynchronizationContextKey,
             HttpPropertyKeys.HttpConfigurationKey,
+            HttpRoute.RoutingContextKey,
             HttpBatchContextKey
         };
 

@@ -24,7 +24,7 @@ namespace System.Web.Http.Routing
         /// </summary>
         public static readonly string HttpRouteKey = "httproute";
 
-        private const string RoutingContextKey = "MS_RoutingContext";
+        internal const string RoutingContextKey = "MS_RoutingContext";
 
         private string _routeTemplate;
         private HttpRouteValueDictionary _defaults;

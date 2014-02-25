@@ -14,6 +14,7 @@ namespace System.Web.Http.Batch
         [InlineData("MS_SynchronizationContext")]
         [InlineData("MS_HttpConfiguration")]
         [InlineData("MS_HttpBatchContext")]
+        [InlineData("MS_RoutingContext")]
         public void CopyBatchRequestProperties_IgnoresSpecialProperties(string specialPropertyName)
         {
             // Arrange

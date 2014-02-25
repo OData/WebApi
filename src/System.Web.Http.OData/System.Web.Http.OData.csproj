@@ -115,7 +115,7 @@
     <Compile Include="OData\ODataUntypedActionParameters.cs" />
     <Compile Include="OData\PerRequestContentNegotiator.cs" />
     <Compile Include="OData\EnableQueryAttribute.cs" />
-    <Compile Include="OData\Query\Expressions\IDictionaryConvertible.cs" />
+    <Compile Include="OData\Query\ISelectExpandWrapper.cs" />
     <Compile Include="OData\Query\Expressions\NamedPropertyExpression.cs" />
     <Compile Include="OData\Query\Expressions\PropertyContainer.cs" />
     <Compile Include="OData\Query\Expressions\SelectExpandBinder.cs" />

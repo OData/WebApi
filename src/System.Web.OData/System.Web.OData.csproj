@@ -148,7 +148,7 @@
     <Compile Include="OData\PerRequestContentNegotiator.cs" />
     <Compile Include="OData\QueryableRestrictions.cs" />
     <Compile Include="OData\QueryableRestrictionsAnnotation.cs" />
-    <Compile Include="OData\Query\Expressions\IDictionaryConvertible.cs" />
+    <Compile Include="OData\Query\ISelectExpandWrapper.cs" />
     <Compile Include="OData\Query\Expressions\NamedPropertyExpression.cs" />
     <Compile Include="OData\Query\Expressions\PropertyContainer.cs" />
     <Compile Include="OData\Query\Expressions\SelectExpandBinder.cs" />

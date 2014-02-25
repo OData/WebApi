@@ -12,7 +12,7 @@ namespace System.Web.Http.OData.Query.Expressions
     {
         public override bool CanConvert(Type objectType)
         {
-            if (objectType.IsAssignableFrom(typeof(IDictionaryConvertible)))
+            if (objectType.IsAssignableFrom(typeof(ISelectExpandWrapper)))
             {
                 return true;
             }
@@ -27,7 +27,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            IDictionaryConvertible dictionaryConvertible = value as IDictionaryConvertible;
+            ISelectExpandWrapper dictionaryConvertible = value as ISelectExpandWrapper;
             if (dictionaryConvertible != null)
             {
                 serializer.Serialize(writer, dictionaryConvertible.ToDictionary());

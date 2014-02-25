@@ -17,7 +17,7 @@ namespace System.Web.OData.Query.Expressions
     /// </summary>
     /// <typeparam name="TElement">The element being selected and expanded.</typeparam>
     [JsonConverter(typeof(SelectExpandWrapperConverter))]
-    internal class SelectExpandWrapper<TElement> : IEdmEntityObject, IDictionaryConvertible
+    internal class SelectExpandWrapper<TElement> : IEdmEntityObject, ISelectExpandWrapper
     {
         private Dictionary<string, object> _containerDict;
         private TypedEdmEntityObject _typedEdmEntityObject;
@@ -93,7 +93,7 @@ namespace System.Web.OData.Query.Expressions
             return false;
         }
 
-        public Dictionary<string, object> ToDictionary()
+        public IDictionary<string, object> ToDictionary()
         {
             Dictionary<string, object> dictionary = new Dictionary<string, object>();
 

@@ -1802,6 +1802,57 @@ namespace System.Web.Mvc.Test
 
 
         [Fact]
+        public void CreateActionInvokerCallsAsyncActionInvokerFactoryCreateInstance()
+        {
+            // Controller uses an IDependencyResolver and an IAsyncActionInvokerFactory
+            // to create an IAsyncActionInvoker.
+            // Arrange
+            var controller = new EmptyController();
+            Mock<IDependencyResolver> resolverMock = new Mock<IDependencyResolver>();
+            Mock<IAsyncActionInvoker> asyncActionInvokerMock = new Mock<IAsyncActionInvoker>();
+            Mock<IAsyncActionInvokerFactory> asyncActionInvokerFactoryMock = new Mock<IAsyncActionInvokerFactory>();
+            asyncActionInvokerFactoryMock.Setup(a => a.CreateInstance()).Returns(asyncActionInvokerMock.Object);
+            resolverMock.Setup(r => r.GetService(typeof(IAsyncActionInvokerFactory)))
+                .Returns(asyncActionInvokerFactoryMock.Object);
+            resolverMock.Setup(r => r.GetService(typeof(IActionInvokerFactory)))
+                .Returns((IActionInvokerFactory)null);
+            controller.Resolver = resolverMock.Object;
+
+            // Act
+            var ai = controller.CreateActionInvoker();
+
+            // Assert
+            resolverMock.Verify(r => r.GetService(typeof(IAsyncActionInvokerFactory)), Times.Once());
+            resolverMock.Verify(r => r.GetService(typeof(IActionInvokerFactory)), Times.Never());
+            Assert.Same(asyncActionInvokerMock.Object, ai);
+        }
+
+        [Fact]
+        public void CreateActionInvokerCallsActionInvokerFactoryCreateInstance()
+        {
+            // Controller uses an IDependencyResolver and an IActionInvokerFactory to create an IActionInvoker.
+            // Arrange
+            var controller = new EmptyController();
+            Mock<IDependencyResolver> resolverMock = new Mock<IDependencyResolver>();
+            Mock<IActionInvoker> actionInvokerMock = new Mock<IActionInvoker>();
+            Mock<IActionInvokerFactory> actionInvokerFactoryMock = new Mock<IActionInvokerFactory>();
+            actionInvokerFactoryMock.Setup(a => a.CreateInstance()).Returns(actionInvokerMock.Object);
+            resolverMock.Setup(r => r.GetService(typeof(IAsyncActionInvokerFactory)))
+                .Returns((IAsyncActionInvokerFactory)null);
+            resolverMock.Setup(r => r.GetService(typeof(IActionInvokerFactory)))
+                .Returns(actionInvokerFactoryMock.Object);
+            controller.Resolver = resolverMock.Object;
+
+            // Act
+            var ai = controller.CreateActionInvoker();
+
+            // Assert
+            resolverMock.Verify(r => r.GetService(typeof(IAsyncActionInvokerFactory)), Times.Once());
+            resolverMock.Verify(r => r.GetService(typeof(IActionInvokerFactory)), Times.Once());
+            Assert.Same(actionInvokerMock.Object, ai);
+        }
+
+        [Fact]
         public void CreateActionInvokerCallsIntoResolverInstance()
         {
             // Controller uses an IDependencyResolver to create an IActionInvoker.

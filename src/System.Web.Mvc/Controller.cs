@@ -31,9 +31,11 @@ namespace System.Web.Mvc
 
         private IDependencyResolver _resolver;
 
-        // By default, use the global resolver with caching. 
-        // Or we can override to supply this instance with its own cache.
-        internal IDependencyResolver Resolver
+        /// <summary>
+        /// Represents a replaceable dependency resolver providing services.
+        /// By default, it uses the <see cref="DependencyResolver.CurrentCache"/>. 
+        /// </summary>
+        public IDependencyResolver Resolver
         {
             get { return _resolver ?? DependencyResolver.CurrentCache; }
             set { _resolver = value; }
@@ -187,7 +189,22 @@ namespace System.Web.Mvc
         protected virtual IActionInvoker CreateActionInvoker()
         {
             // Controller supports asynchronous operations by default. 
-            return Resolver.GetService<IAsyncActionInvoker>() ?? Resolver.GetService<IActionInvoker>() ?? new AsyncControllerActionInvoker();
+            // Those factories can be customized in order to create an action invoker for each request.
+            IAsyncActionInvokerFactory asyncActionInvokerFactory = Resolver.GetService<IAsyncActionInvokerFactory>();
+            if (asyncActionInvokerFactory != null)
+            {
+                return asyncActionInvokerFactory.CreateInstance();
+            }
+            IActionInvokerFactory actionInvokerFactory = Resolver.GetService<IActionInvokerFactory>();
+            if (actionInvokerFactory != null)
+            {
+                return actionInvokerFactory.CreateInstance();
+            }
+
+            // Note that getting a service from the current cache will return the same instance for every request.
+            return Resolver.GetService<IAsyncActionInvoker>() ??
+                Resolver.GetService<IActionInvoker>() ??
+                new AsyncControllerActionInvoker();
         }
 
         protected virtual ITempDataProvider CreateTempDataProvider()

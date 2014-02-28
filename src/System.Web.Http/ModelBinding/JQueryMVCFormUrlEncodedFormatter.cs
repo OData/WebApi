@@ -10,6 +10,17 @@ namespace System.Web.Http.ModelBinding
     // Supports JQuery schema on FormURL. 
     public class JQueryMvcFormUrlEncodedFormatter : FormUrlEncodedMediaTypeFormatter
     {
+        private readonly HttpConfiguration _configuration = null;
+
+        public JQueryMvcFormUrlEncodedFormatter()
+        {
+        }
+
+        public JQueryMvcFormUrlEncodedFormatter(HttpConfiguration config)
+        {
+            _configuration = config;
+        }
+
         public override bool CanReadType(Type type)
         {
             if (type == null)
@@ -48,7 +59,7 @@ namespace System.Web.Http.ModelBinding
 
             try
             {
-                return fd.ReadAs(type, String.Empty, RequiredMemberSelector, formatterLogger);
+                return fd.ReadAs(type, String.Empty, RequiredMemberSelector, formatterLogger, _configuration);
             }
             catch (Exception e)
             {

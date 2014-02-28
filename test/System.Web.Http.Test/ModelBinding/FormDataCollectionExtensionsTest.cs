@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Http.Controllers;
+using System.Web.Http.Validation;
+using System.Web.Http.Validation.Providers;
 using System.Web.Http.ValueProviders;
 using Microsoft.TestCommon;
 using Moq;
@@ -176,7 +179,6 @@ namespace System.Web.Http.ModelBinding
             Assert.Equal(40, result.Data[1].Y);
         }
 
-        
         [Fact]
         public void ReadComplexNestedType()
         {
@@ -187,8 +189,6 @@ namespace System.Web.Http.ModelBinding
             Assert.Equal(3, result.P.X);
             Assert.Equal(4, result.P.Y);
         }
-
-
 
         class ComplexType2
         {
@@ -343,6 +343,81 @@ namespace System.Web.Http.ModelBinding
                 // Assert
                 Assert.Equal<int>(expected, actual);
             }
+        }
+
+        // This test is to make sure that the ServicesConfigurationWrapper has not 
+        // altered HttpConfiguration.Services in any way
+        [Fact]
+        public void Read_As_NoServicesChangeInConfig()
+        {
+            // Arrange
+            HttpContent content = FormContent("a=30");
+            FormDataCollection formData = content.ReadAsAsync<FormDataCollection>().Result;
+
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            {
+                // Act
+                HttpControllerSettings settings = new HttpControllerSettings(configuration);
+                HttpConfiguration clonedConfiguration = 
+                    HttpConfiguration.ApplyControllerSettings(settings, configuration);
+                int actual = (int)formData.ReadAs(typeof(int), "a", requiredMemberSelector: null, 
+                    formatterLogger: (new Mock<IFormatterLogger>()).Object, config: configuration);
+
+                // Assert
+                Assert.Equal<int>(30, actual);
+                Assert.Same(clonedConfiguration.Services, configuration.Services);
+            }
+        }
+
+        [Fact]
+        public void ServicesContainerWrapper_GetServices_Returns_RequiredModelValidatorProvider()
+        {
+            // Arrange
+            var requiredMemberModelValidatorProvider = 
+                new RequiredMemberModelValidatorProvider(requiredMemberSelector: null);
+            FormDataCollectionExtensions.ServicesContainerWrapper wrapper =
+                new FormDataCollectionExtensions.ServicesContainerWrapper(
+                    new HttpConfiguration(), requiredMemberModelValidatorProvider);
+
+            // Act
+            IEnumerable<object> services = wrapper.GetServices(typeof(ModelValidatorProvider));
+
+            // Assert
+            Assert.Same(requiredMemberModelValidatorProvider, services.ElementAt(0));
+        }
+
+        [Fact]
+        public void ServicesContainerWrapper_GetService_Returns_ModelValidatorCache()
+        {
+            // Arrange
+            FormDataCollectionExtensions.ServicesContainerWrapper wrapper =
+                new FormDataCollectionExtensions.ServicesContainerWrapper(
+                    new HttpConfiguration(), new RequiredMemberModelValidatorProvider(requiredMemberSelector: null));
+
+            // Act
+            object serviceInstance1 = wrapper.GetService(typeof(IModelValidatorCache));
+            object serviceInstance2 = wrapper.GetService(typeof(IModelValidatorCache));
+
+            // Assert
+            Assert.IsType<ModelValidatorCache>(serviceInstance1);
+            Assert.NotSame(serviceInstance1, serviceInstance2);
+        }
+
+        [Fact]
+        public void ServicesContainerWrapper_GetService_Returns_ModelValidatorProvider()
+        {
+            // Arrange
+            var requiredMemberModelValidatorProvider =
+                new RequiredMemberModelValidatorProvider(requiredMemberSelector: null);
+            FormDataCollectionExtensions.ServicesContainerWrapper wrapper =
+                new FormDataCollectionExtensions.ServicesContainerWrapper(
+                    new HttpConfiguration(), requiredMemberModelValidatorProvider);
+
+            // Act
+            object service = wrapper.GetService(typeof(ModelValidatorProvider));
+
+            // Assert
+            Assert.Equal(requiredMemberModelValidatorProvider, service);
         }
 
         private static HttpActionContext CreateActionContext(HttpConfiguration configuration)

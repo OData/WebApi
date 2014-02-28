@@ -175,17 +175,29 @@ namespace System.Web.Http.ModelBinding
             return ReadAsInternal(formData, type, modelName, actionContext);
         }
 
+        public static object ReadAs(this FormDataCollection formData, Type type, string modelName,
+            IRequiredMemberSelector requiredMemberSelector, IFormatterLogger formatterLogger)
+        {
+            return ReadAs(formData, type, modelName, requiredMemberSelector, formatterLogger, config: null);
+        }
+
         /// <summary>
         /// Deserialize the form data to the given type, using model binding.  
         /// </summary>
         /// <param name="formData">collection with parsed form url data</param>
         /// <param name="type">target type to read as</param>
-        /// <param name="modelName">null or empty to read the entire form as a single object. This is common for body data. 
-        /// Or the name of a model to do a partial binding against the form data. This is common for extracting individual fields.</param>
-        /// <param name="requiredMemberSelector">The <see cref="IRequiredMemberSelector"/> used to determine required members.</param>
+        /// <param name="modelName">null or empty to read the entire form as a single object. 
+        /// This is common for body data. Or the name of a model to do a partial binding against the form data. 
+        /// This is common for extracting individual fields.</param>
+        /// <param name="requiredMemberSelector">The <see cref="IRequiredMemberSelector"/> 
+        /// used to determine required members.</param>
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
+        /// <param name="config">The <see cref="HttpConfiguration"/> configuration to pick binder from.
+        /// Can be null if the config was not created already. In that case a new config is created.</param>
         /// <returns>best attempt to bind the object. The best attempt may be null.</returns>
-        public static object ReadAs(this FormDataCollection formData, Type type, string modelName, IRequiredMemberSelector requiredMemberSelector, IFormatterLogger formatterLogger)
+        public static object ReadAs(this FormDataCollection formData, Type type, string modelName, 
+                                        IRequiredMemberSelector requiredMemberSelector,
+                                        IFormatterLogger formatterLogger, HttpConfiguration config)
         {
             if (formData == null)
             {
@@ -196,44 +208,66 @@ namespace System.Web.Http.ModelBinding
                 throw Error.ArgumentNull("type");
             }
 
-            using (HttpConfiguration config = new HttpConfiguration())
+            object result = null;
+            HttpActionContext actionContext = null;
+
+            bool validateRequiredMembers = requiredMemberSelector != null && formatterLogger != null;
+
+            if (validateRequiredMembers)
             {
-                // The HttpActionContext provides access to configuration for ModelBinders, and is also provided
-                // to the IModelBinder when binding occurs. Since an HttpActionContext was not provided, create a default.
-                HttpActionContext actionContext = CreateActionContextForModelBinding(config);
-
-                bool validateRequiredMembers = requiredMemberSelector != null && formatterLogger != null;
-                if (validateRequiredMembers)
+                // We wrap the config so we can override the services and cache 
+                // without affecting outside callers or users of the config.
+                using (HttpConfiguration wrapperConfig = new HttpConfiguration())
                 {
-                    // Set a ModelValidatorProvider that understands the IRequiredMemberSelector
-                    config.Services.Replace(typeof(ModelValidatorProvider), new RequiredMemberModelValidatorProvider(requiredMemberSelector));
+                    config = config == null ? wrapperConfig : config;
+                    wrapperConfig.Services = new ServicesContainerWrapper(config,
+                                                new RequiredMemberModelValidatorProvider(requiredMemberSelector));
+
+                    // The HttpActionContext provides access to configuration for ModelBinders, and is also provided
+                    // to the IModelBinder when binding occurs. Since HttpActionContext was not provided, create a default.
+                    actionContext = CreateActionContextForModelBinding(wrapperConfig);
+                    result = ReadAs(formData, type, modelName, actionContext);
                 }
-
-                object result = ReadAs(formData, type, modelName, actionContext);
-
-                // The model binding will log any errors to the HttpActionContext's ModelState. Since this is a context
-                // that we created and doesn't map to a real action invocation, we want to forward the errors to 
-                // the user-specified IFormatterLogger.
-                if (formatterLogger != null)
+            }
+            else
+            {
+                if (config == null)
                 {
-                    foreach (KeyValuePair<string, ModelState> modelStatePair in actionContext.ModelState)
+                    using (config = new HttpConfiguration())
                     {
-                        foreach (ModelError modelError in modelStatePair.Value.Errors)
+                        actionContext = CreateActionContextForModelBinding(config);
+                        result = ReadAs(formData, type, modelName, actionContext);
+                    }
+                }
+                else
+                {
+                    actionContext = CreateActionContextForModelBinding(config);
+                    result = ReadAs(formData, type, modelName, actionContext);
+                }
+            }
+
+            // The model binding will log any errors to the HttpActionContext's ModelState. Since this is a context
+            // that we created and doesn't map to a real action invocation, we want to forward the errors to 
+            // the user-specified IFormatterLogger.
+            if (formatterLogger != null)
+            {
+                foreach (KeyValuePair<string, ModelState> modelStatePair in actionContext.ModelState)
+                {
+                    foreach (ModelError modelError in modelStatePair.Value.Errors)
+                    {
+                        if (modelError.Exception != null)
                         {
-                            if (modelError.Exception != null)
-                            {
-                                formatterLogger.LogError(modelStatePair.Key, modelError.Exception);
-                            }
-                            else
-                            {
-                                formatterLogger.LogError(modelStatePair.Key, modelError.ErrorMessage);
-                            }
+                            formatterLogger.LogError(modelStatePair.Key, modelError.Exception);
+                        }
+                        else
+                        {
+                            formatterLogger.LogError(modelStatePair.Key, modelError.ErrorMessage);
                         }
                     }
                 }
-
-                return result;
             }
+
+            return result;
         }
 
         private static object ReadAsInternal(this FormDataCollection formData, Type type, string modelName, HttpActionContext actionContext)
@@ -300,6 +334,76 @@ namespace System.Web.Http.ModelBinding
             HttpActionContext actionContext = new HttpActionContext { ControllerContext = controllerContext };
 
             return actionContext;
+        }
+
+        // This class is internal for Unit Testing purposes
+        internal class ServicesContainerWrapper : ServicesContainer
+        {
+            private HttpConfiguration _originalConfig;
+            private ModelValidatorProvider _requiredMemberModelValidatorProvider;
+
+            public ServicesContainerWrapper(
+                                HttpConfiguration originalConfig,
+                                ModelValidatorProvider requiredMemberModelValidatorProvider)
+            {
+                _originalConfig = originalConfig;
+                _requiredMemberModelValidatorProvider = requiredMemberModelValidatorProvider;
+            }
+
+            // Without modifying the original config, the wrapper returns only the expected
+            // Validator Provider. Since the cache is expected to have the original config's
+            // cache entries, it is wrapped as well.
+            public override object GetService(Type serviceType)
+            {
+                if (serviceType == typeof(IModelValidatorCache))
+                {
+                    return new ModelValidatorCache(
+                                    new Lazy<IEnumerable<ModelValidatorProvider>>(
+                                        () => this.GetServices<ModelValidatorProvider>()));
+                }
+                else if (serviceType == typeof(ModelValidatorProvider))
+                {
+                    return _requiredMemberModelValidatorProvider;
+                }
+                else
+                {
+                    return _originalConfig.Services.GetService(serviceType);
+                }
+            }
+
+            public override IEnumerable<object> GetServices(Type serviceType)
+            {
+                if (serviceType == typeof(ModelValidatorProvider))
+                {
+                    return new ModelValidatorProvider[] { _requiredMemberModelValidatorProvider };
+                }
+                else
+                {
+                    return _originalConfig.Services.GetServices(serviceType);
+                }
+            }
+
+            protected override List<object> GetServiceInstances(Type serviceType)
+            {
+                throw new NotImplementedException();
+            }
+
+            // The following methods are expected to work the same way irrespective of the wrapper.
+            // Hence they are not special cased for the Validator Providers / Cache.
+            public override bool IsSingleService(Type serviceType)
+            {
+                return _originalConfig.Services.IsSingleService(serviceType);
+            }
+
+            protected override void ClearSingle(Type serviceType)
+            {
+                _originalConfig.Services.Clear(serviceType);
+            }
+
+            protected override void ReplaceSingle(Type serviceType, object service)
+            {
+                _originalConfig.Services.Replace(serviceType, service);
+            }
         }
     }
 }

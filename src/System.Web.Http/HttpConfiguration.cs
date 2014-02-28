@@ -26,7 +26,7 @@ namespace System.Web.Http
     {
         private readonly HttpRouteCollection _routes;
         private readonly ConcurrentDictionary<object, object> _properties = new ConcurrentDictionary<object, object>();
-        private readonly MediaTypeFormatterCollection _formatters = DefaultFormatters();
+        private readonly MediaTypeFormatterCollection _formatters;
         private readonly Collection<DelegatingHandler> _messageHandlers = new Collection<DelegatingHandler>();
         private readonly HttpFilterCollection _filters = new HttpFilterCollection();
 
@@ -58,6 +58,8 @@ namespace System.Web.Http
             }
 
             _routes = routes;
+            _formatters = DefaultFormatters(this);
+
             Services = new DefaultServices(this);
             ParameterBindingRules = DefaultActionValueBinder.GetDefaultParameterBinders();
         }
@@ -213,13 +215,13 @@ namespace System.Web.Http
             get { return _formatters; }
         }
 
-        private static MediaTypeFormatterCollection DefaultFormatters()
+        private static MediaTypeFormatterCollection DefaultFormatters(HttpConfiguration config)
         {
             var formatters = new MediaTypeFormatterCollection();
 
             // Basic FormUrlFormatter does not support binding to a T. 
             // Use our JQuery formatter instead.
-            formatters.Add(new JQueryMvcFormUrlEncodedFormatter());
+            formatters.Add(new JQueryMvcFormUrlEncodedFormatter(config));
 
             return formatters;
         }

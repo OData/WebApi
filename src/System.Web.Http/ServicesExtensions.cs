@@ -167,7 +167,18 @@ namespace System.Web.Http
             return services.GetService<ITraceWriter>();
         }
 
-        // Runtime code shouldn't call GetService() directly. Instead, have a wrapper (like the ones above) and call through the wrapper.
+        internal static IEnumerable<TService> GetServices<TService>(this ServicesContainer services)
+        {
+            if (services == null)
+            {
+                throw Error.ArgumentNull("services");
+            }
+
+            return services.GetServices(typeof(TService)).Cast<TService>();
+        }
+
+        // Runtime code shouldn't call GetService() directly. Instead, have a wrapper (like the ones above)
+        // and call through the wrapper.
         private static TService GetService<TService>(this ServicesContainer services)
         {
             if (services == null)
@@ -176,16 +187,6 @@ namespace System.Web.Http
             }
 
             return (TService)services.GetService(typeof(TService));
-        }
-
-        private static IEnumerable<TService> GetServices<TService>(this ServicesContainer services)
-        {
-            if (services == null)
-            {
-                throw Error.ArgumentNull("services");
-            }
-
-            return services.GetServices(typeof(TService)).Cast<TService>();
         }
 
         private static T GetServiceOrThrow<T>(this ServicesContainer services)

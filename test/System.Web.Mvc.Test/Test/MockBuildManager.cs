@@ -40,6 +40,16 @@ namespace System.Web.Mvc.Test
             _compiledType = compiledType;
         }
 
+        public virtual bool FileExists(string virtualPath)
+        {
+            if (_expectedVirtualPath == virtualPath)
+            {
+                return _fileExists;
+            }
+
+            throw new InvalidOperationException("Unexpected call to IBuildManager.FileExists()");
+        }
+
         public Type GetCompiledType(string virtualPath)
         {
             if (_expectedVirtualPath == virtualPath)
@@ -50,19 +60,19 @@ namespace System.Web.Mvc.Test
             throw new InvalidOperationException("Unexpected call to IBuildManager.GetCompiledType()");
         }
 
-        ICollection IBuildManager.GetReferencedAssemblies()
+        public virtual ICollection GetReferencedAssemblies()
         {
             return _referencedAssemblies;
         }
 
-        Stream IBuildManager.ReadCachedFile(string fileName)
+        public virtual Stream ReadCachedFile(string fileName)
         {
             Stream stream;
             CachedFileStore.TryGetValue(fileName, out stream);
             return stream;
         }
 
-        Stream IBuildManager.CreateCachedFile(string fileName)
+        public virtual Stream CreateCachedFile(string fileName)
         {
             MemoryStream stream = new MemoryStream();
             CachedFileStore[fileName] = stream;

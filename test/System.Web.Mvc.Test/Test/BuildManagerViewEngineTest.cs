@@ -39,6 +39,55 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void FileExistsDoesNotQueryBuildManagerIfAppIsNotPrecompiledNonUpdateable()
+        {
+            // Arrange
+            string testPath = "/Path.txt";
+            var engine = new TestableBuildManagerViewEngine(pathProvider: CreatePathProvider("some random path"));
+            var buildManagerMock = new Mock<MockBuildManager>();
+            engine.BuildManager = buildManagerMock.Object;
+
+            // Act
+            bool result = engine.FileExists(testPath);
+
+            // Assert
+            buildManagerMock.Verify(b => b.FileExists(It.IsAny<string>()), Times.Never());
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void FileExistsQueriesBuildManagerForFilesThatPathProviderDoesNotFindWhenRunningInPrecompiledNonUpdateableApp()
+        {
+            // Arrange
+            string testPath = "/Path.txt";
+            var engine = new TestableBuildManagerViewEngine(pathProvider: CreatePathProvider("some random path"));
+            engine.SetIsPrecompiledNonUpdateableSite(true);
+            var buildManagerMock = new MockBuildManager(testPath, typeof(object));
+            engine.BuildManager = buildManagerMock;
+
+            // Act
+            bool result = engine.FileExists(testPath);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void FileExistsReturnsFalseWhenBuildManagerFileExistsReturnsFalse()
+        {
+            // Arrange
+            var engine = new TestableBuildManagerViewEngine(pathProvider: CreatePathProvider());
+            var buildManagerMock = new MockBuildManager("some path", false);
+            engine.BuildManager = buildManagerMock;
+
+            // Act
+            bool result = engine.FileExists("some path");
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
         public void FileExistsReturnsTrueForExistingPath_VPPRegistrationChanging()
         {
             AppDomainUtils.RunInSeparateAppDomain(() =>
@@ -78,7 +127,10 @@ namespace System.Web.Mvc.Test
             // Arrange
             string matchingPath = "/Path.txt";
             string nonMatchingPath = "/PathOther.txt";
-            var engine = new TestableBuildManagerViewEngine(pathProvider: CreatePathProvider(matchingPath));
+            var engine = new TestableBuildManagerViewEngine(pathProvider: CreatePathProvider(matchingPath))
+            {
+                BuildManager = new MockBuildManager(nonMatchingPath, fileExists: false)
+            };
 
             // Act
             bool result = engine.FileExists(nonMatchingPath);
@@ -187,6 +239,8 @@ namespace System.Web.Mvc.Test
 
         private class TestableBuildManagerViewEngine : BuildManagerViewEngine
         {
+            private bool _isPrecompiledNonUpdateableSite;
+
             public TestableBuildManagerViewEngine()
                 : base()
             {
@@ -212,6 +266,11 @@ namespace System.Web.Mvc.Test
                 get { return base.VirtualPathProvider; }
             }
 
+            protected override bool IsPrecompiledNonUpdateableSite
+            {
+                get { return _isPrecompiledNonUpdateableSite; }
+            }
+
             protected override IView CreatePartialView(ControllerContext controllerContext, string partialPath)
             {
                 throw new NotImplementedException();
@@ -225,6 +284,11 @@ namespace System.Web.Mvc.Test
             public bool FileExists(string virtualPath)
             {
                 return base.FileExists(null, virtualPath);
+            }
+
+            internal void SetIsPrecompiledNonUpdateableSite(bool value)
+            {
+                _isPrecompiledNonUpdateableSite = value;
             }
         }
     }

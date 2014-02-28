@@ -410,6 +410,11 @@ namespace System.Web.Routing
                 _assemblies = new Assembly[] { assembly };
             }
 
+            public bool FileExists(string virtualPath)
+            {
+                throw new NotImplementedException();
+            }
+
             public Type GetCompiledType(string virtualPath)
             {
                 throw new NotImplementedException();

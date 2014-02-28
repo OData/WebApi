@@ -76,6 +76,17 @@ namespace System.Web.WebPages
             return ExistsInVpp(virtualPath);
         }
 
+        internal bool IsNonUpdatablePrecompiledApp()
+        {
+            VirtualPathProvider vpp = _vppFunc();
+            // VirtualPathProvider currently null in some test scenarios e.g. PreApplicationStartCodeTest.StartTest
+            if (vpp == null)
+            {
+                return false;
+            }
+            return IsNonUpdateablePrecompiledApp(vpp, _virtualPathUtility);
+        }
+
         /// <summary>
         /// An app's is precompiled for our purposes if 
         /// (a) it has a PreCompiledApp.config file in the site root, 
@@ -86,17 +97,9 @@ namespace System.Web.WebPages
         /// </remarks>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We want to replicate the behavior of BuildManager which catches all exceptions.")]
-        internal bool IsNonUpdatablePrecompiledApp()
+        internal static bool IsNonUpdateablePrecompiledApp(VirtualPathProvider vpp, IVirtualPathUtility virtualPathUtility)
         {
-            VirtualPathProvider vpp = _vppFunc();
-
-            // VirtualPathProvider currently null in some test scenarios e.g. PreApplicationStartCodeTest.StartTest
-            if (vpp == null)
-            {
-                return false;
-            }
-
-            var virtualPath = _virtualPathUtility.ToAbsolute("~/PrecompiledApp.config");
+            var virtualPath = virtualPathUtility.ToAbsolute("~/PrecompiledApp.config");
             if (!vpp.FileExists(virtualPath))
             {
                 return false;

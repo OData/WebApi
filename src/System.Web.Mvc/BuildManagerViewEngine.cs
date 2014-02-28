@@ -1,13 +1,18 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Threading;
 using System.Web.Hosting;
 using System.Web.WebPages;
+using Microsoft.Internal.Web.Utils;
 
 namespace System.Web.Mvc
 {
     public abstract class BuildManagerViewEngine : VirtualPathProviderViewEngine
     {
+        private static object _isPrecompiledNonUpdateableSiteInitializedLock = new object();
+        private static bool _isPrecompiledNonUpdateableSite;
+        private static bool _isPrecompiledNonUpdateableSiteInitialized;
         private static FileExistenceCache _sharedFileExistsCache;
 
         private IBuildManager _buildManager;
@@ -84,10 +89,32 @@ namespace System.Web.Mvc
             }
         }
 
+        protected virtual bool IsPrecompiledNonUpdateableSite
+        {
+            get
+            {
+                return LazyInitializer.EnsureInitialized(ref _isPrecompiledNonUpdateableSite,
+                                                         ref _isPrecompiledNonUpdateableSiteInitialized,
+                                                         ref _isPrecompiledNonUpdateableSiteInitializedLock,
+                                                         GetPrecompiledNonUpdateable);
+            }
+        }
+
         protected override bool FileExists(ControllerContext controllerContext, string virtualPath)
         {
+            // When dealing with non-updateable precompiled views, the view files may not exist on disk. The correct
+            // way to check for existence of a file in this case is by querying the BuildManager.
+            // For all other scenarios, checking for files on disk is faster and should suffice.
             Contract.Assert(_fileExistsCache != null);
-            return _fileExistsCache.FileExists(virtualPath);
+            return _fileExistsCache.FileExists(virtualPath) ||
+                   (IsPrecompiledNonUpdateableSite && BuildManager.FileExists(virtualPath));
+        }
+
+        private static bool GetPrecompiledNonUpdateable()
+        {
+            IVirtualPathUtility virtualPathUtility = new VirtualPathUtilityWrapper();
+            return WebPages.BuildManagerWrapper.IsNonUpdateablePrecompiledApp(HostingEnvironment.VirtualPathProvider,
+                                                                              virtualPathUtility);
         }
 
         internal class DefaultViewPageActivator : IViewPageActivator

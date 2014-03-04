@@ -76,6 +76,25 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void DataGroupFieldSetByCtor()
+        {
+            // Arrange
+            IEnumerable items = new object[0];
+            IEnumerable selectedValues = new object[0];
+
+            // Act
+            MultiSelectList multiSelect = new MultiSelectList(items, "SomeValueField", "SomeTextField", selectedValues,
+                "SomeGroupField");
+
+            // Assert
+            Assert.Same(items, multiSelect.Items);
+            Assert.Equal("SomeValueField", multiSelect.DataValueField);
+            Assert.Equal("SomeTextField", multiSelect.DataTextField);
+            Assert.Same(selectedValues, multiSelect.SelectedValues);
+            Assert.Equal("SomeGroupField", multiSelect.DataGroupField);
+        }
+
+        [Fact]
         public void ConstructorWithNullItemsThrows()
         {
             Assert.ThrowsArgumentNull(
@@ -161,6 +180,35 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void GetListItemsWithGroupField()
+        {
+            // Arrange
+            MultiSelectList multiSelect = new MultiSelectList(GetSampleAnonymousObjectsWithGroups(),
+                                                              "Letter",
+                                                              "FullWord",
+                                                              null,
+                                                              "Group");
+
+            // Act
+            IList<SelectListItem> listItems = multiSelect.GetListItems();
+
+            // Assert
+            Assert.Equal(3, listItems.Count);
+            Assert.Equal("A", listItems[0].Value);
+            Assert.Equal("Alpha", listItems[0].Text);
+            Assert.False(listItems[0].Selected);
+            Assert.Equal("B", listItems[1].Value);
+            Assert.Equal("Bravo", listItems[1].Text);
+            Assert.False(listItems[1].Selected);
+            Assert.Equal("C", listItems[2].Value);
+            Assert.Equal("Charlie", listItems[2].Text);
+            Assert.False(listItems[2].Selected);
+            Assert.Equal("AB", listItems[0].Group.Name);
+            Assert.Equal("AB", listItems[1].Group.Name);
+            Assert.Equal("C", listItems[2].Group.Name);
+        }
+
+        [Fact]
         public void GetListItemsWithValueFieldWithSelections()
         {
             // Arrange
@@ -181,6 +229,33 @@ namespace System.Web.Mvc.Test
             Assert.Equal("C", listItems[2].Value);
             Assert.Equal("Charlie", listItems[2].Text);
             Assert.True(listItems[2].Selected);
+        }
+
+        [Fact]
+        public void GetListItemsWithValueFieldWithSelectionsWithGroupField()
+        {
+            // Arrange
+            MultiSelectList multiSelect = new MultiSelectList(GetSampleAnonymousObjectsWithGroups(),
+                                                              "Letter", "FullWord", new string[] { "A", "C", "T" },
+                                                              "Group");
+
+            // Act
+            IList<SelectListItem> listItems = multiSelect.GetListItems();
+
+            // Assert
+            Assert.Equal(3, listItems.Count);
+            Assert.Equal("A", listItems[0].Value);
+            Assert.Equal("Alpha", listItems[0].Text);
+            Assert.True(listItems[0].Selected);
+            Assert.Equal("B", listItems[1].Value);
+            Assert.Equal("Bravo", listItems[1].Text);
+            Assert.False(listItems[1].Selected);
+            Assert.Equal("C", listItems[2].Value);
+            Assert.Equal("Charlie", listItems[2].Text);
+            Assert.True(listItems[2].Selected);
+            Assert.Equal("AB", listItems[0].Group.Name);
+            Assert.Equal("AB", listItems[1].Group.Name);
+            Assert.Equal("C", listItems[2].Group.Name);
         }
 
         [Fact]
@@ -220,6 +295,16 @@ namespace System.Web.Mvc.Test
                 new { Letter = 'A', FullWord = "Alpha" },
                 new { Letter = 'B', FullWord = "Bravo" },
                 new { Letter = 'C', FullWord = "Charlie" }
+            };
+        }
+
+        internal static IEnumerable GetSampleAnonymousObjectsWithGroups()
+        {
+            return new[]
+            {
+                new { Letter = 'A', FullWord = "Alpha", Group = "AB" },
+                new { Letter = 'B', FullWord = "Bravo", Group = "AB" },
+                new { Letter = 'C', FullWord = "Charlie", Group = "C" },
             };
         }
 

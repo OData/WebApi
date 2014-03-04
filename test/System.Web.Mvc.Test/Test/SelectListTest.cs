@@ -82,5 +82,26 @@ namespace System.Web.Mvc.Test
             Assert.Single(selectedValues);
             Assert.Same(selectedValue, selectedValues[0]);
         }
+
+        [Fact]
+        public void DataGroupFieldSetByCtor()
+        {
+            // Arrange
+            IEnumerable items = new object[0];
+            object selectedValue = new object();
+
+            // Act
+            SelectList selectList = new SelectList(items, "SomeValueField", "SomeTextField", selectedValue,
+                "SomeGroupField");
+            IEnumerable selectedValues = selectList.SelectedValues;
+
+            // Assert
+            Assert.Same(items, selectList.Items);
+            Assert.Equal("SomeValueField", selectList.DataValueField);
+            Assert.Equal("SomeTextField", selectList.DataTextField);
+            Assert.Equal("SomeGroupField", selectList.DataGroupField);
+            Assert.Same(selectedValue, selectList.SelectedValue);
+            Assert.Single(selectedValues, selectedValue);
+        }
     }
 }

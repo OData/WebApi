@@ -13,22 +13,46 @@ namespace System.Web.Mvc
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "This is a shipped API")]
     public class MultiSelectList : IEnumerable<SelectListItem>
     {
+        private IList<SelectListGroup> _groups;
+
         public MultiSelectList(IEnumerable items)
-            : this(items, null /* selectedValues */)
+            : this(items, selectedValues: null)
         {
         }
 
         public MultiSelectList(IEnumerable items, IEnumerable selectedValues)
-            : this(items, null /* dataValuefield */, null /* dataTextField */, selectedValues)
+            : this(items, dataValueField: null, dataTextField: null, selectedValues: selectedValues)
         {
         }
 
         public MultiSelectList(IEnumerable items, string dataValueField, string dataTextField)
-            : this(items, dataValueField, dataTextField, null /* selectedValues */)
+            : this(items, dataValueField, dataTextField, selectedValues: null)
         {
         }
 
         public MultiSelectList(IEnumerable items, string dataValueField, string dataTextField, IEnumerable selectedValues)
+            : this(items, dataValueField, dataTextField, selectedValues, dataGroupField: null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the MultiSelectList class by using the items to include in the list, 
+        /// the data value field, the data text field, the selected values, and the data group field.
+        /// </summary>
+        /// <param name="items">The items used to build each <see cref="SelectListItem"/> of the list.</param>
+        /// <param name="dataValueField">The data value field. Used to match the Value property of the corresponding 
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="dataTextField">The data text field. Used to match the Text property of the corresponding 
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="selectedValues">The selected values field. Used to match the Selected property of the 
+        /// corresponding <see cref="SelectListItem"/>.</param>
+        /// <param name="dataGroupField">The data group field. Used to match the Group property of the corresponding 
+        /// <see cref="SelectListItem"/>.</param>
+        public MultiSelectList(IEnumerable items,
+                               string dataValueField,
+                               string dataTextField,
+                               IEnumerable selectedValues,
+                               string dataGroupField)
         {
             if (items == null)
             {
@@ -39,7 +63,18 @@ namespace System.Web.Mvc
             DataValueField = dataValueField;
             DataTextField = dataTextField;
             SelectedValues = selectedValues;
+            DataGroupField = dataGroupField;
+
+            if (DataGroupField != null)
+            {
+                _groups = new List<SelectListGroup>();
+            }
         }
+
+        /// <summary>
+        /// Gets or sets the data group field.
+        /// </summary>
+        public string DataGroupField { get; private set; }
 
         public string DataTextField { get; private set; }
 
@@ -74,6 +109,7 @@ namespace System.Web.Mvc
                             let value = Eval(item, DataValueField)
                             select new SelectListItem
                             {
+                                Group = GetGroup(item),
                                 Value = value,
                                 Text = Eval(item, DataTextField),
                                 Selected = selectedValues.Contains(value)
@@ -92,6 +128,7 @@ namespace System.Web.Mvc
             var listItems = from object item in Items
                             select new SelectListItem
                             {
+                                Group = GetGroup(item),
                                 Text = Eval(item, DataTextField),
                                 Selected = selectedValues.Contains(item)
                             };
@@ -106,6 +143,32 @@ namespace System.Web.Mvc
                 value = DataBinder.Eval(container, expression);
             }
             return Convert.ToString(value, CultureInfo.CurrentCulture);
+        }
+
+        private SelectListGroup GetGroup(object container)
+        {
+            if (_groups == null)
+            {
+                return null;
+            }
+
+            string groupName = Eval(container, DataGroupField);
+            if (String.IsNullOrEmpty(groupName))
+            {
+                return null;
+            }
+
+            // We use StringComparison.CurrentCulture because the group name is used to display as the value of 
+            // optgroup HTML tag's label attribute.
+            SelectListGroup group = _groups.FirstOrDefault(
+                g => String.Equals(g.Name, groupName, StringComparison.CurrentCulture));
+            if (group == null)
+            {
+                group = new SelectListGroup() { Name = groupName };
+                _groups.Add(group);
+            }
+
+            return group;
         }
 
         #region IEnumerable Members

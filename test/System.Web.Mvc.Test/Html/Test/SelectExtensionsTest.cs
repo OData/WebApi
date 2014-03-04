@@ -24,6 +24,28 @@ namespace System.Web.Mvc.Html.Test
             { "WithDuplicates", EnumWithDuplicates.Second },
             { "WithFlags", EnumWithFlags.Second },
         };
+        private static readonly SelectList _selectList = new SelectList(
+            new[]
+            {
+                new { Text = "UFO", Value = "ufo", Category = "" }, /* Empty Group */
+                new { Text = "Volvo", Value = "volvo", Category = "Swedish Cars" },
+                new { Text = "Mercedes-Benz", Value = "mercedes-benz", Category = "German Cars" }, 
+                new { Text = "Saab", Value = "saab", Category = "Swedish Cars" },
+                new { Text = "Audi", Value = "audi", Category = "German Cars" }, 
+                new { Text = "Other", Value = "other", Category = (string) null }, /* Another Empty Group */
+                new { Text = "Unknown", Value = "unknown", Category = " " } /* Unnamed Group */
+            }, "Value", "Text", "audi", "Category");
+        private static readonly MultiSelectList _multiSelectList = new MultiSelectList(
+            new[]
+            {
+                new { Text = "UFO", Value = "ufo", Category = "" }, /* Empty Group */
+                new { Text = "Volvo", Value = "volvo", Category = "Swedish Cars" },
+                new { Text = "Mercedes-Benz", Value = "mercedes-benz", Category = "German Cars" }, 
+                new { Text = "Saab", Value = "saab", Category = "Swedish Cars" },
+                new { Text = "Audi", Value = "audi", Category = "German Cars" }, 
+                new { Text = "Other", Value = "other", Category = (string) null }, /* Another Empty Group */
+                new { Text = "Unknown", Value = "unknown", Category = " " } /* Unnamed Group */
+            }, "Value", "Text", new string[] { "audi", "volvo" }, "Category");
 
         private static ViewDataDictionary GetViewDataWithSelectList()
         {
@@ -119,6 +141,34 @@ namespace System.Web.Mvc.Html.Test
 
             // Act
             MvcHtmlString html = helper.DropDownList("List", GroupedItems_WithDisabled);
+
+            // Assert
+            Assert.Equal(expectedDropDownListHtml, html.ToHtmlString());
+        }
+
+
+        [Fact]
+        void DropDownList_SelectList_WithGroups()
+        {
+            // Arrange
+            HtmlHelper helper = MvcHelper.GetHtmlHelper();
+            const string expectedDropDownListHtml = @"<select id=""List"" name=""List""><option value=""ufo"">UFO</option>
+<optgroup label=""Swedish Cars"">
+<option value=""volvo"">Volvo</option>
+<option value=""saab"">Saab</option>
+</optgroup>
+<optgroup label=""German Cars"">
+<option value=""mercedes-benz"">Mercedes-Benz</option>
+<option selected=""selected"" value=""audi"">Audi</option>
+</optgroup>
+<option value=""other"">Other</option>
+<optgroup label="" "">
+<option value=""unknown"">Unknown</option>
+</optgroup>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.DropDownList("List", _selectList);
 
             // Assert
             Assert.Equal(expectedDropDownListHtml, html.ToHtmlString());
@@ -781,6 +831,36 @@ namespace System.Web.Mvc.Html.Test
 
             // Act
             MvcHtmlString html = helper.DropDownListFor(m => m.foo, GroupedItems_WithDisabled, optionLabel: "Options");
+
+            // Assert
+            Assert.Equal(expectedListBox, html.ToHtmlString());
+        }
+
+        [Fact]
+        void DropDownListFor_SelectList_WithGroups()
+        {
+            // Arrange
+            ViewDataDictionary<FooModel> dict = new ViewDataDictionary<FooModel>();
+            dict.Add("foo", "volvo");
+            HtmlHelper<FooModel> helper = MvcHelper.GetHtmlHelper(dict);
+            const string expectedListBox = @"<select id=""foo"" name=""foo""><option value="""">options...</option>
+<option value=""ufo"">UFO</option>
+<optgroup label=""Swedish Cars"">
+<option selected=""selected"" value=""volvo"">Volvo</option>
+<option value=""saab"">Saab</option>
+</optgroup>
+<optgroup label=""German Cars"">
+<option value=""mercedes-benz"">Mercedes-Benz</option>
+<option value=""audi"">Audi</option>
+</optgroup>
+<option value=""other"">Other</option>
+<optgroup label="" "">
+<option value=""unknown"">Unknown</option>
+</optgroup>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.DropDownListFor(m => m.foo, _selectList, optionLabel: "options...");
 
             // Assert
             Assert.Equal(expectedListBox, html.ToHtmlString());
@@ -1986,6 +2066,33 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        void ListBox_MultiSelectList_WithGroups()
+        {
+            // Arrange
+            HtmlHelper helper = MvcHelper.GetHtmlHelper();
+            const string expectedListBox = @"<select id=""List"" multiple=""multiple"" name=""List""><option value=""ufo"">UFO</option>
+<optgroup label=""Swedish Cars"">
+<option selected=""selected"" value=""volvo"">Volvo</option>
+<option value=""saab"">Saab</option>
+</optgroup>
+<optgroup label=""German Cars"">
+<option value=""mercedes-benz"">Mercedes-Benz</option>
+<option selected=""selected"" value=""audi"">Audi</option>
+</optgroup>
+<option value=""other"">Other</option>
+<optgroup label="" "">
+<option value=""unknown"">Unknown</option>
+</optgroup>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.ListBox("List", _multiSelectList);
+
+            // Assert
+            Assert.Equal(expectedListBox, html.ToHtmlString());
+        }
+
+        [Fact]
         public void ListBoxUsesExplicitValueIfNotProvidedInViewData()
         {
             // Arrange
@@ -2497,6 +2604,35 @@ namespace System.Web.Mvc.Html.Test
 
             // Act
             MvcHtmlString html = helper.ListBoxFor(m => m.foo, GroupedItems_WithDisabled);
+
+            // Assert
+            Assert.Equal(expectedListBox, html.ToHtmlString());
+        }
+
+        [Fact]
+        void ListBoxFor_MultiSelectList_WithGroups()
+        {
+            // Arrange
+            ViewDataDictionary<FooArrayModel> dict = new ViewDataDictionary<FooArrayModel>();
+            dict.Add("foo", new[] { "mercedes-benz", "audi" });
+            HtmlHelper<FooArrayModel> helper = MvcHelper.GetHtmlHelper(dict);
+            const string expectedListBox = @"<select id=""foo"" multiple=""multiple"" name=""foo""><option value=""ufo"">UFO</option>
+<optgroup label=""Swedish Cars"">
+<option value=""volvo"">Volvo</option>
+<option value=""saab"">Saab</option>
+</optgroup>
+<optgroup label=""German Cars"">
+<option selected=""selected"" value=""mercedes-benz"">Mercedes-Benz</option>
+<option selected=""selected"" value=""audi"">Audi</option>
+</optgroup>
+<option value=""other"">Other</option>
+<optgroup label="" "">
+<option value=""unknown"">Unknown</option>
+</optgroup>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.ListBoxFor(m => m.foo, _multiSelectList);
 
             // Assert
             Assert.Equal(expectedListBox, html.ToHtmlString());

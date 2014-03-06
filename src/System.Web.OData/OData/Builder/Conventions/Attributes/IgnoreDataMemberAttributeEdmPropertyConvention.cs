@@ -22,7 +22,11 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// <param name="edmProperty">The property being removed.</param>
         /// <param name="structuralTypeConfiguration">The edm type from which the property is being removed.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
-        public override void Apply(PropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+        /// <param name="model">The ODataConventionModelBuilder used to build the model.</param>
+        public override void Apply(PropertyConfiguration edmProperty,
+            StructuralTypeConfiguration structuralTypeConfiguration,
+            Attribute attribute,
+            ODataConventionModelBuilder model)
         {
             if (structuralTypeConfiguration == null)
             {

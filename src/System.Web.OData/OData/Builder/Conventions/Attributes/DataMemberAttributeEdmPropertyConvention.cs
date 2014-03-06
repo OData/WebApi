@@ -17,7 +17,10 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         {
         }
 
-        public override void Apply(PropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+        public override void Apply(PropertyConfiguration edmProperty,
+            StructuralTypeConfiguration structuralTypeConfiguration,
+            Attribute attribute,
+            ODataConventionModelBuilder model)
         {
             if (structuralTypeConfiguration == null)
             {
@@ -29,19 +32,23 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 throw Error.ArgumentNull("edmProperty");
             }
 
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
             bool isTypeDataContract = structuralTypeConfiguration.ClrType.GetCustomAttributes(typeof(DataContractAttribute), inherit: true).Any();
             DataMemberAttribute dataMember = attribute as DataMemberAttribute;
 
             if (isTypeDataContract && dataMember != null && !edmProperty.AddedExplicitly)
             {
                 // set the name alias
-                if (structuralTypeConfiguration.ModelBuilder != null &&
-                    structuralTypeConfiguration.ModelBuilder.ModelAliasingEnabled &&
+                if (model.ModelAliasingEnabled &&
                     !String.IsNullOrWhiteSpace(dataMember.Name))
                 {
                     edmProperty.Name = dataMember.Name;
                 }
-                               
+
                 StructuralPropertyConfiguration structuralProperty = edmProperty as StructuralPropertyConfiguration;
                 if (structuralProperty != null)
                 {

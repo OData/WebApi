@@ -30,7 +30,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             structuralProperty.Object.AddedExplicitly = false;
 
             // Act
-            new RequiredAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);
+            new RequiredAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, new ODataConventionModelBuilder());
 
             // Assert
             Assert.False(structuralProperty.Object.OptionalProperty);

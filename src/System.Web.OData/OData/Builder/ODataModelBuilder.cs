@@ -18,7 +18,7 @@ namespace System.Web.OData.Builder
     public class ODataModelBuilder
     {
         private static readonly Version _defaultDataServiceVersion = EdmConstants.EdmVersion4;
-        private static readonly Version _defaultMaxDataServiceVersionn = EdmConstants.EdmVersion4;
+        private static readonly Version _defaultMaxDataServiceVersion = EdmConstants.EdmVersion4;
 
         private Dictionary<Type, EnumTypeConfiguration> _enumTypes = new Dictionary<Type, EnumTypeConfiguration>();
         private Dictionary<Type, StructuralTypeConfiguration> _structuralTypes = new Dictionary<Type, StructuralTypeConfiguration>();
@@ -37,8 +37,7 @@ namespace System.Web.OData.Builder
             Namespace = "Default";
             ContainerName = "Container";
             DataServiceVersion = _defaultDataServiceVersion;
-            MaxDataServiceVersion = _defaultMaxDataServiceVersionn;
-            // TODO: change ModelAliasingEnabled's default value to true in v4
+            MaxDataServiceVersion = _defaultMaxDataServiceVersion;
         }
 
         /// <summary>
@@ -88,11 +87,6 @@ namespace System.Web.OData.Builder
                 _maxDataServiceVersion = value;
             }
         }
-
-        /// <summary>
-        /// Gets or sets model aliasing is enabled or not. The default value is false.
-        /// </summary>
-        public bool ModelAliasingEnabled { get; set; }
 
         /// <summary>
         /// Gets the collection of EDM entity sets in the model to be built.

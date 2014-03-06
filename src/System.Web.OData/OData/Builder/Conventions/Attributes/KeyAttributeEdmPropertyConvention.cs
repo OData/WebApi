@@ -22,7 +22,11 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// <param name="edmProperty">The key property.</param>
         /// <param name="structuralTypeConfiguration">The edm type being configured.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on the property.</param>
-        public override void Apply(PrimitivePropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+        /// <param name="model">The ODataConventionModelBuilder used to build the model.</param>
+        public override void Apply(PrimitivePropertyConfiguration edmProperty,
+            StructuralTypeConfiguration structuralTypeConfiguration,
+            Attribute attribute,
+            ODataConventionModelBuilder model)
         {
             if (edmProperty == null)
             {

@@ -26,7 +26,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// </summary>
         /// <param name="edmTypeConfiguration">The edm type to apply the convention to.</param>
         /// <param name="model">The model that this edm type belongs to.</param>
-        public void Apply(IEdmTypeConfiguration edmTypeConfiguration, ODataModelBuilder model)
+        public void Apply(IEdmTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model)
         {
             TEdmTypeConfiguration type = edmTypeConfiguration as TEdmTypeConfiguration;
             if (type != null)
@@ -40,7 +40,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// </summary>
         /// <param name="edmTypeConfiguration">The edm type to apply the convention to.</param>
         /// <param name="model">The model that this edm type belongs to.</param>
-        public void Apply(TEdmTypeConfiguration edmTypeConfiguration, ODataModelBuilder model)
+        public void Apply(TEdmTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model)
         {
             if (edmTypeConfiguration == null)
             {
@@ -59,6 +59,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// <param name="edmTypeConfiguration">The edm type to apply the convention to.</param>
         /// <param name="model">The model that this edm type belongs to.</param>
         /// <param name="attribute">The attribute found on this edm type.</param>
-        public abstract void Apply(TEdmTypeConfiguration edmTypeConfiguration, ODataModelBuilder model, Attribute attribute);
+        public abstract void Apply(TEdmTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
+            Attribute attribute);
     }
 }

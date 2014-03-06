@@ -20,7 +20,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
-            convention.Apply(primitiveProperty, entityType);
+            convention.Apply(primitiveProperty, entityType, new ODataConventionModelBuilder());
 
             // Assert
             Assert.True(primitiveProperty.ConcurrencyToken);
@@ -37,7 +37,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
-            convention.Apply(primitiveProperty, complexType);
+            convention.Apply(primitiveProperty, complexType, new ODataConventionModelBuilder());
 
             // Assert
             Assert.False(primitiveProperty.ConcurrencyToken);
@@ -56,7 +56,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
-            convention.Apply(primitiveProperty, entityType);
+            convention.Apply(primitiveProperty, entityType, new ODataConventionModelBuilder());
 
             // Assert
             Assert.False(primitiveProperty.ConcurrencyToken);
@@ -77,7 +77,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
-            convention.Apply(primitiveProperty, entityType);
+            convention.Apply(primitiveProperty, entityType, new ODataConventionModelBuilder());
 
             // Assert
             Assert.False(primitiveProperty.ConcurrencyToken);

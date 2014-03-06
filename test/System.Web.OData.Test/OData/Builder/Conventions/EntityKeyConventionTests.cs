@@ -25,7 +25,7 @@ namespace System.Web.OData.Builder.Conventions
             mockEntityType.Setup(entityType => entityType.HasKey(typeof(EntityKeyConventionTests_EntityType).GetProperty(propertyName))).Returns(mockEntityType.Object).Verifiable();
             mockEntityType.Object.ExplicitProperties.Add(new MockPropertyInfo(), property.Object);
 
-            var mockModelBuilder = new Mock<ODataModelBuilder>(MockBehavior.Strict);
+            var mockModelBuilder = new Mock<ODataConventionModelBuilder>(MockBehavior.Strict);
 
             // Act
             new EntityKeyConvention().Apply(mockEntityType.Object, mockModelBuilder.Object);

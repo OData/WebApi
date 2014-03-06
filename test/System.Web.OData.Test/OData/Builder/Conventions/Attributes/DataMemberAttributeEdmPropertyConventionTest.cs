@@ -25,14 +25,15 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .Property(typeof(string), "Property", new[] { new DataMemberAttribute { IsRequired = true } });
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
-            PropertyInfo property = type.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
-            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
-            structuralProperty.Object.AddedExplicitly = false;
             structuralType.Setup(t => t.ClrType).Returns(type);
 
+            PropertyInfo property = type.GetProperty("Property");
+            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
+            structuralProperty.Object.AddedExplicitly = false;
+
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, new ODataConventionModelBuilder());
 
             // Assert
             Assert.False(structuralProperty.Object.OptionalProperty);
@@ -42,6 +43,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         public void Apply_DoesnotSetRequiredProperty()
         {
             // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             MockType type =
                 new MockType("Mocktype")
                 .Property(typeof(string), "Property", new[] { new DataMemberAttribute { IsRequired = false } });
@@ -49,12 +51,13 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             PropertyInfo property = type.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
+            structuralType.Setup(s => s.ModelBuilder).Returns(builder);
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
             structuralProperty.Object.AddedExplicitly = false;
             structuralType.Setup(t => t.ClrType).Returns(type);
 
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, builder);
 
             // Assert
             Assert.True(structuralProperty.Object.OptionalProperty);
@@ -69,14 +72,15 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .Property(typeof(string), "Property", new[] { new DataMemberAttribute { IsRequired = true } });
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new object[0]);
 
-            PropertyInfo property = type.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
-            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
-            structuralProperty.Object.AddedExplicitly = false;
             structuralType.Setup(t => t.ClrType).Returns(type);
 
+            PropertyInfo property = type.GetProperty("Property");
+            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
+            structuralProperty.Object.AddedExplicitly = false;
+
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, new ODataConventionModelBuilder());
 
             // Assert
             Assert.True(structuralProperty.Object.OptionalProperty);
@@ -88,21 +92,22 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         public void Apply_AliasSetIfEnabled_ValidPropertyAlias(string propertyAlias, bool modelAliasing, string expectedProptertyName)
         {
             // Arrange
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder() { ModelAliasingEnabled = modelAliasing };
+
             MockType type =
                 new MockType("Mocktype")
                 .Property(typeof(string), "Property", new[] { new DataMemberAttribute { Name = propertyAlias } });
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
-            PropertyInfo property = type.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
-            ODataModelBuilder modelBuilder = new ODataModelBuilder { ModelAliasingEnabled = modelAliasing };
-            structuralType.SetupGet(s => s.ModelBuilder).Returns(modelBuilder);
-            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
-            structuralProperty.Object.AddedExplicitly = false;
             structuralType.Setup(t => t.ClrType).Returns(type);
 
+            PropertyInfo property = type.GetProperty("Property");
+            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
+            structuralProperty.Object.AddedExplicitly = false;
+
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, modelBuilder);
 
             // Assert
             Assert.Equal(expectedProptertyName, structuralProperty.Object.Name);
@@ -118,21 +123,22 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         public void Apply_AliasNotSet_InvalidPropertyAlias(string propertyAlias, bool modelAliasing)
         {
             // Arrange
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder() { ModelAliasingEnabled = modelAliasing };
+
             MockType type =
                 new MockType("Mocktype")
                 .Property(typeof(string), "Property", new[] { new DataMemberAttribute { Name = propertyAlias } });
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
-            PropertyInfo property = type.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
-            ODataModelBuilder modelBuilder = new ODataModelBuilder { ModelAliasingEnabled = modelAliasing };
-            structuralType.SetupGet(s => s.ModelBuilder).Returns(modelBuilder);
-            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
-            structuralProperty.Object.AddedExplicitly = false;
             structuralType.Setup(t => t.ClrType).Returns(type);
 
+            PropertyInfo property = type.GetProperty("Property");
+            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
+            structuralProperty.Object.AddedExplicitly = false;
+
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, modelBuilder);
 
             // Assert
             Assert.Equal("Property", structuralProperty.Object.Name);
@@ -144,21 +150,22 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         public void Apply_AliasNotSet_NoPropertyAlias(bool modelAliasing)
         {
             // Arrange
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder() { ModelAliasingEnabled = modelAliasing };
+
             MockType type =
                 new MockType("Mocktype")
                 .Property(typeof(string), "Property", new[] { new DataMemberAttribute() });
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
-            PropertyInfo property = type.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
-            ODataModelBuilder modelBuilder = new ODataModelBuilder { ModelAliasingEnabled = modelAliasing };
-            structuralType.SetupGet(s => s.ModelBuilder).Returns(modelBuilder);
-            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
-            structuralProperty.Object.AddedExplicitly = false;
             structuralType.Setup(t => t.ClrType).Returns(type);
 
+            PropertyInfo property = type.GetProperty("Property");
+            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
+            structuralProperty.Object.AddedExplicitly = false;
+
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, modelBuilder);
 
             // Assert
             Assert.Equal("Property", structuralProperty.Object.Name);
@@ -246,7 +253,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             // Arrange
             MockType baseType = new MockType("BaseMocktype");
             baseType.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
-
+            
             MockType derivedType =
                 new MockType("DerivedMockType")
                 .Property(typeof(string), "Property", new[] { new DataMemberAttribute { IsRequired = true } })
@@ -254,11 +261,12 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             PropertyInfo property = derivedType.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
+
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
             structuralType.Setup(t => t.ClrType).Returns(derivedType);
 
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, new ODataConventionModelBuilder());
 
             // Assert
             Assert.True(structuralProperty.Object.OptionalProperty);
@@ -268,6 +276,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         public void DerivedType_DataMemberRequired_IsHonored_IfDerivedtypeIsDataContract()
         {
             // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+
             MockType baseType = new MockType("BaseMocktype");
             baseType.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
@@ -276,13 +286,14 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "Property", new[] { new DataMemberAttribute { IsRequired = true } })
                 .BaseType(baseType);
 
-            PropertyInfo property = derivedType.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
-            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
             structuralType.Setup(t => t.ClrType).Returns(derivedType);
 
+            PropertyInfo property = derivedType.GetProperty("Property");
+            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
+
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, builder);
 
             // Assert
             Assert.False(structuralProperty.Object.OptionalProperty);

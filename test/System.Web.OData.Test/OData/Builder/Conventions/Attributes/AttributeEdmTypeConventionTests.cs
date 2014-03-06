@@ -34,14 +34,13 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         {
             Func<Attribute, bool> matchAllFilter = a => true;
 
-            ODataModelBuilder builder = new Mock<ODataModelBuilder>().Object;
+            ODataConventionModelBuilder builder = new Mock<ODataConventionModelBuilder>().Object;
             Attribute attribute = new Mock<Attribute>().Object;
 
             // build the type
             Mock<Type> type = new Mock<Type>();
             type.Setup(t => t.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { attribute });
             Mock<TEdmTypeConfiguration> structuralType = new Mock<TEdmTypeConfiguration>(MockBehavior.Strict);
-
             structuralType.Setup(t => t.ClrType).Returns(type.Object);
 
             // build the convention
@@ -67,7 +66,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             public Attribute Attribute { get; private set; }
 
-            public override void Apply(TConventionType edmTypeConfiguration, ODataModelBuilder model,
+            public override void Apply(TConventionType edmTypeConfiguration, ODataConventionModelBuilder model,
                 Attribute attribute)
             {
                 ModelBuilder = model;

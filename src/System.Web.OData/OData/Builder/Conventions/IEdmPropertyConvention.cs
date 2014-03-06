@@ -12,6 +12,8 @@ namespace System.Web.OData.Builder.Conventions
         /// </summary>
         /// <param name="edmProperty">The property the convention is applied on.</param>
         /// <param name="structuralTypeConfiguration">The <see cref="StructuralTypeConfiguration"/> the edmProperty belongs to.</param>
-        void Apply(PropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration);
+        /// <param name="model">The <see cref="ODataConventionModelBuilder"/>that contains the type this property is being applied to.</param>
+        void Apply(PropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration,
+            ODataConventionModelBuilder model);
     }
 }

@@ -14,7 +14,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         {
         }
 
-        public override void Apply(EntityTypeConfiguration edmTypeConfiguration, ODataModelBuilder model, 
+        public override void Apply(EntityTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model, 
             Attribute attribute)
         {
             if (edmTypeConfiguration == null)

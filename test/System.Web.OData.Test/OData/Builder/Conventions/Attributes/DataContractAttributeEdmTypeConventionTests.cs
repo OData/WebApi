@@ -21,12 +21,12 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         public void Apply_RemovesAllPropertiesThatAreNotDataMembers()
         {
             // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder() { ModelAliasingEnabled = false };
             Mock<Type> clrType = new Mock<Type>();
             clrType.Setup(t => t.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
             Mock<StructuralTypeConfiguration> type = new Mock<StructuralTypeConfiguration>(MockBehavior.Strict);
             type.Setup(t => t.ClrType).Returns(clrType.Object);
-            type.SetupGet(t => t.ModelBuilder).Returns(new ODataModelBuilder());
 
             var mockPropertyWithoutAttributes = CreateMockProperty();
             type.Object.ExplicitProperties.Add(new MockPropertyInfo(), CreateMockProperty(new DataMemberAttribute()));
@@ -36,7 +36,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             type.Setup(t => t.RemoveProperty(mockPropertyWithoutAttributes.PropertyInfo)).Verifiable();
 
             // Act
-            _convention.Apply(type.Object, new Mock<ODataModelBuilder>().Object);
+            _convention.Apply(type.Object, builder);
 
             // Assert
             type.Verify();
@@ -46,7 +46,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         public void Apply_DoesnotRemove_ExplicitlyAddedProperties()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder() { ModelAliasingEnabled = false };
             PropertyInfo propertyInfo = typeof(TestEntity).GetProperty("ExplicitlyAddedProperty");
             EntityTypeConfiguration entity = builder.AddEntityType(typeof(TestEntity));
             PropertyConfiguration property = entity.AddProperty(propertyInfo);
@@ -57,7 +57,6 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             // Assert
             Assert.Contains(propertyInfo, entity.ExplicitProperties.Keys);
             Assert.DoesNotContain(propertyInfo, entity.RemovedProperties);
-
         }
 
         [Fact]
@@ -66,15 +65,14 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             // Arrange
             Mock<Type> clrType = new Mock<Type>();
             clrType.Setup(t => t.GetCustomAttributes(It.IsAny<bool>()))
-                   .Returns(new[] { new DataContractAttribute { Name = "NameAlias", Namespace = "com.contoso" }});
+                   .Returns(new[] { new DataContractAttribute { Name = "NameAlias", Namespace = "com.contoso" } });
 
             Mock<StructuralTypeConfiguration> type = new Mock<StructuralTypeConfiguration> { CallBase = true };
             type.Setup(t => t.ClrType).Returns(clrType.Object);
-            type.SetupGet(t => t.ModelBuilder).Returns(new ODataModelBuilder { ModelAliasingEnabled = true });
             StructuralTypeConfiguration configuration = type.Object;
 
             // Act
-            _convention.Apply(configuration, new Mock<ODataModelBuilder>().Object);
+            _convention.Apply(configuration, new ODataConventionModelBuilder());
 
             // Assert
             Assert.Equal("NameAlias", configuration.Name);
@@ -86,17 +84,17 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         public void Apply_NameAliased_IfModelAliasingEnabled()
         {
             // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             Mock<Type> clrType = new Mock<Type>();
             clrType.Setup(t => t.GetCustomAttributes(It.IsAny<bool>()))
                    .Returns(new[] { new DataContractAttribute { Name = "NameAlias" } });
 
             Mock<StructuralTypeConfiguration> type = new Mock<StructuralTypeConfiguration> { CallBase = true };
             type.Setup(t => t.ClrType).Returns(clrType.Object);
-            type.SetupGet(t => t.ModelBuilder).Returns(new ODataModelBuilder { ModelAliasingEnabled = true });
             StructuralTypeConfiguration configuration = type.Object;
 
             // Act
-            _convention.Apply(configuration, new Mock<ODataModelBuilder>().Object);
+            _convention.Apply(configuration, builder);
 
             // Assert
             Assert.Equal("NameAlias", configuration.Name);
@@ -113,12 +111,11 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             Mock<StructuralTypeConfiguration> type = new Mock<StructuralTypeConfiguration> { CallBase = true };
             type.Setup(t => t.ClrType).Returns(clrType.Object);
-            type.SetupGet(t => t.ModelBuilder).Returns(new ODataModelBuilder { ModelAliasingEnabled = true });
             type.SetupProperty(t => t.Namespace);
             StructuralTypeConfiguration configuration = type.Object;
 
             // Act
-            _convention.Apply(configuration, new Mock<ODataModelBuilder>().Object);
+            _convention.Apply(configuration, new ODataConventionModelBuilder());
 
             // Assert
             Assert.Equal("com.contoso", configuration.Namespace);
@@ -140,7 +137,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             configuration.Namespace = "Namespace";
 
             // Act
-            _convention.Apply(configuration, new Mock<ODataModelBuilder>().Object);
+            _convention.Apply(configuration, new ODataConventionModelBuilder());
 
             // Assert
             Assert.Equal("Name", configuration.Name);
@@ -152,19 +149,20 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         public void Apply_NameAndNamespaceNotAliased_IfAddedExplicitly()
         {
             // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder() { ModelAliasingEnabled = true };
+
             Mock<Type> clrType = new Mock<Type>();
             clrType.Setup(t => t.GetCustomAttributes(It.IsAny<bool>()))
                    .Returns(new[] { new DataContractAttribute { Name = "NameAlias", Namespace = "com.contoso" } });
 
             Mock<StructuralTypeConfiguration> type = new Mock<StructuralTypeConfiguration> { CallBase = true };
             type.Setup(t => t.ClrType).Returns(clrType.Object);
-            type.SetupGet(t => t.ModelBuilder).Returns(new ODataModelBuilder { ModelAliasingEnabled = true });
             StructuralTypeConfiguration configuration = type.Object;
             configuration.Name = "Name";
             configuration.Namespace = "Namespace";
 
             // Act
-            _convention.Apply(configuration, new Mock<ODataModelBuilder>().Object);
+            _convention.Apply(configuration, builder);
 
             // Assert
             Assert.Equal("Name", configuration.Name);
@@ -188,6 +186,6 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             public int DataMemberProperty { get; set; }
 
             public int ExplicitlyAddedProperty { get; set; }
+        }
     }
-}
 }

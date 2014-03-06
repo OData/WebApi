@@ -18,7 +18,7 @@ namespace System.Web.OData.Builder.Conventions
         /// </summary>
         /// <param name="entity">The entity type being configured.</param>
         /// <param name="model">The <see cref="ODataModelBuilder"/>.</param>
-        public override void Apply(EntityTypeConfiguration entity, ODataModelBuilder model)
+        public override void Apply(EntityTypeConfiguration entity, ODataConventionModelBuilder model)
         {
             if (entity == null)
             {

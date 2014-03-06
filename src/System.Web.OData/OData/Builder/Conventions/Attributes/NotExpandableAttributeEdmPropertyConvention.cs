@@ -12,7 +12,10 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         {
         }
 
-        public override void Apply(NavigationPropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+        public override void Apply(NavigationPropertyConfiguration edmProperty,
+            StructuralTypeConfiguration structuralTypeConfiguration,
+            Attribute attribute,
+            ODataConventionModelBuilder model)
         {
             if (edmProperty == null)
             {

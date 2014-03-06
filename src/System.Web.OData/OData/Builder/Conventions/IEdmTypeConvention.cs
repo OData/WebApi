@@ -4,6 +4,6 @@ namespace System.Web.OData.Builder.Conventions
 {
     internal interface IEdmTypeConvention : IConvention
     {
-        void Apply(IEdmTypeConfiguration edmTypeConfiguration, ODataModelBuilder model);
+        void Apply(IEdmTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model);
     }
 }

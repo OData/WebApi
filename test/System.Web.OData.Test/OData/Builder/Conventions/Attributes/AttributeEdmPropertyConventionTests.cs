@@ -41,6 +41,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             // build the type
             Mock<EntityTypeConfiguration> structuralType = new Mock<EntityTypeConfiguration>(MockBehavior.Strict);
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            structuralType.Setup(s => s.ModelBuilder).Returns(builder);
 
             // build the property
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
@@ -64,7 +66,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 new SpyAttributeEdmPropertyConvention<TPropertyConfiguration>(matchAllFilter, allowMultiple: false);
 
             // Apply
-            (spy as IEdmPropertyConvention).Apply(propertyConfiguration.Object, structuralType.Object);
+            (spy as IEdmPropertyConvention).Apply(propertyConfiguration.Object, structuralType.Object, builder);
 
             return spy.Called;
         }
@@ -81,7 +83,9 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             public bool Called { get; private set; }
 
             public override void Apply(TPropertyConfiguration edmProperty,
-                StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+                StructuralTypeConfiguration structuralTypeConfiguration,
+                Attribute attribute,
+                ODataConventionModelBuilder model)
             {
                 Called = true;
             }

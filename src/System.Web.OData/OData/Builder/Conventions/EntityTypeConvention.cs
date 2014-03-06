@@ -12,7 +12,7 @@ namespace System.Web.OData.Builder.Conventions
         {
         }
 
-        public void Apply(IEdmTypeConfiguration edmTypeConfiguration, ODataModelBuilder model)
+        public void Apply(IEdmTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model)
         {
             EntityTypeConfiguration entity = edmTypeConfiguration as EntityTypeConfiguration;
             if (entity != null)
@@ -26,6 +26,6 @@ namespace System.Web.OData.Builder.Conventions
         /// </summary>
         /// <param name="entity">The <see cref="EntityTypeConfiguration"/> to apply the convention on.</param>
         /// <param name="model">The <see cref="ODataModelBuilder"/> instance.</param>
-        public abstract void Apply(EntityTypeConfiguration entity, ODataModelBuilder model);
+        public abstract void Apply(EntityTypeConfiguration entity, ODataConventionModelBuilder model);
     }
 }

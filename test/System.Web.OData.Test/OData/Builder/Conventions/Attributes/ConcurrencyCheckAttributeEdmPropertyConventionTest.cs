@@ -30,7 +30,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             primitiveProperty.Object.AddedExplicitly = false;
 
             // Act
-            new ConcurrencyCheckAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, entityType.Object);
+            new ConcurrencyCheckAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, entityType.Object, new ODataConventionModelBuilder());
 
             // Assert
             Assert.True(primitiveProperty.Object.ConcurrencyToken);

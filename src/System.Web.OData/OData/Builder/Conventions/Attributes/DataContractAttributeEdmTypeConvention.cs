@@ -23,16 +23,21 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// <param name="edmTypeConfiguration">The edm type to configure.</param>
         /// <param name="model">The edm model that this type belongs to.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
-        public override void Apply(StructuralTypeConfiguration edmTypeConfiguration, ODataModelBuilder model, Attribute attribute)
+        public override void Apply(StructuralTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
+            Attribute attribute)
         {
             if (edmTypeConfiguration == null)
             {
                 throw Error.ArgumentNull("edmTypeConfiguration");
             }
 
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
             if (!edmTypeConfiguration.AddedExplicitly &&
-                edmTypeConfiguration.ModelBuilder != null &&
-                edmTypeConfiguration.ModelBuilder.ModelAliasingEnabled)
+                model.ModelAliasingEnabled)
             {
                 // set the name, and namespace, if not null
                 DataContractAttribute dataContractAttribute = attribute as DataContractAttribute;

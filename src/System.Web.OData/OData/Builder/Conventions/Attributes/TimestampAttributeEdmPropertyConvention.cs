@@ -14,7 +14,9 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         }
 
         public override void Apply(PropertyConfiguration edmProperty,
-            StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+            StructuralTypeConfiguration structuralTypeConfiguration,
+            Attribute attribute,
+            ODataConventionModelBuilder model)
         {
             EntityTypeConfiguration entity = structuralTypeConfiguration as EntityTypeConfiguration;
             if (entity != null)

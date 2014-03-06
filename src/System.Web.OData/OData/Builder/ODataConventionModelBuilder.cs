@@ -100,6 +100,11 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Gets or sets model aliasing is enabled or not. The default value is false.
+        /// </summary>
+        public bool ModelAliasingEnabled { get; set; }
+
+        /// <summary>
         /// This action is invoked after the <see cref="ODataConventionModelBuilder"/> has run all the conventions, but before the configuration is locked
         /// down and used to build the <see cref="IEdmModel"/>.
         /// </summary>
@@ -112,6 +117,7 @@ namespace System.Web.OData.Builder
             _configuredEntitySets = new HashSet<EntitySetConfiguration>();
             _mappedTypes = new HashSet<StructuralTypeConfiguration>();
             _ignoredTypes = new HashSet<Type>();
+            ModelAliasingEnabled = true;
             _allTypesWithDerivedTypeMapping = new Lazy<IDictionary<Type, List<Type>>>(
                 () => BuildDerivedTypesMapping(assembliesResolver),
                 isThreadSafe: false);
@@ -759,14 +765,14 @@ namespace System.Web.OData.Builder
             return configuration;
         }
 
-        private static void ApplyPropertyConvention(IEdmPropertyConvention propertyConvention, StructuralTypeConfiguration edmTypeConfiguration)
+        private void ApplyPropertyConvention(IEdmPropertyConvention propertyConvention, StructuralTypeConfiguration edmTypeConfiguration)
         {
             Contract.Assert(propertyConvention != null);
             Contract.Assert(edmTypeConfiguration != null);
 
             foreach (PropertyConfiguration property in edmTypeConfiguration.Properties.ToArray())
             {
-                propertyConvention.Apply(property, edmTypeConfiguration);
+                propertyConvention.Apply(property, edmTypeConfiguration, this);
             }
         }
 

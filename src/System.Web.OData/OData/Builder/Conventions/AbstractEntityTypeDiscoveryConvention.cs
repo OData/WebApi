@@ -8,7 +8,7 @@ namespace System.Web.OData.Builder.Conventions
     /// </summary>
     internal class AbstractEntityTypeDiscoveryConvention : EntityTypeConvention
     {
-        public override void Apply(EntityTypeConfiguration entity, ODataModelBuilder model)
+        public override void Apply(EntityTypeConfiguration entity, ODataConventionModelBuilder model)
         {
             if (entity.IsAbstract == null)
             {

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Web.Http;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
@@ -26,7 +27,9 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// </summary>
         /// <param name="edmProperty">The property being configured.</param>
         /// <param name="structuralTypeConfiguration">The type being configured.</param>
-        public void Apply(PropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration)
+        /// <param name="model">The <see cref="ODataConventionModelBuilder"/>that contains the type this property is being applied to.</param>        
+        public void Apply(PropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration,
+            ODataConventionModelBuilder model)
         {
             if (edmProperty == null)
             {
@@ -41,7 +44,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             TPropertyConfiguration property = edmProperty as TPropertyConfiguration;
             if (property != null)
             {
-                Apply(property, structuralTypeConfiguration);
+                Apply(property, structuralTypeConfiguration, model);
             }
         }
 
@@ -50,7 +53,9 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// </summary>
         /// <param name="edmProperty">The property being configured.</param>
         /// <param name="structuralTypeConfiguration">The type being configured.</param>
-        public void Apply(TPropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration)
+        /// <param name="model">The <see cref="ODataConventionModelBuilder"/>that contains the type this property is being applied to.</param>
+        public void Apply(TPropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration,
+            ODataConventionModelBuilder model)
         {
             if (edmProperty == null)
             {
@@ -64,7 +69,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             foreach (Attribute attribute in GetAttributes(edmProperty.PropertyInfo))
             {
-                Apply(edmProperty, structuralTypeConfiguration, attribute);
+                Apply(edmProperty, structuralTypeConfiguration, attribute, model);
             }
         }
 
@@ -74,6 +79,10 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// <param name="edmProperty">The property being configured.</param>
         /// <param name="structuralTypeConfiguration">The type being configured.</param>
         /// <param name="attribute">The attribute to be used during configuration.</param>
-        public abstract void Apply(TPropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute);
+        /// <param name="model">The ODataConventionModelBuilder used to build the model.</param>
+        public abstract void Apply(TPropertyConfiguration edmProperty,
+            StructuralTypeConfiguration structuralTypeConfiguration,
+            Attribute attribute,
+            ODataConventionModelBuilder model);
     }
 }

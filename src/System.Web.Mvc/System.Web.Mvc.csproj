@@ -157,6 +157,7 @@
     <Compile Include="ControllerDescriptorExtensions.cs" />
     <Compile Include="Async\IAsyncActionInvokerFactory.cs" />
     <Compile Include="IActionInvokerFactory.cs" />
+    <Compile Include="ITempDataProviderFactory.cs" />
     <Compile Include="SelectListGroup.cs" />
     <Compile Include="Html\EnumHelper.cs" />
     <Compile Include="MaxLengthAttributeAdapter.cs" />

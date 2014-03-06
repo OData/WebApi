@@ -1886,7 +1886,7 @@ namespace System.Web.Mvc.Test
         [Fact]
         public void CreateTempProviderWithResolver()
         {
-            // Controller uses an IDependencyResolver to create an IActionInvoker.
+            // Controller uses an IDependencyResolver to create an ITempDataProvider.
             var controller = new EmptyController();
             Mock<IDependencyResolver> resolverMock = new Mock<IDependencyResolver>();
             Mock<ITempDataProvider> tempMock = new Mock<ITempDataProvider>();
@@ -1896,6 +1896,30 @@ namespace System.Web.Mvc.Test
             ITempDataProvider temp = controller.CreateTempDataProvider();
 
             resolverMock.Verify(r => r.GetService(typeof(ITempDataProvider)), Times.Once());
+            Assert.Same(tempMock.Object, temp);
+        }
+
+        [Fact]
+        public void CreateTempProviderWithResolver_ITempDataProviderFactory()
+        {
+            // Controller uses an IDependencyResolver and an ITempDataProviderFactory to create an ITempDataProvider.
+            // Arrange
+            var controller = new EmptyController();
+            Mock<IDependencyResolver> resolverMock = new Mock<IDependencyResolver>();
+            Mock<ITempDataProvider> tempMock = new Mock<ITempDataProvider>();
+            Mock<ITempDataProviderFactory> factoryMock = new Mock<ITempDataProviderFactory>();
+            factoryMock.Setup(f => f.CreateInstance()).Returns(tempMock.Object);
+            resolverMock.Setup(r => r.GetService(typeof(ITempDataProvider))).Returns(tempMock.Object);
+            resolverMock.Setup(r => r.GetService(typeof(ITempDataProviderFactory))).Returns(factoryMock.Object);
+            controller.Resolver = resolverMock.Object;
+
+            // Act
+            ITempDataProvider temp = controller.CreateTempDataProvider();
+
+            // Assert
+            // Times.Once() and Times.Never() confirm the order.
+            resolverMock.Verify(r => r.GetService(typeof(ITempDataProviderFactory)), Times.Once());
+            resolverMock.Verify(r => r.GetService(typeof(ITempDataProvider)), Times.Never());
             Assert.Same(tempMock.Object, temp);
         }
 

@@ -209,6 +209,14 @@ namespace System.Web.Mvc
 
         protected virtual ITempDataProvider CreateTempDataProvider()
         {
+            // The factory can be customized in order to create an ITempDataProvider for the controller.
+            ITempDataProviderFactory tempDataProviderFactory = Resolver.GetService<ITempDataProviderFactory>();
+            if (tempDataProviderFactory != null)
+            {
+                return tempDataProviderFactory.CreateInstance();
+            }
+
+            // Note that getting a service from the current cache will return the same instance for every controller.
             return Resolver.GetService<ITempDataProvider>() ?? new SessionStateTempDataProvider();
         }
 

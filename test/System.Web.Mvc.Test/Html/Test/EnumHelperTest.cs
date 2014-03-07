@@ -81,37 +81,37 @@ namespace System.Web.Mvc.Html.Test
                 return new TheoryDataSet<Type, string>
                 {
                     { typeof(EnumWithDisplay),
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"2\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"3\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"2\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"3\"}]" },
                     { typeof(EnumWithDuplicates),
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"2\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"2\"}]" },
                     { typeof(EnumWithGaps),
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"4\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"6\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"4\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"6\"}]" },
                     { typeof(EnumWithoutAnything), "[]" },
                     { typeof(EnumWithoutZero),
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"12\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"13\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"14\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"15\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"12\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"13\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"14\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"15\"}]" },
                     { typeof(EnumWithReversedValues),
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"3\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"0\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"3\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"0\"}]" },
                     { typeof(EnumWithReversedValues?),
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"\",\"Value\":\"\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"3\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"0\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"\",\"Value\":\"\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"3\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"0\"}]" },
                 };
             }
         }
@@ -149,63 +149,63 @@ namespace System.Web.Mvc.Html.Test
                 return new TheoryDataSet<Type, Enum, string>
                 {
                     { typeof(EnumWithDisplay?), EnumWithDisplay.Zero,
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"\",\"Value\":\"\"}," +
-                        "{\"Group\":null,\"Selected\":true,\"Text\":\"First\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"2\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"3\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"\",\"Value\":\"\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"First\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"2\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"3\"}]" },
                     { typeof(EnumWithDuplicates), EnumWithDuplicates.Second,
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":true,\"Text\":\"Third\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"2\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"Third\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"2\"}]" },
                     { typeof(EnumWithDuplicates), EnumWithDuplicates.Third,
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":true,\"Text\":\"Third\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"2\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"Third\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"2\"}]" },
                     { typeof(EnumWithGaps?), EnumWithGaps.Third,
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"\",\"Value\":\"\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
-                        "{\"Group\":null,\"Selected\":true,\"Text\":\"Third\",\"Value\":\"4\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"6\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"\",\"Value\":\"\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"Third\",\"Value\":\"4\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"6\"}]" },
                     { typeof(EnumWithoutAnything), (EnumWithoutAnything)0,
-                        "[{\"Group\":null,\"Selected\":true,\"Text\":\"\",\"Value\":\"0\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"\",\"Value\":\"0\"}]" },
                     { typeof(EnumWithoutZero), EnumWithoutZero.Fourth,
-                        "[{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"12\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"13\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"14\"}," +
-                        "{\"Group\":null,\"Selected\":true,\"Text\":\"Fourth\",\"Value\":\"15\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"12\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"13\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"14\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"Fourth\",\"Value\":\"15\"}]" },
                     { typeof(EnumWithoutZero), (EnumWithoutZero)0,
-                        "[{\"Group\":null,\"Selected\":true,\"Text\":\"\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"12\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"13\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"14\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"15\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"12\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"13\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"14\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"15\"}]" },
                     { typeof(EnumWithReversedValues?), (EnumWithReversedValues)32,
-                        "[{\"Group\":null,\"Selected\":true,\"Text\":\"\",\"Value\":\"32\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"3\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"0\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"\",\"Value\":\"32\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"3\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"2\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"0\"}]" },
                     { typeof(EnumWithDisplay?), null,
-                        "[{\"Group\":null,\"Selected\":true,\"Text\":\"\",\"Value\":\"\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"2\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"3\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"\",\"Value\":\"\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"2\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"3\"}]" },
                     { typeof(EnumWithDuplicates), null,
-                        "[{\"Group\":null,\"Selected\":true,\"Text\":\"First\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"1\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"2\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"First\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"1\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"2\"}]" },
                     { typeof(EnumWithoutZero), null,
-                        "[{\"Group\":null,\"Selected\":true,\"Text\":\"\",\"Value\":\"0\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"12\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"13\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"14\"}," +
-                        "{\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"15\"}]" },
+                        "[{\"Disabled\":false,\"Group\":null,\"Selected\":true,\"Text\":\"\",\"Value\":\"0\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"First\",\"Value\":\"12\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Second\",\"Value\":\"13\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Third\",\"Value\":\"14\"}," +
+                        "{\"Disabled\":false,\"Group\":null,\"Selected\":false,\"Text\":\"Fourth\",\"Value\":\"15\"}]" },
                 };
             }
         }

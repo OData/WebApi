@@ -34,6 +34,21 @@ namespace System.Web.Mvc.Html.Test
             return viewData;
         }
 
+        private static List<SelectListItem> GroupedItems_WithDisabled
+        {
+            get
+            {
+                List<SelectListItem> items = new List<SelectListItem>();
+                SelectListGroup disabledGroup = new SelectListGroup { Disabled = true, Name = "DisabledGroup" };
+                items.Add(new SelectListItem() { Text = "Alice", Value = "a" });
+                items.Add(new SelectListItem() { Text = "Bob", Value = "b", Group = disabledGroup });
+                items.Add(new SelectListItem() { Text = "Charlie", Value = "c", Group = disabledGroup });
+                items.Add(new SelectListItem() { Text = "David", Value = "d", Disabled = true });
+
+                return items;
+            }
+        }
+
         // DropDownList
 
         private static List<SelectListItem> GroupedItems
@@ -52,7 +67,7 @@ namespace System.Web.Mvc.Html.Test
                 items.Add(new SelectListItem() { Group = unnamed, Text = "other5", Value = "other5" });
                 items.Add(new SelectListItem() { Group = german, Text = "Mercedes-Benz", Value = "mercedes-benz" });
                 items.Add(new SelectListItem() { Group = swedish, Text = "Saab", Value = "saab", Selected = true });
-                items.Add(new SelectListItem() { Group = german, Text = "Audi", Value = "audi" });
+                items.Add(new SelectListItem() { Group = german, Text = "Audi", Value = "audi", Disabled = true });
                 items.Add(new SelectListItem() { Text = "other6", Value = "other6" });
 
                 return items;
@@ -77,13 +92,33 @@ namespace System.Web.Mvc.Html.Test
 </optgroup>
 <optgroup label=""German Cars"">
 <option value=""mercedes-benz"">Mercedes-Benz</option>
-<option value=""audi"">Audi</option>
+<option disabled=""disabled"" value=""audi"">Audi</option>
 </optgroup>
 <option value=""other6"">other6</option>
 </select>";
 
             // Act
             MvcHtmlString html = helper.DropDownList("List", GroupedItems);
+
+            // Assert
+            Assert.Equal(expectedDropDownListHtml, html.ToHtmlString());
+        }
+
+        [Fact]
+        void DropDownList_WithGroups_WithDisabled()
+        {
+            // Arrange
+            HtmlHelper helper = MvcHelper.GetHtmlHelper();
+            const string expectedDropDownListHtml = @"<select id=""List"" name=""List""><option value=""a"">Alice</option>
+<optgroup disabled=""disabled"" label=""DisabledGroup"">
+<option value=""b"">Bob</option>
+<option value=""c"">Charlie</option>
+</optgroup>
+<option disabled=""disabled"" value=""d"">David</option>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.DropDownList("List", GroupedItems_WithDisabled);
 
             // Assert
             Assert.Equal(expectedDropDownListHtml, html.ToHtmlString());
@@ -716,13 +751,36 @@ namespace System.Web.Mvc.Html.Test
 </optgroup>
 <optgroup label=""German Cars"">
 <option value=""mercedes-benz"">Mercedes-Benz</option>
-<option value=""audi"">Audi</option>
+<option disabled=""disabled"" value=""audi"">Audi</option>
 </optgroup>
 <option value=""other6"">other6</option>
 </select>";
 
             // Act
             MvcHtmlString html = helper.DropDownListFor(m => m.foo, GroupedItems, optionLabel: "Cars");
+
+            // Assert
+            Assert.Equal(expectedListBox, html.ToHtmlString());
+        }
+
+        [Fact]
+        void DropDownListFor_WithGroups_WithDisabled()
+        {
+            // Arrange
+            ViewDataDictionary<FooModel> dict = new ViewDataDictionary<FooModel>();
+            dict.Add("foo", "d");
+            HtmlHelper<FooModel> helper = MvcHelper.GetHtmlHelper(dict);
+            const string expectedListBox = @"<select id=""foo"" name=""foo""><option value="""">Options</option>
+<option value=""a"">Alice</option>
+<optgroup disabled=""disabled"" label=""DisabledGroup"">
+<option value=""b"">Bob</option>
+<option value=""c"">Charlie</option>
+</optgroup>
+<option disabled=""disabled"" selected=""selected"" value=""d"">David</option>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.DropDownListFor(m => m.foo, GroupedItems_WithDisabled, optionLabel: "Options");
 
             // Assert
             Assert.Equal(expectedListBox, html.ToHtmlString());
@@ -1895,13 +1953,33 @@ namespace System.Web.Mvc.Html.Test
 </optgroup>
 <optgroup label=""German Cars"">
 <option value=""mercedes-benz"">Mercedes-Benz</option>
-<option value=""audi"">Audi</option>
+<option disabled=""disabled"" value=""audi"">Audi</option>
 </optgroup>
 <option value=""other6"">other6</option>
 </select>";
 
             // Act
             MvcHtmlString html = helper.ListBox("List", GroupedItems);
+
+            // Assert
+            Assert.Equal(expectedListBox, html.ToHtmlString());
+        }
+
+        [Fact]
+        void ListBox_WithGroups_WithDisabled()
+        {
+            // Arrange
+            HtmlHelper helper = MvcHelper.GetHtmlHelper();
+            const string expectedListBox = @"<select id=""List"" multiple=""multiple"" name=""List""><option value=""a"">Alice</option>
+<optgroup disabled=""disabled"" label=""DisabledGroup"">
+<option value=""b"">Bob</option>
+<option value=""c"">Charlie</option>
+</optgroup>
+<option disabled=""disabled"" value=""d"">David</option>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.ListBox("List", GroupedItems_WithDisabled);
 
             // Assert
             Assert.Equal(expectedListBox, html.ToHtmlString());
@@ -2390,13 +2468,35 @@ namespace System.Web.Mvc.Html.Test
 </optgroup>
 <optgroup label=""German Cars"">
 <option value=""mercedes-benz"">Mercedes-Benz</option>
-<option selected=""selected"" value=""audi"">Audi</option>
+<option disabled=""disabled"" selected=""selected"" value=""audi"">Audi</option>
 </optgroup>
 <option value=""other6"">other6</option>
 </select>";
 
             // Act
             MvcHtmlString html = helper.ListBoxFor(m => m.foo, GroupedItems);
+
+            // Assert
+            Assert.Equal(expectedListBox, html.ToHtmlString());
+        }
+
+        [Fact]
+        void ListBoxFor_WithGroups_WithDisabled()
+        {
+            // Arrange
+            ViewDataDictionary<FooArrayModel> dict = new ViewDataDictionary<FooArrayModel>();
+            dict.Add("foo", new[] { "a", "d" });
+            HtmlHelper<FooArrayModel> helper = MvcHelper.GetHtmlHelper(dict);
+            const string expectedListBox = @"<select id=""foo"" multiple=""multiple"" name=""foo""><option selected=""selected"" value=""a"">Alice</option>
+<optgroup disabled=""disabled"" label=""DisabledGroup"">
+<option value=""b"">Bob</option>
+<option value=""c"">Charlie</option>
+</optgroup>
+<option disabled=""disabled"" selected=""selected"" value=""d"">David</option>
+</select>";
+
+            // Act
+            MvcHtmlString html = helper.ListBoxFor(m => m.foo, GroupedItems_WithDisabled);
 
             // Assert
             Assert.Equal(expectedListBox, html.ToHtmlString());

@@ -325,6 +325,10 @@ namespace System.Web.Mvc.Html
             {
                 builder.Attributes["selected"] = "selected";
             }
+            if (item.Disabled)
+            {
+                builder.Attributes["disabled"] = "disabled";
+            }
             return builder.ToString(TagRenderMode.Normal);
         }
 
@@ -470,6 +474,10 @@ namespace System.Web.Mvc.Html
                     if (optGroup.Name != null)
                     {
                         groupBuilder.MergeAttribute("label", optGroup.Name);
+                    }
+                    if (optGroup.Disabled)
+                    {
+                        groupBuilder.MergeAttribute("disabled", "disabled");
                     }
                     listItemBuilder.AppendLine(groupBuilder.ToString(TagRenderMode.StartTag));
                 }

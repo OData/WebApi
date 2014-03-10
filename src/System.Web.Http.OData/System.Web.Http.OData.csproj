@@ -115,6 +115,8 @@
     <Compile Include="OData\ODataUntypedActionParameters.cs" />
     <Compile Include="OData\PerRequestContentNegotiator.cs" />
     <Compile Include="OData\EnableQueryAttribute.cs" />
+    <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
+    <Compile Include="OData\Query\IPropertyMapper.cs" />
     <Compile Include="OData\Query\ISelectExpandWrapper.cs" />
     <Compile Include="OData\Query\Expressions\NamedPropertyExpression.cs" />
     <Compile Include="OData\Query\Expressions\PropertyContainer.cs" />

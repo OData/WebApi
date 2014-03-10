@@ -73,11 +73,11 @@ namespace System.Web.Http.OData.Query.Expressions
             var partialCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<Customer>>(enumerator.Current);
             Assert.False(enumerator.MoveNext());
             Assert.Null(partialCustomer.Instance);
-            IEnumerable<SelectExpandWrapper<Order>> innerOrders = partialCustomer.Container.ToDictionary()["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
+            IEnumerable<SelectExpandWrapper<Order>> innerOrders = partialCustomer.Container.ToDictionary(new IdentityPropertyMapper())["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
             Assert.NotNull(innerOrders);
             SelectExpandWrapper<Order> partialOrder = innerOrders.Single();
             Assert.Same(_queryable.First().Orders.First(), partialOrder.Instance);
-            SelectExpandWrapper<Customer> innerInnerCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<Customer>>(partialOrder.Container.ToDictionary()["Customer"]);
+            SelectExpandWrapper<Customer> innerInnerCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<Customer>>(partialOrder.Container.ToDictionary(new IdentityPropertyMapper())["Customer"]);
             Assert.Same(_queryable.First(), innerInnerCustomer.Instance);
         }
 
@@ -117,7 +117,7 @@ namespace System.Web.Http.OData.Query.Expressions
             SelectExpandWrapper<Order> projectedOrder = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Order>;
             Assert.NotNull(projectedOrder);
             Assert.Null(projectedOrder.Instance);
-            Assert.Null(projectedOrder.Container.ToDictionary()["Customer"]);
+            Assert.Null(projectedOrder.Container.ToDictionary(new IdentityPropertyMapper())["Customer"]);
         }
 
         [Fact]
@@ -195,7 +195,7 @@ namespace System.Web.Http.OData.Query.Expressions
             // Assert
             SelectExpandWrapper<Order> projectedOrder = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Order>;
             Assert.NotNull(projectedOrder);
-            Assert.Contains("Customer", projectedOrder.Container.ToDictionary().Keys);
+            Assert.Contains("Customer", projectedOrder.Container.ToDictionary(new IdentityPropertyMapper()).Keys);
         }
 
         [Fact]
@@ -216,8 +216,8 @@ namespace System.Web.Http.OData.Query.Expressions
             // Assert
             SelectExpandWrapper<Order> projectedOrder = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Order>;
             Assert.NotNull(projectedOrder);
-            Assert.Contains("Customer", projectedOrder.Container.ToDictionary().Keys);
-            Assert.Null(projectedOrder.Container.ToDictionary()["Customer"]);
+            Assert.Contains("Customer", projectedOrder.Container.ToDictionary(new IdentityPropertyMapper()).Keys);
+            Assert.Null(projectedOrder.Container.ToDictionary(new IdentityPropertyMapper())["Customer"]);
         }
 
         [Fact]
@@ -322,7 +322,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             // Assert
             SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
-            Assert.Equal(customer.Name, customerWrapper.Container.ToDictionary()["Name"]);
+            Assert.Equal(customer.Name, customerWrapper.Container.ToDictionary(new IdentityPropertyMapper())["Name"]);
         }
 
         [Theory]
@@ -341,7 +341,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             // Assert
             SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
-            Assert.Equal(customer.ID, customerWrapper.Container.ToDictionary()["ID"]);
+            Assert.Equal(customer.ID, customerWrapper.Container.ToDictionary(new IdentityPropertyMapper())["ID"]);
         }
 
         [Fact]

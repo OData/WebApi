@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
+using System.Web.Http.OData.Properties;
 
 namespace System.Web.Http.OData.Query.Expressions
 {
@@ -27,10 +28,11 @@ namespace System.Web.Http.OData.Query.Expressions
         /// Builds the dictionary of properties in this container keyed by the property name.
         /// </summary>
         /// <returns>The dictionary of properties in this container keyed by the property name.</returns>
-        public Dictionary<string, object> ToDictionary(bool includeAutoSelected = true)
+        public Dictionary<string, object> ToDictionary(IPropertyMapper propertyMapper, bool includeAutoSelected = true)
         {
+            Contract.Assert(propertyMapper != null);
             Dictionary<string, object> result = new Dictionary<string, object>();
-            ToDictionaryCore(result, includeAutoSelected);
+            ToDictionaryCore(result, propertyMapper, includeAutoSelected);
             return result;
         }
 
@@ -38,8 +40,11 @@ namespace System.Web.Http.OData.Query.Expressions
         /// Adds the properties in this container to the given dictionary.
         /// </summary>
         /// <param name="dictionary">The dictionary to add the properties to.</param>
+        /// <param name="propertyMapper">An object responsible to map the properties in this property container to the
+        /// the value that will be used as the key in the dictionary we are adding properties to.</param>
         /// <param name="includeAutoSelected">Specifies whether auto selected properties should be included.</param>
-        public abstract void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected);
+        public abstract void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+            bool includeAutoSelected);
 
         // Expression:
         //      new NamedProperty<T> 
@@ -151,13 +156,20 @@ namespace System.Web.Http.OData.Query.Expressions
 
             public bool AutoSelected { get; set; }
 
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+                bool includeAutoSelected)
             {
                 Contract.Assert(dictionary != null);
 
                 if (Name != null && (includeAutoSelected || !AutoSelected))
                 {
-                    dictionary.Add(Name, GetValue());
+                    string mappedName = propertyMapper.MapProperty(Name);
+                    if (String.IsNullOrEmpty(mappedName))
+                    {
+                        throw Error.InvalidOperation(SRResources.InvalidPropertyMapping, Name);
+                    }
+
+                    dictionary.Add(mappedName, GetValue());
                 }
             }
 
@@ -208,10 +220,11 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             public PropertyContainer Next { get; set; }
 
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+                bool includeAutoSelected)
             {
-                base.ToDictionaryCore(dictionary, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, includeAutoSelected);
+                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
             }
         }
 
@@ -219,10 +232,11 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             public PropertyContainer Next { get; set; }
 
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+                bool includeAutoSelected)
             {
-                base.ToDictionaryCore(dictionary, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, includeAutoSelected);
+                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
             }
         }
 
@@ -230,10 +244,11 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             public PropertyContainer Next { get; set; }
 
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+                bool includeAutoSelected)
             {
-                base.ToDictionaryCore(dictionary, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, includeAutoSelected);
+                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
             }
         }
 
@@ -241,10 +256,11 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             public PropertyContainer Next { get; set; }
 
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+                bool includeAutoSelected)
             {
-                base.ToDictionaryCore(dictionary, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, includeAutoSelected);
+                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
             }
         }
     }

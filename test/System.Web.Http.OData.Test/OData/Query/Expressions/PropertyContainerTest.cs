@@ -42,10 +42,10 @@ namespace System.Web.Http.OData.Query.Expressions
 
             // Assert
             PropertyContainer container = ToContainer(containerExpression);
-            var dict = container.ToDictionary(includeAutoSelected: true);
+            var dict = container.ToDictionary(new IdentityPropertyMapper(), includeAutoSelected: true);
             Assert.Contains("PropertyName", dict.Keys);
 
-            dict = container.ToDictionary(includeAutoSelected: false);
+            dict = container.ToDictionary(new IdentityPropertyMapper(), includeAutoSelected: false);
             Assert.DoesNotContain("PropertyName", dict.Keys);
         }
 
@@ -64,7 +64,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             // Assert
             PropertyContainer container = ToContainer(containerExpression);
-            var dict = container.ToDictionary();
+            var dict = container.ToDictionary(new IdentityPropertyMapper());
             Assert.Contains(propertyName, dict.Keys);
             Assert.Null(dict[propertyName]);
         }
@@ -85,7 +85,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             // Assert
             PropertyContainer container = ToContainer(containerExpression);
-            var dict = container.ToDictionary();
+            var dict = container.ToDictionary(new IdentityPropertyMapper());
             Assert.Contains(propertyName, dict.Keys);
             Assert.Equal(propertyValue, dict[propertyName]);
         }
@@ -105,7 +105,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             // Assert
             PropertyContainer container = ToContainer(containerExpression);
-            var dict = container.ToDictionary();
+            var dict = container.ToDictionary(new IdentityPropertyMapper());
             Assert.Null(dict["Prop1"]);
             Assert.Equal(2, dict["Prop2"]);
         }
@@ -124,7 +124,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             // Assert
             PropertyContainer container = ToContainer(containerExpression);
-            var result = container.ToDictionary()["PropertyName"];
+            var result = container.ToDictionary(new IdentityPropertyMapper())["PropertyName"];
             var truncatedCollection = Assert.IsType<TruncatedCollection<int>>(result);
             Assert.True(truncatedCollection.IsTruncated);
             Assert.Equal(pageSize, truncatedCollection.PageSize);
@@ -145,7 +145,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             // Assert
             PropertyContainer container = ToContainer(containerExpression);
-            Assert.Empty(container.ToDictionary(includeAutoSelected: true));
+            Assert.Empty(container.ToDictionary(new IdentityPropertyMapper(), includeAutoSelected: true));
         }
 
         [Theory]
@@ -166,8 +166,54 @@ namespace System.Web.Http.OData.Query.Expressions
             Expression containerExpression = PropertyContainer.CreatePropertyContainer(properties);
 
             // Assert
-            Dictionary<string, object> dictionary = ToContainer(containerExpression).ToDictionary(includeAutoSelected: true);
+            Dictionary<string, object> dictionary = ToContainer(containerExpression).ToDictionary(new IdentityPropertyMapper(), includeAutoSelected: true);
             Assert.Equal(Enumerable.Range(0, count).ToDictionary(i => i.ToString(), i => (object)i).OrderBy(kvp => kvp.Key), dictionary.OrderBy(kvp => kvp.Key));
+        }
+
+        [Fact]
+        public void ToDictionary_AppliesMappingToAllProperties()
+        {
+            // Arrange
+            IList<NamedPropertyExpression> properties = new NamedPropertyExpression[]
+            {
+                new NamedPropertyExpression(name: Expression.Constant("PropA"), value: Expression.Constant(3)),
+                new NamedPropertyExpression(name: Expression.Constant("PropB"), value: Expression.Constant(6))
+            };
+            Expression containerExpression = PropertyContainer.CreatePropertyContainer(properties);
+            PropertyContainer container = ToContainer(containerExpression);
+
+            Mock<IPropertyMapper> mapperMock = new Mock<IPropertyMapper>();
+            mapperMock.Setup(m => m.MapProperty("PropA")).Returns("PropertyA");
+            mapperMock.Setup(m => m.MapProperty("PropB")).Returns("PropB");
+
+            //Act
+            IDictionary<string, object> result = container.ToDictionary(mapperMock.Object);
+
+            //Assert
+            Assert.NotNull(result);
+            Assert.True(result.ContainsKey("PropertyA"));
+            Assert.True(result.ContainsKey("PropB"));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void ToDictionary_Throws_IfMappingFunctionReturns_NullOrEmpty(string mappedName)
+        {
+            // Arrange
+            IList<NamedPropertyExpression> properties = new NamedPropertyExpression[]
+            {
+                new NamedPropertyExpression(name: Expression.Constant("PropA"), value: Expression.Constant(3))
+            };
+            Expression containerExpression = PropertyContainer.CreatePropertyContainer(properties);
+            PropertyContainer container = ToContainer(containerExpression);
+
+            Mock<IPropertyMapper> mapperMock = new Mock<IPropertyMapper>();
+            mapperMock.Setup(m => m.MapProperty("PropA")).Returns(mappedName);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() =>
+                container.ToDictionary(mapperMock.Object), "The key mapping for the property 'PropA' can't be null or empty.");
         }
 
         private static PropertyContainer ToContainer(Expression containerCreationExpression)

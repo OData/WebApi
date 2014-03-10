@@ -5,6 +5,7 @@ using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Query.Expressions
 {
@@ -175,15 +176,124 @@ namespace System.Web.Http.OData.Query.Expressions
         public void ToDictionary_ContainsAllProperties_FromContainer()
         {
             // Arrange
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            entityType.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Int32);
+
+            EdmModel model = new EdmModel();
+            model.AddElement(entityType);
+            model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(TestEntity)));
+
             MockPropertyContainer container = new MockPropertyContainer();
             container.Properties.Add("Property", 42);
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity> { Container = container };
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>
+            {
+                Container = container,
+                ModelID = ModelContainer.GetModelID(model)
+            };
 
             // Act
             var result = wrapper.ToDictionary();
 
             // Assert
             Assert.Equal(42, result["Property"]);
+        }
+
+        [Fact]
+        public void ToDictionary_Throws_IfMapperProviderIsNull()
+        {
+            // Arrange
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>();
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => wrapper.ToDictionary(mapperProvider: null));
+        }
+
+        [Fact]
+        public void ToDictionary_Throws_IfMapperProvider_ReturnsNullPropertyMapper()
+        {
+            // Arrange
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            entityType.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Int32);
+
+            EdmModel model = new EdmModel();
+            model.AddElement(entityType);
+            model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(TestEntity)));
+            IEdmTypeReference edmType = new EdmEntityTypeReference(entityType, isNullable: false);
+
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>
+            {
+                Instance = new TestEntity { SampleProperty = 42 },
+                ModelID = ModelContainer.GetModelID(model)
+            };
+
+            Func<IEdmModel, IEdmStructuredType, IPropertyMapper> mapperProvider =
+                (IEdmModel m, IEdmStructuredType t) => null;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() =>
+                wrapper.ToDictionary(mapperProvider: mapperProvider),
+                "The mapper provider must return a valid 'System.Web.Http.OData.Query.IPropertyMapper' instance for the given 'NS.Name' IEdmType.");
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void ToDictionary_Throws_IfMappingIsNullOrEmpty_ForAGivenProperty(string propertyMapping)
+        {
+            // Arrange
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            entityType.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Int32);
+
+            EdmModel model = new EdmModel();
+            model.AddElement(entityType);
+            model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(TestEntity)));
+            IEdmTypeReference edmType = new EdmEntityTypeReference(entityType, isNullable: false);
+
+            SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>
+            {
+                Instance = new TestEntity { SampleProperty = 42 },
+                ModelID = ModelContainer.GetModelID(model)
+            };
+
+            Mock<IPropertyMapper> mapperMock = new Mock<IPropertyMapper>();
+            mapperMock.Setup(m => m.MapProperty("SampleProperty")).Returns(propertyMapping);
+            Func<IEdmModel, IEdmStructuredType, IPropertyMapper> mapperProvider =
+                (IEdmModel m, IEdmStructuredType t) => mapperMock.Object;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() =>
+                testWrapper.ToDictionary(mapperProvider),
+                "The key mapping for the property 'SampleProperty' can't be null or empty.");
+        }
+
+        [Fact]
+        public void ToDictionary_AppliesMappingToAllProperties_IfInstanceIsNotNull()
+        {
+            // Arrange
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            entityType.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Int32);
+
+            EdmModel model = new EdmModel();
+            model.AddElement(entityType);
+            model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(TestEntity)));
+            IEdmTypeReference edmType = new EdmEntityTypeReference(entityType, isNullable: false);
+
+            SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>
+            {
+                Instance = new TestEntity { SampleProperty = 42 },
+                ModelID = ModelContainer.GetModelID(model)
+            };
+
+            Mock<IPropertyMapper> mapperMock = new Mock<IPropertyMapper>();
+            mapperMock.Setup(m => m.MapProperty("SampleProperty")).Returns("Sample");
+            Func<IEdmModel, IEdmStructuredType, IPropertyMapper> mapperProvider =
+                (IEdmModel m, IEdmStructuredType t) => mapperMock.Object;
+
+            // Act
+            var result = testWrapper.ToDictionary(mapperProvider);
+
+            // Assert
+            Assert.Equal(42, result["Sample"]);
         }
 
         private class MockPropertyContainer : PropertyContainer
@@ -195,7 +305,8 @@ namespace System.Web.Http.OData.Query.Expressions
 
             public Dictionary<string, object> Properties { get; private set; }
 
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, bool includeAutoSelected)
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper mapper,
+                bool includeAutoSelected)
             {
                 foreach (var kvp in Properties)
                 {

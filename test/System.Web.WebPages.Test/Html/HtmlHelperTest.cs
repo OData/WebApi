@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics;
+using System.Collections;
+using System.Collections.Generic;
 using System.Web.Routing;
 using System.Web.WebPages.Html;
 using Microsoft.TestCommon;
@@ -164,6 +165,22 @@ namespace System.Web.WebPages.Test
             Assert.Equal(7, result.Count);
             Assert.Equal("Bar", result["foo"]);
             Assert.Equal("pow_wow", result["baz-bif"]);
+        }
+
+        [Fact]
+        public void ObjectToDictionaryWithAnonymousTypeLooksUpProperties()
+        {
+            // Arrange
+            object obj = new { _test = "value", oth_er = 1 };
+
+            // Act
+            IDictionary<string, object> dictValues = HtmlHelper.ObjectToDictionary(obj);
+
+            // Assert
+            Assert.NotNull(dictValues);
+            Assert.Equal(2, dictValues.Count);
+            Assert.Equal("value", dictValues["_test"]);
+            Assert.Equal(1, dictValues["oth_er"]);
         }
 
         private static object GetAttributes()

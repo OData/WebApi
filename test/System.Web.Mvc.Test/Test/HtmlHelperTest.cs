@@ -1087,6 +1087,23 @@ namespace System.Web.Mvc.Test
             Assert.Equal(expectedUnformattedDate, htmlHelper.EvalString("date"));
         }
 
+
+        [Fact]
+        public void ObjectToDictionaryWithAnonymousTypeLooksUpProperties()
+        {
+            // Arrange
+            object obj = new { _test = "value", oth_er = 1 };
+
+            // Act
+            IDictionary<string, object> dictValues = HtmlHelper.ObjectToDictionary(obj);
+
+            // Assert
+            Assert.NotNull(dictValues);
+            Assert.Equal(2, dictValues.Count);
+            Assert.Equal("value", dictValues["_test"]);
+            Assert.Equal(1, dictValues["oth_er"]);
+        }
+
         private class ObjectWithWrapperMarkup
         {
             public override string ToString()

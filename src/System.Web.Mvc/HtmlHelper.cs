@@ -10,6 +10,7 @@ using System.Text;
 using System.Web.Helpers;
 using System.Web.Mvc.Properties;
 using System.Web.Routing;
+using System.Web.WebPages;
 using System.Web.WebPages.Scope;
 
 namespace System.Web.Mvc
@@ -99,11 +100,11 @@ namespace System.Web.Mvc
         /// <summary>
         /// Creates a dictionary of HTML attributes from the input object, 
         /// translating underscores to dashes.
+        /// </summary>
         /// <example>
-        /// new { data_name="value" } will translate to the entry { "data-name" , "value" }
+        /// <c>new { data_name="value" }</c> will translate to the entry <c>{ "data-name" , "value" }</c>
         /// in the resulting dictionary.
         /// </example>
-        /// </summary>
         /// <param name="htmlAttributes">Anonymous object describing HTML attributes.</param>
         /// <returns>A dictionary that represents HTML attributes.</returns>
         public static RouteValueDictionary AnonymousObjectToHtmlAttributes(object htmlAttributes)
@@ -508,6 +509,22 @@ namespace System.Web.Mvc
             ViewContext newViewContext = new ViewContext(ViewContext, ViewContext.View, newViewData, ViewContext.TempData, writer);
             IView view = FindPartialView(newViewContext, partialViewName, viewEngineCollection);
             view.Render(newViewContext, writer);
+        }
+
+        /// <summary>
+        /// Creates a dictionary from an object, by adding each public instance property as a key with its associated 
+        /// value to the dictionary. It will expose public properties from derived types as well. This is typically used
+        /// with objects of an anonymous type.
+        /// </summary>
+        /// <example>
+        /// <c>new { property_name = "value" }</c> will translate to the entry <c>{ "property_name" , "value" }</c>
+        /// in the resulting dictionary.
+        /// </example>
+        /// <param name="value">The object to be converted.</param>
+        /// <returns>The created dictionary of property names and property values.</returns>
+        public static IDictionary<string, object> ObjectToDictionary(object value)
+        {
+            return TypeHelper.ObjectToDictionary(value);
         }
     }
 }

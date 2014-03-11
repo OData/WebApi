@@ -20,9 +20,9 @@ namespace System.Web.OData.Builder
 
             var products = builder.EntitySet<EntitySetLinkConfigurationTest_Product>("Products");
             products.HasIdLink(c =>
-                string.Format(
+                new Uri(string.Format(
                     "http://server/service/Products({0})",
-                    c.GetPropertyValue("ID")
+                    c.GetPropertyValue("ID"))
                 ),
                 followsConventions: false);
 
@@ -44,7 +44,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(selfLinks.ReadLink);
             Assert.Equal(expectedEditLink, selfLinks.ReadLink.ToString());
             Assert.NotNull(selfLinks.IdLink);
-            Assert.Equal(expectedEditLink, selfLinks.IdLink);
+            Assert.Equal(expectedEditLink, selfLinks.IdLink.ToString());
         }
 
         [Fact]
@@ -72,9 +72,9 @@ namespace System.Web.OData.Builder
             ),
             followsConventions: false);
             products.HasIdLink(c =>
-                string.Format(
+                new Uri(string.Format(
                     "http://server3/service/Products({0})",
-                    c.GetPropertyValue("ID")
+                    c.GetPropertyValue("ID"))
                 ),
             followsConventions: false
             );
@@ -98,7 +98,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(readLink);
             Assert.Equal(expectedReadLink, readLink.ToString());
             Assert.NotNull(idLink);
-            Assert.Equal(expectedIdLink, idLink);
+            Assert.Equal(expectedIdLink, idLink.ToString());
         }
 
         [Fact]

@@ -28,10 +28,10 @@ namespace System.Web.OData.Builder
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
-            string idLink = entityContext.GenerateSelfLink(includeCast);
+            var idLink = entityContext.GenerateSelfLink(includeCast);
 
             // Assert
-            Assert.Equal(expectedIdLink, idLink);
+            Assert.Equal(expectedIdLink, idLink.ToString());
         }
 
         [Theory]
@@ -63,10 +63,10 @@ namespace System.Web.OData.Builder
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
-            string idLink = entityContext.GenerateSelfLink(includeCast);
+            var idLink = entityContext.GenerateSelfLink(includeCast);
 
             // Assert
-            Assert.Equal(expectedIdLink, idLink);
+            Assert.Equal(expectedIdLink, idLink.ToString());
         }
 
         [Theory]
@@ -233,6 +233,21 @@ namespace System.Web.OData.Builder
 
             // Assert
             Assert.Equal("http://localhost/Me/NS.Customer/upgrade", link.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GenerateActionLink_ReturnsNull_ForContainment()
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.OrderLines, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 42 });
+
+            // Act
+            Uri link = entityContext.GenerateActionLink(_model.Tag);
+
+            // Assert
+            Assert.Null(link);
         }
 
         [Fact]

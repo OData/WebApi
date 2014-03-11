@@ -152,7 +152,7 @@ namespace System.Web.OData.Results
             NavigationSourceLinkBuilderAnnotation linkBuilder = entityContext.EdmModel.GetNavigationSourceLinkBuilder(entityContext.NavigationSource);
             Contract.Assert(linkBuilder != null);
 
-            string idLink = linkBuilder.BuildIdLink(entityContext, ODataMetadataLevel.Default);
+            Uri idLink = linkBuilder.BuildIdLink(entityContext, ODataMetadataLevel.Default);
             Uri editLink = linkBuilder.BuildEditLink(entityContext, ODataMetadataLevel.Default, idLink);
             if (editLink == null)
             {

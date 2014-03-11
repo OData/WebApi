@@ -257,10 +257,13 @@ namespace System.Web.OData.Builder
 
             foreach (NavigationPropertyConfiguration navProp in config.NavigationProperties)
             {
-                EdmNavigationPropertyInfo info = new EdmNavigationPropertyInfo();
-                info.Name = navProp.Name;
-                info.TargetMultiplicity = navProp.Multiplicity;
-                info.Target = GetEdmType(navProp.RelatedClrType) as IEdmEntityType;
+                EdmNavigationPropertyInfo info = new EdmNavigationPropertyInfo
+                {
+                    Name = navProp.Name,
+                    TargetMultiplicity = navProp.Multiplicity,
+                    Target = GetEdmType(navProp.RelatedClrType) as IEdmEntityType,
+                    ContainsTarget = navProp.ContainsTarget
+                };
                 IEdmProperty edmProperty = type.AddUnidirectionalNavigation(info);
                 if (navProp.PropertyInfo != null && edmProperty != null)
                 {

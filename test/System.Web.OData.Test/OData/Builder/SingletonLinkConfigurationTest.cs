@@ -18,7 +18,7 @@ namespace System.Web.OData.Builder
             const string ExpectedEditLink = "http://server/service/Exchange";
 
             var product = builder.Singleton<SingletonProduct>("Exchange");
-            product.HasIdLink(c => "http://server/service/Exchange",
+            product.HasIdLink(c => new Uri("http://server/service/Exchange"),
                 followsConventions: false);
 
             var exchange = builder.Singletons.Single();
@@ -39,7 +39,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(selfLinks.ReadLink);
             Assert.Equal(ExpectedEditLink, selfLinks.ReadLink.ToString());
             Assert.NotNull(selfLinks.IdLink);
-            Assert.Equal(ExpectedEditLink, selfLinks.IdLink);
+            Assert.Equal(ExpectedEditLink, selfLinks.IdLink.ToString());
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace System.Web.OData.Builder
                 followsConventions: false);
             product.HasReadLink(c => new Uri("http://server2/service/Exchange"),
                 followsConventions: false);
-            product.HasIdLink(c => "http://server3/service/Exchange",
+            product.HasIdLink(c => new Uri("http://server3/service/Exchange"),
                 followsConventions: false);
 
             var exchange = builder.Singletons.Single();
@@ -78,7 +78,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(readLink);
             Assert.Equal(ExpectedReadLink, readLink.ToString());
             Assert.NotNull(idLink);
-            Assert.Equal(ExpectedIdLink, idLink);
+            Assert.Equal(ExpectedIdLink, idLink.ToString());
         }
 
         [Fact]

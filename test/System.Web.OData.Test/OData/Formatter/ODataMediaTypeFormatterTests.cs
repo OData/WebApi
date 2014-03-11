@@ -398,6 +398,7 @@ namespace System.Web.OData.Formatter
 
             Assert.NotNull(formatter.MessageWriterSettings);
             Assert.True(formatter.MessageWriterSettings.DisableMessageStreamDisposal);
+            Assert.True(formatter.MessageWriterSettings.AutoComputePayloadMetadataInJson);
         }
 
         [Fact]

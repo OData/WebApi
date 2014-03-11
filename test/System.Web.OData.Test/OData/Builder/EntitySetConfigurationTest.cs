@@ -161,7 +161,7 @@ namespace System.Web.OData.Builder
         public void HasIdLink_RoundTrips()
         {
             // Arrange
-            SelfLinkBuilder<string> idLinkBuilder = new SelfLinkBuilder<string>((ctxt) => null, followsConventions: true);
+            SelfLinkBuilder<Uri> idLinkBuilder = new SelfLinkBuilder<Uri>((ctxt) => null, followsConventions: true);
 
             // Act
             _entityset.HasIdLink(idLinkBuilder);

@@ -43,7 +43,7 @@ namespace System.Web.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            IEdmEntitySet entitySet = writeContext.NavigationSource as IEdmEntitySet;
+            IEdmEntitySetBase entitySet = writeContext.NavigationSource as IEdmEntitySetBase;
             if (entitySet == null)
             {
                 throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
@@ -160,7 +160,7 @@ namespace System.Web.OData.Formatter.Serialization
                 {
                     Request = writeContext.Request,
                     RequestContext = writeContext.RequestContext,
-                    EntitySet = writeContext.NavigationSource as IEdmEntitySet,
+                    EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
                     Url = writeContext.Url,
                     FeedInstance = feedInstance
                 };

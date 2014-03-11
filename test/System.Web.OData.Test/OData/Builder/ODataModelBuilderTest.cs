@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Csdl;
 using Microsoft.TestCommon;
 using Moq;
 using BuilderTestModels = System.Web.OData.Builder.TestModels;
@@ -209,6 +208,155 @@ namespace System.Web.OData.Builder
 
             // Assert
             Assert.Equal(2, model.EntityContainer.OperationImports().Count());
+        }
+
+        [Fact]
+        public void GetEdmModel_HasContainment_WithModelBuilder()
+        {
+            // Arrange
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            var myOrder = builder.EntityType<BuilderTestModels.MyOrder>();
+            myOrder.ContainsMany(mo => mo.OrderLines);
+            myOrder.ContainsRequired(mo => mo.OrderHeader);
+            myOrder.ContainsOptional(mo => mo.OrderCancellation);
+            builder.EntitySet<BuilderTestModels.MyOrder>("MyOrders");
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+            Assert.NotNull(model);
+
+            var container = Assert.Single(model.SchemaElements.OfType<IEdmEntityContainer>());
+
+            var myOrders = container.FindEntitySet("MyOrders");
+            Assert.NotNull(myOrders);
+            var edmMyOrder = myOrders.EntityType();
+            Assert.Equal("MyOrder", edmMyOrder.Name);
+            AssertHasContainment(edmMyOrder, model);
+        }
+
+        [Fact]
+        public void GetEdmModel_HasContainment_WithLowLevelModelBuilder()
+        {
+            // Arrange
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            var myOrder = builder.AddEntityType(typeof(BuilderTestModels.MyOrder));
+            myOrder.HasKey(typeof(BuilderTestModels.MyOrder).GetProperty("ID"));
+            myOrder.AddContainedNavigationProperty(typeof(BuilderTestModels.MyOrder).GetProperty("OrderLines"), EdmMultiplicity.Many);
+            myOrder.AddContainedNavigationProperty(typeof(BuilderTestModels.MyOrder).GetProperty("OrderHeader"), EdmMultiplicity.One);
+            myOrder.AddContainedNavigationProperty(
+                typeof(BuilderTestModels.MyOrder).GetProperty("OrderCancellation"),
+                EdmMultiplicity.ZeroOrOne);
+            builder.AddEntitySet("MyOrders", myOrder);
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+            Assert.NotNull(model);
+
+            var container = Assert.Single(model.SchemaElements.OfType<IEdmEntityContainer>());
+
+            var myOrders = container.FindEntitySet("MyOrders");
+            Assert.NotNull(myOrders);
+            var edmMyOrder = myOrders.EntityType();
+            Assert.Equal("MyOrder", edmMyOrder.Name);
+            AssertHasContainment(edmMyOrder, model);
+        }
+
+        [Fact]
+        public void GetEdmModel_DerivedTypeHasContainment_WithModelBuilder()
+        {
+            // Arrange
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            var myOrder = builder.EntityType<BuilderTestModels.MyOrder>();
+            myOrder.ContainsMany(mo => mo.OrderLines);
+            myOrder.ContainsRequired(mo => mo.OrderHeader);
+            myOrder.ContainsOptional(mo => mo.OrderCancellation);
+            var mySpecialOrder = builder.EntityType<BuilderTestModels.MySpecialOrder>().DerivesFrom<BuilderTestModels.MyOrder>();
+            mySpecialOrder.ContainsOptional(order => order.Gift);
+            builder.EntitySet<BuilderTestModels.MySpecialOrder>("MySpecialOrders");
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+            Assert.NotNull(model);
+
+            var container = Assert.Single(model.SchemaElements.OfType<IEdmEntityContainer>());
+
+            var myOrders = container.FindEntitySet("MySpecialOrders");
+            Assert.NotNull(myOrders);
+            var edmMyOrder = myOrders.EntityType();
+            Assert.Equal("MySpecialOrder", edmMyOrder.Name);
+            AssertHasContainment(edmMyOrder, model);
+            AssertHasAdditionalContainment(edmMyOrder, model);
+        }
+
+        [Fact]
+        public void GetEdmModel_DerivedTypeHasContainment_WithLowLevelModelBuilder()
+        {
+            // Arrange
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            var myOrder = builder.AddEntityType(typeof(BuilderTestModels.MyOrder));
+            myOrder.HasKey(typeof(BuilderTestModels.MyOrder).GetProperty("ID"));
+            myOrder.AddContainedNavigationProperty(typeof(BuilderTestModels.MyOrder).GetProperty("OrderLines"), EdmMultiplicity.Many);
+            myOrder.AddContainedNavigationProperty(typeof(BuilderTestModels.MyOrder).GetProperty("OrderHeader"), EdmMultiplicity.One);
+            myOrder.AddContainedNavigationProperty(
+                typeof(BuilderTestModels.MyOrder).GetProperty("OrderCancellation"),
+                EdmMultiplicity.ZeroOrOne);
+            var mySpecialOrder = builder.AddEntityType(typeof(BuilderTestModels.MySpecialOrder));
+            mySpecialOrder.DerivesFrom(myOrder);
+            mySpecialOrder.AddContainedNavigationProperty(
+                typeof(BuilderTestModels.MySpecialOrder).GetProperty("Gift"),
+                EdmMultiplicity.ZeroOrOne);
+            builder.AddEntitySet("MySpecialOrders", mySpecialOrder);
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+            Assert.NotNull(model);
+
+            var container = Assert.Single(model.SchemaElements.OfType<IEdmEntityContainer>());
+
+            var myOrders = container.FindEntitySet("MySpecialOrders");
+            Assert.NotNull(myOrders);
+            var edmMyOrder = myOrders.EntityType();
+            Assert.Equal("MySpecialOrder", edmMyOrder.Name);
+            AssertHasContainment(edmMyOrder, model);
+            AssertHasAdditionalContainment(edmMyOrder, model);
+        }
+
+        internal static void AssertHasContainment(IEdmEntityType myOrder, IEdmModel model)
+        {
+            var orderLines = myOrder.AssertHasNavigationProperty(
+                model,
+                "OrderLines",
+                typeof(BuilderTestModels.OrderLine),
+                isNullable: false,
+                multiplicity: EdmMultiplicity.Many);
+            Assert.True(orderLines.ContainsTarget);
+
+            var orderHeader = myOrder.AssertHasNavigationProperty(
+                model,
+                "OrderHeader",
+                typeof(BuilderTestModels.OrderHeader),
+                isNullable: false,
+                multiplicity: EdmMultiplicity.One);
+            Assert.True(orderHeader.ContainsTarget);
+
+            var orderCancellation = myOrder.AssertHasNavigationProperty(
+                model,
+                "OrderCancellation",
+                typeof(BuilderTestModels.OrderCancellation),
+                isNullable: true,
+                multiplicity: EdmMultiplicity.ZeroOrOne);
+            Assert.True(orderCancellation.ContainsTarget);
+        }
+
+        internal static void AssertHasAdditionalContainment(IEdmEntityType mySpecialOrder, IEdmModel model)
+        {
+            var gift = mySpecialOrder.AssertHasNavigationProperty(
+                model,
+                "Gift",
+                typeof(BuilderTestModels.Gift),
+                isNullable: true,
+                multiplicity: EdmMultiplicity.ZeroOrOne);
+            Assert.True(gift.ContainsTarget);
         }
 
         [Fact]

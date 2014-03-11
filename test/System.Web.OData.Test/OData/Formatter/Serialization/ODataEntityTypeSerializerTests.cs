@@ -736,11 +736,11 @@ namespace System.Web.OData.Formatter.Serialization
             bool customIdLinkbuilderCalled = false;
             NavigationSourceLinkBuilderAnnotation linkAnnotation = new MockNavigationSourceLinkBuilderAnnotation
             {
-                IdLinkBuilder = new SelfLinkBuilder<string>((EntityInstanceContext context) =>
+                IdLinkBuilder = new SelfLinkBuilder<Uri>((EntityInstanceContext context) =>
                 {
                     Assert.Same(instanceContext, context);
                     customIdLinkbuilderCalled = true;
-                    return "http://sample_id_link";
+                    return new Uri("http://sample_id_link");
                 },
                 followsConventions: false)
             };

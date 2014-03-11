@@ -400,7 +400,7 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 FeedSelfLinkBuilder = (context) =>
                     {
-                        Assert.Equal(_customerSet, context.EntitySet);
+                        Assert.Equal(_customerSet, context.EntitySetBase);
                         Assert.Equal(feedInstance, context.FeedInstance);
                         Assert.Equal(writeContext.Request, context.Request);
                         Assert.Equal(writeContext.Url, context.Url);

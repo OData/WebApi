@@ -332,9 +332,9 @@ namespace System.Web.OData.Formatter
                 .Property(c => c.SeatingCapacity);
 
             builder.EntitySet<Vehicle>("vehicles").HasIdLink(
-                (v) => "http://localhost/vehicles/" + v.GetPropertyValue("Name"), followsConventions: false);
+                (v) => new Uri("http://localhost/vehicles/" + v.GetPropertyValue("Name")), followsConventions: false);
             builder.EntitySet<Motorcycle>("motorcycles").HasIdLink(
-                (m) => "http://localhost/motorcycles/" + m.GetPropertyValue("Name"), followsConventions: false);
+                (m) => new Uri("http://localhost/motorcycles/" + m.GetPropertyValue("Name")), followsConventions: false);
             builder.EntitySet<Car>("cars");
 
             builder

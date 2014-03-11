@@ -133,13 +133,19 @@ namespace System.Web.OData.Builder
                 foreach (NavigationPropertyConfiguration navigationProperty in entityType.NavigationProperties)
                 {
                     NavigationPropertyBindingConfiguration binding = configuration.FindBinding(navigationProperty);
-                    if (binding != null)
+                    bool isContained = navigationProperty.ContainsTarget;
+                    if (binding != null || isContained)
                     {
                         EdmEntityType edmEntityType = edmTypeMap[entityType.ClrType] as EdmEntityType;
                         IEdmNavigationProperty edmNavigationProperty = edmEntityType.NavigationProperties()
                             .Single(np => np.Name == navigationProperty.Name);
 
-                        navigationSource.AddNavigationTarget(edmNavigationProperty, edmNavigationSourceMap[binding.TargetNavigationSource.Name]);
+                        if (!isContained)
+                        {
+                            navigationSource.AddNavigationTarget(
+                                edmNavigationProperty,
+                                edmNavigationSourceMap[binding.TargetNavigationSource.Name]);
+                        }
 
                         NavigationLinkBuilder linkBuilderFunc = configuration.GetNavigationPropertyLink(navigationProperty);
                         if (linkBuilderFunc != null)

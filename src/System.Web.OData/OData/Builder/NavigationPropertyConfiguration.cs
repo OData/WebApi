@@ -61,6 +61,11 @@ namespace System.Web.OData.Builder
         public EdmMultiplicity Multiplicity { get; private set; }
 
         /// <summary>
+        /// Gets whether this navigation property is a containment, default to false.
+        /// </summary>
+        public bool ContainsTarget { get; private set; }
+
+        /// <summary>
         /// Gets the backing CLR type of this property type.
         /// </summary>
         public override Type RelatedClrType
@@ -101,6 +106,24 @@ namespace System.Web.OData.Builder
             }
 
             Multiplicity = EdmMultiplicity.One;
+            return this;
+        }
+
+        /// <summary>
+        /// Marks the navigation property as containment.
+        /// </summary>
+        public NavigationPropertyConfiguration Contained()
+        {
+            ContainsTarget = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Marks the navigation property as non-contained.
+        /// </summary>
+        public NavigationPropertyConfiguration NonContained()
+        {
+            ContainsTarget = false;
             return this;
         }
     }

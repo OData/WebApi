@@ -62,7 +62,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="idLinkBuilder">The builder used to generate the ID.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        INavigationSourceConfiguration HasIdLink(SelfLinkBuilder<string> idLinkBuilder);
+        INavigationSourceConfiguration HasIdLink(SelfLinkBuilder<Uri> idLinkBuilder);
 
         /// <summary>
         /// Configures the navigation link for the given navigation property for this navigation source.
@@ -145,7 +145,7 @@ namespace System.Web.OData.Builder
         /// <returns>The builder.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
             Justification = "Consistent with EF Has/Get pattern")]
-        SelfLinkBuilder<string> GetIdLink();
+        SelfLinkBuilder<Uri> GetIdLink();
 
         /// <summary>
         /// Gets the builder used to generate navigation link for the given navigation property for this navigation source.

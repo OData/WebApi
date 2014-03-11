@@ -10,7 +10,7 @@ namespace System.Web.OData.Formatter.Serialization
         /// <summary>
         /// A string that uniquely identifies the resource.
         /// </summary>
-         public string IdLink { get; set; }
+         public Uri IdLink { get; set; }
  
         /// <summary>
         /// A URL that can be used to edit a copy of the resource.

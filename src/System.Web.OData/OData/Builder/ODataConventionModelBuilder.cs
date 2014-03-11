@@ -483,6 +483,12 @@ namespace System.Web.OData.Builder
                             addedNavigationProperty = entity.AddNavigationProperty(property, EdmMultiplicity.Many);
                         }
 
+                        ContainedAttribute containedAttribute = property.GetCustomAttribute<ContainedAttribute>();
+                        if (containedAttribute != null)
+                        {
+                            addedNavigationProperty.Contained();
+                        }
+
                         addedNavigationProperty.AddedExplicitly = false;
                     }
                 }

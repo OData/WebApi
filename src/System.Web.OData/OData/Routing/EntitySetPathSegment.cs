@@ -17,14 +17,14 @@ namespace System.Web.OData.Routing
         /// Initializes a new instance of the <see cref="EntitySetPathSegment" /> class.
         /// </summary>
         /// <param name="entitySet">The entity set being accessed.</param>
-        public EntitySetPathSegment(IEdmEntitySet entitySet)
+        public EntitySetPathSegment(IEdmEntitySetBase entitySet)
         {
             if (entitySet == null)
             {
                 throw Error.ArgumentNull("entitySet");
             }
 
-            EntitySet = entitySet;
+            EntitySetBase = entitySet;
             EntitySetName = entitySet.Name;
         }
 
@@ -45,8 +45,7 @@ namespace System.Web.OData.Routing
         /// <summary>
         /// Gets the entity set represented by this segment.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "Refers to the EntitySet for this segment.")]
-        public IEdmEntitySet EntitySet
+        public IEdmEntitySetBase EntitySetBase
         {
             get;
             private set;
@@ -81,9 +80,9 @@ namespace System.Web.OData.Routing
         /// </returns>
         public override IEdmType GetEdmType(IEdmType previousEdmType)
         {
-            if (EntitySet != null)
+            if (EntitySetBase != null)
             {
-                return EntitySet.EntityType().GetCollection();
+                return EntitySetBase.EntityType().GetCollection();
             }
 
             return null;
@@ -92,7 +91,7 @@ namespace System.Web.OData.Routing
         /// <inheritdoc/>
         public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
         {
-            return EntitySet;
+            return EntitySetBase;
         }
 
         /// <summary>
@@ -112,7 +111,7 @@ namespace System.Web.OData.Routing
             if (pathSegment.SegmentKind == ODataSegmentKinds.EntitySet)
             {
                 EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)pathSegment;
-                return entitySetSegment.EntitySet == EntitySet && entitySetSegment.EntitySetName == EntitySetName;
+                return entitySetSegment.EntitySetBase == EntitySetBase && entitySetSegment.EntitySetName == EntitySetName;
             }
 
             return false;

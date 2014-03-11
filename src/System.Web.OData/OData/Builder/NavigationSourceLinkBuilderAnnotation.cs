@@ -19,7 +19,7 @@ namespace System.Web.OData.Builder
     {
         private readonly Func<FeedContext, Uri> _feedSelfLinkBuilder;
 
-        private readonly SelfLinkBuilder<string> _idLinkBuilder;
+        private readonly SelfLinkBuilder<Uri> _idLinkBuilder;
         private readonly SelfLinkBuilder<Uri> _editLinkBuilder;
         private readonly SelfLinkBuilder<Uri> _readLinkBuilder;
 
@@ -79,9 +79,9 @@ namespace System.Web.OData.Builder
             _navigationSourceName = navigationSource.Name;
             _feedSelfLinkBuilder = (feedContext) => feedContext.GenerateFeedSelfLink();
 
-            Func<EntityInstanceContext, string> selfLinkFactory =
+            Func<EntityInstanceContext, Uri> selfLinkFactory =
                 (entityInstanceContext) => entityInstanceContext.GenerateSelfLink(includeCast: derivedTypesDefineNavigationProperty);
-            _idLinkBuilder = new SelfLinkBuilder<string>(selfLinkFactory, followsConventions: true);
+            _idLinkBuilder = new SelfLinkBuilder<Uri>(selfLinkFactory, followsConventions: true);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace System.Web.OData.Builder
         public NavigationSourceLinkBuilderAnnotation(
             IEdmNavigationSource navigationSource,
             Func<FeedContext, Uri> feedSelfLinkBuilder,
-            SelfLinkBuilder<string> idLinkBuilder,
+            SelfLinkBuilder<Uri> idLinkBuilder,
             SelfLinkBuilder<Uri> editLinkBuilder,
             SelfLinkBuilder<Uri> readLinkBuilder)
         {
@@ -178,7 +178,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Constructs the IdLink for a particular <see cref="EntityInstanceContext" /> and <see cref="ODataMetadataLevel" />.
         /// </summary>
-        public virtual string BuildIdLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
+        public virtual Uri BuildIdLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
         {
             if (instanceContext == null)
             {
@@ -187,7 +187,12 @@ namespace System.Web.OData.Builder
 
             if (_idLinkBuilder == null)
             {
-                throw Error.InvalidOperation(SRResources.NoIdLinkFactoryFound, _navigationSourceName);
+                if (metadataLevel == ODataMetadataLevel.Default)
+                {
+                    throw Error.InvalidOperation(SRResources.NoIdLinkFactoryFound, _navigationSourceName);
+                }
+
+                return null;
             }
 
             if (IsDefaultOrFull(metadataLevel) || (IsMinimal(metadataLevel) && !_idLinkBuilder.FollowsConventions))
@@ -204,7 +209,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Constructs the EditLink URL for a particular <see cref="EntityInstanceContext" /> and <see cref="ODataMetadataLevel" />.
         /// </summary>
-        public virtual Uri BuildEditLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, string idLink)
+        public virtual Uri BuildEditLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, Uri idLink)
         {
             if (instanceContext == null)
             {
@@ -216,7 +221,7 @@ namespace System.Web.OData.Builder
                 // edit link is the same as id link. emit only in default metadata mode.
                 if (metadataLevel == ODataMetadataLevel.Default)
                 {
-                    return new Uri(idLink);
+                    return idLink;
                 }
             }
             else if (IsDefaultOrFull(metadataLevel) ||
@@ -279,9 +284,13 @@ namespace System.Web.OData.Builder
             NavigationLinkBuilder navigationLinkBuilder;
             if (!_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder))
             {
-                throw Error.Argument("navigationProperty", SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _navigationSourceName);
+                if (metadataLevel == ODataMetadataLevel.Default)
+                {
+                    throw Error.Argument("navigationProperty", SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _navigationSourceName);
+                }
+
+                return null;
             }
-            Contract.Assert(navigationLinkBuilder != null);
 
             if (IsDefaultOrFull(metadataLevel) ||
                 (IsMinimal(metadataLevel) && !navigationLinkBuilder.FollowsConventions))

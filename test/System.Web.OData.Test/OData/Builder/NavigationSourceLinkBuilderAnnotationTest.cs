@@ -46,7 +46,7 @@ namespace System.Web.OData.Builder
         }
 
         [Theory]
-        [PropertyData("AllODataMetadataLevels")]
+        [InlineData(ODataMetadataLevel.Default)]
         public void BuildIdLink_Throws_IfIdLinkBuilderIsNull(ODataMetadataLevel metadataLevel)
         {
             // Arrange
@@ -56,6 +56,17 @@ namespace System.Web.OData.Builder
             Assert.Throws<InvalidOperationException>(
                 () => linkBuilder.BuildIdLink(new EntityInstanceContext(), (ODataMetadataLevel)metadataLevel),
                 "No IdLink factory was found. Try calling HasIdLink on the NavigationSourceConfiguration for 'Customers'.");
+        }
+        
+        [Theory]
+        [InlineData(ODataMetadataLevel.FullMetadata)]
+        [InlineData(ODataMetadataLevel.MinimalMetadata)]
+        [InlineData(ODataMetadataLevel.NoMetadata)]
+        public void BuildIdLink_DoesNotThrow_IfJsonAndIdLinkBuilderIsNull(object metadataLevel)
+        {
+            NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
+            Assert.DoesNotThrow(
+                () => linkBuilder.BuildIdLink(new EntityInstanceContext(), (ODataMetadataLevel)metadataLevel));
         }
 
         [Theory]
@@ -70,16 +81,16 @@ namespace System.Web.OData.Builder
         public void BuildIdLink(bool followsConventions, ODataMetadataLevel metadataLevel, bool linkEmitted)
         {
             // Arrange
-            _entitySet.HasIdLink(new SelfLinkBuilder<string>((context) => "http://selflink", followsConventions));
+            _entitySet.HasIdLink(new SelfLinkBuilder<Uri>((context) => new Uri("http://selflink"), followsConventions));
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
 
             // Act
-            string generatedIdLink = linkBuilder.BuildIdLink(new EntityInstanceContext(), (ODataMetadataLevel)metadataLevel);
+            Uri generatedIdLink = linkBuilder.BuildIdLink(new EntityInstanceContext(), (ODataMetadataLevel)metadataLevel);
 
             // Assert
             if (linkEmitted)
             {
-                Assert.Equal("http://selflink", generatedIdLink);
+                Assert.Equal(new Uri("http://selflink"), generatedIdLink);
             }
             else
             {
@@ -99,11 +110,11 @@ namespace System.Web.OData.Builder
         public void BuildEditLink_WhenEditLinkIsSameAsIdLink_And_IsNotSet(bool followsConventions, ODataMetadataLevel metadataLevel, bool linkEmitted)
         {
             // Arrange
-            _entitySet.HasIdLink(new SelfLinkBuilder<string>((context) => "http://selflink/", followsConventions));
+            _entitySet.HasIdLink(new SelfLinkBuilder<Uri>((context) => new Uri("http://selflink/"), followsConventions));
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
 
             // Act
-            Uri generatedEditLink = linkBuilder.BuildEditLink(new EntityInstanceContext(), (ODataMetadataLevel)metadataLevel, "http://selflink");
+            Uri generatedEditLink = linkBuilder.BuildEditLink(new EntityInstanceContext(), (ODataMetadataLevel)metadataLevel, new Uri("http://selflink"));
 
             // Assert
             if (linkEmitted)
@@ -132,7 +143,7 @@ namespace System.Web.OData.Builder
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
 
             // Act
-            Uri generatedEditLink = linkBuilder.BuildEditLink(new EntityInstanceContext(), (ODataMetadataLevel)metadataLevel, "http://selflink");
+            Uri generatedEditLink = linkBuilder.BuildEditLink(new EntityInstanceContext(), (ODataMetadataLevel)metadataLevel, new Uri("http://selflink"));
 
             // Assert
             if (linkEmitted)
@@ -251,9 +262,8 @@ namespace System.Web.OData.Builder
         public void CanConfigureIdLinkToNotFollowConventions()
         {
             // Arrange
-            string idLink = "http://id_link";
-
-            _entitySet.HasIdLink(new SelfLinkBuilder<string>((ctxt) => idLink, followsConventions: false));
+            Uri idLink = new Uri("http://id_link");
+            _entitySet.HasIdLink(new SelfLinkBuilder<Uri>((ctxt) => idLink, followsConventions: false));
 
             // Act
             var selfLinks = new NavigationSourceLinkBuilderAnnotation(_entitySet).BuildEntitySelfLinks(new EntityInstanceContext(), ODataMetadataLevel.MinimalMetadata);
@@ -268,10 +278,10 @@ namespace System.Web.OData.Builder
         public void CanConfigureEditLinkToNotFollowConventions()
         {
             // Arrange
-            string idLink = "http://id_link";
+            Uri idLink = new Uri("http://id_link");
             Uri editLink = new Uri("http://edit_link");
 
-            _entitySet.HasIdLink(new SelfLinkBuilder<string>((ctxt) => idLink, followsConventions: true));
+            _entitySet.HasIdLink(new SelfLinkBuilder<Uri>((ctxt) => idLink, followsConventions: true));
             _entitySet.HasEditLink(new SelfLinkBuilder<Uri>((ctxt) => editLink, followsConventions: false));
 
             // Act
@@ -287,10 +297,10 @@ namespace System.Web.OData.Builder
         public void CanConfigureReadLinkToNotFollowConventions()
         {
             // Arrange
-            string idLink = "http://id_link";
+            Uri idLink = new Uri("http://id_link");
             Uri readLink = new Uri("http://read_link");
 
-            _entitySet.HasIdLink(new SelfLinkBuilder<string>((ctxt) => idLink, followsConventions: true));
+            _entitySet.HasIdLink(new SelfLinkBuilder<Uri>((ctxt) => idLink, followsConventions: true));
             _entitySet.HasReadLink(new SelfLinkBuilder<Uri>((ctxt) => readLink, followsConventions: false));
 
             // Act
@@ -309,14 +319,14 @@ namespace System.Web.OData.Builder
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             HttpRequestMessage request = GetODataRequest(model.Model);
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, NavigationSource = model.Customers, Url = request.GetUrlHelper() };
-            EntityInstanceContext instanceContext = new EntityInstanceContext(serializerContext, model.Customer.AsReference(), new { ID = 42 });
+            EntityInstanceContext instanceContext = new EntityInstanceContext(serializerContext, model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(model.Customers, model.Model);
-            string result = linkBuilder.BuildIdLink(instanceContext, ODataMetadataLevel.Default);
+            var result = linkBuilder.BuildIdLink(instanceContext, ODataMetadataLevel.Default);
 
             // Assert
-            Assert.Equal("http://localhost/Customers(42)/NS.Customer", result);
+            Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer", result.ToString());
         }
 
         [Fact]
@@ -331,10 +341,10 @@ namespace System.Web.OData.Builder
 
             // Act
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(specialCustomers, model.Model);
-            string result = linkBuilder.BuildIdLink(instanceContext, ODataMetadataLevel.Default);
+            var result = linkBuilder.BuildIdLink(instanceContext, ODataMetadataLevel.Default);
 
             // Assert
-            Assert.Equal("http://localhost/SpecialCustomers(42)", result);
+            Assert.Equal("http://localhost/SpecialCustomers(42)", result.ToString());
         }
 
         [Fact]
@@ -382,7 +392,7 @@ namespace System.Web.OData.Builder
 
             // Act
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(model.Customers, model.Model);
-            Uri result = linkBuilder.BuildFeedSelfLink(new FeedContext { EntitySet = model.Customers, Url = request.GetUrlHelper() });
+            Uri result = linkBuilder.BuildFeedSelfLink(new FeedContext { EntitySetBase = model.Customers, Url = request.GetUrlHelper() });
 
             // Assert
             Assert.Equal("http://localhost/Customers", result.AbsoluteUri);

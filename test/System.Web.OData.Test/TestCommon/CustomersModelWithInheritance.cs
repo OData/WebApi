@@ -70,15 +70,45 @@ namespace System.Web.OData.TestCommon
             testEntity.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Binary);
             model.AddElement(testEntity);
 
+            // containment
+            // my order
+            EdmEntityType myOrder = new EdmEntityType("NS", "MyOrder");
+            myOrder.AddKeys(myOrder.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            myOrder.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            model.AddElement(myOrder);
+
+            // order line
+            EdmEntityType orderLine = new EdmEntityType("NS", "OrderLine");
+            orderLine.AddKeys(orderLine.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            orderLine.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            model.AddElement(orderLine);
+
+            EdmNavigationProperty orderLinesNavProp = myOrder.AddUnidirectionalNavigation(
+                new EdmNavigationPropertyInfo
+                {
+                    Name = "OrderLines",
+                    TargetMultiplicity = EdmMultiplicity.Many,
+                    Target = orderLine,
+                    ContainsTarget = true,
+                });
+
+            EdmAction tag = new EdmAction("NS", "tag", returnType: null, isBound: true, entitySetPathExpression: null);
+            tag.AddParameter("entity", new EdmEntityTypeReference(orderLine, false));
+            model.AddElement(tag);
+            
             // entity sets
             EdmEntityContainer container = new EdmEntityContainer("NS", "ModelWithInheritance");
             model.AddElement(container);
             EdmEntitySet customers = container.AddEntitySet("Customers", customer);
             EdmEntitySet orders = container.AddEntitySet("Orders", order);
+            EdmEntitySet myOrders = container.AddEntitySet("MyOrders", myOrder);
 
             // singletons
             EdmSingleton vipCustomer = container.AddSingleton("VipCustomer", customer);
             EdmSingleton mary = container.AddSingleton("Mary", customer);
+
+            // containment
+            IEdmContainedEntitySet orderLines = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderLinesNavProp);
 
             // actions
             EdmAction upgrade = new EdmAction("NS", "upgrade", returnType: null, isBound: true, entitySetPathExpression: null);
@@ -180,14 +210,16 @@ namespace System.Web.OData.TestCommon
             model.AddElement(isCustomerLocal);
 
             // navigation properties
-            customers.AddNavigationTarget(
-                customer.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo
+            EdmNavigationProperty ordersNavProp = customer.AddUnidirectionalNavigation(
+                new EdmNavigationPropertyInfo
                 {
                     Name = "Orders",
                     TargetMultiplicity = EdmMultiplicity.Many,
                     Target = order
-                }),
-                orders);
+                });
+            mary.AddNavigationTarget(ordersNavProp, orders);
+            vipCustomer.AddNavigationTarget(ordersNavProp, orders);
+            customers.AddNavigationTarget(ordersNavProp, orders);
             orders.AddNavigationTarget(
                  order.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo
                  {
@@ -198,14 +230,15 @@ namespace System.Web.OData.TestCommon
                 customers);
 
             // navigation properties on derived types.
-            customers.AddNavigationTarget(
-                specialCustomer.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo
+            EdmNavigationProperty specialOrdersNavProp = specialCustomer.AddUnidirectionalNavigation(
+                new EdmNavigationPropertyInfo
                 {
                     Name = "SpecialOrders",
                     TargetMultiplicity = EdmMultiplicity.Many,
                     Target = order
-                }),
-                orders);
+                });
+            vipCustomer.AddNavigationTarget(specialOrdersNavProp, orders);
+            customers.AddNavigationTarget(specialOrdersNavProp, orders);
             orders.AddNavigationTarget(
                  specialOrder.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo
                  {
@@ -228,11 +261,14 @@ namespace System.Web.OData.TestCommon
             Customers = customers;
             VipCustomer = vipCustomer;
             Mary = mary;
+            OrderLine = orderLine;
+            OrderLines = orderLines;
             UpgradeCustomer = upgrade;
             UpgradeSpecialCustomer = specialUpgrade;
             CustomerName = customerName;
             IsCustomerUpgraded = isCustomerUpgradedWithParam;
             IsSpecialCustomerUpgraded = IsSpecialUpgraded;
+            Tag = tag;
         }
 
         public EdmModel Model { get; private set; }
@@ -245,6 +281,8 @@ namespace System.Web.OData.TestCommon
 
         public EdmEntityType SpecialOrder { get; private set; }
 
+        public EdmEntityType OrderLine { get; private set; }
+
         public EdmComplexType Address { get; private set; }
 
         public EdmEntitySet Customers { get; private set; }
@@ -255,12 +293,16 @@ namespace System.Web.OData.TestCommon
 
         public EdmSingleton Mary { get; private set; }
 
+        public IEdmContainedEntitySet OrderLines { get; private set; }
+
         public EdmEntityContainer Container { get; private set; }
 
         public EdmAction UpgradeCustomer { get; private set; }
 
         public EdmAction UpgradeSpecialCustomer { get; private set; }
 
+        public EdmAction Tag { get; private set; }
+        
         public IEdmProperty CustomerName { get; private set; }
 
         public EdmFunction IsCustomerUpgraded { get; private set; }

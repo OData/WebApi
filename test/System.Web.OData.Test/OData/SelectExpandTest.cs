@@ -233,10 +233,9 @@ namespace System.Web.OData
                 Assert.Equal("http://localhost/odata2/Players(" + i + ")/Default.PlayerAction1", result["value"][i]["#Default.PlayerAction1"]["target"]);
                 Assert.Equal("http://localhost/odata2/Players(" + i + ")/Default.PlayerAction2", result["value"][i]["#Default.PlayerAction2"]["target"]);
                 Assert.Equal("http://localhost/odata2/Players(" + i + ")/Default.PlayerAction3", result["value"][i]["#Default.PlayerAction3"]["target"]);
+                Assert.Equal("http://localhost/odata2/Players(" + i + ")/Default.PlayerFunction1", result["value"][i]["#Default.PlayerFunction1"]["target"]);
+                Assert.Equal("http://localhost/odata2/Players(" + i + ")/Default.PlayerFunction2", result["value"][i]["#Default.PlayerFunction2"]["target"]);
             }
-
-            // to verify the payload doesn't include any function
-            Assert.DoesNotContain("PlayerFunction1", responseString);
         }
 
         [Theory]

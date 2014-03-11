@@ -159,6 +159,61 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Configures a relationship from this entity type to a contained collection navigation property.
+        /// </summary>
+        /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>
+        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for
+        ///  the relationship. For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET
+        ///  <c>Function(t) t.MyProperty</c>.</param>
+        /// <returns>A configuration object that can be used to further configure the relationship.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Nested generic appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "Explicit Expression generic type is more clear")]
+        public NavigationPropertyConfiguration ContainsMany<TTargetEntity>(
+            Expression<Func<TEntityType, IEnumerable<TTargetEntity>>> navigationPropertyExpression)
+            where TTargetEntity : class
+        {
+            return GetOrCreateContainedNavigationProperty(navigationPropertyExpression, EdmMultiplicity.Many);
+        }
+
+        /// <summary>
+        /// Configures an optional relationship from this entity type to a single contained navigation property.
+        /// </summary>
+        /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>
+        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for
+        ///  the relationship. For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET
+        ///  <c>Function(t) t.MyProperty</c>.</param>
+        /// <returns>A configuration object that can be used to further configure the relationship.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Nested generic appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "Explicit Expression generic type is more clear")]
+        public NavigationPropertyConfiguration ContainsOptional<TTargetEntity>(
+            Expression<Func<TEntityType, TTargetEntity>> navigationPropertyExpression) where TTargetEntity : class
+        {
+            return GetOrCreateContainedNavigationProperty(navigationPropertyExpression, EdmMultiplicity.ZeroOrOne);
+        }
+
+        /// <summary>
+        /// Configures a required relationship from this entity type to a single contained navigation property.
+        /// </summary>
+        /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>
+        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for
+        ///  the relationship. For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET
+        ///  <c>Function(t) t.MyProperty</c>.</param>
+        /// <returns>A configuration object that can be used to further configure the relationship.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Nested generic appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "Explicit Expression generic type is more clear")]
+        public NavigationPropertyConfiguration ContainsRequired<TTargetEntity>(
+            Expression<Func<TEntityType, TTargetEntity>> navigationPropertyExpression) where TTargetEntity : class
+        {
+            return GetOrCreateContainedNavigationProperty(navigationPropertyExpression, EdmMultiplicity.One);
+        }
+
+        /// <summary>
         /// Create an Action that binds to this EntityType.
         /// </summary>
         /// <param name="name">The name of the action.</param>
@@ -218,6 +273,12 @@ namespace System.Web.OData.Builder
         {
             PropertyInfo navigationProperty = PropertySelectorVisitor.GetSelectedProperty(navigationPropertyExpression);
             return _configuration.AddNavigationProperty(navigationProperty, multiplicity);
+        }
+
+        internal NavigationPropertyConfiguration GetOrCreateContainedNavigationProperty(Expression navigationPropertyExpression, EdmMultiplicity multiplicity)
+        {
+            PropertyInfo navigationProperty = PropertySelectorVisitor.GetSelectedProperty(navigationPropertyExpression);
+            return _configuration.AddContainedNavigationProperty(navigationProperty, multiplicity);
         }
     }
 }

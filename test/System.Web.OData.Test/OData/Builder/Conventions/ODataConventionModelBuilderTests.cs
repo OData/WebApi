@@ -1495,6 +1495,47 @@ namespace System.Web.OData.Builder.Conventions
 
             Assert.DoesNotThrow(() => builder.GetEdmModel());
         }
+
+        [Fact]
+        public void ODataConventionModelBuilder_GetEdmModel_HasContainment()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<MyOrder>("MyOrders");
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+            Assert.NotNull(model);
+
+            var container = Assert.Single(model.SchemaElements.OfType<IEdmEntityContainer>());
+
+            var myOrders = container.FindEntitySet("MyOrders");
+            Assert.NotNull(myOrders);
+            var myOrder = myOrders.EntityType();
+            Assert.Equal("MyOrder", myOrder.Name);
+            ODataModelBuilderTest.AssertHasContainment(myOrder, model);
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_GetEdmModel_DerivedTypeHasContainment()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<MySpecialOrder>("MySpecialOrders");
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+            Assert.NotNull(model);
+
+            var container = Assert.Single(model.SchemaElements.OfType<IEdmEntityContainer>());
+
+            var myOrders = container.FindEntitySet("MySpecialOrders");
+            Assert.NotNull(myOrders);
+            var myOrder = myOrders.EntityType();
+            Assert.Equal("MySpecialOrder", myOrder.Name);
+            ODataModelBuilderTest.AssertHasContainment(myOrder, model);
+            ODataModelBuilderTest.AssertHasAdditionalContainment(myOrder, model);
+        }
     }
 
     public class Product

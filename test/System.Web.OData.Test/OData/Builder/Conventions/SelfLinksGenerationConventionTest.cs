@@ -71,7 +71,8 @@ namespace System.Web.OData.Builder.Conventions
 
             EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
 
-            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')/System.Web.OData.Builder.TestModels.Car", selfLinks.IdLink);
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')", selfLinks.IdLink.ToString());
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')/System.Web.OData.Builder.TestModels.Car", selfLinks.EditLink.ToString());
         }
 
         [Fact]
@@ -94,7 +95,8 @@ namespace System.Web.OData.Builder.Conventions
             EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
 
             // Assert
-            Assert.Equal("http://localhost/MyVehicle/System.Web.OData.Builder.TestModels.Car", selfLinks.IdLink);
+            Assert.Equal("http://localhost/MyVehicle", selfLinks.IdLink.ToString());
+            Assert.Equal("http://localhost/MyVehicle/System.Web.OData.Builder.TestModels.Car", selfLinks.EditLink.ToString());
         }
 
         [Fact]
@@ -114,7 +116,7 @@ namespace System.Web.OData.Builder.Conventions
 
             EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
 
-            Assert.Equal("http://localhost/motorcycles(Model=2009,Name='Ninja')", selfLinks.IdLink);
+            Assert.Equal("http://localhost/motorcycles(Model=2009,Name='Ninja')", selfLinks.IdLink.ToString());
         }
 
         [Fact]
@@ -137,7 +139,7 @@ namespace System.Web.OData.Builder.Conventions
             EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
 
             // Assert
-            Assert.Equal("http://localhost/MyMotor", selfLinks.IdLink);
+            Assert.Equal("http://localhost/MyMotor", selfLinks.IdLink.ToString());
         }
 
         private static HttpRequestMessage GetODataRequest(IEdmModel model)

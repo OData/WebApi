@@ -23,9 +23,9 @@ namespace System.Web.OData
         public HttpRequestContext RequestContext { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IEdmEntitySet"/> this instance belongs to.
+        /// Gets the <see cref="IEdmEntitySetBase"/> this instance belongs to.
         /// </summary>
-        public IEdmEntitySet EntitySet { get; set; }
+        public IEdmEntitySetBase EntitySetBase { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="UrlHelper"/> to be used for generating links while serializing this

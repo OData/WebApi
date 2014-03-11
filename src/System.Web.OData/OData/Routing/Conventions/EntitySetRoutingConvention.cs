@@ -42,7 +42,7 @@ namespace System.Web.OData.Routing.Conventions
             if (odataPath.PathTemplate == "~/entityset")
             {
                 EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
-                IEdmEntitySet entitySet = entitySetSegment.EntitySet;
+                IEdmEntitySetBase entitySet = entitySetSegment.EntitySetBase;
                 HttpMethod httpMethod = controllerContext.Request.Method;
 
                 if (httpMethod == HttpMethod.Get)
@@ -63,7 +63,7 @@ namespace System.Web.OData.Routing.Conventions
             else if (odataPath.PathTemplate == "~/entityset/cast")
             {
                 EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
-                IEdmEntitySet entitySet = entitySetSegment.EntitySet;
+                IEdmEntitySetBase entitySet = entitySetSegment.EntitySetBase;
                 IEdmCollectionType collectionType = (IEdmCollectionType)odataPath.EdmType;
                 IEdmEntityType entityType = (IEdmEntityType)collectionType.ElementType.Definition;
                 HttpMethod httpMethod = controllerContext.Request.Method;

@@ -77,12 +77,12 @@ namespace System.Web.OData.Formatter
 
                 var people = model.EntitySet<FormatterPerson>("People");
                 people.HasFeedSelfLink(context => new Uri(context.Url.CreateODataLink(new EntitySetPathSegment(
-                    context.EntitySet))));
+                    context.EntitySetBase))));
                 people.HasIdLink(context =>
                     {
-                        return context.Url.CreateODataLink(
+                        return new Uri(context.Url.CreateODataLink(
                             new EntitySetPathSegment(context.NavigationSource as IEdmEntitySet),
-                            new KeyValuePathSegment(context.GetPropertyValue("PerId").ToString()));
+                            new KeyValuePathSegment(context.GetPropertyValue("PerId").ToString())));
                     },
                     followsConventions: false);
 
@@ -149,7 +149,7 @@ namespace System.Web.OData.Formatter
                 var president = model.Singleton<FormatterPerson>("President");
                 president.HasIdLink(context =>
                     {
-                        return context.Url.CreateODataLink(new SingletonPathSegment(context.NavigationSource as IEdmSingleton));
+                        return new Uri(context.Url.CreateODataLink(new SingletonPathSegment((IEdmSingleton)context.NavigationSource)));
                     },
                     followsConventions: false);
 

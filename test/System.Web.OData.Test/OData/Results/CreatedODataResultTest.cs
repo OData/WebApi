@@ -260,8 +260,8 @@ namespace System.Web.OData.Results
         public void GenerateLocationHeader_UsesEntitySetLinkBuilder_ToGenerateLocationHeader()
         {
             // Arrange
-            string idLink = "http://id-link";
-            Uri editLink = new Uri(idLink);
+            Uri idLink = new Uri("http://id-link");
+            Uri editLink = idLink;
             Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
             linkBuilder.Setup(b => b.BuildIdLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.Default))
                 .Returns(idLink);

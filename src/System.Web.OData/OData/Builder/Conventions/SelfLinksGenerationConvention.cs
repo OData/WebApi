@@ -22,7 +22,7 @@ namespace System.Web.OData.Builder.Conventions
             {
                 entitySet.HasFeedSelfLink(feedContext =>
                 {
-                    string selfLink = feedContext.Url.CreateODataLink(new EntitySetPathSegment(feedContext.EntitySet));
+                    string selfLink = feedContext.Url.CreateODataLink(new EntitySetPathSegment(feedContext.EntitySetBase));
 
                     if (selfLink == null)
                     {
@@ -32,19 +32,29 @@ namespace System.Web.OData.Builder.Conventions
                 });
             }
 
-            // We only need to configure the IdLink by convention, ReadLink and EditLink both delegate to IdLink
             if (configuration.GetIdLink() == null)
             {
-                bool derivedTypesDefineNavigationProperty = model.DerivedTypes(configuration.EntityType).Any(e => e.NavigationProperties.Any());
+                configuration.HasIdLink(new SelfLinkBuilder<Uri>((entityContext) => entityContext.GenerateSelfLink(includeCast: false), followsConventions: true));
+            }
 
+            if (configuration.GetEditLink() == null)
+            {
+                bool derivedTypesDefineNavigationProperty = model.DerivedTypes(configuration.EntityType).Any(e => e.NavigationProperties.Any());
+                
                 // generate links with cast if any of the derived types define a navigation property
                 if (derivedTypesDefineNavigationProperty)
                 {
-                    configuration.HasIdLink(new SelfLinkBuilder<string>((entityContext) => entityContext.GenerateSelfLink(includeCast: true), followsConventions: true));
+                    configuration.HasEditLink(
+                        new SelfLinkBuilder<Uri>(
+                            entityContext => entityContext.GenerateSelfLink(includeCast: true),
+                            followsConventions: true));
                 }
                 else
                 {
-                    configuration.HasIdLink(new SelfLinkBuilder<string>((entityContext) => entityContext.GenerateSelfLink(includeCast: false), followsConventions: true));
+                    configuration.HasEditLink(
+                        new SelfLinkBuilder<Uri>(
+                            entityContext => entityContext.GenerateSelfLink(includeCast: false),
+                            followsConventions: true));
                 }
             }
         }

@@ -635,14 +635,14 @@ namespace System.Web.OData.Builder
         /// otherwise, <see langword="false"/>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
-        public void HasIdLink(Func<EntityInstanceContext<TEntityType>, string> idLinkFactory, bool followsConventions)
+        public void HasIdLink(Func<EntityInstanceContext<TEntityType>, Uri> idLinkFactory, bool followsConventions)
         {
             if (idLinkFactory == null)
             {
                 throw Error.ArgumentNull("idLinkFactory");
             }
 
-            _configuration.HasIdLink(new SelfLinkBuilder<string>((entity) =>
+            _configuration.HasIdLink(new SelfLinkBuilder<Uri>((entity) =>
                 idLinkFactory(UpCastEntityInstanceContext(entity)), followsConventions));
         }
 

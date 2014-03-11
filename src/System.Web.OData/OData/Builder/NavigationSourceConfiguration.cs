@@ -19,7 +19,7 @@ namespace System.Web.OData.Builder
 
         private SelfLinkBuilder<Uri> _editLinkBuilder;
         private SelfLinkBuilder<Uri> _readLinkBuilder;
-        private SelfLinkBuilder<string> _idLinkBuilder;
+        private SelfLinkBuilder<Uri> _idLinkBuilder;
 
         private readonly Dictionary<NavigationPropertyConfiguration, NavigationPropertyBindingConfiguration>
             _navigationPropertyBindings;
@@ -157,7 +157,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="idLinkBuilder">The builder used to generate the ID.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasIdLink(SelfLinkBuilder<string> idLinkBuilder)
+        public virtual INavigationSourceConfiguration HasIdLink(SelfLinkBuilder<Uri> idLinkBuilder)
         {
             if (idLinkBuilder == null)
             {
@@ -390,7 +390,7 @@ namespace System.Web.OData.Builder
         /// <returns>The builder.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
             Justification = "Consistent with EF Has/Get pattern")]
-        public virtual SelfLinkBuilder<string> GetIdLink()
+        public virtual SelfLinkBuilder<Uri> GetIdLink()
         {
             return _idLinkBuilder;
         }

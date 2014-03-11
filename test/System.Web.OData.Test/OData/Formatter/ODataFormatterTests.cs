@@ -123,14 +123,14 @@ namespace System.Web.OData.Formatter
             var personType1 = builder1.EntityType<FormatterPerson>();
             personType1.HasKey(p => p.PerId);
             personType1.Property(p => p.Name);
-            builder1.EntitySet<FormatterPerson>("People").HasIdLink(p => "http://link/", false);
+            builder1.EntitySet<FormatterPerson>("People").HasIdLink(p => new Uri("http://link/"), false);
             var model1 = builder1.GetEdmModel();
 
             ODataModelBuilder builder2 = new ODataModelBuilder();
             var personType2 = builder2.EntityType<FormatterPerson>();
             personType2.HasKey(p => p.PerId);
             personType2.Property(p => p.Age);
-            builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => "http://link/", false);
+            builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => new Uri("http://link/"), false);
             var model2 = builder2.GetEdmModel();
 
             var config = new HttpConfiguration();
@@ -696,8 +696,8 @@ namespace System.Web.OData.Formatter
 
             EntitySetConfiguration<MainEntity> mainSet = builder.EntitySet<MainEntity>("MainEntity");
 
-            Func<EntityInstanceContext<MainEntity>, string> idLinkFactory = (e) =>
-                CreateAbsoluteLink("/MainEntity/id/" + e.GetPropertyValue("Id").ToString());
+            Func<EntityInstanceContext<MainEntity>, Uri> idLinkFactory = (e) =>
+                CreateAbsoluteUri("/MainEntity/id/" + e.GetPropertyValue("Id").ToString());
             mainSet.HasIdLink(idLinkFactory, followsConventions: true);
 
             Func<EntityInstanceContext<MainEntity>, string> editLinkFactory;

@@ -15,7 +15,6 @@ using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -164,23 +163,26 @@ namespace System.Web.OData.Formatter.Serialization
 
             if (entityInstanceContext.NavigationSource != null)
             {
-                IEdmModel model = entityInstanceContext.SerializerContext.Model;
-                NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(entityInstanceContext.NavigationSource);
-                EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityInstanceContext, entityInstanceContext.SerializerContext.MetadataLevel);
-
-                if (selfLinks.IdLink != null)
+                if (!(entityInstanceContext.NavigationSource is IEdmContainedEntitySet))
                 {
-                    entry.Id = new Uri(selfLinks.IdLink);
-                }
+                    IEdmModel model = entityInstanceContext.SerializerContext.Model;
+                    NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(entityInstanceContext.NavigationSource);
+                    EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityInstanceContext, entityInstanceContext.SerializerContext.MetadataLevel);
 
-                if (selfLinks.ReadLink != null)
-                {
-                    entry.ReadLink = selfLinks.ReadLink;
-                }
+                    if (selfLinks.IdLink != null)
+                    {
+                        entry.Id = selfLinks.IdLink;
+                    }
 
-                if (selfLinks.EditLink != null)
-                {
-                    entry.EditLink = selfLinks.EditLink;
+                    if (selfLinks.ReadLink != null)
+                    {
+                        entry.ReadLink = selfLinks.ReadLink;
+                    }
+
+                    if (selfLinks.EditLink != null)
+                    {
+                        entry.EditLink = selfLinks.EditLink;
+                    }
                 }
 
                 string etag = CreateETag(entityInstanceContext);

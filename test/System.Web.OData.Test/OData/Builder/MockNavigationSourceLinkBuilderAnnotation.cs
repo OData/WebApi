@@ -7,7 +7,7 @@ namespace System.Web.OData.Builder
 {
     internal class MockNavigationSourceLinkBuilderAnnotation : NavigationSourceLinkBuilderAnnotation
     {
-        public SelfLinkBuilder<string> IdLinkBuilder { get; set; }
+        public SelfLinkBuilder<Uri> IdLinkBuilder { get; set; }
 
         public SelfLinkBuilder<Uri> EditLinkBuilder { get; set; }
 
@@ -27,7 +27,7 @@ namespace System.Web.OData.Builder
             return null;
         }
 
-        public override Uri BuildEditLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, string idLink)
+        public override Uri BuildEditLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, Uri idLink)
         {
             if (EditLinkBuilder != null)
             {
@@ -37,7 +37,7 @@ namespace System.Web.OData.Builder
             return null;
         }
 
-        public override string BuildIdLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
+        public override Uri BuildIdLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
         {
             if (IdLinkBuilder != null)
             {

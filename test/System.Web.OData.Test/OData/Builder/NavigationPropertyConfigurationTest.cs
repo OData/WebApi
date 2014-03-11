@@ -84,5 +84,53 @@ namespace System.Web.OData.Builder
                 () => navigationProperty.Optional(),
                 "Cannot change multiplicity of the collection navigation property 'P'.");
         }
+
+        [Fact]
+        public void ContainsTarget_DefaultsToFalse()
+        {
+            // Arrange & Act
+            NavigationPropertyConfiguration navigationProperty =
+                new NavigationPropertyConfiguration(
+                    new MockPropertyInfo(),
+                    EdmMultiplicity.ZeroOrOne,
+                    new EntityTypeConfiguration());
+
+            // Assert
+            Assert.False(navigationProperty.ContainsTarget);
+        }
+
+        [Fact]
+        public void Contained_ModifiesContainsTargetToTrue()
+        {
+            // Arrange
+            NavigationPropertyConfiguration navigationProperty =
+                new NavigationPropertyConfiguration(
+                    new MockPropertyInfo(),
+                    EdmMultiplicity.ZeroOrOne,
+                    new EntityTypeConfiguration());
+
+            // Act
+            navigationProperty.Contained();
+
+            // Assert
+            Assert.True(navigationProperty.ContainsTarget);
+        }
+
+        [Fact]
+        public void NonContained_ModifiesContainsTargetToFalse()
+        {
+            // Arrange
+            NavigationPropertyConfiguration navigationProperty =
+                new NavigationPropertyConfiguration(
+                    new MockPropertyInfo(),
+                    EdmMultiplicity.ZeroOrOne,
+                    new EntityTypeConfiguration());
+
+            // Act
+            navigationProperty.Contained().NonContained();
+
+            // Assert
+            Assert.False(navigationProperty.ContainsTarget);
+        }
     }
 }

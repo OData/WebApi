@@ -21,7 +21,9 @@ using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
+using ODL = Microsoft.OData.Core.UriParser.Semantic;
 
 namespace System.Web.OData.Formatter
 {
@@ -82,7 +84,8 @@ namespace System.Web.OData.Formatter
             {
                 Indent = true,
                 DisableMessageStreamDisposal = true,
-                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue }
+                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
+                AutoComputePayloadMetadataInJson = true,
             };
             MessageReaderSettings = new ODataMessageReaderSettings
             {
@@ -460,6 +463,7 @@ namespace System.Web.OData.Formatter
                 
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
                 SelectAndExpand = Request.ODataProperties().SelectExpandClause,
+                Path = GetODataPath(path, model, baseAddress),
             };
 
             MediaTypeHeaderValue contentType = null;
@@ -486,6 +490,33 @@ namespace System.Web.OData.Formatter
 
                 serializer.WriteObject(value, type, messageWriter, writeContext);
             }
+        }
+
+        private static ODL.ODataPath GetODataPath(ODataPath path, IEdmModel model, Uri baseAddress)
+        {
+            if (path == null)
+            {
+                return null;
+            }
+
+            // Get the ODL path, if the EDM type is entity type, or entity collection type.
+            IEdmType elementType = path.EdmType;
+            if (elementType != null && path.EdmType.TypeKind == EdmTypeKind.Collection)
+            {
+                IEdmCollectionType collectionType = (IEdmCollectionType)path.EdmType;
+                elementType = collectionType.ElementType.Definition;
+            }
+
+            if (elementType != null && elementType.TypeKind == EdmTypeKind.Entity)
+            {
+                ODataUriParser odataUriParser = new ODataUriParser(
+                    model,
+                    baseAddress,
+                    new Uri(baseAddress, path.ToString()));
+                return odataUriParser.ParsePath();
+            }
+
+            return null;
         }
 
         private static string GetSelectClause(HttpRequestMessage request)
@@ -665,7 +696,7 @@ namespace System.Web.OData.Formatter
                 throw new SerializationException(SRResources.UnableToDetermineBaseUrl);
             }
 
-            return new Uri(baseAddress);
+            return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
         }
     }
 }

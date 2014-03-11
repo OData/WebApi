@@ -19,6 +19,10 @@ namespace System.Web.OData.Query.Expressions
     [JsonConverter(typeof(SelectExpandWrapperConverter))]
     internal class SelectExpandWrapper<TElement> : IEdmEntityObject, ISelectExpandWrapper
     {
+        private static readonly IPropertyMapper DefaultPropertyMapper = new IdentityPropertyMapper();
+        private static readonly Func<IEdmModel, IEdmStructuredType, IPropertyMapper> _mapperProvider =
+            (IEdmModel m, IEdmStructuredType t) => DefaultPropertyMapper;
+
         private Dictionary<string, object> _containerDict;
         private TypedEdmEntityObject _typedEdmEntityObject;
 
@@ -73,7 +77,7 @@ namespace System.Web.OData.Query.Expressions
             // if the property was expanded.
             if (Container != null)
             {
-                _containerDict = _containerDict ?? Container.ToDictionary(includeAutoSelected: true);
+                _containerDict = _containerDict ?? Container.ToDictionary(DefaultPropertyMapper, includeAutoSelected: true);
                 if (_containerDict.TryGetValue(propertyName, out value))
                 {
                     return true;
@@ -95,22 +99,46 @@ namespace System.Web.OData.Query.Expressions
 
         public IDictionary<string, object> ToDictionary()
         {
+            return ToDictionary(_mapperProvider);
+        }
+
+        public IDictionary<string, object> ToDictionary(Func<IEdmModel, IEdmStructuredType, IPropertyMapper> mapperProvider)
+        {
+            if (mapperProvider == null)
+            {
+                throw Error.ArgumentNull("mapperProvider");
+            }
+
             Dictionary<string, object> dictionary = new Dictionary<string, object>();
+            IEdmStructuredType type = GetEdmType().AsStructured().StructuredDefinition();
+
+            IPropertyMapper mapper = mapperProvider(GetModel(), type);
+            if (mapper == null)
+            {
+                throw Error.InvalidOperation(SRResources.InvalidPropertyMapper, typeof(IPropertyMapper).FullName,
+                    type.FullTypeName());
+            }
 
             if (Container != null)
             {
-                dictionary = Container.ToDictionary(includeAutoSelected: false);
+                dictionary = Container.ToDictionary(mapper, includeAutoSelected: false);
             }
 
             // The user asked for all the structural properties on this instance.
             if (Instance != null)
             {
-                foreach (IEdmStructuralProperty property in GetEdmType().AsStructured().StructuralProperties())
+                foreach (IEdmStructuralProperty property in type.StructuralProperties())
                 {
                     object propertyValue;
                     if (TryGetPropertyValue(property.Name, out propertyValue))
                     {
-                        dictionary[property.Name] = propertyValue;
+                        string mappingName = mapper.MapProperty(property.Name);
+                        if (String.IsNullOrWhiteSpace(mappingName))
+                        {
+                            throw Error.InvalidOperation(SRResources.InvalidPropertyMapping, property.Name);
+                        }
+
+                        dictionary[mappingName] = propertyValue;
                     }
                 }
             }

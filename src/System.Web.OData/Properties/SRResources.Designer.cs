@@ -745,6 +745,24 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The mapper provider must return a valid &apos;{0}&apos; instance for the given &apos;{1}&apos; IEdmType..
+        /// </summary>
+        internal static string InvalidPropertyMapper {
+            get {
+                return ResourceManager.GetString("InvalidPropertyMapper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The key mapping for the property &apos;{0}&apos; can&apos;t be null or empty..
+        /// </summary>
+        internal static string InvalidPropertyMapping {
+            get {
+                return ResourceManager.GetString("InvalidPropertyMapping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The count of single quotes in non-string literal &apos;{0}&apos; must be 0 or 2 in segment &apos;{1}&apos;..
         /// </summary>
         internal static string InvalidSingleQuoteCountForNonStringLiteral {

@@ -718,4 +718,10 @@
   <data name="EntityTypeDoesntHaveKeyDefined" xml:space="preserve">
     <value>The entity '{0}' does not have a key defined.</value>
   </data>
+  <data name="InvalidPropertyMapper" xml:space="preserve">
+    <value>The mapper provider must return a valid '{0}' instance for the given '{1}' IEdmType.</value>
+  </data>
+  <data name="InvalidPropertyMapping" xml:space="preserve">
+    <value>The key mapping for the property '{0}' can't be null or empty.</value>
+  </data>
 </root>

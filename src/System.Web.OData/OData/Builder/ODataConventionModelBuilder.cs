@@ -100,7 +100,7 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets or sets model aliasing is enabled or not. The default value is false.
+        /// Gets or sets if model aliasing is enabled or not. The default value is true.
         /// </summary>
         public bool ModelAliasingEnabled { get; set; }
 

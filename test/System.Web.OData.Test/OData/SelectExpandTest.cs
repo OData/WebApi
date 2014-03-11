@@ -9,8 +9,10 @@ using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace System.Web.OData
@@ -34,8 +36,8 @@ namespace System.Web.OData
             _configuration.Routes.MapODataServiceRoute(
                 "odata-alias2-inheritance",
                 "odata-alias2-inheritance",
-                GetModelWithCustomerAliasAndInheritance()); 
-            _configuration.Routes.MapHttpRoute("api", "api", new { controller = "NonODataSelectExpandTestCustomers" });
+                GetModelWithCustomerAliasAndInheritance());
+            _configuration.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers" });
 
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);
@@ -147,6 +149,35 @@ namespace System.Web.OData
         }
 
         [Fact]
+        public void SelectExpand_WithNonODataJson_Respects_JsonProperty()
+        {
+            // Arrange
+            string uri = "/api/AttributedSelectExpandCustomers?$select=Id,Orders&$expand=Orders($select=Total)";
+
+            // Act
+            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+
+            // Assert
+            JArray result = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(1, result[0]["JsonId"]);
+            Assert.Equal(1, result[0]["JsonOrders"][0]["JsonTotal"]);
+        }
+
+        [Fact]
+        public void SelectExpand_WithNonODataJson_JsonProperty_Wins_OverDataMember()
+        {
+            // Arrange
+            string uri = "/api/AttributedSelectExpandCustomers?$select=DataMemberCustomerName";
+
+            // Act
+            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+
+            // Assert
+            JArray result = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal("Name 1", result[0]["JsonName"]);
+        }
+
+        [Fact]
         public void SelectExpand_QueryableOnSingleEntity_Works()
         {
             // Arrange
@@ -185,7 +216,7 @@ namespace System.Web.OData
         private HttpResponseMessage GetResponse(string uri, string acceptHeader)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptHeader));
             return _client.SendAsync(request).Result;
         }
 
@@ -363,6 +394,36 @@ namespace System.Web.OData
         public SelectExpandTestSpecialCustomerWithAlias SpecialCustomer { get; set; }
     }
 
+    [DataContract]
+    public class AttributedSelectExpandCustomer
+    {
+        [DataMember]
+        [JsonProperty(PropertyName = "JsonId")]
+        public int Id { get; set; }
+
+        [DataMember(Name = "DataMemberCustomerName")]
+        [JsonProperty(PropertyName = ("JsonName"))]
+        public string Name { get; set; }
+
+        [DataMember]
+        [JsonProperty(PropertyName = "JsonOrders")]
+        public ICollection<AttributedSelectExpandOrder> Orders { get; set; }
+    }
+
+    [DataContract]
+    public class AttributedSelectExpandOrder
+    {
+        [DataMember]
+        public int Id { get; set; }
+
+        [DataMember]
+        public string CustomerName { get; set; }
+
+        [DataMember]
+        [JsonProperty(PropertyName = "JsonTotal")]
+        public double Total { get; set; }
+    }
+
     public class SelectExpandTestCustomersController : ODataController
     {
         [EnableQuery]
@@ -407,5 +468,25 @@ namespace System.Web.OData
             IQueryable<SelectExpandTestCustomer> singleCustomer = SelectExpandTestCustomer.Customers.AsQueryable().Take(1);
             return SingleResult.Create(singleCustomer);
         }
+    }
+
+    public class AttributedSelectExpandCustomersController : ApiController
+    {
+        public IHttpActionResult Get(ODataQueryOptions<AttributedSelectExpandCustomer> options)
+        {
+            IQueryable result = options.ApplyTo(Enumerable.Range(1, 10).Select(i => new AttributedSelectExpandCustomer
+            {
+                Id = i,
+                Name = "Name " + i,
+                Orders = Enumerable.Range(1, 10).Select(j => new AttributedSelectExpandOrder
+                {
+                    CustomerName = "Customer Name" + j,
+                    Id = j,
+                    Total = i * j
+                }).ToList()
+            }).AsQueryable());
+            return Ok(result);
+        }
+
     }
 }

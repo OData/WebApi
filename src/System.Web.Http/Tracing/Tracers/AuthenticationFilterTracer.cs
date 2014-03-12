@@ -2,6 +2,7 @@
 
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Filters;
@@ -31,13 +32,20 @@ namespace System.Web.Http.Tracing.Tracers
 
         public Task AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
         {
+            IPrincipal originalPrincipal = null;
             return TraceWriter.TraceBeginEndAsync(
                 request: context != null ? context.Request : null,
                 category: TraceCategories.FiltersCategory,
                 level: TraceLevel.Info,
                 operatorName: _innerFilter.GetType().Name,
                 operationName: AuthenticateAsyncMethodName,
-                beginTrace: null,
+                beginTrace: (tr) =>
+                {
+                    if (context != null)
+                    {
+                        originalPrincipal = context.Principal;
+                    }
+                },
                 execute: () => _innerFilter.AuthenticateAsync(context, cancellationToken),
                 endTrace: (tr) =>
                 {
@@ -49,9 +57,9 @@ namespace System.Web.Http.Tracing.Tracers
                                 SRResources.AuthenticationFilterErrorResult,
                                 context.ErrorResult);
                         }
-                        else if (context.Principal != null)
+                        else if (context.Principal != originalPrincipal)
                         {
-                            if (context.Principal.Identity == null)
+                            if (context.Principal == null || context.Principal.Identity == null)
                             {
                                 tr.Message = SRResources.AuthenticationFilterSetPrincipalToUnknownIdentity;
                             }

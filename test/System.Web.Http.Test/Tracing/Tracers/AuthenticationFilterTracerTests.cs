@@ -150,8 +150,7 @@ namespace System.Web.Http.Tracing.Tracers
 
             using (HttpRequestMessage expectedRequest = CreateRequest())
             {
-                HttpAuthenticationContext authenticationContext = CreateAuthenticationContext(expectedRequest,
-                                                                                              isPrincipalSet: false);
+                HttpAuthenticationContext authenticationContext = CreateAuthenticationContext(expectedRequest);
 
                 // Act
                 Task task = product.AuthenticateAsync(authenticationContext, cancellationToken);

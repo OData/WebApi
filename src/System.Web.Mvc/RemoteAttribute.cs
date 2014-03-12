@@ -61,6 +61,15 @@ namespace System.Web.Mvc
             }
         }
 
+        public RemoteAttribute(string action, string controller, AreaReference areaReference)
+            : this(action, controller)
+        {
+            if (areaReference == AreaReference.UseRoot)
+            {
+                RouteData["area"] = null;
+            }
+        }
+
         public string HttpMethod { get; set; }
 
         public string AdditionalFields

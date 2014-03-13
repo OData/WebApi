@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http.Controllers;
@@ -144,6 +145,87 @@ namespace System.Web.Http.Description
             Assert.Equal(expectedExpandedRouteTemplate, expandedRouteTemplate);
         }
 
+
+        [Theory]
+        // Simple type
+        [InlineData("?id={id}", typeof(int), "id")]
+        // Simple Array and Collection
+        [InlineData("?id[0]={id[0]}&id[1]={id[1]}", typeof(int[]), "id")]
+        [InlineData("?id[0]={id[0]}&id[1]={id[1]}", typeof(string[]), "id")]
+        [InlineData("?id[0]={id[0]}&id[1]={id[1]}", typeof(IList<string>), "id")]
+        [InlineData("?id[0]={id[0]}&id[1]={id[1]}", typeof(List<string>), "id")]
+        [InlineData("?id[0]={id[0]}&id[1]={id[1]}", typeof(IEnumerable<string>), "id")]
+        [InlineData("?id[0]={id[0]}&id[1]={id[1]}", typeof(ICollection<int>), "id")]
+        // Complex Array and Collection
+        [InlineData("?users[0].Name={users[0].Name}&users[0].Age={users[0].Age}" +
+                        "&users[1].Name={users[1].Name}&users[1].Age={users[1].Age}",
+                    typeof(IEnumerable<User>),
+                    "users")]
+        [InlineData("?users[0].Name={users[0].Name}&users[0].Age={users[0].Age}" +
+                        "&users[1].Name={users[1].Name}&users[1].Age={users[1].Age}",
+                    typeof(User[]),
+                    "users")]
+        // MutableObject
+        [InlineData("?Foo={Foo}&Bar={Bar}", typeof(MutableObject), "mutable")]
+        // Dictionary
+        // Note that Dictionary is currently not supported here.
+        [InlineData("?Item={Item}", typeof(Dictionary<string, string>), "dict")]
+        // KeyValuePair
+        // Note that KeyValuePair is currently not supported here.
+        [InlineData("", typeof(KeyValuePair<string, string>), "pair")]
+        // MutableObject extending IList<> does not generate query string samples like ?id[0]={id[0]}&id[1]={id[1]}.
+        // Note that the "Item" query string in the following is not valid,
+        // which is a bug but will happen in rare cases.
+        [InlineData("?Foo={Foo}&Bar={Bar}&Capacity={Capacity}&Item={Item}",
+                    typeof(GenericMutableObject<string>),
+                    "genericMutable")]
+        public void TryExpandUriParameters_FromUri_Succeeds(string expectedPath,
+                                                                      Type parameterType,
+                                                                      string parameterName)
+        {
+            // Arrange
+            string finalPath;
+            List<ApiParameterDescription> descriptions = new List<ApiParameterDescription>()
+            {
+                CreateApiParameterDescription(parameterType, parameterName),
+            };
+
+            // Act
+            bool isExpanded = ApiExplorer.TryExpandUriParameters(new HttpRoute(),
+                                                     new HttpParsedRoute(new List<PathSegment>()),
+                                                     descriptions,
+                                                     out finalPath);
+
+            // Assert
+            Assert.True(isExpanded);
+            Assert.Equal(expectedPath, finalPath);
+        }
+
+        [Fact]
+        public void TryExpandUriParameters_CompositeParametersFromUri_Succeeds()
+        {
+            // Arrange
+            string finalPath;
+            const string expectedPath = 
+                "?id[0]={id[0]}&id[1]={id[1]}&property[0]={property[0]}&property[1]={property[1]}&name={name}";
+            List<ApiParameterDescription> descriptions = new List<ApiParameterDescription>()
+            {
+                CreateApiParameterDescription(typeof(int[]), "id"),
+                CreateApiParameterDescription(typeof(ICollection<string>), "property"),
+                CreateApiParameterDescription(typeof(string), "name"),
+            };
+
+            // Act
+            bool isExpanded = ApiExplorer.TryExpandUriParameters(new HttpRoute(),
+                                                     new HttpParsedRoute(new List<PathSegment>()),
+                                                     descriptions,
+                                                     out finalPath);
+
+            // Assert
+            Assert.True(isExpanded);
+            Assert.Equal(expectedPath, finalPath);
+        }
+
         [Fact]
         public void Descriptions_RecognizesMixedCaseParameters()
         {
@@ -187,6 +269,37 @@ namespace System.Web.Http.Description
             DirectRouteBuilder builder = new DirectRouteBuilder(actions, targetIsAction: true);
             builder.Template = template;
             return builder.Build().Route;
+        }
+
+        private ApiParameterDescription CreateApiParameterDescription(Type type, string name)
+        {
+            Mock<HttpParameterDescriptor> parameterDescriptorMock = new Mock<HttpParameterDescriptor>();
+            parameterDescriptorMock.SetupGet(p => p.ParameterName).Returns(name);
+            parameterDescriptorMock.SetupGet(p => p.ParameterType).Returns(type);
+            return new ApiParameterDescription()
+            {
+                Source = ApiParameterSource.FromUri,
+                ParameterDescriptor = parameterDescriptorMock.Object,
+                Name = name
+            };
+        }
+
+        private class MutableObject
+        {
+            public string Foo { get; set; }
+            public string Bar { get; set; }
+        }
+
+        private class GenericMutableObject<T> : List<T>
+        {
+            public string Foo { get; set; }
+            public string Bar { get; set; }
+        }
+
+        private class User
+        {
+            public string Name { get; set; }
+            public int Age { get; set; }
         }
     }
 }

@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Internal;
+using System.Web.Http.ModelBinding.Binders;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
 
@@ -426,38 +427,62 @@ namespace System.Web.Http.Description
             Dictionary<string, object> parameterValuesForRoute = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             bool emitPrefixes = ShouldEmitPrefixes(parameterDescriptions);
             string prefix = String.Empty;
-            foreach (ApiParameterDescription parameterDescriptor in parameterDescriptions)
+            foreach (ApiParameterDescription parameterDescription in parameterDescriptions)
             {
-                if (parameterDescriptor.Source == ApiParameterSource.FromUri)
+                if (parameterDescription.Source == ApiParameterSource.FromUri)
                 {
-                    if (parameterDescriptor.ParameterDescriptor == null ||
-                        (parameterDescriptor.ParameterDescriptor != null &&
-                        TypeHelper.CanConvertFromString(parameterDescriptor.ParameterDescriptor.ParameterType)))
+                    if (parameterDescription.ParameterDescriptor == null)
                     {
-                        if (!parameterValuesForRoute.ContainsKey(parameterDescriptor.Name))
+                        // Undeclared route parameter handling generates query string like
+                        // "?name={name}"
+                        AddPlaceholder(parameterValuesForRoute, parameterDescription.Name);
+                    }
+                    else if (TypeHelper.CanConvertFromString(parameterDescription.ParameterDescriptor.ParameterType))
+                    {
+                        // Simple type generates query string like
+                        // "?name={name}"
+                        AddPlaceholder(parameterValuesForRoute, parameterDescription.Name);
+                    }
+                    else if (IsBindableCollection(parameterDescription.ParameterDescriptor.ParameterType))
+                    {
+                        string parameterName = parameterDescription.ParameterDescriptor.ParameterName;
+                        Type innerType =
+                            GetCollectionElementType(parameterDescription.ParameterDescriptor.ParameterType);
+                        PropertyInfo[] innerTypeProperties =
+                            ApiParameterDescription.GetBindableProperties(innerType).ToArray();
+                        if (innerTypeProperties.Any())
                         {
-                            parameterValuesForRoute.Add(parameterDescriptor.Name, "{" + parameterDescriptor.Name + "}");
+                            // Complex array and collection generate query string like
+                            // "?name[0].foo={name[0].foo}&name[0].bar={name[0].bar}
+                            //  &name[1].foo={name[1].foo}&name[1].bar={name[1].bar}"
+                            AddPlaceholderForProperties(parameterValuesForRoute,
+                                                        innerTypeProperties,
+                                                        parameterName + "[0].");
+                            AddPlaceholderForProperties(parameterValuesForRoute,
+                                                        innerTypeProperties,
+                                                        parameterName + "[1].");
+                        }
+                        else
+                        {
+                            // Simple array and collection generate query string like
+                            // "?name[0]={name[0]}&name[1]={name[1]}".
+                            AddPlaceholder(parameterValuesForRoute, parameterName + "[0]");
+                            AddPlaceholder(parameterValuesForRoute, parameterName + "[1]");
                         }
                     }
-                    else if (parameterDescriptor.ParameterDescriptor != null &&
-                             parameterDescriptor.CanConvertPropertiesFromString())
+                    else if (parameterDescription.CanConvertPropertiesFromString())
                     {
                         if (emitPrefixes)
                         {
-                            prefix = parameterDescriptor.Name + ".";
+                            prefix = parameterDescription.Name + ".";
                         }
-     
+
                         // Inserting the individual properties of the object in the query string
                         // as all the complex object can not be converted from string, but all its
                         // individual properties can.
-                        foreach (PropertyInfo property in parameterDescriptor.GetBindableProperties())
-                        {
-                            string queryParameterName = prefix + property.Name;
-                            if (!parameterValuesForRoute.ContainsKey(queryParameterName))
-                            {
-                                parameterValuesForRoute.Add(queryParameterName, "{" + queryParameterName + "}");
-                            }
-                        }
+                        AddPlaceholderForProperties(parameterValuesForRoute,
+                                                    parameterDescription.GetBindableProperties(),
+                                                    prefix);
                     }
                 }
             }
@@ -471,6 +496,48 @@ namespace System.Web.Http.Description
 
             expandedRouteTemplate = Uri.UnescapeDataString(boundRouteTemplate.BoundTemplate);
             return true;
+        }
+
+        private static Type GetCollectionElementType(Type collectionType)
+        {
+            Contract.Assert(!typeof(IDictionary).IsAssignableFrom(collectionType));
+
+            Type elementType = collectionType.GetElementType();
+            if (elementType == null)
+            {
+                elementType = CollectionModelBinderUtil
+                    .GetGenericBinderTypeArgs(typeof(ICollection<>),
+                                              collectionType)
+                    .First();
+            }
+            return elementType;
+        }
+
+        private static void AddPlaceholderForProperties(Dictionary<string, object> parameterValuesForRoute,
+                                                        IEnumerable<PropertyInfo> properties,
+                                                        string prefix)
+        {
+            foreach (PropertyInfo property in properties)
+            {
+                string queryParameterName = prefix + property.Name;
+                AddPlaceholder(parameterValuesForRoute, queryParameterName);
+            }
+        }
+
+        private static bool IsBindableCollection(Type type)
+        {
+            Contract.Assert(type != null);
+
+            return type.IsArray || new CollectionModelBinderProvider().GetBinder(null, type) != null;
+        }
+
+        private static void AddPlaceholder(Dictionary<string, object> parameterValuesForRoute,
+                                          string queryParameterName)
+        {
+            if (!parameterValuesForRoute.ContainsKey(queryParameterName))
+            {
+                parameterValuesForRoute.Add(queryParameterName, "{" + queryParameterName + "}");
+            }
         }
 
         private IList<ApiParameterDescription> CreateParameterDescriptions(HttpActionDescriptor actionDescriptor, HttpParsedRoute parsedRoute, IDictionary<string, object> routeDefaults)

@@ -53,13 +53,18 @@ namespace System.Web.Http.Description
 
         internal IEnumerable<PropertyInfo> GetBindableProperties()
         {
-            return ParameterDescriptor.ParameterType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                       .Where(p => p.GetGetMethod() != null && p.GetSetMethod() != null);
+            return GetBindableProperties(ParameterDescriptor.ParameterType);
         }
 
         internal bool CanConvertPropertiesFromString()
         {
             return GetBindableProperties().All(p => TypeHelper.CanConvertFromString(p.PropertyType));
+        }
+
+        internal static IEnumerable<PropertyInfo> GetBindableProperties(Type type)
+        {
+            return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                       .Where(p => p.GetGetMethod() != null && p.GetSetMethod() != null);
         }
     }
 }

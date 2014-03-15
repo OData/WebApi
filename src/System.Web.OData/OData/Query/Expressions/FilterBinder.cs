@@ -688,7 +688,9 @@ namespace System.Web.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            MethodInfo ceiling = arguments[0].Type == typeof(double) ? ClrCanonicalFunctions.CeilingOfDouble : ClrCanonicalFunctions.CeilingOfDecimal;
+            MethodInfo ceiling = IsType<double>(arguments[0].Type) 
+                ? ClrCanonicalFunctions.CeilingOfDouble 
+                : ClrCanonicalFunctions.CeilingOfDecimal;
             return MakeFunctionCall(ceiling, arguments);
         }
 
@@ -700,7 +702,9 @@ namespace System.Web.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            MethodInfo floor = arguments[0].Type == typeof(double) ? ClrCanonicalFunctions.FloorOfDouble : ClrCanonicalFunctions.FloorOfDecimal;
+            MethodInfo floor = IsType<double>(arguments[0].Type) 
+                ? ClrCanonicalFunctions.FloorOfDouble 
+                : ClrCanonicalFunctions.FloorOfDecimal;
             return MakeFunctionCall(floor, arguments);
         }
 

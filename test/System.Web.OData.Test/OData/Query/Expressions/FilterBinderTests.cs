@@ -38,6 +38,32 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
+        public static TheoryDataSet<decimal?, bool, object> MathFloorDecimal_DataSet
+        {
+            get
+            {
+                return new TheoryDataSet<decimal?, bool, object>
+                {
+                    { null, false, typeof(InvalidOperationException) },
+                    { 5.4m, true, true },
+                    { 4.4m, false, false },
+                };
+            }
+        }
+
+        public static TheoryDataSet<decimal?, bool, object> MathCeilingDecimal_DataSet
+        {
+            get
+            {
+                return new TheoryDataSet<decimal?, bool, object>
+                {
+                    { null, false, typeof(InvalidOperationException) },
+                    { 4.1m, true, true },
+                    { 5.9m, false, false },
+                };
+            }
+        }
+
         #region Inequalities
         [Theory]
         [InlineData(null, true, true)]
@@ -1132,14 +1158,11 @@ namespace System.Web.OData.Query.Expressions
                new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
         }
 
-        [Theory]
-        [InlineData(null, false, typeof(InvalidOperationException))]
-        [InlineData(5.4, true, true)]
-        [InlineData(4.4, false, false)]
-        public void MathFloor(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
+        [Theory, PropertyData("MathFloorDecimal_DataSet")]
+        public void MathFloorDecimal(decimal? unitPrice, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "floor(UnitPrice) eq 5m",
+                "floor(UnitPrice) eq 5",
                 "$it => ($it.UnitPrice.Value.Floor() == 5)",
                 NotTesting);
 
@@ -1150,17 +1173,78 @@ namespace System.Web.OData.Query.Expressions
 
         [Theory]
         [InlineData(null, false, typeof(InvalidOperationException))]
-        [InlineData(4.1, true, true)]
-        [InlineData(5.9, false, false)]
-        public void MathCeiling(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
+        [InlineData(5.4d, true, true)]
+        [InlineData(4.4d, false, false)]
+        public void MathFloorDouble(double? weight, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "ceiling(UnitPrice) eq 5m",
+                "floor(Weight) eq 5",
+                "$it => ($it.Weight.Value.Floor() == 5)",
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Weight = ToNullable<double>(weight) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData(null, false, typeof(InvalidOperationException))]
+        [InlineData(5.4f, true, true)]
+        [InlineData(4.4f, false, false)]
+        public void MathFloorFloat(float? width, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "floor(Width) eq 5",
+                "$it => (Convert($it.Width).Value.Floor() == 5)",
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Width = ToNullable<float>(width) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory, PropertyData("MathCeilingDecimal_DataSet")]
+        public void MathCeilingDecimal(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "ceiling(UnitPrice) eq 5",
                 "$it => ($it.UnitPrice.Value.Ceiling() == 5)",
                 NotTesting);
 
             RunFilters(filters,
                new Product { UnitPrice = ToNullable<decimal>(unitPrice) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData(null, false, typeof(InvalidOperationException))]
+        [InlineData(4.1d, true, true)]
+        [InlineData(5.9d, false, false)]
+        public void MathCeilingDouble(double? weight, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "ceiling(Weight) eq 5",
+                "$it => ($it.Weight.Value.Ceiling() == 5)",
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Weight = ToNullable<double>(weight) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData(null, false, typeof(InvalidOperationException))]
+        [InlineData(4.1f, true, true)]
+        [InlineData(5.9f, false, false)]
+        public void MathCeilingFloat(float? width, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "ceiling(Width) eq 5",
+                "$it => (Convert($it.Width).Value.Ceiling() == 5)",
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Width = ToNullable<float>(width) },
                new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
         }
 

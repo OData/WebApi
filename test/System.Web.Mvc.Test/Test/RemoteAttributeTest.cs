@@ -138,23 +138,24 @@ namespace System.Web.Mvc.Test
             Assert.Equal("POST", rule.ValidationParameters["type"]);
         }
 
+        // Current area is root in this case.
         [Fact]
-        public void NoAreaWithActionController()
+        public void ActionController_RemoteFindsControllerInCurrentArea()
         {
             // Arrange
-            string url = null;
-
-            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(null, typeof(string), "Length");
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
             TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller");
             attribute.HttpMethod = "POST";
 
             var context = new AreaRegistrationContext("Test", attribute.RouteTable);
-            context.MapRoute(null, "Test/{controller}/{action}");
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
 
             attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
 
             // Act
-            ModelClientValidationRule rule = attribute.GetClientValidationRules(metadata, GetMockControllerContext(url)).Single();
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContext(url: null)).Single();
 
             // Assert
             Assert.Equal("remote", rule.ValidationType);
@@ -162,137 +163,143 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void AreaWithActionController()
+        public void ActionControllerArea_RemoteFindsControllerInNamedArea()
         {
             // Arrange
-            string url = null;
-
-            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(null, typeof(string), "Length");
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
             TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", "Test");
             attribute.HttpMethod = "POST";
 
             var context = new AreaRegistrationContext("Test", attribute.RouteTable);
-            context.MapRoute(null, "Test/{controller}/{action}");
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
 
             attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
 
             // Act
-            ModelClientValidationRule rule = attribute.GetClientValidationRules(metadata, GetMockControllerContext(url)).Single();
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContext(url: null)).Single();
 
             // Assert
             Assert.Equal("remote", rule.ValidationType);
             Assert.Equal("/Test/Controller/Action", rule.ValidationParameters["url"]);
         }
 
+        // Current area is root in this case.
         [Fact]
-        public void EmptyAreaWithActionController()
+        public void ActionControllerArea_WithEmptyArea_RemoteFindsControllerInCurrentArea()
         {
             // Arrange
-            string url = null;
-
-            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(null, typeof(string), "Length");
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
             TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", "");
             attribute.HttpMethod = "POST";
 
             var context = new AreaRegistrationContext("Test", attribute.RouteTable);
-            context.MapRoute(null, "Test/{controller}/{action}");
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
 
             attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
 
             // Act
-            ModelClientValidationRule rule = attribute.GetClientValidationRules(metadata, GetMockControllerContext(url)).Single();
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContext(url: null)).Single();
 
             // Assert
             Assert.Equal("remote", rule.ValidationType);
             Assert.Equal("/Controller/Action", rule.ValidationParameters["url"]);
         }
 
+        // Current area is root in this case.
         [Fact]
-        public void NoAreaWithActionControllerInArea()
-        {
-            // Arrange 
-            string url = null;
-
-            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(null, typeof(string), "Length");
-            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller");
-            attribute.HttpMethod = "POST";
-
-            var context = new AreaRegistrationContext("Test", attribute.RouteTable);
-            context.MapRoute(null, "Test/{controller}/{action}");
-
-            attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
-
-            // Act
-            ModelClientValidationRule rule = attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url, "Test")).Single();
-
-            // Assert
-            Assert.Equal("remote", rule.ValidationType);
-            Assert.Equal("/Test/Controller/Action", rule.ValidationParameters["url"]);
-        }
-
-        [Fact]
-        public void AreaWithActionControllerInArea()
+        public void ActionControllerAreaReference_WithUseCurrent_RemoteFindsControllerInCurrentArea()
         {
             // Arrange
-            string url = null;
-
-            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(null, typeof(string), "Length");
-            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", "Test");
-            attribute.HttpMethod = "POST";
-
-            var context = new AreaRegistrationContext("Test", attribute.RouteTable);
-            context.MapRoute(null, "Test/{controller}/{action}");
-
-            attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
-
-            // Act
-            ModelClientValidationRule rule = attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url, "Test")).Single();
-
-            // Assert
-            Assert.Equal("remote", rule.ValidationType);
-            Assert.Equal("/Test/Controller/Action", rule.ValidationParameters["url"]);
-        }
-
-        [Fact]
-        public void EmptyAreaWithActionControllerInArea()
-        {
-            // Arrange
-            string url = null;
-
-            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(null, typeof(string), "Length");
-            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", "");
-            attribute.HttpMethod = "POST";
-
-            var context = new AreaRegistrationContext("Test", attribute.RouteTable);
-            context.MapRoute(null, "Test/{controller}/{action}");
-
-            attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
-
-            // Act
-            ModelClientValidationRule rule = attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url, "Test")).Single();
-
-            // Assert
-            Assert.Equal("remote", rule.ValidationType);
-            Assert.Equal("/Test/Controller/Action", rule.ValidationParameters["url"]);
-        }
-
-        [Fact]
-        public void AreaReferenceUseCurrentWithActionControllerInArea()
-        {
-            // Arrange
-            string url = null;
-
-            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(null, typeof(string), "Length");
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
             TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", AreaReference.UseCurrent);
             attribute.HttpMethod = "POST";
 
             var context = new AreaRegistrationContext("Test", attribute.RouteTable);
-            context.MapRoute(null, "Test/{controller}/{action}");
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
 
             attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
 
             // Act
-            ModelClientValidationRule rule = attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url, "Test")).Single();
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContext(url: null)).Single();
+
+            // Assert
+            Assert.Equal("remote", rule.ValidationType);
+            Assert.Equal("/Controller/Action", rule.ValidationParameters["url"]);
+        }
+
+        [Fact]
+        public void ActionControllerAreaReference_WithUseRoot_RemoteFindsControllerInRoot()
+        {
+            // Arrange
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
+            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", AreaReference.UseRoot);
+            attribute.HttpMethod = "POST";
+
+            var context = new AreaRegistrationContext("Test", attribute.RouteTable);
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
+
+            attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
+
+            // Act
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContext(url: null)).Single();
+
+            // Assert
+            Assert.Equal("remote", rule.ValidationType);
+            Assert.Equal("/Controller/Action", rule.ValidationParameters["url"]);
+        }
+
+        // Current area is Test in this case.
+        [Fact]
+        public void ActionController_InArea_RemoteFindsControllerInCurrentArea()
+        {
+            // Arrange 
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
+            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller");
+            attribute.HttpMethod = "POST";
+
+            var context = new AreaRegistrationContext("Test", attribute.RouteTable);
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
+
+            attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
+
+            // Act
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url: null, areaName: "Test"))
+                .Single();
+
+            // Assert
+            Assert.Equal("remote", rule.ValidationType);
+            Assert.Equal("/Test/Controller/Action", rule.ValidationParameters["url"]);
+        }
+
+        // Explicit reference to the Test area.
+        [Fact]
+        public void ActionControllerArea_InSameArea_RemoteFindsControllerInNamedArea()
+        {
+            // Arrange
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
+            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", "Test");
+            attribute.HttpMethod = "POST";
+
+            var context = new AreaRegistrationContext("Test", attribute.RouteTable);
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
+
+            attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
+
+            // Act
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url: null, areaName: "Test"))
+                .Single();
 
             // Assert
             Assert.Equal("remote", rule.ValidationType);
@@ -300,22 +307,99 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void AreaReferenceUseRootWithActionControllerInArea()
+        public void ActionControllerArea_InArea_RemoteFindsControllerInNamedArea()
         {
             // Arrange
-            string url = null;
-
-            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(null, typeof(string), "Length");
-            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", AreaReference.UseRoot);
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
+            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", "AnotherArea");
             attribute.HttpMethod = "POST";
 
             var context = new AreaRegistrationContext("Test", attribute.RouteTable);
-            context.MapRoute(null, "Test/{controller}/{action}");
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
+            context = new AreaRegistrationContext("AnotherArea", attribute.RouteTable);
+            context.MapRoute(name: null, url: "AnotherArea/{controller}/{action}");
 
             attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
 
             // Act
-            ModelClientValidationRule rule = attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url, "Test")).Single();
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url: null, areaName: "Test"))
+                .Single();
+
+            // Assert
+            Assert.Equal("remote", rule.ValidationType);
+            Assert.Equal("/AnotherArea/Controller/Action", rule.ValidationParameters["url"]);
+        }
+
+        // Current area is Test in this case.
+        [Fact]
+        public void ActionControllerArea_WithEmptyAreaInArea_RemoteFindsControllerInCurrentArea()
+        {
+            // Arrange
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
+            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", "");
+            attribute.HttpMethod = "POST";
+
+            var context = new AreaRegistrationContext("Test", attribute.RouteTable);
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
+
+            attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
+
+            // Act
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url: null, areaName: "Test"))
+                .Single();
+
+            // Assert
+            Assert.Equal("remote", rule.ValidationType);
+            Assert.Equal("/Test/Controller/Action", rule.ValidationParameters["url"]);
+        }
+
+        // Current area is Test in this case.
+        [Fact]
+        public void ActionControllerAreaReference_WithUseCurrentInArea_RemoteFindsControllerInCurrentArea()
+        {
+            // Arrange
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
+            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", AreaReference.UseCurrent);
+            attribute.HttpMethod = "POST";
+
+            var context = new AreaRegistrationContext("Test", attribute.RouteTable);
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
+
+            attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
+
+            // Act
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url: null, areaName: "Test"))
+                .Single();
+
+            // Assert
+            Assert.Equal("remote", rule.ValidationType);
+            Assert.Equal("/Test/Controller/Action", rule.ValidationParameters["url"]);
+        }
+
+        [Fact]
+        public void ActionControllerAreaReference_WithUseRootInArea_RemoteFindsControllerInRoot()
+        {
+            // Arrange
+            ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForProperty(modelAccessor: null,
+                containerType: typeof(string), propertyName: "Length");
+            TestableRemoteAttribute attribute = new TestableRemoteAttribute("Action", "Controller", AreaReference.UseRoot);
+            attribute.HttpMethod = "POST";
+
+            var context = new AreaRegistrationContext("Test", attribute.RouteTable);
+            context.MapRoute(name: null, url: "Test/{controller}/{action}");
+
+            attribute.RouteTable.Add(new Route("{controller}/{action}", new MvcRouteHandler()));
+
+            // Act
+            ModelClientValidationRule rule =
+                attribute.GetClientValidationRules(metadata, GetMockControllerContextWithArea(url: null, areaName: "Test"))
+                .Single();
 
             // Assert
             Assert.Equal("remote", rule.ValidationType);

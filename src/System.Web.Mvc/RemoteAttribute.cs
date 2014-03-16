@@ -61,6 +61,14 @@ namespace System.Web.Mvc
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RemoteAttribute"/> class.
+        /// </summary>
+        /// <param name="action">The route name.</param>
+        /// <param name="controller">The name of the controller.</param>
+        /// <param name="areaReference">
+        /// Find the controller in the root if <see cref="AreaReference.UseRoot"/>. Otherwise look in the current area.
+        /// </param>
         public RemoteAttribute(string action, string controller, AreaReference areaReference)
             : this(action, controller)
         {

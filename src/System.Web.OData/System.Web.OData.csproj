@@ -75,6 +75,8 @@
     <Compile Include="OData\Builder\EnumPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\EnumTypeConfiguration.cs" />
     <Compile Include="OData\Builder\EnumTypeConfigurationOfTEnumType.cs" />
+    <Compile Include="OData\Builder\LowerCamelCaser.cs" />
+    <Compile Include="OData\Builder\NameResolverOptions.cs" />
     <Compile Include="OData\Builder\NullableEnumTypeConfiguration.cs" />
     <Compile Include="OData\Builder\OperationTitleAnnotation.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />

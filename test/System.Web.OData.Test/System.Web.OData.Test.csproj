@@ -87,6 +87,7 @@
     <Compile Include="OData\Builder\EnumTypeTest.cs" />
     <Compile Include="OData\Builder\FunctionConfigurationTest.cs" />
     <Compile Include="OData\Builder\LinkGenerationHelpersTest.cs" />
+    <Compile Include="OData\Builder\LowerCamelCaserTest.cs" />
     <Compile Include="OData\Builder\PropertyConfigurationTest.cs" />
     <Compile Include="OData\Builder\StructuralTypeConfigurationOfTStructuralTypeTest.cs" />
     <Compile Include="OData\Builder\StructuralTypeConfigurationTest.cs" />

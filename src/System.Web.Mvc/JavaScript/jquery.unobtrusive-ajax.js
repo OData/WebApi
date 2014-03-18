@@ -8,7 +8,7 @@
 
 (function ($) {
     var data_click = "unobtrusiveAjaxClick",
-        data_target = "unobtrusiveAjaxClickTarget"
+        data_target = "unobtrusiveAjaxClickTarget",
         data_validation = "unobtrusiveValidation";
 
     function getFunction(code, argNames) {

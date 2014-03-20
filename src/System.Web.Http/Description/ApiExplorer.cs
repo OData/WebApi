@@ -470,6 +470,24 @@ namespace System.Web.Http.Description
                             AddPlaceholder(parameterValuesForRoute, parameterName + "[1]");
                         }
                     }
+                    else if (IsBindableKeyValuePair(parameterDescription.ParameterDescriptor.ParameterType))
+                    {
+                        // KeyValuePair generates query string like
+                        // "?key={key}&value={value}"
+                        AddPlaceholder(parameterValuesForRoute, "key");
+                        AddPlaceholder(parameterValuesForRoute, "value");
+                    }
+                    else if (IsBindableDictionry(parameterDescription.ParameterDescriptor.ParameterType))
+                    {
+                        // Dictionary generates query string like
+                        // "?dict[0].key={dict[0].key}&dict[0].value={dict[0].value}
+                        //  &dict[1].key={dict[1].key}&dict[1].value={dict[1].value}"
+                        string parameterName = parameterDescription.ParameterDescriptor.ParameterName;
+                        AddPlaceholder(parameterValuesForRoute, parameterName + "[0].key");
+                        AddPlaceholder(parameterValuesForRoute, parameterName + "[0].value");
+                        AddPlaceholder(parameterValuesForRoute, parameterName + "[1].key");
+                        AddPlaceholder(parameterValuesForRoute, parameterName + "[1].value");
+                    }
                     else if (parameterDescription.CanConvertPropertiesFromString())
                     {
                         if (emitPrefixes)
@@ -506,8 +524,7 @@ namespace System.Web.Http.Description
             if (elementType == null)
             {
                 elementType = CollectionModelBinderUtil
-                    .GetGenericBinderTypeArgs(typeof(ICollection<>),
-                                              collectionType)
+                    .GetGenericBinderTypeArgs(typeof(ICollection<>), collectionType)
                     .First();
             }
             return elementType;
@@ -529,6 +546,20 @@ namespace System.Web.Http.Description
             Contract.Assert(type != null);
 
             return type.IsArray || new CollectionModelBinderProvider().GetBinder(null, type) != null;
+        }
+
+        private static bool IsBindableDictionry(Type type)
+        {
+            Contract.Assert(type != null);
+
+            return new DictionaryModelBinderProvider().GetBinder(null, type) != null;
+        }
+
+        private static bool IsBindableKeyValuePair(Type type)
+        {
+            Contract.Assert(type != null);
+
+            return TypeHelper.GetTypeArgumentsIfMatch(type, typeof(KeyValuePair<,>)) != null;
         }
 
         private static void AddPlaceholder(Dictionary<string, object> parameterValuesForRoute,

@@ -32,7 +32,7 @@ Namespace Areas.HelpPage
                 localPath.Replace("/", "-").Replace("{", String.Empty).Replace("}", String.Empty))
 
             If (Not queryKeyString Is Nothing) Then
-                friendlyPath.AppendFormat("_{0}", queryKeyString)
+                friendlyPath.AppendFormat("_{0}", queryKeyString.Replace(".", "-"))
             End If
 
             GetFriendlyId = friendlyPath.ToString()

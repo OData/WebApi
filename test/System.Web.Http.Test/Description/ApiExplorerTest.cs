@@ -167,12 +167,13 @@ namespace System.Web.Http.Description
                     "users")]
         // MutableObject
         [InlineData("?Foo={Foo}&Bar={Bar}", typeof(MutableObject), "mutable")]
-        // Dictionary
-        // Note that Dictionary is currently not supported here.
-        [InlineData("?Item={Item}", typeof(Dictionary<string, string>), "dict")]
         // KeyValuePair
-        // Note that KeyValuePair is currently not supported here.
-        [InlineData("", typeof(KeyValuePair<string, string>), "pair")]
+        [InlineData("?key={key}&value={value}", typeof(KeyValuePair<string, string>), "pair")]
+        // Dictionary
+        [InlineData("?dict[0].key={dict[0].key}&dict[0].value={dict[0].value}&dict[1].key={dict[1].key}" +
+                        "&dict[1].value={dict[1].value}",
+                    typeof(Dictionary<string, string>),
+                    "dict")]
         // MutableObject extending IList<> does not generate query string samples like ?id[0]={id[0]}&id[1]={id[1]}.
         // Note that the "Item" query string in the following is not valid,
         // which is a bug but will happen in rare cases.

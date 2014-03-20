@@ -10,6 +10,7 @@ using System.Web.Http.ModelBinding;
 using Microsoft.TestCommon;
 using Moq;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
+using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models;
 
 namespace WebApiHelpPageWebHost.UnitTest
@@ -45,6 +46,27 @@ namespace WebApiHelpPageWebHost.UnitTest
             Assert.NotNull(model);
             Assert.Same(model, config.GetHelpPageApiModel(apiId));
             Assert.Equal(apiId, model.ApiDescription.GetFriendlyId(), StringComparer.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void GetHelpPageApiModel_TypeConverterModel_GeneratesUriParameter()
+        {
+            // If class Point with properties X and Y is defined with a TypeConverter, 
+            // the UriParameters should be a single parameter name "point" instead of two member properties X and Y,
+            // because X and Y do not appear in the Relative Path and it is the user that should specify how the query
+            // string is parsed.
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "{controller}/{id}", new { id = RouteParameter.Optional });
+
+            // Act
+            HelpPageApiModel model = config.GetHelpPageApiModel("GET-Values_point");
+
+            // Assert
+            Assert.NotNull(model);
+            string expectedParameter = Assert.Single(model.ApiDescription.ParameterDescriptions).Name;
+            ParameterDescription parameterDescription = Assert.Single(model.UriParameters);
+            Assert.Equal(expectedParameter, parameterDescription.Name);
         }
 
         [Theory]

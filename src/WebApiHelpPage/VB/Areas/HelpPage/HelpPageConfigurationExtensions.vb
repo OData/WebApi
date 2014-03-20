@@ -1,6 +1,7 @@
 Imports System
 Imports System.Collections.Generic
 Imports System.Collections.ObjectModel
+Imports System.ComponentModel
 Imports System.Diagnostics
 Imports System.Diagnostics.CodeAnalysis
 Imports System.Globalization
@@ -258,7 +259,24 @@ Namespace Areas.HelpPage
                         complexTypeDescription = TryCast(typeDescription, ComplexTypeModelDescription)
                     End If
 
-                    If complexTypeDescription IsNot Nothing Then
+                    '' Example:
+                    '' <TypeConverter(GetType(PointConverter))>
+                    '' Public Class Point
+                    ''     Public Sub New(x As Integer, y As Integer)
+                    ''         x = x
+                    ''         y = y
+                    ''     End Sub
+                    ''     Public X As Integer
+                    ''     Public Y As Integer
+                    '' End Class
+                    '' Class Point is bindable with a TypeConverter, so Point will be added to UriParameters collection.
+                    ''
+                    '' Public Class Point
+                    ''     Public X As Integer
+                    ''     Public Y As Integer
+                    '' End Class
+                    '' Regular complex class Point will have properties X and Y added to UriParameters collection.
+                    If complexTypeDescription IsNot Nothing AndAlso Not IsBindableWithTypeConverter(parameterType) Then
                         For Each uriParameter As ParameterDescription In complexTypeDescription.Properties
                             apiModel.UriParameters.Add(uriParameter)
                         Next
@@ -291,6 +309,14 @@ Namespace Areas.HelpPage
                 End If
             Next
         End Sub
+
+        Private Function IsBindableWithTypeConverter(type As Type) As Boolean
+            If type Is Nothing Then
+                Return False
+            End If
+
+            Return TypeDescriptor.GetConverter(type).CanConvertFrom(GetType(String))
+        End Function
 
         Private Function AddParameterDescription(apiModel As HelpPageApiModel, apiParameter As ApiParameterDescription,
                                                  typeDescription As ModelDescription) As ParameterDescription

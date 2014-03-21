@@ -40,6 +40,9 @@ namespace System.Web.OData.Query.Expressions
         private static readonly Expression _zeroConstant = Expression.Constant(0);
         private static readonly Expression _ordinalStringComparisonConstant = Expression.Constant(StringComparison.Ordinal);
 
+        private static readonly MethodInfo _enumTryParseMethod = typeof(Enum).GetMethods()
+                        .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
+
         private static Dictionary<BinaryOperatorKind, ExpressionType> _binaryOperatorMapping = new Dictionary<BinaryOperatorKind, ExpressionType>
         {
             { BinaryOperatorKind.Add, ExpressionType.Add },
@@ -201,6 +204,9 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.SingleEntityCast:
                         return BindSingleEntityCastNode(node as SingleEntityCastNode);
 
+                    case QueryNodeKind.SingleEntityFunctionCall:
+                        return BindSingleEntityFunctionCallNode(node as SingleEntityFunctionCallNode);
+
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }
@@ -208,6 +214,46 @@ namespace System.Web.OData.Query.Expressions
             else
             {
                 throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
+            }
+        }
+
+        private Expression BindSingleEntityFunctionCallNode(SingleEntityFunctionCallNode node)
+        {
+            switch (node.Name)
+            {
+                case ClrCanonicalFunctions.CastFunctionName:
+                    return BindSingleEntityCastFunctionCall(node);
+                default:
+                    throw Error.NotSupported(SRResources.ODataFunctionNotSupported, node.Name);
+            }
+        }
+
+        private Expression BindSingleEntityCastFunctionCall(SingleEntityFunctionCallNode node)
+        {
+            Contract.Assert(ClrCanonicalFunctions.CastFunctionName == node.Name);
+
+            Expression[] arguments = BindArguments(node.Parameters);
+
+            Contract.Assert(arguments.Length == 2);
+
+            string targetEdmTypeName = (string)((ConstantNode)node.Parameters.Last()).Value;
+            IEdmType targetEdmType = _model.FindType(targetEdmTypeName);
+            Type targetClrType = null;
+
+            if (targetEdmType != null)
+            {
+                targetClrType = EdmLibHelpers.GetClrType(targetEdmType.ToEdmTypeReference(false), _model);
+            }
+
+            if (arguments[0].Type == targetClrType)
+            {
+                // We only support to cast Entity type to the same type now.
+                return arguments[0];
+            }
+            else
+            {
+                // Cast fails and return null.
+                return _nullConstant;
             }
         }
 
@@ -551,6 +597,9 @@ namespace System.Web.OData.Query.Expressions
                 case ClrCanonicalFunctions.CeilingFunctionName:
                     return BindCeiling(node);
 
+                case ClrCanonicalFunctions.CastFunctionName:
+                    return BindCastSingleValue(node);
+
                 default:
                     throw new NotImplementedException(Error.Format(SRResources.ODataFunctionNotSupported, node.Name));
             }
@@ -655,6 +704,145 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+        }
+
+        private Expression BindCastSingleValue(SingleValueFunctionCallNode node)
+        {
+            Contract.Assert(ClrCanonicalFunctions.CastFunctionName == node.Name);
+
+            Expression[] arguments = BindArguments(node.Parameters);
+            Contract.Assert(arguments.Length == 1 || arguments.Length == 2);
+
+            Expression source = arguments.Length == 1 ? _lambdaParameters[ODataItParameterName] : arguments[0];
+            string targetTypeName = (string)((ConstantNode)node.Parameters.Last()).Value;
+            IEdmType targetEdmType = _model.FindType(targetTypeName);
+            Type targetClrType = null;
+
+            if (targetEdmType != null)
+            {
+                IEdmTypeReference targetEdmTypeReference = targetEdmType.ToEdmTypeReference(false);
+                targetClrType = EdmLibHelpers.GetClrType(targetEdmTypeReference, _model);
+
+                if (source != _nullConstant)
+                {
+                    if (source.Type == targetClrType)
+                    {
+                        return source;
+                    }
+
+                    if ((!targetEdmTypeReference.IsPrimitive() && !targetEdmTypeReference.IsEnum()) ||
+                        (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(source.Type) == null && !TypeHelper.IsEnum(source.Type)))
+                    {
+                        // Cast fails and return null.
+                        return _nullConstant;
+                    }
+                }
+            }
+
+            if (targetClrType == null || source == _nullConstant)
+            {
+                return _nullConstant;
+            }
+
+            if (targetClrType == typeof(string))
+            {
+                return BindCastToStringType(source);
+            }
+            else if (TypeHelper.IsEnum(targetClrType))
+            {
+                return BindCastToEnumType(source.Type, targetClrType, node.Parameters.First(), arguments.Length);
+            }
+            else
+            {
+                if (source.Type.IsNullable() && !targetClrType.IsNullable())
+                {
+                    // Make the target Clr type nullable to avoid failure while casting
+                    // nullable source, whose value may be null, to a non-nullable type.
+                    // For example: cast(NullableInt32Property,Edm.Int64)
+                    // The target Clr type should be Nullable<Int64> rather than Int64.
+                    targetClrType = typeof(Nullable<>).MakeGenericType(targetClrType);
+                }
+
+                try
+                {
+                    return Expression.Convert(source, targetClrType);
+                }
+                catch (InvalidOperationException)
+                {
+                    // Cast fails and return null.
+                    return _nullConstant;
+                }
+            }
+        }
+
+        private static Expression BindCastToStringType(Expression source)
+        {
+            Expression sourceValue;
+
+            if (source.Type.IsGenericType && source.Type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                if (TypeHelper.IsEnum(source.Type))
+                {
+                    // Entity Framework doesn't have ToString method for enum types.
+                    // Convert enum types to their underlying numeric types.
+                    sourceValue = Expression.Convert(
+                        Expression.Property(source, "Value"),
+                        Enum.GetUnderlyingType(TypeHelper.GetUnderlyingTypeOrSelf(source.Type)));
+                }
+                else
+                {
+                    // Entity Framework has ToString method for numeric types.
+                    sourceValue = Expression.Property(source, "Value");
+                }
+
+                // Entity Framework doesn't have ToString method for nullable numeric types.
+                // Call ToString method on non-nullable numeric types.
+                return Expression.Condition(
+                    Expression.Property(source, "HasValue"),
+                    Expression.Call(sourceValue, "ToString", typeArguments: null, arguments: null),
+                    Expression.Constant(null, typeof(string)));
+            }
+            else
+            {
+                sourceValue = TypeHelper.IsEnum(source.Type) ?
+                    Expression.Convert(source, Enum.GetUnderlyingType(source.Type)) :
+                    source;
+                return Expression.Call(sourceValue, "ToString", typeArguments: null, arguments: null);
+            }
+        }
+
+        private Expression BindCastToEnumType(Type sourceType, Type targetClrType, QueryNode firstParameter, int parameterLength)
+        {
+            Type enumType = TypeHelper.GetUnderlyingTypeOrSelf(targetClrType);
+            ConstantNode sourceNode = firstParameter as ConstantNode;
+
+            if (parameterLength == 1 || sourceNode == null || sourceType != typeof(string))
+            {
+                // We only support to cast Enumeration type from constant string now,
+                // because LINQ to Entities does not recognize the method Enum.TryParse.
+                return _nullConstant;
+            }
+            else
+            {
+                object[] parameters = new[] { sourceNode.Value, Enum.ToObject(enumType, 0) };
+                bool isSuccessful = (bool)_enumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
+
+                if (isSuccessful)
+                {
+                    if (_querySettings.EnableConstantParameterization)
+                    {
+                        return LinqParameterContainer.Parameterize(targetClrType, parameters[1]);
+                    }
+                    else
+                    {
+                        return Expression.Constant(parameters[1], targetClrType);
+                    }
+                }
+                else
+                {
+                    return _nullConstant;
+                }
+            }
         }
 
         private Expression BindCeiling(SingleValueFunctionCallNode node)
@@ -890,13 +1078,13 @@ namespace System.Web.OData.Query.Expressions
 
         private Expression BindHas(Expression left, Expression flag)
         {
-            Contract.Assert(left.Type.IsEnum);
+            Contract.Assert(TypeHelper.IsEnum(left.Type));
             Contract.Assert(flag.Type == typeof(Enum));
 
             Expression[] arguments = new[] { left, flag };
             return MakeFunctionCall(ClrCanonicalFunctions.HasFlag, arguments);
         }
-        
+
         private Expression[] BindArguments(IEnumerable<QueryNode> nodes)
         {
             return nodes.OfType<SingleValueNode>().Select(n => Bind(n)).ToArray();
@@ -1181,7 +1369,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 // Enum has a "has" operator
                 // {(c1, c2) => c1.HasFlag(Convert(c2))}
-                if (left.Type.IsEnum && right.Type.IsEnum && binaryOperator == BinaryOperatorKind.Has)
+                if (TypeHelper.IsEnum(left.Type) && TypeHelper.IsEnum(right.Type) && binaryOperator == BinaryOperatorKind.Has)
                 {
                     UnaryExpression flag = Expression.Convert(right, typeof(Enum));
                     return BindHas(left, flag);
@@ -1255,7 +1443,7 @@ namespace System.Web.OData.Query.Expressions
 
             return null;
         }
-        
+
         private static IEnumerable<Expression> ExtractValueFromNullableArguments(IEnumerable<Expression> arguments)
         {
             return arguments.Select(arg => ExtractValueFromNullableExpression(arg));

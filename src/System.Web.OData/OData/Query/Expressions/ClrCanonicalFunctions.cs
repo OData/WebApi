@@ -40,6 +40,7 @@ namespace System.Web.OData.Query.Expressions
         internal const string RoundFunctionName = "round";
         internal const string FloorFunctionName = "floor";
         internal const string CeilingFunctionName = "ceiling";
+        internal const string CastFunctionName = "cast";
 
         // string functions
         public static readonly MethodInfo StartsWith;

@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
@@ -15,6 +16,7 @@ using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
+using Address = System.Web.OData.Builder.TestModels.Address;
 
 namespace System.Web.OData.Query
 {
@@ -111,9 +113,9 @@ namespace System.Web.OData.Query
                     { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'Fourth'", new int[] { } },
                     { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'3'", new int[] { } },
                     { "Microsoft.TestCommon.Types.SimpleEnum'First' eq Simple", new int[] { 1, 3 } },
-                    // TODO: Support cast() in $filter, workitem 1586
-                    // { "Simple eq cast(cast(0, 'Edm.String'), 'Microsoft.TestCommon.Types.SimpleEnum')", new int[] { 1, 3} },
-                    // { "Simple eq cast('First', 'Microsoft.TestCommon.Types.SimpleEnum')", new int[] { 1, 3} },
+                    // TODO: 1826 Remove single quotes on enumeration types in cast.
+                    { "Simple eq cast('0','Microsoft.TestCommon.Types.SimpleEnum')", new int[] { 1, 3} },
+                    { "Simple eq cast('First','Microsoft.TestCommon.Types.SimpleEnum')", new int[] { 1, 3} },
                     { "Simple eq null", new int[] { } },
                     { "null eq Simple", new int[] { } },
                     { "Simple eq SimpleNullable", new int[] { 1 } },
@@ -251,6 +253,86 @@ namespace System.Web.OData.Query
                         UInt = (UIntEnum)8,
                         Flag = (FlagsEnum)8,
                         FlagNullable = (FlagsEnum)16
+                    }
+                };
+            }
+        }
+
+        // Legal filter queries usable against CastModelTestData.
+        // Tuple is: filter, expected list of Id's
+        public static TheoryDataSet<string, int[]> CastModelTestFilters
+        {
+            get
+            {
+                return new TheoryDataSet<string, int[]>
+                {
+                    // Cast works.
+                    { "cast(IntProp,Edm.Double) lt 2.5", new int[] { 1, 2 }},
+                    { "cast(IntProp,Edm.String) eq '3'", new int[] { 3 } },
+                    { "cast(NullableIntProp,Edm.Int64) eq 1", new int[] { 1 }},
+                    { "cast(NullableIntProp,Edm.String) eq null", new int[] { 3 }},
+                    // TODO: 1826 Remove single quotes on enumeration types in cast.
+                    { "cast('Two, Four','Microsoft.TestCommon.Types.FlagsEnum') has FlagsEnumProp", new int[] { 2, 3 } },
+                    { "contains(cast(StringProp,Edm.String),'String')", new int[] { 1, 3 } },
+                    { "cast(NullableSimpleEnumProp,Edm.String) ne '0'", new int[] { 2, 3 } },
+                    { "cast(DateTimeOffsetProp,Edm.DateTimeOffset) eq 2001-01-01T01:01:01.000+00:00", new int[] { 1 } },
+                    { "cast(GuidProp,Edm.String) eq '00000000-0000-0000-0000-000000000000'", new int[] { 1, 3 } },
+                    { "cast(null,Edm.Int32) ne null", new int[] { } },
+                    { "cast(null,Edm.String) eq null", new int[] { 1, 2, 3 } },
+                    { "cast(cast(cast(IntProp,Edm.Int64),Edm.Int16),Edm.Double) gt 1.5", new int[] { 2, 3 } },
+                    // Cast fails.
+                    { "cast(IntProp,Edm.DateTimeOffset) eq null", new int[] { 1, 2, 3 } },
+                    { "cast(NullableIntProp,Edm.Guid) eq null", new int[] { 1, 2, 3 } },
+                    { "cast(StringProp,Edm.Double) eq null", new int[] { 1, 2, 3 } },
+                    // TODO: 1826 Remove single quotes on enumeration types in cast.
+                    { "cast(StringProp,'Microsoft.TestCommon.Types.SimpleEnum') eq null", new int[] { 1, 2, 3 } },
+                    { "cast(DateTimeOffsetProp,Edm.Int32) eq null", new int[] { 1, 2, 3 } },
+                    { "cast(Edm.Int32) eq null", new int[] { 1, 2, 3 } },
+                    { "cast($it,Edm.String) ne null", new int[] { } },
+                    { "cast(ComplexProp,Edm.Double) ne null", new int[] { } },
+                    { "cast(ComplexProp,Edm.String) ne null", new int[] { } },
+                };
+            }
+        }
+
+        // Test data used by CastModelTestFilters TheoryDataSet
+        public static List<DataTypes> CastModelTestData
+        {
+            get
+            {
+                return new List<DataTypes>()
+                {
+                    new DataTypes()
+                    {
+                        IntProp = 1,
+                        NullableIntProp = 1,
+                        StringProp = "String 1",
+                        FlagsEnumProp = FlagsEnum.One | FlagsEnum.Four,
+                        NullableSimpleEnumProp = SimpleEnum.First,
+                        DateTimeOffsetProp = new DateTimeOffset(new DateTime(2001, 1, 1, 1, 1, 1, DateTimeKind.Utc)),
+                        GuidProp = Guid.Empty,
+                        ComplexProp = new Expressions.Address()
+                    },
+                    new DataTypes()
+                    {
+                        IntProp = 2,
+                        NullableIntProp = 2,
+                        FlagsEnumProp = FlagsEnum.Four,
+                        NullableSimpleEnumProp = SimpleEnum.Second,
+                        DateTimeOffsetProp = new DateTimeOffset(new DateTime(2002, 2, 2, 2, 2, 2, DateTimeKind.Utc)),
+                        EntityProp = new Product(),
+                        GuidProp = Guid.NewGuid(),
+                        ComplexProp = new Expressions.Address()
+                    },
+                    new DataTypes()
+                    {
+                        IntProp = 3,
+                        StringProp = "String 3",
+                        FlagsEnumProp = FlagsEnum.Two | FlagsEnum.Four,
+                        NullableSimpleEnumProp = SimpleEnum.Third,
+                        DateTimeOffsetProp = new DateTimeOffset(new DateTime(2003, 3, 3, 3, 3, 3, DateTimeKind.Utc)),
+                        GuidProp = Guid.Empty,
+                        EntityProp = new Product()
                     }
                 };
             }
@@ -554,6 +636,49 @@ namespace System.Web.OData.Query
         }
 
         [Theory]
+        [PropertyData("CastModelTestFilters")]
+        public void ApplyWithCast_ReturnsCorrectQueryable(string filter, int[] castModelIds)
+        {
+            // Arrange
+            var model = GetCastModel();
+            var context = new ODataQueryContext(model, typeof(DataTypes));
+            var filterOption = new FilterQueryOption(filter, context);
+            IEnumerable<DataTypes> castModels = CastModelTestData;
+
+            // Act
+            IQueryable queryable = filterOption.ApplyTo(castModels.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+
+            // Assert
+            Assert.NotNull(queryable);
+            IEnumerable<DataTypes> actualProducts = Assert.IsAssignableFrom<IEnumerable<DataTypes>>(queryable);
+            Assert.Equal(
+                castModelIds,
+                actualProducts.Select(product => product.IntProp));
+        }
+
+        [Theory]
+        [InlineData("cast(NoSuchProperty,Edm.String) eq null", typeof(ODataException))]
+        [InlineData("cast(ProductId,Edm.NoSuchType) eq null", typeof(ODataException))]
+        [InlineData("cast(ProductId,Edm.String) eq 123", typeof(ODataException))]
+        [InlineData("cast('123',Microsoft.TestCommon.Types.SimpleEnum) ne 'First'", typeof(ODataException))]
+        [InlineData("cast(Edm.Int32) eq '123'", typeof(ODataException))]
+        public void ApplyWithCast_Throws_WithInvalidFilter(string filter, Type exceptionType)
+        {
+            // Arrange
+            var model = GetCastModel();
+            var context = new ODataQueryContext(model, typeof(DataTypes));
+            var filterOption = new FilterQueryOption(filter, context);
+            IEnumerable<DataTypes> castModels = CastModelTestData;
+
+            // Act & Assert
+            Assert.Throws(
+                exceptionType,
+                () => filterOption.ApplyTo(
+                    castModels.AsQueryable(),
+                    new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }));
+        }
+
+        [Theory]
         [InlineData(
             "length(Simple) eq 5",
             "No function signature for the function with name 'length' matches the specified arguments. The function signatures considered are: length(Edm.String Nullable=true).")]
@@ -664,6 +789,15 @@ namespace System.Web.OData.Query
             config.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(EnumModel)));
             var builder = new ODataConventionModelBuilder(config);
             builder.EntitySet<EnumModel>("EnumModels");
+            return builder.GetEdmModel();
+        }
+
+        private static IEdmModel GetCastModel()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(DataTypes)));
+            var builder = new ODataConventionModelBuilder(config);
+            builder.EntitySet<DataTypes>("CastModels");
             return builder.GetEdmModel();
         }
 

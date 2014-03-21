@@ -1507,6 +1507,120 @@ namespace System.Web.OData.Query.Expressions
 
         #endregion
 
+        #region cast in query option
+
+        [Theory]
+        [InlineData("cast(null,Edm.Int16) eq null", "$it => (null == null)")]
+        [InlineData("cast(null,Edm.Int32) eq 123", "$it => (null == Convert(123))")]
+        [InlineData("cast(null,Edm.Int64) ne 123", "$it => (null != Convert(123))")]
+        [InlineData("cast(null,Edm.Single) ne 123", "$it => (null != Convert(123))")]
+        [InlineData("cast(null,Edm.Double) ne 123", "$it => (null != Convert(123))")]
+        [InlineData("cast(null,Edm.Decimal) ne 123", "$it => (null != Convert(123))")]
+        [InlineData("cast(null,Edm.Boolean) ne true", "$it => (null != Convert(True))")]
+        [InlineData("cast(null,Edm.Byte) ne 1", "$it => (null != Convert(1))")]
+        [InlineData("cast(null,Edm.Guid) eq 00000000-0000-0000-0000-000000000000", "$it => (null == Convert(00000000-0000-0000-0000-000000000000))")]
+        [InlineData("cast(null,Edm.String) ne '123'", "$it => (null != \"123\")")]
+        [InlineData("cast(null,Edm.DateTimeOffset) eq 2001-01-01T12:00:00.000+08:00", "$it => (null == Convert(1/1/2001 12:00:00 PM +08:00))")]
+        [InlineData("cast(null,Edm.Duration) eq duration'P8DT23H59M59.9999S'", "$it => (null == Convert(8.23:59:59.9999000))")]
+        [InlineData("cast(IntProp,Edm.String) eq '123'", "$it => (Convert($it.IntProp.ToString()) == \"123\")")]
+        [InlineData("cast(LongProp,Edm.String) eq '123'", "$it => (Convert($it.LongProp.ToString()) == \"123\")")]
+        [InlineData("cast(SingleProp,Edm.String) eq '123'", "$it => (Convert($it.SingleProp.ToString()) == \"123\")")]
+        [InlineData("cast(DoubleProp,Edm.String) eq '123'", "$it => (Convert($it.DoubleProp.ToString()) == \"123\")")]
+        [InlineData("cast(DecimalProp,Edm.String) eq '123'", "$it => (Convert($it.DecimalProp.ToString()) == \"123\")")]
+        [InlineData("cast(BoolProp,Edm.String) eq '123'", "$it => (Convert($it.BoolProp.ToString()) == \"123\")")]
+        [InlineData("cast(ByteProp,Edm.String) eq '123'", "$it => (Convert($it.ByteProp.ToString()) == \"123\")")]
+        [InlineData("cast(GuidProp,Edm.String) eq '123'", "$it => (Convert($it.GuidProp.ToString()) == \"123\")")]
+        [InlineData("cast(StringProp,Edm.String) eq '123'", "$it => (Convert($it.StringProp) == \"123\")")]
+        [InlineData("cast(DateTimeOffsetProp,Edm.String) eq '123'", "$it => (Convert($it.DateTimeOffsetProp.ToString()) == \"123\")")]
+        [InlineData("cast(TimeSpanProp,Edm.String) eq '123'", "$it => (Convert($it.TimeSpanProp.ToString()) == \"123\")")]
+        [InlineData("cast(SimpleEnumProp,Edm.String) eq '123'", "$it => (Convert(Convert($it.SimpleEnumProp).ToString()) == \"123\")")]
+        [InlineData("cast(FlagsEnumProp,Edm.String) eq '123'", "$it => (Convert(Convert($it.FlagsEnumProp).ToString()) == \"123\")")]
+        [InlineData("cast(LongEnumProp,Edm.String) eq '123'", "$it => (Convert(Convert($it.LongEnumProp).ToString()) == \"123\")")]
+        [InlineData("cast(NullableIntProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableIntProp.HasValue, $it.NullableIntProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableIntProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableIntProp.HasValue, $it.NullableIntProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableLongProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableLongProp.HasValue, $it.NullableLongProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableSingleProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableSingleProp.HasValue, $it.NullableSingleProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableDoubleProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableDoubleProp.HasValue, $it.NullableDoubleProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableDecimalProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableDecimalProp.HasValue, $it.NullableDecimalProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableBoolProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableBoolProp.HasValue, $it.NullableBoolProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableByteProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableByteProp.HasValue, $it.NullableByteProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableGuidProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableGuidProp.HasValue, $it.NullableGuidProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableDateTimeOffsetProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableDateTimeOffsetProp.HasValue, $it.NullableDateTimeOffsetProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableTimeSpanProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableTimeSpanProp.HasValue, $it.NullableTimeSpanProp.Value.ToString(), null)) == \"123\")")]
+        [InlineData("cast(NullableSimpleEnumProp,Edm.String) eq '123'", "$it => (Convert(IIF($it.NullableSimpleEnumProp.HasValue, Convert($it.NullableSimpleEnumProp.Value).ToString(), null)) == \"123\")")]
+        [InlineData("cast(IntProp,Edm.Int64) eq 123", "$it => (Convert($it.IntProp) == 123)")]
+        [InlineData("cast(NullableLongProp,Edm.Double) eq 1.23", "$it => (Convert($it.NullableLongProp) == Convert(1.23))")]
+        [InlineData("cast(2147483647,Edm.Int16) ne null", "$it => (Convert(Convert(2147483647)) != null)")]
+        [InlineData("cast(Microsoft.TestCommon.Types.SimpleEnum'1',Edm.String) eq '1'", "$it => (Convert(Convert(Second).ToString()) == \"1\")")]
+        [InlineData("cast(cast(cast(IntProp,Edm.Int64),Edm.Int16),Edm.String) eq '123'", "$it => (Convert(Convert(Convert($it.IntProp)).ToString()) == \"123\")")]
+        // TODO: 1826 Remove single quotes on enumeration types in cast.
+        [InlineData("cast('123','Microsoft.TestCommon.Types.SimpleEnum') ne null", "$it => (Convert(123) != null)")]
+        public void CastMethod_Succeeds(string filter, string expectedResult)
+        {
+            VerifyQueryDeserialization<DataTypes>(
+                filter,
+                expectedResult,
+                NotTesting);
+        }
+
+        [Theory]
+        [InlineData("cast(NoSuchProperty,Edm.Int32) ne null", "Could not find a property named 'NoSuchProperty' on type 'System.Web.OData.Query.Expressions.DataTypes'.")]
+        [InlineData("cast(null,Edm.Unknown) ne null", "The child type 'Edm.Unknown' in a cast was not an entity type. Casts can only be performed on entity types.")]
+        public void CastFails_UndefinedSourceOrTarget_Throws(string filter, string errorMessage)
+        {
+            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), errorMessage);
+        }
+
+        [Theory]
+        // TODO: 1826 Remove single quotes on enumeration types in cast.
+        [InlineData("cast(SimpleEnumProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
+        [InlineData("cast(FlagsEnumProp,'Microsoft.TestCommon.Types.FlagsEnum') ne null")]
+        [InlineData("cast(NullableSimpleEnumProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
+        [InlineData("cast(IntProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
+        [InlineData("cast(DateTimeOffsetProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
+        [InlineData("cast(null,'Microsoft.TestCommon.Types.SimpleEnum') eq null")]
+        [InlineData("cast(null,'Microsoft.TestCommon.Types.FlagsEnum') eq null")]
+        [InlineData("cast(FlagsEnumProp,Edm.Int32) eq 123")]
+        [InlineData("cast(NullableSimpleEnumProp,Edm.Guid) ne null")]
+        public void CastFails_UnsupportedSourceOrTargetForEnumCast_Throws(string filter)
+        {
+            // TODO : 1824 Should not throw exception for invalid enum cast in query option.
+            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), "Enumeration type value can only be casted to or from string.");
+        }
+
+        [Theory]
+        [InlineData("cast(IntProp,Edm.DateTimeOffset) eq null")]
+        [InlineData("cast(ByteProp,Edm.Guid) eq null")]
+        [InlineData("cast(NullableLongProp,Edm.Duration) eq null")]
+        [InlineData("cast(StringProp,Edm.Double) eq null")]
+        [InlineData("cast(StringProp,Edm.Int16) eq null")]
+        [InlineData("cast(DateTimeOffsetProp,Edm.Int32) eq null")]
+        [InlineData("cast(NullableGuidProp,Edm.Int64) eq null")]
+        [InlineData("cast(Edm.Int32) eq null")]
+        [InlineData("cast($it,Edm.String) eq null")]
+        [InlineData("cast(ComplexProp,Edm.Double) eq null")]
+        [InlineData("cast(ComplexProp,Edm.String) eq null")]
+        // TODO: 1826 Remove single quotes on enumeration types in cast.
+        [InlineData("cast(StringProp,'Microsoft.TestCommon.Types.SimpleEnum') eq null")]
+        [InlineData("cast(StringProp,'Microsoft.TestCommon.Types.FlagsEnum') eq null")]
+        public void CastFails_UnsupportedTarget_ReturnsNull(string filter)
+        {
+            VerifyQueryDeserialization<DataTypes>(filter, "$it => (null == null)");
+        }
+
+        [Theory]
+        [InlineData("cast(null,System.Web.OData.Query.Expressions.Address) ne null",
+            "The child type 'System.Web.OData.Query.Expressions.Address' in a cast was not an entity type. Casts can only be performed on entity types.")]
+        [InlineData("cast(null,System.Web.OData.Query.Expressions.DataTypes) ne null",
+            "Cast or IsOf Function must have a type in its arguments.")]
+        public void CastFails_NonPrimitiveTarget_Throws(string filter, string expectErrorMessage)
+        {
+            // TODO : 1827 Should not throw when the target type of cast is not primitive or enumeration type.
+            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), expectErrorMessage);
+        }
+
+        #endregion
+
         [Theory]
         [InlineData("UShortProp eq 12", "$it => (Convert($it.UShortProp) == 12)")]
         [InlineData("ULongProp eq 12L", "$it => (Convert($it.ULongProp) == 12)")]

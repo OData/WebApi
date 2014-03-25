@@ -37,6 +37,7 @@ namespace System.Web.OData
                 "odata-alias2-inheritance",
                 "odata-alias2-inheritance",
                 GetModelWithCustomerAliasAndInheritance());
+            _configuration.Routes.MapODataServiceRoute("odata2", "odata2", GetModelWithProcedures());
             _configuration.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers" });
 
             HttpServer server = new HttpServer(_configuration);
@@ -213,6 +214,49 @@ namespace System.Web.OData
             Assert.NotNull(result["Orders"]);
         }
 
+        [Fact]
+        public void SelectExpand_Works_ForSelectAction_WithNamespaceQualifiedName()
+        {
+            // Arrange
+            const string URI = "/odata2/Players?$select=Name,Default.*";
+
+            // Act
+            HttpResponseMessage response = GetResponse(URI, AcceptJsonFullMetadata);
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(responseString);
+            Assert.Equal(5, result["value"].Count());
+            for (int i = 0; i < 5; i++)
+            {
+                Assert.Equal("http://localhost/odata2/Players(" + i + ")/Default.PlayerAction1", result["value"][i]["#Default.PlayerAction1"]["target"]);
+                Assert.Equal("http://localhost/odata2/Players(" + i + ")/Default.PlayerAction2", result["value"][i]["#Default.PlayerAction2"]["target"]);
+                Assert.Equal("http://localhost/odata2/Players(" + i + ")/Default.PlayerAction3", result["value"][i]["#Default.PlayerAction3"]["target"]);
+            }
+
+            // to verify the payload doesn't include any function
+            Assert.DoesNotContain("PlayerFunction1", responseString);
+        }
+
+        [Theory]
+        [InlineData("Default.Container.*")]
+        [InlineData("Container.*")]
+        public void SelectExpand_DoesnotWork_ForSelectAction_WithNonNamespaceQualifiedName(string nonNamespaceQualifiedName)
+        {
+            // Arrange
+            string uri = "/odata2/Players?$select=Name," + nonNamespaceQualifiedName;
+
+            // Act
+            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.False(response.IsSuccessStatusCode);
+            Assert.Contains("The query specified in the URI is not valid. Could not find a property named '" + nonNamespaceQualifiedName +
+                "' on type 'System.Web.OData.Player'.", responseString);
+        }
+
         private HttpResponseMessage GetResponse(string uri, string acceptHeader)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
@@ -277,6 +321,23 @@ namespace System.Web.OData
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = true };
             builder.EntitySet<SelectExpandTestCustomerWithAlias>("SelectExpandTestCustomersAlias");
             builder.EntitySet<SelectExpandTestOrderWithAlias>("SelectExpandTestOrdersAlias");
+            return builder.GetEdmModel();
+        }
+
+        private IEdmModel GetModelWithProcedures()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Player>("Players");
+
+            // Actions
+            builder.EntityType<Player>().Action("PlayerAction1");
+            builder.EntityType<Player>().Action("PlayerAction2");
+            builder.EntityType<Player>().Action("PlayerAction3");
+
+            // Functions
+            builder.EntityType<Player>().Function("PlayerFunction1").Returns<int>();
+            builder.EntityType<Player>().Function("PlayerFunction2").Returns<int>();
+
             return builder.GetEdmModel();
         }
     }
@@ -487,6 +548,31 @@ namespace System.Web.OData
             }).AsQueryable());
             return Ok(result);
         }
+    }
 
+    public class PlayersController : ODataController
+    {
+        private IList<Player> players = Enumerable.Range(0, 5).Select(i =>
+                    new Player
+                    {
+                        Id = i,
+                        Name = "PayerName " + i,
+                        Category = "Category " + i,
+                        Address = "Address " + i
+                    }).ToList();
+
+        [EnableQuery]
+        public IHttpActionResult Get()
+        {
+            return Ok(players);
+        }
+    }
+
+    public class Player
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public string Address { get; set; }
     }
 }

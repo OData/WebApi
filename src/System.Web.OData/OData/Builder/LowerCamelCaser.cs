@@ -1,14 +1,18 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using System.Globalization;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// Default lower camel caser to resolve property names for <see cref="ODataConventionModelBuilder"/>
+    /// Default lower camel caser to resolve property names for <see cref="ODataConventionModelBuilder"/>.
+    /// The rule is to convert the leading upper case characters to lower case, 
+    /// until a character, which is not the first character and is followed by a non-upper case character, is met.
+    /// id => id, ID => id, MyName => myName, IOStream => ioStream, MyID => myid, yourID => yourID
     /// </summary>
     public class LowerCamelCaser
     {
@@ -18,8 +22,10 @@ namespace System.Web.OData.Builder
         /// Initializes a new instance of the <see cref="LowerCamelCaser"/> class.
         /// </summary>
         public LowerCamelCaser()
+            : this(NameResolverOptions.ProcessReflectedPropertyNames |
+                NameResolverOptions.ProcessDataMemberAttributePropertyNames |
+                NameResolverOptions.ProcessExplicitPropertyNames)
         {
-            this._options = NameResolverOptions.ApplyToAllProperties;
         }
 
         /// <summary>
@@ -36,7 +42,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="builder">The <see cref="ODataConventionModelBuilder"/> to be applied on.</param>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Explicit Expression generic type is more clear")]
-        public void Apply(ODataConventionModelBuilder builder)
+        public void ApplyLowerCamelCase(ODataConventionModelBuilder builder)
         {
             foreach (StructuralTypeConfiguration typeConfiguration in builder.StructuralTypes)
             {
@@ -68,24 +74,17 @@ namespace System.Web.OData.Builder
             }
 
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(Char.ToLowerInvariant(name[0]));
 
-            for (int index = 1; index < name.Length; index++)
+            for (int index = 0; index < name.Length; index++)
             {
-                if (Char.IsUpper(name[index]))
+                if (index != 0 && index + 1 < name.Length && !Char.IsUpper(name[index + 1]))
                 {
-                    stringBuilder.Append(Char.ToLowerInvariant(name[index]));
+                    stringBuilder.Append(name.Substring(index));
+                    break;
                 }
                 else
                 {
-                    if (Char.IsLower(name[index]) && stringBuilder.Length > 1)
-                    {
-                        stringBuilder[stringBuilder.Length - 1] =
-                            Char.ToUpperInvariant(stringBuilder[stringBuilder.Length - 1]);
-                    }
-
-                    stringBuilder.Append(name.Substring(index));
-                    break;
+                    stringBuilder.Append(Char.ToLower(name[index], CultureInfo.InvariantCulture));
                 }
             }
 
@@ -96,24 +95,19 @@ namespace System.Web.OData.Builder
         {
             if (property.AddedExplicitly)
             {
-                if (_options.HasFlag(NameResolverOptions.RespectExplicitProperties))
-                {
-                    return false;
-                }
+                return _options.HasFlag(NameResolverOptions.ProcessExplicitPropertyNames);
             }
-            else if (_options.HasFlag(NameResolverOptions.RespectModelAliasing))
+            else
             {
-                DataMemberAttribute attribute = property.PropertyInfo.GetCustomAttributes(inherit: true)
-                    .OfType<DataMemberAttribute>().SingleOrDefault();
+                DataMemberAttribute attribute = property.PropertyInfo.GetCustomAttribute<DataMemberAttribute>(inherit: false);
 
                 if (attribute != null && !String.IsNullOrWhiteSpace(attribute.Name))
                 {
-                    // The property has a resolved name by model aliasing.
-                    return false;
+                    return _options.HasFlag(NameResolverOptions.ProcessDataMemberAttributePropertyNames);
                 }
-            }
 
-            return true;
+                return _options.HasFlag(NameResolverOptions.ProcessReflectedPropertyNames);
+            }
         }
     }
 }

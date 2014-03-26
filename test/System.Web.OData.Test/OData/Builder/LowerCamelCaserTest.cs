@@ -7,57 +7,58 @@ using System.Runtime.Serialization;
 using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Serialization;
 
 namespace System.Web.OData.Builder
 {
     public class LowerCamelCaserTest
     {
         [Theory]
-        [InlineData("", "")]
-        [InlineData("a", "a")]
-        [InlineData("B", "b")]
-        [InlineData("ab", "ab")]
-        [InlineData("Ab", "ab")]
-        [InlineData("aBcd", "aBcd")]
-        [InlineData("AbCD", "abCD")]
-        [InlineData("AbcDE", "abcDE")]
-        [InlineData("AbcD", "abcD")]
-        [InlineData("ABCdef", "abCdef")]
-        [InlineData("A1B2", "a1B2")]
-        [InlineData("A_BC", "a_BC")]
-        [InlineData("_123", "_123")]
-        [InlineData("_abc", "_abc")]
-        [InlineData("_ABC", "_ABC")]
-        [InlineData("aB_Cd", "aB_Cd")]
-        [InlineData("AB_CD", "ab_CD")]
-        [InlineData("AB12", "ab12")]
-        [InlineData("ABCD", "abcd")]
+        [InlineData("URLValue", "urlValue")]
+        [InlineData("URL", "url")]
         [InlineData("ID", "id")]
+        [InlineData("I", "i")]
+        [InlineData("", "")]
+        [InlineData(null, null)]
+        [InlineData("iKnow", "iKnow")]
+        [InlineData("Person", "person")]
+        [InlineData("IKnow", "iKnow")]
+        [InlineData("I Know", "i Know")]
+        [InlineData(" IKnow", " IKnow")]
+        [InlineData("u", "u")]
+        [InlineData("A1B2", "a1B2")]
+        [InlineData("U_ID", "u_id")]
+        [InlineData("_name", "_name")]
         [InlineData("Id", "id")]
         [InlineData("id", "id")]
         [InlineData("IOStream", "ioStream")]
-        [InlineData("ID1", "id1")]
+        [InlineData("ID1", "iD1")]
         [InlineData("MyId", "myId")]
         [InlineData("YourId", "yourId")]
-        public void ToLowerCamelCase_LowerCamelCaser(string propertyName, string expectName)
+        [InlineData("MyPI", "mypi")]
+        [InlineData("YourPI", "yourPI")]
+        public void ToLowerCamelCase_LowerCamelCaser_HasSameBehaviorAsJsonNet(string propertyName, string expectName)
         {
             // Arrange
             var lowerCamelCaser = new LowerCamelCaser();
+            var camelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
 
             // Act
-            string actualName = lowerCamelCaser.ToLowerCamelCase(propertyName);
+            string nameResolvedByLowerCamelCaser = lowerCamelCaser.ToLowerCamelCase(propertyName);
+            string nameResolveByJsonNet = camelCasePropertyNamesContractResolver.GetResolvedPropertyName(propertyName);
 
             // Assert
-            Assert.Equal(expectName, actualName);
+            Assert.Equal(nameResolveByJsonNet, nameResolvedByLowerCamelCaser);
+            Assert.Equal(expectName, nameResolvedByLowerCamelCaser);
         }
 
         [Fact]
-        public void LowerCamelCaser_RespectModelAliasing()
+        public void LowerCamelCaser_ProcessReflectedAndExplicitPropertyNames()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = new ODataConventionModelBuilder().EnableLowerCamelCase(
+                NameResolverOptions.ProcessReflectedPropertyNames | NameResolverOptions.ProcessExplicitPropertyNames);
             builder.EntitySet<LowerCamelCaserModelAliasEntity>("Entities");
-            builder.OnModelCreating += new LowerCamelCaser(NameResolverOptions.RespectModelAliasing).Apply;
             
             // Act
             IEdmModel model = builder.GetEdmModel();
@@ -73,17 +74,17 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void LowerCamelCaser_RespectExplicitProperties()
+        public void LowerCamelCaser_ProcessReflectedAndDataMemberAttributePropertyNames()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = new ODataConventionModelBuilder().EnableLowerCamelCase(
+                NameResolverOptions.ProcessReflectedPropertyNames | NameResolverOptions.ProcessDataMemberAttributePropertyNames);
             EntityTypeConfiguration<LowerCamelCaserEntity> entityTypeConfiguration = builder.EntitySet<LowerCamelCaserEntity>("Entities").EntityType;
             entityTypeConfiguration.Property(b => b.ID).Name = "iD";
             entityTypeConfiguration.Property(d => d.Name).Name = "Name";
             entityTypeConfiguration.EnumProperty(d => d.Color).Name = "Something";
             ComplexTypeConfiguration<LowerCamelCaserComplex> complexTypeConfiguration = builder.ComplexType<LowerCamelCaserComplex>();
             complexTypeConfiguration.CollectionProperty(c => c.Notes).Name = "MyNotes";
-            builder.OnModelCreating += new LowerCamelCaser(NameResolverOptions.RespectExplicitProperties).Apply;
 
             // Act
             IEdmModel model = builder.GetEdmModel();
@@ -105,14 +106,13 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void LowerCamelCaser_RespectModelAliasingAndExplicitProperties()
+        public void LowerCamelCaser_ProcessReflectedPropertyNames()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = new ODataConventionModelBuilder().EnableLowerCamelCase(NameResolverOptions.ProcessReflectedPropertyNames);
             EntityTypeConfiguration<LowerCamelCaserModelAliasEntity> entity = builder.EntitySet<LowerCamelCaserModelAliasEntity>("Entities").EntityType;
             entity.HasKey(e => e.ID).Property(e => e.ID).Name = "IDExplicitly"; 
             entity.Property(d => d.Price).Name = "Price";
-            builder.OnModelCreating += new LowerCamelCaser(NameResolverOptions.RespectModelAliasing | NameResolverOptions.RespectExplicitProperties).Apply;
 
             // Act
             IEdmModel model = builder.GetEdmModel();

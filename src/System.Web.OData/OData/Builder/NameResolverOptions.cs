@@ -3,24 +3,26 @@
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// Options for resolving property names.
+    /// Options for resolving names.
     /// </summary>
     [Flags]
     public enum NameResolverOptions
     {
         /// <summary>
-        /// Apply to property names which are not resolved by model aliasing.
+        /// Process reflected property names.
         /// </summary>
-        RespectModelAliasing = 1,
+        ProcessReflectedPropertyNames = 1,
 
         /// <summary>
-        /// Apply to property names which are not resolved explicitly.
+        /// Process property names in DataMemberAttribute
+        /// such as [DataMember(Name = "DataMemberCustomerName")].
         /// </summary>
-        RespectExplicitProperties = 2,
+        ProcessDataMemberAttributePropertyNames = 2,
 
         /// <summary>
-        /// Apply to every property name.
+        /// Process explicit property names
+        /// such as entityTypeConfiguration.Property(e => e.Key).Name="Id".
         /// </summary>
-        ApplyToAllProperties = 4,
+        ProcessExplicitPropertyNames = 4
     }
 }

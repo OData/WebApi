@@ -956,6 +956,65 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        public void ValidationSummaryWithCustomHeadingTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationSummary(true /* excludePropertyErrors */, "This is my message.", "h2");
+
+            // Assert
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\"><h2>This is my message.</h2>" + Environment.NewLine
+              + "<ul><li style=\"display:none\"></li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationSummaryWithDictionaryAndMessageWithCustomHeadingTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+            RouteValueDictionary htmlAttributes = new RouteValueDictionary();
+            htmlAttributes["class"] = "my-class";
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationSummary("This is my message.", htmlAttributes, "h2");
+
+            // Assert
+            Assert.Equal(
+                "<div class=\"validation-summary-errors my-class\"><h2>This is my message.</h2>" + Environment.NewLine
+              + "<ul><li>foo error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>foo error 2</li>" + Environment.NewLine
+              + "<li>bar error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>bar error 2</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationSummaryWithObjectAttributesAndMessageWithCustomHeadingTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationSummary("This is my message.", new { baz = "baz" }, "h2");
+
+            // Assert
+            Assert.Equal(
+                "<div baz=\"baz\" class=\"validation-summary-errors\"><h2>This is my message.</h2>" + Environment.NewLine
+              + "<ul><li>foo error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>foo error 2</li>" + Environment.NewLine
+              + "<li>bar error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>bar error 2</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
         public void ValidationMessageWithPrefix()
         {
             // Arrange

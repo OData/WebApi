@@ -6,7 +6,7 @@ using System.Web.Mvc.Properties;
 
 namespace System.Web.Mvc
 {
-    public class ReflectedActionDescriptor : ActionDescriptor
+    public class ReflectedActionDescriptor : ActionDescriptor, IMethodInfoActionDescriptor
     {
         private readonly string _actionName;
         private readonly ControllerDescriptor _controllerDescriptor;

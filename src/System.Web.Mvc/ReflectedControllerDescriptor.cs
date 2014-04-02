@@ -51,10 +51,7 @@ namespace System.Web.Mvc
 
         private MethodInfo[] GetAllActionMethodsFromSelector()
         {
-            List<MethodInfo> allValidMethods = new List<MethodInfo>();
-            allValidMethods.AddRange(_selector.AliasedMethods);
-            allValidMethods.AddRange(_selector.NonAliasedMethods.SelectMany(g => g));
-            return allValidMethods.ToArray();
+            return _selector.StandardRouteMethods.ToArray();
         }
 
         public override ActionDescriptor[] GetCanonicalActions()

@@ -197,7 +197,7 @@ namespace System.Web.Routing
         [InlineData(typeof(Bad2Controller), "The route prefix 'pref/' on the controller named 'Bad2' cannot begin or end with a forward slash.")]
         [InlineData(typeof(Bad3Controller), "The route template '/getme' on the action named 'GetMe' on the controller named 'Bad3' cannot begin with a forward slash.")]
         [InlineData(typeof(Bad4Controller), null)]
-        [InlineData(typeof(Bad5Controller), null)]
+        [InlineData(typeof(Bad5Controller), "The route template '/puget-sound/getme' on the action named 'GetMe' on the controller named 'Bad5' cannot begin with a forward slash.")]
         [InlineData(typeof(Bad6Controller), "The prefix 'puget-sound/' of the route area named 'PugetSound' on the controller named 'Bad6' cannot end with a forward slash.")]
         public void TemplatesAreValidated(Type controllerType, string expectedErrorMessage)
         {
@@ -355,11 +355,23 @@ namespace System.Web.Routing
         [RouteArea("PugetSound", AreaPrefix = "/puget-sound")]
         private class Bad5Controller : Controller
         {
+            [HttpGet]
+            [Route("getme")]
+            public ActionResult GetMe()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         [RouteArea("PugetSound", AreaPrefix = "puget-sound/")]
         private class Bad6Controller : Controller
         {
+            [HttpGet]
+            [Route("getme")]
+            public ActionResult GetMe()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class FruitConstraintController : Controller

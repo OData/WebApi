@@ -265,7 +265,7 @@ namespace System.Web.Mvc.Async
             Type controllerType = controllerContext.Controller.GetType();
             ControllerDescriptor controllerDescriptor = DescriptorCache.GetDescriptor(
                 controllerType: controllerType,
-                creator: (Type innerType) => new ReflectedAsyncControllerDescriptor(innerType),
+                creator: ReflectedAsyncControllerDescriptor.DefaultDescriptorFactory,
                 state: controllerType);
             return controllerDescriptor;
         }

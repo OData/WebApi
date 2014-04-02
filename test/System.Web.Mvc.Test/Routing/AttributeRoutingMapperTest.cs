@@ -14,9 +14,9 @@ namespace System.Web.Mvc.Routing
         [Fact]
         public void MapMvcAttributeRoutes_DoesNotTryToInferRouteNames()
         {
-            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(MyController));
+            var controllerType = typeof(MyController);
 
-            var routeEntries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
+            var routeEntries = AttributeRoutingMapper.GetAttributeRoutes(controllerType);
 
             var routeEntry = Assert.Single(routeEntries);
             Assert.Null(routeEntry.Name);
@@ -26,10 +26,10 @@ namespace System.Web.Mvc.Routing
         public void MapMvcAttributeRoutes_RespectsActionNameAttribute()
         {
             // Arrange
-            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(MyController));
+            var controllerType = typeof(MyController);
 
             // Act
-            var routeEntries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
+            var routeEntries = AttributeRoutingMapper.GetAttributeRoutes(controllerType);
 
             // Assert
             var routeEntry = Assert.Single(routeEntries);
@@ -40,14 +40,14 @@ namespace System.Web.Mvc.Routing
         public void MapMvcAttributeRoutes_WithControllerRoute()
         {
             // Arrange
-            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(AnotherController));
+            var controllerType = typeof(AnotherController);
 
             // Act
-            var entries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
+            var entries = AttributeRoutingMapper.GetAttributeRoutes(controllerType);
 
             // Assert
             var controllerEntry = Assert.Single(entries.Where(r => !r.Route.Defaults.ContainsKey("action")));
-            Assert.Same(controllerDescriptor, controllerEntry.Route.GetTargetControllerDescriptor());
+            Assert.Same(controllerType, controllerEntry.Route.GetTargetControllerDescriptor().ControllerType);
 
             var actionMethods = controllerEntry.Route.GetTargetActionDescriptors().ToArray();
             Assert.Equal(2, actionMethods.Length);
@@ -59,10 +59,10 @@ namespace System.Web.Mvc.Routing
         public void MapMvcAttributeRoutes_WithControllerRoute_AndNoReachableActions()
         {
             // Arrange
-            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(NoActionsController));
+            var controllerType = typeof(NoActionsController);
 
             // Act
-            var entries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
+            var entries = AttributeRoutingMapper.GetAttributeRoutes(controllerType);
 
             // Assert
             Assert.Empty(entries);
@@ -72,14 +72,14 @@ namespace System.Web.Mvc.Routing
         public void MapMvcAttributeRoutes_WithControllerRoute_ExcludesAttributeRoute()
         {
             // Arrange
-            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(MixedRoutingController));
+            var controllerType = typeof(MixedRoutingController);
 
             // Act
-            var entries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
+            var entries = AttributeRoutingMapper.GetAttributeRoutes(controllerType);
 
             // Assert
             var controllerEntry = Assert.Single(entries.Where(r => !r.Route.Defaults.ContainsKey("action")));
-            Assert.Same(controllerDescriptor, controllerEntry.Route.GetTargetControllerDescriptor());
+            Assert.Same(controllerType, controllerEntry.Route.GetTargetControllerDescriptor().ControllerType);
 
             var actionMethods = controllerEntry.Route.GetTargetActionDescriptors().ToArray();
             Assert.Equal(1, actionMethods.Length);
@@ -93,10 +93,10 @@ namespace System.Web.Mvc.Routing
         public void MapMvcAttributeRoutes_SetsTargetIsAction()
         {
             // Arrange
-            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(MixedRoutingController));
+            var controllerType = typeof(MixedRoutingController);
 
             // Act
-            var entries = AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor);
+            var entries = AttributeRoutingMapper.GetAttributeRoutes(controllerType);
 
             // Assert
             var controllerEntry = Assert.Single(entries.Where(r => !r.Route.Defaults.ContainsKey("action")));
@@ -110,7 +110,7 @@ namespace System.Web.Mvc.Routing
         public void MapMvcAttributeRoutes_ValidatesConstraints()
         {
             // Arrange
-            var controllerDescriptor = new ReflectedAsyncControllerDescriptor(typeof(InvalidConstraintController));
+            var controllerType = typeof(InvalidConstraintController);
 
             string expectedMessage =
                 "The constraint entry 'custom' on the route with route template 'invalidconstraint/{action}' " +
@@ -118,124 +118,33 @@ namespace System.Web.Mvc.Routing
 
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.MapAttributeRoutes(controllerDescriptor), expectedMessage);
+            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.GetAttributeRoutes(controllerType), expectedMessage);
         }
 
-
-        [Fact]
-        public void CreateRouteEntry_IfDirectRouteProviderReturnsNull_Throws()
+        [InvalidConstraintRoute("invalidconstraint/{action}")]
+        public class InvalidConstraintController : Controller
         {
-            // Arrange
-            string areaPrefix = null;
-            string controllerPrefix = null;
-            IDirectRouteFactory factory = CreateStubRouteFactory(null);
-            ControllerDescriptor controllerDescriptor = CreateStubControllerDescriptor("IgnoreController");
-            ActionDescriptor actionDescriptor = CreateStubActionDescriptor(controllerDescriptor, "IgnoreAction");
-            IReadOnlyCollection<ActionDescriptor> actions = new ActionDescriptor[] { actionDescriptor };
-            IInlineConstraintResolver constraintResolver =
-                new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object;
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(areaPrefix,
-                controllerPrefix, factory, actions, constraintResolver, targetIsAction: false),
-                "IDirectRouteFactory.CreateRoute must not return null.");
+            public void A1()
+            {
+            }
         }
 
-        [Fact]
-        public void CreateRouteEntry_IfDirectRouteProviderReturnsRouteWithoutActionDescriptors_Throws()
+        public class InvalidConstraintRouteAttribute : RouteFactoryAttribute
         {
-            // Arrange
-            string areaPrefix = null;
-            string controllerPrefix = null;
-            Route route = new Route(url: null, routeHandler: null);
-            Assert.Null(route.GetTargetActionDescriptors()); // Guard
-            RouteEntry entry = new RouteEntry(name: null, route: route);
-            IDirectRouteFactory factory = CreateStubRouteFactory(entry);
-            ControllerDescriptor controllerDescriptor = CreateStubControllerDescriptor("IgnoreController");
-            ActionDescriptor actionDescriptor = CreateStubActionDescriptor(controllerDescriptor, "IgnoreAction");
-            IReadOnlyCollection<ActionDescriptor> actions = new ActionDescriptor[] { actionDescriptor };
-            IInlineConstraintResolver constraintResolver =
-                new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object;
+            public InvalidConstraintRouteAttribute(string template)
+                : base(template)
+            {
+            }
 
-            // Act & Assert
-            string expectedMessage = "The route does not have any associated action descriptors. Routing requires " +
-                "that each direct route map to a non-empty set of actions.";
-            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(areaPrefix,
-                controllerPrefix, factory, actions, constraintResolver, targetIsAction: false), expectedMessage);
-        }
-
-        [Fact]
-        public void CreateRouteEntry_IfDirectRouteProviderReturnsRouteWithEmptyActionDescriptors_Throws()
-        {
-            // Arrange
-            string areaPrefix = null;
-            string controllerPrefix = null;
-            Route route = new Route(url: null, routeHandler: null);
-            route.DataTokens = new RouteValueDictionary();
-            route.DataTokens.Add(RouteDataTokenKeys.Actions, new ActionDescriptor[0]);
-            ActionDescriptor[] originalActions = route.GetTargetActionDescriptors();
-            Assert.NotNull(originalActions); // Guard
-            Assert.Equal(0, originalActions.Length); // Guard
-            RouteEntry entry = new RouteEntry(name: null, route: route);
-            IDirectRouteFactory factory = CreateStubRouteFactory(entry);
-            ControllerDescriptor controllerDescriptor = CreateStubControllerDescriptor("IgnoreController");
-            ActionDescriptor actionDescriptor = CreateStubActionDescriptor(controllerDescriptor, "IgnoreAction");
-            IReadOnlyCollection<ActionDescriptor> actions = new ActionDescriptor[] { actionDescriptor };
-            IInlineConstraintResolver constraintResolver =
-                new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object;
-
-            // Act & Assert
-            string expectedMessage = "The route does not have any associated action descriptors. Routing requires " +
-                "that each direct route map to a non-empty set of actions.";
-            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(areaPrefix,
-                controllerPrefix, factory, actions, constraintResolver, targetIsAction: false), expectedMessage);
-        }
-
-        [Fact]
-        public void CreateRouteEntry_IfDirectRouteProviderReturnsRouteWithHandler_Throws()
-        {
-            // Arrange
-            string areaPrefix = null;
-            string controllerPrefix = null;
-            ControllerDescriptor controllerDescriptor = CreateStubControllerDescriptor("IgnoreController");
-            ActionDescriptor actionDescriptor = CreateStubActionDescriptor(controllerDescriptor, "IgnoreAction");
-            Route route = new Route(url: null, routeHandler: null);
-            route.DataTokens = new RouteValueDictionary();
-            route.DataTokens.Add(RouteDataTokenKeys.Actions, new ActionDescriptor[] { actionDescriptor });
-            route.RouteHandler = new Mock<IRouteHandler>(MockBehavior.Strict).Object;
-            ActionDescriptor[] originalActions = route.GetTargetActionDescriptors();
-            RouteEntry entry = new RouteEntry(name: null, route: route);
-            IDirectRouteFactory factory = CreateStubRouteFactory(entry);
-            IReadOnlyCollection<ActionDescriptor> actions = new ActionDescriptor[] { actionDescriptor };
-            IInlineConstraintResolver constraintResolver =
-                new Mock<IInlineConstraintResolver>(MockBehavior.Strict).Object;
-
-            // Act & Assert
-            string expectedMessage = "Direct routing does not support per-route route handlers.";
-            Assert.Throws<InvalidOperationException>(() => AttributeRoutingMapper.CreateRouteEntry(areaPrefix,
-                controllerPrefix, factory, actions, constraintResolver, targetIsAction: false), expectedMessage);
-        }
-
-        private static ActionDescriptor CreateStubActionDescriptor(ControllerDescriptor controllerDescriptor, string actionName)
-        {
-            Mock<ActionDescriptor> mock = new Mock<ActionDescriptor>(MockBehavior.Strict);
-            mock.SetupGet(d => d.ControllerDescriptor).Returns(controllerDescriptor);
-            mock.SetupGet(d => d.ActionName).Returns(actionName);
-            return mock.Object;
-        }
-
-        private static ControllerDescriptor CreateStubControllerDescriptor(string controllerName)
-        {
-            Mock<ControllerDescriptor> mock = new Mock<ControllerDescriptor>(MockBehavior.Strict);
-            mock.SetupGet(d => d.ControllerName).Returns(controllerName);
-            return mock.Object;
-        }
-
-        private static IDirectRouteFactory CreateStubRouteFactory(RouteEntry entry)
-        {
-            Mock<IDirectRouteFactory> mock = new Mock<IDirectRouteFactory>(MockBehavior.Strict);
-            mock.Setup(p => p.CreateRoute(It.IsAny<DirectRouteFactoryContext>())).Returns(entry);
-            return mock.Object;
+            public override RouteValueDictionary Constraints
+            {
+                get
+                {
+                    var result = new RouteValueDictionary();
+                    result.Add("custom", new Uri("http://localhost"));
+                    return result;
+                }
+            }
         }
 
         public class MyController : Controller
@@ -263,32 +172,6 @@ namespace System.Web.Mvc.Routing
         [Route("controller/{action}")]
         public class NoActionsController : Controller
         {
-        }
-
-        [InvalidConstraintRoute("invalidconstraint/{action}")]
-        public class InvalidConstraintController : Controller
-        {
-            public void A1()
-            {
-            }
-        }
-
-        public class InvalidConstraintRouteAttribute : RouteFactoryAttribute
-        {
-            public InvalidConstraintRouteAttribute(string template)
-                : base(template)
-            {
-            }
-
-            public override RouteValueDictionary Constraints
-            {
-                get
-                {
-                    var result = new RouteValueDictionary();
-                    result.Add("custom", new Uri("http://localhost"));
-                    return result;
-                }
-            }
         }
 
         [Route("controller/{action}")]

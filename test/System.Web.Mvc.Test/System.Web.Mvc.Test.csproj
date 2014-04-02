@@ -69,6 +69,7 @@
     <Compile Include="..\Common\Routing\DirectRouteBuilderTests.cs">
       <Link>Routing\DirectRouteBuilderTests.cs</Link>
     </Compile>
+    <Compile Include="Routing\DefaultDirectRouteProviderTest.cs" />
     <Compile Include="Routing\DirectRouteCandidateTest.cs" />
     <Compile Include="Routing\DirectRouteTestHelpers.cs" />
     <Compile Include="Routing\RouteAttributeTests.cs" />

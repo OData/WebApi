@@ -19,38 +19,68 @@ namespace System.Web.Mvc
     // Common base class for Async and Sync action selectors
     internal abstract class ActionMethodSelectorBase
     {
-        private static readonly MethodInfo[] _emptyMethodInfo = new MethodInfo[0];
-        private static readonly ILookup<string, MethodInfo> _emptyMethodInfoLookup = Enumerable.Empty<MethodInfo>().ToLookup(m => m.Name);
+        private StandardRouteActionMethodCache _standardRouteCache;
 
         protected void Initialize(Type controllerType)
         {
             ControllerType = controllerType;
 
-            // If controller type has a RouteAttribute, then standard routes can't reach it.             
-            _hasRouteAttributeOnController = controllerType.GetCustomAttributes(typeof(IDirectRouteFactory), inherit: false).Any()
-                || controllerType.GetCustomAttributes(typeof(IRouteInfoProvider), inherit: false).Any();
+            var allMethods = ControllerType.GetMethods(BindingFlags.InvokeMethod | BindingFlags.Instance | BindingFlags.Public);
+            ActionMethods = Array.FindAll(allMethods, IsValidActionMethod);
 
-            PopulateLookupTables();
+            // The attribute routing mapper will remove methods from this set as they are mapped.
+            // The lookup tables are initialized lazily to ensure that direct routing's changes are respected.
+            StandardRouteMethods = new HashSet<MethodInfo>(ActionMethods);
         }
-
-        private bool _hasRouteAttributeOnController;
 
         public Type ControllerType { get; private set; }
 
-        public MethodInfo[] AliasedMethods { get; private set; }
-
-        public ILookup<string, MethodInfo> NonAliasedMethods { get; private set; }
+        /// <summary>
+        /// All action methods.
+        /// </summary>
+        public MethodInfo[] ActionMethods { get; private set; }
 
         /// <summary>
-        /// Methods with some form of IRouteInfoProvider decorating them directly.
+        /// Methods with no direct route, reachable via standard routing only
         /// </summary>
-        public MethodInfo[] DirectRouteMethods { get; private set; }
+        public HashSet<MethodInfo> StandardRouteMethods { get; private set; }
 
         /// <summary>
-        /// Methods with no IRouteInfoProvider decorating them directly. This set includes action methods in a controller 
-        /// with RouteAttribute but where the method does not have a RouteAttribute.
+        /// Methods which have ActionNameSelectorAttributes - these methods have dynamic functionality
+        /// and might choose to opt-in to any request.
         /// </summary>
-        public MethodInfo[] StandardRouteMethods { get; private set; }
+        public MethodInfo[] AliasedMethods 
+        { 
+            get 
+            {
+                return StandardRouteCache.AliasedMethods;
+            }
+        }
+
+        /// <summary>
+        /// Methods which do not have ActionNameSelectorAttributes - these are selected statically by name.
+        /// </summary>
+        public ILookup<string, MethodInfo> NonAliasedMethods
+        {
+            get
+            {
+                return StandardRouteCache.NonAliasedMethods;
+            }
+        }
+
+        private StandardRouteActionMethodCache StandardRouteCache
+        {
+            get
+            {
+                if (_standardRouteCache == null)
+                {
+                    // This data structure is immutable, so it's safe for multiple threads to race to create it.
+                    _standardRouteCache = CreateStandardRouteCache();
+                }
+
+                return _standardRouteCache;
+            }
+        }
 
         protected AmbiguousMatchException CreateAmbiguousActionMatchException(IEnumerable<MethodInfo> ambiguousMethods, string actionName)
         {
@@ -83,16 +113,6 @@ namespace System.Web.Mvc
             return exceptionMessageBuilder.ToString();
         }
 
-        private bool IsValidActionMethodNoDirectRoute(MethodInfo methodInfo)
-        {
-            return IsValidActionMethod(methodInfo) && !HasDirectRoutes(methodInfo);
-        }
-
-        private bool IsValidActionMethodWithDirectRoute(MethodInfo methodInfo)
-        {
-            return IsValidActionMethod(methodInfo) && HasDirectRoutes(methodInfo);
-        }
-
         private static bool IsMethodDecoratedWithAliasingAttribute(MethodInfo methodInfo)
         {
             return methodInfo.IsDefined(typeof(ActionNameSelectorAttribute), true /* inherit */);
@@ -107,53 +127,33 @@ namespace System.Web.Mvc
             return methodName;
         }
 
-        // Does this method have any direct routes on it?
-        // This does not include a route attribute on the controller itself.
-        private bool HasDirectRoutes(MethodInfo method)
+        private StandardRouteActionMethodCache CreateStandardRouteCache()
         {
-            // Inherited actions should not inherit the Route attributes.
-            // Only check the attribute on declared actions.
-            bool isDeclaredAction = method.DeclaringType == ControllerType;
-            return isDeclaredAction && (method.GetCustomAttributes(typeof(IDirectRouteFactory), inherit: false).Any()
-                || method.GetCustomAttributes(typeof(IRouteInfoProvider), inherit: false).Any());
-        }
+            var cache = new StandardRouteActionMethodCache();
+            cache.AliasedMethods = StandardRouteMethods.Where(IsMethodDecoratedWithAliasingAttribute).ToArray();
+            cache.NonAliasedMethods = StandardRouteMethods
+                .Except(cache.AliasedMethods)
+                .ToLookup(GetCanonicalMethodName, StringComparer.OrdinalIgnoreCase);
 
-        private void PopulateLookupTables()
-        {
-            MethodInfo[] allMethods = ControllerType.GetMethods(BindingFlags.InvokeMethod | BindingFlags.Instance | BindingFlags.Public);
-            MethodInfo[] actionMethods = Array.FindAll(allMethods, IsValidActionMethodNoDirectRoute);
-
-            if (_hasRouteAttributeOnController)
-            {
-                // Short circuit these tables when there's a direct route attribute on the controller, none of these
-                // will be reachable by-name.
-                AliasedMethods = _emptyMethodInfo;
-                NonAliasedMethods = _emptyMethodInfoLookup;
-            }
-            else
-            {
-                AliasedMethods = Array.FindAll(actionMethods, IsMethodDecoratedWithAliasingAttribute);
-                NonAliasedMethods = actionMethods.Except(AliasedMethods).ToLookup(GetCanonicalMethodName, StringComparer.OrdinalIgnoreCase);
-            }
-
-            DirectRouteMethods = Array.FindAll(allMethods, IsValidActionMethodWithDirectRoute);
-            StandardRouteMethods = actionMethods;
+            return cache;
         }
 
         protected List<MethodInfo> FindActionMethods(ControllerContext controllerContext, string actionName)
         {
             List<MethodInfo> matches = new List<MethodInfo>();
 
+            var cache = StandardRouteCache;
+
             // Performance sensitive, so avoid foreach
-            for (int i = 0; i < AliasedMethods.Length; i++)
+            for (int i = 0; i < cache.AliasedMethods.Length; i++)
             {
-                MethodInfo method = AliasedMethods[i];
+                MethodInfo method = cache.AliasedMethods[i];
                 if (IsMatchingAliasedMethod(method, controllerContext, actionName))
                 {
                     matches.Add(method);
                 }
             }
-            matches.AddRange(NonAliasedMethods[actionName]);
+            matches.AddRange(cache.NonAliasedMethods[actionName]);
             RunSelectionFilters(controllerContext, matches);
             return matches;
         }
@@ -280,6 +280,13 @@ namespace System.Web.Mvc
                 default:
                     throw CreateAmbiguousActionMatchException(finalMethods, actionName);
             }
+        }
+
+        private class StandardRouteActionMethodCache
+        {
+            public MethodInfo[] AliasedMethods { get; set; }
+
+            public ILookup<string, MethodInfo> NonAliasedMethods { get; set; }
         }
     }
 }

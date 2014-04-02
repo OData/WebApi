@@ -6,6 +6,9 @@ namespace System.Web.Mvc.Async
 {
     public class ReflectedAsyncControllerDescriptor : ControllerDescriptor
     {
+        internal static readonly Func<Type, ControllerDescriptor> DefaultDescriptorFactory =
+            (type) => new ReflectedAsyncControllerDescriptor(type);
+
         private static readonly ActionDescriptor[] _emptyCanonicalActions = new ActionDescriptor[0];
 
         private readonly Type _controllerType;

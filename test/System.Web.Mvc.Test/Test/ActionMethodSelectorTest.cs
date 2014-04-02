@@ -137,6 +137,10 @@ namespace System.Web.Mvc.Test
             Type controllerType = typeof(WithRoutingAttributeController);
             ActionMethodSelector selector = new ActionMethodSelector(controllerType);
 
+            // This simulates what AttributeRoutingMapper will do
+            selector.StandardRouteMethods.Remove(controllerType.GetMethod("ActionWithoutRoute"));
+            selector.StandardRouteMethods.Remove(controllerType.GetMethod("DirectRouteOnly"));
+
             // Act
             MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "Action");
 
@@ -151,6 +155,10 @@ namespace System.Web.Mvc.Test
             // Arrange
             Type controllerType = typeof(WithRoutingAttributeController);
             ActionMethodSelector selector = new ActionMethodSelector(controllerType);
+
+            // This simulates what AttributeRoutingMapper will do
+            selector.StandardRouteMethods.Remove(controllerType.GetMethod("ActionWithoutRoute"));
+            selector.StandardRouteMethods.Remove(controllerType.GetMethod("DirectRouteOnly"));
 
             // Act
             MethodInfo matchedMethod = selector.FindActionMethod(new ControllerContext(), "DirectRouteOnly");

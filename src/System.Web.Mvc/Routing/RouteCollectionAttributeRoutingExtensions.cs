@@ -44,5 +44,62 @@ namespace System.Web.Mvc
 
             AttributeRoutingMapper.MapAttributeRoutes(routes, constraintResolver);
         }
+
+        /// <summary>
+        /// Maps the attribute-defined routes for the application.
+        /// </summary>
+        /// <param name="routes"></param>
+        /// <param name="directRouteProvider">
+        /// The <see cref="IDirectRouteProvider"/> to use for mapping routes.
+        /// </param>
+        public static void MapMvcAttributeRoutes(
+            this RouteCollection routes,
+            IDirectRouteProvider directRouteProvider)
+        {
+            if (routes == null)
+            {
+                throw new ArgumentNullException("routes");
+            }
+
+            if (directRouteProvider == null)
+            {
+                throw new ArgumentNullException("directRouteProvider");
+            }
+
+            AttributeRoutingMapper.MapAttributeRoutes(routes, new DefaultInlineConstraintResolver(), directRouteProvider);
+        }
+
+        /// <summary>
+        /// Maps the attribute-defined routes for the application.
+        /// </summary>
+        /// <param name="routes"></param>
+        /// <param name="constraintResolver">
+        /// The <see cref="IInlineConstraintResolver"/> to use for resolving inline constraints in route templates.
+        /// </param>
+        /// <param name="directRouteProvider">
+        /// The <see cref="IDirectRouteProvider"/> to use for mapping routes.
+        /// </param>
+        public static void MapMvcAttributeRoutes(
+            this RouteCollection routes,
+            IInlineConstraintResolver constraintResolver,
+            IDirectRouteProvider directRouteProvider)
+        {
+            if (routes == null)
+            {
+                throw new ArgumentNullException("routes");
+            }
+
+            if (constraintResolver == null)
+            {
+                throw new ArgumentNullException("constraintResolver");
+            }
+
+            if (directRouteProvider == null)
+            {
+                throw new ArgumentNullException("directRouteProvider");
+            }
+
+            AttributeRoutingMapper.MapAttributeRoutes(routes, constraintResolver, directRouteProvider);
+        }
     }
 }

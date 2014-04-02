@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace System.Web.Mvc.Async
 {
-    public class ReflectedAsyncActionDescriptor : AsyncActionDescriptor
+    public class ReflectedAsyncActionDescriptor : AsyncActionDescriptor, IMethodInfoActionDescriptor
     {
         private readonly object _executeTag = new object();
 
@@ -74,6 +74,11 @@ namespace System.Web.Mvc.Async
         public override ControllerDescriptor ControllerDescriptor
         {
             get { return _controllerDescriptor; }
+        }
+
+        public MethodInfo MethodInfo
+        {
+            get { return AsyncMethodInfo; }
         }
 
         public override string UniqueId

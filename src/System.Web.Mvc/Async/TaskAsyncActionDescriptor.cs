@@ -16,7 +16,7 @@ namespace System.Web.Mvc.Async
     /// <summary>
     /// When an action method returns either Task or Task{T} the TaskAsyncActionDescriptor provides information about the action.
     /// </summary>
-    public class TaskAsyncActionDescriptor : AsyncActionDescriptor
+    public class TaskAsyncActionDescriptor : AsyncActionDescriptor, IMethodInfoActionDescriptor
     {
         /// <summary>
         /// dictionary to hold methods that can read Task{T}.Result
@@ -72,6 +72,11 @@ namespace System.Web.Mvc.Async
         public override ControllerDescriptor ControllerDescriptor
         {
             get { return _controllerDescriptor; }
+        }
+
+        public MethodInfo MethodInfo
+        {
+            get { return TaskMethodInfo; }
         }
 
         public override string UniqueId

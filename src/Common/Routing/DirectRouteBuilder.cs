@@ -16,6 +16,7 @@ using System.Web.Routing;
 using TActionDescriptor = System.Web.Http.Controllers.HttpActionDescriptor;
 using TParsedRoute = System.Web.Http.Routing.HttpParsedRoute;
 using TResources = System.Web.Http.Properties.SRResources;
+using TRoute = System.Web.Http.Routing.IHttpRoute;
 using TRouteDictionary = System.Collections.Generic.IDictionary<string, object>;
 using TRouteDictionaryConcrete = System.Web.Http.Routing.HttpRouteValueDictionary;
 
@@ -24,6 +25,7 @@ using TRouteDictionaryConcrete = System.Web.Http.Routing.HttpRouteValueDictionar
 using TActionDescriptor = System.Web.Mvc.ActionDescriptor;
 using TParsedRoute = System.Web.Mvc.Routing.ParsedRoute;
 using TResources = System.Web.Mvc.Properties.MvcResources;
+using TRoute = System.Web.Routing.Route;
 using TRouteDictionary = System.Web.Routing.RouteValueDictionary;
 using TRouteDictionaryConcrete = System.Web.Routing.RouteValueDictionary;
 #endif
@@ -234,27 +236,31 @@ namespace System.Web.Mvc.Routing
             }
         }
 
-#if ASPNETWEBAPI
         internal static void ValidateRouteEntry(RouteEntry entry)
         {
             Contract.Assert(entry != null);
 
-            IHttpRoute route = entry.Route;
+            TRoute route = entry.Route;
             Contract.Assert(route != null);
 
-            HttpActionDescriptor[] targetActions = route.GetTargetActionDescriptors();
+            TActionDescriptor[] targetActions = route.GetTargetActionDescriptors();
 
             if (targetActions == null || targetActions.Length == 0)
             {
-                throw new InvalidOperationException(SRResources.DirectRoute_MissingActionDescriptors);
+                throw new InvalidOperationException(TResources.DirectRoute_MissingActionDescriptors);
             }
-
+#if ASPNETWEBAPI
             if (route.Handler != null)
             {
-                throw new InvalidOperationException(SRResources.DirectRoute_HandlerNotSupported);
+                throw new InvalidOperationException(TResources.DirectRoute_HandlerNotSupported);
             }
-        }
+#else
+            if (route.RouteHandler != null)
+            {
+                throw new InvalidOperationException(TResources.DirectRoute_RouteHandlerNotSupported);
+            }
 #endif
+        }
 
         private static TRouteDictionaryConcrete Copy(TRouteDictionary routeDictionary)
         {

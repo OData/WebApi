@@ -45,8 +45,11 @@ namespace System.Web.Routing.Test
         public static void AddDirectRouteFromController<T>(SubRouteCollection collector)
         {
             var controllerType = typeof(T);
-            AttributeRoutingMapper.AddRouteEntries(collector, new Type[] { controllerType },
-                new DefaultInlineConstraintResolver());
+            AttributeRoutingMapper.AddRouteEntries(
+                collector, 
+                new Type[] { controllerType },
+                new DefaultInlineConstraintResolver(),
+                new DefaultDirectRouteProvider());
         }
 
         public static void AddDirectRouteMatches(this RouteData routeData, Func<RouteBase, RouteData, bool> selector = null)

@@ -38,6 +38,8 @@ namespace System.Web.Mvc.Async
             get { return _allowLegacyAsyncActions; }
         }
 
+        // This method and GetMethodInfo need to stay in sync, we need to be able to
+        // get a method info from each type of action descriptor we create.
         internal ActionDescriptorCreator GetActionDescriptorDelegate(MethodInfo entryMethod)
         {
             // Does the action return a Task?

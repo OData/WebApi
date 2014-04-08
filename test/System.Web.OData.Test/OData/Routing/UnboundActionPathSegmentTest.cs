@@ -25,7 +25,7 @@ namespace System.Web.OData.Routing
             builder.Action("MyAction").Returns<string>();
             builder.Action("ActionWithoutReturn");
             _model = builder.GetEdmModel();
-            _container = _model.EntityContainers().Single();
+            _container = _model.EntityContainer;
         }
 
         [Fact]
@@ -149,7 +149,7 @@ namespace System.Web.OData.Routing
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("System.Web.OData.Routing.MyCustomer", result.ElementType.FullName());
+            Assert.Equal("System.Web.OData.Routing.MyCustomer", result.EntityType().FullName());
         }
 
         [Fact]

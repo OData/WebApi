@@ -281,7 +281,12 @@ namespace System.Web.OData.Query.Expressions
         {
             // Arrange
             Customer customer = new Customer();
-            SelectExpandClause selectExpand = new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, "Orders", _model.Customer, _model.Customers);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$select", select }, { "$expand", "Orders" } });
+            SelectExpandClause selectExpand = parser.ParseSelectAndExpand();
             Expression source = Expression.Constant(customer);
 
             // Act
@@ -299,7 +304,9 @@ namespace System.Web.OData.Query.Expressions
         {
             // Arrange
             Customer customer = new Customer();
-            SelectExpandClause selectExpand = new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand("ID,Orders", "Orders", _model.Customer, _model.Customers);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
+                new Dictionary<string, string> { { "$select", "ID,Orders" }, { "$expand", "Orders" } });
+            SelectExpandClause selectExpand = parser.ParseSelectAndExpand();
             Expression source = Expression.Constant(customer);
 
             // Act
@@ -317,7 +324,9 @@ namespace System.Web.OData.Query.Expressions
         {
             // Arrange
             Customer customer = new Customer { Name = "OData" };
-            SelectExpandClause selectExpand = new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand("Name,Orders", "Orders", _model.Customer, _model.Customers);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
+                new Dictionary<string, string> { { "$select", "Name,Orders" }, { "$expand", "Orders" } });
+            SelectExpandClause selectExpand = parser.ParseSelectAndExpand();
             Expression source = Expression.Constant(customer);
 
             // Act
@@ -335,8 +344,10 @@ namespace System.Web.OData.Query.Expressions
         {
             // Arrange
             Customer customer = new Customer { ID = 42, FirstName = "OData" };
-            SelectExpandClause selectExpand =
-                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, null, _model.Customer, _model.Customers);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
+                new Dictionary<string, string> { { "$select", select } });
+
+            SelectExpandClause selectExpand = parser.ParseSelectAndExpand();
             Expression source = Expression.Constant(customer);
 
             // Act
@@ -354,8 +365,10 @@ namespace System.Web.OData.Query.Expressions
         {
             // Arrange
             Customer customer = new Customer { ID = 42, City = "any" };
-            SelectExpandClause selectExpand =
-                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, null, _model.Customer, _model.Customers);
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
+                new Dictionary<string, string> { { "$select", select } });
+            SelectExpandClause selectExpand = parser.ParseSelectAndExpand();
             Expression source = Expression.Constant(customer);
 
             // Act

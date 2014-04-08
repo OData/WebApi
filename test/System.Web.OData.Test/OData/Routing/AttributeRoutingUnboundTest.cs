@@ -88,7 +88,8 @@ namespace System.Web.OData.Routing
             // Arrange
             const int CustomerId = 408;// a magic customer id, just for test
             const string OrderName = "OrderName 5";
-            string requestUri = "http://localhost/GetConventionOrderByCustomerIdAndOrderName(CustomerId=" + CustomerId + ",OrderName=" + OrderName + ")";
+            string requestUri = "http://localhost/GetConventionOrderByCustomerIdAndOrderName(CustomerId=" + CustomerId + ",OrderName='" + OrderName + "')";
+
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
 
@@ -196,8 +197,9 @@ namespace System.Web.OData.Routing
             return ModelDataBase.Instance.Customers.Where(c => c.ID == CustomerId).FirstOrDefault();
         }
 
+        // TODO: Remove [FromODataUri] after issue 1734 is fixed
         [ODataRoute("GetConventionOrderByCustomerIdAndOrderName(CustomerId={CustomerId},OrderName={OrderName})")]
-        public ConventionOrder GetConventionOrderByCustomerIdAndOrderName(int CustomerId, string OrderName)
+        public ConventionOrder GetConventionOrderByCustomerIdAndOrderName(int CustomerId, [FromODataUri]string OrderName)
         {
             ConventionCustomer customer = ModelDataBase.Instance.Customers.Where(c => c.ID == CustomerId).FirstOrDefault();
             return customer.Orders.Where(o => o.OrderName == OrderName).FirstOrDefault();

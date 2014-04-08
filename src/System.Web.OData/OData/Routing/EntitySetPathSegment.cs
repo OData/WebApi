@@ -83,7 +83,7 @@ namespace System.Web.OData.Routing
         {
             if (EntitySet != null)
             {
-                return EntitySet.ElementType.GetCollection();
+                return EntitySet.EntityType().GetCollection();
             }
             return null;
         }

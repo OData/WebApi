@@ -27,7 +27,7 @@ namespace System.Web.OData.Builder.Conventions
             convention.Apply(paintAction, builder);
 
             IEdmModel model = builder.GetEdmModel();
-            var vehiclesEdmSet = model.EntityContainers().Single().FindEntitySet("vehicles");
+            var vehiclesEdmSet = model.EntityContainer.FindEntitySet("vehicles");
             var carEdmType = model.FindDeclaredType("System.Web.OData.Builder.TestModels.Car") as IEdmEntityType;
             var paintEdmAction =
                 model.GetAvailableProcedures(
@@ -64,7 +64,7 @@ namespace System.Web.OData.Builder.Conventions
 
             // Assert
             IEdmModel model = builder.GetEdmModel();
-            var paintEdmAction = model.EntityContainers().Single().Elements.OfType<IEdmActionImport>().Single();
+            var paintEdmAction = model.EntityContainer.Elements.OfType<IEdmActionImport>().Single();
 
             ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(paintEdmAction);
 

@@ -21,6 +21,7 @@ namespace System.Web.OData.Query
     {
         private OrderByClause _orderByClause;
         private IList<OrderByNode> _orderByNodes;
+        private ODataQueryOptionParser _queryOptionParser;
 
         /// <summary>
         /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and 
@@ -28,7 +29,32 @@ namespace System.Web.OData.Query
         /// </summary>
         /// <param name="rawValue">The raw value for $orderby query. It can be null or empty.</param>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
-        public OrderByQueryOption(string rawValue, ODataQueryContext context)
+        /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
+        public OrderByQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser)
+        {
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            if (String.IsNullOrEmpty(rawValue))
+            {
+                throw Error.ArgumentNullOrEmpty("rawValue");
+            }
+
+            if (queryOptionParser == null)
+            {
+                throw Error.ArgumentNull("queryOptionParser");
+            }
+
+            Context = context;
+            RawValue = rawValue;
+            Validator = new OrderByQueryValidator();
+            _queryOptionParser = queryOptionParser;
+        }
+
+        // This constructor is intended for unit testing only.
+        internal OrderByQueryOption(string rawValue, ODataQueryContext context)
         {
             if (context == null)
             {
@@ -43,6 +69,11 @@ namespace System.Web.OData.Query
             Context = context;
             RawValue = rawValue;
             Validator = new OrderByQueryValidator();
+            _queryOptionParser = new ODataQueryOptionParser(
+                context.Model,
+                context.ElementType,
+                context.NavigationSource,
+                new Dictionary<string, string> { { "$orderby", rawValue } });
         }
 
         /// <summary>
@@ -84,7 +115,7 @@ namespace System.Web.OData.Query
             {
                 if (_orderByClause == null)
                 {
-                    _orderByClause = ODataUriParser.ParseOrderBy(RawValue, Context.Model, Context.ElementType);
+                    _orderByClause = _queryOptionParser.ParseOrderBy();
                 }
                 return _orderByClause;
             }

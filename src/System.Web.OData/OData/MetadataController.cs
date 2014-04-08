@@ -42,7 +42,7 @@ namespace System.Web.OData
         {
             IEdmModel model = GetModel();
             ODataServiceDocument serviceDocument = new ODataServiceDocument();
-            IEdmEntityContainer container = model.EntityContainers().Single();
+            IEdmEntityContainer container = model.EntityContainer;
 
             // Add Entitysets into service document
             serviceDocument.EntitySets = container.EntitySets().Select(

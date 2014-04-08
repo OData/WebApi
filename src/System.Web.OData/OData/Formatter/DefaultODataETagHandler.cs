@@ -80,7 +80,7 @@ namespace System.Web.OData.Formatter
                 byte[] bytes = Convert.FromBase64String(rawValue);
                 string valueString = Encoding.UTF8.GetString(bytes);
                 object obj = ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V4);
-                if (obj is ODataUriNullValue)
+                if (obj is ODataNullValue)
                 {
                     obj = null;
                 }

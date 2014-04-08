@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 
 namespace System.Web.OData.Query
 {
@@ -14,13 +16,38 @@ namespace System.Web.OData.Query
     public class CountQueryOption
     {
         private bool? _value;
+        private ODataQueryOptionParser _queryOptionParser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CountQueryOption" /> class.
         /// </summary>
         /// <param name="rawValue">The raw value for the $count query option.</param>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the query context.</param>
-        public CountQueryOption(string rawValue, ODataQueryContext context)
+        /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
+        public CountQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser)
+        {
+            if (String.IsNullOrEmpty(rawValue))
+            {
+                throw Error.ArgumentNullOrEmpty("rawValue");
+            }
+
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            if (queryOptionParser == null)
+            {
+                throw Error.ArgumentNull("queryOptionParser");
+            }
+
+            Context = context;
+            RawValue = rawValue;
+            _queryOptionParser = queryOptionParser;
+        }
+
+        // This constructor is intended for unit testing only.
+        internal CountQueryOption(string rawValue, ODataQueryContext context)
         {
             if (String.IsNullOrEmpty(rawValue))
             {
@@ -34,6 +61,11 @@ namespace System.Web.OData.Query
 
             Context = context;
             RawValue = rawValue;
+            _queryOptionParser = new ODataQueryOptionParser(
+                context.Model,
+                context.ElementType,
+                context.NavigationSource,
+                new Dictionary<string, string> { { "$count", rawValue } });
         }
 
         /// <summary>
@@ -55,19 +87,10 @@ namespace System.Web.OData.Query
             {
                 if (_value == null)
                 {
-                    // $count value is case-insensitive.
-                    bool result;
-                    if (Boolean.TryParse(RawValue, out result))
-                    {
-                        _value = result;
-                    }
-                    else
-                    {
-                        throw new ODataException(Error.Format(SRResources.InvalidCountOption, RawValue));
-                    }
+                    _value = _queryOptionParser.ParseCount();
                 }
 
-                Contract.Assert(_value != null);
+                Contract.Assert(_value.HasValue);
                 return _value.Value;
             }
         }

@@ -64,7 +64,7 @@ namespace System.Web.OData.Formatter.Serialization
             IODataResponseMessage response = CreateResponse();
             ODataMessageWriterSettings settings = CreateJsonLightSettings();
             IEdmModel model = CreateModel();
-            IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().First();
+            IEdmEntitySet entitySet = model.EntityContainer.EntitySets().First();
 
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
@@ -95,7 +95,7 @@ namespace System.Web.OData.Formatter.Serialization
             IODataResponseMessage response = CreateResponse();
             ODataMessageWriterSettings settings = CreateJsonLightSettings();
             IEdmModel model = CreateModel();
-            IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().First();
+            IEdmEntitySet entitySet = model.EntityContainer.EntitySets().First();
 
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
@@ -134,12 +134,12 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 Url = CreateFakeUri()
             };
-            IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().First();
+            IEdmEntitySet entitySet = model.EntityContainer.EntitySets().First();
 
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => writer.WriteEntityReferenceLink(link, entitySet, null));
+                Assert.DoesNotThrow(() => writer.WriteEntityReferenceLink(link));
             }
         }
 
@@ -154,14 +154,16 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 Url = CreateFakeUri()
             };
-            IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().First();
+            IEdmEntitySet entitySet = model.EntityContainer.EntitySets().First();
+            Assert.NotNull(entitySet);
             IEdmNavigationProperty navigationProperty =
-                model.EntityContainers().Single().EntitySets().First().NavigationPropertyBindings.First().NavigationProperty;
+                model.EntityContainer.EntitySets().First().NavigationPropertyBindings.First().NavigationProperty;
+            Assert.NotNull(navigationProperty);
 
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => writer.WriteEntityReferenceLink(link, entitySet, navigationProperty));
+                Assert.DoesNotThrow(() => writer.WriteEntityReferenceLink(link));
             }
         }
 
@@ -172,9 +174,11 @@ namespace System.Web.OData.Formatter.Serialization
 
         private static ODataMessageWriterSettings CreateJsonLightSettings()
         {
-            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
+            };
             settings.SetContentType(ODataFormat.Json);
-            settings.SetServiceDocumentUri(CreateFakeUri());
             return settings;
         }
 

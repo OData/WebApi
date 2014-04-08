@@ -31,9 +31,11 @@ namespace System.Web.OData.Query
         [Fact]
         public void Ctor_ThrowsArgument_IfBothSelectAndExpandAreNull()
         {
+            // Arrange
             _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext context = new ODataQueryContext(_model.Model, typeof(Customer));
 
+            // Act & Assert
             Assert.Throws<ArgumentException>(
                 () => new SelectExpandQueryOption(select: null, expand: null, context: context),
                 "'select' and 'expand' cannot be both null or empty.");
@@ -42,12 +44,26 @@ namespace System.Web.OData.Query
         [Fact]
         public void Ctor_ThrowsArgument_IfContextIsNotForAnEntityType()
         {
+            // Arrange
             ODataQueryContext context = new ODataQueryContext(_model.Model, typeof(int));
 
+            // Act & Assert
             Assert.ThrowsArgument(
                 () => new SelectExpandQueryOption(select: "Name", expand: "Name", context: context),
                 "context",
                 "The type 'Edm.Int32' is not an entity type. Only entity types support $select and $expand.");
+        }
+
+        [Fact]
+        public void Ctor_ThrowsArgumentNull_QueryOptionParser()
+        {
+            // Arrange
+            ODataQueryContext context = new ODataQueryContext(_model.Model, typeof(int));
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(
+                () => new SelectExpandQueryOption("select", "expand", context, null),
+                "queryOptionParser");
         }
 
         [Fact]
@@ -161,7 +177,6 @@ namespace System.Web.OData.Query
         [Theory]
         [InlineData("IDD", null, "Could not find a property named 'IDD' on type 'NS.Customer'.")]
         [InlineData("ID, Namee", null, "Could not find a property named 'Namee' on type 'NS.Customer'.")]
-        [InlineData("NSSS.Name", null, "Could not find a property named 'NSSS.Name' on type 'NS.Customer'.")]
         [InlineData("NS+Name", null, "Syntax error: character '+' is not valid at position 2 in 'NS+Name'.")]
         [InlineData("NS.Customerrr/SpecialCustomerProperty", null, "The type 'NS.Customerrr' is not defined in the model.")]
         public void SelectExpandCaluse_ThrowsODataException_InvalidQuery(string select, string expand, string error)

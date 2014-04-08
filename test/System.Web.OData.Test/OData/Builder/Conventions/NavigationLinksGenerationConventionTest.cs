@@ -72,7 +72,7 @@ namespace System.Web.OData.Builder.Conventions
             builder.EntitySet<Manufacturer>("manufacturers");
 
             IEdmModel model = builder.GetEdmModel();
-            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainers().Single().FindEntitySet("vehicles");
+            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainer.FindEntitySet("vehicles");
             IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
@@ -130,7 +130,7 @@ namespace System.Web.OData.Builder.Conventions
             builder.EntitySet<Manufacturer>("manufacturers");
 
             IEdmModel model = builder.GetEdmModel();
-            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainers().Single().FindEntitySet("vehicles");
+            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainer.FindEntitySet("vehicles");
             IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
@@ -160,7 +160,7 @@ namespace System.Web.OData.Builder.Conventions
             builder.EntitySet<Manufacturer>("manufacturers");
 
             IEdmModel model = builder.GetEdmModel();
-            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainers().Single().FindEntitySet("vehicles");
+            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainer.FindEntitySet("vehicles");
             IEdmEntityType sportbikeType = model.AssertHasEntityType(typeof(SportBike));
             IEdmNavigationProperty motorcycleManufacturerProperty = sportbikeType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 

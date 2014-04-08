@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Web.Http;
@@ -18,7 +19,7 @@ namespace System.Web.OData.Query
     public class SelectExpandQueryOption
     {
         private SelectExpandClause _selectExpandClause;
-        private IEdmEntityType _entityType;
+        private ODataQueryOptionParser _queryOptionParser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SelectExpandQueryOption"/> class.
@@ -26,7 +27,40 @@ namespace System.Web.OData.Query
         /// <param name="select">The $select query parameter value.</param>
         /// <param name="expand">The $select query parameter value.</param>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>
-        public SelectExpandQueryOption(string select, string expand, ODataQueryContext context)
+        /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
+        public SelectExpandQueryOption(string select, string expand, ODataQueryContext context,
+            ODataQueryOptionParser queryOptionParser)
+        {
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            if (String.IsNullOrEmpty(select) && String.IsNullOrEmpty(expand))
+            {
+                throw Error.Argument(SRResources.SelectExpandEmptyOrNull);
+            }
+
+            if (queryOptionParser == null)
+            {
+                throw Error.ArgumentNull("queryOptionParser");
+            }
+
+            IEdmEntityType entityType = context.ElementType as IEdmEntityType;
+            if (entityType == null)
+            {
+                throw Error.Argument("context", SRResources.SelectNonEntity, context.ElementType.ToTraceString());
+            }
+
+            Context = context;
+            RawSelect = select;
+            RawExpand = expand;
+            Validator = new SelectExpandQueryValidator();
+            _queryOptionParser = queryOptionParser;
+        }
+
+        // This constructor is intended for unit testing only.
+        internal SelectExpandQueryOption(string select, string expand, ODataQueryContext context)
         {
             if (context == null)
             {
@@ -44,12 +78,15 @@ namespace System.Web.OData.Query
                 throw Error.Argument("context", SRResources.SelectNonEntity, context.ElementType.ToTraceString());
             }
 
-            _entityType = entityType;
-
             Context = context;
             RawSelect = select;
             RawExpand = expand;
             Validator = new SelectExpandQueryValidator();
+            _queryOptionParser = new ODataQueryOptionParser(
+                context.Model,
+                context.ElementType,
+                context.NavigationSource,
+                new Dictionary<string, string> { { "$select", select }, { "$expand", expand } });
         }
 
         /// <summary>
@@ -81,12 +118,7 @@ namespace System.Web.OData.Query
             {
                 if (_selectExpandClause == null)
                 {
-                    ODataUriParser uriParser = new ODataUriParser(Context.Model, serviceRoot: null);
-                    _selectExpandClause = uriParser.ParseSelectAndExpand(
-                        RawSelect,
-                        RawExpand,
-                        _entityType,
-                        Context.NavigationSource as IEdmEntitySetBase);
+                    _selectExpandClause = _queryOptionParser.ParseSelectAndExpand();
                 }
 
                 return _selectExpandClause;

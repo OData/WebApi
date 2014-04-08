@@ -56,5 +56,19 @@ namespace System.Web.OData
                 }
             }
         }
+
+        public static string ReadContentId(HttpResponseMessage response)
+        {
+            Contract.Assert(response != null);
+
+            string contentId = String.Empty;
+            IEnumerable<string> values;
+            if (response.Headers.TryGetValues(ContentId, out values))
+            {
+                contentId = values.FirstOrDefault();
+            }
+
+            return contentId ?? String.Empty;
+        }
     }
 }

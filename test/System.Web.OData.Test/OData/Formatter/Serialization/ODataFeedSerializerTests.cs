@@ -32,8 +32,8 @@ namespace System.Web.OData.Formatter.Serialization
         public ODataFeedSerializerTests()
         {
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
-            _customerSet = _model.FindDeclaredEntityContainer("Default.Container").FindEntitySet("Customers");
-            _model.SetAnnotationValue(_customerSet.ElementType, new ClrTypeAnnotation(typeof(Customer)));
+            _customerSet = _model.EntityContainer.FindEntitySet("Customers");
+            _model.SetAnnotationValue(_customerSet.EntityType(), new ClrTypeAnnotation(typeof(Customer)));
             _customers = new[] {
                 new Customer()
                 {
@@ -427,11 +427,12 @@ namespace System.Web.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().NextLink = nextLink;
             var result = new object[0];
-            IEdmNavigationProperty navProp = new Mock<IEdmNavigationProperty>().Object;
+            IEdmNavigationProperty navProp = _customerSet.EntityType().NavigationProperties().First();
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
             EntityInstanceContext entity = new EntityInstanceContext
             {
-                SerializerContext = new ODataSerializerContext { Request = request, EntitySet = _customerSet }
+                SerializerContext =
+                    new ODataSerializerContext { Request = request, EntitySet = _customerSet, Model = _model }
             };
             ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, navProp);
 
@@ -450,11 +451,12 @@ namespace System.Web.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().TotalCount = 42;
             var result = new object[0];
-            IEdmNavigationProperty navProp = new Mock<IEdmNavigationProperty>().Object;
+            IEdmNavigationProperty navProp = _customerSet.EntityType().NavigationProperties().First();
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
             EntityInstanceContext entity = new EntityInstanceContext
             {
-                SerializerContext = new ODataSerializerContext { Request = request, EntitySet = _customerSet }
+                SerializerContext =
+                    new ODataSerializerContext { Request = request, EntitySet = _customerSet, Model = _model }
             };
             ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, navProp);
 

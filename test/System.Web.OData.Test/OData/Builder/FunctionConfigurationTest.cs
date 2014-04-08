@@ -281,7 +281,6 @@ namespace System.Web.OData.Builder
             IEdmFunction function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
             Assert.False(function.IsComposable);
             Assert.True(function.IsBound);
-            Assert.True(model.IsAlwaysBindable(function));
             Assert.Equal("FunctionName", function.Name);
             Assert.NotNull(function.ReturnType);
             Assert.Equal(1, function.Parameters.Count());
@@ -302,19 +301,21 @@ namespace System.Web.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            IEdmEntityContainer container = Assert.Single(model.EntityContainers());
+            IEdmEntityContainer container = model.EntityContainer;
+            Assert.NotNull(container);
             Assert.Equal(1, container.Elements.OfType<IEdmFunctionImport>().Count());
             Assert.Equal(1, container.Elements.OfType<IEdmEntitySet>().Count());
             IEdmFunctionImport functionImport = Assert.Single(container.Elements.OfType<IEdmFunctionImport>());
             IEdmFunction function = functionImport.Function;
             Assert.False(function.IsComposable);
             Assert.False(function.IsBound);
-            Assert.False(model.IsAlwaysBindable(function));
             Assert.Equal("FunctionName", function.Name);
             Assert.NotNull(function.ReturnType);
             Assert.NotNull(functionImport.EntitySet);
             Assert.Equal("Customers", (functionImport.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.Name);
-            Assert.Equal(typeof(Customer).FullName, (functionImport.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.ElementType.FullName());
+            Assert.Equal(
+                typeof(Customer).FullName,
+                (functionImport.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.EntityType().FullName());
             Assert.Empty(function.Parameters);
         }
 
@@ -336,7 +337,6 @@ namespace System.Web.OData.Builder
             Assert.Equal(1, model.SchemaElements.OfType<IEdmFunction>().Count());
             IEdmFunction function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
             Assert.True(function.IsBound);
-            Assert.False(model.IsAlwaysBindable(function));
         }
 
         [Fact]
@@ -424,7 +424,7 @@ namespace System.Web.OData.Builder
 
             // Act
             IEdmModel model = builder.GetEdmModel();
-            IEdmOperationImport functionImport = model.EntityContainers().First().OperationImports().OfType<IEdmFunctionImport>().Single();
+            IEdmOperationImport functionImport = model.EntityContainer.OperationImports().OfType<IEdmFunctionImport>().Single();
             Assert.NotNull(functionImport);
             OperationTitleAnnotation functionTitleAnnotation = model.GetOperationTitleAnnotation(functionImport.Operation);
 

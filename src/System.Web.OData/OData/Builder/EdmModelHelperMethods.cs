@@ -7,9 +7,7 @@ using System.Reflection;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
-using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Expressions;
@@ -41,10 +39,6 @@ namespace System.Web.OData.Builder
 
             // build the map from IEdmEntityType to IEdmFunctionImport
             model.SetAnnotationValue<BindableProcedureFinder>(model, new BindableProcedureFinder(model));
-
-            // set the data service version annotations.
-            model.SetDataServiceVersion(builder.DataServiceVersion);
-            model.SetMaxDataServiceVersion(builder.MaxDataServiceVersion);
 
             return model;
         }
@@ -209,7 +203,6 @@ namespace System.Web.OData.Builder
                 AddProcedureParameters(operation, procedure, edmTypeMap);
                 if (procedure.IsBindable)
                 {
-                    model.SetIsAlwaysBindable(operation, procedure.IsAlwaysBindable);
                     AddProcedureLinkBuilder(model, operation, procedure);
                     ValidateProcedureEntitySetPath(model, operationImport, procedure);
                 }

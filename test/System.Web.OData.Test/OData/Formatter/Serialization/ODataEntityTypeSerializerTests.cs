@@ -43,7 +43,7 @@ namespace System.Web.OData.Formatter.Serialization
             _model.SetAnnotationValue<ClrTypeAnnotation>(_model.FindType("Default.Customer"), new ClrTypeAnnotation(typeof(Customer)));
             _model.SetAnnotationValue<ClrTypeAnnotation>(_model.FindType("Default.Order"), new ClrTypeAnnotation(typeof(Order)));
 
-            _customerSet = _model.FindDeclaredEntityContainer("Default.Container").FindEntitySet("Customers");
+            _customerSet = _model.EntityContainer.FindEntitySet("Customers");
             _customer = new Customer()
             {
                 FirstName = "Foo",
@@ -56,7 +56,7 @@ namespace System.Web.OData.Formatter.Serialization
             _serializer = new ODataEntityTypeSerializer(_serializerProvider);
             _path = new ODataPath(new EntitySetPathSegment(_customerSet));
             _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, Model = _model, Path = _path };
-            _entityInstanceContext = new EntityInstanceContext(_writeContext, _customerSet.ElementType.AsReference(), _customer);
+            _entityInstanceContext = new EntityInstanceContext(_writeContext, _customerSet.EntityType().AsReference(), _customer);
         }
 
         [Fact]
@@ -290,9 +290,13 @@ namespace System.Web.OData.Formatter.Serialization
         public void WriteObjectInline_ExpandsUsingInnerSerializerUsingRightContext_ExpandedNavigationProperties()
         {
             // Arrange
-            IEdmEntityType customerType = _customerSet.ElementType;
+            IEdmEntityType customerType = _customerSet.EntityType();
             IEdmNavigationProperty ordersProperty = customerType.NavigationProperties().Single(p => p.Name == "Orders");
-            SelectExpandClause selectExpandClause = new ODataUriParser(_model, serviceRoot: null).ParseSelectAndExpand("Orders", "Orders", customerType, _customerSet);
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model, customerType, _customerSet,
+                new Dictionary<string, string> { { "$select", "Orders" }, { "$expand", "Orders" } });
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
+
             SelectExpandNode selectExpandNode = new SelectExpandNode
             {
                 ExpandedNavigationProperties = 
@@ -334,7 +338,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void WriteObjectInline_CanExpandNavigationProperty_ContainingEdmObject()
         {
             // Arrange
-            IEdmEntityType customerType = _customerSet.ElementType;
+            IEdmEntityType customerType = _customerSet.EntityType();
             IEdmNavigationProperty ordersProperty = customerType.NavigationProperties().Single(p => p.Name == "Orders");
 
             Mock<IEdmObject> orders = new Mock<IEdmObject>();
@@ -345,7 +349,10 @@ namespace System.Web.OData.Formatter.Serialization
             customer.Setup(c => c.TryGetPropertyValue("Orders", out ordersValue)).Returns(true);
             customer.Setup(c => c.GetEdmType()).Returns(customerType.AsReference());
 
-            SelectExpandClause selectExpandClause = new ODataUriParser(_model, serviceRoot: null).ParseSelectAndExpand("Orders", "Orders", customerType, _customerSet);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model, customerType, _customerSet,
+                new Dictionary<string, string> { { "$select", "Orders" }, { "$expand", "Orders" } });
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
+
             SelectExpandNode selectExpandNode = new SelectExpandNode();
             selectExpandNode.ExpandedNavigationProperties[ordersProperty] = selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand;
 
@@ -443,7 +450,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateEntry_SetsETagToNull_IfModelDontHaveConcurrencyProperty()
         {
             // Arrange
-            IEdmEntitySet orderSet = _model.FindDeclaredEntityContainer("Default.Container").FindEntitySet("Orders");
+            IEdmEntitySet orderSet = _model.EntityContainer.FindEntitySet("Orders");
             Order order = new Order()
             {
                 Name = "Foo",
@@ -451,7 +458,7 @@ namespace System.Web.OData.Formatter.Serialization
                 ID = 10,
             };
             _writeContext.EntitySet = orderSet;
-            _entityInstanceContext = new EntityInstanceContext(_writeContext, orderSet.ElementType.AsReference(), order);
+            _entityInstanceContext = new EntityInstanceContext(_writeContext, orderSet.EntityType().AsReference(), order);
 
             SelectExpandNode selectExpandNode = new SelectExpandNode
             {
@@ -930,7 +937,6 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetActionLinkBuilder(action, linkBuilder);
             annotationsManager.SetIsAlwaysBindable(action);
-            annotationsManager.SetDefaultContainer(container);
             IEdmModel model = CreateFakeModel(annotationsManager);
             UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
 
@@ -989,7 +995,6 @@ namespace System.Web.OData.Formatter.Serialization
                 followsConventions: false);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetActionLinkBuilder(action, linkBuilder);
-            annotationsManager.SetDefaultContainer(container);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
             UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
@@ -1121,7 +1126,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Theory]
         [InlineData(TestODataMetadataLevel.MinimalMetadata)]
         [InlineData(TestODataMetadataLevel.NoMetadata)]
-        public void CreateODataAction_OmitsTarget_WhenFollowingConventions(TestODataMetadataLevel metadataLevel)
+        public void CreateODataAction_OmitsAction_WhenFollowingConventions(TestODataMetadataLevel metadataLevel)
         {
             // Arrange
             IEdmAction action = CreateFakeAction("IgnoreAction", isBindable: true);
@@ -1141,8 +1146,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataAction actualAction = _serializer.CreateODataAction(action, context);
 
             // Assert
-            Assert.NotNull(actualAction);
-            Assert.Null(actualAction.Target);
+            Assert.Null(actualAction);
         }
         
         [Fact]
@@ -1156,7 +1160,6 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmAction action = CreateFakeAction(expectedNamespace, expectedActionName);
 
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetDefaultContainer(container);
             IEdmModel model = CreateFakeModel(annotationsManager);
 
             // Act
@@ -1167,33 +1170,20 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(TestODataMetadataLevel.Default, false, false, false)]
-        [InlineData(TestODataMetadataLevel.Default, false, true, false)]
-        [InlineData(TestODataMetadataLevel.Default, true, false, false)]
-        [InlineData(TestODataMetadataLevel.Default, true, true, false)]
-        [InlineData(TestODataMetadataLevel.FullMetadata, false, false, false)]
-        [InlineData(TestODataMetadataLevel.FullMetadata, false, true, false)]
-        [InlineData(TestODataMetadataLevel.FullMetadata, true, false, false)]
-        [InlineData(TestODataMetadataLevel.FullMetadata, true, true, false)]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata, false, false, false)]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata, false, true, false)]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata, true, false, false)]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata, true, true, true)]
-        [InlineData(TestODataMetadataLevel.NoMetadata, false, false, false)]
-        [InlineData(TestODataMetadataLevel.NoMetadata, false, true, false)]
-        [InlineData(TestODataMetadataLevel.NoMetadata, true, false, false)]
-        [InlineData(TestODataMetadataLevel.NoMetadata, true, true, true)]
-        public void TestShouldOmitAction(TestODataMetadataLevel metadataLevel, bool isAlwaysAvailable,
+        [InlineData(TestODataMetadataLevel.Default, false, false)]
+        [InlineData(TestODataMetadataLevel.Default, true, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, false, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, true, false)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, false, false)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, true, true)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, false, false)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, true, true)]
+        public void TestShouldOmitAction(TestODataMetadataLevel metadataLevel,
             bool followsConventions, bool expectedResult)
         {
             // Arrange
             IEdmActionImport action = CreateFakeActionImport(true);
             IEdmDirectValueAnnotationsManager annonationsManager = CreateFakeAnnotationsManager();
-
-            if (isAlwaysAvailable)
-            {
-                annonationsManager.SetIsAlwaysBindable(action.Action);
-            }
 
             IEdmModel model = CreateFakeModel(annonationsManager);
 
@@ -1201,7 +1191,7 @@ namespace System.Web.OData.Formatter.Serialization
                 followsConventions);
 
             // Act
-            bool actualResult = ODataEntityTypeSerializer.ShouldOmitAction(action.Action, model, builder,
+            bool actualResult = ODataEntityTypeSerializer.ShouldOmitAction(action.Action, builder,
                 (ODataMetadataLevel)metadataLevel);
 
             // Assert
@@ -1247,7 +1237,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             ODataWriter mockWriter = new Mock<ODataWriter>().Object;
-            IEdmNavigationProperty ordersProperty = _customerSet.ElementType.DeclaredNavigationProperties().Single();
+            IEdmNavigationProperty ordersProperty = _customerSet.EntityType().DeclaredNavigationProperties().Single();
             Mock<ODataEdmTypeSerializer> expandedItemSerializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Feed);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
             serializerProvider.Setup(p => p.GetEdmTypeSerializer(ordersProperty.Type))
@@ -1278,7 +1268,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateSelectExpandNode_Caches_SelectExpandNode()
         {
             // Arrange
-            IEdmEntityTypeReference customerType = _customerSet.ElementType.AsReference();
+            IEdmEntityTypeReference customerType = _customerSet.EntityType().AsReference();
             EntityInstanceContext entity1 = new EntityInstanceContext(_writeContext, customerType, new Customer());
             EntityInstanceContext entity2 = new EntityInstanceContext(_writeContext, customerType, new Customer());
 
@@ -1294,7 +1284,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateSelectExpandNode_ReturnsDifferentSelectExpandNode_IfEntityTypeIsDifferent()
         {
             // Arrange
-            IEdmEntityType customerType = _customerSet.ElementType;
+            IEdmEntityType customerType = _customerSet.EntityType();
             IEdmEntityType derivedCustomerType = new EdmEntityType("NS", "DerivedCustomer", customerType);
 
             EntityInstanceContext entity1 = new EntityInstanceContext(_writeContext, customerType.AsReference(), new Customer());
@@ -1312,7 +1302,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateSelectExpandNode_ReturnsDifferentSelectExpandNode_IfSelectExpandClauseIsDifferent()
         {
             // Arrange
-            IEdmEntityType customerType = _customerSet.ElementType;
+            IEdmEntityType customerType = _customerSet.EntityType();
 
             EntityInstanceContext entity1 = new EntityInstanceContext(_writeContext, customerType.AsReference(), new Customer());
             EntityInstanceContext entity2 = new EntityInstanceContext(_writeContext, customerType.AsReference(), new Customer());

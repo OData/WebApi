@@ -13,14 +13,12 @@ namespace System.Web.OData.Builder
     {
         public static IEdmEntityType AssertHasEntitySet(this IEdmModel model, string entitySetName, Type mappedEntityClrType)
         {
-            string entityTypeName = mappedEntityClrType.FullName;
-
-            var entitySet = model.EntityContainers().Single().EntitySets().Single(set => set.Name == entitySetName);
+            var entitySet = model.EntityContainer.EntitySets().Single(set => set.Name == entitySetName);
             Assert.NotNull(entitySet);
             Assert.Equal(entitySet.Name, entitySetName);
-            Assert.True(model.GetEdmType(mappedEntityClrType).IsEquivalentTo(entitySet.ElementType));
+            Assert.True(model.GetEdmType(mappedEntityClrType).IsEquivalentTo(entitySet.EntityType()));
 
-            return entitySet.ElementType;
+            return entitySet.EntityType();
         }
 
         public static IEdmNavigationPropertyBinding AssertHasNavigationTarget(this IEdmEntitySet entitySet, IEdmNavigationProperty navigationProperty, string targetEntitySet)

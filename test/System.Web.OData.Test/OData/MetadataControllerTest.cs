@@ -228,23 +228,5 @@ namespace System.Web.OData.Builder
 
             Assert.DoesNotContain("ODataMetadata", apis);
         }
-
-        [Fact]
-        public void GetMetadata_Doesnot_Change_DataServiceVersion()
-        {
-            // Arrange
-            IEdmModel model = new EdmModel();
-            model.SetDataServiceVersion(new Version(0, 42));
-
-            MetadataController controller = new MetadataController();
-            controller.Request = new HttpRequestMessage();
-            controller.Request.ODataProperties().Model = model;
-
-            // Act
-            IEdmModel controllerModel = controller.GetMetadata();
-
-            // Assert
-            Assert.Equal(new Version(0, 42), controllerModel.GetDataServiceVersion());
-        }
     }
 }

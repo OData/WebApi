@@ -120,28 +120,6 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void DataServiceVersion_Is_AppliedToTheResultingModel()
-        {
-            ODataModelBuilder builder = new ODataModelBuilder();
-            builder.DataServiceVersion = new Version(2, 2);
-
-            IEdmModel model = builder.GetEdmModel();
-
-            Assert.Equal(new Version(2, 2), model.GetDataServiceVersion());
-        }
-
-        [Fact]
-        public void MaxDataServiceVersion_Is_AppliedToTheResultingModel()
-        {
-            ODataModelBuilder builder = new ODataModelBuilder();
-            builder.MaxDataServiceVersion = new Version(2, 2);
-
-            IEdmModel model = builder.GetEdmModel();
-
-            Assert.Equal(new Version(2, 2), model.GetMaxDataServiceVersion());
-        }
-
-        [Fact]
         public void EntityContainer_Is_Default()
         {
             ODataModelBuilder builder = new ODataModelBuilder();

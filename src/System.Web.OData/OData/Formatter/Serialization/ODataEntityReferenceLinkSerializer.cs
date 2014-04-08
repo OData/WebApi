@@ -35,23 +35,6 @@ namespace System.Web.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            IEdmEntitySet entitySet = writeContext.EntitySet;
-            if (entitySet == null)
-            {
-                throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
-            }
-
-            if (writeContext.Path == null)
-            {
-                throw new SerializationException(SRResources.ODataPathMissing);
-            }
-
-            IEdmNavigationProperty navigationProperty = writeContext.Path.GetNavigationProperty();
-            if (navigationProperty == null)
-            {
-                throw new SerializationException(SRResources.NavigationPropertyMissingDuringSerialization);
-            }
-
             if (graph != null)
             {
                 ODataEntityReferenceLink entityReferenceLink = graph as ODataEntityReferenceLink;
@@ -66,7 +49,7 @@ namespace System.Web.OData.Formatter.Serialization
                     entityReferenceLink = new ODataEntityReferenceLink { Url = uri };
                 }
 
-                messageWriter.WriteEntityReferenceLink(entityReferenceLink, entitySet, navigationProperty);
+                messageWriter.WriteEntityReferenceLink(entityReferenceLink);
             }
         }
     }

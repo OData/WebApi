@@ -100,7 +100,7 @@ namespace System.Web.OData.Routing
         {
             // Arrange
             IEdmModel model = GetEdmModel();
-            IEdmEntityContainer container = model.EntityContainers().Single();
+            IEdmEntityContainer container = model.EntityContainer;
             IEnumerable<IEdmFunctionImport> functions =
                 container.OperationImports().Where(o => o.Name == functionName).OfType<IEdmFunctionImport>();
 
@@ -125,7 +125,7 @@ namespace System.Web.OData.Routing
         {
             // Arrange
             IEdmModel model = GetEdmModel();
-            IEdmEntityContainer container = model.EntityContainers().Single();
+            IEdmEntityContainer container = model.EntityContainer;
             IEnumerable<IEdmFunctionImport> functions =
                 container.OperationImports().Where(o => o.Name == functionName).OfType<IEdmFunctionImport>();
 
@@ -141,7 +141,7 @@ namespace System.Web.OData.Routing
             // Arrange
             const string FunctionName = "UnboundOverloadFailed";
             IEdmModel model = GetEdmModel();
-            IEdmEntityContainer container = model.EntityContainers().Single();
+            IEdmEntityContainer container = model.EntityContainer;
             IEnumerable<IEdmFunctionImport> functions =
                 container.OperationImports().Where(o => o.Name == FunctionName).OfType<IEdmFunctionImport>();
 

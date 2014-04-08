@@ -420,7 +420,7 @@ namespace System.Web.OData.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
-            Assert.Equal(1, model.EntityContainers().Single().EntitySets().Count());
+            Assert.Equal(1, model.EntityContainer.EntitySets().Count());
             model.AssertHasEntitySet("Vehicles", typeof(Vehicle));
 
             var vehicle = model.AssertHasEntityType(typeof(Vehicle));
@@ -477,7 +477,7 @@ namespace System.Web.OData.Builder.Conventions
 
             // ignore motorcycle, sportbike and MotorcycleManufacturer
             Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel - 3, model.SchemaElements.Count());
-            Assert.Equal(1, model.EntityContainers().Single().EntitySets().Count());
+            Assert.Equal(1, model.EntityContainer.EntitySets().Count());
             model.AssertHasEntitySet("Vehicles", typeof(Vehicle));
 
             var vehicle = model.AssertHasEntityType(typeof(Vehicle));
@@ -506,7 +506,7 @@ namespace System.Web.OData.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel - 1, model.SchemaElements.Count());
-            Assert.Equal(1, model.EntityContainers().Single().EntitySets().Count());
+            Assert.Equal(1, model.EntityContainer.EntitySets().Count());
             model.AssertHasEntitySet("Vehicles", typeof(Vehicle));
 
             var vehicle = model.AssertHasEntityType(typeof(Vehicle));
@@ -767,7 +767,7 @@ namespace System.Web.OData.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             model.AssertHasEntitySet("vehicles", typeof(Vehicle));
-            IEdmEntitySet vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            IEdmEntitySet vehicles = model.EntityContainer.FindEntitySet("vehicles");
 
             IEdmEntityType car = model.AssertHasEntityType(typeof(Car));
             IEdmEntityType motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
@@ -796,7 +796,7 @@ namespace System.Web.OData.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             model.AssertHasEntitySet("vehicles", typeof(Vehicle));
-            IEdmEntitySet vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            IEdmEntitySet vehicles = model.EntityContainer.FindEntitySet("vehicles");
 
             IEdmEntityType car = model.AssertHasEntityType(typeof(Car));
             IEdmEntityType motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
@@ -829,27 +829,27 @@ namespace System.Web.OData.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // one for motorcycle manufacturer and one for car manufacturer
-            IEdmEntitySet vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            IEdmEntitySet vehicles = model.EntityContainer.FindEntitySet("vehicles");
             Assert.Equal(2, vehicles.NavigationPropertyBindings.Count());
 
             // one for car manufacturer
-            IEdmEntitySet cars = model.EntityContainers().Single().FindEntitySet("cars");
+            IEdmEntitySet cars = model.EntityContainer.FindEntitySet("cars");
             Assert.Equal(1, cars.NavigationPropertyBindings.Count());
 
             // one for motorcycle manufacturer
-            IEdmEntitySet motorcycles = model.EntityContainers().Single().FindEntitySet("motorcycles");
+            IEdmEntitySet motorcycles = model.EntityContainer.FindEntitySet("motorcycles");
             Assert.Equal(1, motorcycles.NavigationPropertyBindings.Count());
 
             // one for motorcycle manufacturer
-            IEdmEntitySet sportbikes = model.EntityContainers().Single().FindEntitySet("sportbikes");
+            IEdmEntitySet sportbikes = model.EntityContainer.FindEntitySet("sportbikes");
             Assert.Equal(1, sportbikes.NavigationPropertyBindings.Count());
 
             // no navigations
-            IEdmEntitySet carManufacturers = model.EntityContainers().Single().FindEntitySet("car_manufacturers");
+            IEdmEntitySet carManufacturers = model.EntityContainer.FindEntitySet("car_manufacturers");
             Assert.Equal(0, carManufacturers.NavigationPropertyBindings.Count());
 
             //  no navigations
-            IEdmEntitySet motorcycleManufacturers = model.EntityContainers().Single().FindEntitySet("motorcycle_manufacturers");
+            IEdmEntitySet motorcycleManufacturers = model.EntityContainer.FindEntitySet("motorcycle_manufacturers");
             Assert.Equal(0, motorcycleManufacturers.NavigationPropertyBindings.Count());
         }
 

@@ -177,8 +177,10 @@ namespace System.Web.OData.Formatter.Deserialization
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
-            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
-            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/") }
+            };
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, _model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = _model };
@@ -201,8 +203,10 @@ namespace System.Web.OData.Formatter.Deserialization
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
-            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
-            settings.SetServiceDocumentUri(new Uri("http://any"));
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/") }
+            };
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, _model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = _model };

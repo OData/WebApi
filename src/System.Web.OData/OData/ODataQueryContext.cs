@@ -119,7 +119,7 @@ namespace System.Web.OData
             }
 
             List<IEdmEntitySet> matchedNavigationSources =
-                entityContainer.EntitySets().Where(e => e.ElementType == elementType).ToList();
+                entityContainer.EntitySets().Where(e => e.EntityType() == elementType).ToList();
 
             return (matchedNavigationSources.Count != 1) ? null : matchedNavigationSources[0];
         }

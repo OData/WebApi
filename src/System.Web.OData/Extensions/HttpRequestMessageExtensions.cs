@@ -88,11 +88,10 @@ namespace System.Web.OData.Extensions
             {
                 return request.CreateResponse(
                     statusCode,
-                    new ODataError()
+                    new ODataError
                     {
                         ErrorCode = oDataError.ErrorCode,
                         Message = oDataError.Message,
-                        MessageLanguage = oDataError.MessageLanguage
                     });
             }
         }

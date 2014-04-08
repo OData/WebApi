@@ -53,7 +53,7 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "RoutingCustomers(10)/Address", "GetAddress(10)")]
         [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Name", "GetName(10)")]
         [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Company", "GetCompanyFromVIP(10)")]
-        // links
+        // $ref
         [InlineData("PUT", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)")]
         [InlineData("POST", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)")]
         [InlineData("DELETE", "RoutingCustomers(1)/Products/$ref", "DeleteRef(1)(Products)")]

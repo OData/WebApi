@@ -135,8 +135,10 @@ namespace System.Web.OData.Formatter.Serialization
             var serializer = new ODataPrimitiveSerializer();
             ODataSerializerContext writecontext = new ODataSerializerContext() { RootElementName = "PropertyName", Model = EdmCoreModel.Instance };
 
-            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
-            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
+            };
             ODataMessageWriter writer = new ODataMessageWriter(
                 new ODataMessageWrapper(new MemoryStream()) as IODataResponseMessage,
                 settings);

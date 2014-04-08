@@ -92,7 +92,7 @@ namespace System.Web.OData.Formatter
             {
                 request.SetConfiguration(configuration);
                 IEdmProperty property =
-                    model.EntityContainers().Single().EntitySets().Single().ElementType.Properties().First();
+                    model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
                 request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new PropertyAccessPathSegment(property));
                 request.SetFakeODataRouteName();

@@ -46,8 +46,10 @@ namespace System.Web.OData.Formatter.Serialization
             ODataServiceDocumentSerializer serializer = new ODataServiceDocumentSerializer();
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
-            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
-            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
+            };
             settings.SetContentType(ODataFormat.Atom);
             ODataMessageWriter writer = new ODataMessageWriter(message, settings);
 

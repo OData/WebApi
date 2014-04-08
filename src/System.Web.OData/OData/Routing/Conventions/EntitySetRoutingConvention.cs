@@ -85,7 +85,7 @@ namespace System.Web.OData.Routing.Conventions
                 {
                     // e.g. Try PostCustomer first, then fall back to Post action name
                     return actionMap.FindMatchingAction(
-                        "Post" + entitySet.ElementType.Name,
+                        "Post" + entitySet.EntityType().Name,
                         "Post");
                 }
             }
@@ -108,7 +108,7 @@ namespace System.Web.OData.Routing.Conventions
                 {
                     // e.g. Try PostCustomerFromSpecialCustomer first, then fall back to PostFromSpecialCustomer
                     return actionMap.FindMatchingAction(
-                        "Post" + entitySet.ElementType.Name + "From" + entityType.Name,
+                        "Post" + entitySet.EntityType().Name + "From" + entityType.Name,
                         "PostFrom" + entityType.Name);
                 }
             }

@@ -24,7 +24,6 @@ namespace System.Web.OData.Test
             ODataError oDataError = error.CreateODataError();
 
             Assert.Equal("error", oDataError.Message);
-            Assert.Equal("language", oDataError.MessageLanguage);
             Assert.Equal("42", oDataError.ErrorCode);
             Assert.Equal("exception", oDataError.InnerError.Message);
             Assert.Equal("System.ReallyBadException", oDataError.InnerError.TypeName);

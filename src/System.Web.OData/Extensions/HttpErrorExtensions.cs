@@ -26,10 +26,9 @@ namespace System.Web.OData.Extensions
                 throw Error.ArgumentNull("httpError");
             }
 
-            return new ODataError()
+            return new ODataError
             {
                 Message = httpError.GetPropertyValue<string>(HttpErrorKeys.MessageKey),
-                MessageLanguage = httpError.GetPropertyValue<string>(HttpErrorKeys.MessageLanguageKey),
                 ErrorCode = httpError.GetPropertyValue<string>(HttpErrorKeys.ErrorCodeKey),
                 InnerError = ToODataInnerError(httpError)
             };

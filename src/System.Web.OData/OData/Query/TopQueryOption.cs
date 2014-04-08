@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Validators;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Query
@@ -17,6 +19,7 @@ namespace System.Web.OData.Query
     public class TopQueryOption
     {
         private int? _value;
+        private ODataQueryOptionParser _queryOptionParser;
 
         /// <summary>
         /// Initialize a new instance of <see cref="TopQueryOption"/> based on the raw $top value and 
@@ -24,7 +27,32 @@ namespace System.Web.OData.Query
         /// </summary>
         /// <param name="rawValue">The raw value for $top query. It can be null or empty.</param>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
-        public TopQueryOption(string rawValue, ODataQueryContext context)
+        /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
+        public TopQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser)
+        {
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            if (String.IsNullOrEmpty(rawValue))
+            {
+                throw Error.ArgumentNullOrEmpty("rawValue");
+            }
+
+            if (queryOptionParser == null)
+            {
+                throw Error.ArgumentNull("queryOptionParser");
+            }
+
+            Context = context;
+            RawValue = rawValue;
+            Validator = new TopQueryValidator();
+            _queryOptionParser = queryOptionParser;
+        }
+
+        // This constructor is intended for unit testing only.
+        internal TopQueryOption(string rawValue, ODataQueryContext context)
         {
             if (context == null)
             {
@@ -39,11 +67,16 @@ namespace System.Web.OData.Query
             Context = context;
             RawValue = rawValue;
             Validator = new TopQueryValidator();
+            _queryOptionParser = new ODataQueryOptionParser(
+                context.Model,
+                context.ElementType,
+                context.NavigationSource,
+                new Dictionary<string, string> { { "$top", rawValue } });
         }
 
         /// <summary>
         /// Gets the given <see cref="ODataQueryContext"/>.
-        /// </summary>        
+        /// </summary>
         public ODataQueryContext Context { get; private set; }
 
         /// <summary>
@@ -60,15 +93,16 @@ namespace System.Web.OData.Query
             {
                 if (_value == null)
                 {
-                    try
+                    long? topValue = _queryOptionParser.ParseTop();
+
+                    if (topValue.HasValue)
                     {
-                        _value = Convert.ToInt32(RawValue, CultureInfo.InvariantCulture);
+                        Contract.Assert(topValue.Value <= Int32.MaxValue);
                     }
-                    catch (FormatException exception)
-                    {
-                        throw new ODataException(Error.Format(SRResources.CanNotParseInteger, RawValue), exception);
-                    }
+
+                    _value = (int?)topValue;
                 }
+
                 Contract.Assert(_value.HasValue);
                 return _value.Value;
             }

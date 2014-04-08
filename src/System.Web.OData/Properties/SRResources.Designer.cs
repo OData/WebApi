@@ -241,15 +241,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to convert &apos;{0}&apos; to an integer..
-        /// </summary>
-        internal static string CanNotParseInteger {
-            get {
-                return ResourceManager.GetString("CanNotParseInteger", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cannot apply PATCH to navigation property &apos;{0}&apos; on entity type &apos;{1}&apos;..
         /// </summary>
         internal static string CannotPatchNavigationProperties {
@@ -682,15 +673,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid value for $count..
-        /// </summary>
-        internal static string InvalidCountOption {
-            get {
-                return ResourceManager.GetString("InvalidCountOption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid entity set name..
         /// </summary>
         internal static string InvalidEntitySetName {
@@ -1006,24 +988,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The related navigation property could not be found from the OData path. The related navigation property is required to deserialize the payload..
-        /// </summary>
-        internal static string NavigationPropertyMissingDuringDeserialization {
-            get {
-                return ResourceManager.GetString("NavigationPropertyMissingDuringDeserialization", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The related navigation property could not be found from the OData path. The related navigation property is required to serialize the payload..
-        /// </summary>
-        internal static string NavigationPropertyMissingDuringSerialization {
-            get {
-                return ResourceManager.GetString("NavigationPropertyMissingDuringSerialization", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cannot find navigation property &apos;{0}&apos; on the entity type &apos;{1}&apos;..
         /// </summary>
         internal static string NavigationPropertyNotfound {
@@ -1299,15 +1263,6 @@ namespace System.Web.OData.Properties {
         internal static string ParameterAliasMustBeInCurlyBraces {
             get {
                 return ResourceManager.GetString("ParameterAliasMustBeInCurlyBraces", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The parser requires an EDM model with exactly 1 entity container. {0} entity containers were found..
-        /// </summary>
-        internal static string ParserModelMustHaveOneContainer {
-            get {
-                return ResourceManager.GetString("ParserModelMustHaveOneContainer", resourceCulture);
             }
         }
         

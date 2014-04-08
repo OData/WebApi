@@ -140,7 +140,6 @@ namespace System.Web.OData.Query.Expressions
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
             CollectionNode collectionNode = node as CollectionNode;
-            EnumNode enumNode = node as EnumNode;
             SingleValueNode singleValueNode = node as SingleValueNode;
 
             if (collectionNode != null)
@@ -160,11 +159,6 @@ namespace System.Web.OData.Query.Expressions
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }
-            }
-            else if (enumNode != null)
-            {
-                // TODO: remove this else if, once the ODataLib v4 EnumNode.Kind bug 1818931 is fixed.
-                return BindEnumNode(enumNode);
             }
             else if (singleValueNode != null)
             {
@@ -343,40 +337,23 @@ namespace System.Web.OData.Query.Expressions
             }
 
             Type constantType = EdmLibHelpers.GetClrType(constantNode.TypeReference, _model, _assembliesResolver);
+            object value = constantNode.Value;
+
+            if (constantNode.TypeReference != null && constantNode.TypeReference.IsEnum())
+            {
+                ODataEnumValue odataEnumValue = (ODataEnumValue)value;
+                string strValue = odataEnumValue.Value;
+                Contract.Assert(strValue != null);
+                value = Enum.Parse(constantType, strValue);
+            }
 
             if (_querySettings.EnableConstantParameterization)
             {
-                return LinqParameterContainer.Parameterize(constantType, constantNode.Value);
+                return LinqParameterContainer.Parameterize(constantType, value);
             }
             else
             {
-                return Expression.Constant(constantNode.Value, constantType);
-            }
-        }
-
-        private Expression BindEnumNode(EnumNode enumNode)
-        {
-            Contract.Assert(enumNode != null);
-
-            // no need to parameterize null's as there cannot be multiple values for null.
-            if (enumNode.Value == null || enumNode.Value.Value == null)
-            {
-                return _nullConstant;
-            }
-
-            Type enumType = EdmLibHelpers.GetClrType(enumNode.TypeReference, _model, _assembliesResolver);
-            IEdmPrimitiveValue value = enumNode.Value.Value;
-            EdmIntegerConstant intConst = value as EdmIntegerConstant;
-            Contract.Assert(intConst != null);
-            object enumValue = Enum.ToObject(enumType, intConst.Value);
-
-            if (_querySettings.EnableConstantParameterization)
-            {
-                return LinqParameterContainer.Parameterize(enumType, enumValue);
-            }
-            else
-            {
-                return Expression.Constant(enumValue, enumType);
+                return Expression.Constant(value, constantType);
             }
         }
 

@@ -207,7 +207,7 @@ namespace System.Web.OData.Routing
                 return new BatchPathSegment();
             }
 
-            IEdmEntityContainer container = ExtractEntityContainer(model);
+            IEdmEntityContainer container = model.EntityContainer;
             IEdmEntitySet entitySet = container.FindEntitySet(segment);
             if (entitySet != null)
             {
@@ -549,17 +549,6 @@ namespace System.Web.OData.Routing
             return new UnresolvedPathSegment(segment);
         }
 
-        private static IEdmEntityContainer ExtractEntityContainer(IEdmModel model)
-        {
-            IEnumerable<IEdmEntityContainer> containers = model.EntityContainers();
-            int containerCount = containers.Count();
-            if (containerCount != 1)
-            {
-                throw Error.Argument("model", SRResources.ParserModelMustHaveOneContainer, containerCount);
-            }
-            return containers.Single();
-        }
-
         /// <summary>
         /// Converts an instance of <see cref="ODataPath" /> into an OData link.
         /// </summary>
@@ -618,7 +607,7 @@ namespace System.Web.OData.Routing
 
         private static UnboundFunctionPathSegment TryMatchUnboundFunctionCall(string segment, Queue<string> segments, IEdmModel model)
         {
-            IEdmEntityContainer container = ExtractEntityContainer(model);
+            IEdmEntityContainer container = model.EntityContainer;
             string nextSegment = segments.Count > 0 ? segments.Peek() : null;
 
             IEnumerable<IEdmOperationImport> operationImports = container.FindMatchedOperationImports(segment);

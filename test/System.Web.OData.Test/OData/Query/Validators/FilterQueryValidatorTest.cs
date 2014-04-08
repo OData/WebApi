@@ -344,7 +344,6 @@ namespace System.Web.OData.Query.Validators
             Assert.Equal(1, _validator.Times["Validate"]); // entry
             Assert.Equal(1, _validator.Times["ValidateSingleValuePropertyAccessNode"]); // FavouriteColor
             Assert.Equal(1, _validator.Times["ValidateLogicalOperator"]); // has
-            Assert.Equal(1, _validator.Times["ValidateEnumQueryNode"]); // Red
             Assert.Equal(1, _validator.Times["ValidateBinaryOperatorQueryNode"]); // has
             Assert.Equal(1, _validator.Times["ValidateParameterQueryNode"]); // $it
         }
@@ -460,12 +459,6 @@ namespace System.Web.OData.Query.Validators
             {
                 IncrementCount("ValidateConvertQueryNode");
                 base.ValidateConvertNode(convertQueryNode, settings);
-            }
-
-            public override void ValidateEnumNode(EnumNode enumNode, ODataValidationSettings settings)
-            {
-                IncrementCount("ValidateEnumQueryNode");
-                base.ValidateEnumNode(enumNode, settings);
             }
 
             public override void ValidateLogicalOperator(BinaryOperatorNode binaryNode, ODataValidationSettings settings)

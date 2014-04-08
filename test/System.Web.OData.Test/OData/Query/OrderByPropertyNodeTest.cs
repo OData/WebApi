@@ -89,7 +89,13 @@ namespace System.Web.OData.Query
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType sampleClassEntityType = model.SchemaElements.Single(t => t.Name == "SampleClass") as IEdmEntityType;
-            OrderByClause orderbyNode = ODataUriParser.ParseOrderBy("Property1 desc, Property2 asc", model, sampleClassEntityType);
+            Assert.NotNull(sampleClassEntityType); // Guard
+            IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet("entityset");
+            Assert.NotNull(entitySet); // Guard
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(model, sampleClassEntityType, entitySet,
+                new Dictionary<string, string> { { "$orderby", "Property1 desc, Property2 asc" } });
+            OrderByClause orderbyNode = parser.ParseOrderBy();
 
             // Act
             ICollection<OrderByNode> nodes = OrderByNode.CreateCollection(orderbyNode);
@@ -116,7 +122,13 @@ namespace System.Web.OData.Query
 
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entityType = model.SchemaElements.Single(t => t.Name == typeName) as IEdmEntityType;
-            OrderByClause orderbyNode = ODataUriParser.ParseOrderBy(propertyName + " desc, Id asc", model, entityType);
+            Assert.NotNull(entityType); // Guard
+            IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet("entityset");
+            Assert.NotNull(entitySet); // Guard
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(model, entityType, entitySet,
+                new Dictionary<string, string> { { "$orderby", propertyName + " desc, Id asc" } });
+            OrderByClause orderbyNode = parser.ParseOrderBy();
 
             // Act
             ICollection<OrderByNode> nodes = OrderByNode.CreateCollection(orderbyNode);
@@ -137,7 +149,10 @@ namespace System.Web.OData.Query
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            OrderByClause orderByNode = ODataUriParser.ParseOrderBy("Street desc, City asc", model.Model, model.Address);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(model.Model, model.Customer, model.Customers,
+                new Dictionary<string, string> { { "$orderby", "Address/Street desc, Address/City asc" } });
+
+            OrderByClause orderByNode = parser.ParseOrderBy();
 
             // Act
             ICollection<OrderByNode> nodes = OrderByNode.CreateCollection(orderByNode);

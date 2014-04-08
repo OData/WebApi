@@ -1485,7 +1485,7 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("Edm.Int32 eq 123", "The child type 'Edm.Int32' in a cast was not an entity type. Casts can only be performed on entity types.")]
+        [InlineData("Edm.Int32 eq 123", "A binary operator with incompatible types was detected. Found operand types 'Edm.String' and 'Edm.Int32' for operator kind 'Equal'.")]
         [InlineData("ProductName/Edm.String eq 123", "Can only bind segments that are Navigation, Structural, Complex, or Collections. We found a segment " +
             "'ProductName' that isn't any of those. Please revise the query.")]
         public void CastToNonEntityType_Throws(string filter, string error)
@@ -1513,7 +1513,7 @@ namespace System.Web.OData.Query.Expressions
         [InlineData("UIntProp eq 12", "$it => (Convert($it.UIntProp) == 12)")]
         [InlineData("CharProp eq 'a'", "$it => (Convert($it.CharProp.ToString()) == \"a\")")]
         [InlineData("CharArrayProp eq 'a'", "$it => (new String($it.CharArrayProp) == \"a\")")]
-        [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == System.Byte[])")]
+        [InlineData("BinaryProp eq binary'TWFu'", "$it => ($it.BinaryProp.ToArray() == System.Byte[])")]
         [InlineData("XElementProp eq '<name />'", "$it => ($it.XElementProp.ToString() == \"<name />\")")]
         public void NonstandardEdmPrimtives(string filter, string expression)
         {
@@ -1527,20 +1527,20 @@ namespace System.Web.OData.Query.Expressions
                     UIntProp = 12,
                     CharProp = 'a',
                     CharArrayProp = new[] { 'a' },
-                    BinaryProp = new Binary(new byte[] { 35, 171, 255 }),
+                    BinaryProp = new Binary(new byte[] { 77, 97, 110 }),
                     XElementProp = new XElement("name")
                 },
                 new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
 
         [Theory]
-        [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == System.Byte[])", true, true)]
-        [InlineData("BinaryProp ne binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() != System.Byte[])", false, false)]
-        [InlineData("ByteArrayProp eq binary'23ABFF'", "$it => ($it.ByteArrayProp == System.Byte[])", true, true)]
-        [InlineData("ByteArrayProp ne binary'23ABFF'", "$it => ($it.ByteArrayProp != System.Byte[])", false, false)]
-        [InlineData("binary'23ABFF' eq binary'23ABFF'", "$it => (System.Byte[] == System.Byte[])", true, true)]
-        [InlineData("binary'23ABFF' ne binary'23ABFF'", "$it => (System.Byte[] != System.Byte[])", false, false)]
-        [InlineData("ByteArrayPropWithNullValue ne binary'23ABFF'", "$it => ($it.ByteArrayPropWithNullValue != System.Byte[])", true, true)]
+        [InlineData("BinaryProp eq binary'I6v/'", "$it => ($it.BinaryProp.ToArray() == System.Byte[])", true, true)]
+        [InlineData("BinaryProp ne binary'I6v/'", "$it => ($it.BinaryProp.ToArray() != System.Byte[])", false, false)]
+        [InlineData("ByteArrayProp eq binary'I6v/'", "$it => ($it.ByteArrayProp == System.Byte[])", true, true)]
+        [InlineData("ByteArrayProp ne binary'I6v/'", "$it => ($it.ByteArrayProp != System.Byte[])", false, false)]
+        [InlineData("binary'I6v/' eq binary'I6v/'", "$it => (System.Byte[] == System.Byte[])", true, true)]
+        [InlineData("binary'I6v/' ne binary'I6v/'", "$it => (System.Byte[] != System.Byte[])", false, false)]
+        [InlineData("ByteArrayPropWithNullValue ne binary'I6v/'", "$it => ($it.ByteArrayPropWithNullValue != System.Byte[])", true, true)]
         [InlineData("ByteArrayPropWithNullValue ne ByteArrayPropWithNullValue", "$it => ($it.ByteArrayPropWithNullValue != $it.ByteArrayPropWithNullValue)", false, false)]
         [InlineData("ByteArrayPropWithNullValue ne null", "$it => ($it.ByteArrayPropWithNullValue != null)", false, false)]
         [InlineData("ByteArrayPropWithNullValue eq null", "$it => ($it.ByteArrayPropWithNullValue == null)", true, true)]
@@ -1559,14 +1559,14 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("binary'23ABFF' ge binary'23ABFF'", "GreaterThanOrEqual")]
-        [InlineData("binary'23ABFF' le binary'23ABFF'", "LessThanOrEqual")]
-        [InlineData("binary'23ABFF' lt binary'23ABFF'", "LessThan")]
-        [InlineData("binary'23ABFF' gt binary'23ABFF'", "GreaterThan")]
-        [InlineData("binary'23ABFF' add binary'23ABFF'", "Add")]
-        [InlineData("binary'23ABFF' sub binary'23ABFF'", "Subtract")]
-        [InlineData("binary'23ABFF' mul binary'23ABFF'", "Multiply")]
-        [InlineData("binary'23ABFF' div binary'23ABFF'", "Divide")]
+        [InlineData("binary'AP8Q' ge binary'AP8Q'", "GreaterThanOrEqual")]
+        [InlineData("binary'AP8Q' le binary'AP8Q'", "LessThanOrEqual")]
+        [InlineData("binary'AP8Q' lt binary'AP8Q'", "LessThan")]
+        [InlineData("binary'AP8Q' gt binary'AP8Q'", "GreaterThan")]
+        [InlineData("binary'AP8Q' add binary'AP8Q'", "Add")]
+        [InlineData("binary'AP8Q' sub binary'AP8Q'", "Subtract")]
+        [InlineData("binary'AP8Q' mul binary'AP8Q'", "Multiply")]
+        [InlineData("binary'AP8Q' div binary'AP8Q'", "Divide")]
         public void DisAllowed_ByteArrayComparisons(string filter, string op)
         {
             Assert.Throws<ODataException>(
@@ -1647,9 +1647,16 @@ namespace System.Web.OData.Query.Expressions
 
         private FilterClause CreateFilterNode(string filter, IEdmModel model, Type entityType)
         {
-            var queryUri = new Uri(_serviceBaseUri, String.Format("Products?$filter={0}", Uri.EscapeDataString(filter)));
             IEdmEntityType productType = model.SchemaElements.OfType<IEdmEntityType>().Single(t => t.Name == entityType.Name);
-            return ODataUriParser.ParseFilter(filter, model, productType);
+            Assert.NotNull(productType); // Guard
+
+            IEdmEntitySet products = model.EntityContainer.FindEntitySet("Products");
+            Assert.NotNull(products); // Guard
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(model, productType, products,
+                new Dictionary<string, string> { { "$filter", filter } });
+
+            return parser.ParseFilter();
         }
 
         private static ODataQuerySettings CreateSettings()

@@ -27,7 +27,7 @@ namespace System.Web.OData.Formatter.Serialization
         public ODataCollectionSerializerTests()
         {
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
-            _customerSet = _model.FindDeclaredEntityContainer("Default.Container").FindEntitySet("Customers");
+            _customerSet = _model.EntityContainer.FindEntitySet("Customers");
             _edmIntType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false);
             _customer = new Customer()
             {
@@ -71,7 +71,6 @@ namespace System.Web.OData.Formatter.Serialization
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
-            settings.SetServiceDocumentUri(new Uri("http://any/"));
             settings.SetContentType(ODataFormat.Atom);
             ODataMessageWriter messageWriter = new ODataMessageWriter(message, settings);
             Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(new DefaultODataSerializerProvider());

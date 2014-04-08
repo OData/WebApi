@@ -143,7 +143,7 @@ namespace System.Web.OData.Builder
             actionPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext)));
 
             // generate link with cast if the entityset type doesn't match the entity type the action is bound to.
-            if (entityContext.EntitySet.ElementType.FullName() != bindingParameterType)
+            if (entityContext.EntitySet.EntityType().FullName() != bindingParameterType)
             {
                 actionPathSegments.Add(new CastPathSegment(bindingParameterType));
             }
@@ -188,7 +188,7 @@ namespace System.Web.OData.Builder
             functionPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext)));
 
             // generate link with cast if the entityset type doesn't match the entity type the function is bound to.
-            if (entityContext.EntitySet.ElementType.FullName() != bindingParameterType)
+            if (entityContext.EntitySet.EntityType().FullName() != bindingParameterType)
             {
                 functionPathSegments.Add(new CastPathSegment(bindingParameterType));
             }

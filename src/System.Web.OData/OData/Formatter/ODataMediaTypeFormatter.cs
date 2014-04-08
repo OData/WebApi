@@ -21,7 +21,6 @@ using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter
@@ -441,9 +440,10 @@ namespace System.Web.OData.Formatter
 
             IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream, content.Headers);
 
+            Uri baseAddress = GetBaseAddress(Request);
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings(MessageWriterSettings)
             {
-                PayloadBaseUri = GetBaseAddress(Request),
+                PayloadBaseUri = baseAddress,
                 Version = _version,
             };
 
@@ -454,19 +454,12 @@ namespace System.Web.OData.Formatter
                 throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
             }
 
-            string resourcePath = path != null ? path.ToString() : String.Empty;
-            Uri baseAddress = GetBaseAddress(Request);
-            writerSettings.SetServiceDocumentUri(
-                baseAddress,
-                Request.ODataProperties().SelectExpandClause,
-                resourcePath,
-                isIndividualProperty: false);
-
             writerSettings.ODataUri = new ODataUri
             {
                 ServiceRoot = baseAddress,
-                 
+                
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
+                SelectAndExpand = Request.ODataProperties().SelectExpandClause,
             };
 
             MediaTypeHeaderValue contentType = null;

@@ -24,8 +24,10 @@ namespace System.Web.OData.Query
         [Fact]
         public void ConstructorNullRawValueThrows()
         {
+            // Arrange
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
+            // Act & Assert
             Assert.Throws<ArgumentException>(() =>
                 new SkipQueryOption(null, new ODataQueryContext(model, typeof(Customer))));
         }
@@ -33,10 +35,24 @@ namespace System.Web.OData.Query
         [Fact]
         public void ConstructorEmptyRawValueThrows()
         {
+            // Arrange
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
+            // Act & Assert
             Assert.Throws<ArgumentException>(() =>
                 new SkipQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer))));
+        }
+
+        [Fact]
+        public void ConstructorNullQueryOptionParserThrows()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() =>
+                new SkipQueryOption("5", new ODataQueryContext(model, typeof(Customer)), queryOptionParser: null),
+                "queryOptionParser");
         }
 
         [Theory]
@@ -69,7 +85,6 @@ namespace System.Web.OData.Query
         }
 
         [Theory]
-        [InlineData("-1", -1)]
         [InlineData("0", 0)]
         [InlineData("100", 100)]
         public void Value_Returns_ParsedSkipValue(string skipValue, int expectedValue)
@@ -85,6 +100,7 @@ namespace System.Web.OData.Query
         [InlineData("NotANumber")]
         [InlineData("''")]
         [InlineData(" ")]
+        [InlineData("-1")]
         public void Value_ThrowsODataException_ForInvalidValues(string skipValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();

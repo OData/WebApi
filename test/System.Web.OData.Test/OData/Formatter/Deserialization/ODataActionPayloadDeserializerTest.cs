@@ -27,7 +27,7 @@ namespace System.Web.OData.Formatter.Deserialization
         static ODataActionPayloadDeserializerTest()
         {
             _model = GetModel();
-            _container = _model.EntityContainers().SingleOrDefault();
+            _container = _model.EntityContainer;
             _deserializer = new ODataActionPayloadDeserializer(new DefaultODataDeserializerProvider());
         }
 

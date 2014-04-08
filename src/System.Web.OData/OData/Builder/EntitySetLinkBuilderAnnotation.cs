@@ -51,7 +51,7 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("model");
             }
 
-            IEdmEntityType elementType = entitySet.ElementType;
+            IEdmEntityType elementType = entitySet.EntityType();
             IEnumerable<IEdmEntityType> derivedTypes = model.FindAllDerivedTypes(elementType).Cast<IEdmEntityType>();
             bool derivedTypesDefineNavigationProperty = false;
 

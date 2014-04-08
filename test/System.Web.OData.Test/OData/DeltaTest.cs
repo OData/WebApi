@@ -412,7 +412,7 @@ namespace System.Web.OData
 
             using (HttpRequestMessage request = new HttpRequestMessage { RequestUri = new Uri("http://localhost") })
             {
-                IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
+                IEdmEntitySet entitySet = model.EntityContainer.EntitySets().Single();
                 HttpConfiguration config = new HttpConfiguration();
                 config.Routes.MapODataServiceRoute("default", "", model);
                 request.ODataProperties().RouteName = "default";
@@ -465,7 +465,7 @@ namespace System.Web.OData
 
             using (HttpRequestMessage request = new HttpRequestMessage { RequestUri = new Uri("http://localhost") })
             {
-                IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
+                IEdmEntitySet entitySet = model.EntityContainer.EntitySets().Single();
                 HttpConfiguration config = new HttpConfiguration();
                 config.Routes.MapODataServiceRoute("default", "", model);
                 request.ODataProperties().RouteName = "default";

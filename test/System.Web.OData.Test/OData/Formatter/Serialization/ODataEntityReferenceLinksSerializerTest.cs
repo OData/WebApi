@@ -19,7 +19,7 @@ namespace System.Web.OData.Formatter.Serialization
         public ODataEntityReferenceLinksSerializerTest()
         {
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
-            _customerSet = _model.FindDeclaredEntityContainer("Default.Container").FindEntitySet("Customers");
+            _customerSet = _model.EntityContainer.FindEntitySet("Customers");
         }
 
         [Fact]
@@ -43,45 +43,9 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteObject_Throws_EntitySetMissingDuringSerialization()
-        {
-            ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
-            ODataSerializerContext writeContext = new ODataSerializerContext();
-
-            Assert.Throws<SerializationException>(
-                () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLinks),
-                    messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
-                "The related entity set could not be found from the OData path. The related entity set is required to serialize the payload.");
-        }
-
-        [Fact]
-        public void WriteObject_Throws_ODataPathMissing()
-        {
-            ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
-            ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet };
-
-            Assert.Throws<SerializationException>(
-                () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLinks),
-                    messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
-                "The operation cannot be completed because no ODataPath is available for the request.");
-        }
-
-        [Fact]
-        public void WriteObject_Throws_NavigationPropertyMissingDuringSerialization()
-        {
-            ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
-            ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = new ODataPath() };
-
-            Assert.Throws<SerializationException>(
-                () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLinks),
-                    messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
-                "The related navigation property could not be found from the OData path. The related navigation property is required to serialize the payload.");
-        }
-
-        [Fact]
         public void WriteObject_Throws_ObjectCannotBeWritten_IfGraphIsNotUri()
         {
-            IEdmNavigationProperty navigationProperty = _customerSet.ElementType.NavigationProperties().First();
+            IEdmNavigationProperty navigationProperty = _customerSet.EntityType().NavigationProperties().First();
             ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             ODataPath path = new ODataPath(new NavigationPathSegment(navigationProperty));
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = path };
@@ -120,13 +84,15 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
-            IEdmNavigationProperty navigationProperty = _customerSet.ElementType.NavigationProperties().First();
+            IEdmNavigationProperty navigationProperty = _customerSet.EntityType().NavigationProperties().First();
             ODataPath path = new ODataPath(new NavigationPathSegment(navigationProperty));
             ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = path };
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
-            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
-            settings.SetServiceDocumentUri(new Uri("http://any/"));
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
+            };
             settings.SetContentType(ODataFormat.Atom);
             ODataMessageWriter writer = new ODataMessageWriter(message, settings);
 

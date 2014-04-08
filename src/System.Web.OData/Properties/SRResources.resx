@@ -180,9 +180,6 @@
   <data name="OrderByClauseNotSupported" xml:space="preserve">
     <value>Only ordering by properties is supported for non-primitive collections. Expressions are not supported.</value>
   </data>
-  <data name="CanNotParseInteger" xml:space="preserve">
-    <value>Failed to convert '{0}' to an integer.</value>
-  </data>
   <data name="EntitySetNotFoundForName" xml:space="preserve">
     <value>No EntitySet exists in the EdmModel with entitySetName '{0}'.</value>
   </data>
@@ -423,9 +420,6 @@
   <data name="NoActionFoundForCollection" xml:space="preserve">
     <value>Invalid action detected. '{0}' is not an action that can bind to 'Collection({1})'.</value>
   </data>
-  <data name="ParserModelMustHaveOneContainer" xml:space="preserve">
-    <value>The parser requires an EDM model with exactly 1 entity container. {0} entity containers were found.</value>
-  </data>
   <data name="PreviousSegmentMustBeCollectionType" xml:space="preserve">
     <value>The previous segment's EDM type '{0}' must be a collection type.</value>
   </data>
@@ -483,14 +477,8 @@
   <data name="EntitySetMissingDuringSerialization" xml:space="preserve">
     <value>The related entity set could not be found from the OData path. The related entity set is required to serialize the payload.</value>
   </data>
-  <data name="NavigationPropertyMissingDuringSerialization" xml:space="preserve">
-    <value>The related navigation property could not be found from the OData path. The related navigation property is required to serialize the payload.</value>
-  </data>
   <data name="UnableToDetermineMetadataUrl" xml:space="preserve">
     <value>The ODataMediaTypeFormatter must be able to determine the metadata URL for a request in order to serialize the response.</value>
-  </data>
-  <data name="InvalidCountOption" xml:space="preserve">
-    <value>'{0}' is not a valid value for $count.</value>
   </data>
   <data name="ODataPathMissing" xml:space="preserve">
     <value>The operation cannot be completed because no ODataPath is available for the request.</value>
@@ -506,9 +494,6 @@
   </data>
   <data name="EntitySetMissingDuringDeserialization" xml:space="preserve">
     <value>The related entity set could not be found from the OData path. The related entity set is required to deserialize the payload.</value>
-  </data>
-  <data name="NavigationPropertyMissingDuringDeserialization" xml:space="preserve">
-    <value>The related navigation property could not be found from the OData path. The related navigation property is required to deserialize the payload.</value>
   </data>
   <data name="RequestMustHaveModel" xml:space="preserve">
     <value>The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataServiceRoute to register a route that parses the OData URI and attaches the model information.</value>

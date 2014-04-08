@@ -184,7 +184,7 @@ namespace System.Web.OData.Query
             odataModel.EntitySet<Customer>(setName);
             IEdmModel model = odataModel.GetEdmModel();
             IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet(setName);
-            IEdmEntityType entityType = entitySet.ElementType;
+            IEdmEntityType entityType = entitySet.EntityType();
             ODataPath path = new ODataPath(new EntitySetPathSegment(entitySet));
 
             // Act

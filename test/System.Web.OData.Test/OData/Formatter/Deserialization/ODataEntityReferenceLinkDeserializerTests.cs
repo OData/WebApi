@@ -50,7 +50,6 @@ namespace System.Web.OData.Formatter.Deserialization
             var deserializer = new ODataEntityReferenceLinkDeserializer();
             MockODataRequestMessage requestMessage = new MockODataRequestMessage();
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
-            settings.SetServiceDocumentUri(new Uri("http://any/"));
             settings.SetContentType(ODataFormat.Atom);
             ODataMessageWriter messageWriter = new ODataMessageWriter(requestMessage, settings);
             messageWriter.WriteEntityReferenceLink(new ODataEntityReferenceLink { Url = new Uri("http://localhost/samplelink") });
@@ -99,35 +98,6 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Equal("http://localhost/samplelink", uri.AbsoluteUri);
         }
 
-        [Fact]
-        public void ReadThrowsWhenPathIsMissing()
-        {
-            // Arrange
-            var deserializer = new ODataEntityReferenceLinkDeserializer();
-            ODataMessageReader reader = new ODataMessageReader(new MockODataRequestMessage());
-            ODataDeserializerContext context = new ODataDeserializerContext();
-
-            // Act & Assert
-            Assert.Throws<SerializationException>(() => deserializer.Read(reader, typeof(Uri), context),
-                "The operation cannot be completed because no ODataPath is available for the request.");
-        }
-
-        [Fact]
-        public void ReadThrowsWhenNavigationPropertyIsMissing()
-        {
-            // Arrange
-            var deserializer = new ODataEntityReferenceLinkDeserializer();
-            ODataMessageReader reader = new ODataMessageReader(new MockODataRequestMessage());
-            ODataDeserializerContext context = new ODataDeserializerContext
-            {
-                Path = new ODataPath()
-            };
-
-            // Act & Assert
-            Assert.Throws<SerializationException>(() => deserializer.Read(reader, typeof(Uri), context),
-                "The related navigation property could not be found from the OData path. The related navigation property is required to deserialize the payload.");
-        }
-
         private static IEdmModel CreateModel()
         {
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
@@ -143,7 +113,7 @@ namespace System.Web.OData.Formatter.Deserialization
         private static IEdmNavigationProperty GetNavigationProperty(IEdmModel model)
         {
             return
-                model.EntityContainers().Single().EntitySets().First().NavigationPropertyBindings.Single().NavigationProperty;
+                model.EntityContainer.EntitySets().First().NavigationPropertyBindings.Single().NavigationProperty;
         }
 
         private class Entity

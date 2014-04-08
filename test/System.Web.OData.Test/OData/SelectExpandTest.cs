@@ -250,11 +250,12 @@ namespace System.Web.OData
             // Act
             HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
             string responseString = response.Content.ReadAsStringAsync().Result;
-
+            
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Contains("The query specified in the URI is not valid. Could not find a property named '" + nonNamespaceQualifiedName +
-                "' on type 'System.Web.OData.Player'.", responseString);
+            Assert.Contains("The query specified in the URI is not valid. " +
+                "A path within the select or expand query option is not supported.",
+                responseString);
         }
 
         private HttpResponseMessage GetResponse(string uri, string acceptHeader)

@@ -50,16 +50,16 @@ namespace System.Web.OData.Builder
             Assert.Equal(EdmTypeKind.Collection, ordersProperty.Type.Definition.TypeKind);
             Assert.Equal(typeof(Order).FullName, (ordersProperty.Type.Definition as IEdmCollectionType).ElementType.FullName());
 
-            var entityContainer = model.EntityContainers().Single();
+            var entityContainer = model.EntityContainer;
             Assert.NotNull(entityContainer);
 
             var customers = entityContainer.FindEntitySet("Customers");
             Assert.NotNull(customers);
-            Assert.Equal(typeof(Customer).FullName, customers.ElementType.FullName());
+            Assert.Equal(typeof(Customer).FullName, customers.EntityType().FullName());
 
             var orders = entityContainer.FindEntitySet("Orders");
             Assert.NotNull(orders);
-            Assert.Equal(typeof(Order).FullName, orders.ElementType.FullName());
+            Assert.Equal(typeof(Order).FullName, orders.EntityType().FullName());
         }
     }
 }

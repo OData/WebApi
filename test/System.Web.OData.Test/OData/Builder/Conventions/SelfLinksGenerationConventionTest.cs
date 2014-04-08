@@ -60,7 +60,7 @@ namespace System.Web.OData.Builder.Conventions
             var vehicles = builder.EntitySet<Vehicle>("vehicles");
 
             IEdmModel model = builder.GetEdmModel();
-            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
+            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainer.EntitySets().Single();
             IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
 
             HttpRequestMessage request = GetODataRequest(model);
@@ -80,7 +80,7 @@ namespace System.Web.OData.Builder.Conventions
             var motorcycles = builder.EntitySet<Motorcycle>("motorcycles");
 
             IEdmModel model = builder.GetEdmModel();
-            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
+            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainer.EntitySets().Single();
             IEdmEntityType sportbikeType = model.AssertHasEntityType(typeof(SportBike));
 
             HttpRequestMessage request = GetODataRequest(model);

@@ -108,7 +108,6 @@ namespace System.Net.Http
             {
                 ErrorCode = "36",
                 Message = "Bad stuff",
-                MessageLanguage = "en-US",
                 InnerError = new ODataInnerError()
                 {
                     Message = "Exception message"
@@ -122,7 +121,6 @@ namespace System.Net.Http
             Assert.True(response.TryGetContentValue<ODataError>(out contentError));
             Assert.Equal("36", contentError.ErrorCode);
             Assert.Equal("Bad stuff", contentError.Message);
-            Assert.Equal("en-US", contentError.MessageLanguage);
             if (detailIncluded)
             {
                 Assert.NotNull(contentError.InnerError);

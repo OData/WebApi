@@ -40,14 +40,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("readContext");
             }
 
-            IEdmNavigationProperty navigationProperty = GetNavigationProperty(readContext.Path);
-
-            if (navigationProperty == null)
-            {
-                throw new SerializationException(SRResources.NavigationPropertyMissingDuringDeserialization);
-            }
-
-            ODataEntityReferenceLink entityReferenceLink = messageReader.ReadEntityReferenceLink(navigationProperty);
+            ODataEntityReferenceLink entityReferenceLink = messageReader.ReadEntityReferenceLink();
 
             if (entityReferenceLink != null)
             {
@@ -78,16 +71,6 @@ namespace System.Web.OData.Formatter.Deserialization
             }
 
             return uri;
-        }
-
-        private static IEdmNavigationProperty GetNavigationProperty(ODataPath path)
-        {
-            if (path == null)
-            {
-                throw new SerializationException(SRResources.ODataPathMissing);
-            }
-
-            return path.GetNavigationProperty();
         }
     }
 }

@@ -240,8 +240,7 @@ namespace System.Web.OData.Formatter
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
 
             ODataDeserializerContext context = new ODataDeserializerContext { Model = _model };
-            IEdmActionImport action = _model.EntityContainers()
-                .Single()
+            IEdmActionImport action = _model.EntityContainer
                 .OperationImports()
                 .Single(f => f.Name == "PostMotorcycle_When_Expecting_Car") as IEdmActionImport;
             Assert.NotNull(action);

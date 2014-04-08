@@ -492,7 +492,8 @@ namespace System.Web.OData.Query
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             Assert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
-                 "Failed to convert 'NotANumber' to an integer.");
+                 "Invalid value 'NotANumber' for $top query option found. " +
+                 "The $top query option requires a non-negative integer value.");
 
             message = new HttpRequestMessage(
                 HttpMethod.Get,
@@ -502,7 +503,8 @@ namespace System.Web.OData.Query
             options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             Assert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
-                 "Failed to convert '''' to an integer.");
+                 "Invalid value '''' for $top query option found. " +
+                 "The $top query option requires a non-negative integer value.");
         }
 
 
@@ -519,7 +521,8 @@ namespace System.Web.OData.Query
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             Assert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
-                 "Failed to convert 'NotANumber' to an integer.");
+                 "Invalid value 'NotANumber' for $skip query option found. " +
+                 "The $skip query option requires a non-negative integer value.");
 
             message = new HttpRequestMessage(
                 HttpMethod.Get,
@@ -529,7 +532,8 @@ namespace System.Web.OData.Query
             options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             Assert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
-                 "Failed to convert '''' to an integer.");
+                 "Invalid value '''' for $skip query option found. " +
+                 "The $skip query option requires a non-negative integer value.");
         }
 
         [Theory]
@@ -901,7 +905,7 @@ namespace System.Web.OData.Query
         [Theory]
         [InlineData("$filter=ID eq 1")]
         [InlineData("$orderby=ID")]
-        [InlineData("$count=true")] // or other true or false in case-insensitive
+        [InlineData("$count=true")]
         [InlineData("$skip=1")]
         [InlineData("$top=0")]
         public void ApplyTo_Entity_ThrowsInvalidOperation_IfNonSelectExpand(string parameter)

@@ -28,7 +28,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public ODataEntityDeserializerTests()
         {
             _edmModel = EdmTestHelpers.GetModel();
-            IEdmEntitySet entitySet = _edmModel.EntityContainers().Single().FindEntitySet("Products");
+            IEdmEntitySet entitySet = _edmModel.EntityContainer.FindEntitySet("Products");
             _readContext = new ODataDeserializerContext
             {
                 Path = new ODataPath(new EntitySetPathSegment(entitySet)),
@@ -686,7 +686,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             var readContext = new ODataDeserializerContext
             {
-                Path = new ODataPath(new EntitySetPathSegment(_edmModel.EntityContainers().Single().FindEntitySet("Suppliers"))),
+                Path = new ODataPath(new EntitySetPathSegment(_edmModel.EntityContainer.FindEntitySet("Suppliers"))),
                 Model = _edmModel,
                 ResourceType = typeof(Supplier)
             };
@@ -724,7 +724,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             var readContext = new ODataDeserializerContext
             {
-                Path = new ODataPath(new EntitySetPathSegment(_edmModel.EntityContainers().Single().FindEntitySet("Suppliers"))),
+                Path = new ODataPath(new EntitySetPathSegment(_edmModel.EntityContainer.FindEntitySet("Suppliers"))),
                 Model = _edmModel,
                 ResourceType = typeof(Delta<Supplier>)
             };

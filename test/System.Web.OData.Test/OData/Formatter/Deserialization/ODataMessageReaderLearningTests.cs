@@ -35,7 +35,7 @@ namespace System.Web.OData.Formatter.Serialization
             IODataRequestMessage request = CreateJsonLightRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
-            IEdmOperationImport producingOperationImport = model.EntityContainers().Single().OperationImports().First();
+            IEdmOperationImport producingOperationImport = model.EntityContainer.OperationImports().First();
             IEdmTypeReference expectedItemTypeReference = new EdmPrimitiveTypeReference(
                 EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32), false);
 
@@ -68,7 +68,7 @@ namespace System.Web.OData.Formatter.Serialization
             IODataRequestMessage request = CreateJsonLightRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
-            IEdmEntityType entityType = model.EntityContainers().Single().EntitySets().First().ElementType;
+            IEdmEntityType entityType = model.EntityContainer.EntitySets().First().EntityType();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
@@ -84,7 +84,7 @@ namespace System.Web.OData.Formatter.Serialization
             IODataRequestMessage request = CreateJsonLightRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
-            IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().First();
+            IEdmEntitySet entitySet = model.EntityContainer.EntitySets().First();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
@@ -115,7 +115,7 @@ namespace System.Web.OData.Formatter.Serialization
             IODataRequestMessage request = CreateJsonLightRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
-            IEdmEntityType entityType = model.EntityContainers().Single().EntitySets().First().ElementType;
+            IEdmEntityType entityType = model.EntityContainer.EntitySets().First().EntityType();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
@@ -131,7 +131,7 @@ namespace System.Web.OData.Formatter.Serialization
             IODataRequestMessage request = CreateJsonLightRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
-            IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().First();
+            IEdmEntitySet entitySet = model.EntityContainer.EntitySets().First();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
@@ -162,13 +162,11 @@ namespace System.Web.OData.Formatter.Serialization
             IODataRequestMessage request = CreateJsonLightRequest("{\"@odata.id\":\"aa:b\"}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
-            IEdmNavigationProperty navigationProperty =
-                model.EntityContainers().Single().EntitySets().First().NavigationPropertyBindings.First().NavigationProperty;
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.ReadEntityReferenceLink(navigationProperty));
+                Assert.DoesNotThrow(() => reader.ReadEntityReferenceLink());
             }
         }
 
@@ -194,7 +192,7 @@ namespace System.Web.OData.Formatter.Serialization
             IODataRequestMessage request = CreateJsonLightRequest("{\"value\":1}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
-            IEdmStructuralProperty property = model.EntityContainers().Single().EntitySets().First().ElementType.StructuralProperties().First();
+            IEdmStructuralProperty property = model.EntityContainer.EntitySets().First().EntityType().StructuralProperties().First();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {

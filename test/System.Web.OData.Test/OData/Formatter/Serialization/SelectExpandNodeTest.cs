@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
@@ -60,8 +61,10 @@ namespace System.Web.OData.Formatter.Serialization
             string select, string expand, bool specialCustomer, string structuralPropertiesToSelect)
         {
             // Arrange
-            SelectExpandClause selectExpandClause =
-                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand,  _model.Customer, _model.Customers);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
+                new Dictionary<string, string> { { "$select", select }, { "$expand", expand } });
+
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
             IEdmEntityType entityType = specialCustomer ? _model.SpecialCustomer : _model.Customer;
 
             // Act
@@ -83,8 +86,10 @@ namespace System.Web.OData.Formatter.Serialization
             string select, string expand, bool specialOrder, string structuralPropertiesToSelect)
         {
             // Arrange
-            SelectExpandClause selectExpandClause =
-                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
+                new Dictionary<string, string> { { "$select", select }, { "$expand", expand } });
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
+
             SelectExpandClause nestedSelectExpandClause = selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand;
 
             IEdmEntityType entityType = specialOrder ? _model.SpecialOrder : _model.Order;
@@ -116,8 +121,9 @@ namespace System.Web.OData.Formatter.Serialization
             string select, string expand, bool specialCustomer, string navigationPropertiesToSelect)
         {
             // Arrange
-            SelectExpandClause selectExpandClause =
-                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
+                new Dictionary<string, string> { { "$select", select }, { "$expand", expand } });
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
 
             IEdmEntityType entityType = specialCustomer ? _model.SpecialCustomer : _model.Customer;
 
@@ -149,8 +155,9 @@ namespace System.Web.OData.Formatter.Serialization
             string select, string expand, bool specialCustomer, string navigationPropertiesToExpand)
         {
             // Arrange
-            SelectExpandClause selectExpandClause =
-                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
+                new Dictionary<string, string> { { "$select", select }, { "$expand", expand } });
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
 
             IEdmEntityType entityType = specialCustomer ? _model.SpecialCustomer : _model.Customer;
 
@@ -178,8 +185,10 @@ namespace System.Web.OData.Formatter.Serialization
             string select, string expand, bool specialCustomer, string actionsToSelect)
         {
             // Arrange
-            SelectExpandClause selectExpandClause =
-                new ODataUriParser(_model.Model, serviceRoot: null).ParseSelectAndExpand(select, expand, _model.Customer, _model.Customers);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
+                new Dictionary<string, string> { { "$select", select }, { "$expand", expand } });
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
+
             IEdmEntityType entityType = specialCustomer ? _model.SpecialCustomer : _model.Customer;
 
             // Act

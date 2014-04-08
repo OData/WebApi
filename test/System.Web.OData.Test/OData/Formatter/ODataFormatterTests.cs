@@ -96,13 +96,17 @@ namespace System.Web.OData.Formatter
         public void GetEntry_UsesRouteModel_ForMultipleModels()
         {
             // Model 1 only has Name, Model 2 only has Age
-            ODataModelBuilder builder1 = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
-            var personType1 = builder1.EntityType<FormatterPerson>().Property(p => p.Name);
+            ODataModelBuilder builder1 = new ODataModelBuilder();
+            var personType1 = builder1.EntityType<FormatterPerson>();
+            personType1.HasKey(p => p.PerId);
+            personType1.Property(p => p.Name);
             builder1.EntitySet<FormatterPerson>("People").HasIdLink(p => "http://link/", false);
             var model1 = builder1.GetEdmModel();
 
-            ODataModelBuilder builder2 = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
-            builder2.EntityType<FormatterPerson>().Property(p => p.Age);
+            ODataModelBuilder builder2 = new ODataModelBuilder();
+            var personType2 = builder2.EntityType<FormatterPerson>();
+            personType2.HasKey(p => p.PerId);
+            personType2.Property(p => p.Age);
             builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => "http://link/", false);
             var model2 = builder2.GetEdmModel();
 

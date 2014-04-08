@@ -663,7 +663,7 @@ namespace System.Web.OData.Builder
 
             // Act & Assert
             IEdmModel model = builder.GetEdmModel();
-            IEdmActionImport actionImport = model.EntityContainers().Single().OperationImports().Single(o => o.Name == "UnboundAction") as IEdmActionImport;
+            IEdmActionImport actionImport = model.EntityContainer.OperationImports().Single(o => o.Name == "UnboundAction") as IEdmActionImport;
 
             IEdmTypeReference color = actionImport.Action.Parameters.Single(p => p.Name == "Color").Type;
             IEdmTypeReference returnType = actionImport.Action.ReturnType;
@@ -687,7 +687,7 @@ namespace System.Web.OData.Builder
 
             // Act & Assert
             IEdmModel model = builder.GetEdmModel();
-            IEdmFunctionImport functionImport = model.EntityContainers().Single().OperationImports().Single(o => o.Name == "UnboundFunction") as IEdmFunctionImport;
+            IEdmFunctionImport functionImport = model.EntityContainer.OperationImports().Single(o => o.Name == "UnboundFunction") as IEdmFunctionImport;
 
             IEdmTypeReference colors = functionImport.Function.Parameters.Single(p => p.Name == "Colors").Type;
             IEdmTypeReference returnType = functionImport.Function.ReturnType;
@@ -760,7 +760,7 @@ namespace System.Web.OData.Builder
 
             // Act & Assert
             IEdmModel model = builder.GetEdmModel();
-            IEdmActionImport actionImport = model.EntityContainers().Single().OperationImports().Single(o => o.Name == "UnboundAction") as IEdmActionImport;
+            IEdmActionImport actionImport = model.EntityContainer.OperationImports().Single(o => o.Name == "UnboundAction") as IEdmActionImport;
 
             IEdmTypeReference colors = actionImport.Action.Parameters.Single(p => p.Name == "Colors").Type;
             IEdmTypeReference returnType = actionImport.Action.ReturnType;
@@ -784,7 +784,7 @@ namespace System.Web.OData.Builder
 
             // Act & Assert
             IEdmModel model = builder.GetEdmModel();
-            IEdmFunctionImport functionImport = model.EntityContainers().Single().OperationImports().Single(o => o.Name == "UnboundFunction") as IEdmFunctionImport;
+            IEdmFunctionImport functionImport = model.EntityContainer.OperationImports().Single(o => o.Name == "UnboundFunction") as IEdmFunctionImport;
 
             IEdmTypeReference color = functionImport.Function.Parameters.Single(p => p.Name == "Color").Type;
             IEdmTypeReference returnType = functionImport.Function.ReturnType;
@@ -940,8 +940,8 @@ namespace System.Web.OData.Builder
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<EntityTypeWithEnumTypePropertyTestModel>("Entities");
             IEdmModel model = builder.GetEdmModel();
-            IEdmEntitySet entitySet = model.EntityContainers().Single().FindEntitySet("Entities");
-            return entitySet.ElementType;
+            IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet("Entities");
+            return entitySet.EntityType();
         }
     }
 

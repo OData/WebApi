@@ -45,7 +45,9 @@ namespace System.Web.OData.Batch
                 throw Error.ArgumentNull("response");
             }
 
-            ODataBatchOperationResponseMessage batchResponse = writer.CreateOperationResponseMessage();
+            string contentId = ContentIdHelpers.ReadContentId(response);
+
+            ODataBatchOperationResponseMessage batchResponse = writer.CreateOperationResponseMessage(contentId);
 
             batchResponse.StatusCode = (int)response.StatusCode;
 

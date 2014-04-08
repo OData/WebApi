@@ -104,7 +104,7 @@ namespace System.Web.OData.Formatter
             configuration.Routes.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
             request.ODataProperties().Model = model;
-            IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
+            IEdmEntitySet entitySet = model.EntityContainer.EntitySets().Single();
             request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet), new KeyValuePathSegment("10"));
             request.ODataProperties().RouteName = routeName;
 
@@ -160,7 +160,7 @@ namespace System.Web.OData.Formatter
             var content = new ObjectContent<ODataServiceDocument>(new ODataServiceDocument(), formatter);
 
             string actualContent = content.ReadAsStringAsync().Result;
-            Assert.Contains("xml:base=\"" + baseUri + "\"", actualContent);
+            Assert.Contains("xml:base=\"" + baseUri + "/\"", actualContent);
         }
 
         [Fact]
@@ -819,7 +819,7 @@ namespace System.Web.OData.Formatter
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
             request.ODataProperties().Path =
-                new ODataPath(new EntitySetPathSegment(model.EntityContainers().Single().EntitySets().Single()));
+                new ODataPath(new EntitySetPathSegment(model.EntityContainer.EntitySets().Single()));
             request.SetFakeODataRouteName();
             return request;
         }

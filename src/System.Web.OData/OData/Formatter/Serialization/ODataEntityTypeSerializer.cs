@@ -15,6 +15,7 @@ using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -51,8 +52,8 @@ namespace System.Web.OData.Formatter.Serialization
                 throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
             }
 
-            ODataWriter writer = messageWriter.CreateODataEntryWriter(entitySet, entitySet.ElementType);
-            WriteObjectInline(graph, entitySet.ElementType.ToEdmTypeReference(isNullable: false), writer, writeContext);
+            ODataWriter writer = messageWriter.CreateODataEntryWriter(entitySet, entitySet.EntityType());
+            WriteObjectInline(graph, entitySet.EntityType().ToEdmTypeReference(isNullable: false), writer, writeContext);
         }
 
         /// <inheritdoc />
@@ -150,8 +151,13 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 TypeName = typeName,
                 Properties = CreateStructuralPropertyBag(selectExpandNode.SelectedStructuralProperties, entityInstanceContext),
-                Actions = CreateODataActions(selectExpandNode.SelectedActions, entityInstanceContext)
             };
+
+            IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, entityInstanceContext);
+            foreach (ODataAction action in actions)
+            {
+                entry.AddAction(action);
+            }
 
             IEdmEntityType pathType = GetODataPathType(entityInstanceContext.SerializerContext);
             AddTypeNameAnnotationAsNeeded(entry, pathType, entityInstanceContext.SerializerContext.MetadataLevel);
@@ -437,7 +443,7 @@ namespace System.Web.OData.Formatter.Serialization
                 return null;
             }
 
-            if (ShouldOmitAction(action, model, builder, metadataLevel))
+            if (ShouldOmitAction(action, builder, metadataLevel))
             {
                 return null;
             }
@@ -505,7 +511,7 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 // we are in an expanded navigation property. use the entityset to figure out the 
                 // type.
-                return serializerContext.EntitySet.ElementType;
+                return serializerContext.EntitySet.EntityType();
             }
             else
             {
@@ -565,17 +571,16 @@ namespace System.Web.OData.Formatter.Serialization
             return metadataLevel != ODataMetadataLevel.Default;
         }
 
-        internal static bool ShouldOmitAction(IEdmAction action, IEdmModel model, ActionLinkBuilder builder,
+        internal static bool ShouldOmitAction(IEdmAction action, ActionLinkBuilder builder,
             ODataMetadataLevel metadataLevel)
         {
-            Contract.Assert(model != null);
             Contract.Assert(builder != null);
 
             switch (metadataLevel)
             {
                 case ODataMetadataLevel.MinimalMetadata:
                 case ODataMetadataLevel.NoMetadata:
-                    return model.IsAlwaysBindable(action) && builder.FollowsConventions;
+                    return action.IsBound && builder.FollowsConventions;
 
                 case ODataMetadataLevel.Default:
                 case ODataMetadataLevel.FullMetadata:

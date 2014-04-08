@@ -16,12 +16,6 @@ namespace System.Web.OData.Formatter.Serialization
             SetCoreAnnotation<ActionLinkBuilder>(manager, element, value);
         }
 
-        public static void SetDefaultContainer(this IEdmDirectValueAnnotationsManager manager,
-            IEdmEntityContainer container)
-        {
-            SetODataAnnotation(manager, container, "IsDefaultEntityContainer", "true");
-        }
-
         public static void SetIsAlwaysBindable(this IEdmDirectValueAnnotationsManager manager, IEdmOperation operation)
         {
             SetODataAnnotation(manager, operation, "IsAlwaysBindable", "true");

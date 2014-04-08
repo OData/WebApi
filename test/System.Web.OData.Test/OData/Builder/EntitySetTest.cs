@@ -24,7 +24,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(container);
             var customers = container.EntitySets().SingleOrDefault(e => e.Name == "Customers");
             Assert.NotNull(customers);
-            Assert.Equal("Customer", customers.ElementType.Name);
+            Assert.Equal("Customer", customers.EntityType().Name);
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace System.Web.OData.Builder
 
             Assert.Equal(
                 "manufacturers",
-                model.EntityContainers().Single().FindEntitySet("vehicles").FindNavigationTarget(edmNavProperty).Name);
+                model.EntityContainer.FindEntitySet("vehicles").FindNavigationTarget(edmNavProperty).Name);
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace System.Web.OData.Builder
             IEdmModel model = builder.GetEdmModel();
             var motorcycleEdmType = model.AssertHasEntityType(typeof(Motorcycle));
             var edmNavProperty = motorcycleEdmType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.One);
-            var vehiclesEdmSet = model.EntityContainers().Single().FindEntitySet("vehicles");
+            var vehiclesEdmSet = model.EntityContainer.FindEntitySet("vehicles");
 
             Assert.NotNull(model.GetEntitySetLinkBuilder(vehiclesEdmSet));
             Assert.Equal(
@@ -151,7 +151,7 @@ namespace System.Web.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            var vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            var vehicles = model.EntityContainer.FindEntitySet("vehicles");
             Assert.NotNull(vehicles);
 
             var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
@@ -175,7 +175,7 @@ namespace System.Web.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            var vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            var vehicles = model.EntityContainer.FindEntitySet("vehicles");
             Assert.NotNull(vehicles);
 
             var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
@@ -199,7 +199,7 @@ namespace System.Web.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            var vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            var vehicles = model.EntityContainer.FindEntitySet("vehicles");
             Assert.NotNull(vehicles);
 
             var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
@@ -224,7 +224,7 @@ namespace System.Web.OData.Builder
                         ctxt.GetPropertyValue("Model"), ctxt.GetPropertyValue("Name"), property.Name)), followsConventions: false);
 
             IEdmModel model = builder.GetEdmModel();
-            var vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            var vehicles = model.EntityContainer.FindEntitySet("vehicles");
             var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
             var motorcycleManufacturerProperty =
                 motorcycle.AssertHasNavigationProperty(

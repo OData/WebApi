@@ -123,8 +123,8 @@ namespace System.Web.OData.Builder
             builder.EntitySet<EntitySetLinkConfigurationTest_Product>("Products").HasManyBinding(p => p.Orders, "Orders");
             var model = builder.GetEdmModel();
 
-            IEdmEntitySet products = model.EntityContainers().Single().EntitySets().Single(s => s.Name == "Products");
-            IEdmNavigationProperty ordersProperty = products.ElementType.DeclaredNavigationProperties().Single();
+            IEdmEntitySet products = model.EntityContainer.EntitySets().Single(s => s.Name == "Products");
+            IEdmNavigationProperty ordersProperty = products.EntityType().DeclaredNavigationProperties().Single();
             var linkBuilder = model.GetEntitySetLinkBuilder(products);
 
             // Act & Assert

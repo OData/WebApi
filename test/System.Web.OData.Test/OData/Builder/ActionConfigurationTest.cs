@@ -242,7 +242,6 @@ namespace System.Web.OData.Builder
             // Assert
             IEdmAction action = Assert.Single(model.SchemaElements.OfType<IEdmAction>());
             Assert.True(action.IsBound);
-            Assert.True(model.IsAlwaysBindable(action));
             Assert.Equal("ActionName", action.Name);
             Assert.Null(action.ReturnType);
             Assert.Equal(1, action.Parameters.Count());
@@ -263,18 +262,19 @@ namespace System.Web.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            IEdmEntityContainer container = model.EntityContainers().SingleOrDefault();
+            IEdmEntityContainer container = model.EntityContainer;
             Assert.NotNull(container);
             Assert.Equal(1, container.Elements.OfType<IEdmActionImport>().Count());
             Assert.Equal(1, container.Elements.OfType<IEdmEntitySet>().Count());
             IEdmActionImport action = container.Elements.OfType<IEdmActionImport>().Single();
             Assert.False(action.Action.IsBound);
-            Assert.False(model.IsAlwaysBindable(action.Action));
             Assert.Equal("ActionName", action.Name);
             Assert.NotNull(action.Action.ReturnType);
             Assert.NotNull(action.EntitySet);
             Assert.Equal("Customers", (action.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.Name);
-            Assert.Equal(typeof(Customer).FullName, (action.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.ElementType.FullName());
+            Assert.Equal(
+                typeof(Customer).FullName,
+                (action.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.EntityType().FullName());
             Assert.Empty(action.Action.Parameters);
         }
 
@@ -294,7 +294,6 @@ namespace System.Web.OData.Builder
             // Assert
             IEdmAction action = Assert.Single(model.SchemaElements.OfType<IEdmAction>());
             Assert.True(action.IsBound);
-            Assert.False(model.IsAlwaysBindable(action));
         }
 
         [Fact]
@@ -533,7 +532,7 @@ namespace System.Web.OData.Builder
 
             // Act
             IEdmModel model = builder.GetEdmModel();
-            IEdmOperationImport actionImport = model.EntityContainers().First().OperationImports().OfType<IEdmActionImport>().Single();
+            IEdmOperationImport actionImport = model.EntityContainer.OperationImports().OfType<IEdmActionImport>().Single();
             Assert.NotNull(actionImport);
             OperationTitleAnnotation actionTitleAnnotation = model.GetOperationTitleAnnotation(actionImport.Operation);
             

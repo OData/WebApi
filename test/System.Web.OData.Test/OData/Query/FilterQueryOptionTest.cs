@@ -313,8 +313,10 @@ namespace System.Web.OData.Query
         [Fact]
         public void ConstructorNullRawValueThrows()
         {
+            // Arrange
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
+            // Act & Assert
             Assert.Throws<ArgumentException>(() =>
                 new FilterQueryOption(null, new ODataQueryContext(model, typeof(Customer))));
         }
@@ -322,10 +324,24 @@ namespace System.Web.OData.Query
         [Fact]
         public void ConstructorEmptyRawValueThrows()
         {
+            // Arrange
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
+            // Act & Assert
             Assert.Throws<ArgumentException>(() =>
                 new FilterQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer))));
+        }
+
+        [Fact]
+        public void ConstructorNullQueryOptionParserThrows()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() =>
+                new FilterQueryOption("test", new ODataQueryContext(model, typeof(Customer)), queryOptionParser: null),
+                "queryOptionParser");
         }
 
         [Theory]

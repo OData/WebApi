@@ -6,6 +6,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -14,7 +15,9 @@ namespace System.Web.OData.Query
 {
     public class CountQueryOptionTest
     {
-        private static IEdmModel _model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+        private static IEdmModel _model = new ODataModelBuilder()
+            .Add_Customer_EntityType()
+            .Add_Customers_EntitySet().GetEdmModel();
         private static ODataQueryContext _context = new ODataQueryContext(_model, typeof(Customer));
         private static IQueryable _customers = new List<Customer>()
             {
@@ -26,22 +29,29 @@ namespace System.Web.OData.Query
         [Fact]
         public void Constructor_ThrowsException_IfNullContextArgument()
         {
-            Assert.ThrowsArgumentNull(() => new CountQueryOption("false", context: null),
+            Assert.ThrowsArgumentNull(() => new CountQueryOption("false", context: null, queryOptionParser: null),
                 "context");
         }
 
         [Fact]
         public void Constructor_ThrowsException_IfNullRawValueArgument()
         {
-            Assert.Throws<ArgumentException>(() => new CountQueryOption(null, _context),
+            Assert.Throws<ArgumentException>(() => new CountQueryOption(null, _context, null),
                 "The argument 'rawValue' is null or empty.\r\nParameter name: rawValue");
         }
 
         [Fact]
         public void Constructor_ThrowsException_IfEmptyRawValue()
         {
-            Assert.Throws<ArgumentException>(() => new CountQueryOption(string.Empty, _context),
+            Assert.Throws<ArgumentException>(() => new CountQueryOption(string.Empty, _context, null),
                 "The argument 'rawValue' is null or empty.\r\nParameter name: rawValue");
+        }
+
+        [Fact]
+        public void Constructor_ThrowsException_IfNullQueryOptionParser()
+        {
+            Assert.ThrowsArgumentNull(() => new CountQueryOption("false", _context, queryOptionParser: null),
+                "queryOptionParser");
         }
 
         [Fact]
@@ -64,26 +74,34 @@ namespace System.Web.OData.Query
             Assert.Same("test", countOption.RawValue);
         }
 
-        [Theory]
-        [InlineData("true", true)]
-        [InlineData("TrUe", true)]
-        [InlineData("TRUE", true)]
-        [InlineData("false", false)]
-        [InlineData("False", false)]
-        [InlineData("FALSE", false)]
-        public void Value_Returns_ParsedCountRawValue(string countValue, bool expectedValue)
+        [Fact]
+        public void Value_ReturnsTrue_IfParseTrueRawValue()
         {
             // Assert
-            var countOption = new CountQueryOption(countValue, _context);
+            var countOption = new CountQueryOption("true", _context);
 
             // Act & Assert
-            Assert.Equal(expectedValue, countOption.Value);
+            Assert.True(countOption.Value);
+        }
+
+        [Fact]
+        public void Value_ReturnsFalse_IfParseFalseRawValue()
+        {
+            // Assert
+            var countOption = new CountQueryOption("false", _context);
+
+            // Act & Assert
+            Assert.False(countOption.Value);
         }
 
         [Theory]
         [InlineData("onions")]
         [InlineData(" ")]
         [InlineData("Trrue")]
+        [InlineData("TrUe")]
+        [InlineData("TRUE")]
+        [InlineData("False")]
+        [InlineData("FALSE")]
         public void Value_ThrowsODataException_ForInvalidValues(string countValue)
         {
             // Arrange
@@ -91,7 +109,7 @@ namespace System.Web.OData.Query
 
             // Act & Assert
             Assert.Throws<ODataException>(() => countOption.Value,
-                "'" + countValue + "' is not a valid value for $count.");
+                "'" + countValue + "' is not a valid count option.");
         }
 
         [Fact]

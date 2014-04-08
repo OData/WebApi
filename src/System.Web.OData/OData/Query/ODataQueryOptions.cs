@@ -41,6 +41,8 @@ namespace System.Web.OData.Query
 
         private bool _etagIfNoneMatchChecked;
 
+        private ODataQueryOptionParser _queryOptionParser;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
@@ -74,6 +76,11 @@ namespace System.Web.OData.Query
             // Parse the query from request Uri
             RawValues = new ODataRawQueryOptions();
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.GetQueryNameValuePairs();
+
+            IDictionary<string, string> queryOptions = queryParameters.ToDictionary(p => p.Key, p => p.Value);
+            _queryOptionParser = new ODataQueryOptionParser(context.Model, context.ElementType,
+                context.NavigationSource, queryOptions);
+
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
                 switch (kvp.Key)
@@ -81,22 +88,22 @@ namespace System.Web.OData.Query
                     case "$filter":
                         ThrowIfEmpty(kvp.Value, "$filter");
                         RawValues.Filter = kvp.Value;
-                        Filter = new FilterQueryOption(kvp.Value, context);
+                        Filter = new FilterQueryOption(kvp.Value, context, _queryOptionParser);
                         break;
                     case "$orderby":
                         ThrowIfEmpty(kvp.Value, "$orderby");
                         RawValues.OrderBy = kvp.Value;
-                        OrderBy = new OrderByQueryOption(kvp.Value, context);
+                        OrderBy = new OrderByQueryOption(kvp.Value, context, _queryOptionParser);
                         break;
                     case "$top":
                         ThrowIfEmpty(kvp.Value, "$top");
                         RawValues.Top = kvp.Value;
-                        Top = new TopQueryOption(kvp.Value, context);
+                        Top = new TopQueryOption(kvp.Value, context, _queryOptionParser);
                         break;
                     case "$skip":
                         ThrowIfEmpty(kvp.Value, "$skip");
                         RawValues.Skip = kvp.Value;
-                        Skip = new SkipQueryOption(kvp.Value, context);
+                        Skip = new SkipQueryOption(kvp.Value, context, _queryOptionParser);
                         break;
                     case "$select":
                         RawValues.Select = kvp.Value;
@@ -104,7 +111,7 @@ namespace System.Web.OData.Query
                     case "$count":
                         ThrowIfEmpty(kvp.Value, "$count");
                         RawValues.Count = kvp.Value;
-                        Count = new CountQueryOption(kvp.Value, context);
+                        Count = new CountQueryOption(kvp.Value, context, _queryOptionParser);
                         break;
                     case "$expand":
                         RawValues.Expand = kvp.Value;
@@ -123,7 +130,8 @@ namespace System.Web.OData.Query
 
             if (RawValues.Select != null || RawValues.Expand != null)
             {
-                SelectExpand = new SelectExpandQueryOption(RawValues.Select, RawValues.Expand, context);
+                SelectExpand = new SelectExpandQueryOption(RawValues.Select, RawValues.Expand,
+                    context, _queryOptionParser);
             }
 
             Validator = new ODataQueryValidator();
@@ -429,6 +437,7 @@ namespace System.Web.OData.Query
             string orderByRaw = String.Join(",",
                                     GetAvailableOrderByProperties(context)
                                         .Select(property => property.Name));
+
             return String.IsNullOrEmpty(orderByRaw)
                     ? null
                     : new OrderByQueryOption(orderByRaw, context);
@@ -463,6 +472,7 @@ namespace System.Web.OData.Query
                 // the sort stable but preserving the user's original intent for the major
                 // sort order.
                 orderBy = new OrderByQueryOption(orderBy.RawValue, context);
+
                 foreach (IEdmStructuralProperty property in propertiesToAdd)
                 {
                     orderBy.OrderByNodes.Add(new OrderByPropertyNode(property, OrderByDirection.Ascending));

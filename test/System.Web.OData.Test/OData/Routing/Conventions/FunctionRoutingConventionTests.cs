@@ -11,6 +11,8 @@ namespace System.Web.OData.Routing.Conventions
 {
     public class FunctionRoutingConventionTests
     {
+        private const string _serviceRoot = "http://any/";
+
         [Fact]
         public void SelectAction_ThrowsArgumentNull_IfODataPathIsNull()
         {
@@ -78,7 +80,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(1)/NS.IsUpgraded");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(1)/NS.IsUpgraded");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
                 {
@@ -104,7 +106,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "VipCustomer/NS.IsUpgraded");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "VipCustomer/NS.IsUpgraded");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
             {
@@ -129,7 +131,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers/NS.IsAnyUpgraded");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers/NS.IsAnyUpgraded");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
                 {
@@ -154,7 +156,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(1)/NS.IsUpgradedWithParam(city='any')");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(1)/NS.IsUpgradedWithParam(city='any')");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
                 {
@@ -181,7 +183,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "VipCustomer/NS.IsUpgradedWithParam(city='any')");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "VipCustomer/NS.IsUpgradedWithParam(city='any')");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
             {
@@ -206,7 +208,7 @@ namespace System.Web.OData.Routing.Conventions
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(1)/NS.IsLocal");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(1)/NS.IsUpgraded");
             ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
             HttpControllerContext controllerContext = new HttpControllerContext
                 {

@@ -28,6 +28,7 @@ namespace System.Web.OData.Routing
             builder.EntitySet<EnumCustomer>("EnumCustomers");
             builder.Singleton<RoutingCustomer>("VipCustomer");
             builder.Singleton<Product>("MyProduct");
+            builder.EntitySet<DateTimeOffsetKeyCustomer>("DateTimeOffsetKeyCustomers");
 
             ActionConfiguration getRoutingCustomerById = builder.Action("GetRoutingCustomerById");
             getRoutingCustomerById.Parameter<int>("RoutingCustomerId");
@@ -124,6 +125,65 @@ namespace System.Web.OData.Routing
             function.Parameter<LongEnum>("LongEnum");
             function.Parameter<FlagsEnum>("FlagsEnum");
             function.Returns<string>();
+
+            // Unbound function
+            builder.Function("UnboundFunction").Returns<int>();
+
+            // Action only bound to the derived entity type
+            builder.EntityType<SpecialVIP>().Action("ActionBoundToSpecialVIP");
+
+            // Action only bound to the derived entity type
+            builder.EntityType<SpecialVIP>().Collection.Action("ActionBoundToSpecialVIPs");
+
+            // Function only bound to the base entity collection type
+            builder.EntityType<RoutingCustomer>().Collection.Function("FunctionBoundToRoutingCustomers").Returns<int>();
+
+            // Function only bound to the derived entity collection type
+            builder.EntityType<VIP>().Collection.Function("FunctionBoundToVIPs").Returns<int>();
+
+            // Bound function with multiple parameters
+            var functionBoundToProductWithMultipleParamters = builder.EntityType<Product>().Function("FunctionBoundToProductWithMultipleParamters");
+            functionBoundToProductWithMultipleParamters.Parameter<int>("P1");
+            functionBoundToProductWithMultipleParamters.Parameter<int>("P2");
+            functionBoundToProductWithMultipleParamters.Parameter<string>("P3");
+            functionBoundToProductWithMultipleParamters.Returns<int>();
+
+            // Overloaded bound function with no parameter
+            builder.EntityType<Product>().Function("FunctionBoundToProduct").Returns<int>();
+
+            // Overloaded bound function with one parameter
+            builder.EntityType<Product>().Function("FunctionBoundToProduct").Returns<int>().Parameter<int>("P1");
+
+            // Overloaded bound function with multiple parameters
+            var functionBoundToProduct = builder.EntityType<Product>().Function("FunctionBoundToProduct").Returns<int>();
+            functionBoundToProduct.Parameter<int>("P1");
+            functionBoundToProduct.Parameter<int>("P2");
+            functionBoundToProduct.Parameter<string>("P3");
+
+            // Unbound function with one parameter
+            var unboundFunctionWithOneParamters = builder.Function("UnboundFunctionWithOneParamters");
+            unboundFunctionWithOneParamters.Parameter<int>("P1");
+            unboundFunctionWithOneParamters.ReturnsFromEntitySet<RoutingCustomer>("RoutingCustomers");
+            unboundFunctionWithOneParamters.IsComposable = true;
+
+            // Unbound function with multiple parameters
+            var functionWithMultipleParamters = builder.Function("UnboundFunctionWithMultipleParamters");
+            functionWithMultipleParamters.Parameter<int>("P1");
+            functionWithMultipleParamters.Parameter<int>("P2");
+            functionWithMultipleParamters.Parameter<string>("P3");
+            functionWithMultipleParamters.Returns<int>();
+
+            // Overloaded unbound function with no parameter
+            builder.Function("OverloadUnboundFunction").Returns<int>();
+
+            // Overloaded unbound function with one parameter
+            builder.Function("OverloadUnboundFunction").Returns<int>().Parameter<int>("P1");
+
+            // Overloaded unbound function with multiple parameters
+            var overloadUnboundFunction = builder.Function("OverloadUnboundFunction").Returns<int>();
+            overloadUnboundFunction.Parameter<int>("P1");
+            overloadUnboundFunction.Parameter<int>("P2");
+            overloadUnboundFunction.Parameter<string>("P3");
 
             return builder.GetEdmModel();
         }
@@ -222,6 +282,11 @@ namespace System.Web.OData.Routing
         {
             public int ID { get; set; }
             public Color Color { get; set; }
+        }
+
+        public class DateTimeOffsetKeyCustomer
+        {
+            public DateTimeOffset ID { get; set; }
         }
     }
 }

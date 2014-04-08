@@ -201,6 +201,12 @@
   <data name="OrderByDuplicateProperty" xml:space="preserve">
     <value>Duplicate property named '{0}' is not supported in '$orderby'.</value>
   </data>
+  <data name="CannotRecognizeNodeType" xml:space="preserve">
+    <value>'{0}' does not recognize the node with type '{1}'.</value>
+  </data>
+  <data name="TargetKindNotImplemented" xml:space="preserve">
+    <value>'{0}' of kind '{1}' is not implemented.</value>
+  </data>
   <data name="ErrorTypeMustBeODataErrorOrHttpError" xml:space="preserve">
     <value>The type '{0}' is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError.</value>
   </data>
@@ -363,9 +369,6 @@
   <data name="WriteToStreamAsyncMustHaveRequest" xml:space="preserve">
     <value>The OData formatter does not support writing client requests. This formatter instance must have an associated request.</value>
   </data>
-  <data name="ActionResolutionFailed" xml:space="preserve">
-    <value>Action resolution failed. Multiple actions matching the action identifier '{0}' were found. The matching actions are: {1}.</value>
-  </data>
   <data name="ValueIsInvalid" xml:space="preserve">
     <value>The value '{0}' is invalid. {1}</value>
   </data>
@@ -411,32 +414,8 @@
   <data name="GetOnlyCollectionCannotBeArray" xml:space="preserve">
     <value>The value of the property '{0}' on type '{1}' is an array. Consider adding a setter for the property.</value>
   </data>
-  <data name="PreviousSegmentEdmTypeCannotBeNull" xml:space="preserve">
-    <value>The previous path segment cannot have a null value as its EdmType.</value>
-  </data>
   <data name="InvalidPathSegment" xml:space="preserve">
     <value>The URI segment '{0}' is invalid after the segment '{1}'.</value>
-  </data>
-  <data name="NoActionFoundForCollection" xml:space="preserve">
-    <value>Invalid action detected. '{0}' is not an action that can bind to 'Collection({1})'.</value>
-  </data>
-  <data name="PreviousSegmentMustBeCollectionType" xml:space="preserve">
-    <value>The previous segment's EDM type '{0}' must be a collection type.</value>
-  </data>
-  <data name="PreviousSegmentMustBeComplexType" xml:space="preserve">
-    <value>The previous segment's EDM type '{0}' must be a complex type.</value>
-  </data>
-  <data name="PreviousSegmentMustBeEntityCollectionType" xml:space="preserve">
-    <value>The previous segment's EDM type '{0}' must be an entity collection type.</value>
-  </data>
-  <data name="PreviousSegmentMustBeEntityType" xml:space="preserve">
-    <value>The previous segment's EDM type '{0}' must be an entity type.</value>
-  </data>
-  <data name="InvalidCastInPath" xml:space="preserve">
-    <value>Invalid cast encountered. Cast type '{0}' must be the same as or derive from the previous segment's type '{1}'.</value>
-  </data>
-  <data name="SegmentNullOrEmpty" xml:space="preserve">
-    <value>The segment value must not be null or empty.</value>
   </data>
   <data name="RequestNotActionInvocation" xml:space="preserve">
     <value>The last segment of the request URI '{0}' was not recognized as an OData action.</value>
@@ -586,9 +565,6 @@
   <data name="ActionNotBoundToEntity" xml:space="preserve">
     <value>The action '{0}' is not bound to an entity. Only actions that are bound to entities can have action links.</value>
   </data>
-  <data name="ODataPathInvalid" xml:space="preserve">
-    <value>The OData path is invalid.</value>
-  </data>
   <data name="TypeMustBeEntity" xml:space="preserve">
     <value>{0} is not an entity type. Only entity types are supported.</value>
   </data>
@@ -693,9 +669,6 @@
   </data>
   <data name="NotNavigablePropertyUsedInNavigation" xml:space="preserve">
     <value>The property '{0}' cannot be used for navigation.</value>
-  </data>
-  <data name="FunctionResolutionFailed" xml:space="preserve">
-    <value>Function resolution failed. Multiple functions found in the model with identifier: '{0}' and parameter names : '{1}'.</value>
   </data>
   <data name="EntityTypeDoesntHaveKeyDefined" xml:space="preserve">
     <value>The entity '{0}' does not have a key defined.</value>

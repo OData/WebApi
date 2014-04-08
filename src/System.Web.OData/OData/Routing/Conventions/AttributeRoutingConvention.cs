@@ -258,6 +258,11 @@ namespace System.Web.OData.Routing.Conventions
                 {
                     pathTemplate = prefix;
                 }
+                else if (pathTemplate.StartsWith("(", StringComparison.Ordinal))
+                {
+                    // We don't need '/' when the pathTemplate starts with a key segment.
+                    pathTemplate = prefix + pathTemplate;
+                }
                 else
                 {
                     pathTemplate = prefix + "/" + pathTemplate;

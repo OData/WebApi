@@ -12,6 +12,8 @@ namespace System.Web.OData.Routing.Conventions
 {
     public class PropertyRoutingConventionTests
     {
+        private const string _serviceRoot = "http://any/";
+
         [Fact]
         public void SelectAction_ThrowsArgumentNull_IfMissOdataPath()
         {
@@ -56,7 +58,7 @@ namespace System.Web.OData.Routing.Conventions
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(7)/Name");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(7)/Name");
             ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "GetNameFromCustomer");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
@@ -82,7 +84,7 @@ namespace System.Web.OData.Routing.Conventions
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "VipCustomer/Address");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "VipCustomer/Address");
             ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "GetAddress");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
@@ -107,7 +109,7 @@ namespace System.Web.OData.Routing.Conventions
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(10)/Name");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(10)/Name");
             ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext

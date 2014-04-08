@@ -7,7 +7,9 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
+using Semantic = Microsoft.OData.Core.UriParser.Semantic;
 
 namespace System.Web.OData.Routing
 {
@@ -20,49 +22,25 @@ namespace System.Web.OData.Routing
         /// Parses the specified OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
         /// </summary>
         /// <param name="model">The model to use for path parsing.</param>
+        /// <param name="serviceRoot">The service root of the OData path.</param>
         /// <param name="odataPath">The OData path to parse.</param>
         /// <returns>A parsed representation of the path, or <c>null</c> if the path does not match the model.</returns>
-        public virtual ODataPath Parse(IEdmModel model, string odataPath)
+        public virtual ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath)
         {
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
-
+            if (serviceRoot == null)
+            {
+                throw Error.ArgumentNull("serviceRoot");
+            }
             if (odataPath == null)
             {
                 throw Error.ArgumentNull("odataPath");
             }
 
-            List<ODataPathSegment> pathSegments = new List<ODataPathSegment>();
-            ODataPathSegment pathSegment = null;
-            IEdmType previousEdmType = null;
-
-            Queue<string> segments = new Queue<string>(ParseSegments(odataPath));
-
-            while (segments.Count > 0)
-            {
-                string nextSegment = segments.Dequeue();
-
-                // ignore empty parenthesis
-                if (FunctionResolver.IsEnclosedInParentheses(nextSegment) &&
-                    String.IsNullOrWhiteSpace(nextSegment.Substring(1, nextSegment.Length - 2)))
-                {
-                    continue;
-                }
-
-                pathSegment = ParseNextSegment(model, pathSegment, previousEdmType, nextSegment, segments);
-
-                // If the Uri stops matching the model at any point, return null
-                if (pathSegment == null)
-                {
-                    return null;
-                }
-
-                pathSegments.Add(pathSegment);
-                previousEdmType = pathSegment.GetEdmType(previousEdmType);
-            }
-            return new ODataPath(pathSegments);
+            return Parse(model, serviceRoot, odataPath, enableUriTemplateParsing: false);
         }
 
         /// <summary>
@@ -74,490 +52,18 @@ namespace System.Web.OData.Routing
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly")]
         public virtual ODataPathTemplate ParseTemplate(IEdmModel model, string odataPathTemplate)
         {
-            return Templatify(Parse(model, odataPathTemplate), odataPathTemplate);
-        }
-
-        /// <summary>
-        /// Parses the OData path into segments.
-        /// </summary>
-        /// <param name="odataPath">The OData path.</param>
-        /// <returns>The segments of the OData path.</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly")]
-        protected internal virtual IEnumerable<string> ParseSegments(string odataPath)
-        {
-            if (odataPath == null)
+            if (model == null)
             {
-                throw Error.ArgumentNull("odataPath");
+                throw Error.ArgumentNull("model");
+            }
+            if (odataPathTemplate == null)
+            {
+                throw Error.ArgumentNull("odataPathTemplate");
             }
 
-            string[] segments = odataPath.Split('/');
-
-            foreach (string segment in segments)
-            {
-                int startIndex = 0;
-                int openParensIndex = 0;
-                bool insideParens = false;
-                for (int i = 0; i < segment.Length; i++)
-                {
-                    switch (segment[i])
-                    {
-                        case '(':
-                            openParensIndex = i;
-                            insideParens = true;
-                            break;
-                        case ')':
-                            if (insideParens)
-                            {
-                                if (openParensIndex > startIndex)
-                                {
-                                    yield return segment.Substring(startIndex, openParensIndex - startIndex);
-                                }
-                                yield return segment.Substring(openParensIndex, (i + 1) - openParensIndex);
-                                startIndex = i + 1;
-                                insideParens = false;
-                            }
-                            break;
-                    }
-                }
-
-                if (startIndex < segment.Length)
-                {
-                    yield return segment.Substring(startIndex);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Parses the next OData path segment.
-        /// </summary>
-        /// <param name="model">The model to use for path parsing.</param>
-        /// <param name="previous">The previous path segment.</param>
-        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
-        /// <param name="segment">The value of the segment to parse.</param>
-        /// <param name="segments">The queue of pending segments.</param>
-        /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseNextSegment(IEdmModel model, ODataPathSegment previous,
-            IEdmType previousEdmType, string segment, Queue<string> segments)
-        {
-            if (String.IsNullOrEmpty(segment))
-            {
-                throw Error.Argument(SRResources.SegmentNullOrEmpty);
-            }
-
-            if (previous == null)
-            {
-                // Parse entry node
-                return ParseEntrySegment(model, segment, segments);
-            }
-            else
-            {
-                // Parse non-entry node
-                if (previousEdmType == null)
-                {
-                    throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
-                }
-
-                switch (previousEdmType.TypeKind)
-                {
-                    case EdmTypeKind.Collection:
-                        return ParseAtCollection(model, previous, previousEdmType, segment, segments);
-
-                    case EdmTypeKind.Entity:
-                        return ParseAtEntity(model, previous, previousEdmType, segment, segments);
-
-                    case EdmTypeKind.Complex:
-                        return ParseAtComplex(model, previous, previousEdmType, segment, segments);
-
-                    case EdmTypeKind.Primitive:
-                        return ParseAtPrimitiveProperty(model, previous, previousEdmType, segment, segments);
-
-                    case EdmTypeKind.Enum:
-                        return ParseAtEnumProperty(model, previous, previousEdmType, segment, segments);
-
-                    default:
-                        throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Parses the first OData segment following the service base URI.
-        /// </summary>
-        /// <param name="model">The model to use for path parsing.</param>
-        /// <param name="segment">The value of the segment to parse.</param>
-        /// <param name="segments">The queue of pending segments.</param>
-        /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseEntrySegment(IEdmModel model, string segment, Queue<string> segments)
-        {
-            if (segments == null)
-            {
-                throw Error.ArgumentNull("segments");
-            }
-            if (String.IsNullOrEmpty(segment))
-            {
-                throw Error.Argument(SRResources.SegmentNullOrEmpty);
-            }
-
-            // ~/$metadata
-            if (segment == ODataSegmentKinds.Metadata)
-            {
-                return new MetadataPathSegment();
-            }
-
-            // ~/$batch
-            if (segment == ODataSegmentKinds.Batch)
-            {
-                return new BatchPathSegment();
-            }
-
-            // ~/EntitySet
-            IEdmEntityContainer container = model.EntityContainer;
-            IEdmEntitySet entitySet = container.FindEntitySet(segment);
-            if (entitySet != null)
-            {
-                return new EntitySetPathSegment(entitySet);
-            }
-
-            // ~/Singleton
-            IEdmSingleton singleton = container.FindSingleton(segment);
-            if (singleton != null)
-            {
-                return new SingletonPathSegment(singleton);
-            }
-
-            // It's not possible to use a bound function (or action) at root.
-            // So, try to match an unbound action call
-            IEdmActionImport action = container.FindActionImport(segment);
-            if (action != null)
-            {
-                return new UnboundActionPathSegment(action);
-            }
-
-            // Try to match an unbound function call
-            UnboundFunctionPathSegment pathSegment = TryMatchUnboundFunctionCall(segment, segments, model);
-            if (pathSegment != null)
-            {
-                return pathSegment;
-            }
-
-            // segment does not match the model
-            return null;
-        }
-
-        /// <summary>
-        /// Parses the next OData path segment following a collection.
-        /// </summary>
-        /// <param name="model">The model to use for path parsing.</param>
-        /// <param name="previous">The previous path segment.</param>
-        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
-        /// <param name="segment">The value of the segment to parse.</param>
-        /// <param name="segments">The queue of pending segments.</param>
-        /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtCollection(IEdmModel model, ODataPathSegment previous,
-            IEdmType previousEdmType, string segment, Queue<string> segments)
-        {
-            if (previous == null)
-            {
-                throw Error.ArgumentNull("previous");
-            }
-            if (segments == null)
-            {
-                throw Error.ArgumentNull("segments");
-            }
-            if (String.IsNullOrEmpty(segment))
-            {
-                throw Error.Argument(SRResources.SegmentNullOrEmpty);
-            }
-
-            if (previousEdmType == null)
-            {
-                throw Error.InvalidOperation(SRResources.PreviousSegmentEdmTypeCannotBeNull);
-            }
-
-            IEdmCollectionType collection = previousEdmType as IEdmCollectionType;
-            if (collection == null)
-            {
-                throw Error.Argument(SRResources.PreviousSegmentMustBeCollectionType, previousEdmType);
-            }
-
-            switch (collection.ElementType.Definition.TypeKind)
-            {
-                case EdmTypeKind.Entity:
-                    return ParseAtEntityCollection(model, previous, previousEdmType, segment, segments);
-
-                default:
-                    throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
-            }
-        }
-
-        /// <summary>
-        /// Parses the next OData path segment following a complex-typed segment.
-        /// </summary>
-        /// <param name="model">The model to use for path parsing.</param>
-        /// <param name="previous">The previous path segment.</param>
-        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
-        /// <param name="segment">The value of the segment to parse.</param>
-        /// <param name="segments">The queue of pending segments.</param>
-        /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtComplex(IEdmModel model, ODataPathSegment previous,
-            IEdmType previousEdmType, string segment, Queue<string> segments)
-        {
-            if (previous == null)
-            {
-                throw Error.ArgumentNull("previous");
-            }
-            if (segments == null)
-            {
-                throw Error.ArgumentNull("segments");
-            }
-            if (String.IsNullOrEmpty(segment))
-            {
-                throw Error.Argument(SRResources.SegmentNullOrEmpty);
-            }
-
-            IEdmComplexType previousType = previousEdmType as IEdmComplexType;
-            if (previousType == null)
-            {
-                throw Error.Argument(SRResources.PreviousSegmentMustBeComplexType, previousEdmType);
-            }
-
-            // look for properties
-            IEdmProperty property = previousType.Properties().SingleOrDefault(p => p.Name == segment);
-            if (property != null)
-            {
-                return new PropertyAccessPathSegment(property);
-            }
-
-            // Treating as an open property
-            return new UnresolvedPathSegment(segment);
-        }
-
-        /// <summary>
-        /// Parses the next OData path segment following an entity collection.
-        /// </summary>
-        /// <param name="model">The model to use for path parsing.</param>
-        /// <param name="previous">The previous path segment.</param>
-        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
-        /// <param name="segment">The value of the segment to parse.</param>
-        /// <param name="segments">The queue of pending segments.</param>
-        /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtEntityCollection(IEdmModel model, ODataPathSegment previous,
-            IEdmType previousEdmType, string segment, Queue<string> segments)
-        {
-            if (previous == null)
-            {
-                throw Error.ArgumentNull("previous");
-            }
-            if (segments == null)
-            {
-                throw Error.ArgumentNull("segments");
-            }
-            if (String.IsNullOrEmpty(segment))
-            {
-                throw Error.Argument(SRResources.SegmentNullOrEmpty);
-            }
-
-            if (previousEdmType == null)
-            {
-                throw Error.InvalidOperation(SRResources.PreviousSegmentEdmTypeCannotBeNull);
-            }
-            IEdmCollectionType collectionType = previousEdmType as IEdmCollectionType;
-            if (collectionType == null)
-            {
-                throw Error.Argument(SRResources.PreviousSegmentMustBeEntityCollectionType, previousEdmType);
-            }
-            IEdmEntityType elementType = collectionType.ElementType.Definition as IEdmEntityType;
-            if (elementType == null)
-            {
-                throw Error.Argument(SRResources.PreviousSegmentMustBeEntityCollectionType, previousEdmType);
-            }
-
-            // look for keys first.
-            if (segment.StartsWith("(", StringComparison.Ordinal) && segment.EndsWith(")", StringComparison.Ordinal))
-            {
-                Contract.Assert(segment.Length >= 2);
-                string value = segment.Substring(1, segment.Length - 2);
-                return new KeyValuePathSegment(value);
-            }
-
-            // next look for casts
-            IEdmEntityType castType = model.FindDeclaredType(segment) as IEdmEntityType;
-            if (castType != null)
-            {
-                IEdmType previousElementType = collectionType.ElementType.Definition;
-                if (!castType.IsOrInheritsFrom(previousElementType) && !previousElementType.IsOrInheritsFrom(castType))
-                {
-                    throw new ODataException(Error.Format(SRResources.InvalidCastInPath, castType, previousElementType));
-                }
-                return new CastPathSegment(castType);
-            }
-
-            // look for $ref
-            if (segment == ODataSegmentKinds.Ref)
-            {
-                return new RefPathSegment();
-            }
-
-            // now look for bindable actions
-            IEdmAction action = model.FindAction(segment, collectionType);
-            if (action != null)
-            {
-                return new BoundActionPathSegment(action);
-            }
-
-            // Try to match this to a function call
-            BoundFunctionPathSegment pathSegment = TryMatchBoundFunctionCall(segment, segments, model, bindingType: collectionType);
-            if (pathSegment != null)
-            {
-                return pathSegment;
-            }
-
-            throw new ODataException(Error.Format(SRResources.NoActionFoundForCollection, segment, collectionType.ElementType));
-        }
-
-        /// <summary>
-        /// Parses the next OData path segment following an enum property.
-        /// </summary>
-        /// <param name="model">The model to use for path parsing.</param>
-        /// <param name="previous">The previous path segment.</param>
-        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
-        /// <param name="segment">The value of the segment to parse.</param>
-        /// <param name="segments">The queue of pending segments.</param>
-        /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtEnumProperty(IEdmModel model, ODataPathSegment previous,
-            IEdmType previousEdmType, string segment, Queue<string> segments)
-        {
-            if (previous == null)
-            {
-                throw Error.ArgumentNull("previous");
-            }
-            if (segments == null)
-            {
-                throw Error.ArgumentNull("segments");
-            }
-            if (String.IsNullOrEmpty(segment))
-            {
-                throw Error.Argument(SRResources.SegmentNullOrEmpty);
-            }
-
-            if (segment == ODataSegmentKinds.Value)
-            {
-                return new ValuePathSegment();
-            }
-
-            throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
-        }
-
-        /// <summary>
-        /// Parses the next OData path segment following a primitive property.
-        /// </summary>
-        /// <param name="model">The model to use for path parsing.</param>
-        /// <param name="previous">The previous path segment.</param>
-        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
-        /// <param name="segment">The value of the segment to parse.</param>
-        /// <param name="segments">The queue of pending segments.</param>
-        /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtPrimitiveProperty(IEdmModel model, ODataPathSegment previous,
-            IEdmType previousEdmType, string segment, Queue<string> segments)
-        {
-            if (previous == null)
-            {
-                throw Error.ArgumentNull("previous");
-            }
-            if (segments == null)
-            {
-                throw Error.ArgumentNull("segments");
-            }
-            if (String.IsNullOrEmpty(segment))
-            {
-                throw Error.Argument(SRResources.SegmentNullOrEmpty);
-            }
-
-            if (segment == ODataSegmentKinds.Value)
-            {
-                return new ValuePathSegment();
-            }
-
-            throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
-        }
-
-        /// <summary>
-        /// Parses the next OData path segment following an entity.
-        /// </summary>
-        /// <param name="model">The model to use for path parsing.</param>
-        /// <param name="previous">The previous path segment.</param>
-        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
-        /// <param name="segment">The value of the segment to parse.</param>
-        /// <param name="segments">The queue of pending segments.</param>
-        /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtEntity(IEdmModel model, ODataPathSegment previous,
-            IEdmType previousEdmType, string segment, Queue<string> segments)
-        {
-            if (previous == null)
-            {
-                throw Error.ArgumentNull("previous");
-            }
-            if (segments == null)
-            {
-                throw Error.ArgumentNull("segments");
-            }
-            if (String.IsNullOrEmpty(segment))
-            {
-                throw Error.Argument(SRResources.SegmentNullOrEmpty);
-            }
-            IEdmEntityType previousType = previousEdmType as IEdmEntityType;
-            if (previousType == null)
-            {
-                throw Error.Argument(SRResources.PreviousSegmentMustBeEntityType, previousEdmType);
-            }
-
-            // first look for navigation properties
-            IEdmNavigationProperty navigation = previousType.NavigationProperties().SingleOrDefault(np => np.Name == segment);
-            if (navigation != null)
-            {
-                return new NavigationPathSegment(navigation);
-            }
-
-            // next look for properties
-            IEdmProperty property = previousType.Properties().SingleOrDefault(p => p.Name == segment);
-            if (property != null)
-            {
-                return new PropertyAccessPathSegment(property);
-            }
-
-            // next look for type casts
-            IEdmEntityType castType = model.FindDeclaredType(segment) as IEdmEntityType;
-            if (castType != null)
-            {
-                if (!castType.IsOrInheritsFrom(previousType) && !previousType.IsOrInheritsFrom(castType))
-                {
-                    throw new ODataException(Error.Format(SRResources.InvalidCastInPath, castType, previousType));
-                }
-                return new CastPathSegment(castType);
-            }
-
-            // look for $ref
-            if (segment == ODataSegmentKinds.Ref)
-            {
-                return new RefPathSegment();
-            }
-
-            // finally look for bindable procedures
-            IEdmAction action = model.FindAction(segment, previousType);
-            if (action != null)
-            {
-                return new BoundActionPathSegment(action);
-            }
-
-            // Try to match this to a function call
-            BoundFunctionPathSegment pathSegment = TryMatchBoundFunctionCall(segment, segments, model, bindingType: previousType);
-            if (pathSegment != null)
-            {
-                return pathSegment;
-            }
-
-            // Treating as an open property
-            return new UnresolvedPathSegment(segment);
+            return Templatify(
+                Parse(model, serviceRoot: null, odataPath: odataPathTemplate, enableUriTemplateParsing: true),
+                odataPathTemplate);
         }
 
         /// <summary>
@@ -569,68 +75,74 @@ namespace System.Web.OData.Routing
         /// </returns>
         public virtual string Link(ODataPath path)
         {
+            if (path == null)
+            {
+                throw Error.ArgumentNull("path");
+            }
+
             return path.ToString();
         }
 
-        private static BoundFunctionPathSegment TryMatchBoundFunctionCall(string segment, Queue<string> segments, IEdmModel model,
-            IEdmType bindingType)
+        private static ODataPath Parse(
+            IEdmModel model,
+            string serviceRoot,
+            string odataPath,
+            bool enableUriTemplateParsing)
         {
-            Contract.Assert(model != null);
-            Contract.Assert(bindingType != null);
+            ODataUriParser uriParser;
 
-            string nextSegment = segments.Count > 0 ? segments.Peek() : null;
-            IEnumerable<IEdmOperation> matchedOperations = model.FindMatchedOperations(segment, bindingType);
-            IEnumerable<IEdmFunction> possibleFunctions = matchedOperations.OfType<IEdmFunction>();
-            if (possibleFunctions.Count() == 0)
+            if (enableUriTemplateParsing)
             {
-                return null;
-            }
-
-            IEdmEntityType currentBindingType;
-            if (bindingType.TypeKind == EdmTypeKind.Collection)
-            {
-                currentBindingType = (IEdmEntityType)(((IEdmCollectionType)bindingType).ElementType.Definition);
+                uriParser = new ODataUriParser(model, new Uri(odataPath, UriKind.Relative));
+                uriParser.EnableUriTemplateParsing = true;
             }
             else
             {
-               currentBindingType = (IEdmEntityType)bindingType;
+                Contract.Assert(serviceRoot != null);
+
+                Uri serviceRootUri = new Uri(
+                    serviceRoot.EndsWith("/", StringComparison.Ordinal) ?
+                        serviceRoot :
+                        serviceRoot + "/");
+
+                Uri fullUri = new Uri(serviceRootUri, odataPath);
+                uriParser = new ODataUriParser(model, serviceRootUri, fullUri);
             }
 
-            while (currentBindingType != null)
+            Semantic.ODataPath path;
+            UnresolvedPathSegment unresolvedPathSegment = null;
+            try
             {
-                IEnumerable<IEdmFunction> matchedFunctions = possibleFunctions.Where(f => FunctionResolver.IsBoundTo(f, currentBindingType));
-                BoundFunctionPathSegment functionSegment = FunctionResolver.TryResolveBound(matchedFunctions, model, nextSegment);
-                if (functionSegment != null)
+                path = uriParser.ParsePath();
+            }
+            catch (ODataUnrecognizedPathException ex)
+            {
+                if (ex.ParsedSegments != null &&
+                    ex.ParsedSegments.Count() > 0 &&
+                    (ex.ParsedSegments.Last().EdmType is IEdmComplexType ||
+                     ex.ParsedSegments.Last().EdmType is IEdmEntityType))
                 {
-                    if (FunctionResolver.IsEnclosedInParentheses(nextSegment))
+                    if (ex.UnparsedSegments.Count() == 0)
                     {
-                        segments.Dequeue();
+                        path = new Semantic.ODataPath(ex.ParsedSegments);
+                        unresolvedPathSegment = new UnresolvedPathSegment(ex.CurrentSegment);
                     }
-
-                    return functionSegment;
+                    else
+                    {
+                        // Throw ODataException if there is some segment following the unresolved segment.
+                        throw new ODataException(Error.Format(
+                            SRResources.InvalidPathSegment, 
+                            ex.UnparsedSegments.First(), 
+                            ex.CurrentSegment));
+                    }
                 }
-
-                currentBindingType = currentBindingType.BaseEntityType();
+                else
+                {
+                    throw;
+                }
             }
 
-            return null;
-        }
-
-        private static UnboundFunctionPathSegment TryMatchUnboundFunctionCall(string segment, Queue<string> segments, IEdmModel model)
-        {
-            IEdmEntityContainer container = model.EntityContainer;
-            string nextSegment = segments.Count > 0 ? segments.Peek() : null;
-
-            IEnumerable<IEdmOperationImport> operationImports = container.FindMatchedOperationImports(segment);
-            IEnumerable<IEdmFunctionImport> possibleFunctions = operationImports.OfType<IEdmFunctionImport>();
-
-            UnboundFunctionPathSegment unboundFunctionSegment = FunctionResolver.TryResolveUnbound(possibleFunctions, model, nextSegment);
-            if (unboundFunctionSegment != null && FunctionResolver.IsEnclosedInParentheses(nextSegment))
-            {
-                segments.Dequeue();
-            }
-
-            return unboundFunctionSegment;
+            return ODataPathSegmentTranslator.TranslateODLPathToWebAPIPath(path, model, unresolvedPathSegment, enableUriTemplateParsing);
         }
 
         private static ODataPathTemplate Templatify(ODataPath path, string pathTemplate)

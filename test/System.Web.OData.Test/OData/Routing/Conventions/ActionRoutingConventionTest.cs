@@ -13,6 +13,8 @@ namespace System.Web.OData.Routing.Conventions
 {
     public class ActionRoutingConventionTest
     {
+        private const string _serviceRoot = "http://any/";
+
         [Fact]
         public void SelectAction_ThrowsArgumentNull_IfODataPathIsNull()
         {
@@ -73,7 +75,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             ActionRoutingConvention actionConvention = new ActionRoutingConvention();
             IEdmModel model = ODataRoutingModel.GetModel();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, "RoutingCustomers/Default.GetVIPs");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, _serviceRoot,"RoutingCustomers/Default.GetVIPs");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
             {
@@ -98,7 +100,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             ActionRoutingConvention actionConvention = new ActionRoutingConvention();
             IEdmModel model = new CustomersModelWithInheritance().Model;
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, "VipCustomer/NS.upgrade");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, _serviceRoot, "VipCustomer/NS.upgrade");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
             {
@@ -122,7 +124,7 @@ namespace System.Web.OData.Routing.Conventions
         [InlineData("RoutingCustomers/Default.GetProducts")]
         public void SelectAction_ReturnsNull_IfActionIsMissing(string path)
         {
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(ODataRoutingModel.GetModel(), path);
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(ODataRoutingModel.GetModel(), _serviceRoot, path);
             ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
             HttpControllerContext controllerContext = new HttpControllerContext();
             controllerContext.Request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/");

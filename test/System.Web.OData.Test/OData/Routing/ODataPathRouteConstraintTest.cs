@@ -8,10 +8,9 @@ using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing.Conventions;
-using Microsoft.OData.Core;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
-using Moq;
 
 namespace System.Web.OData.Routing
 {
@@ -44,44 +43,58 @@ namespace System.Web.OData.Routing
         [Fact]
         public void Match_ReturnsFalse_IfODataPathCannotBeParsed()
         {
-            var values = new Dictionary<string, object>() { { "odataPath", "NotAnODataPath" } };
+            // Arrange
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://any/");
+            HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
+            httpRouteCollection.Add(_routeName, new HttpRoute());
+            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
 
+            var values = new Dictionary<string, object>() { { "odataPath", "NotAnODataPath" } };
             var constraint = new ODataPathRouteConstraint(_pathHandler, _model, _routeName, _conventions);
-            Assert.False(constraint.Match(_request, null, null, values, HttpRouteDirection.UriResolution));
+
+            // Act & Assert
+            Assert.False(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
         }
 
         [Fact]
         public void Match_ReturnsTrue_IfODataPathCanBeParsed()
         {
-            var values = new Dictionary<string, object>() { { "odataPath", "$metadata" } };
+            // Arrange
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://any/");
+            HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
+            httpRouteCollection.Add(_routeName, new HttpRoute());
+            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
 
+            var values = new Dictionary<string, object>() { { "odataPath", "$metadata" } };
             var constraint = new ODataPathRouteConstraint(_pathHandler, _model, _routeName, _conventions);
-            Assert.True(constraint.Match(_request, null, null, values, HttpRouteDirection.UriResolution));
+
+            // Act & Assert
+            Assert.True(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
 
             Assert.Equal("Metadata", values["controller"]);
-            Assert.Same(_model, _request.ODataProperties().Model);
-            Assert.Same(_routeName, _request.ODataProperties().RouteName);
-            Assert.Equal(_conventions, _request.ODataProperties().RoutingConventions);
-            Assert.Same(_pathHandler, _request.ODataProperties().PathHandler);
+            Assert.Same(_model, request.ODataProperties().Model);
+            Assert.Same(_routeName, request.ODataProperties().RouteName);
+            Assert.Equal(_conventions, request.ODataProperties().RoutingConventions);
+            Assert.Same(_pathHandler, request.ODataProperties().PathHandler);
         }
 
         [Fact]
-        public void Match_ThrowsHttpResponseException_IfPathParserThrowsODataException()
+        public void Match_ReturnsFalse_IfODataPathHasNotImplementedSegment()
         {
-            var values = new Dictionary<string, object>() { { "odataPath", "" } };
-            _request.SetConfiguration(new HttpConfiguration() { IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always });
-            Mock<IODataPathHandler> pathHandler = new Mock<IODataPathHandler>();
-            string exceptionMessage = "NOOODATA";
-            pathHandler.Setup(handler => handler.Parse(_model, "")).Throws(new ODataException(exceptionMessage));
-            var constraint = new ODataPathRouteConstraint(pathHandler.Object, _model, _routeName, _conventions);
+            // Arrange
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://any/");
+            HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
+            httpRouteCollection.Add(_routeName, new HttpRoute());
+            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
 
-            var ex = Assert.Throws<HttpResponseException>(
-                () => constraint.Match(_request, null, null, values, HttpRouteDirection.UriResolution));
+            var values = new Dictionary<string, object>() { { "odataPath", "Customers/$count" } };
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            var constraint = new ODataPathRouteConstraint(_pathHandler, model, _routeName, _conventions);
 
-            Assert.Equal(HttpStatusCode.NotFound, ex.Response.StatusCode);
-            HttpError error = ex.Response.Content.ReadAsAsync<HttpError>().Result;
-            Assert.Equal("The OData path is invalid.", error.Message);
-            Assert.Equal(exceptionMessage, error.ExceptionMessage);
+            // Act & Assert
+            Assert.False(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
         }
     }
 }

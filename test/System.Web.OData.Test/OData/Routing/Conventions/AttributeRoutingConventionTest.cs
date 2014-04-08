@@ -201,8 +201,9 @@ namespace System.Web.OData.Routing.Conventions
             Assert.Throws<InvalidOperationException>(
                 () => convention.SelectController(new ODataPath(), new HttpRequestMessage()),
                 "The path template 'Customers/Order' on the action 'GetCustomers' in controller 'TestController' is not " +
-                "a valid OData path template. Invalid action detected. 'Order' is not an action that can bind to 'Collec" +
-                "tion([NS.Customer Nullable=False])'.");
+                "a valid OData path template. The request URI is not valid. Since the segment 'Customers' refers to a " +
+                "collection, this must be the last segment in the request URI or it must be followed by an function or " +
+                "action that can be bound to it otherwise all intermediate segments must refer to a single resource.");
         }
 
         [Fact]

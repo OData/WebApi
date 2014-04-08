@@ -2,13 +2,17 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.OData.Builder;
+using System.Web.OData.Formatter;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 
 namespace System.Web.OData.Routing
 {
@@ -16,43 +20,14 @@ namespace System.Web.OData.Routing
     {
         private static DefaultODataPathHandler _parser = new DefaultODataPathHandler();
         private static IEdmModel _model = ODataRoutingModel.GetModel();
-
-        public static TheoryDataSet<string, string[]> ParseSegmentsData
-        {
-            get
-            {
-                return new TheoryDataSet<string, string[]>()
-                {
-                    { "", new string[] { } },
-                    { "foo(12)/xy/g()", new string[] { "foo", "(12)", "xy", "g", "()" } },
-                    { "foo(12/xy", new string[] { "foo(12", "xy" } },
-                    { "(/)", new string[] { "(", ")" } },
-                    { "()", new string[] { "()" } },
-                    { ")(", new string[] { ")(" } },
-                    { ")hahaha(", new string[] { ")hahaha(" } },
-                    { "foo///bar", new string[] { "foo", "bar" } },
-                    { "()/()/()/()ok", new string[] { "()","()","()","()","ok" } },
-                    { "RoutingCustomers(45)()(5)()()()(8)", new string[] { "RoutingCustomers", "(45)", "()", "(5)", "()", "()", "()", "(8)" } },
-                    { "RoutingCustomers(45))()ok", new string[] { "RoutingCustomers", "(45)", ")", "()", "ok"} }
-                };
-            }
-        }
-
-        [Theory]
-        [PropertyData("ParseSegmentsData")]
-        public void ParseSegments_ParsesODataSegments(string relativePath, string[] expectedSegments)
-        {
-            IEnumerable<string> segments = _parser.ParseSegments(relativePath);
-
-            Assert.Equal(expectedSegments, segments);
-        }
+        private const string _serviceRoot = "http://any/";
 
         [Fact]
         public void Parse_WorksOnEncodedCharacters()
         {
             string odataPath = "üCategories";
 
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             Assert.NotNull(path);
@@ -66,8 +41,9 @@ namespace System.Web.OData.Routing
             string odataPath = "RoutingCustomers/System.Web.OData.Routing.Product";
 
             Assert.Throws<ODataException>(
-                () => _parser.Parse(_model, odataPath),
-                "Invalid cast encountered. Cast type 'System.Web.OData.Routing.Product' must be the same as or derive from the previous segment's type 'System.Web.OData.Routing.RoutingCustomer'.");
+                () => _parser.Parse(_model, _serviceRoot, odataPath),
+                "The type 'System.Web.OData.Routing.Product' specified in the URI is neither a base type " +
+                "nor a sub-type of the previously-specified type 'System.Web.OData.Routing.RoutingCustomer'.");
         }
 
         [Fact]
@@ -75,57 +51,93 @@ namespace System.Web.OData.Routing
         {
             string odataPath = "$metadata/foo";
 
-            Assert.Throws<ODataException>(
-                () => _parser.Parse(_model, odataPath),
-                "The URI segment 'foo' is invalid after the segment '$metadata'.");
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => _parser.Parse(_model, _serviceRoot, odataPath),
+                "The request URI is not valid. The segment '$metadata' must be the last segment in the URI because " +
+                "it is one of the following: $batch, $value, $metadata, a collection property, a named media resource, " +
+                "an action, a noncomposable function, an action import, or a noncomposable function import.");
         }
 
         [Theory]
-        [InlineData("", "~")]
-        [InlineData("$metadata", "~/$metadata")]
-        [InlineData("$batch", "~/$batch")]
-        [InlineData("RoutingCustomers(112)", "~/entityset/key")]
-        [InlineData("RoutingCustomers(112)()", "~/entityset/key")]
-        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP", "~/entityset/cast")]
-        [InlineData("RoutingCustomers(100)/Products", "~/entityset/key/navigation")]
-        [InlineData("RoutingCustomers(100)/Products()", "~/entityset/key/navigation")]
-        [InlineData("RoutingCustomers(100)/System.Web.OData.Routing.VIP/RelationshipManager", "~/entityset/key/cast/navigation")]
-        [InlineData("GetRoutingCustomerById()", "~/unboundaction")]
-        [InlineData("RoutingCustomers(112)/Address/Street", "~/entityset/key/property/property")]
-        [InlineData("RoutingCustomers(1)/Name/$value", "~/entityset/key/property/$value")]
-        [InlineData("RoutingCustomers(1)/Products/$ref", "~/entityset/key/navigation/$ref")]
-        [InlineData("RoutingCustomers(112)/Default.GetRelatedRoutingCustomers", "~/entityset/key/action")]
-        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetMostProfitable", "~/entityset/cast/action")]
-        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "~/entityset/key/navigation/cast/key/navigation/navigation")]
-        [InlineData("EnumCustomers(1)/Color", "~/entityset/key/property")]
-        [InlineData("EnumCustomers(1)/Color/$value", "~/entityset/key/property/$value")]
-        [InlineData("VipCustomer", "~/singleton")]
-        [InlineData("VipCustomer/System.Web.OData.Routing.VIP", "~/singleton/cast")]
-        [InlineData("VipCustomer/Products", "~/singleton/navigation")]
-        [InlineData("VipCustomer/System.Web.OData.Routing.VIP/RelationshipManager", "~/singleton/cast/navigation")]
-        [InlineData("VipCustomer/Name/$value", "~/singleton/property/$value")]
-        [InlineData("VipCustomer/Products/$ref", "~/singleton/navigation/$ref")]
-        [InlineData("VipCustomer/Default.GetRelatedRoutingCustomers", "~/singleton/action")]
-        [InlineData("MyProduct/Default.TopProductId()", "~/singleton/function")]
-        public void Parse_ReturnsPath_WithCorrectTemplate(string odataPath, string template)
+        [InlineData("", "~", "")]
+        [InlineData("$metadata", "~/$metadata", "$metadata")]
+        [InlineData("$batch", "~/$batch", "$batch")]
+        [InlineData("RoutingCustomers(112)", "~/entityset/key", "RoutingCustomers(112)")]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP", "~/entityset/cast", "RoutingCustomers/System.Web.OData.Routing.VIP")]
+        [InlineData("RoutingCustomers(100)/Products", "~/entityset/key/navigation", "RoutingCustomers(100)/Products")]
+        [InlineData("RoutingCustomers(100)/Address/Unknown", "~/entityset/key/property/unresolved", "RoutingCustomers(100)/Address/Unknown")]
+        [InlineData("RoutingCustomers(100)/Products()", "~/entityset/key/navigation", "RoutingCustomers(100)/Products")]
+        [InlineData("RoutingCustomers(100)/System.Web.OData.Routing.VIP/RelationshipManager", "~/entityset/key/cast/navigation",
+            "RoutingCustomers(100)/System.Web.OData.Routing.VIP/RelationshipManager")]
+        [InlineData("GetRoutingCustomerById()", "~/unboundaction", "GetRoutingCustomerById")]
+        [InlineData("UnboundFunction()", "~/unboundfunction", "UnboundFunction()")]
+        [InlineData("UnboundFunctionWithOneParamters(P1=1)", "~/unboundfunction", "UnboundFunctionWithOneParamters(P1=1)")]
+        [InlineData("UnboundFunctionWithMultipleParamters(P1=1,P2=2,P3='a')", "~/unboundfunction", "UnboundFunctionWithMultipleParamters(P1=1,P2=2,P3='a')")]
+        [InlineData("OverloadUnboundFunction()", "~/unboundfunction", "OverloadUnboundFunction()")]
+        [InlineData("OverloadUnboundFunction(P1=1)", "~/unboundfunction", "OverloadUnboundFunction(P1=1)")]
+        [InlineData("OverloadUnboundFunction(P1=1,P2=2,P3='a')", "~/unboundfunction", "OverloadUnboundFunction(P1=1,P2=2,P3='a')")]
+        [InlineData("RoutingCustomers(112)/Address/Street", "~/entityset/key/property/property", "RoutingCustomers(112)/Address/Street")]
+        [InlineData("RoutingCustomers(1)/Name/$value", "~/entityset/key/property/$value", "RoutingCustomers(1)/Name/$value")]
+        [InlineData("RoutingCustomers(1)/Products/$ref", "~/entityset/key/navigation/$ref", "RoutingCustomers(1)/Products/$ref")]
+        [InlineData("RoutingCustomers(112)/Default.GetRelatedRoutingCustomers", "~/entityset/key/action",
+            "RoutingCustomers(112)/Default.GetRelatedRoutingCustomers")]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetMostProfitable", "~/entityset/cast/action",
+            "RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetMostProfitable")]
+        [InlineData("RoutingCustomers(112)/Default.GetOrdersCount(factor=1)", "~/entityset/key/function",
+            "RoutingCustomers(112)/Default.GetOrdersCount(factor=1)")]
+        [InlineData("RoutingCustomers(112)/System.Web.OData.Routing.VIP/Default.GetOrdersCount(factor=1)", "~/entityset/key/cast/function",
+            "RoutingCustomers(112)/System.Web.OData.Routing.VIP/Default.GetOrdersCount(factor=1)")]
+        [InlineData("RoutingCustomers/Default.FunctionBoundToRoutingCustomers()", "~/entityset/function",
+            "RoutingCustomers/Default.FunctionBoundToRoutingCustomers()")]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/Default.FunctionBoundToRoutingCustomers()", "~/entityset/cast/function",
+            "RoutingCustomers/System.Web.OData.Routing.VIP/Default.FunctionBoundToRoutingCustomers()")]
+        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts",
+            "~/entityset/key/navigation/cast/key/navigation/navigation",
+            "Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts")]
+        [InlineData("Products(1)/Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2,P3='a')", "~/entityset/key/function",
+            "Products(1)/Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2,P3='a')")]
+        [InlineData("Products(1)/Default.FunctionBoundToProduct()", "~/entityset/key/function",
+            "Products(1)/Default.FunctionBoundToProduct()")]
+        [InlineData("Products(1)/Default.FunctionBoundToProduct(P1=1)", "~/entityset/key/function",
+            "Products(1)/Default.FunctionBoundToProduct(P1=1)")]
+        [InlineData("Products(1)/Default.FunctionBoundToProduct(P1=1,P2=2,P3='a')", "~/entityset/key/function",
+            "Products(1)/Default.FunctionBoundToProduct(P1=1,P2=2,P3='a')")]
+        [InlineData("EnumCustomers(1)/Color", "~/entityset/key/property", "EnumCustomers(1)/Color")]
+        [InlineData("EnumCustomers(1)/Color/$value", "~/entityset/key/property/$value", "EnumCustomers(1)/Color/$value")]
+        [InlineData("VipCustomer", "~/singleton", "VipCustomer")]
+        [InlineData("VipCustomer/System.Web.OData.Routing.VIP", "~/singleton/cast", "VipCustomer/System.Web.OData.Routing.VIP")]
+        [InlineData("VipCustomer/Products", "~/singleton/navigation", "VipCustomer/Products")]
+        [InlineData("VipCustomer/System.Web.OData.Routing.VIP/RelationshipManager", "~/singleton/cast/navigation",
+            "VipCustomer/System.Web.OData.Routing.VIP/RelationshipManager")]
+        [InlineData("VipCustomer/Name/$value", "~/singleton/property/$value", "VipCustomer/Name/$value")]
+        [InlineData("VipCustomer/Products/$ref", "~/singleton/navigation/$ref", "VipCustomer/Products/$ref")]
+        [InlineData("VipCustomer/Default.GetRelatedRoutingCustomers", "~/singleton/action", "VipCustomer/Default.GetRelatedRoutingCustomers")]
+        [InlineData("MyProduct/Default.TopProductId()", "~/singleton/function", "MyProduct/Default.TopProductId()")]
+        public void Parse_ReturnsPath_WithCorrectTemplateAndPathString(string odataPath, string template, string pathString)
         {
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
 
             Assert.NotNull(path);
             Assert.Equal(template, path.PathTemplate);
+            Assert.Equal(pathString, path.ToString());
         }
 
-        [Fact]
-        public void CanParseUrlWithNoModelElements()
+        [Theory]
+        [InlineData("", new string[] { })]
+        [InlineData("UnboundFunctionWithOneParamters(P1=1)/Products", new string[] { "UnboundFunctionWithOneParamters(P1=1)", "Products" })]
+        [InlineData("UnboundFunctionWithMultipleParamters(P1=1,P2=2,P3='a')", new string[] { "UnboundFunctionWithMultipleParamters(P1=1,P2=2,P3='a')" })]
+        [InlineData("RoutingCustomers(100)/System.Web.OData.Routing.VIP/RelationshipManager", new string[] { "RoutingCustomers", "100", "System.Web.OData.Routing.VIP", "RelationshipManager" })]
+        [InlineData("RoutingCustomers(112)/Address/Street", new string[] { "RoutingCustomers", "112", "Address", "Street" })]
+        [InlineData("RoutingCustomers(1)/Name/$value", new string[] { "RoutingCustomers", "1", "Name", "$value" })]
+        [InlineData("RoutingCustomers(1)/Products/$ref", new string[] { "RoutingCustomers", "1", "Products", "$ref" })]
+        [InlineData("VipCustomer/Default.GetRelatedRoutingCustomers", new string[] { "VipCustomer", "Default.GetRelatedRoutingCustomers" })]
+        public void ParseSegmentsCorrectly(string odataPath, string[] expectedSegments)
         {
-            // Arrange
-            string odataPath = "1/2()/3/4()/5";
-
-            // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            // Arrange & Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
 
             // Assert
-            Assert.Null(path);
+            Assert.Equal(expectedSegments, path.Segments.Select(segment => segment.ToString()));
         }
 
         [Fact]
@@ -133,7 +145,7 @@ namespace System.Web.OData.Routing
         {
             string odataPath = "$metadata";
 
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -150,7 +162,7 @@ namespace System.Web.OData.Routing
             string odataPath = "$batch";
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -170,7 +182,7 @@ namespace System.Web.OData.Routing
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -191,7 +203,7 @@ namespace System.Web.OData.Routing
                 .SingleOrDefault(s => s.FullName() == "System.Web.OData.Routing.VIP");
 
             // Act
-            ODataPath path = _parser.Parse(_model, "RoutingCustomers/System.Web.OData.Routing.VIP");
+            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers/System.Web.OData.Routing.VIP");
             Assert.NotNull(path); // Guard
             ODataPathSegment segment = path.Segments.Last();
 
@@ -212,7 +224,7 @@ namespace System.Web.OData.Routing
             Assert.NotNull(expectedSingleton); // Guard
 
             // Act
-            ODataPath path = _parser.Parse(_model, ODataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, ODataPath);
             Assert.NotNull(path); // Guard
             ODataPathSegment segment = path.Segments.Last();
 
@@ -233,7 +245,7 @@ namespace System.Web.OData.Routing
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -254,7 +266,7 @@ namespace System.Web.OData.Routing
             IEdmEntityType expectedType = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -274,7 +286,7 @@ namespace System.Web.OData.Routing
             IEdmEntityType expectedType = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -294,7 +306,7 @@ namespace System.Web.OData.Routing
             IEdmEntityType expectedType = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -314,7 +326,7 @@ namespace System.Web.OData.Routing
             IEdmNavigationProperty expectedEdmElement = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "RoutingCustomer").NavigationProperties().SingleOrDefault(n => n.Name == "Products");
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -336,7 +348,7 @@ namespace System.Web.OData.Routing
             IEdmNavigationProperty expectedEdmElement = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP").NavigationProperties().SingleOrDefault(n => n.Name == "RelationshipManager");
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -360,7 +372,7 @@ namespace System.Web.OData.Routing
                 .SingleOrDefault(s => s.Name == "GetRoutingCustomerById") as IEdmActionImport;
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -384,7 +396,7 @@ namespace System.Web.OData.Routing
             IEdmType expectedType = expectedEdmElement.Type.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -407,7 +419,7 @@ namespace System.Web.OData.Routing
             IEdmType expectedType = expectedEdmElement.Type.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -431,7 +443,7 @@ namespace System.Web.OData.Routing
             IEdmType expectedType = expectedEdmElement.Type.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -449,7 +461,7 @@ namespace System.Web.OData.Routing
         public void CanParsePropertyValueSegment(string odataPath)
         {
             // Arrange & Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -470,7 +482,7 @@ namespace System.Web.OData.Routing
             IEdmEntityType expectedType = expectedSet.EntityType();
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -481,17 +493,25 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("RoutingCustomers(1)/GetRelatedRoutingCustomers", "~/entityset/key/unresolved")]
-        [InlineData("RoutingCustomers(2)/System.Web.OData.Routing.VIP/GetMostProfitable", "~/entityset/key/cast/unresolved")]
-        [InlineData("Products(7)/TopProductId", "~/entityset/key/unresolved")]
-        [InlineData("Products(7)/System.Web.OData.Routing.ImportantProduct/TopProductId", "~/entityset/key/cast/unresolved")]
-        public void CannotParseUnqualifiedOperationPath(string odataPath, string expect)
+        [InlineData("RoutingCustomers(1)/GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers")]
+        [InlineData("RoutingCustomers(2)/System.Web.OData.Routing.VIP/GetMostProfitable", "GetMostProfitable")]
+        [InlineData("Products(7)/TopProductId", "TopProductId")]
+        [InlineData("Products(7)/System.Web.OData.Routing.ImportantProduct/TopProductId", "TopProductId")]
+        public void ParseAsUnresolvedPathSegment_UnqualifiedOperationPath(string odataPath, string unresolveValue)
         {
-            // Arrange & Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            // Arrange & Act & Assert
+            UnresolvedPathSegment unresolvedPathSegment = Assert.IsType<UnresolvedPathSegment>(
+                _parser.Parse(_model, _serviceRoot, odataPath).Segments.Last());
+            Assert.Equal(unresolveValue, unresolvedPathSegment.SegmentValue);
+        }
 
-            // Assert
-            Assert.Equal(expect, path.PathTemplate);
+        [Fact]
+        public void CannotParseSegmentAfterUnresolvedPathSegment()
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ODataException>(
+                () => _parser.Parse(_model, _serviceRoot, _serviceRoot + "RoutingCustomers(1)/GetRelatedRoutingCustomers/Segment"),
+                "The URI segment 'Segment' is invalid after the segment 'GetRelatedRoutingCustomers'.");
         }
 
         [Fact]
@@ -507,7 +527,7 @@ namespace System.Web.OData.Routing
             IEdmType expectedType = expectedEdmElement.ReturnType.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(_model, "RoutingCustomers(112)/Default.GetRelatedRoutingCustomers");
+            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers(112)/Default.GetRelatedRoutingCustomers");
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -531,7 +551,7 @@ namespace System.Web.OData.Routing
             IEdmType expectedType = expectedEdmElement.ReturnType.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(_model, "VipCustomer/Default.GetRelatedRoutingCustomers");
+            ODataPath path = _parser.Parse(_model, _serviceRoot, "VipCustomer/Default.GetRelatedRoutingCustomers");
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -555,7 +575,7 @@ namespace System.Web.OData.Routing
             IEdmType expectedType = expectedEdmElement.ReturnType.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -568,11 +588,11 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("Default.FunctionAtRoot()")]
-        [InlineData("Default.Container.FunctionAtRoot()")]
-        [InlineData("Default.ActionAtRoot")]
-        [InlineData("Default.Container.ActionAtRoot")]
-        public void CannotParseQualifiedUnboundOperation(string odataPath)
+        [InlineData("Default.FunctionAtRoot()", "Default.FunctionAtRoot")]
+        [InlineData("Default.Container.FunctionAtRoot()", "Default.Container.FunctionAtRoot")]
+        [InlineData("Default.ActionAtRoot", "Default.ActionAtRoot")]
+        [InlineData("Default.Container.ActionAtRoot", "Default.Container.ActionAtRoot")]
+        public void CannotParseQualifiedUnboundOperation(string odataPath, string segmentName)
         {
             // Arrange
             var model = new CustomersModelWithInheritance();
@@ -583,11 +603,198 @@ namespace System.Web.OData.Routing
 
             model.Container.AddActionImport(new EdmAction(model.Container.Namespace, "ActionAtRoot", returnType));
 
-            // Act
-            ODataPath path = _parser.Parse(model.Model, odataPath);
+            // Act & Assert
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => _parser.Parse(model.Model, _serviceRoot, odataPath),
+                String.Format("Resource not found for the segment '{0}'.", segmentName));
+        }
 
-            // Assert
-            Assert.Null(path);
+        [Theory]
+        [InlineData("RoutingCustomers(5)/Default.GetSpecialGuid()", "Default.GetSpecialGuid()")]
+        [InlineData("RoutingCustomers(5)/System.Web.OData.Routing.VIP/Default.GetSpecialGuid()", "Default.GetSpecialGuid()")]
+        [InlineData("RoutingCustomers(5)/Default.ActionBoundToSpecialVIP()", "Default.ActionBoundToSpecialVIP()")]
+        public void ParseAsUnresolvePathSegment_OperationBoundToDerivedType(string uri, string unresolvedValue)
+        {
+            // Arrange & Act & Assert
+            UnresolvedPathSegment unresolvedPathSegment = Assert.IsType<UnresolvedPathSegment>(
+                _parser.Parse(_model, _serviceRoot, _serviceRoot + uri).Segments.Last());
+            Assert.Equal(unresolvedValue, unresolvedPathSegment.SegmentValue);
+        }
+
+        [Theory]
+        [InlineData("RoutingCustomers/Default.ActionBoundToSpecialVIPs()")]
+        [InlineData("RoutingCustomers/Default.FunctionBoundToVIPs()")]
+        public void CannotParseOperationBoundToDerivedCollectionType(string uri)
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ODataException>(
+                () => _parser.Parse(_model, _serviceRoot, _serviceRoot + uri),
+                "The request URI is not valid. Since the segment 'RoutingCustomers' refers to a collection," +
+                " this must be the last segment in the request URI or it must be followed by an function or action " +
+                "that can be bound to it otherwise all intermediate segments must refer to a single resource.");
+        }
+
+        [Fact]
+        public void ParseAsUnresolvedPathSegment_UnboundOperationAfterEntityType()
+        {
+            // Arrange & Act & Assert
+            UnresolvedPathSegment unresolvedPathSegment = Assert.IsType<UnresolvedPathSegment>(
+                _parser.Parse(_model, _serviceRoot, _serviceRoot + "RoutingCustomers(1)/Default.GetAllVIPs()").Segments.Last());
+            Assert.Equal("Default.GetAllVIPs()", unresolvedPathSegment.SegmentValue);
+        }
+
+        [Fact]
+        public void CannotParseUnboundOperationAfterEntityCollectionType()
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ODataException>(
+                () => _parser.Parse(_model, _serviceRoot, _serviceRoot + "RoutingCustomers/Default.GetAllVIPs()"),
+                "The request URI is not valid. Since the segment 'RoutingCustomers' refers to a collection," +
+                " this must be the last segment in the request URI or it must be followed by an function or action " +
+                "that can be bound to it otherwise all intermediate segments must refer to a single resource.");
+        }
+
+        [Fact]
+        public void CannotParseAmbiguousAction()
+        {
+            // Arrange
+            EdmModel model = new EdmModel();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            model.AddElement(container);
+
+            container.AddActionImport(new EdmAction("NS", "AmbiguousAction", returnType: null));
+            container.AddActionImport(new EdmAction("NS", "AmbiguousAction", returnType: null));
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _parser.Parse(model, _serviceRoot, _serviceRoot + "AmbiguousAction"),
+                "Multiple action import overloads were found with the same binding parameter for 'AmbiguousAction'.");
+        }
+
+        [Theory]
+        [InlineData("Products(1)/Default.FunctionBoundToProductWithMultipleParamters()", "Default.FunctionBoundToProductWithMultipleParamters()")]
+        [InlineData("Products(1)/Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2)", "Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2)")]
+        [InlineData("Products(1)/Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2,UnknownP3='a')", "Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2,UnknownP3='a')")]
+        [InlineData("Products(1)/Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2,P3='a',UnknownP4=1)", "Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2,P3='a',UnknownP4=1)")]
+        [InlineData("Products(1)/Default.FunctionBoundToProduct(UnknownP1=1)", "Default.FunctionBoundToProduct(UnknownP1=1)")]
+        [InlineData("Products(1)/Default.FunctionBoundToProduct(P1=1,P2=2,UnknownP3='a')", "Default.FunctionBoundToProduct(P1=1,P2=2,UnknownP3='a')")]
+        [InlineData("Products(1)/Default.FunctionBoundToProduct(P1=1,P2=2,P3='a',UnknownP4=1)", "Default.FunctionBoundToProduct(P1=1,P2=2,P3='a',UnknownP4=1)")]
+        public void ParseAsUnresolvePathSegment_FunctionBoundToEntityWithInvalidParameters(string uri, string unresolvedValue)
+        {
+            // Arrange & Act & Assert
+            UnresolvedPathSegment unresolvedPathSegment = Assert.IsType<UnresolvedPathSegment>(
+                _parser.Parse(_model, _serviceRoot, _serviceRoot + uri).Segments.Last());
+            Assert.Equal(unresolvedValue, unresolvedPathSegment.SegmentValue);
+        }
+
+        [Theory]
+        [InlineData("UnboundFunction(somekey=1)", "Resource not found for the segment 'UnboundFunction'.")]
+        [InlineData("UnboundFunctionWithOneParamters(UnknownP1=1)", "Resource not found for the segment 'UnboundFunctionWithOneParamters'.")]
+        [InlineData("UnboundFunctionWithOneParamters(UnknownP1=1,UnknownP2=2)", "Resource not found for the segment 'UnboundFunctionWithOneParamters'.")]
+        [InlineData("UnboundFunctionWithOneParamters(P1=1,UnknownP2=2)", "Resource not found for the segment 'UnboundFunctionWithOneParamters'.")]
+        [InlineData("UnboundFunctionWithMultipleParamters(P1=1,P2=2)", "Resource not found for the segment 'UnboundFunctionWithMultipleParamters'.")]
+        public void CannotParseFunctionImportWithInvalidParameters(string uri, string expectedError)
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => _parser.Parse(_model, _serviceRoot, _serviceRoot + uri),
+                expectedError);
+        }
+
+        [Theory]
+        [InlineData("EntitySet(1)/NS.OverloadBoundFunction(FunctionParameter=1)", "NS.OverloadBoundFunction(FunctionParameter=1)")]
+        [InlineData("EntitySet(1)/NS.OverloadBoundFunction(FunctionParameter='abc')", "NS.OverloadBoundFunction(FunctionParameter='abc')")]
+        public void ParseAsUnresolvePathSegment_OverloadBoundFunctionWithDifferentParamterType(string uri, string unresolvedValue)
+        {
+            // Arrange
+            EdmModel model = new EdmModel();
+            var entityType = new EdmEntityType("NS", "EntityTypeName");
+            entityType.AddKeys(entityType.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            model.AddElement(entityType);
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            model.AddElement(container);
+            container.AddEntitySet("EntitySet", entityType);
+
+            var boundFunction = new EdmFunction("NS", "OverloadBoundFunction", EdmCoreModel.Instance.GetInt32(false));
+            boundFunction.AddParameter("bindingParameter", entityType.ToEdmTypeReference(false));
+            boundFunction.AddParameter("FunctionParameter", EdmCoreModel.Instance.GetInt32(false));
+            model.AddElement(boundFunction);
+
+            boundFunction = new EdmFunction("NS", "OverloadBoundFunction", EdmCoreModel.Instance.GetInt32(false));
+            boundFunction.AddParameter("bindingParameter", entityType.ToEdmTypeReference(false));
+            boundFunction.AddParameter("FunctionParameter", EdmCoreModel.Instance.GetString(false));
+            model.AddElement(boundFunction);
+
+            // Act & Assert
+            UnresolvedPathSegment unresolvedPathSegment = Assert.IsType<UnresolvedPathSegment>(
+                _parser.Parse(model, _serviceRoot, _serviceRoot + uri).Segments.Last());
+            Assert.Equal(unresolvedValue, unresolvedPathSegment.SegmentValue);
+        }
+
+        [Theory]
+        [InlineData("OverloadUnboundFunction(Parameter=1)")]
+        [InlineData("OverloadUnboundFunction(Parameter='abc')")]
+        public void CannotParseOverloadUnboundFunctionWithDifferentParamterType(string uri)
+        {
+            // Arrange
+            EdmModel model = new EdmModel();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            model.AddElement(container);
+
+            var unboundFunction = new EdmFunction("NS", "OverloadUnboundFunction", EdmCoreModel.Instance.GetInt32(false));
+            unboundFunction.AddParameter("Parameter", EdmCoreModel.Instance.GetInt32(false));
+            model.AddElement(unboundFunction);
+
+            unboundFunction = new EdmFunction("NS", "OverloadUnboundFunction", EdmCoreModel.Instance.GetInt32(false));
+            unboundFunction.AddParameter("Parameter", EdmCoreModel.Instance.GetString(false));
+            model.AddElement(unboundFunction);
+
+            // Act & Assert
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => _parser.Parse(model, _serviceRoot, _serviceRoot + uri),
+                "Resource not found for the segment 'OverloadUnboundFunction'.");
+        }
+
+        [Theory]
+        [InlineData(typeof(SimpleEnum), "Microsoft.TestCommon.Types.SimpleEnum'123'")]
+        [InlineData(typeof(SimpleEnum), "Microsoft.TestCommon.Types.SimpleEnum'-9999'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.TestCommon.Types.FlagsEnum'999'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.TestCommon.Types.FlagsEnum'-12345'")]
+        public void CanParseUndefinedEnumValue(Type enumerationType, string enumerationExpression)
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            EnumTypeConfiguration enumTypeConfiguration = builder.AddEnumType(enumerationType);
+            FunctionConfiguration functionConfiguration = builder.Function("FunctionWithEnumParam");
+            functionConfiguration.AddParameter("Enum", enumTypeConfiguration);
+            functionConfiguration.Returns<int>();
+            IEdmModel model = builder.GetEdmModel();
+            string uri = String.Format("FunctionWithEnumParam(Enum={0})", enumerationExpression);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _parser.Parse(model, _serviceRoot, uri));
+        }
+
+        [Theory]
+        [InlineData(typeof(SimpleEnum), "Microsoft.TestCommon.Types.SimpleEnum'First, Second'")]
+        [InlineData(typeof(SimpleEnum), "Microsoft.TestCommon.Types.SimpleEnum'UnknownValue'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.TestCommon.Types.FlagsEnum'UnknownValue'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.TestCommon.Types.FlagsEnum'abc'")]
+        public void CannotParseInvalidEnumValue(Type enumerationType, string enumerationExpression)
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            EnumTypeConfiguration enumTypeConfiguration = builder.AddEnumType(enumerationType);
+            FunctionConfiguration functionConfiguration = builder.Function("FunctionWithEnumParam");
+            functionConfiguration.AddParameter("Enum", enumTypeConfiguration);
+            functionConfiguration.Returns<int>();
+            IEdmModel model = builder.GetEdmModel();
+            string uri = String.Format("FunctionWithEnumParam(Enum={0})", enumerationExpression);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _parser.Parse(model, _serviceRoot, uri),
+                String.Format("The string '{0}' is not a valid enumeration type constant.", enumerationExpression));
         }
 
         [Fact]
@@ -606,7 +813,7 @@ namespace System.Web.OData.Routing
                     isComposable: true));
 
             // Act
-            ODataPath path = _parser.Parse(model.Model, "FunctionAtRoot");
+            ODataPath path = _parser.Parse(model.Model, _serviceRoot, "FunctionAtRoot");
 
             // Assert
             Assert.NotNull(path);
@@ -636,7 +843,7 @@ namespace System.Web.OData.Routing
             model.Model.AddElement(function);
 
             // Act
-            ODataPath path = _parser.Parse(model.Model, odataPath);
+            ODataPath path = _parser.Parse(model.Model, _serviceRoot, odataPath);
 
             // Assert
             Assert.NotNull(path);
@@ -666,7 +873,7 @@ namespace System.Web.OData.Routing
             model.Model.AddElement(function);
 
             // Act
-            ODataPath path = _parser.Parse(model.Model, "Customers/NS.Count");
+            ODataPath path = _parser.Parse(model.Model, _serviceRoot, "Customers/NS.Count");
 
             // Assert
             Assert.NotNull(path);
@@ -693,14 +900,14 @@ namespace System.Web.OData.Routing
             model.Container.AddFunctionImport("FunctionAtRoot", function, entitySet: null);
 
             // Act
-            ODataPath path = _parser.Parse(model.Model, "FunctionAtRoot(IntParameter=1)");
+            ODataPath path = _parser.Parse(model.Model, _serviceRoot, "FunctionAtRoot(IntParameter=1)");
             UnboundFunctionPathSegment functionSegment = (UnboundFunctionPathSegment)path.Segments.Last();
 
             // Assert
-            int intParameter = (int) functionSegment.GetParameterValue("IntParameter");
+            int intParameter = (int)functionSegment.GetParameterValue("IntParameter");
             Assert.Equal(1, intParameter);
         }
-        
+
         [Fact]
         public void CanParse_FunctionParameters_CanResolveAliasedParameterValue()
         {
@@ -718,7 +925,7 @@ namespace System.Web.OData.Routing
             model.Container.AddFunctionImport("FunctionAtRoot", function, entitySet: null);
 
             // Act
-            ODataPath path = _parser.Parse(model.Model, "FunctionAtRoot(IntParameter=@p1)");
+            ODataPath path = _parser.Parse(model.Model, _serviceRoot, "FunctionAtRoot(IntParameter=@p1)");
             UnboundFunctionPathSegment functionSegment = (UnboundFunctionPathSegment)path.Segments.Last();
 
             // Assert
@@ -731,16 +938,15 @@ namespace System.Web.OData.Routing
         [InlineData("unBoundWithoutParams", 1, "Edm.Boolean", "~/unboundfunction")]
         [InlineData("unBoundWithoutParams()", 1, "Edm.Boolean", "~/unboundfunction")]
         [InlineData("unBoundWithOneParam(Param=false)", 1, "Edm.Boolean", "~/unboundfunction")]
-        [InlineData("unBoundWithMultipleParams(Param1=false,Param2=false,Param3='')", 1, "Edm.Boolean", "~/unboundfunction")]
+        [InlineData("unBoundWithMultipleParams(Param1=false,Param2=false,Param3=true)", 1, "Edm.Boolean", "~/unboundfunction")]
         [InlineData("Customers(42)/NS.BoundToEntityNoParams()", 3, "Edm.Boolean", "~/entityset/key/function")]
         [InlineData("Customers(42)/NS.BoundToEntityNoParams", 3, "Edm.Boolean", "~/entityset/key/function")]
-        [InlineData("Customers(42)/NS.BoundToEntity(Param=something)", 3, "Edm.Boolean", "~/entityset/key/function")]
+        [InlineData("Customers(42)/NS.BoundToEntity(Param=false)", 3, "Edm.Boolean", "~/entityset/key/function")]
         [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityNoParams()", 3, "NS.Customer", "~/entityset/key/function")]
         [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityNoParams()/ID", 4, "Edm.Int32", "~/entityset/key/function/property")]
         [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityNoParams()/Orders(42)", 5, "NS.Order", "~/entityset/key/function/navigation/key")]
         [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityNoParams()/NS.BoundToEntityReturnsEntityNoParams", 4, "NS.Customer", "~/entityset/key/function/function")]
         [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityCollectionNoParams()", 3, "Collection([NS.Customer Nullable=False])", "~/entityset/key/function")]
-        [InlineData("Customers(42)/NS.BoundToEntityReturnsEntityCollectionNoParams()(42)", 4, "NS.Customer", "~/entityset/key/function/key")]
         [InlineData("Customers/NS.BoundToEntityCollection", 2, "Edm.Boolean", "~/entityset/function")]
         [InlineData("Customers/NS.BoundToEntityCollection()", 2, "Edm.Boolean", "~/entityset/function")]
         [InlineData("Customers/NS.BoundToEntityCollectionReturnsComplex()", 2, "NS.Address", "~/entityset/function")]
@@ -752,13 +958,28 @@ namespace System.Web.OData.Routing
             var model = GetModelWithFunctions();
 
             // Act
-            ODataPath path = _parser.Parse(model, odataPath);
+            ODataPath path = _parser.Parse(model, _serviceRoot, odataPath);
 
             // Assert
             Assert.NotNull(path);
             Assert.Equal(expectedCount, path.Segments.Count());
             Assert.Equal(expectedTypeName, path.EdmType.ToString());
             Assert.Equal(expectedTemplate, path.PathTemplate);
+        }
+
+        [Fact]
+        public void CannotParse_KeySegmentAfterFunctionSegment()
+        {
+            // Arrange
+            var model = GetModelWithFunctions();
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _parser.Parse(
+                    model,
+                    _serviceRoot,
+                    "Customers(42)/NS.BoundToEntityReturnsEntityCollectionNoParams()(42)"),
+                "Bad Request - Error in query syntax.");
         }
 
         [Theory]
@@ -784,7 +1005,7 @@ namespace System.Web.OData.Routing
             // Act
             try
             {
-                path = _parser.Parse(model, odataPath);
+                path = _parser.Parse(model, _serviceRoot, odataPath);
             }
             catch (ODataException)
             {
@@ -793,6 +1014,27 @@ namespace System.Web.OData.Routing
 
             // Assert
             Assert.True(path == null || path.EdmType == null || exceptionThrown);
+        }
+
+        [Theory]
+        [InlineData("CustomersWithMultiKeys(Key1=1)")]
+        [InlineData("CustomersWithMultiKeys(Key2=2)")]
+        [InlineData("CustomersWithMultiKeys(Key3=3)")]
+        [InlineData("CustomersWithMultiKeys(Key1=1,Key2=2,Key3=3)")]
+        public void CannotParse_UnmatchedCountOfKeys(string path)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            EdmEntityType customerWithMultiKeys = new EdmEntityType("NS", "CustomerWithMultiKeys");
+            customerWithMultiKeys.AddKeys(customerWithMultiKeys.AddStructuralProperty("Key1", EdmPrimitiveTypeKind.Int32));
+            customerWithMultiKeys.AddKeys(customerWithMultiKeys.AddStructuralProperty("Key2", EdmPrimitiveTypeKind.Int32));
+            model.Model.AddElement(customerWithMultiKeys);
+            model.Container.AddEntitySet("CustomersWithMultiKeys", customerWithMultiKeys);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _parser.Parse(model.Model, _serviceRoot, path),
+                "The number of keys specified in the URI does not match number of key properties for the resource 'NS.CustomerWithMultiKeys'.");
         }
 
         private static IEdmModel GetModelWithFunctions()
@@ -820,7 +1062,7 @@ namespace System.Web.OData.Routing
             boundToEntity.AddParameter("Param", boolType);
 
             AddFunction(model, "BoundToEntityReturnsEntityNoParams",
-                returnType: customerType, entitySet: model.Customers, bindingParameterType: customerType);
+                returnType: customerType, entitySet: model.Customers, bindingParameterType: customerType, entitySetPath: "bindingParameter");
 
             AddFunction(model, "BoundToEntityReturnsEntityCollectionNoParams",
                 returnType: customersType, entitySet: model.Customers, bindingParameterType: customerType);
@@ -846,7 +1088,7 @@ namespace System.Web.OData.Routing
             var expectedType = model.FindDeclaredType("System.Web.OData.Routing." + expectedTypeName) as IEdmEntityType;
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -940,6 +1182,7 @@ namespace System.Web.OData.Routing
         [Theory]
         [InlineData("RoutingCustomers/Default.GetVIPs", "VIP", "RoutingCustomers", true)]
         [InlineData("RoutingCustomers/Default.GetProducts", "Product", "RoutingCustomers", true)]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetProducts", "Product", "RoutingCustomers", true)]
         [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "RoutingCustomers", true)]
         [InlineData("MyProduct/RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "RoutingCustomers", true)]
         [InlineData("SalesPeople/Default.GetVIPRoutingCustomers", "VIP", "SalesPeople", true)]
@@ -969,6 +1212,7 @@ namespace System.Web.OData.Routing
             EdmModel model = new EdmModel();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
             var vehicle = new EdmEntityType("NS", "Vehicle");
+            vehicle.AddKeys(vehicle.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
             var car = new EdmEntityType("NS", "Car", vehicle);
             var motorcycle = new EdmEntityType("NS", "Motorcycle", vehicle);
             model.AddElements(new IEdmSchemaElement[] { vehicle, car, motorcycle, container });
@@ -979,7 +1223,7 @@ namespace System.Web.OData.Routing
             container.AddSingleton("Contoso", vehicle);
 
             // Act
-            ODataPath odataPath = _parser.Parse(model, path);
+            ODataPath odataPath = _parser.Parse(model, _serviceRoot, path);
 
             // Assert
             Assert.NotNull(odataPath);
@@ -987,20 +1231,27 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("Vehicles/NS.Car/NS.Motorcycle")]
-        [InlineData("Vehicles/NS.Motorcycle/NS.Car")]
-        [InlineData("Cars/NS.Motorcycle")]
-        [InlineData("Motorcycles/NS.Car")]
-        [InlineData("Vehicles(42)/NS.Car/NS.Motorcycle")]
-        [InlineData("Vehicles(42)/NS.Motorcycle/NS.Car")]
-        [InlineData("Cars(42)/NS.Motorcycle")]
-        [InlineData("Motorcycles(42)/NS.Car")]
-        public void Invalid_CastTests(string path)
+        [InlineData("Vehicles/NS.Car/NS.Motorcycle",
+            "The type 'NS.Motorcycle' specified in the URI is neither a base type nor a sub-type of the previously-specified type 'NS.Car'.")]
+        [InlineData("Vehicles/NS.Motorcycle/NS.Car",
+            "The type 'NS.Car' specified in the URI is neither a base type nor a sub-type of the previously-specified type 'NS.Motorcycle'.")]
+        [InlineData("Cars/NS.Motorcycle",
+            "The type 'NS.Motorcycle' specified in the URI is neither a base type nor a sub-type of the previously-specified type 'NS.Car'.")]
+        [InlineData("Motorcycles/NS.Car",
+            "The type 'NS.Car' specified in the URI is neither a base type nor a sub-type of the previously-specified type 'NS.Motorcycle'.")]
+        [InlineData("Vehicles(42)/NS.Car/NS.Motorcycle",
+            "The type 'NS.Motorcycle' specified in the URI is neither a base type nor a sub-type of the previously-specified type 'NS.Car'.")]
+        [InlineData("Cars(42)/NS.Motorcycle",
+            "The type 'NS.Motorcycle' specified in the URI is neither a base type nor a sub-type of the previously-specified type 'NS.Car'.")]
+        [InlineData("Motorcycles(42)/NS.Car",
+            "The type 'NS.Car' specified in the URI is neither a base type nor a sub-type of the previously-specified type 'NS.Motorcycle'.")]
+        public void Invalid_CastTests(string path, string expectedError)
         {
             // Arrange
             EdmModel model = new EdmModel();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
             var vehicle = new EdmEntityType("NS", "Vehicle");
+            vehicle.AddKeys(vehicle.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
             var car = new EdmEntityType("NS", "Car", vehicle);
             var motorcycle = new EdmEntityType("NS", "Motorcycle", vehicle);
             model.AddElements(new IEdmSchemaElement[] { vehicle, car, motorcycle, container });
@@ -1009,9 +1260,10 @@ namespace System.Web.OData.Routing
             container.AddEntitySet("Cars", car);
             container.AddEntitySet("Motorcycles", motorcycle);
 
-            // Act
-            var exception = Assert.Throws<ODataException>(() => _parser.Parse(model, path));
-            Assert.Contains("Invalid cast encountered.", exception.Message);
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _parser.Parse(model, _serviceRoot, path),
+                expectedError);
         }
 
         [Theory]
@@ -1030,6 +1282,7 @@ namespace System.Web.OData.Routing
             EdmModel model = new EdmModel();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
             var vehicle = new EdmEntityType("NS", "Vehicle");
+            vehicle.AddKeys(new EdmStructuralProperty(vehicle, "ID", EdmCoreModel.Instance.GetInt32(false)));
             var car = new EdmEntityType("NS", "Car", vehicle);
             var motorcycle = new EdmEntityType("NS", "Motorcycle", vehicle);
             model.AddElements(new IEdmSchemaElement[] { vehicle, car, motorcycle, container });
@@ -1045,7 +1298,7 @@ namespace System.Web.OData.Routing
             container.AddSingleton("Contoso", vehicle);
 
             // Act
-            ODataPath odataPath = _parser.Parse(model, path);
+            ODataPath odataPath = _parser.Parse(model, _serviceRoot, path);
 
             // Assert
             Assert.NotNull(odataPath);
@@ -1075,7 +1328,7 @@ namespace System.Web.OData.Routing
             IEdmEntityContainer container = model.EntityContainer;
             var action = new EdmAction(
                 container.Namespace, name, returnType: null, isBound: true, entitySetPathExpression: null);
-            
+
             IEdmTypeReference bindingParamterType = new EdmEntityTypeReference(bindingType, isNullable: false);
             if (isCollection)
             {
@@ -1091,21 +1344,27 @@ namespace System.Web.OData.Routing
         [InlineData("Customers", "Customers", new string[] { })]
         [InlineData("Customers(42)", "Customers({key})", new string[] { "key:42" })]
         [InlineData("Customers(ID=42)", "Customers(ID={key})", new string[] { "key:42" })]
-        [InlineData("Customers(ID1=1,ID2=2)", "Customers(ID1={key1},ID2={key2})", new string[] { "key1:1", "key2:2" })]
-        [InlineData("Customers(ID2=2,ID1=1)", "Customers(ID1={key1},ID2={key2})", new string[] { "key1:1", "key2:2" })]
+        [InlineData("CustomersWithMultiKeys(ID1=1,ID2=2)", "CustomersWithMultiKeys(ID1={key1},ID2={key2})", new string[] { "key1:1", "key2:2" })]
+        [InlineData("CustomersWithMultiKeys(ID2=2,ID1=1)", "CustomersWithMultiKeys(ID1={key1},ID2={key2})", new string[] { "key1:1", "key2:2" })]
         [InlineData("Customers(42)/Orders(24)", "Customers({customerID})/Orders({orderID})", new string[] { "customerID:42", "orderID:24" })]
-        [InlineData("Function(foo=42,bar=24)", "Function(foo={newFoo},bar={newBar})", new string[] { "newFoo:42", "newBar:24" })]
-        [InlineData("Function(bar=24,foo=42)", "Function(foo={newFoo},bar={newBar})", new string[] { "newFoo:42", "newBar:24" })]
+        [InlineData("Function(foo=42,bar=true)", "Function(foo={newFoo},bar={newBar})", new string[] { "newFoo:42", "newBar:true" })]
+        [InlineData("Function(bar=false,foo=24)", "Function(foo={newFoo},bar={newBar})", new string[] { "newFoo:24", "newBar:false" })]
         public void ParseTemplate(string path, string template, string[] keyValues)
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var function = AddFunction(model, "Function");
-            function.AddParameter("foo", EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false));
+            function.AddParameter("foo", EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false));
             function.AddParameter("bar", EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false));
 
+            EdmEntityType customerWithMultiKeys = new EdmEntityType("NS", "CustomerWithMultiKeys");
+            customerWithMultiKeys.AddKeys(customerWithMultiKeys.AddStructuralProperty("ID1", EdmPrimitiveTypeKind.Int32));
+            customerWithMultiKeys.AddKeys(customerWithMultiKeys.AddStructuralProperty("ID2", EdmPrimitiveTypeKind.Int32));
+            model.Model.AddElement(customerWithMultiKeys);
+            model.Container.AddEntitySet("CustomersWithMultiKeys", customerWithMultiKeys);
+
             // Act
-            ODataPath odataPath = _parser.Parse(model.Model, path);
+            ODataPath odataPath = _parser.Parse(model.Model, _serviceRoot, path);
             ODataPathTemplate odataPathTemplate = _parser.ParseTemplate(model.Model, template);
 
             // Assert
@@ -1115,16 +1374,17 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("Customer")] // Customer is not a correct entity set in the model
-        [InlineData("UnknowFunction(foo={newFoo})")] // UnknowFunction is not a function name in the model
-        public void ParseTemplate_ThrowODataException_InvalidODataPathSegmentTemplate(string template)
+        [InlineData("Customer", "Customer")] // Customer is not a correct entity set in the model
+        [InlineData("UnknowFunction(foo={newFoo})", "UnknowFunction")] // UnknowFunction is not a function name in the model
+        public void ParseTemplate_ThrowODataException_InvalidODataPathSegmentTemplate(string template, string segmentValue)
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _parser.ParseTemplate(model.Model, template),
-                "The given OData path template '" + template + "' is invalid.");
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => _parser.ParseTemplate(model.Model, template),
+                String.Format("Resource not found for the segment '{0}'.", segmentValue));
         }
 
         [Fact]
@@ -1157,7 +1417,7 @@ namespace System.Web.OData.Routing
             var expectedType = _model.FindDeclaredType("System.Web.OData.Routing." + expectedTypeName) as IEdmEntityType;
 
             // Act
-            ODataPath path = _parser.Parse(_model, odataPath);
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -1176,8 +1436,8 @@ namespace System.Web.OData.Routing
             }
         }
 
-        private static EdmFunction AddFunction(CustomersModelWithInheritance model, string name,
-            IEdmTypeReference returnType = null, IEdmEntitySet entitySet = null, IEdmTypeReference bindingParameterType = null)
+        private static EdmFunction AddFunction(CustomersModelWithInheritance model, string name, IEdmTypeReference returnType = null,
+            IEdmEntitySet entitySet = null, IEdmTypeReference bindingParameterType = null, string entitySetPath = null)
         {
             returnType = returnType ?? EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
             IEdmExpression expression = entitySet == null ? null : new EdmEntitySetReferenceExpression(entitySet);
@@ -1187,7 +1447,7 @@ namespace System.Web.OData.Routing
                 name,
                 returnType,
                 isBound: bindingParameterType != null,
-                entitySetPathExpression: null,
+                entitySetPathExpression: entitySetPath == null ? null : new EdmPathExpression(entitySetPath),
                 isComposable: true);
             if (bindingParameterType != null)
             {

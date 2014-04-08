@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,6 +22,7 @@ namespace System.Web.OData.Formatter.Deserialization
         private static IEdmModel _model;
         private static IEdmEntityContainer _container;
         private static ODataActionPayloadDeserializer _deserializer;
+        private const string _serviceRoot = "http://any/";
 
         static ODataActionPayloadDeserializerTest()
         {
@@ -377,7 +377,7 @@ namespace System.Web.OData.Formatter.Deserialization
         private static ODataPath CreateBoundPath(string actionName)
         {
             string path = String.Format("Customers(1)/A.B.{0}", actionName);
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(_model, path);
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(_model, _serviceRoot, path);
             Assert.NotNull(odataPath); // Guard
             return odataPath;
         }
@@ -385,7 +385,7 @@ namespace System.Web.OData.Formatter.Deserialization
         private static ODataPath CreateUnboundPath(string actionName)
         {
             string path = String.Format("{0}", actionName);
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(_model, path);
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(_model, _serviceRoot, path);
             Assert.NotNull(odataPath); // Guard
             return odataPath;
         }

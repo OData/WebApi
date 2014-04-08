@@ -245,7 +245,7 @@ namespace System.Web.OData.Formatter
 
         [Theory]
         [InlineData("abc", "GetEnum", "simpleEnum")]
-        public void ODataModelBinderProvider_Throws_ForInvalidEnum(object value, string action, string parameterName)
+        public void ResourceIsNotFound_IfContainsInvalidEnum(object value, string action, string parameterName)
         {
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
@@ -269,7 +269,7 @@ namespace System.Web.OData.Formatter
             HttpResponseMessage response = client.GetAsync(url).Result;
 
             // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         private IEdmModel GetEdmModel()

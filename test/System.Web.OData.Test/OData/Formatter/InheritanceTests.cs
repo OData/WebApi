@@ -306,7 +306,7 @@ namespace System.Web.OData.Formatter
         private void AddRequestInfo(HttpRequestMessage request)
         {
             request.ODataProperties().Path = new DefaultODataPathHandler()
-                .Parse(_model, GetODataPath(request.RequestUri.AbsoluteUri));
+                .Parse(_model, "http://any/", GetODataPath(request.RequestUri.AbsoluteUri));
             request.ODataProperties().Model = _model;
             request.SetFakeODataRouteName();
         }

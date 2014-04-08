@@ -9,7 +9,6 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Extensions;
-using System.Web.OData.Properties;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -131,12 +130,13 @@ namespace System.Web.OData.Routing
                     ODataPath path;
                     try
                     {
-                        path = PathHandler.Parse(EdmModel, odataPath);
+                        UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
+                        string serviceRoot = urlHelper.CreateODataLink(RouteName, PathHandler, new List<ODataPathSegment>());
+                        path = PathHandler.Parse(EdmModel, serviceRoot, odataPath);
                     }
-                    catch (ODataException e)
+                    catch (ODataException)
                     {
-                        throw new HttpResponseException(
-                            request.CreateErrorResponse(HttpStatusCode.NotFound, SRResources.ODataPathInvalid, e));
+                        path = null;
                     }
 
                     if (path != null)

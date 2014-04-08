@@ -53,7 +53,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             Mock<HttpRequestMessage> request = new Mock<HttpRequestMessage>();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "http://any/", "Customers");
 
             // Act
             string controller = new MockNavigationSourceRoutingConvention().SelectController(odataPath, request.Object);
@@ -68,7 +68,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             Mock<HttpRequestMessage> request = new Mock<HttpRequestMessage>();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "VipCustomer");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "http://any/", "VipCustomer");
 
             // Act
             string controller = new MockNavigationSourceRoutingConvention().SelectController(odataPath, request.Object);

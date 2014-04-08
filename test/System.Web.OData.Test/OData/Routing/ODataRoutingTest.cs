@@ -22,7 +22,13 @@ namespace System.Web.OData.Routing
             configuration.Routes.MapODataServiceRoute("RouteName", null, ODataRoutingModel.GetModel())
                 .MapODataRouteAttributes(configuration);
 
-            var controllers = new[] { typeof(RoutingCustomersController), typeof(ProductsController) };
+            var controllers = new[]
+            {
+                typeof(DateTimeOffsetKeyCustomersController),
+                typeof(RoutingCustomersController),
+                typeof(ProductsController)
+            };
+
             TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
@@ -117,6 +123,8 @@ namespace System.Web.OData.Routing
         // unmapped requests
         [InlineData("GET", "RoutingCustomers(10)/Products(1)", "~/entityset/key/navigation/key")]
         [InlineData("CUSTOM", "RoutingCustomers(10)", "~/entityset/key")]
+        // entity by key with type DateTimeOffset
+        [InlineData("GET", "DateTimeOffsetKeyCustomers(2001-01-01T12:00:00.000+08:00)", "GetDateTimeOffsetKeyCustomer(01/01/2001 12:00:00 +08:00)")]
         public void RoutesCorrectly(string httpMethod, string uri, string expectedResponse)
         {
             // Arrange
@@ -125,6 +133,14 @@ namespace System.Web.OData.Routing
             // Act & Assert
             response.EnsureSuccessStatusCode();
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
+        }
+    }
+
+    public class DateTimeOffsetKeyCustomersController : ODataController
+    {
+        public string GetDateTimeOffsetKeyCustomer(DateTimeOffset key)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "GetDateTimeOffsetKeyCustomer({0})", key);
         }
     }
 

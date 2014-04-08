@@ -189,7 +189,6 @@
     <Compile Include="OData\Routing\EntitySetPathSegmentTest.cs" />
     <Compile Include="OData\Routing\BoundFunctionPathSegmentTemplateTest.cs" />
     <Compile Include="OData\Routing\BoundFunctionPathSegmentTest.cs" />
-    <Compile Include="OData\Routing\FunctionResolverTest.cs" />
     <Compile Include="OData\Routing\KeyValueParserTest.cs" />
     <Compile Include="OData\Routing\KeyValuePathSegmentTemplateTest.cs" />
     <Compile Include="OData\Routing\ODataPathRouteConstraintTest.cs" />
@@ -275,7 +274,6 @@
     <Compile Include="OData\Query\Validators\SkipQueryValidatorTest.cs" />
     <Compile Include="OData\Query\Validators\FilterQueryValidatorTest.cs" />
     <Compile Include="OData\Query\Validators\TopQueryValidatorTest.cs" />
-    <Compile Include="OData\Routing\ProcedureHelpersTest.cs" />
     <Compile Include="OData\Routing\ODataValueProviderFactoryTest.cs" />
     <Compile Include="OData\SelectExpandTest.cs" />
     <Compile Include="Resources.cs" />

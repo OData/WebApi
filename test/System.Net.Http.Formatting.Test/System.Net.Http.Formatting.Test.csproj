@@ -65,6 +65,10 @@
     <Compile Include="Mocks\MockCompletedAsyncResult.cs" />
     <Compile Include="Mocks\MockMediaTypeMapping.cs" />
     <Compile Include="Mocks\MockContentNegotiator.cs" />
+    <Compile Include="CustomMultipartFormDataRemoteStreamProvider.cs" />
+    <Compile Include="RemoteStreamInfoTests.cs" />
+    <Compile Include="MultipartRemoteFileDataTests.cs" />
+    <Compile Include="MultipartFormDataRemoteStreamProviderTests.cs" />
     <Compile Include="PushStreamContentTest.cs" />
     <Compile Include="HttpClientFactoryTest.cs" />
     <Compile Include="Handlers\ProgressContentTest.cs" />

@@ -678,6 +678,15 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; method in &apos;{1}&apos; returned null. It must return a RemoteStreamInfo instance containing a writable stream and a valid URL..
+        /// </summary>
+        internal static string RemoteStreamInfoCannotBeNull {
+            get {
+                return ResourceManager.GetString("RemoteStreamInfoCannotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The &apos;{0}&apos; serializer cannot serialize the type &apos;{1}&apos;..
         /// </summary>
         internal static string SerializerCannotSerializeType {

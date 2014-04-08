@@ -56,6 +56,10 @@
     <Compile Include="Formatting\BsonMediaTypeFormatter.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueRange.cs" />
     <Compile Include="HttpContentFormDataExtensions.cs" />
+    <Compile Include="MultipartFormDataRemoteStreamProvider.cs" />
+    <Compile Include="MultipartFormDataStreamProviderHelper.cs" />
+    <Compile Include="MultipartRemoteFileData.cs" />
+    <Compile Include="RemoteStreamInfo.cs" />
     <Compile Include="UnsupportedMediaTypeException.cs" />
     <Compile Include="Internal\ByteRangeStream.cs" />
     <Compile Include="Internal\ReadOnlyStreamWithEncodingPreamble.cs" />

@@ -131,6 +131,69 @@ namespace System.Net.Http
         }
 
         [Fact]
+        public async void PostProcessing_ProcessesFormData_WithCustomMultipartFormDataStreamProvider()
+        {
+            // Arrange
+            string tempPath = Path.GetTempPath();
+            int maxContents = 16;
+            string contentFormat = "Content {0}";
+            string formNameFormat = "FormName_{0}";
+            string fileNameFormat = "FileName_{0}";
+
+            MultipartFormDataContent multipartContent = new MultipartFormDataContent();
+
+            // Create half contents for form data and the other half for file data.
+            for (int index = 0; index < maxContents; index++)
+            {
+                string content = String.Format(contentFormat, index);
+                string formName = String.Format(formNameFormat, index);
+                if (index < maxContents/2)
+                {
+                    multipartContent.Add(new StringContent(content), formName);
+                }
+                else
+                {
+                    string fileName = String.Format(fileNameFormat, index);
+                    multipartContent.Add(new StringContent(content), formName, fileName);
+                }
+            }
+
+            CustomMultipartFormDataStreamProvider provider = 
+                new CustomMultipartFormDataStreamProvider(tempPath);
+            foreach (HttpContent content in multipartContent)
+            {
+                provider.Contents.Add(content);
+                using (provider.GetStream(multipartContent, content.Headers)) { }
+            }
+
+            // Act
+            Task processingTask = provider.ExecutePostProcessingAsync();
+            await processingTask;
+
+            // Assert
+            Assert.Equal(TaskStatus.RanToCompletion, processingTask.Status);
+            Assert.Equal(maxContents / 2, provider.FormData.Count);
+
+            // half contents for form data
+            for (int index = 0; index < maxContents / 2; index++)
+            {
+                string content = String.Format(contentFormat, index);
+                string formName = String.Format(formNameFormat, index);
+                Assert.Equal(content, provider.FormData[formName]);
+            }
+
+            // the other half for file data
+            HttpContent[] contents = multipartContent.ToArray();
+            for (int index = maxContents / 2; index < maxContents; index++)
+            {
+                int fileDataIndex = index - (maxContents / 2);
+                string fileName = String.Format(fileNameFormat, index);
+                Assert.Equal(fileName, provider.FileData[fileDataIndex].LocalFileName);
+                Assert.Same(contents[index].Headers, provider.FileData[fileDataIndex].Headers);
+            }
+        }
+
+        [Fact]
         public async Task ExecutePostProcessingAsyncWithoutCancellationToken_GetCalledBy_ReadAsMultipartAsync()
         {
             // Arrange
@@ -143,6 +206,40 @@ namespace System.Net.Http
 
             // Assert
             mockProvider.Verify(p => p.ExecutePostProcessingAsync(), Times.Once());
+        }
+
+        private class CustomMultipartFormDataStreamProvider : MultipartFormDataStreamProvider
+        {
+            public CustomMultipartFormDataStreamProvider(string rootPath)
+                : base(rootPath)
+            {
+            }
+
+            public CustomMultipartFormDataStreamProvider(string rootPath, int bufferSize)
+                : base(rootPath, bufferSize)
+            {
+            }
+
+            public override Stream GetStream(HttpContent parent, HttpContentHeaders headers)
+            {
+                Stream stream = null;
+                ContentDispositionHeaderValue contentDisposition = headers.ContentDisposition;
+                if (contentDisposition != null)
+                {
+                    if (!String.IsNullOrEmpty(contentDisposition.FileName))
+                    {
+                        FileData.Add(new MultipartFileData(headers, contentDisposition.FileName));
+                        // Can be replaced with any stream the user want. e.g. Azure Blob Storage Stream.
+                        stream = new MemoryStream(); 
+                    }
+                    else
+                    {
+                        stream = base.GetStream(parent, headers);
+                    }
+                }
+
+                return stream;
+            }
         }
     }
 }

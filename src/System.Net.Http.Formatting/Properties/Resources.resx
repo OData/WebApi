@@ -336,4 +336,7 @@
   <data name="MediaTypeFormatter_BsonParseError_UnexpectedData" xml:space="preserve">
     <value>Error parsing BSON data; unexpected dictionary content: {0} entries, first key '{1}'.</value>
   </data>
+  <data name="RemoteStreamInfoCannotBeNull" xml:space="preserve">
+    <value>The '{0}' method in '{1}' returned null. It must return a RemoteStreamResult instance containing a writable stream and a valid URL.</value>
+  </data>
 </root>

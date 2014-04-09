@@ -43,7 +43,26 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void Constructor3SetsProperties()
+        public void Constructor3SetsProperties_SelectedValues_DisabledValues()
+        {
+            // Arrange
+            IEnumerable items = new[] { "A", "B", "C" };
+            IEnumerable selectedValues = new[] { "A", "C" };
+            IEnumerable disabledValues = new[] { "B", "C" };
+
+            // Act
+            MultiSelectList multiSelect = new MultiSelectList(items, selectedValues, disabledValues);
+
+            // Assert
+            Assert.Same(items, multiSelect.Items);
+            Assert.Equal(selectedValues, multiSelect.SelectedValues);
+            Assert.Equal(disabledValues, multiSelect.DisabledValues);
+            Assert.Null(multiSelect.DataTextField);
+            Assert.Null(multiSelect.DataValueField);
+        }
+
+        [Fact]
+        public void Constructor3SetsProperties_Value_Text()
         {
             // Arrange
             IEnumerable items = new object[0];
@@ -76,6 +95,116 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void Constructor_SetsProperties_Items_SelectedValues_DisabledValues_Groups()
+        {
+            // Arrange
+            MultiSelectList multiSelect = new MultiSelectList(GetSampleAnonymousObjectsWithGroups(),
+                "Letter", "FullWord", "Group",
+                selectedValues: new[] { "A", "C", "T" },
+                disabledValues: new[] { "C" },
+                disabledGroups: null);
+
+            // Act
+            IList<SelectListItem> listItems = multiSelect.GetListItems();
+
+            // Assert
+            Assert.Equal(3, listItems.Count);
+
+            Assert.Equal("A", listItems[0].Value);
+            Assert.Equal("Alpha", listItems[0].Text);
+            Assert.True(listItems[0].Selected);
+            Assert.False(listItems[0].Disabled);
+
+            Assert.Equal("B", listItems[1].Value);
+            Assert.Equal("Bravo", listItems[1].Text);
+            Assert.False(listItems[1].Selected);
+            Assert.False(listItems[1].Disabled);
+
+            Assert.Equal("C", listItems[2].Value);
+            Assert.Equal("Charlie", listItems[2].Text);
+            Assert.True(listItems[2].Selected);
+            Assert.True(listItems[2].Disabled);
+
+            Assert.Equal("AB", listItems[0].Group.Name);
+            Assert.Equal("AB", listItems[1].Group.Name);
+            Assert.Equal("C", listItems[2].Group.Name);
+        }
+
+        [Fact]
+        public void Constructor_SetsProperties_Items_SelectedValues_DisabledValues_Groups_DisabledGroups()
+        {
+            // Arrange
+            object[] disabledValues = { "C" };
+            object[] disabledGroups = { "AB" };
+            MultiSelectList multiSelect = new MultiSelectList(GetSampleAnonymousObjectsWithGroups(),
+                "Letter", "FullWord", "Group",
+                selectedValues: new[] { "A", "C", "T" },
+                disabledValues: disabledValues,
+                disabledGroups: disabledGroups);
+
+            // Act
+            IList<SelectListItem> listItems = multiSelect.GetListItems();
+
+            // Assert
+            // Count of Items and Groups
+            Assert.Equal(3, listItems.Count);
+
+            // Getters
+            Assert.Same(disabledValues, multiSelect.DisabledValues);
+            Assert.Same(disabledGroups, multiSelect.DisabledGroups);
+
+            // Item A
+            Assert.Equal("A", listItems[0].Value);
+            Assert.Equal("Alpha", listItems[0].Text);
+            Assert.True(listItems[0].Selected);
+            Assert.False(listItems[0].Disabled);
+
+            // Item B
+            Assert.Equal("B", listItems[1].Value);
+            Assert.Equal("Bravo", listItems[1].Text);
+            Assert.False(listItems[1].Selected);
+            Assert.False(listItems[1].Disabled);
+
+            // Item C
+            Assert.Equal("C", listItems[2].Value);
+            Assert.Equal("Charlie", listItems[2].Text);
+            Assert.True(listItems[2].Selected);
+            Assert.True(listItems[2].Disabled);
+
+            // Group AB
+            Assert.Equal("AB", listItems[0].Group.Name);
+            Assert.Equal("AB", listItems[1].Group.Name);
+            Assert.True(listItems[0].Group.Disabled);
+            Assert.Same(listItems[0].Group, listItems[1].Group);
+
+            // Group C is disabled.
+            Assert.Equal("C", listItems[2].Group.Name);
+            Assert.False(listItems[2].Group.Disabled);
+        }
+
+        [Fact]
+        public void Constructor_SetsProperties_Items_Value_Text_SelectedValues_DisabledValues_Groups()
+        {
+            // Arrange
+            IEnumerable items = new object[0];
+            IEnumerable selectedValues = new object[0];
+            IEnumerable disabledValues = new object[0];
+
+            // Act
+            MultiSelectList multiSelect = new MultiSelectList(items, "SomeValueField", "SomeTextField", "SomeGroupField",
+                selectedValues,
+                disabledValues);
+
+            // Assert
+            Assert.Same(items, multiSelect.Items);
+            Assert.Equal("SomeValueField", multiSelect.DataValueField);
+            Assert.Equal("SomeTextField", multiSelect.DataTextField);
+            Assert.Equal("SomeGroupField", multiSelect.DataGroupField);
+            Assert.Same(selectedValues, multiSelect.SelectedValues);
+            Assert.Equal(disabledValues, multiSelect.DisabledValues);
+        }
+
+        [Fact]
         public void DataGroupFieldSetByCtor()
         {
             // Arrange
@@ -83,8 +212,8 @@ namespace System.Web.Mvc.Test
             IEnumerable selectedValues = new object[0];
 
             // Act
-            MultiSelectList multiSelect = new MultiSelectList(items, "SomeValueField", "SomeTextField", selectedValues,
-                "SomeGroupField");
+            MultiSelectList multiSelect = new MultiSelectList(items, "SomeValueField", "SomeTextField", "SomeGroupField",
+                selectedValues);
 
             // Assert
             Assert.Same(items, multiSelect.Items);
@@ -92,6 +221,47 @@ namespace System.Web.Mvc.Test
             Assert.Equal("SomeTextField", multiSelect.DataTextField);
             Assert.Same(selectedValues, multiSelect.SelectedValues);
             Assert.Equal("SomeGroupField", multiSelect.DataGroupField);
+        }
+
+        [Fact]
+        public void Constructor_SetsProperties_Items_Value_Text_SelectedValues_DisabledValues()
+        {
+            // Arrange
+            object[] disabledValues = { "C" };
+            MultiSelectList multiSelect = new MultiSelectList(GetSampleAnonymousObjectsWithGroups(),
+                "Letter", "FullWord",
+                new[] { "A", "C", "T" },
+                disabledValues);
+
+            // Act
+            IList<SelectListItem> listItems = multiSelect.GetListItems();
+
+            // Assert
+            // Count of Items
+            Assert.Equal(3, listItems.Count);
+
+            // Getters
+            Assert.Same(disabledValues, multiSelect.DisabledValues);
+
+            // Item A
+            Assert.Equal("A", listItems[0].Value);
+            Assert.Equal("Alpha", listItems[0].Text);
+            Assert.True(listItems[0].Selected);
+            Assert.False(listItems[0].Disabled);
+
+            // Item B
+            Assert.Equal("B", listItems[1].Value);
+            Assert.Equal("Bravo", listItems[1].Text);
+            Assert.False(listItems[1].Selected);
+            Assert.False(listItems[1].Disabled);
+
+            // Item C
+            Assert.Equal("C", listItems[2].Value);
+            Assert.Equal("Charlie", listItems[2].Text);
+            Assert.True(listItems[2].Selected);
+            Assert.True(listItems[2].Disabled);
+
+            Assert.Equal(disabledValues, multiSelect.DisabledValues);
         }
 
         [Fact]
@@ -186,7 +356,6 @@ namespace System.Web.Mvc.Test
             MultiSelectList multiSelect = new MultiSelectList(GetSampleAnonymousObjectsWithGroups(),
                                                               "Letter",
                                                               "FullWord",
-                                                              null,
                                                               "Group");
 
             // Act
@@ -236,8 +405,7 @@ namespace System.Web.Mvc.Test
         {
             // Arrange
             MultiSelectList multiSelect = new MultiSelectList(GetSampleAnonymousObjectsWithGroups(),
-                                                              "Letter", "FullWord", new string[] { "A", "C", "T" },
-                                                              "Group");
+                "Letter", "FullWord", "Group", new string[] { "A", "C", "T" });
 
             // Act
             IList<SelectListItem> listItems = multiSelect.GetListItems();

@@ -27,7 +27,7 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void Constructor2SetsProperties()
+        public void Constructor2SetsProperties_Items_SelectedValue()
         {
             // Arrange
             IEnumerable items = new object[0];
@@ -47,7 +47,26 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void Constructor3SetsProperties()
+        public void Constructor3SetsProperties_SelectedValue_DisabledValues()
+        {
+            // Arrange
+            IEnumerable items = new[] { "A", "B", "C" };
+            IEnumerable selectedValues = "A";
+            IEnumerable disabledValues = new[] { "B", "C" };
+
+            // Act
+            SelectList multiSelect = new SelectList(items, selectedValues, disabledValues);
+
+            // Assert
+            Assert.Same(items, multiSelect.Items);
+            Assert.Equal(new object[] { selectedValues }, multiSelect.SelectedValues);
+            Assert.Equal(disabledValues, multiSelect.DisabledValues);
+            Assert.Null(multiSelect.DataTextField);
+            Assert.Null(multiSelect.DataValueField);
+        }
+
+        [Fact]
+        public void Constructor3SetsProperties_Value_Text()
         {
             // Arrange
             IEnumerable items = new object[0];
@@ -84,6 +103,137 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void Constructor_SetsProperties_Items_Value_Text_SelectedValue_DisabledValues()
+        {
+            // Arrange
+            IEnumerable items = new[]
+            {
+                new { Value = "A", Text = "Alice" },
+                new { Value = "B", Text = "Bravo" },
+                new { Value = "C", Text = "Charlie" },
+            };
+            object selectedValue = "A";
+            IEnumerable disabledValues = new[] { "B", "C" };
+
+            // Act
+            SelectList selectList = new SelectList(items,
+                "Value",
+                "Text",
+                selectedValue,
+                disabledValues);
+            List<object> selectedValues = selectList.SelectedValues.Cast<object>().ToList();
+
+            // Assert
+            Assert.Same(items, selectList.Items);
+            Assert.Equal("Value", selectList.DataValueField);
+            Assert.Equal("Text", selectList.DataTextField);
+            Assert.Same(selectedValue, selectList.SelectedValue);
+            Assert.Single(selectedValues);
+            Assert.Same(selectedValue, selectedValues[0]);
+            Assert.Same(disabledValues, selectList.DisabledValues);
+            Assert.Equal(disabledValues, selectList.DisabledValues);
+            Assert.Null(selectList.DataGroupField);
+            Assert.Null(selectList.DisabledGroups);
+        }
+
+        [Fact]
+        public void Constructor_SetsProperties_Items_Value_Text_SelectedValue_Group()
+        {
+            // Arrange
+            IEnumerable items = new[]
+            {
+                new { Value = "A", Text = "Alice", Group = "AB" },
+                new { Value = "B", Text = "Bravo", Group = "AB" },
+                new { Value = "C", Text = "Charlie", Group = "C" },
+            };
+            object selectedValue = "A";
+
+            // Act
+            SelectList selectList = new SelectList(items,
+                "Value",
+                "Text",
+                "Group",
+                selectedValue);
+            List<object> selectedValues = selectList.SelectedValues.Cast<object>().ToList();
+
+            // Assert
+            Assert.Same(items, selectList.Items);
+            Assert.Equal("Value", selectList.DataValueField);
+            Assert.Equal("Text", selectList.DataTextField);
+            Assert.Same(selectedValue, selectList.SelectedValue);
+            Assert.Single(selectedValues);
+            Assert.Same(selectedValue, selectedValues[0]);
+            Assert.Equal("Group", selectList.DataGroupField);
+        }
+
+        [Fact]
+        public void Constructor_SetsProperties_Items_Value_Text_SelectedValue_Group_DisabledGroups()
+        {
+            // Arrange
+            IEnumerable items = new[]
+            {
+                new { Value = "A", Text = "Alice", Group = "AB" },
+                new { Value = "B", Text = "Bravo", Group = "AB" },
+                new { Value = "C", Text = "Charlie", Group = "C" },
+            };
+            object selectedValue = "A";
+            IEnumerable disabledGroups = new[] { "AB" };
+
+            // Act
+            SelectList selectList = new SelectList(items,
+                "Value",
+                "Text",
+                "Group",
+                selectedValue,
+                null,
+                disabledGroups);
+            List<object> selectedValues = selectList.SelectedValues.Cast<object>().ToList();
+
+            // Assert
+            Assert.Same(items, selectList.Items);
+            Assert.Equal("Value", selectList.DataValueField);
+            Assert.Equal("Text", selectList.DataTextField);
+            Assert.Same(selectedValue, selectList.SelectedValue);
+            Assert.Single(selectedValues);
+            Assert.Same(selectedValue, selectedValues[0]);
+            Assert.Equal("Group", selectList.DataGroupField);
+            Assert.Equal(disabledGroups, selectList.DisabledGroups);
+        }
+
+        [Fact]
+        public void Constructor_SetsProperties_Items_Value_Text_SelectedValue_DisabledValues_Group()
+        {
+            // Arrange
+            IEnumerable items = new[]
+            {
+                new { Value = "A", Text = "Alice", Group = "AB" },
+                new { Value = "B", Text = "Bravo", Group = "AB" },
+                new { Value = "C", Text = "Charlie", Group = "C" },
+            };
+            object selectedValue = "A";
+            IEnumerable disabledValues = new[] { "A", "C" };
+
+            // Act
+            SelectList selectList = new SelectList(items,
+                "Value",
+                "Text",
+                "Group",
+                selectedValue,
+                disabledValues);
+            List<object> selectedValues = selectList.SelectedValues.Cast<object>().ToList();
+
+            // Assert
+            Assert.Same(items, selectList.Items);
+            Assert.Equal("Value", selectList.DataValueField);
+            Assert.Equal("Text", selectList.DataTextField);
+            Assert.Same(selectedValue, selectList.SelectedValue);
+            Assert.Single(selectedValues);
+            Assert.Same(selectedValue, selectedValues[0]);
+            Assert.Equal("Group", selectList.DataGroupField);
+            Assert.Same(disabledValues, selectList.DisabledValues);
+        }
+
+        [Fact]
         public void DataGroupFieldSetByCtor()
         {
             // Arrange
@@ -91,8 +241,8 @@ namespace System.Web.Mvc.Test
             object selectedValue = new object();
 
             // Act
-            SelectList selectList = new SelectList(items, "SomeValueField", "SomeTextField", selectedValue,
-                "SomeGroupField");
+            SelectList selectList = new SelectList(items, "SomeValueField", "SomeTextField", "SomeGroupField",
+                selectedValue);
             IEnumerable selectedValues = selectList.SelectedValues;
 
             // Assert
@@ -102,6 +252,8 @@ namespace System.Web.Mvc.Test
             Assert.Equal("SomeGroupField", selectList.DataGroupField);
             Assert.Same(selectedValue, selectList.SelectedValue);
             Assert.Single(selectedValues, selectedValue);
+            Assert.Null(selectList.DisabledValues);
+            Assert.Null(selectList.DisabledGroups);
         }
     }
 }

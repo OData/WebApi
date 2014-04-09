@@ -34,7 +34,7 @@ namespace System.Web.Mvc.Html.Test
                 new { Text = "Audi", Value = "audi", Category = "German Cars" }, 
                 new { Text = "Other", Value = "other", Category = (string) null }, /* Another Empty Group */
                 new { Text = "Unknown", Value = "unknown", Category = " " } /* Unnamed Group */
-            }, "Value", "Text", "audi", "Category");
+            }, "Value", "Text", "Category", (object) "audi");
         private static readonly MultiSelectList _multiSelectList = new MultiSelectList(
             new[]
             {
@@ -45,7 +45,7 @@ namespace System.Web.Mvc.Html.Test
                 new { Text = "Audi", Value = "audi", Category = "German Cars" }, 
                 new { Text = "Other", Value = "other", Category = (string) null }, /* Another Empty Group */
                 new { Text = "Unknown", Value = "unknown", Category = " " } /* Unnamed Group */
-            }, "Value", "Text", new string[] { "audi", "volvo" }, "Category");
+            }, "Value", "Text", "Category", new[] { "audi", "volvo" });
 
         private static ViewDataDictionary GetViewDataWithSelectList()
         {
@@ -2703,7 +2703,8 @@ namespace System.Web.Mvc.Html.Test
             helper.ViewContext.FormContext = new FormContext();
             helper.ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = "MyPrefix";
 
-            MultiSelectList selectList = new MultiSelectList(MultiSelectListTest.GetSampleAnonymousObjects(), "Letter", "FullWord", "C");
+            MultiSelectList selectList = new MultiSelectList(MultiSelectListTest.GetSampleAnonymousObjects(), "Letter",
+                "FullWord", new[] { "C" });
 
             // Act
             MvcHtmlString html = helper.ListBoxFor(m => m.ElementAt(0).foo, selectList);

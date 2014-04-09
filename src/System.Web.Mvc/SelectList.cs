@@ -18,6 +18,24 @@ namespace System.Web.Mvc
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the SelectList class by using the specified items for the list,
+        /// the selected value, and the disabled values.
+        /// </summary>
+        /// <param name="items">The items used to build each <see cref="SelectListItem"/> of the list.</param>
+        /// <param name="selectedValue">The selected value. Used to match the Selected property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="disabledValues">The disabled values. Used to match the Disabled property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        public SelectList(IEnumerable items, object selectedValue, IEnumerable disabledValues)
+            : this(items,
+                   dataValueField: null,
+                   dataTextField: null,
+                   selectedValue: selectedValue,
+                   disabledValues: disabledValues)
+        {
+        }
+
         public SelectList(IEnumerable items, string dataValueField, string dataTextField)
             : this(items, dataValueField, dataTextField, selectedValue: null)
         {
@@ -30,24 +48,110 @@ namespace System.Web.Mvc
         }
 
         /// <summary>
-        /// Initializes a new instance of the SelectList class by using the specified items for the list, 
-        /// the data value field, the data text field, a selected value, and the data group field.
+        /// Initializes a new instance of the SelectList class by using the specified items for the list,
+        /// the data value field, the data text field, the data group field, and the selected value.
         /// </summary>
         /// <param name="items">The items used to build each <see cref="SelectListItem"/> of the list.</param>
-        /// <param name="dataValueField">The data value field. Used to match the Value property of the corresponding 
+        /// <param name="dataValueField">The data value field. Used to match the Value property of the corresponding
         /// <see cref="SelectListItem"/>.</param>
-        /// <param name="dataTextField">The data text field. Used to match the Text property of the corresponding 
+        /// <param name="dataTextField">The data text field. Used to match the Text property of the corresponding
         /// <see cref="SelectListItem"/>.</param>
-        /// <param name="selectedValue">The selected values. Used to match the Selected property of the corresponding 
+        /// <param name="dataGroupField">The data group field. Used to match the Group property of the corresponding
         /// <see cref="SelectListItem"/>.</param>
-        /// <param name="dataGroupField">The data group field. Used to match the Group property of the corresponding 
+        /// <param name="selectedValue">The selected value. Used to match the Selected property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        public SelectList(IEnumerable items,
+                          string dataValueField,
+                          string dataTextField,
+                          string dataGroupField,
+                          object selectedValue)
+            : base(items, dataValueField, dataTextField, dataGroupField, ToEnumerable(selectedValue))
+        {
+            SelectedValue = selectedValue;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the SelectList class by using the specified items for the list,
+        /// the data value field, the data text field, the selected value, and the disabled values.
+        /// </summary>
+        /// <param name="items">The items used to build each <see cref="SelectListItem"/> of the list.</param>
+        /// <param name="dataValueField">The data value field. Used to match the Value property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="dataTextField">The data text field. Used to match the Text property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="selectedValue">The selected value. Used to match the Selected property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="disabledValues">The disabled values. Used to match the Disabled property of the corresponding
         /// <see cref="SelectListItem"/>.</param>
         public SelectList(IEnumerable items,
                           string dataValueField,
                           string dataTextField,
                           object selectedValue,
-                          string dataGroupField)
-            : base(items, dataValueField, dataTextField, ToEnumerable(selectedValue), dataGroupField)
+                          IEnumerable disabledValues)
+            : base(items, dataValueField, dataTextField, ToEnumerable(selectedValue), disabledValues)
+        {
+            SelectedValue = selectedValue;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the SelectList class by using the specified items for the list,
+        /// the data value field, the data text field, the data group field, the selected value, and the disabled
+        /// values.
+        /// </summary>
+        /// <param name="items">The items used to build each <see cref="SelectListItem"/> of the list.</param>
+        /// <param name="dataValueField">The data value field. Used to match the Value property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="dataTextField">The data text field. Used to match the Text property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="dataGroupField">The data group field. Used to match the Group property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="selectedValue">The selected value. Used to match the Selected property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="disabledValues">The disabled values. Used to match the Disabled property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        public SelectList(IEnumerable items,
+                          string dataValueField,
+                          string dataTextField,
+                          string dataGroupField,
+                          object selectedValue,
+                          IEnumerable disabledValues)
+            : base(items, dataValueField, dataTextField, dataGroupField, ToEnumerable(selectedValue), disabledValues)
+        {
+            SelectedValue = selectedValue;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the SelectList class by using the specified items for the list,
+        /// the data value field, the data text field, the data group field. the selected value, the disabled values,
+        /// and the disabled groups.
+        /// </summary>
+        /// <param name="items">The items used to build each <see cref="SelectListItem"/> of the list.</param>
+        /// <param name="dataValueField">The data value field. Used to match the Value property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="dataTextField">The data text field. Used to match the Text property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="dataGroupField">The data group field. Used to match the Group property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="selectedValue">The selected value. Used to match the Selected property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="disabledValues">The disabled values. Used to match the Disabled property of the corresponding
+        /// <see cref="SelectListItem"/>.</param>
+        /// <param name="disabledGroups">The disabled groups. Used to match the Disabled property of the corresponding
+        /// <see cref="SelectListGroup"/>.</param>
+        public SelectList(IEnumerable items,
+                          string dataValueField,
+                          string dataTextField,
+                          string dataGroupField,
+                          object selectedValue,
+                          IEnumerable disabledValues,
+                          IEnumerable disabledGroups)
+            : base(items,
+                   dataValueField,
+                   dataTextField,
+                   dataGroupField,
+                   ToEnumerable(selectedValue),
+                   disabledValues,
+                   disabledGroups)
         {
             SelectedValue = selectedValue;
         }

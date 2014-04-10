@@ -11,10 +11,11 @@ namespace System.Web.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles function invocations.
     /// </summary>
-    public class FunctionRoutingConvention : EntitySetRoutingConvention
+    public class FunctionRoutingConvention : NavigationSourceRoutingConvention
     {
         /// <inheritdoc/>
-        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
+        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext,
+            ILookup<string, HttpActionDescriptor> actionMap)
         {
             if (odataPath == null)
             {
@@ -47,6 +48,10 @@ namespace System.Web.OData.Routing.Conventions
                     case "~/entityset/cast/function":
                     case "~/entityset/function":
                         actionName = GetFunction(odataPath).SelectAction(actionMap, isCollection: true);
+                        break;
+                    case "~/singleton/function":
+                    case "~/singleton/cast/function":
+                        actionName = GetFunction(odataPath).SelectAction(actionMap, isCollection: false);
                         break;
                 }
 

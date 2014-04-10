@@ -205,7 +205,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot automatically bind the navigation property &apos;{0}&apos; on entity type &apos;{1}&apos; for the source entity set &apos;{2}&apos; because there are two or more matching target entity sets. The matching entity sets are: {3}..
+        ///   Looks up a localized string similar to Cannot automatically bind the navigation property &apos;{0}&apos; on entity type &apos;{1}&apos; for the entity set or singleton &apos;{2}&apos; because there are two or more matching target entity sets or singletons. The matching entity sets or singletons are: {3}..
         /// </summary>
         internal static string CannotAutoCreateMultipleCandidates {
             get {
@@ -457,20 +457,20 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The related entity set could not be found from the OData path. The related entity set is required to deserialize the payload..
-        /// </summary>
-        internal static string EntitySetMissingDuringDeserialization {
-            get {
-                return ResourceManager.GetString("EntitySetMissingDuringDeserialization", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The related entity set could not be found from the OData path. The related entity set is required to serialize the payload..
         /// </summary>
         internal static string EntitySetMissingDuringSerialization {
             get {
                 return ResourceManager.GetString("EntitySetMissingDuringSerialization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The entity set name &apos;{0}&apos; was already configured as a singleton..
+        /// </summary>
+        internal static string EntitySetNameAlreadyConfiguredAsSingleton {
+            get {
+                return ResourceManager.GetString("EntitySetNameAlreadyConfiguredAsSingleton", resourceCulture);
             }
         }
         
@@ -754,6 +754,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid singleton name. The singleton name cannot contain &apos;.&apos;..
+        /// </summary>
+        internal static string InvalidSingletonName {
+            get {
+                return ResourceManager.GetString("InvalidSingletonName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Key property &apos;{0}&apos; of type &apos;{1}&apos; is null. Key properties cannot have null values..
         /// </summary>
         internal static string KeyValueCannotBeNull {
@@ -997,11 +1006,29 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The declaring entity type &apos;{0}&apos; of the given navigation property is not a part of the entity type &apos;{1}&apos; hierarchy of the entity set &apos;{2}&apos;..
+        ///   Looks up a localized string similar to The declaring entity type &apos;{0}&apos; of the given navigation property is not a part of the entity type &apos;{1}&apos; hierarchy of the entity set or singleton &apos;{2}&apos;..
         /// </summary>
         internal static string NavigationPropertyNotInHierarchy {
             get {
                 return ResourceManager.GetString("NavigationPropertyNotInHierarchy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to deserialize the payload..
+        /// </summary>
+        internal static string NavigationSourceMissingDuringDeserialization {
+            get {
+                return ResourceManager.GetString("NavigationSourceMissingDuringDeserialization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to serialize the payload..
+        /// </summary>
+        internal static string NavigationSourceMissingDuringSerialization {
+            get {
+                return ResourceManager.GetString("NavigationSourceMissingDuringSerialization", resourceCulture);
             }
         }
         
@@ -1015,7 +1042,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No IdLink factory was found. Try calling HasIdLink on the EntitySetConfiguration for &apos;{0}&apos;..
+        ///   Looks up a localized string similar to No IdLink factory was found. Try calling HasIdLink on the NavigationSourceConfiguration for &apos;{0}&apos;..
         /// </summary>
         internal static string NoIdLinkFactoryFound {
             get {
@@ -1051,7 +1078,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No NavigationLink factory was found for the navigation property &apos;{0}&apos; from entity type &apos;{1}&apos; on entity set &apos;{2}&apos;. Try calling HasNavigationPropertyLink on the EntitySetConfiguration..
+        ///   Looks up a localized string similar to No NavigationLink factory was found for the navigation property &apos;{0}&apos; from entity type &apos;{1}&apos; on entity set or singleton &apos;{2}&apos;. Try calling HasNavigationPropertyLink on the NavigationSourceConfiguration..
         /// </summary>
         internal static string NoNavigationLinkFactoryFound {
             get {
@@ -1587,6 +1614,24 @@ namespace System.Web.OData.Properties {
         internal static string SingleResultHasMoreThanOneEntity {
             get {
                 return ResourceManager.GetString("SingleResultHasMoreThanOneEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The singleton &apos;{0}&apos; was already configured with a different EntityType (&apos;{1}&apos;)..
+        /// </summary>
+        internal static string SingletonAlreadyConfiguredDifferentEntityType {
+            get {
+                return ResourceManager.GetString("SingletonAlreadyConfiguredDifferentEntityType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The singleton name &apos;{0}&apos; was already configured as an entity set..
+        /// </summary>
+        internal static string SingletonNameAlreadyConfiguredAsEntitySet {
+            get {
+                return ResourceManager.GetString("SingletonNameAlreadyConfiguredAsEntitySet", resourceCulture);
             }
         }
         

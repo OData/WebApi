@@ -271,6 +271,38 @@ namespace System.Web.OData
             }
         }
 
+        public static string SingletonSelectAndExpand
+        {
+            get
+            {
+                return GetString("SingletonSelectAndExpand.json");
+            }
+        }
+
+        public static string MetadataWithSingleton
+        {
+            get
+            {
+                return GetString("MetadataWithSingleton.xml");
+            }
+        }
+
+        public static string SingletonNavigationToEntitysetFullMetadata
+        {
+            get
+            {
+                return GetString("SingletonNavigationToEntitysetFullMetadata.json");
+            }
+        }
+
+        public static string EntityNavigationToSingletonFullMetadata
+        {
+            get
+            {
+                return GetString("EntityNavigationToSingletonFullMetadata.json");
+            }
+        }
+
         public static string GetString(string fileName)
         {
             using (Stream stream = GetStream(fileName))

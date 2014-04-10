@@ -98,9 +98,9 @@ namespace System.Web.OData.Builder
         public IEdmTypeConfiguration ReturnType { get; set; }
 
         /// <summary>
-        /// The EntitySet that entities are returned from.
+        /// The Navigation Source that are returned from.
         /// </summary>
-        public EntitySetConfiguration EntitySet { get; set; }
+        public NavigationSourceConfiguration NavigationSource { get; set; }
 
         /// <summary>
         /// The EntitySetPathExpression that entities are returned from.
@@ -173,7 +173,7 @@ namespace System.Web.OData.Builder
         internal void ReturnsFromEntitySetImplementation<TEntityType>(string entitySetName) where TEntityType : class
         {
             ModelBuilder.EntitySet<TEntityType>(entitySetName);
-            EntitySet = ModelBuilder.EntitySets.Single(s => s.Name == entitySetName);
+            NavigationSource = ModelBuilder.EntitySets.Single(s => s.Name == entitySetName);
             ReturnType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TEntityType));
         }
 
@@ -187,7 +187,7 @@ namespace System.Web.OData.Builder
         {
             Type clrCollectionType = typeof(IEnumerable<TElementEntityType>);
             ModelBuilder.EntitySet<TElementEntityType>(entitySetName);
-            EntitySet = ModelBuilder.EntitySets.Single(s => s.Name == entitySetName);
+            NavigationSource = ModelBuilder.EntitySets.Single(s => s.Name == entitySetName);
             IEdmTypeConfiguration elementType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TElementEntityType));
             ReturnType = new CollectionTypeConfiguration(elementType, clrCollectionType);
         }

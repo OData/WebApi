@@ -6,6 +6,12 @@ namespace System.Web.OData.Builder.TestModels
     {
         public string Part1 { get; set; }
         public string Part2 { get; set; }
-        public ZipCode Recursive { get; set; }
+    }
+
+    public class RecursiveZipCode
+    {
+        public string Part1 { get; set; }
+        public string Part2 { get; set; }
+        public RecursiveZipCode Recursive { get; set; }
     }
 }

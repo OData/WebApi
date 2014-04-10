@@ -41,6 +41,7 @@ namespace System.Web.OData.Formatter
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
                 ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
+
             // Act
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
@@ -84,6 +85,28 @@ namespace System.Web.OData.Formatter
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
                 MediaTypeWithQualityHeaderValue.Parse(metadata)))
+
+            // Act
+            using (HttpResponseMessage response = client.SendAsync(request).Result)
+            {
+                // Assert
+                AssertODataVersion4JsonResponse(Resources.GetString(expect), response);
+            }
+        }
+
+        [Theory]
+        [InlineData("application/json;odata.metadata=none", "PresidentInJsonLightNoMetadata.json")]
+        [InlineData("application/json;odata.metadata=minimal", "PresidentInJsonLightMinimalMetadata.json")]
+        [InlineData("application/json;odata.metadata=full", "PresidentInJsonLightFullMetadata.json")]
+        public void GetSingletonInODataJsonLightFormat(string metadata, string expect)
+        {
+            // Arrange
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpServer host = new HttpServer(configuration))
+            using (HttpClient client = new HttpClient(host))
+            using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("President",
+                MediaTypeWithQualityHeaderValue.Parse(metadata)))
+
             // Act
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
@@ -223,7 +246,7 @@ namespace System.Web.OData.Formatter
         [Fact]
         public void ConditionallySupportODataIfQueryStringPresent()
         {
-            // Arrange #1, #2 and #3
+            // Arrange #1, #2, #3 and #4
             using (HttpConfiguration configuration = CreateConfiguration())
             {
                 foreach (ODataMediaTypeFormatter odataFormatter in
@@ -272,6 +295,17 @@ namespace System.Web.OData.Formatter
                         Assert.Null(ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
 
                         ODataTestUtil.VerifyJsonResponse(response.Content, Resources.PersonEntryInPlainOldJson);
+                    }
+
+                    // Arrange #4: this request should return response in OData json format
+                    using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
+                        CreateAbsoluteUri("President?$format=application/json"), isAtom: false))
+                    // Act #4
+                    using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
+                    {
+                        // Assert #4
+                        AssertODataVersion4JsonResponse(Resources.GetString("PresidentInJsonLightMinimalMetadata.json"),
+                            response);
                     }
                 }
             }

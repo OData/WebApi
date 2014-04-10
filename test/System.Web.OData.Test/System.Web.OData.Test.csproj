@@ -87,14 +87,19 @@
     <Compile Include="OData\Builder\Conventions\Attributes\ComplexTypeAttributeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConventionTests.cs" />
+    <Compile Include="OData\Builder\SingletonLinkConfigurationTest.cs" />
+    <Compile Include="OData\Builder\SingletonConfigurationTest.cs" />
     <Compile Include="OData\Builder\EnumTypeTest.cs" />
     <Compile Include="OData\Builder\FunctionConfigurationTest.cs" />
     <Compile Include="OData\Builder\LinkGenerationHelpersTest.cs" />
     <Compile Include="OData\Builder\LowerCamelCaserTest.cs" />
     <Compile Include="OData\Builder\PropertyConfigurationTest.cs" />
+    <Compile Include="OData\Builder\SingletonTest.cs" />
     <Compile Include="OData\Builder\StructuralTypeConfigurationOfTStructuralTypeTest.cs" />
     <Compile Include="OData\Builder\StructuralTypeConfigurationTest.cs" />
     <Compile Include="OData\Builder\TestModels\Color.cs" />
+    <Compile Include="OData\Builder\TestModels\Company.cs" />
+    <Compile Include="OData\Builder\TestModels\Employee.cs" />
     <Compile Include="OData\Builder\TestModels\ModelAlias.cs" />
     <Compile Include="OData\Builder\TestModels\PropertyAlias.cs" />
     <Compile Include="OData\ClrPropertyInfoAnnotationTest.cs" />
@@ -110,9 +115,11 @@
     <Compile Include="OData\Formatter\ClrTypeCacheTest.cs" />
     <Compile Include="OData\Formatter\DefaultODataETagHandlerTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerContextTest.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataSingletonDeserializerTest.cs" />
     <Compile Include="OData\Formatter\ETagOfTEntityTypeTests.cs" />
     <Compile Include="OData\Formatter\ETagTests.cs" />
     <Compile Include="OData\Formatter\ODataMessageWrapperTest.cs" />
+    <Compile Include="OData\Formatter\PresidentController.cs" />
     <Compile Include="OData\Formatter\Serialization\EdmEntityObjectTest.cs" />
     <Compile Include="OData\EntityInstanceContextTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpersTest.cs" />
@@ -129,6 +136,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataEdmTypeSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataSingletonSerializerTest.cs" />
     <Compile Include="OData\NullEdmComplexObjectTest.cs" />
     <Compile Include="OData\ODataNullValueAttributeTests.cs" />
     <Compile Include="OData\Formatter\Serialization\SelectExpandNodeTest.cs" />
@@ -137,10 +145,18 @@
     <Compile Include="OData\Formatter\HttpRequestMessageExtensions.cs" />
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="OData\PerRequestParameterBindingTest.cs" />
+    <Compile Include="OData\ODataSingletonTest.cs" />
     <Compile Include="OData\QueryableLimitationTest.cs" />
+    <Compile Include="OData\Query\ODataSingletonQueryOptionTest.cs" />
     <Compile Include="OData\Query\TruncatedCollectionTest.cs" />
     <Compile Include="OData\Results\CreatedODataResultTest.cs" />
     <Compile Include="OData\Results\UpdatedODataResultTest.cs" />
+    <Compile Include="OData\Routing\AttributeRoutingOnSingletonTest.cs" />
+    <Compile Include="OData\Routing\Conventions\MockNavigationSourceRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\NavigationSourceRoutingConventionTest.cs" />
+    <Compile Include="OData\Routing\Conventions\SingletonRoutingConventionTest.cs" />
+    <Compile Include="OData\Routing\ODataSingletonRoutingTest.cs" />
+    <Compile Include="OData\Routing\SingletonPathSegmentTest.cs" />
     <Compile Include="OData\Routing\UnboundFunctionPathSegmentTemplateTest.cs" />
     <Compile Include="OData\Routing\UnboundActionPathSegmentTest.cs" />
     <Compile Include="OData\Routing\UnboundFunctionPathSegmentTest.cs" />
@@ -170,8 +186,8 @@
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
     <Compile Include="OData\Builder\ActionLinkBuilderTests.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinderAnnotationTest.cs" />
-    <Compile Include="OData\Builder\EntitySetLinkBuilderAnnotationTest.cs" />
-    <Compile Include="OData\Builder\MockEntitySetLinkBuilderAnnotation.cs" />
+    <Compile Include="OData\Builder\NavigationSourceLinkBuilderAnnotationTest.cs" />
+    <Compile Include="OData\Builder\MockNavigationSourceLinkBuilderAnnotation.cs" />
     <Compile Include="OData\Builder\Conventions\ActionLinkGenerationConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\AssociationSetDiscoveryConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\NavigationLinksGenerationConventionTest.cs" />
@@ -341,7 +357,9 @@
     <EmbeddedResource Include="Resources\SingleInXml.xml" />
     <EmbeddedResource Include="Resources\StringInXml.xml" />
     <EmbeddedResource Include="Resources\SupplierPatchInAtom.xml" />
-    <EmbeddedResource Include="Resources\SupplierRequestEntryInAtom.xml" />
+    <EmbeddedResource Include="Resources\SupplierRequestEntryInAtom.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\TimeSpanInXml.xml" />
     <EmbeddedResource Include="Resources\WorkItemEntryInAtom.xml" />
     <Compile Include="OData\Builder\Conventions\Attributes\KeyAttributeEdmPropertyConventionTests.cs" />
@@ -388,6 +406,12 @@
     <EmbeddedResource Include="Resources\PersonEntryInJsonLightMinimalMetadata.json" />
     <EmbeddedResource Include="Resources\PersonEntryInJsonLightNoMetadata.json" />
     <EmbeddedResource Include="Resources\PersonEntryInJsonLight.json" />
+    <EmbeddedResource Include="Resources\EntityNavigationToSingletonFullMetadata.json" />
+    <EmbeddedResource Include="Resources\SingletonNavigationToEntitysetFullMetadata.json" />
+    <EmbeddedResource Include="Resources\SingletonSelectAndExpand.json" />
+    <EmbeddedResource Include="Resources\PresidentInJsonLightNoMetadata.json" />
+    <EmbeddedResource Include="Resources\PresidentInJsonLightMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\PresidentInJsonLightFullMetadata.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">
@@ -442,6 +466,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\MetadataWithSingleton.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

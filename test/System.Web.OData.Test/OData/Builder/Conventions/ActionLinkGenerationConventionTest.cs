@@ -43,8 +43,8 @@ namespace System.Web.OData.Builder.Conventions
 
             ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(paintEdmAction);
 
-            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehiclesEdmSet, Url = request.GetUrlHelper() };
-            var entityContext = new EntityInstanceContext(serializerContext, carEdmType.AsReference(), new Car { Model = 2009, Name = "Accord" });
+            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmSet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carEdmType.AsReference(), new Car { Model = 2009, Name = "Contoso" });
 
             Uri link = actionLinkBuilder.BuildActionLink(entityContext);
             Assert.Equal("http://localhost/ActionTestWorks", link.AbsoluteUri);

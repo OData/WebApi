@@ -37,7 +37,7 @@ namespace System.Web.OData.Formatter.Serialization
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataSerializerContext context = new ODataSerializerContext
             {
-                EntitySet = model.Customers,
+                NavigationSource = model.Customers,
                 MetadataLevel = ODataMetadataLevel.FullMetadata,
                 Model = model.Model,
                 Path = new ODataPath(),
@@ -71,7 +71,7 @@ namespace System.Web.OData.Formatter.Serialization
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             IEdmNavigationProperty navProp = model.Customer.NavigationProperties().First();
-            ODataSerializerContext context = new ODataSerializerContext { EntitySet = model.Customers, Model = model.Model };
+            ODataSerializerContext context = new ODataSerializerContext { NavigationSource = model.Customers, Model = model.Model };
             EntityInstanceContext entity = new EntityInstanceContext { SerializerContext = context };
 
             // Act
@@ -81,7 +81,7 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Same(entity, nestedContext.ExpandedEntity);
             Assert.Same(navProp, nestedContext.NavigationProperty);
             Assert.Same(selectExpand, nestedContext.SelectExpandClause);
-            Assert.Same(model.Orders, nestedContext.EntitySet);
+            Assert.Same(model.Orders, nestedContext.NavigationSource);
         }
 
         [Fact]

@@ -69,36 +69,25 @@ namespace System.Web.OData.Routing
             private set;
         }
 
-        /// <summary>
-        /// Gets the EDM type for this segment.
-        /// </summary>
-        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
-        /// <returns>
-        /// The EDM type for this segment.
-        /// </returns>
+        /// <inheritdoc/>
         public override IEdmType GetEdmType(IEdmType previousEdmType)
         {
             if (NavigationProperty != null)
             {
                 return NavigationProperty.Type.Definition;
             }
+
             return null;
         }
 
-        /// <summary>
-        /// Gets the entity set for this segment.
-        /// </summary>
-        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
-        /// <returns>
-        /// The entity set for this segment.
-        /// </returns>
-        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        /// <inheritdoc/>
+        public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
         {
-            if (NavigationProperty != null && previousEntitySet != null)
+            if (NavigationProperty != null && previousNavigationSource != null)
             {
-                // Cast will fail in singleton / containment cases.
-                return previousEntitySet.FindNavigationTarget(NavigationProperty) as IEdmEntitySet;
+                return previousNavigationSource.FindNavigationTarget(NavigationProperty);
             }
+
             return null;
         }
 

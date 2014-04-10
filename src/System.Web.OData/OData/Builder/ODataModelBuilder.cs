@@ -22,7 +22,8 @@ namespace System.Web.OData.Builder
 
         private Dictionary<Type, EnumTypeConfiguration> _enumTypes = new Dictionary<Type, EnumTypeConfiguration>();
         private Dictionary<Type, StructuralTypeConfiguration> _structuralTypes = new Dictionary<Type, StructuralTypeConfiguration>();
-        private Dictionary<string, EntitySetConfiguration> _entitySets = new Dictionary<string, EntitySetConfiguration>();
+        private Dictionary<string, INavigationSourceConfiguration> _navigationSources
+            = new Dictionary<string, INavigationSourceConfiguration>();
         private Dictionary<Type, PrimitiveTypeConfiguration> _primitiveTypes = new Dictionary<Type, PrimitiveTypeConfiguration>();
         private List<ProcedureConfiguration> _procedures = new List<ProcedureConfiguration>();
 
@@ -46,7 +47,7 @@ namespace System.Web.OData.Builder
         public string Namespace { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the container that will hold all the EntitySets, Actions and Functions
+        /// Gets or sets the name of the container that will hold all the navigation sources, actions and functions
         /// </summary>
         public string ContainerName { get; set; }
 
@@ -93,7 +94,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         public virtual IEnumerable<EntitySetConfiguration> EntitySets
         {
-            get { return _entitySets.Values; }
+            get { return _navigationSources.Values.OfType<EntitySetConfiguration>(); }
         }
 
         /// <summary>
@@ -113,7 +114,23 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets the collection of Procedures (i.e. Actions, Functions and ServiceOperations) in the model to be built
+        /// Gets the collection of EDM singletons in the model to be built.
+        /// </summary>
+        public virtual IEnumerable<SingletonConfiguration> Singletons
+        {
+            get { return _navigationSources.Values.OfType<SingletonConfiguration>(); }
+        }
+
+        /// <summary>
+        /// Gets the collection of EDM navigation sources (entity sets and singletons) in the model to be built.
+        /// </summary>
+        public virtual IEnumerable<INavigationSourceConfiguration> NavigationSources
+        {
+            get { return _navigationSources.Values; }
+        }
+
+        /// <summary>
+        /// Gets the collection of Procedures (i.e. Actions, Functions and ServiceOperations) in the model to be built.
         /// </summary>
         public virtual IEnumerable<ProcedureConfiguration> Procedures
         {
@@ -121,7 +138,7 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Registers an entity type as part of the model and returns an object that can be used to configure the entity.
+        /// Registers an entity type as part of the model and returns an object that can be used to configure the entity type.
         /// This method can be called multiple times for the same entity to perform multiple lines of configuration.
         /// </summary>
         /// <typeparam name="TEntityType">The type to be registered or configured.</typeparam>
@@ -166,7 +183,20 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Adds a non-bindable action to the builder.
+        /// Registers a singleton as a part of the model and returns an object that can be used to configure the singleton.
+        /// This method can be called multiple times for the same type to perform multiple lines of configuration.
+        /// </summary>
+        /// <typeparam name="TEntityType">The entity type of the singleton.</typeparam>
+        /// <param name="name">The name of the singleton.</param>
+        /// <returns>The configuration object for the specified singleton.</returns>
+        public SingletonConfiguration<TEntityType> Singleton<TEntityType>(string name) where TEntityType : class
+        {
+            EntityTypeConfiguration entity = AddEntityType(typeof(TEntityType));
+            return new SingletonConfiguration<TEntityType>(this, AddSingleton(name, entity));
+        }
+
+        /// <summary>
+        /// Adds an unbound action to the builder.
         /// </summary>
         /// <param name="name">The name of the action.</param>
         /// <returns>The configuration object for the specified action.</returns>
@@ -178,7 +208,7 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Adds a non-bindable function to the builder.
+        /// Adds an unbound function to the builder.
         /// </summary>
         /// <param name="name">The name of the function.</param>
         /// <returns>The configuration object for the specified function.</returns>
@@ -320,20 +350,75 @@ namespace System.Web.OData.Builder
             }
 
             EntitySetConfiguration entitySet = null;
-            if (_entitySets.ContainsKey(name))
+            if (_navigationSources.ContainsKey(name))
             {
-                entitySet = _entitySets[name] as EntitySetConfiguration;
+                entitySet = _navigationSources[name] as EntitySetConfiguration;
+                if (entitySet == null)
+                {
+                    throw Error.Argument("name", SRResources.EntitySetNameAlreadyConfiguredAsSingleton, name);
+                }
+
                 if (entitySet.EntityType != entityType)
                 {
-                    throw Error.Argument("entityType", SRResources.EntitySetAlreadyConfiguredDifferentEntityType, entitySet.Name, entitySet.EntityType.Name);
+                    throw Error.Argument("entityType", SRResources.EntitySetAlreadyConfiguredDifferentEntityType,
+                        entitySet.Name, entitySet.EntityType.Name);
                 }
             }
             else
             {
                 entitySet = new EntitySetConfiguration(this, entityType, name);
-                _entitySets[name] = entitySet;
+                _navigationSources[name] = entitySet;
             }
+
             return entitySet;
+        }
+
+        /// <summary>
+        /// Registers a singleton as a part of the model and returns an object that can be used to configure the singleton.
+        /// This method can be called multiple times for the same type to perform multiple lines of configuration.
+        /// </summary>
+        /// <param name="name">The name of the singleton.</param>
+        /// <param name="entityType">The type to be registered or configured.</param>
+        /// <returns>The configuration object for the specified singleton.</returns>
+        public virtual SingletonConfiguration AddSingleton(string name, EntityTypeConfiguration entityType)
+        {
+            if (String.IsNullOrWhiteSpace(name))
+            {
+                throw Error.ArgumentNullOrEmpty("name");
+            }
+
+            if (entityType == null)
+            {
+                throw Error.ArgumentNull("entityType");
+            }
+
+            if (name.Contains("."))
+            {
+                throw Error.NotSupported(SRResources.InvalidSingletonName, name);
+            }
+
+            SingletonConfiguration singleton = null;
+            if (_navigationSources.ContainsKey(name))
+            {
+                singleton = _navigationSources[name] as SingletonConfiguration;
+                if (singleton == null)
+                {
+                    throw Error.Argument("name", SRResources.SingletonNameAlreadyConfiguredAsEntitySet, name);
+                }
+
+                if (singleton.EntityType != entityType)
+                {
+                    throw Error.Argument("entityType", SRResources.SingletonAlreadyConfiguredDifferentEntityType,
+                        singleton.Name, singleton.EntityType.Name);
+                }
+            }
+            else
+            {
+                singleton = new SingletonConfiguration(this, entityType, name);
+                _navigationSources[name] = singleton;
+            }
+
+            return singleton;
         }
 
         /// <summary>
@@ -378,7 +463,40 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("name");
             }
 
-            return _entitySets.Remove(name);
+            if (_navigationSources.ContainsKey(name))
+            {
+                EntitySetConfiguration entitySet = _navigationSources[name] as EntitySetConfiguration;
+                if (entitySet != null)
+                {
+                    return _navigationSources.Remove(name);
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Removes the singleton from the model.
+        /// </summary>
+        /// <param name="name">The name of the singleton to be removed.</param>
+        /// <returns><see>true</see> if the singleton is present in the model and <see>false</see> otherwise.</returns>
+        public virtual bool RemoveSingleton(string name)
+        {
+            if (name == null)
+            {
+                throw Error.ArgumentNull("name");
+            }
+
+            if (_navigationSources.ContainsKey(name))
+            {
+                SingletonConfiguration singleton = _navigationSources[name] as SingletonConfiguration;
+                if (singleton != null)
+                {
+                    return _navigationSources.Remove(name);
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -458,6 +576,7 @@ namespace System.Web.OData.Builder
                     return _enumTypes[type];
                 }
             }
+
             return null;
         }
 

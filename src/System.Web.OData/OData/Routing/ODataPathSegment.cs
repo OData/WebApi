@@ -32,10 +32,10 @@ namespace System.Web.OData.Routing
         public abstract IEdmType GetEdmType(IEdmType previousEdmType);
 
         /// <summary>
-        /// Gets the entity set for this segment.
+        /// Gets the navigation source for this segment.
         /// </summary>
-        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
-        /// <returns>The entity set for this segment.</returns>
-        public abstract IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet);
+        /// <param name="previousNavigationSource">The navigation source of the previous path segment.</param>
+        /// <returns>The navigation source for this segment.</returns>
+        public abstract IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource);
     }
 }

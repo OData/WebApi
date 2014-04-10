@@ -222,7 +222,7 @@ namespace System.Web.OData.Results
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
-                "The related entity set could not be found from the OData path. The related entity set is required to serialize the payload.");
+                "The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to serialize the payload.");
         }
 
         [Fact]
@@ -262,7 +262,7 @@ namespace System.Web.OData.Results
             // Arrange
             string idLink = "http://id-link";
             Uri editLink = new Uri(idLink);
-            Mock<EntitySetLinkBuilderAnnotation> linkBuilder = new Mock<EntitySetLinkBuilderAnnotation>();
+            Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
             linkBuilder.Setup(b => b.BuildIdLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.Default))
                 .Returns(idLink);
             linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.Default, idLink))
@@ -270,7 +270,7 @@ namespace System.Web.OData.Results
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
-            model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
+            model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
@@ -288,10 +288,10 @@ namespace System.Web.OData.Results
         public void GenerateLocationHeader_ThrowsEditLinkNullForLocationHeader_IfEntitySetLinkBuilderReturnsNull()
         {
             // Arrange
-            Mock<EntitySetLinkBuilderAnnotation> linkBuilder = new Mock<EntitySetLinkBuilderAnnotation>();
+            Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
-            model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
+            model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
@@ -308,13 +308,13 @@ namespace System.Web.OData.Results
         {
             // Arrange
             Uri editLink = new Uri("http://edit-link");
-            Mock<EntitySetLinkBuilderAnnotation> linkBuilder = new Mock<EntitySetLinkBuilderAnnotation>();
+            Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
             linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.Default, null))
                 .Returns(editLink);
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
-            model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
+            model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
@@ -336,13 +336,13 @@ namespace System.Web.OData.Results
         {
             // Arrange
             Uri editLink = new Uri("http://edit-link");
-            Mock<EntitySetLinkBuilderAnnotation> linkBuilder = new Mock<EntitySetLinkBuilderAnnotation>();
+            Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
             linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.Default, null))
                 .Returns(editLink);
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
-            model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
+            model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;

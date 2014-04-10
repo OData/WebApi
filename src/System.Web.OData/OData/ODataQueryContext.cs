@@ -106,7 +106,7 @@ namespace System.Web.OData
             Contract.Assert(model != null);
             Contract.Assert(elementType != null);
 
-            IEdmNavigationSource navigationSource = (odataPath != null) ? odataPath.EntitySet : null;
+            IEdmNavigationSource navigationSource = (odataPath != null) ? odataPath.NavigationSource : null;
             if (navigationSource != null)
             {
                 return navigationSource;

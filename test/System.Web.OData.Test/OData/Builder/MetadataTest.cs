@@ -84,6 +84,74 @@ namespace System.Web.OData.Builder
             var csdl = GetCSDL(model);
         }
 
+        [Fact]
+        public void CanEmitModelWithSingleton()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder()
+                .Add_Company_Singleton();
+
+            // Act
+            var model = builder.GetServiceModel();
+
+            // Assert
+            var csdl = GetCSDL(model);
+        }
+
+        [Fact]
+        public void CanEmitModelWithEntitySetHasSingletonBinding()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder()
+                .Add_Company_EntityType()
+                .Add_Employee_EntityType()
+                .Add_CompanyEmployees_Relationship()
+                .Add_EmployeeComplany_Relationship()
+                .Add_CompaniesCEO_Binding();
+
+            // Act
+            var model = builder.GetServiceModel();
+
+            // Assert
+            var csdl = GetCSDL(model);
+        }
+
+        [Fact]
+        public void CanEmitModelWithSingletonHasSingletonBinding()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder()
+                .Add_Company_EntityType()
+                .Add_Employee_EntityType()
+                .Add_CompanyEmployees_Relationship()
+                .Add_EmployeeComplany_Relationship()
+                .Add_MicrosoftCEO_Binding();
+
+            // Act
+            var model = builder.GetServiceModel();
+
+            // Assert
+            var csdl = GetCSDL(model);
+        }
+
+        [Fact]
+        public void CanEmitModelWithSingletonHasEntitysetBinding()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder()
+                .Add_Company_EntityType()
+                .Add_Employee_EntityType()
+                .Add_CompanyEmployees_Relationship()
+                .Add_EmployeeComplany_Relationship()
+                .Add_MicrosoftEmployees_Binding();
+
+            // Act
+            var model = builder.GetServiceModel();
+
+            // Assert
+            var csdl = GetCSDL(model);
+        }
+
         public static string GetCSDL(IEdmModel model)
         {
             StringWriter writer = new StringWriter();

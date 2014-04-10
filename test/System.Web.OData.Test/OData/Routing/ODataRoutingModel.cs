@@ -25,6 +25,8 @@ namespace System.Web.OData.Routing
             builder.EntitySet<EmailAddress>("EmailAddresses");
             builder.EntitySet<üCategory>("üCategories");
             builder.EntitySet<EnumCustomer>("EnumCustomers");
+            builder.Singleton<RoutingCustomer>("VipCustomer");
+            builder.Singleton<Product>("MyProduct");
 
             ActionConfiguration getRoutingCustomerById = builder.Action("GetRoutingCustomerById");
             getRoutingCustomerById.Parameter<int>("RoutingCustomerId");
@@ -109,7 +111,7 @@ namespace System.Web.OData.Routing
 
         public static ActionConfiguration ActionReturnsFromEntitySet<TEntityType>(ODataModelBuilder builder, ActionConfiguration action, string entitySetName) where TEntityType : class
         {
-            action.EntitySet = CreateOrReuseEntitySet<TEntityType>(builder, entitySetName);
+            action.NavigationSource = CreateOrReuseEntitySet<TEntityType>(builder, entitySetName);
             action.ReturnType = builder.GetTypeConfigurationOrNull(typeof(TEntityType));
             return action;
         }
@@ -117,7 +119,7 @@ namespace System.Web.OData.Routing
         public static ActionConfiguration ActionReturnsCollectionFromEntitySet<TElementEntityType>(ODataModelBuilder builder, ActionConfiguration action, string entitySetName) where TElementEntityType : class
         {
             Type clrCollectionType = typeof(IEnumerable<TElementEntityType>);
-            action.EntitySet = CreateOrReuseEntitySet<TElementEntityType>(builder, entitySetName);
+            action.NavigationSource = CreateOrReuseEntitySet<TElementEntityType>(builder, entitySetName);
             IEdmTypeConfiguration elementType = builder.GetTypeConfigurationOrNull(typeof(TElementEntityType));
             action.ReturnType = new CollectionTypeConfiguration(elementType, clrCollectionType);
             return action;

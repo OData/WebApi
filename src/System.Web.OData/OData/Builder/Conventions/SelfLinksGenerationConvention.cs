@@ -7,9 +7,9 @@ using System.Web.OData.Routing;
 
 namespace System.Web.OData.Builder.Conventions
 {
-    internal class SelfLinksGenerationConvention : IEntitySetConvention
+    internal class SelfLinksGenerationConvention : INavigationSourceConvention
     {
-        public void Apply(EntitySetConfiguration configuration, ODataModelBuilder model)
+        public void Apply(INavigationSourceConfiguration configuration, ODataModelBuilder model)
         {
             if (configuration == null)
             {
@@ -17,11 +17,12 @@ namespace System.Web.OData.Builder.Conventions
             }
 
             // Configure the self link for the feed
-            if (configuration.GetFeedSelfLink() == null)
+            EntitySetConfiguration entitySet = configuration as EntitySetConfiguration;
+            if (entitySet != null && (entitySet.GetFeedSelfLink() == null))
             {
-                configuration.HasFeedSelfLink(entitySetContext =>
+                entitySet.HasFeedSelfLink(feedContext =>
                 {
-                    string selfLink = entitySetContext.Url.CreateODataLink(new EntitySetPathSegment(entitySetContext.EntitySet));
+                    string selfLink = feedContext.Url.CreateODataLink(new EntitySetPathSegment(feedContext.EntitySet));
 
                     if (selfLink == null)
                     {

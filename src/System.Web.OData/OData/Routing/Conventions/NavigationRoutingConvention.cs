@@ -11,15 +11,9 @@ namespace System.Web.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles navigation properties.
     /// </summary>
-    public class NavigationRoutingConvention : EntitySetRoutingConvention
+    public class NavigationRoutingConvention : NavigationSourceRoutingConvention
     {
-        /// <summary>
-        /// Selects the action.
-        /// </summary>
-        /// <param name="odataPath">The OData path.</param>
-        /// <param name="controllerContext">The controller context.</param>
-        /// <param name="actionMap">The action map.</param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
         {
             if (odataPath == null)
@@ -39,9 +33,11 @@ namespace System.Web.OData.Routing.Conventions
 
             HttpMethod method = controllerContext.Request.Method;
 
-            if ((method == HttpMethod.Get || method == HttpMethod.Post) &&
-                (odataPath.PathTemplate == "~/entityset/key/navigation" ||
-                 odataPath.PathTemplate == "~/entityset/key/cast/navigation"))
+            if ((method == HttpMethod.Get || method == HttpMethod.Post) && (
+                odataPath.PathTemplate == "~/entityset/key/navigation" ||
+                odataPath.PathTemplate == "~/entityset/key/cast/navigation" ||
+                odataPath.PathTemplate == "~/singleton/navigation" ||
+                odataPath.PathTemplate == "~/singleton/cast/navigation"))
             {
                 NavigationPathSegment navigationSegment = odataPath.Segments.Last() as NavigationPathSegment;
                 IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
@@ -58,8 +54,12 @@ namespace System.Web.OData.Routing.Conventions
 
                     if (actionName != null)
                     {
-                        KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                        controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                        if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
+                        {
+                            KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
+                            controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                        }
+
                         return actionName;
                     }
                 }

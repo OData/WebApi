@@ -104,7 +104,7 @@ namespace System.Web.OData.Builder
             ComplexTypeConfiguration address = createAddress.ReturnType as ComplexTypeConfiguration;
             Assert.NotNull(address);
             Assert.Equal(typeof(Address).FullName, address.FullName);
-            Assert.Null(createAddress.EntitySet);
+            Assert.Null(createAddress.NavigationSource);
 
             CollectionTypeConfiguration addresses = createAddresses.ReturnType as CollectionTypeConfiguration;
             Assert.NotNull(addresses);
@@ -112,7 +112,7 @@ namespace System.Web.OData.Builder
             address = addresses.ElementType as ComplexTypeConfiguration;
             Assert.NotNull(address);
             Assert.Equal(typeof(Address).FullName, address.FullName);
-            Assert.Null(createAddresses.EntitySet);
+            Assert.Null(createAddresses.NavigationSource);
         }
 
         [Fact]
@@ -131,7 +131,7 @@ namespace System.Web.OData.Builder
             Assert.Equal(typeof(Customer).FullName, customer.FullName);
             EntitySetConfiguration goodCustomers = builder.EntitySets.SingleOrDefault(s => s.Name == "GoodCustomers");
             Assert.NotNull(goodCustomers);
-            Assert.Same(createGoodCustomer.EntitySet, goodCustomers);
+            Assert.Same(createGoodCustomer.NavigationSource, goodCustomers);
 
             CollectionTypeConfiguration customers = createBadCustomers.ReturnType as CollectionTypeConfiguration;
             Assert.NotNull(customers);
@@ -139,7 +139,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(customer);
             EntitySetConfiguration badCustomers = builder.EntitySets.SingleOrDefault(s => s.Name == "BadCustomers");
             Assert.NotNull(badCustomers);
-            Assert.Same(createBadCustomers.EntitySet, badCustomers);
+            Assert.Same(createBadCustomers.NavigationSource, badCustomers);
         }
 
         [Fact]
@@ -381,7 +381,7 @@ namespace System.Web.OData.Builder
             IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
             IEdmAction watchAction = Assert.Single(model.SchemaElements.OfType<IEdmAction>()); // Guard
             IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
-            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model, EntitySet = entitySet, Url = urlHelper };
+            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model, NavigationSource = entitySet, Url = urlHelper };
 
             EntityInstanceContext context = new EntityInstanceContext(serializerContext, movieType.AsReference(), new Movie { ID = 1, Name = "Avatar" });
             ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(watchAction);
@@ -436,7 +436,7 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void ReturnsFromEntitySet_Sets_EntitySetAndReturnType()
+        public void ReturnsFromEntitySet_Sets_NavigationSourceAndReturnType()
         {
             // Arrange
             string entitySetName = "movies";
@@ -448,7 +448,7 @@ namespace System.Web.OData.Builder
             action.ReturnsFromEntitySet(movies);
 
             // Assert
-            Assert.Equal(entitySetName, action.EntitySet.Name);
+            Assert.Equal(entitySetName, action.NavigationSource.Name);
             Assert.Equal(typeof(Movie), action.ReturnType.ClrType);
         }
 
@@ -477,7 +477,7 @@ namespace System.Web.OData.Builder
             action.ReturnsCollectionFromEntitySet(movies);
 
             // Assert
-            Assert.Equal(entitySetName, action.EntitySet.Name);
+            Assert.Equal(entitySetName, action.NavigationSource.Name);
             Assert.Equal(typeof(IEnumerable<Movie>), action.ReturnType.ClrType);
         }
 

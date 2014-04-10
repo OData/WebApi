@@ -50,11 +50,13 @@ namespace System.Web.OData.TestCommon
             // derived entity type special customer
             EdmEntityType specialCustomer = new EdmEntityType("NS", "SpecialCustomer", customer);
             specialCustomer.AddStructuralProperty("SpecialCustomerProperty", EdmPrimitiveTypeKind.Guid);
+            specialCustomer.AddStructuralProperty("SpecialAddress", new EdmComplexTypeReference(address, isNullable: true));
             model.AddElement(specialCustomer);
 
             // entity type order
             EdmEntityType order = new EdmEntityType("NS", "Order");
             order.AddKeys(order.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            order.AddStructuralProperty("City", EdmPrimitiveTypeKind.String);
             order.AddStructuralProperty("Amount", EdmPrimitiveTypeKind.Int32);
             model.AddElement(order);
 
@@ -74,27 +76,24 @@ namespace System.Web.OData.TestCommon
             EdmEntitySet customers = container.AddEntitySet("Customers", customer);
             EdmEntitySet orders = container.AddEntitySet("Orders", order);
 
+            // singletons
+            EdmSingleton vipCustomer = container.AddSingleton("VipCustomer", customer);
+            EdmSingleton mary = container.AddSingleton("Mary", customer);
+
             // actions
             EdmAction upgrade = new EdmAction("NS", "upgrade", returnType: null, isBound: true, entitySetPathExpression: null);
             upgrade.AddParameter("entity", new EdmEntityTypeReference(customer, false));
             model.AddElement(upgrade);
-            EdmActionImport upgradeCustomer = container.AddActionImport(
-                "upgrade",
-                upgrade,
-                new EdmEntitySetReferenceExpression(customers));
 
             EdmAction specialUpgrade =
                 new EdmAction("NS", "specialUpgrade", returnType: null, isBound: true, entitySetPathExpression: null);
             specialUpgrade.AddParameter("entity", new EdmEntityTypeReference(specialCustomer, false));
             model.AddElement(specialUpgrade);
-            EdmActionImport upgradeSpecialCustomer = container.AddActionImport(
-                "specialUpgrade",
-                specialUpgrade,
-                new EdmEntitySetReferenceExpression(customers));
 
             // functions
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
             IEdmTypeReference stringType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: false);
+            IEdmTypeReference intType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false);
 
             EdmFunction IsUpgraded = new EdmFunction(
                 "NS",
@@ -105,10 +104,18 @@ namespace System.Web.OData.TestCommon
                 isComposable: false);
             IsUpgraded.AddParameter("entity", new EdmEntityTypeReference(customer, false));
             model.AddElement(IsUpgraded);
-            EdmFunctionImport isCustomerUpgraded = container.AddFunctionImport(
-                "IsUpgraded",
-                IsUpgraded,
-                new EdmEntitySetReferenceExpression(customers));
+
+            EdmFunction orderByCityAndAmount = new EdmFunction(
+                "NS",
+                "OrderByCityAndAmount",
+                stringType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
+            orderByCityAndAmount.AddParameter("entity", new EdmEntityTypeReference(customer, false));
+            orderByCityAndAmount.AddParameter("city", stringType);
+            orderByCityAndAmount.AddParameter("amount", intType);
+            model.AddElement(orderByCityAndAmount);
 
             EdmFunction IsSpecialUpgraded = new EdmFunction(
                 "NS",
@@ -119,10 +126,6 @@ namespace System.Web.OData.TestCommon
                 isComposable: false);
             IsSpecialUpgraded.AddParameter("entity", new EdmEntityTypeReference(specialCustomer, false));
             model.AddElement(IsSpecialUpgraded);
-            var isSpecialCustomerUpgraded = container.AddFunctionImport(
-                "IsSpecialUpgraded",
-                IsSpecialUpgraded,
-                new EdmEntitySetReferenceExpression(customers));
 
             EdmFunction getSalary = new EdmFunction(
                 "NS",
@@ -154,10 +157,6 @@ namespace System.Web.OData.TestCommon
             EdmCollectionType edmCollectionType = new EdmCollectionType(new EdmEntityTypeReference(customer, false));
             IsAnyUpgraded.AddParameter("entityset", new EdmCollectionTypeReference(edmCollectionType));
             model.AddElement(IsAnyUpgraded);
-            container.AddFunctionImport(
-                "IsAnyUpgraded",
-                IsAnyUpgraded,
-                new EdmEntitySetReferenceExpression(customers));
 
             EdmFunction isCustomerUpgradedWithParam = new EdmFunction(
                 "NS",
@@ -169,10 +168,6 @@ namespace System.Web.OData.TestCommon
             isCustomerUpgradedWithParam.AddParameter("entity", new EdmEntityTypeReference(customer, false));
             isCustomerUpgradedWithParam.AddParameter("city", EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: false));
             model.AddElement(isCustomerUpgradedWithParam);
-            container.AddFunctionImport(
-                "IsUpgradedWithParam",
-                isCustomerUpgradedWithParam,
-                new EdmEntitySetReferenceExpression(customers));
 
             EdmFunction isCustomerLocal = new EdmFunction(
                 "NS",
@@ -183,10 +178,6 @@ namespace System.Web.OData.TestCommon
                 isComposable: false);
             isCustomerLocal.AddParameter("entity", new EdmEntityTypeReference(customer, false));
             model.AddElement(isCustomerLocal);
-            container.AddFunctionImport(
-                "IsLocal",
-                isCustomerLocal,
-                new EdmEntitySetReferenceExpression(customers));
 
             // navigation properties
             customers.AddNavigationTarget(
@@ -235,11 +226,13 @@ namespace System.Web.OData.TestCommon
             SpecialOrder = specialOrder;
             Orders = orders;
             Customers = customers;
-            UpgradeCustomer = upgradeCustomer;
-            UpgradeSpecialCustomer = upgradeSpecialCustomer;
+            VipCustomer = vipCustomer;
+            Mary = mary;
+            UpgradeCustomer = upgrade;
+            UpgradeSpecialCustomer = specialUpgrade;
             CustomerName = customerName;
-            IsCustomerUpgraded = isCustomerUpgraded;
-            IsSpecialCustomerUpgraded = isSpecialCustomerUpgraded;
+            IsCustomerUpgraded = isCustomerUpgradedWithParam;
+            IsSpecialCustomerUpgraded = IsSpecialUpgraded;
         }
 
         public EdmModel Model { get; private set; }
@@ -258,16 +251,20 @@ namespace System.Web.OData.TestCommon
 
         public EdmEntitySet Orders { get; private set; }
 
+        public EdmSingleton VipCustomer { get; private set; }
+
+        public EdmSingleton Mary { get; private set; }
+
         public EdmEntityContainer Container { get; private set; }
 
-        public EdmActionImport UpgradeCustomer { get; private set; }
+        public EdmAction UpgradeCustomer { get; private set; }
 
-        public EdmActionImport UpgradeSpecialCustomer { get; private set; }
+        public EdmAction UpgradeSpecialCustomer { get; private set; }
 
         public IEdmProperty CustomerName { get; private set; }
 
-        public EdmFunctionImport IsCustomerUpgraded { get; private set; }
+        public EdmFunction IsCustomerUpgraded { get; private set; }
 
-        public EdmFunctionImport IsSpecialCustomerUpgraded { get; private set; }
+        public EdmFunction IsSpecialCustomerUpgraded { get; private set; }
     }
 }

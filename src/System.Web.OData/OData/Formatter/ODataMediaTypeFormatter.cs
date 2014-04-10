@@ -429,7 +429,7 @@ namespace System.Web.OData.Formatter
             UrlHelper urlHelper = Request.GetUrlHelper() ?? new UrlHelper(Request);
 
             ODataPath path = Request.ODataProperties().Path;
-            IEdmEntitySet targetEntitySet = path == null ? null : path.EntitySet;
+            IEdmNavigationSource targetNavigationSource = path == null ? null : path.NavigationSource;
 
             // serialize a response
             HttpConfiguration configuration = Request.GetConfiguration();
@@ -475,7 +475,7 @@ namespace System.Web.OData.Formatter
                     Request = Request,
                     RequestContext = Request.GetRequestContext(),
                     Url = urlHelper,
-                    EntitySet = targetEntitySet,
+                    NavigationSource = targetNavigationSource,
                     Model = model,
                     RootElementName = GetRootElementName(path) ?? "root",
                     SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,

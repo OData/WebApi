@@ -198,20 +198,31 @@ namespace System.Web.OData.Routing
                 throw Error.Argument(SRResources.SegmentNullOrEmpty);
             }
 
+            // ~/$metadata
             if (segment == ODataSegmentKinds.Metadata)
             {
                 return new MetadataPathSegment();
             }
+
+            // ~/$batch
             if (segment == ODataSegmentKinds.Batch)
             {
                 return new BatchPathSegment();
             }
 
+            // ~/EntitySet
             IEdmEntityContainer container = model.EntityContainer;
             IEdmEntitySet entitySet = container.FindEntitySet(segment);
             if (entitySet != null)
             {
                 return new EntitySetPathSegment(entitySet);
+            }
+
+            // ~/Singleton
+            IEdmSingleton singleton = container.FindSingleton(segment);
+            if (singleton != null)
+            {
+                return new SingletonPathSegment(singleton);
             }
 
             // It's not possible to use a bound function (or action) at root.

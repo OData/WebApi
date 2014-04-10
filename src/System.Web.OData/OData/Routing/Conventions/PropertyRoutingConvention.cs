@@ -11,7 +11,7 @@ namespace System.Web.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles reading structural properties.
     /// </summary>
-    public class PropertyRoutingConvention : EntitySetRoutingConvention
+    public class PropertyRoutingConvention : NavigationSourceRoutingConvention
     {
         /// <inheritdoc/>
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
@@ -43,11 +43,16 @@ namespace System.Web.OData.Routing.Conventions
 
                 if (actionName != null)
                 {
-                    KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                    controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                    if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
+                    {
+                        KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
+                        controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                    }
+
                     return actionName;
                 }
             }
+
             return null;
         }
 
@@ -57,16 +62,21 @@ namespace System.Web.OData.Routing.Conventions
             if (method == HttpMethod.Get)
             {
                 if (odataPath.PathTemplate == "~/entityset/key/property" ||
-                    odataPath.PathTemplate == "~/entityset/key/cast/property")
+                    odataPath.PathTemplate == "~/entityset/key/cast/property" ||
+                    odataPath.PathTemplate == "~/singleton/property" ||
+                    odataPath.PathTemplate == "~/singleton/cast/property")
                 {
                     segment = odataPath.Segments[odataPath.Segments.Count - 1] as PropertyAccessPathSegment;
                 }
                 else if (odataPath.PathTemplate == "~/entityset/key/property/$value" ||
-                     odataPath.PathTemplate == "~/entityset/key/cast/property/$value")
+                    odataPath.PathTemplate == "~/entityset/key/cast/property/$value" ||
+                    odataPath.PathTemplate == "~/singleton/property/$value" ||
+                    odataPath.PathTemplate == "~/singleton/cast/property/$value")
                 {
                     segment = odataPath.Segments[odataPath.Segments.Count - 2] as PropertyAccessPathSegment;
                 }
             }
+
             return segment == null ? null : segment.Property;
         }
     }

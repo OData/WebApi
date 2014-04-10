@@ -12,49 +12,71 @@ namespace System.Web.OData
     public class EdmModelExtensionsTest
     {
         [Fact]
-        public void GetEntitySetLinkBuilder_ThrowsArgumentNull_Model()
+        public void GetNavigationSourceLinkBuilder_ThrowsArgumentNull_Model()
         {
             IEdmModel model = null;
             Assert.ThrowsArgumentNull(
-                () => model.GetEntitySetLinkBuilder(entitySet: new Mock<IEdmEntitySet>().Object),
+                () => model.GetNavigationSourceLinkBuilder(navigationSource: new Mock<IEdmNavigationSource>().Object),
                 "model");
         }
 
         [Fact]
-        public void GetEntitySetLinkBuilder_After_SetEntitySetLinkBuilder()
+        public void GetNavigationSourceLinkBuilder_After_SetNavigationSourceLinkBuilder_OnEntitySet()
         {
             // Arrange
             IEdmModel model = new EdmModel();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
             EdmEntityType entityType = new EdmEntityType("NS", "Entity");
             IEdmEntitySet entitySet = new EdmEntitySet(container, "EntitySet", entityType);
-            EntitySetLinkBuilderAnnotation entitySetLinkBuilder = new EntitySetLinkBuilderAnnotation();
+            NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation();
 
             // Act
-            model.SetEntitySetLinkBuilder(entitySet, entitySetLinkBuilder);
-            var result = model.GetEntitySetLinkBuilder(entitySet);
+            model.SetNavigationSourceLinkBuilder(entitySet, linkBuilder);
+            var result = model.GetNavigationSourceLinkBuilder(entitySet);
 
             // Assert
-            Assert.Same(entitySetLinkBuilder, result);
+            Assert.Same(linkBuilder, result);
         }
 
         [Fact]
-        public void GetEntitySetLinkBuilder_ReturnsDefaultEntitySetBuilder_IfNotSet()
+        public void GetNavigationSourceLinkBuilder_After_SetNavigationSourceLinkBuilder_OnSingleton()
         {
+            // Arrange
             IEdmModel model = new EdmModel();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
             EdmEntityType entityType = new EdmEntityType("NS", "Entity");
-            IEdmEntitySet entitySet = new EdmEntitySet(container, "EntitySet", entityType);
+            IEdmSingleton singleton = new EdmSingleton(container, "Singleton", entityType);
+            NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation();
 
-            Assert.NotNull(model.GetEntitySetLinkBuilder(entitySet));
+            // Act
+            model.SetNavigationSourceLinkBuilder(singleton, linkBuilder);
+            var result = model.GetNavigationSourceLinkBuilder(singleton);
+
+            // Assert
+            Assert.Same(linkBuilder, result);
+        }
+
+        [Fact]
+        public void GetNavigationSourceLinkBuilder_ReturnsDefaultNavigationSourceBuilder_IfNotSet()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            EdmEntityType entityType = new EdmEntityType("NS", "Entity");
+            IEdmNavigationSource navigationSource = new EdmEntitySet(container, "EntitySet", entityType);
+
+            // Act & Assert
+            Assert.NotNull(model.GetNavigationSourceLinkBuilder(navigationSource));
         }
 
         [Fact]
         public void GetActionLinkBuilder_ThrowsArgumentNull_Model()
         {
+            // Arrange
             IEdmModel model = null;
             IEdmAction action = new Mock<IEdmAction>().Object;
 
+            // Act & Assert
             Assert.ThrowsArgumentNull(() => model.GetActionLinkBuilder(action), "model");
         }
 
@@ -83,6 +105,7 @@ namespace System.Web.OData
             IEdmEntityContainer container = new EdmEntityContainer("NS", "Container");
             IEdmAction action = new EdmAction("NS", "Action", returnType: null);
 
+            // Act & Assert
             Assert.NotNull(model.GetActionLinkBuilder(action));
         }
 
@@ -96,10 +119,14 @@ namespace System.Web.OData
         [Fact]
         public void GetTypeMappingCache_ReturnsCachedInstance_IfCalledMultipleTimes()
         {
+            // Arrange
             IEdmModel model = new EdmModel();
+
+            // Act
             ClrTypeCache cache1 = model.GetTypeMappingCache();
             ClrTypeCache cache2 = model.GetTypeMappingCache();
 
+            // Assert
             Assert.Same(cache1, cache2);
         }
     }

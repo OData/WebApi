@@ -12,8 +12,14 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData
 {
     /// <summary>
-    /// An instance of <see cref="EntityInstanceContext{TEntityType}"/> gets passed to the self link (<see cref="M:EntitySetConfiguration.HasIdLink"/>, <see cref="M:EntitySetConfiguration.HasEditLink"/>, <see cref="M:EntitySetConfiguration.HasReadLink"/>)
-    /// and navigation link (<see cref="M:EntitySetConfiguration.HasNavigationPropertyLink"/>, <see cref="M:EntitySetConfiguration.HasNavigationPropertiesLink"/>) builders and can be used by the link builders to generate links.
+    /// An instance of <see cref="EntityInstanceContext{TEntityType}"/> gets passed to the self link (
+    /// <see cref="M:NavigationSourceConfiguration.HasIdLink"/>,
+    /// <see cref="M:NavigationSourceConfiguration.HasEditLink"/>,
+    /// <see cref="M:NavigationSourceConfiguration.HasReadLink"/>
+    /// ) and navigation link (
+    /// <see cref="M:NavigationSourceConfiguration.HasNavigationPropertyLink"/>,
+    /// <see cref="M:NavigationSourceConfiguration.HasNavigationPropertiesLink"/>
+    /// ) builders and can be used by the link builders to generate links.
     /// </summary>
     public class EntityInstanceContext
     {
@@ -86,17 +92,17 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="IEdmEntitySet"/> to which this instance belongs.
+        /// Gets or sets the <see cref="IEdmNavigationSource"/> to which this instance belongs.
         /// </summary>
-        public IEdmEntitySet EntitySet
+        public IEdmNavigationSource NavigationSource
         {
             get
             {
-                return SerializerContext.EntitySet;
+                return SerializerContext.NavigationSource;
             }
             set
             {
-                SerializerContext.EntitySet = value;
+                SerializerContext.NavigationSource = value;
             }
         }
 

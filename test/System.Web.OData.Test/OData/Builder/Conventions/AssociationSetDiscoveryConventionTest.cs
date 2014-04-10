@@ -46,7 +46,7 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
-        public void GetTargetEntitySet_Throws_IfTargetEntityTypeIsMissing()
+        public void GetTargetNavigationSource_Throws_IfTargetEntityTypeIsMissing()
         {
             // Arrange
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
@@ -61,12 +61,12 @@ namespace System.Web.OData.Builder.Conventions
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => AssociationSetDiscoveryConvention.GetTargetEntitySet(config, modelBuilder.Object),
+                () => AssociationSetDiscoveryConvention.GetTargetNavigationSource(config, modelBuilder.Object),
                 "Could not find the target entity type for the navigation property 'SamplePropertyName' on entity type 'System.Web.OData.Builder.Conventions.AssociationSetDiscoveryConventionTest'.");
         }
 
         [Fact]
-        public void GetTargetEntitySet_Returns_Null_IfNoMatchingTargetEntitySet()
+        public void GetTargetNavigationSource_Returns_Null_IfNoMatchingTargetNavigaitonSource()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -74,14 +74,14 @@ namespace System.Web.OData.Builder.Conventions
             NavigationPropertyConfiguration navigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
 
             // Act
-            EntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
+           NavigationSourceConfiguration targetNavigationSource = AssociationSetDiscoveryConvention.GetTargetNavigationSource(navigationProperty, builder);
 
             // Assert
-            Assert.Null(targetEntitySet);
+           Assert.Null(targetNavigationSource);
         }
 
         [Fact]
-        public void GetTargetEntitySet_Returns_TargetEntitySet()
+        public void GetTargetNavigationSource_Returns_TargetEntitySet()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -91,14 +91,14 @@ namespace System.Web.OData.Builder.Conventions
             EntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
             // Act
-            EntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
+            NavigationSourceConfiguration targetNavigationSource = AssociationSetDiscoveryConvention.GetTargetNavigationSource(navigationProperty, builder);
 
             // Assert
-            Assert.Equal(manufacturers, targetEntitySet);
+            Assert.Same(manufacturers, targetNavigationSource);
         }
 
         [Fact]
-        public void GetTargetEntitySet_Returns_Null_IfMultipleMatchingTargetEntitySet()
+        public void GetTargetNavigationSource_Returns_Null_IfMultipleMatchingTargetEntitySet()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -109,14 +109,14 @@ namespace System.Web.OData.Builder.Conventions
             EntitySetConfiguration manufacturers2 = builder.AddEntitySet("manufacturers2", manufacturer);
 
             // Act
-            EntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
+            NavigationSourceConfiguration targetNavigationSource = AssociationSetDiscoveryConvention.GetTargetNavigationSource(navigationProperty, builder);
 
             // Assert
-            Assert.Null(targetEntitySet);
+            Assert.Null(targetNavigationSource);
         }
 
         [Fact]
-        public void GetTargetEntitySet_Returns_BaseTypeEntitySet_IfNoMatchingEntitysetForCurrentType()
+        public void GetTargetNavigationSource_Returns_BaseTypeNavigationSource_IfNoMatchingEntitysetForCurrentType()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -128,10 +128,45 @@ namespace System.Web.OData.Builder.Conventions
             EntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
             // Act
-            EntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
+            NavigationSourceConfiguration targetNavigationSource = AssociationSetDiscoveryConvention.GetTargetNavigationSource(navigationProperty, builder);
 
             // Assert
-            Assert.Equal(manufacturers, targetEntitySet);
+            Assert.Same(manufacturers, targetNavigationSource);
+        }
+
+        [Fact]
+        public void GetTargetNavigationSource_Returns_TargetSingleton()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration companyType = builder.AddEntityType(typeof(Company));
+            EntityTypeConfiguration employeeType = builder.AddEntityType(typeof(Employee));
+            NavigationPropertyConfiguration navigationProperty = companyType.AddNavigationProperty(typeof(Company).GetProperty("CEO"), EdmMultiplicity.One);
+            SingletonConfiguration gazes = builder.AddSingleton("Gazes", employeeType);
+
+            // Act
+            NavigationSourceConfiguration targetNavigationSource = AssociationSetDiscoveryConvention.GetTargetNavigationSource(navigationProperty, builder);
+
+            // Assert
+            Assert.Same(gazes, targetNavigationSource);
+        }
+
+        [Fact]
+        public void GetTargetNavigationSource_Returns_Null_IfMultipleMatchingTargetSingleton()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration companyType = builder.AddEntityType(typeof(Company));
+            EntityTypeConfiguration employeeType = builder.AddEntityType(typeof(Employee));
+            NavigationPropertyConfiguration navigationProperty = companyType.AddNavigationProperty(typeof(Company).GetProperty("CEO"), EdmMultiplicity.One);
+            SingletonConfiguration gazes1 = builder.AddSingleton("Gazes1", employeeType);
+            SingletonConfiguration gazes2 = builder.AddSingleton("Gazes2", employeeType);
+
+            // Act
+            NavigationSourceConfiguration targetNavigationSource = AssociationSetDiscoveryConvention.GetTargetNavigationSource(navigationProperty, builder);
+
+            // Assert
+            Assert.Null(targetNavigationSource);
         }
     }
 }

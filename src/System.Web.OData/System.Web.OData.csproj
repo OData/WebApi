@@ -74,6 +74,15 @@
     <Compile Include="OData\Builder\Conventions\Attributes\ComplexTypeAttributeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\INavigationSourceConvention.cs" />
+    <Compile Include="OData\Builder\NavigationSourceAndAnnotations.cs" />
+    <Compile Include="OData\Builder\INavigationSourceConfiguration.cs" />
+    <Compile Include="OData\Builder\NavigationSourceConfigurationOfTEntityType.cs" />
+    <Compile Include="OData\Builder\NavigationSourceLinkBuilderAnnotation.cs" />
+    <Compile Include="OData\Builder\SingletonAttribute.cs" />
+    <Compile Include="OData\Builder\SingletonConfigurationOfTEntityType.cs" />
+    <Compile Include="OData\Builder\NavigationSourceConfiguration.cs" />
+    <Compile Include="OData\Builder\SingletonConfiguration.cs" />
     <Compile Include="OData\Builder\EnumMemberConfiguration.cs" />
     <Compile Include="OData\Builder\EnumPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\EnumTypeConfiguration.cs" />
@@ -169,6 +178,9 @@
     <Compile Include="OData\Query\Validators\SelectExpandQueryValidator.cs" />
     <Compile Include="OData\Results\CreatedODataResult.cs" />
     <Compile Include="OData\Results\UpdatedODataResult.cs" />
+    <Compile Include="OData\Routing\Conventions\NavigationSourceRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\SingletonRoutingConvention.cs" />
+    <Compile Include="OData\Routing\SingletonPathSegment.cs" />
     <Compile Include="OData\Routing\UnboundFunctionPathSegmentTemplate.cs" />
     <Compile Include="OData\Routing\UnboundFunctionPathSegment.cs" />
     <Compile Include="OData\Routing\UnboundActionPathSegment.cs" />
@@ -269,7 +281,6 @@
     <Compile Include="OData\Builder\Conventions\IConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IEdmPropertyConventionOfTPropertyConfiguration.cs" />
-    <Compile Include="OData\Builder\Conventions\IEntitySetConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\KeyAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\NavigationLinksGenerationConvention.cs" />
     <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConvention.cs" />
@@ -345,8 +356,7 @@
     <Compile Include="OData\PropertyAccessor.cs" />
     <Compile Include="OData\Query\SkipQueryOption.cs" />
     <Compile Include="OData\Builder\EdmModelHelperMethods.cs" />
-    <Compile Include="OData\Builder\EntitySetLinkBuilderAnnotation.cs" />
-    <Compile Include="OData\Builder\EntitySetUrlAnnotation.cs" />
+    <Compile Include="OData\Builder\NavigationSourceUrlAnnotation.cs" />
     <Compile Include="OData\Formatter\ODataMessageWrapper.cs" />
     <Compile Include="OData\ClrTypeAnnotation.cs" />
     <Compile Include="OData\Formatter\Deserialization\DefaultODataDeserializerProvider.cs" />

@@ -3,6 +3,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Tracing;
 using System.Web.OData.Extensions;
@@ -20,12 +22,15 @@ namespace System.Web.OData.Builder
         [Fact]
         public void DollarMetaData_Works_WithoutAcceptHeader()
         {
+            // Arrange
             HttpServer server = new HttpServer();
             server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
-
             HttpClient client = new HttpClient(server);
+
+            // Act
             var response = client.GetAsync("http://localhost/$metadata").Result;
 
+            // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<edmx:Edmx", response.Content.ReadAsStringAsync().Result);
@@ -115,6 +120,28 @@ namespace System.Web.OData.Builder
             Assert.Equal("application/atomsvc+xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<workspace>", response.Content.ReadAsStringAsync().Result);
         }
+
+        [Fact]
+        public void ServiceDocumentWorks_OutputSingleton()
+        {
+            // Arrange
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
+
+            HttpClient client = new HttpClient(server);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+            // Act
+            var response = client.SendAsync(request).Result;
+            var repsoneString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains("\"name\":\"President\",\"kind\":\"Singleton\",\"url\":\"President\"",
+                repsoneString);
+        }
+
 
         [Fact]
         public void ServiceDocument_ContainsFunctonImport()

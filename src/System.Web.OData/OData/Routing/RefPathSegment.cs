@@ -28,10 +28,10 @@ namespace System.Web.OData.Routing
         }
 
         /// <inheritdoc/>
-        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
         {
-            // $ref is the last path segment.  It uses previous segment's entity set.
-            return previousEntitySet;
+            // $ref is the last path segment.  It uses previous segment's navigation source.
+            return previousNavigationSource;
         }
 
         /// <summary>

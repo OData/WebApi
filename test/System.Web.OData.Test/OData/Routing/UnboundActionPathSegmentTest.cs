@@ -138,14 +138,14 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
-        public void GetEntitySet_ReturnsNotNull_UnboundActionEntityset()
+        public void GetNavigationSource_ReturnsNotNull_UnboundActionEntityset()
         {
             // Arrange
             IEdmActionImport action = _container.FindOperationImports("CreateCustomer").SingleOrDefault() as IEdmActionImport;
 
             // Act
             UnboundActionPathSegment segment = new UnboundActionPathSegment(action);
-            var result = segment.GetEntitySet(previousEntitySet: null);
+            var result = segment.GetNavigationSource(previousNavigationSource: null);
 
             // Assert
             Assert.NotNull(result);
@@ -153,14 +153,14 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
-        public void GetEntitySet_ReturnsNull_UnboundActionPrimitveReturnType()
+        public void GetNavigationSource_ReturnsNull_UnboundActionPrimitveReturnType()
         {
             // Arrange
             IEdmActionImport action = _container.FindOperationImports("MyAction").SingleOrDefault() as IEdmActionImport;
             UnboundActionPathSegment segment = new UnboundActionPathSegment(action);
 
             // Act
-            var result = segment.GetEntitySet(previousEntitySet: null);
+            var result = segment.GetNavigationSource(previousNavigationSource: null);
 
             // Assert
             Assert.Null(result);

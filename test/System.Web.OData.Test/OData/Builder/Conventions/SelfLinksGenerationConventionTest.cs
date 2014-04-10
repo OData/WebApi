@@ -22,7 +22,8 @@ namespace System.Web.OData.Builder.Conventions
             var mockEntityType = new Mock<EntityTypeConfiguration>();
             var mockEntitySet = new Mock<EntitySetConfiguration>();
             mockEntitySet.Setup(entitySet => entitySet.GetFeedSelfLink()).Returns((Func<FeedContext, Uri>)null).Verifiable();
-            mockEntitySet.Setup(entitySet => entitySet.HasFeedSelfLink(It.IsAny<Func<FeedContext, Uri>>())).Returns(mockEntitySet.Object).Verifiable();
+            mockEntitySet.Setup(entitySet => entitySet.HasFeedSelfLink(It.IsAny<Func<FeedContext, Uri>>()))
+                .Returns(mockEntitySet.Object).Verifiable();
             mockEntitySet.Setup(entitySet => entitySet.EntityType).Returns(mockEntityType.Object);
 
             var mockModelBuilder = new Mock<ODataModelBuilder>();
@@ -64,13 +65,36 @@ namespace System.Web.OData.Builder.Conventions
             IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
 
             HttpRequestMessage request = GetODataRequest(model);
-            EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
-            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
-            var entityContext = new EntityInstanceContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Accord" });
+            NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
+            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Contoso" });
 
             EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
 
-            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.OData.Builder.TestModels.Car", selfLinks.IdLink);
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')/System.Web.OData.Builder.TestModels.Car", selfLinks.IdLink);
+        }
+
+        [Fact]
+        public void SelfLinksGenerationConvention_Uses_WithCast_IfDerivedTypeHasNavigationProperty_ForSingleton()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            var myVehicle = builder.Singleton<Vehicle>("MyVehicle");
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmSingleton vehicleEdmSingleton = model.EntityContainer.FindSingleton("MyVehicle");
+            IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
+
+            HttpRequestMessage request = GetODataRequest(model);
+            NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehicleEdmSingleton);
+            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehicleEdmSingleton, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, carType.AsReference(), new Car { Model = 2014, Name = "Contoso" });
+
+            // Act
+            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
+
+            // Assert
+            Assert.Equal("http://localhost/MyVehicle/System.Web.OData.Builder.TestModels.Car", selfLinks.IdLink);
         }
 
         [Fact]
@@ -84,13 +108,36 @@ namespace System.Web.OData.Builder.Conventions
             IEdmEntityType sportbikeType = model.AssertHasEntityType(typeof(SportBike));
 
             HttpRequestMessage request = GetODataRequest(model);
-            EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
-            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
+            NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
+            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, sportbikeType.AsReference(), new SportBike { Model = 2009, Name = "Ninja" });
 
             EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
 
             Assert.Equal("http://localhost/motorcycles(Model=2009,Name='Ninja')", selfLinks.IdLink);
+        }
+
+        [Fact]
+        public void SelfLinksGenerationConvention_Uses_WithoutCast_IfDerivedTypeDoesnotHaveNavigationProperty_ForSingleton()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            var myMotorcycle = builder.Singleton<Motorcycle>("MyMotor");
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmSingleton vehicleEdmSingleton = model.EntityContainer.FindSingleton("MyMotor");
+            IEdmEntityType sportbikeType = model.AssertHasEntityType(typeof(SportBike));
+
+            HttpRequestMessage request = GetODataRequest(model);
+            NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehicleEdmSingleton);
+            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehicleEdmSingleton, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, sportbikeType.AsReference(), new SportBike { Model = 2014, Name = "Ninja" });
+
+            // Act
+            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
+
+            // Assert
+            Assert.Equal("http://localhost/MyMotor", selfLinks.IdLink);
         }
 
         private static HttpRequestMessage GetODataRequest(IEdmModel model)

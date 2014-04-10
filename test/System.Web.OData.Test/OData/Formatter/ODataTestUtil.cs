@@ -81,7 +81,7 @@ namespace System.Web.OData.Formatter
                 people.HasIdLink(context =>
                     {
                         return context.Url.CreateODataLink(
-                            new EntitySetPathSegment(context.EntitySet),
+                            new EntitySetPathSegment(context.NavigationSource as IEdmEntitySet),
                             new KeyValuePathSegment(context.GetPropertyValue("PerId").ToString()));
                     },
                     followsConventions: false);
@@ -144,6 +144,14 @@ namespace System.Web.OData.Formatter
                 getSalary.Parameter<string>("month");
                 getSalary.Returns<int>();
                 getSalary.IncludeInServiceDocument = true;
+
+                // Add Singleton
+                var president = model.Singleton<FormatterPerson>("President");
+                president.HasIdLink(context =>
+                    {
+                        return context.Url.CreateODataLink(new SingletonPathSegment(context.NavigationSource as IEdmSingleton));
+                    },
+                    followsConventions: false);
 
                 _model = model.GetEdmModel();
             }

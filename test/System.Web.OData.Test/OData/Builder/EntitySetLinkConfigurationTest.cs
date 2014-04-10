@@ -31,12 +31,12 @@ namespace System.Web.OData.Builder
             var productType = model.SchemaElements.OfType<IEdmEntityType>().Single();
             var productsSet = model.SchemaElements.OfType<IEdmEntityContainer>().Single().EntitySets().Single();
             var productInstance = new EntitySetLinkConfigurationTest_Product { ID = 15 };
-            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = productsSet };
+            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = productsSet };
             var entityContext = new EntityInstanceContext(serializerContext, productType.AsReference(), productInstance);
-            var entitySetLinkBuilderAnnotation = new EntitySetLinkBuilderAnnotation(actor);
+            var linkBuilderAnnotation = new NavigationSourceLinkBuilderAnnotation(actor);
 
             // Act
-            var selfLinks = entitySetLinkBuilderAnnotation.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
+            var selfLinks = linkBuilderAnnotation.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
 
             // Assert
             Assert.NotNull(selfLinks.EditLink);
@@ -84,7 +84,7 @@ namespace System.Web.OData.Builder
             var productType = model.SchemaElements.OfType<IEdmEntityType>().Single();
             var productsSet = model.SchemaElements.OfType<IEdmEntityContainer>().Single().EntitySets().Single();
             var productInstance = new EntitySetLinkConfigurationTest_Product { ID = 15 };
-            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = productsSet };
+            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = productsSet };
             var entityContext = new EntityInstanceContext(serializerContext, productType.AsReference(), productInstance);
 
             // Act
@@ -125,14 +125,14 @@ namespace System.Web.OData.Builder
 
             IEdmEntitySet products = model.EntityContainer.EntitySets().Single(s => s.Name == "Products");
             IEdmNavigationProperty ordersProperty = products.EntityType().DeclaredNavigationProperties().Single();
-            var linkBuilder = model.GetEntitySetLinkBuilder(products);
+            var linkBuilder = model.GetNavigationSourceLinkBuilder(products);
 
             // Act & Assert
             Assert.ThrowsArgument(
                 () => linkBuilder.BuildNavigationLink(new EntityInstanceContext(), ordersProperty, ODataMetadataLevel.Default),
                 "navigationProperty",
-                "No NavigationLink factory was found for the navigation property 'Orders' from entity type 'System.Web.OData.Builder.EntitySetLinkConfigurationTest_Product' on entity set 'Products'. " +
-                "Try calling HasNavigationPropertyLink on the EntitySetConfiguration.");
+                "No NavigationLink factory was found for the navigation property 'Orders' from entity type 'System.Web.OData.Builder.EntitySetLinkConfigurationTest_Product' on entity set or singleton 'Products'. " +
+                "Try calling HasNavigationPropertyLink on the NavigationSourceConfiguration.");
         }
 
         private ODataModelBuilder GetCommonModel()

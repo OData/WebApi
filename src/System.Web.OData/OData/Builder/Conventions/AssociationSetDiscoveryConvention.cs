@@ -1,38 +1,40 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Web.Http;
 using System.Web.OData.Properties;
 
 namespace System.Web.OData.Builder.Conventions
 {
     /// <summary>
-    /// <see cref="IEntitySetConvention"/> to configure the EDM association sets for the given entity set.
+    /// <see cref="INavigationSourceConvention"/> to configure the EDM association sets for the given entity set.
     /// <remarks>This convention adds an association set for each EDM navigation property defined in this type, its base types and all its derived types.
-    /// The target entity set chosen is the default entity set for the navigation property's target entity type.
-    /// The default entity set for an entity type is the entity set that contains entries of that entity type. If more than one entity sets match, the default entity set is none.
-    /// If no entity sets match the default entity set is the default entity set of the base type.</remarks>
+    /// The target navigation source chosen is the default navigation source for the navigation property's target entity type.
+    /// The default navigation source for an entity type is the navigation source that contains entity of that entity type. 
+    /// If more than one navigation source match, the default navigation source is none.
+    /// If no navigation sources match the default navigation source is the default navigation source of the base type.</remarks>
     /// </summary>
-    internal class AssociationSetDiscoveryConvention : IEntitySetConvention
+    internal class AssociationSetDiscoveryConvention : INavigationSourceConvention
     {
-        public void Apply(EntitySetConfiguration configuration, ODataModelBuilder model)
+        public void Apply(INavigationSourceConfiguration configuration, ODataModelBuilder model)
         {
             foreach (EntityTypeConfiguration entity in model.ThisAndBaseAndDerivedTypes(configuration.EntityType))
             {
                 foreach (NavigationPropertyConfiguration navigationProperty in entity.NavigationProperties)
                 {
-                    EntitySetConfiguration targetEntitySet = GetTargetEntitySet(navigationProperty, model);
-                    if (targetEntitySet != null)
+                    NavigationSourceConfiguration targetNavigationSource = GetTargetNavigationSource(navigationProperty, model);
+                    if (targetNavigationSource != null)
                     {
-                        configuration.AddBinding(navigationProperty, targetEntitySet);
+                        configuration.AddBinding(navigationProperty, targetNavigationSource);
                     }
                 }
             }
         }
 
-        // Get the default target entity set for this navigation property.
-        internal static EntitySetConfiguration GetTargetEntitySet(NavigationPropertyConfiguration navigationProperty, ODataModelBuilder model)
+        // Get the default target navigation source for this navigation property.
+        internal static NavigationSourceConfiguration GetTargetNavigationSource(NavigationPropertyConfiguration navigationProperty,
+            ODataModelBuilder model)
         {
             EntityTypeConfiguration targetEntityType =
                 model
@@ -42,34 +44,45 @@ namespace System.Web.OData.Builder.Conventions
 
             if (targetEntityType == null)
             {
-                throw Error.InvalidOperation(SRResources.TargetEntityTypeMissing, navigationProperty.Name, navigationProperty.PropertyInfo.ReflectedType.FullName);
+                throw Error.InvalidOperation(SRResources.TargetEntityTypeMissing, navigationProperty.Name,
+                    navigationProperty.PropertyInfo.ReflectedType.FullName);
             }
 
-            return GetDefaultEntitySet(targetEntityType, model);
+            bool hasSingletonAttribute = navigationProperty.PropertyInfo.GetCustomAttributes<SingletonAttribute>().Any();
+
+            return GetDefaultNavigationSource(targetEntityType, model, hasSingletonAttribute);
         }
 
-        private static EntitySetConfiguration GetDefaultEntitySet(EntityTypeConfiguration targetEntityType, ODataModelBuilder model)
+        private static NavigationSourceConfiguration GetDefaultNavigationSource(EntityTypeConfiguration targetEntityType,
+            ODataModelBuilder model, bool isSingleton)
         {
             if (targetEntityType == null)
             {
                 return null;
             }
 
-            IEnumerable<EntitySetConfiguration> matchingEntitySets = model.EntitySets.Where(e => e.EntityType == targetEntityType);
-
-            if (matchingEntitySets.Count() > 1)
+            NavigationSourceConfiguration[] matchingNavigationSources = null;
+            if (isSingleton)
             {
-                // no default entity set if more than one entity set match.
-                return null;
-            }
-            else if (matchingEntitySets.Count() == 1)
-            {
-                return matchingEntitySets.Single();
+                matchingNavigationSources = model.Singletons.Where(e => e.EntityType == targetEntityType).ToArray();
             }
             else
             {
-                // default entity set is the same as the default entity set for the base type.
-                return GetDefaultEntitySet(targetEntityType.BaseType, model);
+                matchingNavigationSources = model.EntitySets.Where(e => e.EntityType == targetEntityType).ToArray();
+            }
+
+            if (matchingNavigationSources.Length > 1)
+            {
+                return null;
+            }
+            else if (matchingNavigationSources.Length == 1)
+            {
+                return matchingNavigationSources[0];
+            }
+            else
+            {
+                // default navigation source is the same as the default navigation source for the base type.
+                return GetDefaultNavigationSource(targetEntityType.BaseType, model, isSingleton);
             }
         }
     }

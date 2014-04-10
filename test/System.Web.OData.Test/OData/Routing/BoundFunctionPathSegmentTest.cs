@@ -81,10 +81,10 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
-        public void GetEntitySet_Returns_FunctionTargetEntitySet()
+        public void GetNavigationSource_Returns_FunctionTargetNavigationSource()
         {
             // Arrange
-            Mock<IEdmEntitySet> targetEntitySet = new Mock<IEdmEntitySet>();
+            Mock<IEdmNavigationSource> targetNavigationSource = new Mock<IEdmNavigationSource>();
             Mock<IEdmFunction> edmFuncton = new Mock<IEdmFunction>();
             edmFuncton.Setup(a => a.Namespace).Returns("NS");
             edmFuncton.Setup(a => a.Name).Returns("Funtion");
@@ -93,7 +93,7 @@ namespace System.Web.OData.Routing
             BoundFunctionPathSegment segment = new BoundFunctionPathSegment(edmFuncton.Object, null, null);
 
             // Assert
-            Assert.Same(targetEntitySet.Object, segment.GetEntitySet(targetEntitySet.Object));
+            Assert.Same(targetNavigationSource.Object, segment.GetNavigationSource(targetNavigationSource.Object));
         }
 
         [Fact]

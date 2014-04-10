@@ -97,18 +97,18 @@ namespace System.Web.OData.Routing
         }
 
         /// <inheritdoc/>
-        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
         {
-            // for unbound function, the previous entity set must be null
-            if (previousEntitySet != null)
+            // for unbound function, the previous navigation source must be null
+            if (previousNavigationSource != null)
             {
-                throw Error.Argument("previousEntitySet");
+                throw Error.Argument("previousNavigationSource");
             }
 
             if (Function != null)
             {
-                // entity set
-                IEdmEntitySet functionEntitySet;
+                // In current ODL V4 implementation, unbound function can't return the singleton.
+                IEdmEntitySet functionEntitySet = null;
                 if (Function.TryGetStaticEntitySet(out functionEntitySet))
                 {
                     return functionEntitySet;

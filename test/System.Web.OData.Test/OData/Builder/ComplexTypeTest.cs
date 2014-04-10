@@ -72,14 +72,14 @@ namespace System.Web.OData.Builder
         public void CreateInfiniteRecursiveComplexTypeDefinitionFails()
         {
             var builder = new ODataModelBuilder()
-                .Add_ZipCode_ComplexType();
+                .Add_RecursiveZipCode_ComplexType();
 
-            var zipCode = builder.ComplexType<ZipCode>();
+            var zipCode = builder.ComplexType<RecursiveZipCode>();
 
             Assert.ThrowsArgument(
                 () => zipCode.ComplexProperty(z => z.Recursive),
                 "propertyInfo",
-                "The complex type 'System.Web.OData.Builder.TestModels.ZipCode' has a reference to itself through the property 'Recursive'. A recursive loop of complex types is not allowed.");
+                "The complex type 'System.Web.OData.Builder.TestModels.RecursiveZipCode' has a reference to itself through the property 'Recursive'. A recursive loop of complex types is not allowed.");
         }
 
         [Fact]

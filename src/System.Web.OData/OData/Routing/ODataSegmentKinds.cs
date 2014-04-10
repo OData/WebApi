@@ -19,6 +19,7 @@ namespace System.Web.OData.Routing
         internal const string _UnboundFunction = "unboundfunction";
         internal const string _Cast = "cast";
         internal const string _EntitySet = "entityset";
+        internal const string _Singleton = "singleton";
         internal const string _Key = "key";
         internal const string _Navigation = "navigation";
         internal const string _Property = "property";
@@ -78,6 +79,11 @@ namespace System.Web.OData.Routing
         /// Represents a segment indicating an entity set.
         /// </summary>
         public static readonly string EntitySet = _EntitySet;
+
+        /// <summary>
+        /// Represents a segment indicating a singleton.
+        /// </summary>
+        public static readonly string Singleton = _Singleton;
 
         /// <summary>
         /// Represents a segment indicating an index by key operation.

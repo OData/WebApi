@@ -3,7 +3,7 @@
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// Used to configure the binding for a navigation property for an entity set.
+    /// Used to configure the binding for a navigation property for a navigation source.
     /// This configuration functionality is exposed by the model builder Fluent API, see <see
     /// cref="ODataModelBuilder"/>.
     /// </summary>
@@ -13,12 +13,12 @@ namespace System.Web.OData.Builder
         /// Initializes a new instance of the <see cref="NavigationPropertyBindingConfiguration"/> class.
         /// </summary>
         /// <param name="navigationProperty">The navigation property for the binding.</param>
-        /// <param name="entitySet">The target entity set of the binding.</param>
+        /// <param name="navigationSource">The target navigation source of the binding.</param>
         public NavigationPropertyBindingConfiguration(NavigationPropertyConfiguration navigationProperty,
-            EntitySetConfiguration entitySet)
+            INavigationSourceConfiguration navigationSource)
         {
             NavigationProperty = navigationProperty;
-            EntitySet = entitySet;
+            TargetNavigationSource = navigationSource;
         }
 
         /// <summary>
@@ -27,8 +27,8 @@ namespace System.Web.OData.Builder
         public NavigationPropertyConfiguration NavigationProperty { get; private set; }
 
         /// <summary>
-        /// Gets the target entity set of the binding.
+        /// Gets the target navigation source of the binding.
         /// </summary>
-        public EntitySetConfiguration EntitySet { get; private set; }
+        public INavigationSourceConfiguration TargetNavigationSource { get; private set; }
     }
 }

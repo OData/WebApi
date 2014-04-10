@@ -73,7 +73,7 @@ namespace System.Web.OData.Routing.Conventions
         }
 
         [Fact]
-        public void SelectAction_ReturnsFunctionName_ForFunctionOnEntity()
+        public void SelectAction_ReturnsFunctionName_ForEntityFunctionOnEntity()
         {
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
@@ -96,6 +96,31 @@ namespace System.Web.OData.Routing.Conventions
             Assert.Equal("IsUpgraded", function);
             Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
             Assert.Equal("1", controllerContext.Request.GetRouteData().Values["key"]);
+        }
+
+        [Fact]
+        public void SelectAction_ReturnsFunctionName_ForSingletonFunctionOnEntity()
+        {
+            // Arrange
+            FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "VipCustomer/NS.IsUpgraded");
+            HttpRequestContext requestContext = new HttpRequestContext();
+            HttpControllerContext controllerContext = new HttpControllerContext
+            {
+                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
+                RequestContext = requestContext,
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+            controllerContext.Request.SetRequestContext(requestContext);
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "IsUpgraded");
+
+            // Act
+            string function = functionConvention.SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Equal("IsUpgraded", function);
+            Assert.Equal(0, controllerContext.Request.GetRouteData().Values.Count);
         }
 
         [Fact]
@@ -124,7 +149,7 @@ namespace System.Web.OData.Routing.Conventions
         }
 
         [Fact]
-        public void SelectAction_UpdatesRouteData_ForFunctionWithParameters()
+        public void SelectAction_UpdatesRouteData_ForEntityFunctionWithParameters()
         {
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
@@ -151,11 +176,37 @@ namespace System.Web.OData.Routing.Conventions
         }
 
         [Fact]
+        public void SelectAction_UpdatesRouteData_ForSingletonFunctionWithParameters()
+        {
+            // Arrange
+            FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "VipCustomer/NS.IsUpgradedWithParam(city='any')");
+            HttpRequestContext requestContext = new HttpRequestContext();
+            HttpControllerContext controllerContext = new HttpControllerContext
+            {
+                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
+                RequestContext = requestContext,
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+            controllerContext.Request.SetRequestContext(requestContext);
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "IsUpgradedWithParam");
+
+            // Act
+            string function = functionConvention.SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Equal("IsUpgradedWithParam", function);
+            Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
+            Assert.Equal("any", controllerContext.Request.GetRouteData().Values["city"]);
+        }
+
+        [Fact]
         public void SelectAction_ReturnsNull_IfActionIsMissing()
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(1)/IsLocal");
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "Customers(1)/NS.IsLocal");
             ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
             HttpControllerContext controllerContext = new HttpControllerContext
                 {

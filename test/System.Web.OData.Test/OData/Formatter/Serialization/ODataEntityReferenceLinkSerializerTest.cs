@@ -1,31 +1,21 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Web.OData.Routing;
-using System.Xml.Linq;
 using Microsoft.OData.Core;
-using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Formatter.Serialization
 {
     public class ODataEntityReferenceLinkSerializerTest
     {
-        private readonly IEdmModel _model;
-        private readonly IEdmEntitySet _customerSet;
-
-        public ODataEntityReferenceLinkSerializerTest()
-        {
-            _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
-            _customerSet = _model.EntityContainer.FindEntitySet("Customers");
-        }
-
         [Fact]
         public void WriteObject_ThrowsArgumentNull_MessageWriter()
         {
+            // Arrange
             ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
+
+            // Act & Assert
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLink), messageWriter: null,
                     writeContext: new ODataSerializerContext()),
@@ -35,7 +25,10 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_ThrowsArgumentNull_WriteContext()
         {
+            // Arrange
             ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
+
+            // Act & Assert
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLink),
                     messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
@@ -45,14 +38,13 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_Throws_ObjectCannotBeWritten_IfGraphIsNotUri()
         {
-            IEdmNavigationProperty navigationProperty = _customerSet.EntityType().NavigationProperties().First();
+            // Arrange
             ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
-            ODataPath path = new ODataPath(new NavigationPathSegment(navigationProperty));
-            ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = path };
 
+            // Act & Assert
             Assert.Throws<SerializationException>(
                 () => serializer.WriteObject(graph: "not uri", type: typeof(ODataEntityReferenceLink),
-                    messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: writeContext),
+                    messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: new ODataSerializerContext()),
                 "ODataEntityReferenceLinkSerializer cannot write an object of type 'System.String'.");
         }
 
@@ -75,16 +67,14 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             ODataEntityReferenceLinkSerializer serializer = new ODataEntityReferenceLinkSerializer();
-            IEdmNavigationProperty navigationProperty = _customerSet.EntityType().NavigationProperties().First();
-            ODataPath path = new ODataPath(new NavigationPathSegment(navigationProperty));
-            ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Path = path };
+            ODataSerializerContext writeContext = new ODataSerializerContext();
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings
             {
-                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/") }
             };
-            settings.SetContentType(ODataFormat.Atom);
+            settings.SetContentType(ODataFormat.Json);
             ODataMessageWriter writer = new ODataMessageWriter(message, settings);
 
             // Act
@@ -92,8 +82,8 @@ namespace System.Web.OData.Formatter.Serialization
 
             // Assert
             stream.Seek(0, SeekOrigin.Begin);
-            XElement element = XElement.Load(stream);
-            Assert.Equal("http://sampleuri/", element.Attribute("id").Value);
+            string result = new StreamReader(stream).ReadToEnd();
+            Assert.Equal("{\"@odata.context\":\"http://any/$metadata#$ref\",\"@odata.id\":\"http://sampleuri/\"}", result);
         }
     }
 }

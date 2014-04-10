@@ -38,7 +38,6 @@ namespace System.Web.OData.Routing
             Values = parameterValues ?? new Dictionary<string, string>();
         }
 
-        // This constructor is intended for use by unit testing only.
         internal BoundFunctionPathSegment(string functionName, IDictionary<string, string> parameterValues)
         {
             Contract.Assert(!String.IsNullOrEmpty(functionName));
@@ -86,10 +85,10 @@ namespace System.Web.OData.Routing
         }
 
         /// <inheritdoc/>
-        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
         {
-            // For bound function, the previous entity set is the bounding entity set.
-            return previousEntitySet;
+            // For bound function, the previous navigation source is the bounding navigation source.
+            return previousNavigationSource;
         }
 
         /// <summary>

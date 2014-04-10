@@ -19,6 +19,7 @@ namespace System.Web.OData.Routing.Conventions
             {
                 new MetadataRoutingConvention(),
                 new EntitySetRoutingConvention(),
+                new SingletonRoutingConvention(),
                 new EntityRoutingConvention(),
                 new NavigationRoutingConvention(),
                 new PropertyRoutingConvention(),

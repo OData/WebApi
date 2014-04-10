@@ -2,8 +2,8 @@
 
 namespace System.Web.OData.Builder.Conventions
 {
-    internal interface IEntitySetConvention : IConvention
+    internal interface INavigationSourceConvention : IConvention
     {
-        void Apply(EntitySetConfiguration configuration, ODataModelBuilder model);
+        void Apply(INavigationSourceConfiguration configuration, ODataModelBuilder model);
     }
 }

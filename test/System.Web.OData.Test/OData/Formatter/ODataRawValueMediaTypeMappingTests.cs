@@ -64,7 +64,7 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void TryMatchMediaTypeWithNonRawvalueRequestDoesntMatchRequest()
+        public void TryMatchMediaType_WithNonRawvalueRequest_DoesntMatchRequest()
         {
             IEdmModel model = ODataTestUtil.GetEdmModel();
             PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment((model.GetEdmType(typeof(FormatterPerson)) as IEdmEntityType).FindProperty("Age"));
@@ -76,6 +76,26 @@ namespace System.Web.OData.Formatter
 
             double mapResult = mapping.TryMatchMediaType(request);
 
+            Assert.Equal(0, mapResult);
+        }
+
+        [Fact]
+        public void TryMatchMediaType_WithNonRawvalueRequest_DoesntMatchRequest_OnSingleton()
+        {
+            // Arrange
+            IEdmModel model = ODataTestUtil.GetEdmModel();
+            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment(
+                (model.GetEdmType(typeof(FormatterPerson)) as IEdmEntityType).FindProperty("Age"));
+            ODataPath path = new ODataPath(new SingletonPathSegment("President"), propertySegment);
+            ODataPrimitiveValueMediaTypeMapping mapping = new ODataPrimitiveValueMediaTypeMapping();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/President/Age/");
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = path;
+
+            // Act
+            double mapResult = mapping.TryMatchMediaType(request);
+
+            // Assert
             Assert.Equal(0, mapResult);
         }
 
@@ -133,6 +153,26 @@ namespace System.Web.OData.Formatter
             Assert.Equal(1.0, mapResult);
         }
 
+        [Fact]
+        public void TryMatchMediaTypeWithBinaryRawValueMatchesRequest_OnODataSingleton()
+        {
+            // Arrange
+            IEdmModel model = GetBinaryModel();
+            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment(
+                (model.GetEdmType(typeof(RawValueEntity)) as IEdmEntityType).FindProperty("BinaryProperty"));
+            ODataPath path = new ODataPath(new SingletonPathSegment("RawSingletonValue"), propertySegment, new ValuePathSegment());
+            ODataBinaryValueMediaTypeMapping mapping = new ODataBinaryValueMediaTypeMapping();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/RawSingletonValue/BinaryProperty/$value");
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = path;
+
+            // Act
+            double mapResult = mapping.TryMatchMediaType(request);
+
+            // Assert
+            Assert.Equal(1.0, mapResult);
+        }
+
         private class RawValueEntity
         {
             public int Id { get; set; }
@@ -143,6 +183,7 @@ namespace System.Web.OData.Formatter
         {
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<RawValueEntity>("RawValue");
+            builder.Singleton<RawValueEntity>("RawSingletonValue");
             return builder.GetEdmModel();
         }
 

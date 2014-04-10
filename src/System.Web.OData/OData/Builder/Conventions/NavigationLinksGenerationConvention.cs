@@ -4,9 +4,9 @@ using System.Web.Http;
 
 namespace System.Web.OData.Builder.Conventions
 {
-    internal class NavigationLinksGenerationConvention : IEntitySetConvention
+    internal class NavigationLinksGenerationConvention : INavigationSourceConvention
     {
-        public void Apply(EntitySetConfiguration configuration, ODataModelBuilder model)
+        public void Apply(INavigationSourceConfiguration configuration, ODataModelBuilder model)
         {
             if (configuration == null)
             {

@@ -17,7 +17,9 @@ namespace System.Web.OData
         [Theory]
         [InlineData("Drive", "Vehicles(6)/org.odata.Drive")]
         [InlineData("Drive", "Vehicles(6)/System.Web.OData.Builder.TestModels.Car/org.odata.Drive")]
-        public void Can_find_action(string actionName, string url)
+        [InlineData("Drive", "MyVehicle/org.odata.Drive")]
+        [InlineData("Drive", "MyVehicle/System.Web.OData.Builder.TestModels.Car/org.odata.Drive")]
+        public void Can_Find_Action_QualifiedActionName(string actionName, string url)
         {
             // Arrange
             IEdmModel model = GetModel();
@@ -36,6 +38,8 @@ namespace System.Web.OData
         [Theory]
         [InlineData("Vehicles(6)/Drive")]
         [InlineData("Vehicles(6)/System.Web.OData.Builder.TestModels.Car/Drive")]
+        [InlineData("MyVehicle/Drive")]
+        [InlineData("MyVehicle/System.Web.OData.Builder.TestModels.Car/Drive")]
         public void ParserThrows_SerializationException_UnqualifiedBoundAction(string url)
         {
             // Arrange
@@ -51,12 +55,13 @@ namespace System.Web.OData
             "The last segment of the request URI '" + url + "' was not recognized as an OData action.");
         }
 
-        [Fact]
-        public void Can_find_action_overload_using_bindingparameter_type()
+        [Theory]
+        [InlineData("Vehicles(8)/System.Web.OData.Builder.TestModels.Car/org.odata.Wash")]
+        [InlineData("MyVehicle/System.Web.OData.Builder.TestModels.Car/org.odata.Wash")]
+        public void Can_find_action_overload_using_bindingparameter_type(string url)
         {
             // Arrange
             IEdmModel model = GetModel();
-            string url = "Vehicles(8)/System.Web.OData.Builder.TestModels.Car/org.odata.Wash";
             ODataPath path = new DefaultODataPathHandler().Parse(model, url);
             Assert.NotNull(path); // Guard
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
@@ -102,6 +107,7 @@ namespace System.Web.OData
             builder.Namespace = "org.odata";
             // Action with no overloads
             builder.EntitySet<Vehicle>("Vehicles").EntityType.Action("Drive");
+            builder.Singleton<Vehicle>("MyVehicle");
             // Valid overloads of "Wash" bound to different entities
             builder.EntityType<Motorcycle>().Action("Wash");
             builder.EntityType<Car>().Action("Wash");

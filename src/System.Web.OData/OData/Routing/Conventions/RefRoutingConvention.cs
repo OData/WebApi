@@ -12,32 +12,10 @@ namespace System.Web.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles entity reference manipulations.
     /// </summary>
-    public class RefRoutingConvention : EntitySetRoutingConvention
+    public class RefRoutingConvention : NavigationSourceRoutingConvention
     {
         private const string DeleteRefActionNamePrefix = "DeleteRef";
         private const string CreateRefActionNamePrefix = "CreateRef";
-
-        private const string EntitysetKeyNavigation =
-            ODataSegmentKinds._ServiceBase + "/" + ODataSegmentKinds._EntitySet + "/" + ODataSegmentKinds._Key + "/"
-            + ODataSegmentKinds._Navigation;
-
-        private const string EntitysetKeyCastNavigation =
-            ODataSegmentKinds._ServiceBase + "/" + ODataSegmentKinds._EntitySet + "/" + ODataSegmentKinds._Key + "/"
-            + ODataSegmentKinds._Cast + "/" + ODataSegmentKinds._Navigation;
-
-        // "~/entityset/key/navigation/$ref"
-        private const string EntitysetKeyNavigationRef = EntitysetKeyNavigation + "/" + ODataSegmentKinds._Ref;
-
-        // "~/entityset/key/cast/navigation/$ref"
-        private const string EntitysetKeyCastNavigationRef = EntitysetKeyCastNavigation + "/" + ODataSegmentKinds._Ref;
-
-        // "~/entityset/key/navigation/key/$ref"
-        private const string EntitysetKeyNavigationKeyRef =
-            EntitysetKeyNavigation + "/" + ODataSegmentKinds._Key + "/" + ODataSegmentKinds._Ref;
-
-        // "~/entityset/key/cast/navigation/key/$ref"
-        private const string EntitysetKeyCastNavigationKeyRef =
-            EntitysetKeyCastNavigation + "/" + ODataSegmentKinds._Key + "/" + ODataSegmentKinds._Ref;
 
         /// <inheritdoc/>
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
@@ -60,8 +38,15 @@ namespace System.Web.OData.Routing.Conventions
             HttpMethod requestMethod = controllerContext.Request.Method;
             IHttpRouteData routeData = controllerContext.RouteData;
 
-            if (odataPath.PathTemplate == EntitysetKeyNavigationRef ||
-                odataPath.PathTemplate == EntitysetKeyCastNavigationRef)
+            if (!IsSupportedRequestMethod(requestMethod))
+            {
+                return null;
+            }
+
+            if (odataPath.PathTemplate == "~/entityset/key/navigation/$ref" ||
+                odataPath.PathTemplate == "~/entityset/key/cast/navigation/$ref" ||
+                odataPath.PathTemplate == "~/singleton/navigation/$ref" ||
+                odataPath.PathTemplate == "~/singleton/cast/navigation/$ref")
             {
                 NavigationPathSegment navigationSegment = (NavigationPathSegment)odataPath.Segments[odataPath.Segments.Count - 2];
                 IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
@@ -70,13 +55,20 @@ namespace System.Web.OData.Routing.Conventions
                 string refActionName = FindRefActionName(actionMap, navigationProperty, declaringType, requestMethod);
                 if (refActionName != null)
                 {
-                    routeData.Values[ODataRouteConstants.Key] = ((KeyValuePathSegment)odataPath.Segments[1]).Value;
+                    if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
+                    {
+                        routeData.Values[ODataRouteConstants.Key] = ((KeyValuePathSegment)odataPath.Segments[1]).Value;
+                    }
+
                     routeData.Values[ODataRouteConstants.NavigationProperty] = navigationSegment.NavigationProperty.Name;
                     return refActionName;
                 }
             }
-            else if ((odataPath.PathTemplate == EntitysetKeyNavigationKeyRef ||
-                odataPath.PathTemplate == EntitysetKeyCastNavigationKeyRef) && requestMethod == HttpMethod.Delete)
+            else if ((requestMethod == HttpMethod.Delete) && (
+                odataPath.PathTemplate == "~/entityset/key/navigation/key/$ref" ||
+                odataPath.PathTemplate == "~/entityset/key/cast/navigation/key/$ref" ||
+                odataPath.PathTemplate == "~/singleton/navigation/key/$ref" ||
+                odataPath.PathTemplate == "~/singleton/cast/navigation/key/$ref"))
             {
                 NavigationPathSegment navigationSegment = (NavigationPathSegment)odataPath.Segments[odataPath.Segments.Count - 3];
                 IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
@@ -85,7 +77,11 @@ namespace System.Web.OData.Routing.Conventions
                 string refActionName = FindRefActionName(actionMap, navigationProperty, declaringType, requestMethod);
                 if (refActionName != null)
                 {
-                    routeData.Values[ODataRouteConstants.Key] = ((KeyValuePathSegment)odataPath.Segments[1]).Value;
+                    if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
+                    {
+                        routeData.Values[ODataRouteConstants.Key] = ((KeyValuePathSegment)odataPath.Segments[1]).Value;
+                    }
+
                     routeData.Values[ODataRouteConstants.NavigationProperty] = navigationSegment.NavigationProperty.Name;
                     routeData.Values[ODataRouteConstants.RelatedKey] = ((KeyValuePathSegment)odataPath.Segments[odataPath.Segments.Count - 2]).Value;
                     return refActionName;
@@ -113,6 +109,13 @@ namespace System.Web.OData.Routing.Conventions
                         actionNamePrefix + "To" + navigationProperty.Name + "From" + declaringType.Name,
                         actionNamePrefix + "To" + navigationProperty.Name,
                         actionNamePrefix);
+        }
+
+        private static bool IsSupportedRequestMethod(HttpMethod method)
+        {
+            return (method == HttpMethod.Delete ||
+                method == HttpMethod.Put ||
+                method == HttpMethod.Post);
         }
     }
 }

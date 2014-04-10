@@ -2,6 +2,7 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
@@ -12,28 +13,37 @@ namespace System.Web.OData
 {
     public class DollarFormatTest
     {
-        [Fact]
-        public void DollarFormat_Applies_IfPresent()
+        [Theory]
+        [InlineData("FormatCustomers/?$format=application/json;odata.metadata=full")]
+        [InlineData("This/?$format=application/json;odata.metadata=full")]
+        public async Task DollarFormat_Applies_IfPresent(string path)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.EntitySet<Customer>("FormatCustomers");
-            IEdmModel model = builder.GetEdmModel();
+            string url = "http://localhost/" + path;
+
+            IEdmModel model = GetEdmModel();
             HttpConfiguration configuration = new HttpConfiguration();
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
             configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
 
             // Act
-            HttpRequestMessage request = new HttpRequestMessage(
-                HttpMethod.Get,
-                "http://localhost/FormatCustomers/?$format=atom");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             response.EnsureSuccessStatusCode();
-            Assert.Equal("application/atom+xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
+            Assert.Equal(2, response.Content.Headers.ContentType.Parameters.Count);
+        }
+
+        private IEdmModel GetEdmModel()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("FormatCustomers");
+            builder.Singleton<Customer>("This"); // Singleton
+            return builder.GetEdmModel();
         }
 
         public class Customer
@@ -48,6 +58,14 @@ namespace System.Web.OData
             public Customer[] Get()
             {
                 return new Customer[] { };
+            }
+        }
+
+        public class ThisController : ODataController
+        {
+            public Customer Get()
+            {
+                return new Customer();
             }
         }
     }

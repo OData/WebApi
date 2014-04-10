@@ -43,7 +43,7 @@ namespace System.Web.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            IEdmEntitySet entitySet = writeContext.EntitySet;
+            IEdmEntitySet entitySet = writeContext.NavigationSource as IEdmEntitySet;
             if (entitySet == null)
             {
                 throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
@@ -152,15 +152,15 @@ namespace System.Web.OData.Formatter.Serialization
         {
             ODataFeed feed = new ODataFeed();
 
-            if (writeContext.EntitySet != null)
+            if (writeContext.NavigationSource != null)
             {
                 IEdmModel model = writeContext.Model;
-                EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(writeContext.NavigationSource);
                 FeedContext feedContext = new FeedContext
                 {
                     Request = writeContext.Request,
                     RequestContext = writeContext.RequestContext,
-                    EntitySet = writeContext.EntitySet,
+                    EntitySet = writeContext.NavigationSource as IEdmEntitySet,
                     Url = writeContext.Url,
                     FeedInstance = feedInstance
                 };
@@ -211,8 +211,8 @@ namespace System.Web.OData.Formatter.Serialization
         {
             Contract.Assert(writeContext.ExpandedEntity != null);
 
-            IEdmEntitySet sourceEntitySet = writeContext.ExpandedEntity.EntitySet;
-            EntitySetLinkBuilderAnnotation linkBuilder = writeContext.Model.GetEntitySetLinkBuilder(sourceEntitySet);
+            IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedEntity.NavigationSource;
+            NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
             Uri navigationLink =
                 linkBuilder.BuildNavigationLink(writeContext.ExpandedEntity, writeContext.NavigationProperty, ODataMetadataLevel.Default);
 

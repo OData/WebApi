@@ -20,29 +20,70 @@ namespace System.Web.OData.Builder
         [Theory]
         [InlineData(false, "http://localhost/Customers(42)")]
         [InlineData(true, "http://localhost/Customers(42)/NS.SpecialCustomer")]
-        public void GenerateSelfLink_GeneratesExpectedSelfLink(bool includeCast, string expectedIdLink)
+        public void GenerateSelfLink_WorksToGenerateExpectedSelfLink_ForEntitySet(bool includeCast, string expectedIdLink)
         {
+            // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
-            var serializerContext = new ODataSerializerContext { Model = _model.Model, EntitySet = _model.Customers, Url = request.GetUrlHelper() };
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
+            // Act
             string idLink = entityContext.GenerateSelfLink(includeCast);
 
+            // Assert
             Assert.Equal(expectedIdLink, idLink);
         }
 
         [Theory]
         [InlineData(false, "http://localhost/Customers(42)/Orders")]
         [InlineData(true, "http://localhost/Customers(42)/NS.SpecialCustomer/Orders")]
-        public void GenerateNavigationLink_GeneratesExpectedNavigationLink(bool includeCast, string expectedNavigationLink)
+        public void GenerateNavigationLink_WorksToGenerateExpectedNavigationLink_ForEntitySet(bool includeCast, string expectedNavigationLink)
         {
+            // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
-            var serializerContext = new ODataSerializerContext { Model = _model.Model, EntitySet = _model.Customers, Url = request.GetUrlHelper() };
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
             IEdmNavigationProperty ordersProperty = _model.Customer.NavigationProperties().Single();
 
+            // Act
             Uri uri = entityContext.GenerateNavigationPropertyLink(ordersProperty, includeCast);
 
+            // Assert
+            Assert.Equal(expectedNavigationLink, uri.AbsoluteUri);
+        }
+
+        [Theory]
+        [InlineData(false, "http://localhost/Mary")]
+        [InlineData(true, "http://localhost/Mary/NS.SpecialCustomer")]
+        public void GenerateSelfLink_WorksToGenerateExpectedSelfLink_ForSingleton(bool includeCast, string expectedIdLink)
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Mary, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+
+            // Act
+            string idLink = entityContext.GenerateSelfLink(includeCast);
+
+            // Assert
+            Assert.Equal(expectedIdLink, idLink);
+        }
+
+        [Theory]
+        [InlineData(false, "http://localhost/Mary/Orders")]
+        [InlineData(true, "http://localhost/Mary/NS.SpecialCustomer/Orders")]
+        public void GenerateNavigationLink_WorksToGenerateExpectedNavigationLink_ForSingleton(bool includeCast, string expectedNavigationLink)
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Mary, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            IEdmNavigationProperty ordersProperty = _model.Customer.NavigationProperties().Single();
+
+            // Act
+            Uri uri = entityContext.GenerateNavigationPropertyLink(ordersProperty, includeCast);
+
+            // Assert
             Assert.Equal(expectedNavigationLink, uri.AbsoluteUri);
         }
 
@@ -123,11 +164,11 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
-            var serializerContext = new ODataSerializerContext { Model = _model.Model, EntitySet = _model.Customers, Url = request.GetUrlHelper() };
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, _model.Customer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer.Action);
+            Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
 
             Assert.Equal("http://localhost/Customers(42)/upgrade", link.AbsoluteUri);
         }
@@ -137,12 +178,13 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
-            var serializerContext = new ODataSerializerContext { Model = _model.Model, EntitySet = _model.Customers, Url = request.GetUrlHelper() };
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateActionLink(_model.UpgradeSpecialCustomer.Action);
+            Uri link = entityContext.GenerateActionLink(_model.UpgradeSpecialCustomer);
 
+            // Assert
             Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/specialUpgrade", link.AbsoluteUri);
         }
 
@@ -152,13 +194,45 @@ namespace System.Web.OData.Builder
             // Arrange
             IEdmEntitySet specialCustomers = new EdmEntitySet(_model.Container, "SpecialCustomers", _model.SpecialCustomer);
             HttpRequestMessage request = GetODataRequest(_model.Model);
-            var serializerContext = new ODataSerializerContext { Model = _model.Model, EntitySet = specialCustomers, Url = request.GetUrlHelper() };
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = specialCustomers, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer.Action);
+            Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
 
+            // Assert
             Assert.Equal("http://localhost/SpecialCustomers(42)/NS.Customer/upgrade", link.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GenerateActionLink_GeneratesLinkWithCast_IfEntitySetTypeDoesnotMatchActionEntityType_ForSingleton()
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Mary, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+
+            // Act
+            Uri link = entityContext.GenerateActionLink(_model.UpgradeSpecialCustomer);
+
+            // Assert
+            Assert.Equal("http://localhost/Mary/NS.SpecialCustomer/specialUpgrade", link.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GenerateActionLink_GeneratesLinkWithDownCast_IfElementTypeDerivesFromBindingParameterType_ForSingleton()
+        {
+            // Arrange
+            IEdmSingleton me = new EdmSingleton(_model.Container, "Me", _model.SpecialCustomer);
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = me, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+
+            // Act
+            Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
+
+            // Assert
+            Assert.Equal("http://localhost/Me/NS.Customer/upgrade", link.AbsoluteUri);
         }
 
         [Fact]
@@ -166,14 +240,14 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
-            var serializerContext = new ODataSerializerContext { Model = _model.Model, EntitySet = _model.Customers, Url = request.GetUrlHelper() };
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, _model.Customer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded.Function);
+            Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);
 
             // Assert
-            Assert.Equal("http://localhost/Customers(42)/IsUpgraded(entity=@entity)", link.AbsoluteUri);
+            Assert.Equal("http://localhost/Customers(42)/IsUpgradedWithParam(entity=@entity,city=@city)", link.AbsoluteUri);
         }
 
         [Fact]
@@ -181,11 +255,11 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
-            var serializerContext = new ODataSerializerContext { Model = _model.Model, EntitySet = _model.Customers, Url = request.GetUrlHelper() };
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateFunctionLink(_model.IsSpecialCustomerUpgraded.Function);
+            Uri link = entityContext.GenerateFunctionLink(_model.IsSpecialCustomerUpgraded);
 
             // Assert
             Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/IsSpecialUpgraded(entity=@entity)", link.AbsoluteUri);
@@ -197,14 +271,47 @@ namespace System.Web.OData.Builder
             // Arrange
             IEdmEntitySet specialCustomers = new EdmEntitySet(_model.Container, "SpecialCustomers", _model.SpecialCustomer);
             HttpRequestMessage request = GetODataRequest(_model.Model);
-            var serializerContext = new ODataSerializerContext { Model = _model.Model, EntitySet = specialCustomers, Url = request.GetUrlHelper() };
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = specialCustomers, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
-            Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded.Function);
+            Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);
 
             // Assert
-            Assert.Equal("http://localhost/SpecialCustomers(42)/NS.Customer/IsUpgraded(entity=@entity)", link.AbsoluteUri);
+            Assert.Equal("http://localhost/SpecialCustomers(42)/NS.Customer/IsUpgradedWithParam(entity=@entity,city=@city)",
+                link.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GenerateFunctionLink_GeneratesLinkWithCast_IfEntitySetTypeDoesnotMatchActionEntityType_ForSingleton()
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Mary, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+
+            // Act
+            Uri link = entityContext.GenerateFunctionLink(_model.IsSpecialCustomerUpgraded);
+
+            // Assert
+            Assert.Equal("http://localhost/Mary/NS.SpecialCustomer/IsSpecialUpgraded(entity=@entity)", link.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GenerateFunctionLink_GeneratesLinkWithDownCast_IfElementTypeDerivesFromBindingParameterType_ForSingleton()
+        {
+            // Arrange
+            IEdmSingleton me = new EdmSingleton(_model.Container, "Me", _model.SpecialCustomer);
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = me, Url = request.GetUrlHelper() };
+            var entityContext = new EntityInstanceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+
+            // Act
+            Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);
+
+            // Assert
+            Assert.Equal("http://localhost/Me/NS.Customer/IsUpgradedWithParam(entity=@entity,city=@city)",
+                link.AbsoluteUri);
         }
 
         private static HttpRequestMessage GetODataRequest(IEdmModel model)

@@ -30,6 +30,7 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 throw Error.ArgumentNull("messageWriter");
             }
+
             if (writeContext == null)
             {
                 throw Error.ArgumentNull("writeContext");

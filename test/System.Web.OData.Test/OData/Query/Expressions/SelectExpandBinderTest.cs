@@ -455,7 +455,8 @@ namespace System.Web.OData.Query.Expressions
         public void CreatePropertyValueExpression_DerivedNonNullableProperty_ReturnsPropertyAccessExpressionCastToNullable()
         {
             Expression customer = Expression.Constant(new Customer());
-            IEdmStructuralProperty specialCustomerProperty = _model.SpecialCustomer.DeclaredStructuralProperties().Single();
+            IEdmStructuralProperty specialCustomerProperty = _model.SpecialCustomer.DeclaredStructuralProperties()
+                .Single(s => s.Name == "SpecialCustomerProperty");
 
             Expression property = _binder.CreatePropertyValueExpression(_model.Customer, specialCustomerProperty, customer);
 

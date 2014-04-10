@@ -86,12 +86,12 @@ namespace System.Web.OData.Routing
         }
 
         /// <inheritdoc/>
-        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
         {
-            // for unbound action, the previous entity set must be null
-            if (previousEntitySet != null)
+            // for unbound action, the previous navigation source must be null
+            if (previousNavigationSource != null)
             {
-                throw Error.Argument("previousEntitySet.");
+                throw Error.Argument("previousNavigationSource");
             }
 
             if (Action != null)

@@ -11,37 +11,8 @@ namespace System.Web.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles entity sets.
     /// </summary>
-    public class EntitySetRoutingConvention : IODataRoutingConvention
+    public class EntitySetRoutingConvention : NavigationSourceRoutingConvention
     {
-        /// <summary>
-        /// Selects the controller for OData requests.
-        /// </summary>
-        /// <param name="odataPath">The OData path.</param>
-        /// <param name="request">The request.</param>
-        /// <returns>
-        ///   <c>null</c> if the request isn't handled by this convention; otherwise, the name of the selected controller
-        /// </returns>
-        public string SelectController(ODataPath odataPath, HttpRequestMessage request)
-        {
-            if (odataPath == null)
-            {
-                throw Error.ArgumentNull("odataPath");
-            }
-
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-            
-            EntitySetPathSegment entitySetSegment = odataPath.Segments.FirstOrDefault() as EntitySetPathSegment;
-            if (entitySetSegment != null)
-            {
-                return entitySetSegment.EntitySet.Name;
-            }
-
-            return null;
-        }
-
         /// <summary>
         /// Selects the action for OData requests.
         /// </summary>
@@ -51,7 +22,7 @@ namespace System.Web.OData.Routing.Conventions
         /// <returns>
         ///   <c>null</c> if the request isn't handled by this convention; otherwise, the name of the selected action
         /// </returns>
-        public virtual string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
+        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
         {
             if (odataPath == null)
             {

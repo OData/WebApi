@@ -17,7 +17,7 @@ namespace System.Web.OData.Routing
     {
         private ReadOnlyCollection<ODataPathSegment> _segments;
         private IEdmType _edmType;
-        private IEdmEntitySet _entitySet;
+        private IEdmNavigationSource _navigationSource;
         private string _pathTemplate;
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace System.Web.OData.Routing
             foreach (ODataPathSegment segment in segments)
             {
                 _edmType = segment.GetEdmType(_edmType);
-                _entitySet = segment.GetEntitySet(_entitySet);
+                _navigationSource = segment.GetNavigationSource(_navigationSource);
             }
 
             _segments = new ReadOnlyCollection<ODataPathSegment>(segments);
@@ -61,13 +61,13 @@ namespace System.Web.OData.Routing
         }
 
         /// <summary>
-        /// Gets or sets the entity set of the path.
+        /// Gets or sets the navigation source of the path.
         /// </summary>
-        public IEdmEntitySet EntitySet
+        public IEdmNavigationSource NavigationSource
         {
             get
             {
-                return _entitySet;
+                return _navigationSource;
             }
         }
 

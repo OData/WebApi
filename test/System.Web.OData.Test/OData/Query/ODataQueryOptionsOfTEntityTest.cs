@@ -86,7 +86,7 @@ namespace System.Web.OData.Query
 
             Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
             mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.GetEdmType(typeof(Customer)));
-            mockSegment.Setup(s => s.GetEntitySet(null)).Returns((IEdmEntitySet)null);
+            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)null);
             ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
             request.ODataProperties().Path = odataPath;
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));

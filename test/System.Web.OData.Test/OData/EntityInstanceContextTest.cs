@@ -40,7 +40,7 @@ namespace System.Web.OData
         [Fact]
         public void Property_EntitySet_RoundTrips()
         {
-            Assert.Reflection.Property(_context, (c) => c.EntitySet, null, allowNull: true, roundTripTestValue: new Mock<IEdmEntitySet>().Object);
+            Assert.Reflection.Property(_context, (c) => c.NavigationSource, null, allowNull: true, roundTripTestValue: new Mock<IEdmEntitySet>().Object);
         }
 
         [Fact]

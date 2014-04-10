@@ -4,8 +4,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.OData.Routing.Conventions
 {
@@ -14,12 +16,8 @@ namespace System.Web.OData.Routing.Conventions
         [Fact]
         public void SelectAction_ThrowsArgumentNull_IfODataPathIsNull()
         {
-            // Arrange
-            ActionRoutingConvention actionConvention = new ActionRoutingConvention();
-
-            // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => actionConvention.SelectAction(odataPath: null, controllerContext: null, actionMap: null),
+                () => new ActionRoutingConvention().SelectAction(odataPath: null, controllerContext: null, actionMap: null),
                 "odataPath");
         }
 
@@ -27,12 +25,11 @@ namespace System.Web.OData.Routing.Conventions
         public void SelectAction_ThrowsArgumentNull_IfControllerContextIsNull()
         {
             // Arrange
-            ActionRoutingConvention actionConvention = new ActionRoutingConvention();
             ODataPath odataPath = new ODataPath();
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => actionConvention.SelectAction(odataPath, controllerContext: null, actionMap: null),
+                () => new ActionRoutingConvention().SelectAction(odataPath, controllerContext: null, actionMap: null),
                 "controllerContext");
         }
 
@@ -40,13 +37,12 @@ namespace System.Web.OData.Routing.Conventions
         public void SelectAction_ThrowsArgumentNull_IfActionMapIsNull()
         {
             // Arrange
-            ActionRoutingConvention actionConvention = new ActionRoutingConvention();
             ODataPath odataPath = new ODataPath();
-            HttpControllerContext controllerContext = new HttpControllerContext();
+            var controllerContext = new Mock<HttpControllerContext>().Object;
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => actionConvention.SelectAction(odataPath, controllerContext, actionMap: null),
+                () => new ActionRoutingConvention().SelectAction(odataPath, controllerContext, actionMap: null),
                 "actionMap");
         }
 
@@ -59,21 +55,20 @@ namespace System.Web.OData.Routing.Conventions
         public void SelectAction_ReturnsNull_RequestMethodIsNotPost(string requestMethod)
         {
             // Arrange
-            ActionRoutingConvention actionConvention = new ActionRoutingConvention();
             ODataPath odataPath = new ODataPath();
             HttpControllerContext controllerContext = new HttpControllerContext();
             controllerContext.Request = new HttpRequestMessage(new HttpMethod(requestMethod), "http://localhost/");
             ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
 
             // Act
-            string selectedAction = actionConvention.SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = new ActionRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
 
             // Assert
             Assert.Null(selectedAction);
         }
 
         [Fact]
-        public void SelectAction_ReturnsTheActionName_ForActionBoundToEntitySet()
+        public void SelectAction_ReturnsTheActionName_ForEntitySetActionBoundToEntitySet()
         {
             // Arrange
             ActionRoutingConvention actionConvention = new ActionRoutingConvention();
@@ -94,6 +89,31 @@ namespace System.Web.OData.Routing.Conventions
 
             // Assert
             Assert.Equal("GetVIPs", action);
+            Assert.Equal(0, controllerContext.Request.GetRouteData().Values.Count);
+        }
+
+        [Fact]
+        public void SelectAction_ReturnsTheActionName_ForSingletonActionBoundToEntity()
+        {
+            // Arrange
+            ActionRoutingConvention actionConvention = new ActionRoutingConvention();
+            IEdmModel model = new CustomersModelWithInheritance().Model;
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, "VipCustomer/NS.upgrade");
+            HttpRequestContext requestContext = new HttpRequestContext();
+            HttpControllerContext controllerContext = new HttpControllerContext
+            {
+                Request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/"),
+                RequestContext = requestContext,
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+            controllerContext.Request.SetRequestContext(requestContext);
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "upgrade");
+
+            // Act
+            string action = actionConvention.SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Equal("upgrade", action);
             Assert.Equal(0, controllerContext.Request.GetRouteData().Values.Count);
         }
 

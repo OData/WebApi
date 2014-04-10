@@ -46,14 +46,14 @@ namespace System.Web.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            IEdmEntitySet entitySet = writeContext.EntitySet;
-            if (entitySet == null)
+            IEdmNavigationSource navigationSource = writeContext.NavigationSource;
+            if (navigationSource == null)
             {
-                throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
+                throw new SerializationException(SRResources.NavigationSourceMissingDuringSerialization);
             }
 
-            ODataWriter writer = messageWriter.CreateODataEntryWriter(entitySet, entitySet.EntityType());
-            WriteObjectInline(graph, entitySet.EntityType().ToEdmTypeReference(isNullable: false), writer, writeContext);
+            ODataWriter writer = messageWriter.CreateODataEntryWriter(navigationSource, navigationSource.EntityType());
+            WriteObjectInline(graph, navigationSource.EntityType().ToEdmTypeReference(isNullable: false), writer, writeContext);
         }
 
         /// <inheritdoc />
@@ -162,10 +162,10 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmEntityType pathType = GetODataPathType(entityInstanceContext.SerializerContext);
             AddTypeNameAnnotationAsNeeded(entry, pathType, entityInstanceContext.SerializerContext.MetadataLevel);
 
-            if (entityInstanceContext.EntitySet != null)
+            if (entityInstanceContext.NavigationSource != null)
             {
                 IEdmModel model = entityInstanceContext.SerializerContext.Model;
-                EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(entityInstanceContext.EntitySet);
+                NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(entityInstanceContext.NavigationSource);
                 EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityInstanceContext, entityInstanceContext.SerializerContext.MetadataLevel);
 
                 if (selfLinks.IdLink != null)
@@ -327,11 +327,11 @@ namespace System.Web.OData.Formatter.Serialization
             ODataSerializerContext writeContext = entityInstanceContext.SerializerContext;
             ODataNavigationLink navigationLink = null;
 
-            if (writeContext.EntitySet != null)
+            if (writeContext.NavigationSource != null)
             {
                 IEdmTypeReference propertyType = navigationProperty.Type;
                 IEdmModel model = writeContext.Model;
-                EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(writeContext.NavigationSource);
                 Uri navigationUrl = linkBuilder.BuildNavigationLink(entityInstanceContext, navigationProperty, writeContext.MetadataLevel);
 
                 navigationLink = new ODataNavigationLink
@@ -509,9 +509,9 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(serializerContext != null);
             if (serializerContext.NavigationProperty != null)
             {
-                // we are in an expanded navigation property. use the entityset to figure out the 
+                // we are in an expanded navigation property. use the navigation source to figure out the 
                 // type.
-                return serializerContext.EntitySet.EntityType();
+                return serializerContext.NavigationSource.EntityType();
             }
             else
             {

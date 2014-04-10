@@ -152,9 +152,14 @@ namespace System.Web.OData.Routing.Conventions
         [InlineData(typeof(TestODataController), "Customers", "GetCustomers")]
         [InlineData(typeof(TestODataController), "Customers({key})/Orders", "GetOrdersOfACustomer")]
         [InlineData(typeof(TestODataController), "Customers({key})", "GetCustomer")]
+        [InlineData(typeof(TestODataController), "VipCustomer", "GetVipCustomer")] // Singleton
+        [InlineData(typeof(TestODataController), "VipCustomer/Orders", "GetOrdersOfVipCustomer")] // Singleton/Navigation
         [InlineData(typeof(TestODataControllerWithPrefix), "Customers", "GetCustomers")]
         [InlineData(typeof(TestODataControllerWithPrefix), "Customers({key})/Orders", "GetOrdersOfACustomer")]
         [InlineData(typeof(TestODataControllerWithPrefix), "Customers({key})", "GetCustomer")]
+        [InlineData(typeof(SingletonTestControllerWithPrefix), "VipCustomer", "GetVipCustomerWithPrefix")] // Singleton
+        [InlineData(typeof(SingletonTestControllerWithPrefix), "VipCustomer/Name", "GetVipCustomerNameWithPrefix")] // Singleton/property
+        [InlineData(typeof(SingletonTestControllerWithPrefix), "VipCustomer/Orders", "GetVipCustomerOrdersWithPrefix")] // Singleton/Navigation
         public void AttributeMappingsIsInitialized_WithRightActionAndTemplate(Type controllerType,
             string expectedPathTemplate, string expectedActionName)
         {
@@ -216,6 +221,18 @@ namespace System.Web.OData.Routing.Conventions
             public void GetCustomer()
             {
             }
+
+            // Singleton
+            [ODataRoute("VipCustomer")]
+            public void GetVipCustomer()
+            {
+            }
+
+            // Singleton/navigation property
+            [ODataRoute("VipCustomer/Orders")]
+            public void GetOrdersOfVipCustomer()
+            {
+            }
         }
 
         [ODataRoutePrefix("Customers({key})")]
@@ -233,6 +250,25 @@ namespace System.Web.OData.Routing.Conventions
 
             [ODataRoute("/Customers")]
             public void GetCustomers()
+            {
+            }
+        }
+
+        [ODataRoutePrefix("VipCustomer")]
+        public class SingletonTestControllerWithPrefix : ODataController
+        {
+            [ODataRoute("Orders")]
+            public void GetVipCustomerOrdersWithPrefix()
+            {
+            }
+
+            [ODataRoute("")]
+            public void GetVipCustomerWithPrefix()
+            {
+            }
+
+            [ODataRoute("Name")]
+            public void GetVipCustomerNameWithPrefix()
             {
             }
         }

@@ -40,7 +40,7 @@ namespace System.Web.OData.Builder
             new NotNavigableAttributeEdmPropertyConvention(),
             new NotExpandableAttributeEdmPropertyConvention(),
 
-            // IEntitySetConvention's
+            // INavigationSourceConvention's
             new SelfLinksGenerationConvention(),
             new NavigationLinksGenerationConvention(),
             new AssociationSetDiscoveryConvention(),
@@ -50,11 +50,11 @@ namespace System.Web.OData.Builder
             new FunctionLinkGenerationConvention(),
         };
 
-        // These hashset's keep track of edmtypes/entitysets for which conventions
+        // These hashset's keep track of edmtypes/navigation sources for which conventions
         // have been applied or being applied so that we don't run a convention twice on the
         // same type/set.
         private HashSet<StructuralTypeConfiguration> _mappedTypes;
-        private HashSet<EntitySetConfiguration> _configuredEntitySets;
+        private HashSet<INavigationSourceConfiguration> _configuredNavigationSources;
         private HashSet<Type> _ignoredTypes;
 
         private IEnumerable<StructuralTypeConfiguration> _explicitlyAddedTypes;
@@ -114,7 +114,7 @@ namespace System.Web.OData.Builder
         internal void Initialize(IAssembliesResolver assembliesResolver, bool isQueryCompositionMode)
         {
             _isQueryCompositionMode = isQueryCompositionMode;
-            _configuredEntitySets = new HashSet<EntitySetConfiguration>();
+            _configuredNavigationSources = new HashSet<INavigationSourceConfiguration>();
             _mappedTypes = new HashSet<StructuralTypeConfiguration>();
             _ignoredTypes = new HashSet<Type>();
             ModelAliasingEnabled = true;
@@ -180,10 +180,22 @@ namespace System.Web.OData.Builder
             EntitySetConfiguration entitySetConfiguration = base.AddEntitySet(name, entityType);
             if (_isModelBeingBuilt)
             {
-                ApplyEntitySetConventions(entitySetConfiguration);
+                ApplyNavigationSourceConventions(entitySetConfiguration);
             }
 
             return entitySetConfiguration;
+        }
+
+        /// <inheritdoc />
+        public override SingletonConfiguration AddSingleton(string name, EntityTypeConfiguration entityType)
+        {
+            SingletonConfiguration singletonConfiguration = base.AddSingleton(name, entityType);
+            if (_isModelBeingBuilt)
+            {
+                ApplyNavigationSourceConventions(singletonConfiguration);
+            }
+
+            return singletonConfiguration;
         }
 
         /// <inheritdoc />
@@ -240,11 +252,12 @@ namespace System.Web.OData.Builder
             // prune unreachable types
             PruneUnreachableTypes();
 
-            // Apply entity set conventions.
-            IEnumerable<EntitySetConfiguration> explictlyConfiguredEntitySets = new List<EntitySetConfiguration>(EntitySets);
-            foreach (EntitySetConfiguration entitySet in explictlyConfiguredEntitySets)
+            // Apply navigation source conventions.
+            IEnumerable<INavigationSourceConfiguration> explictlyConfiguredNavigationSource =
+                new List<INavigationSourceConfiguration>(NavigationSources);
+            foreach (INavigationSourceConfiguration navigationSource in explictlyConfiguredNavigationSource)
             {
-                ApplyEntitySetConventions(entitySet);
+                ApplyNavigationSourceConventions(navigationSource);
             }
 
             foreach (ProcedureConfiguration procedure in Procedures)
@@ -729,17 +742,17 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private void ApplyEntitySetConventions(EntitySetConfiguration entitySetConfiguration)
+        private void ApplyNavigationSourceConventions(INavigationSourceConfiguration navigationSourceConfiguration)
         {
-            if (!_configuredEntitySets.Contains(entitySetConfiguration))
+            if (!_configuredNavigationSources.Contains(navigationSourceConfiguration))
             {
-                _configuredEntitySets.Add(entitySetConfiguration);
+                _configuredNavigationSources.Add(navigationSourceConfiguration);
 
-                foreach (IEntitySetConvention convention in _conventions.OfType<IEntitySetConvention>())
+                foreach (INavigationSourceConvention convention in _conventions.OfType<INavigationSourceConvention>())
                 {
                     if (convention != null)
                     {
-                        convention.Apply(entitySetConfiguration, this);
+                        convention.Apply(navigationSourceConfiguration, this);
                     }
                 }
             }

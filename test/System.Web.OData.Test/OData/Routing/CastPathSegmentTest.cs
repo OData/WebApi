@@ -54,18 +54,18 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
-        public void GetEntitySet_Returns_PreviousEntitySet()
+        public void GetNavigationSource_Returns_PreviousEntitySet()
         {
             // Arrange
             EdmEntityType castType = new EdmEntityType("NS", "Entity");
             CastPathSegment castSegment = new CastPathSegment(castType);
-            IEdmEntitySet previousEntitySet = new Mock<IEdmEntitySet>().Object;
+            IEdmNavigationSource previousNavigationSource = new Mock<IEdmNavigationSource>().Object;
 
             // Act
-            var result = castSegment.GetEntitySet(previousEntitySet);
+            var result = castSegment.GetNavigationSource(previousNavigationSource);
 
             // Assert
-            Assert.Same(previousEntitySet, result);
+            Assert.Same(previousNavigationSource, result);
         }
 
         [Fact]

@@ -11,7 +11,7 @@ namespace System.Web.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles action invocations.
     /// </summary>
-    public class ActionRoutingConvention : EntitySetRoutingConvention
+    public class ActionRoutingConvention : NavigationSourceRoutingConvention
     {
         /// <inheritdoc/>
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
@@ -46,6 +46,9 @@ namespace System.Web.OData.Routing.Conventions
                     case "~/entityset/cast/action":
                     case "~/entityset/action":
                         return GetAction(odataPath).SelectAction(actionMap, isCollection: true);
+                    case "~/singleton/action":
+                    case "~/singleton/cast/action":
+                        return GetAction(odataPath).SelectAction(actionMap, isCollection: false);
                 }
             }
 

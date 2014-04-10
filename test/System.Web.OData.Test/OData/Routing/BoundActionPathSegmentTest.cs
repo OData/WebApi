@@ -85,7 +85,7 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
-        public void GetEntitySet_Returns_ActionTargetEntitySet()
+        public void GetNavigationSource_Returns_ActionTargetEntitySet()
         {
             // Arrange
             Mock<IEdmEntitySet> targetEntitySet = new Mock<IEdmEntitySet>();
@@ -97,7 +97,7 @@ namespace System.Web.OData.Routing
             BoundActionPathSegment segment = new BoundActionPathSegment(edmAction.Object);
 
             // Assert
-            Assert.Same(targetEntitySet.Object, segment.GetEntitySet(targetEntitySet.Object));
+            Assert.Same(targetEntitySet.Object, segment.GetNavigationSource(targetEntitySet.Object));
         }
 
         [Fact]

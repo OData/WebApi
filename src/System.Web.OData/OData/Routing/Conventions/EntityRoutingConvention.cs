@@ -12,17 +12,9 @@ namespace System.Web.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles operating on entities by key.
     /// </summary>
-    public class EntityRoutingConvention : EntitySetRoutingConvention
+    public class EntityRoutingConvention : NavigationSourceRoutingConvention
     {
-        /// <summary>
-        /// Selects the action for OData requests.
-        /// </summary>
-        /// <param name="odataPath">The OData path.</param>
-        /// <param name="controllerContext">The controller context.</param>
-        /// <param name="actionMap">The action map.</param>
-        /// <returns>
-        ///   <c>null</c> if the request isn't handled by this convention; otherwise, the name of the selected action
-        /// </returns>
+        /// <inheritdoc/>
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
         {
             if (odataPath == null)

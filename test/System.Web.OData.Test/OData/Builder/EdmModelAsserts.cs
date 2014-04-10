@@ -21,11 +21,27 @@ namespace System.Web.OData.Builder
             return entitySet.EntityType();
         }
 
-        public static IEdmNavigationPropertyBinding AssertHasNavigationTarget(this IEdmEntitySet entitySet, IEdmNavigationProperty navigationProperty, string targetEntitySet)
+        public static IEdmEntityType AssertHasSingleton(this IEdmModel model, string singletonName, Type mappedEntityClrType)
         {
-            IEdmNavigationPropertyBinding navMapping = entitySet.NavigationPropertyBindings.SingleOrDefault(n => n.NavigationProperty == navigationProperty);
-            Assert.NotNull(navMapping);
-            Assert.Equal(targetEntitySet, navMapping.Target.Name);
+            string entityTypeName = mappedEntityClrType.FullName;
+
+            IEdmSingleton singleton = model.EntityContainer.FindSingleton(singletonName);
+            Assert.NotNull(singleton);
+            Assert.Equal(singletonName, singleton.Name);
+            Assert.True(model.GetEdmType(mappedEntityClrType).IsEquivalentTo(singleton.EntityType()));
+
+            return singleton.EntityType();
+        }
+
+        public static IEdmNavigationPropertyBinding AssertHasNavigationTarget(this IEdmNavigationSource navigationSource,
+            IEdmNavigationProperty navigationProperty, string targetNavigationsource)
+        {
+            IEdmNavigationPropertyBinding navMapping = navigationSource.NavigationPropertyBindings
+                .SingleOrDefault(n => n.NavigationProperty == navigationProperty);
+
+            Assert.NotNull(navMapping); // Guard
+            Assert.Equal(targetNavigationsource, navMapping.Target.Name); // Guard
+
             return navMapping;
         }
 

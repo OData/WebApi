@@ -29,10 +29,21 @@ namespace System.Web.OData.Builder
 
             // add types and sets, building an index on the way.
             Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(builder.StructuralTypes, builder.EnumTypes);
-            Dictionary<string, EdmEntitySet> edmEntitySetMap = model.AddEntitySets(builder, container, edmTypeMap);
+
+            // Add EntitySets and build the mapping between the EdmEntitySet and the NavigationSourceConfiguration
+            NavigationSourceAndAnnotations[] entitySets = container.AddEntitySetAndAnnotations(builder, edmTypeMap);
+
+            // Add Singletons and build the mapping between the EdmSingleton and the NavigationSourceConfiguration
+            NavigationSourceAndAnnotations[] singletons = container.AddSingletonAndAnnotations(builder, edmTypeMap);
+
+            // Merge EntitySets and Singletons together
+            IEnumerable<NavigationSourceAndAnnotations> navigationSources = entitySets.Concat(singletons);
+
+            // Build the navigation source map
+            IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(builder, edmTypeMap, navigationSources);
 
             // add procedures
-            model.AddProcedures(builder.Procedures, container, edmTypeMap, edmEntitySetMap);
+            model.AddProcedures(builder.Procedures, container, edmTypeMap, navigationSourceMap);
 
             // finish up
             model.AddElement(container);
@@ -54,55 +65,83 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private static Dictionary<string, EdmEntitySet> AddEntitySets(this EdmModel model, ODataModelBuilder builder,
-            EdmEntityContainer container, Dictionary<Type, IEdmType> edmTypeMap)
+        private static NavigationSourceAndAnnotations[] AddEntitySetAndAnnotations(this EdmEntityContainer container,
+            ODataModelBuilder builder, Dictionary<Type, IEdmType> edmTypeMap)
         {
             IEnumerable<EntitySetConfiguration> configurations = builder.EntitySets;
 
-            // build the entitysets and their annotations
+            // build the entitysets
             IEnumerable<Tuple<EdmEntitySet, EntitySetConfiguration>> entitySets = AddEntitySets(configurations, container, edmTypeMap);
-            var entitySetAndAnnotations = entitySets.Select(e => new
+
+            // return the annotation array
+            return entitySets.Select(e => new NavigationSourceAndAnnotations()
             {
-                EntitySet = e.Item1,
+                NavigationSource = e.Item1,
                 Configuration = e.Item2,
-                Annotations = new
-                {
-                    LinkBuilder = new EntitySetLinkBuilderAnnotation(e.Item2),
-                    Url = new EntitySetUrlAnnotation { Url = e.Item2.GetUrl() }
-                }
+                LinkBuilder = new NavigationSourceLinkBuilderAnnotation(e.Item2),
+                Url = new NavigationSourceUrlAnnotation { Url = e.Item2.GetUrl() }
             }).ToArray();
-
-            // index the entitySets by name
-            Dictionary<string, EdmEntitySet> edmEntitySetMap = entitySetAndAnnotations.ToDictionary(e => e.EntitySet.Name, e => e.EntitySet);
-
-            // apply the annotations
-            foreach (var iter in entitySetAndAnnotations)
-            {
-                EdmEntitySet entitySet = iter.EntitySet;
-                model.SetAnnotationValue<EntitySetUrlAnnotation>(entitySet, iter.Annotations.Url);
-                model.SetEntitySetLinkBuilder(entitySet, iter.Annotations.LinkBuilder);
-
-                AddNavigationBindings(iter.Configuration, iter.EntitySet, iter.Annotations.LinkBuilder, builder, edmTypeMap, edmEntitySetMap);
-            }
-            return edmEntitySetMap;
         }
 
-        private static void AddNavigationBindings(EntitySetConfiguration configuration, EdmEntitySet entitySet, EntitySetLinkBuilderAnnotation linkBuilder, ODataModelBuilder builder,
-            Dictionary<Type, IEdmType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
+        private static NavigationSourceAndAnnotations[] AddSingletonAndAnnotations(this EdmEntityContainer container,
+            ODataModelBuilder builder, Dictionary<Type, IEdmType> edmTypeMap)
         {
-            foreach (EntityTypeConfiguration entity in builder.ThisAndBaseAndDerivedTypes(configuration.EntityType))
+            IEnumerable<SingletonConfiguration> configurations = builder.Singletons;
+
+            // build the singletons
+            IEnumerable<Tuple<EdmSingleton, SingletonConfiguration>> singletons = AddSingletons(configurations, container, edmTypeMap);
+
+            // return the annotation array
+            return singletons.Select(e => new NavigationSourceAndAnnotations()
             {
-                foreach (NavigationPropertyConfiguration navigation in entity.NavigationProperties)
+                NavigationSource = e.Item1,
+                Configuration = e.Item2,
+                LinkBuilder = new NavigationSourceLinkBuilderAnnotation(e.Item2),
+                Url = new NavigationSourceUrlAnnotation { Url = e.Item2.GetUrl() }
+            }).ToArray();
+        }
+
+        private static IDictionary<string, EdmNavigationSource> GetNavigationSourceMap(this EdmModel model, ODataModelBuilder builder,
+            Dictionary<Type, IEdmType> edmTypeMap, IEnumerable<NavigationSourceAndAnnotations> navigationSourceAndAnnotations)
+        {
+            // index the navigation source by name
+            Dictionary<string, EdmNavigationSource> edmNavigationSourceMap = navigationSourceAndAnnotations.ToDictionary(e => e.NavigationSource.Name, e => e.NavigationSource);
+
+            // apply the annotations
+            foreach (NavigationSourceAndAnnotations navigationSourceAndAnnotation in navigationSourceAndAnnotations)
+            {
+                EdmNavigationSource navigationSource = navigationSourceAndAnnotation.NavigationSource;
+                model.SetAnnotationValue<NavigationSourceUrlAnnotation>(navigationSource, navigationSourceAndAnnotation.Url);
+                model.SetNavigationSourceLinkBuilder(navigationSource, navigationSourceAndAnnotation.LinkBuilder);
+
+                AddNavigationBindings(navigationSourceAndAnnotation.Configuration, navigationSource, navigationSourceAndAnnotation.LinkBuilder,
+                    builder, edmTypeMap, edmNavigationSourceMap);
+            }
+
+            return edmNavigationSourceMap;
+        }
+
+        private static void AddNavigationBindings(NavigationSourceConfiguration configuration,
+            EdmNavigationSource navigationSource,
+            NavigationSourceLinkBuilderAnnotation linkBuilder,
+            ODataModelBuilder builder,
+            Dictionary<Type, IEdmType> edmTypeMap,
+            Dictionary<string, EdmNavigationSource> edmNavigationSourceMap)
+        {
+            foreach (EntityTypeConfiguration entityType in builder.ThisAndBaseAndDerivedTypes(configuration.EntityType))
+            {
+                foreach (NavigationPropertyConfiguration navigationProperty in entityType.NavigationProperties)
                 {
-                    NavigationPropertyBindingConfiguration binding = configuration.FindBinding(navigation);
+                    NavigationPropertyBindingConfiguration binding = configuration.FindBinding(navigationProperty);
                     if (binding != null)
                     {
-                        EdmEntityType edmEntityType = edmTypeMap[entity.ClrType] as EdmEntityType;
-                        IEdmNavigationProperty edmNavigationProperty = edmEntityType.NavigationProperties().Single(np => np.Name == navigation.Name);
+                        EdmEntityType edmEntityType = edmTypeMap[entityType.ClrType] as EdmEntityType;
+                        IEdmNavigationProperty edmNavigationProperty = edmEntityType.NavigationProperties()
+                            .Single(np => np.Name == navigationProperty.Name);
 
-                        entitySet.AddNavigationTarget(edmNavigationProperty, edmEntitySetMap[binding.EntitySet.Name]);
+                        navigationSource.AddNavigationTarget(edmNavigationProperty, edmNavigationSourceMap[binding.TargetNavigationSource.Name]);
 
-                        NavigationLinkBuilder linkBuilderFunc = configuration.GetNavigationPropertyLink(navigation);
+                        NavigationLinkBuilder linkBuilderFunc = configuration.GetNavigationPropertyLink(navigationProperty);
                         if (linkBuilderFunc != null)
                         {
                             linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, linkBuilderFunc);
@@ -159,7 +198,7 @@ namespace System.Web.OData.Builder
         }
 
         private static void AddProcedures(this EdmModel model, IEnumerable<ProcedureConfiguration> configurations, EdmEntityContainer container,
-            Dictionary<Type, IEdmType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
+            Dictionary<Type, IEdmType> edmTypeMap, IDictionary<string, EdmNavigationSource> edmNavigationSourceMap)
         {
             Contract.Assert(model != null, "Model can't be null");
 
@@ -171,7 +210,7 @@ namespace System.Web.OData.Builder
                     edmTypeMap,
                     procedure.ReturnType,
                     procedure.ReturnType != null && EdmLibHelpers.IsNullable(procedure.ReturnType.ClrType));
-                IEdmExpression expression = GetEdmEntitySetExpression(edmEntitySetMap, procedure);
+                IEdmExpression expression = GetEdmEntitySetExpression(edmNavigationSourceMap, procedure);
                 IEdmPathExpression pathExpression = procedure.EntitySetPath != null
                     ? new EdmPathExpression(procedure.EntitySetPath)
                     : null;
@@ -355,6 +394,16 @@ namespace System.Web.OData.Builder
             return entitySets.Select(es => Tuple.Create(container.AddEntitySet(es, edmTypeMap), es));
         }
 
+        private static EdmSingleton AddSingleton(this EdmEntityContainer container, SingletonConfiguration singletonType, IDictionary<Type, IEdmType> edmTypeMap)
+        {
+            return container.AddSingleton(singletonType.Name, (IEdmEntityType)edmTypeMap[singletonType.EntityType.ClrType]);
+        }
+
+        private static IEnumerable<Tuple<EdmSingleton, SingletonConfiguration>> AddSingletons(IEnumerable<SingletonConfiguration> singletons, EdmEntityContainer container, Dictionary<Type, IEdmType> edmTypeMap)
+        {
+            return singletons.Select(sg => Tuple.Create(container.AddSingleton(sg, edmTypeMap), sg));
+        }
+
         private static void AddClrTypeAnnotations(this EdmModel model, Dictionary<Type, IEdmType> edmTypes)
         {
             foreach (KeyValuePair<Type, IEdmType> map in edmTypes)
@@ -390,18 +439,22 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private static IEdmExpression GetEdmEntitySetExpression(Dictionary<string, EdmEntitySet> entitySets, ProcedureConfiguration procedure)
+        private static IEdmExpression GetEdmEntitySetExpression(IDictionary<string, EdmNavigationSource> navigationSources, ProcedureConfiguration procedure)
         {
-            if (procedure.EntitySet != null)
+            if (procedure.NavigationSource != null)
             {
-                if (entitySets.ContainsKey(procedure.EntitySet.Name))
+                EdmNavigationSource navigationSource;
+                if (navigationSources.TryGetValue(procedure.NavigationSource.Name, out navigationSource))
                 {
-                    EdmEntitySet entitySet = entitySets[procedure.EntitySet.Name];
-                    return new EdmEntitySetReferenceExpression(entitySet);
+                    EdmEntitySet entitySet = navigationSource as EdmEntitySet;
+                    if (entitySet != null)
+                    {
+                        return new EdmEntitySetReferenceExpression(entitySet);
+                    }
                 }
                 else
                 {
-                    throw Error.InvalidOperation(SRResources.EntitySetNotFoundForName, procedure.EntitySet.Name);
+                    throw Error.InvalidOperation(SRResources.EntitySetNotFoundForName, procedure.NavigationSource.Name);
                 }
             }
             else if (procedure.EntitySetPath != null)
@@ -472,22 +525,22 @@ namespace System.Web.OData.Builder
             }
         }
 
-        internal static string GetEntitySetUrl(this IEdmModel model, IEdmEntitySet entitySet)
+        internal static string GetNavigationSourceUrl(this IEdmModel model, IEdmNavigationSource navigationSource)
         {
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
 
-            if (entitySet == null)
+            if (navigationSource == null)
             {
-                throw Error.ArgumentNull("entitySet");
+                throw Error.ArgumentNull("navigationSource");
             }
 
-            EntitySetUrlAnnotation annotation = model.GetAnnotationValue<EntitySetUrlAnnotation>(entitySet);
+            NavigationSourceUrlAnnotation annotation = model.GetAnnotationValue<NavigationSourceUrlAnnotation>(navigationSource);
             if (annotation == null)
             {
-                return entitySet.Name;
+                return navigationSource.Name;
             }
             else
             {

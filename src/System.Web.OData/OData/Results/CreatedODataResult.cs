@@ -149,14 +149,14 @@ namespace System.Web.OData.Results
             EntityInstanceContext entityContext = CreateEntityInstanceContext(Request, Entity);
             Contract.Assert(entityContext != null);
 
-            EntitySetLinkBuilderAnnotation linkBuilder = entityContext.EdmModel.GetEntitySetLinkBuilder(entityContext.EntitySet);
+            NavigationSourceLinkBuilderAnnotation linkBuilder = entityContext.EdmModel.GetNavigationSourceLinkBuilder(entityContext.NavigationSource);
             Contract.Assert(linkBuilder != null);
 
             string idLink = linkBuilder.BuildIdLink(entityContext, ODataMetadataLevel.Default);
             Uri editLink = linkBuilder.BuildEditLink(entityContext, ODataMetadataLevel.Default, idLink);
             if (editLink == null)
             {
-                throw Error.InvalidOperation(SRResources.EditLinkNullForLocationHeader, entityContext.EntitySet.Name);
+                throw Error.InvalidOperation(SRResources.EditLinkNullForLocationHeader, entityContext.NavigationSource.Name);
             }
 
             return editLink;
@@ -176,15 +176,15 @@ namespace System.Web.OData.Results
                 throw new InvalidOperationException(SRResources.ODataPathMissing);
             }
 
-            IEdmEntitySet entitySet = path.EntitySet;
-            if (entitySet == null)
+            IEdmNavigationSource navigationSource = path.NavigationSource;
+            if (navigationSource == null)
             {
-                throw new InvalidOperationException(SRResources.EntitySetMissingDuringSerialization);
+                throw new InvalidOperationException(SRResources.NavigationSourceMissingDuringSerialization);
             }
 
             ODataSerializerContext serializerContext = new ODataSerializerContext
             {
-                EntitySet = entitySet,
+                NavigationSource = navigationSource,
                 Model = model,
                 Url = request.GetUrlHelper() ?? new UrlHelper(request),
                 MetadataLevel = ODataMetadataLevel.Default,

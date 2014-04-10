@@ -5,7 +5,7 @@ using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
 {
-    internal class MockEntitySetLinkBuilderAnnotation : EntitySetLinkBuilderAnnotation
+    internal class MockNavigationSourceLinkBuilderAnnotation : NavigationSourceLinkBuilderAnnotation
     {
         public SelfLinkBuilder<string> IdLinkBuilder { get; set; }
 

@@ -2,7 +2,8 @@
 
 namespace System.Web.OData.Builder
 {
-    internal class EntitySetUrlAnnotation
+    // An internal class used in <see cref="NavigationSourceAndAnnotations" /> class.
+    internal class NavigationSourceUrlAnnotation
     {
         public string Url { get; set; }
     }

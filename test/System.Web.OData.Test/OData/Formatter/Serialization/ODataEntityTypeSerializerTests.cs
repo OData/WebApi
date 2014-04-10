@@ -55,7 +55,7 @@ namespace System.Web.OData.Formatter.Serialization
             _customerType = _model.GetEdmTypeReference(typeof(Customer)).AsEntity();
             _serializer = new ODataEntityTypeSerializer(_serializerProvider);
             _path = new ODataPath(new EntitySetPathSegment(_customerSet));
-            _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, Model = _model, Path = _path };
+            _writeContext = new ODataSerializerContext() { NavigationSource = _customerSet, Model = _model, Path = _path };
             _entityInstanceContext = new EntityInstanceContext(_writeContext, _customerSet.EntityType().AsReference(), _customer);
         }
 
@@ -90,7 +90,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataMessageWriter messageWriter = new ODataMessageWriter(new Mock<IODataRequestMessage>().Object);
             Assert.Throws<SerializationException>(
                 () => _serializer.WriteObject(graph: _customer, type: typeof(Customer), messageWriter: messageWriter, writeContext: new ODataSerializerContext()),
-                "The related entity set could not be found from the OData path. The related entity set is required to serialize the payload.");
+                "The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to serialize the payload.");
         }
 
         [Fact]
@@ -311,7 +311,7 @@ namespace System.Web.OData.Formatter.Serialization
                 .Setup(s => s.WriteObjectInline(_customer.Orders, ordersProperty.Type, writer.Object, It.IsAny<ODataSerializerContext>()))
                 .Callback((object o, IEdmTypeReference t, ODataWriter w, ODataSerializerContext context) =>
                     {
-                        Assert.Same(context.EntitySet.Name, "Orders");
+                        Assert.Same(context.NavigationSource.Name, "Orders");
                         Assert.Same(context.SelectExpandClause, selectExpandNode.ExpandedNavigationProperties.Single().Value);
                     })
                 .Verifiable();
@@ -330,7 +330,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Assert
             innerSerializer.Verify();
             // check that the context is rolled back
-            Assert.Same(_writeContext.EntitySet.Name, "Customers");
+            Assert.Same(_writeContext.NavigationSource.Name, "Customers");
             Assert.Same(_writeContext.SelectExpandClause, selectExpandClause);
         }
 
@@ -457,7 +457,8 @@ namespace System.Web.OData.Formatter.Serialization
                 Shipment = "Bar",
                 ID = 10,
             };
-            _writeContext.EntitySet = orderSet;
+
+            _writeContext.NavigationSource = orderSet;
             _entityInstanceContext = new EntityInstanceContext(_writeContext, orderSet.EntityType().AsReference(), order);
 
             SelectExpandNode selectExpandNode = new SelectExpandNode
@@ -641,7 +642,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             Assert.Same(instance, (instanceContext.EdmObject as TypedEdmEntityObject).Instance);
             Assert.Equal(writeContext.Model, instanceContext.EdmModel);
-            Assert.Equal(writeContext.EntitySet, instanceContext.EntitySet);
+            Assert.Equal(writeContext.NavigationSource, instanceContext.NavigationSource);
             Assert.Equal(writeContext.Request, instanceContext.Request);
             Assert.Equal(writeContext.SkipExpensiveAvailabilityChecks, instanceContext.SkipExpensiveAvailabilityChecks);
             Assert.Equal(writeContext.Url, instanceContext.Url);
@@ -671,11 +672,11 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             Uri navigationLinkUri = new Uri("http://navigation_link");
             IEdmNavigationProperty property1 = CreateFakeNavigationProperty("Property1", _customerType);
-            EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
+            NavigationSourceLinkBuilderAnnotation linkAnnotation = new MockNavigationSourceLinkBuilderAnnotation
             {
                 NavigationLinkBuilder = (ctxt, property, metadataLevel) => navigationLinkUri
             };
-            _model.SetEntitySetLinkBuilder(_customerSet, linkAnnotation);
+            _model.SetNavigationSourceLinkBuilder(_customerSet, linkAnnotation);
 
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
             serializer.CallBase = true;
@@ -733,7 +734,7 @@ namespace System.Web.OData.Formatter.Serialization
             };
 
             bool customIdLinkbuilderCalled = false;
-            EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
+            NavigationSourceLinkBuilderAnnotation linkAnnotation = new MockNavigationSourceLinkBuilderAnnotation
             {
                 IdLinkBuilder = new SelfLinkBuilder<string>((EntityInstanceContext context) =>
                 {
@@ -743,7 +744,7 @@ namespace System.Web.OData.Formatter.Serialization
                 },
                 followsConventions: false)
             };
-            _model.SetEntitySetLinkBuilder(_customerSet, linkAnnotation);
+            _model.SetNavigationSourceLinkBuilder(_customerSet, linkAnnotation);
 
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
             serializer.CallBase = true;
@@ -766,7 +767,7 @@ namespace System.Web.OData.Formatter.Serialization
                 EntityType = _customerType.EntityDefinition()
             };
             bool customEditLinkbuilderCalled = false;
-            EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
+            NavigationSourceLinkBuilderAnnotation linkAnnotation = new MockNavigationSourceLinkBuilderAnnotation
             {
                 EditLinkBuilder = new SelfLinkBuilder<Uri>((EntityInstanceContext context) =>
                 {
@@ -776,7 +777,7 @@ namespace System.Web.OData.Formatter.Serialization
                 },
                 followsConventions: false)
             };
-            _model.SetEntitySetLinkBuilder(_customerSet, linkAnnotation);
+            _model.SetNavigationSourceLinkBuilder(_customerSet, linkAnnotation);
 
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
             serializer.CallBase = true;
@@ -795,7 +796,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             EntityInstanceContext instanceContext = new EntityInstanceContext(_writeContext, _customerType, 42);
             bool customReadLinkbuilderCalled = false;
-            EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
+            NavigationSourceLinkBuilderAnnotation linkAnnotation = new MockNavigationSourceLinkBuilderAnnotation
             {
                 ReadLinkBuilder = new SelfLinkBuilder<Uri>((EntityInstanceContext context) =>
                 {
@@ -806,7 +807,7 @@ namespace System.Web.OData.Formatter.Serialization
                 followsConventions: false)
             };
 
-            _model.SetEntitySetLinkBuilder(_customerSet, linkAnnotation);
+            _model.SetNavigationSourceLinkBuilder(_customerSet, linkAnnotation);
 
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
             serializer.CallBase = true;

@@ -21,7 +21,7 @@ namespace System.Web.OData.Builder
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_ModelBuilder()
         {
             Assert.ThrowsArgumentNull(
-                () => new EntitySetConfiguration(modelBuilder: null, entityType: typeof(EntitySetConfigurationTest), name: "entityset"),
+                () => new EntitySetConfiguration(modelBuilder: null, entityClrType: typeof(EntitySetConfigurationTest), name: "entityset"),
                 "modelBuilder");
         }
 
@@ -29,16 +29,16 @@ namespace System.Web.OData.Builder
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_EntityType()
         {
             Assert.ThrowsArgumentNull(
-                () => new EntitySetConfiguration(modelBuilder: new ODataModelBuilder(), entityType: (Type)null, name: "entityset"),
+                () => new EntitySetConfiguration(modelBuilder: new ODataModelBuilder(), entityClrType: (Type)null, name: "entityset"),
                 "clrType");
         }
 
         [Fact]
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_Name()
         {
-            Assert.ThrowsArgumentNull(
-                () => new EntitySetConfiguration(modelBuilder: new ODataModelBuilder(), entityType: typeof(EntitySetConfigurationTest), name: null),
-                "name");
+            Assert.Throws<ArgumentException>(
+                () => new EntitySetConfiguration(modelBuilder: new ODataModelBuilder(), entityClrType: typeof(EntitySetConfigurationTest), name: null),
+                "The argument 'name' is null or empty.\r\nParameter name: name");
         }
 
         [Fact]
@@ -66,12 +66,12 @@ namespace System.Web.OData.Builder
         [Fact]
         public void CtorThatTakesEntityTypeConfiguration_Throws_ArgumentNull_For_Name()
         {
-            Assert.ThrowsArgumentNull(
+            Assert.Throws<ArgumentException>(
                 () => new EntitySetConfiguration(
                     modelBuilder: new ODataModelBuilder(),
                     entityType: new EntityTypeConfiguration(new ODataModelBuilder(), typeof(EntitySetConfigurationTest)),
                     name: null),
-                "name");
+                    "The argument 'name' is null or empty.\r\nParameter name: name");
         }
 
         [Fact]

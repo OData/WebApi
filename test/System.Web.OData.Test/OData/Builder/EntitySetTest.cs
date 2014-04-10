@@ -92,10 +92,10 @@ namespace System.Web.OData.Builder
             var edmNavProperty = motorcycleEdmType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.One);
             var vehiclesEdmSet = model.EntityContainer.FindEntitySet("vehicles");
 
-            Assert.NotNull(model.GetEntitySetLinkBuilder(vehiclesEdmSet));
+            Assert.NotNull(model.GetNavigationSourceLinkBuilder(vehiclesEdmSet));
             Assert.Equal(
                 "http://works/",
-                model.GetEntitySetLinkBuilder(vehiclesEdmSet).BuildNavigationLink(new EntityInstanceContext(), edmNavProperty, ODataMetadataLevel.Default).AbsoluteUri);
+                model.GetNavigationSourceLinkBuilder(vehiclesEdmSet).BuildNavigationLink(new EntityInstanceContext(), edmNavProperty, ODataMetadataLevel.Default).AbsoluteUri);
         }
 
         [Fact]
@@ -115,7 +115,9 @@ namespace System.Web.OData.Builder
             Assert.ThrowsArgument(
                 () => vehicles.AddBinding(navProperty, manufacturers),
                 "navigationConfiguration",
-                "The declaring entity type 'System.Web.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
+                "The declaring entity type 'System.Web.OData.Builder.TestModels.Motorcycle' of " +
+                "the given navigation property is not a part of the entity type " +
+                "'System.Web.OData.Builder.TestModels.Vehicle' hierarchy of the entity set or singleton 'vehicles'.");
         }
 
         [Fact]
@@ -135,7 +137,9 @@ namespace System.Web.OData.Builder
             Assert.ThrowsArgument(
                 () => vehicles.HasNavigationPropertyLink(navProperty, new NavigationLinkBuilder((ctxt, property) => new Uri("http://works/"), followsConventions: false)),
                 "navigationProperty",
-                "The declaring entity type 'System.Web.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
+                "The declaring entity type 'System.Web.OData.Builder.TestModels.Motorcycle' " +
+                "of the given navigation property is not a part of the entity type " +
+                "'System.Web.OData.Builder.TestModels.Vehicle' hierarchy of the entity set or singleton 'vehicles'.");
         }
 
         [Fact]
@@ -230,10 +234,10 @@ namespace System.Web.OData.Builder
                 motorcycle.AssertHasNavigationProperty(
                 model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
-            var serializerContext = new ODataSerializerContext { Model = model, EntitySet = vehicles };
+            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehicles };
             var entityContext = new EntityInstanceContext(serializerContext, motorcycle.AsReference(), new Motorcycle { Name = "Motorcycle1", Model = 2009 });
 
-            Uri link = model.GetEntitySetLinkBuilder(vehicles).BuildNavigationLink(entityContext, motorcycleManufacturerProperty, ODataMetadataLevel.Default);
+            Uri link = model.GetNavigationSourceLinkBuilder(vehicles).BuildNavigationLink(entityContext, motorcycleManufacturerProperty, ODataMetadataLevel.Default);
 
             Assert.Equal("http://localhost/vehicles/2009/Motorcycle1/Manufacturer", link.AbsoluteUri);
         }
@@ -249,8 +253,8 @@ namespace System.Web.OData.Builder
 
             Assert.Throws<NotSupportedException>(
             () => builder.GetEdmModel(),
-            "Cannot automatically bind the navigation property 'Manufacturer' on entity type 'System.Web.OData.Builder.TestModels.Motorcycle' for the source entity set 'motorcycles2' because there are two or more matching target entity sets. " +
-            "The matching entity sets are: NorthWestMotorcycleManufacturers, SouthWestMotorcycleManufacturers.");
+            "Cannot automatically bind the navigation property 'Manufacturer' on entity type 'System.Web.OData.Builder.TestModels.Motorcycle' for the entity set or singleton 'motorcycles2' because there are two or more matching target entity sets or singletons. " +
+            "The matching entity sets or singletons are: NorthWestMotorcycleManufacturers, SouthWestMotorcycleManufacturers.");
         }
     }
 }

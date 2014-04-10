@@ -205,7 +205,7 @@
     <value>The type '{0}' is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError.</value>
   </data>
   <data name="CannotAutoCreateMultipleCandidates" xml:space="preserve">
-    <value>Cannot automatically bind the navigation property '{0}' on entity type '{1}' for the source entity set '{2}' because there are two or more matching target entity sets. The matching entity sets are: {3}.</value>
+    <value>Cannot automatically bind the navigation property '{0}' on entity type '{1}' for the entity set or singleton '{2}' because there are two or more matching target entity sets or singletons. The matching entity sets or singletons are: {3}.</value>
   </data>
   <data name="PropertyDoesNotBelongToType" xml:space="preserve">
     <value>The property '{0}' does not belong to the type '{1}'.</value>
@@ -238,7 +238,7 @@
     <value>The provided mapping does not contain an entry for the entity type '{0}'.</value>
   </data>
   <data name="NoIdLinkFactoryFound" xml:space="preserve">
-    <value>No IdLink factory was found. Try calling HasIdLink on the EntitySetConfiguration for '{0}'.</value>
+    <value>No IdLink factory was found. Try calling HasIdLink on the NavigationSourceConfiguration for '{0}'.</value>
   </data>
   <data name="ManyToManyNavigationPropertyMustReturnCollection" xml:space="preserve">
     <value>The property '{0}' on the type '{1}' is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections.</value>
@@ -274,7 +274,7 @@
     <value>The node count limit of '{0}' has been exceeded. To increase the limit, set the '{1}' property on EnableQueryAttribute or ODataValidationSettings.</value>
   </data>
   <data name="NoNavigationLinkFactoryFound" xml:space="preserve">
-    <value>No NavigationLink factory was found for the navigation property '{0}' from entity type '{1}' on entity set '{2}'. Try calling HasNavigationPropertyLink on the EntitySetConfiguration.</value>
+    <value>No NavigationLink factory was found for the navigation property '{0}' from entity type '{1}' on entity set or singleton '{2}'. Try calling HasNavigationPropertyLink on the NavigationSourceConfiguration.</value>
   </data>
   <data name="InvalidEntitySetName" xml:space="preserve">
     <value>'{0}' is not a valid entity set name.</value>
@@ -385,7 +385,7 @@
     <value>To register an action link factory, actions must be bindable to a single entity. Action '{0}' does not meet this requirement.</value>
   </data>
   <data name="NavigationPropertyNotInHierarchy" xml:space="preserve">
-    <value>The declaring entity type '{0}' of the given navigation property is not a part of the entity type '{1}' hierarchy of the entity set '{2}'.</value>
+    <value>The declaring entity type '{0}' of the given navigation property is not a part of the entity type '{1}' hierarchy of the entity set or singleton '{2}'.</value>
   </data>
   <data name="TargetEntityTypeMissing" xml:space="preserve">
     <value>Could not find the target entity type for the navigation property '{0}' on entity type '{1}'.</value>
@@ -491,9 +491,6 @@
   </data>
   <data name="ReadFromStreamAsyncMustHaveRequest" xml:space="preserve">
     <value>The OData formatter requires an attached request in order to deserialize. Controller classes must derive from ODataController or be marked with ODataFormattingAttribute. Custom parameter bindings must call GetPerRequestFormatterInstance on each formatter and use these per-request instances.</value>
-  </data>
-  <data name="EntitySetMissingDuringDeserialization" xml:space="preserve">
-    <value>The related entity set could not be found from the OData path. The related entity set is required to deserialize the payload.</value>
   </data>
   <data name="RequestMustHaveModel" xml:space="preserve">
     <value>The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataServiceRoute to register a route that parses the OData URI and attaches the model information.</value>
@@ -708,5 +705,23 @@
   </data>
   <data name="InvalidPropertyMapping" xml:space="preserve">
     <value>The key mapping for the property '{0}' can't be null or empty.</value>
+  </data> 	
+  <data name="InvalidSingletonName" xml:space="preserve">
+    <value>'{0}' is not a valid singleton name. The singleton name cannot contain '.'.</value>
+  </data>
+  <data name="SingletonAlreadyConfiguredDifferentEntityType" xml:space="preserve">
+    <value>The singleton '{0}' was already configured with a different EntityType ('{1}').</value>
+  </data>
+  <data name="EntitySetNameAlreadyConfiguredAsSingleton" xml:space="preserve">
+    <value>The entity set name '{0}' was already configured as a singleton.</value>
+  </data>
+  <data name="SingletonNameAlreadyConfiguredAsEntitySet" xml:space="preserve">
+    <value>The singleton name '{0}' was already configured as an entity set.</value>
+  </data>
+  <data name="NavigationSourceMissingDuringSerialization" xml:space="preserve">
+    <value>The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to serialize the payload.</value>
+  </data>
+  <data name="NavigationSourceMissingDuringDeserialization" xml:space="preserve">
+    <value>The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to deserialize the payload.</value>
   </data>
 </root>

@@ -44,11 +44,14 @@ namespace System.Web.OData
             ODataServiceDocument serviceDocument = new ODataServiceDocument();
             IEdmEntityContainer container = model.EntityContainer;
 
-            // Add Entitysets into service document
+            // Add EntitySets into service document
             serviceDocument.EntitySets = container.EntitySets().Select(
-                e => GetODataEntitySetInfo(model.GetEntitySetUrl(e).ToString(), e.Name));
+                e => GetODataEntitySetInfo(model.GetNavigationSourceUrl(e).ToString(), e.Name));
 
-            // TODO: 1637 Add Singletons to service document
+            // Add Singletons into the service document
+            IEnumerable<IEdmSingleton> singletons = container.Elements.OfType<IEdmSingleton>();
+            serviceDocument.Singletons = singletons.Select(
+                e => GetODataSingletonInfo(model.GetNavigationSourceUrl(e).ToString(), e.Name));
 
             // Add FunctionImports into service document
             // ODL spec says:
@@ -75,6 +78,17 @@ namespace System.Web.OData
             };
 
             info.SetAnnotation<AtomResourceCollectionMetadata>(new AtomResourceCollectionMetadata { Title = name });
+
+            return info;
+        }
+
+        private static ODataSingletonInfo GetODataSingletonInfo(string url, string name)
+        {
+            ODataSingletonInfo info = new ODataSingletonInfo
+            {
+                Name = name,
+                Url = new Uri(url, UriKind.Relative)
+            };
 
             return info;
         }

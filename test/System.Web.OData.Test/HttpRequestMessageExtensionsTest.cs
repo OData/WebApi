@@ -240,7 +240,7 @@ namespace System.Net.Http
 
             Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
             mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.Customer);
-            mockSegment.Setup(s => s.GetEntitySet(null)).Returns((IEdmEntitySet)null);
+            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)null);
             ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
             request.ODataProperties().Path = odataPath;
 
@@ -267,7 +267,7 @@ namespace System.Net.Http
 
             Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
             mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.Customer);
-            mockSegment.Setup(s => s.GetEntitySet(null)).Returns((IEdmEntitySet)null);
+            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)null);
             ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
             request.ODataProperties().Path = odataPath;
 

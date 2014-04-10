@@ -47,10 +47,10 @@ namespace System.Web.OData.Formatter.Deserialization
                 throw Error.Argument("readContext", SRResources.ODataPathMissing);
             }
 
-            IEdmEntitySet entitySet = GetEntitySet(readContext.Path);
-            if (entitySet == null)
+            IEdmNavigationSource navigationSource = readContext.Path.NavigationSource;
+            if (navigationSource == null)
             {
-                throw new SerializationException(SRResources.EntitySetMissingDuringDeserialization);
+                throw new SerializationException(SRResources.NavigationSourceMissingDuringDeserialization);
             }
 
             IEdmTypeReference edmType = readContext.GetEdmType(type);
@@ -63,7 +63,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             IEdmEntityTypeReference entityType = edmType.AsEntity();
 
-            ODataReader odataReader = messageReader.CreateODataEntryReader(entitySet, entityType.EntityDefinition());
+            ODataReader odataReader = messageReader.CreateODataEntryReader(navigationSource, entityType.EntityDefinition());
             ODataEntryWithNavigationLinks topLevelEntry = ReadEntryOrFeed(odataReader) as ODataEntryWithNavigationLinks;
             Contract.Assert(topLevelEntry != null);
 
@@ -506,12 +506,6 @@ namespace System.Web.OData.Formatter.Deserialization
 
             string propertyName = EdmLibHelpers.GetClrPropertyName(navigationProperty, readContext.Model);
             DeserializationHelpers.SetCollectionProperty(entityResource, navigationProperty, value, propertyName);
-        }
-
-        private static IEdmEntitySet GetEntitySet(ODataPath path)
-        {
-            Contract.Assert(path != null);
-            return path.EntitySet;
         }
     }
 }

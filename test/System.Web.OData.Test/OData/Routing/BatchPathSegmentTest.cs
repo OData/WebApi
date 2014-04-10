@@ -24,12 +24,12 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
-        public void GetEntitySet_ReturnsNull()
+        public void GetNavigationSource_ReturnsNull()
         {
             BatchPathSegment batchSegment = new BatchPathSegment();
             IEdmEntitySet entitySet = new Mock<IEdmEntitySet>().Object;
 
-            Assert.Null(batchSegment.GetEntitySet(entitySet));
+            Assert.Null(batchSegment.GetNavigationSource(entitySet));
         }
 
         [Fact]

@@ -85,23 +85,14 @@ namespace System.Web.OData.Routing
             {
                 return EntitySet.EntityType().GetCollection();
             }
+
             return null;
         }
 
-        /// <summary>
-        /// Gets the entity set for this segment.
-        /// </summary>
-        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
-        /// <returns>
-        /// The entity set for this segment.
-        /// </returns>
-        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        /// <inheritdoc/>
+        public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
         {
-            if (EntitySet != null)
-            {
-                return EntitySet;
-            }
-            return null;
+            return EntitySet;
         }
 
         /// <summary>

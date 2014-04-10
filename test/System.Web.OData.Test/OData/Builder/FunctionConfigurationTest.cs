@@ -101,7 +101,7 @@ namespace System.Web.OData.Builder
             ComplexTypeConfiguration address = createAddress.ReturnType as ComplexTypeConfiguration;
             Assert.NotNull(address);
             Assert.Equal(typeof(Address).FullName, address.FullName);
-            Assert.Null(createAddress.EntitySet);
+            Assert.Null(createAddress.NavigationSource);
 
             CollectionTypeConfiguration addresses = createAddresses.ReturnType as CollectionTypeConfiguration;
             Assert.NotNull(addresses);
@@ -109,7 +109,7 @@ namespace System.Web.OData.Builder
             address = addresses.ElementType as ComplexTypeConfiguration;
             Assert.NotNull(address);
             Assert.Equal(typeof(Address).FullName, address.FullName);
-            Assert.Null(createAddresses.EntitySet);
+            Assert.Null(createAddresses.NavigationSource);
         }
 
         [Fact]
@@ -128,7 +128,7 @@ namespace System.Web.OData.Builder
             Assert.Equal(typeof(Customer).FullName, customer.FullName);
             EntitySetConfiguration goodCustomers = builder.EntitySets.SingleOrDefault(s => s.Name == "GoodCustomers");
             Assert.NotNull(goodCustomers);
-            Assert.Same(createGoodCustomer.EntitySet, goodCustomers);
+            Assert.Same(createGoodCustomer.NavigationSource, goodCustomers);
 
             CollectionTypeConfiguration customers = createBadCustomers.ReturnType as CollectionTypeConfiguration;
             Assert.NotNull(customers);
@@ -136,7 +136,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(customer);
             EntitySetConfiguration badCustomers = builder.EntitySets.SingleOrDefault(s => s.Name == "BadCustomers");
             Assert.NotNull(badCustomers);
-            Assert.Same(createBadCustomers.EntitySet, badCustomers);
+            Assert.Same(createBadCustomers.NavigationSource, badCustomers);
         }
 
         [Fact]

@@ -12,10 +12,10 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// <see cref="EntitySetLinkBuilderAnnotation" /> is a class used to annotate an <see cref="IEdmEntitySet" /> inside an <see cref="IEdmModel" />
-    /// with information about how to build links related to that entity set.
+    /// <see cref="NavigationSourceLinkBuilderAnnotation" /> is a class used to annotate an <see cref="IEdmNavigationSource" /> inside an <see cref="IEdmModel" />
+    /// with information about how to build links related to that navigation source.
     /// </summary>
-    public class EntitySetLinkBuilderAnnotation
+    public class NavigationSourceLinkBuilderAnnotation
     {
         private readonly Func<FeedContext, Uri> _feedSelfLinkBuilder;
 
@@ -24,36 +24,36 @@ namespace System.Web.OData.Builder
         private readonly SelfLinkBuilder<Uri> _readLinkBuilder;
 
         private readonly Dictionary<IEdmNavigationProperty, NavigationLinkBuilder> _navigationPropertyLinkBuilderLookup = new Dictionary<IEdmNavigationProperty, NavigationLinkBuilder>();
-        private readonly string _entitySetName;
+        private readonly string _navigationSourceName;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntitySetLinkBuilderAnnotation" /> class.
+        /// Initializes a new instance of the <see cref="NavigationSourceLinkBuilderAnnotation" /> class.
         /// </summary>
         /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
-        public EntitySetLinkBuilderAnnotation()
+        public NavigationSourceLinkBuilderAnnotation()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntitySetLinkBuilderAnnotation"/> class.
+        /// Initializes a new instance of the <see cref="NavigationSourceLinkBuilderAnnotation"/> class.
         /// </summary>
-        /// <param name="entitySet">The entity set for which the link builder is being constructed.</param>
-        /// <param name="model">The EDM model that this entity set belongs to.</param>
-        /// <remarks>This constructor creates a link builder that generates URL's that follow OData conventions for the given entity set.</remarks>
-        public EntitySetLinkBuilderAnnotation(IEdmEntitySet entitySet, IEdmModel model)
+        /// <param name="navigationSource">The navigation source for which the link builder is being constructed.</param>
+        /// <param name="model">The EDM model that this navigation source belongs to.</param>
+        /// <remarks>This constructor creates a link builder that generates URL's that follow OData conventions for the given navigation source.</remarks>
+        public NavigationSourceLinkBuilderAnnotation(IEdmNavigationSource navigationSource, IEdmModel model)
         {
-            if (entitySet == null)
+            if (navigationSource == null)
             {
-                throw Error.ArgumentNull("entitySet");
+                throw Error.ArgumentNull("navigationSource");
             }
+
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
 
-            IEdmEntityType elementType = entitySet.EntityType();
+            IEdmEntityType elementType = navigationSource.EntityType();
             IEnumerable<IEdmEntityType> derivedTypes = model.FindAllDerivedTypes(elementType).Cast<IEdmEntityType>();
-            bool derivedTypesDefineNavigationProperty = false;
 
             // Add navigation link builders for all navigation properties of entity.
             foreach (IEdmNavigationProperty navigationProperty in elementType.NavigationProperties())
@@ -64,6 +64,7 @@ namespace System.Web.OData.Builder
             }
 
             // Add navigation link builders for all navigation properties in derived types.
+            bool derivedTypesDefineNavigationProperty = false;
             foreach (IEdmEntityType derivedEntityType in derivedTypes)
             {
                 foreach (IEdmNavigationProperty navigationProperty in derivedEntityType.DeclaredNavigationProperties())
@@ -75,7 +76,7 @@ namespace System.Web.OData.Builder
                 }
             }
 
-            _entitySetName = entitySet.Name;
+            _navigationSourceName = navigationSource.Name;
             _feedSelfLinkBuilder = (feedContext) => feedContext.GenerateFeedSelfLink();
 
             Func<EntityInstanceContext, string> selfLinkFactory =
@@ -84,22 +85,26 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Constructs an instance of an <see cref="EntitySetLinkBuilderAnnotation" />.
-        /// <remarks>Every parameter must be non-null.</remarks>
+        /// Constructs an instance of an <see cref="NavigationSourceLinkBuilderAnnotation" /> class.
         /// </summary>
-        public EntitySetLinkBuilderAnnotation(
-            IEdmEntitySet entitySet,
+        /// <param name="navigationSource">The navigation source for which the link builder is being constructed.</param>
+        /// <param name="feedSelfLinkBuilder">The feed sellf link builder which is used to build the feed self link.</param>
+        /// <param name="idLinkBuilder">The ID link builder which is used to build the ID link.</param>
+        /// <param name="editLinkBuilder">The Edit link builder which is used to build the Edit link.</param>
+        /// <param name="readLinkBuilder">The Read link builder which is used to build the Read link.</param>
+        public NavigationSourceLinkBuilderAnnotation(
+            IEdmNavigationSource navigationSource,
             Func<FeedContext, Uri> feedSelfLinkBuilder,
             SelfLinkBuilder<string> idLinkBuilder,
             SelfLinkBuilder<Uri> editLinkBuilder,
             SelfLinkBuilder<Uri> readLinkBuilder)
         {
-            if (entitySet == null)
+            if (navigationSource == null)
             {
-                throw Error.ArgumentNull("entitySet");
+                throw Error.ArgumentNull("navigationSource");
             }
 
-            _entitySetName = entitySet.Name;
+            _navigationSourceName = navigationSource.Name;
             _feedSelfLinkBuilder = feedSelfLinkBuilder;
             _idLinkBuilder = idLinkBuilder;
             _editLinkBuilder = editLinkBuilder;
@@ -107,24 +112,33 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Constructs an instance of an <see cref="EntitySetLinkBuilderAnnotation" /> from an <see cref="EntitySetConfiguration" />.
+        /// Constructs an instance of an <see cref="NavigationSourceLinkBuilderAnnotation" /> from an <see cref="NavigationSourceConfiguration" />.
         /// </summary>
-        public EntitySetLinkBuilderAnnotation(EntitySetConfiguration entitySet)
+        public NavigationSourceLinkBuilderAnnotation(NavigationSourceConfiguration navigationSource)
         {
-            if (entitySet == null)
+            if (navigationSource == null)
             {
-                throw Error.ArgumentNull("entitySet");
+                throw Error.ArgumentNull("navigationSource");
             }
 
-            _entitySetName = entitySet.Name;
-            _feedSelfLinkBuilder = entitySet.GetFeedSelfLink();
-            _idLinkBuilder = entitySet.GetIdLink();
-            _editLinkBuilder = entitySet.GetEditLink();
-            _readLinkBuilder = entitySet.GetReadLink();
+            _navigationSourceName = navigationSource.Name;
+            EntitySetConfiguration entitySet = navigationSource as EntitySetConfiguration;
+            if (entitySet != null)
+            {
+                _feedSelfLinkBuilder = entitySet.GetFeedSelfLink();
+            }
+            else
+            {
+                _feedSelfLinkBuilder = null;
+            }
+
+            _idLinkBuilder = navigationSource.GetIdLink();
+            _editLinkBuilder = navigationSource.GetEditLink();
+            _readLinkBuilder = navigationSource.GetReadLink();
         }
 
         /// <summary>
-        /// Register a link builder for a <see cref="IEdmNavigationProperty" /> that navigates from Entities in this EntitySet. 
+        /// Register a link builder for a <see cref="IEdmNavigationProperty" /> that navigates from Entities in this navigation source. 
         /// </summary>
         public void AddNavigationPropertyLinkBuilder(IEdmNavigationProperty navigationProperty, NavigationLinkBuilder linkBuilder)
         {
@@ -173,7 +187,7 @@ namespace System.Web.OData.Builder
 
             if (_idLinkBuilder == null)
             {
-                throw Error.InvalidOperation(SRResources.NoIdLinkFactoryFound, _entitySetName);
+                throw Error.InvalidOperation(SRResources.NoIdLinkFactoryFound, _navigationSourceName);
             }
 
             if (IsDefaultOrFull(metadataLevel) || (IsMinimal(metadataLevel) && !_idLinkBuilder.FollowsConventions))
@@ -265,7 +279,7 @@ namespace System.Web.OData.Builder
             NavigationLinkBuilder navigationLinkBuilder;
             if (!_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder))
             {
-                throw Error.Argument("navigationProperty", SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _entitySetName);
+                throw Error.Argument("navigationProperty", SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _navigationSourceName);
             }
             Contract.Assert(navigationLinkBuilder != null);
 

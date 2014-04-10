@@ -50,7 +50,7 @@ namespace System.Web.OData.Formatter.Serialization
             Request = context.Request;
             RequestContext = context.RequestContext;
             Url = context.Url;
-            EntitySet = context.EntitySet;
+            NavigationSource = context.NavigationSource;
             Model = context.Model;
             Path = context.Path;
             RootElementName = context.RootElementName;
@@ -62,8 +62,7 @@ namespace System.Web.OData.Formatter.Serialization
             SelectExpandClause = selectExpandClause;
             NavigationProperty = navigationProperty;
 
-            // Cast will fail in singleton / containment cases.
-            EntitySet = context.EntitySet.FindNavigationTarget(navigationProperty) as IEdmEntitySet;
+            NavigationSource = context.NavigationSource.FindNavigationTarget(navigationProperty);
         }
 
         /// <summary>
@@ -82,9 +81,9 @@ namespace System.Web.OData.Formatter.Serialization
         public UrlHelper Url { get; set; }
 
         /// <summary>
-        /// Gets or sets the entity set.
+        /// Gets or sets the navigation source.
         /// </summary>
-        public IEdmEntitySet EntitySet { get; set; }
+        public IEdmNavigationSource NavigationSource { get; set; }
 
         /// <summary>
         /// Gets or sets the EDM model associated with the request.

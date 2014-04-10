@@ -12,7 +12,7 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
-    /// Represents an <see cref="ODataSerializer"/> for serializing $link response for a collection navigation property.
+    /// Represents an <see cref="ODataSerializer"/> for serializing $ref response for a collection navigation property.
     /// </summary>
     public class ODataEntityReferenceLinksSerializer : ODataSerializer
     {

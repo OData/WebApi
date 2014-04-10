@@ -27,6 +27,8 @@ namespace System.Web.OData.Builder
             var ordersSetConfig = builder.AddEntitySet("Orders", orderConfig);
             customersSetConfig.AddBinding(ordersPropertyConfig, ordersSetConfig);
 
+            var meConfig = builder.AddSingleton("Me", customerConfig);
+
             var model = builder.GetServiceModel();
             var customerType = model.SchemaElements.OfType<IEdmEntityType>().Single(e => e.Name == "Customer");
             Assert.NotNull(customerType);
@@ -59,7 +61,12 @@ namespace System.Web.OData.Builder
 
             var orders = entityContainer.FindEntitySet("Orders");
             Assert.NotNull(orders);
+
             Assert.Equal(typeof(Order).FullName, orders.EntityType().FullName());
+
+            var me = entityContainer.FindSingleton("Me");
+            Assert.NotNull(me);
+            Assert.Equal(typeof(Customer).FullName, me.EntityType().FullName());
         }
     }
 }

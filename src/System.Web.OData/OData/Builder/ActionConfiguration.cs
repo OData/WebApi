@@ -90,7 +90,7 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("entitySetConfiguration");
             }
 
-            EntitySet = entitySetConfiguration.EntitySet;
+            NavigationSource = entitySetConfiguration.EntitySet;
             ReturnType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TEntityType));
             return this;
         }
@@ -122,7 +122,7 @@ namespace System.Web.OData.Builder
             }
 
             Type clrCollectionType = typeof(IEnumerable<TElementEntityType>);
-            EntitySet = entitySetConfiguration.EntitySet;
+            NavigationSource = entitySetConfiguration.EntitySet;
             IEdmTypeConfiguration elementType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TElementEntityType));
             ReturnType = new CollectionTypeConfiguration(elementType, clrCollectionType);
             return this;

@@ -80,7 +80,7 @@ namespace System.Web.OData.Formatter.Deserialization
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
             Assert.Throws<SerializationException>(
                 () => deserializer.Read(ODataTestUtil.GetMockODataMessageReader(), typeof(Product), new ODataDeserializerContext { Path = new ODataPath() }),
-                "The related entity set could not be found from the OData path. The related entity set is required to deserialize the payload.");
+                "The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to deserialize the payload.");
         }
 
         [Fact]

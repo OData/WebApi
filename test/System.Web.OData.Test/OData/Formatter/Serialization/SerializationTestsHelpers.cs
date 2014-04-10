@@ -44,15 +44,16 @@ namespace System.Web.OData.Formatter.Serialization
             customerType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Orders", Target = orderType, TargetMultiplicity = EdmMultiplicity.Many });
             orderType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Customer", Target = customerType, TargetMultiplicity = EdmMultiplicity.One });
 
+            // Add Entity set
             var container = new EdmEntityContainer("Default", "Container");
             var customerSet = container.AddEntitySet("Customers", customerType);
             var orderSet = container.AddEntitySet("Orders", orderType);
             customerSet.AddNavigationTarget(customerType.NavigationProperties().Single(np => np.Name == "Orders"), orderSet);
             orderSet.AddNavigationTarget(orderType.NavigationProperties().Single(np => np.Name == "Customer"), customerSet);
 
-            EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation();
-            model.SetEntitySetLinkBuilder(customerSet, linkAnnotation);
-            model.SetEntitySetLinkBuilder(orderSet, linkAnnotation);
+            NavigationSourceLinkBuilderAnnotation linkAnnotation = new MockNavigationSourceLinkBuilderAnnotation();
+            model.SetNavigationSourceLinkBuilder(customerSet, linkAnnotation);
+            model.SetNavigationSourceLinkBuilder(orderSet, linkAnnotation);
 
             model.AddElement(container);
             return model;

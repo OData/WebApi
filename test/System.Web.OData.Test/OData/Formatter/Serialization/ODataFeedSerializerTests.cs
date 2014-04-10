@@ -51,7 +51,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             _customersType = _model.GetEdmTypeReference(typeof(Customer[])).AsCollection();
 
-            _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, Model = _model };
+            _writeContext = new ODataSerializerContext() { NavigationSource = _customerSet, Model = _model };
         }
 
         [Fact]
@@ -392,11 +392,11 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             var feedInstance = new object[0];
-            ODataSerializerContext writeContext = new ODataSerializerContext { EntitySet = _customerSet, Model = _model, Request = new HttpRequestMessage() };
+            ODataSerializerContext writeContext = new ODataSerializerContext { NavigationSource = _customerSet, Model = _model, Request = new HttpRequestMessage() };
             writeContext.Url = new UrlHelper(writeContext.Request);
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
             Uri feedSelfLink = new Uri("http://feed_self_link/");
-            EntitySetLinkBuilderAnnotation linkBuilder = new MockEntitySetLinkBuilderAnnotation
+            NavigationSourceLinkBuilderAnnotation linkBuilder = new MockNavigationSourceLinkBuilderAnnotation
             {
                 FeedSelfLinkBuilder = (context) =>
                     {
@@ -407,7 +407,7 @@ namespace System.Web.OData.Formatter.Serialization
                         return feedSelfLink;
                     }
             };
-            _model.SetEntitySetLinkBuilder(_customerSet, linkBuilder);
+            _model.SetNavigationSourceLinkBuilder(_customerSet, linkBuilder);
 
             // Act
             ODataFeed feed = serializer.CreateODataFeed(feedInstance, _customersType, writeContext);
@@ -432,7 +432,7 @@ namespace System.Web.OData.Formatter.Serialization
             EntityInstanceContext entity = new EntityInstanceContext
             {
                 SerializerContext =
-                    new ODataSerializerContext { Request = request, EntitySet = _customerSet, Model = _model }
+                    new ODataSerializerContext { Request = request, NavigationSource = _customerSet, Model = _model }
             };
             ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, navProp);
 
@@ -456,7 +456,7 @@ namespace System.Web.OData.Formatter.Serialization
             EntityInstanceContext entity = new EntityInstanceContext
             {
                 SerializerContext =
-                    new ODataSerializerContext { Request = request, EntitySet = _customerSet, Model = _model }
+                    new ODataSerializerContext { Request = request, NavigationSource = _customerSet, Model = _model }
             };
             ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, navProp);
 
@@ -478,15 +478,15 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmNavigationProperty ordersProperty = model.Customer.NavigationProperties().First();
             EntityInstanceContext entity = new EntityInstanceContext
             {
-                SerializerContext = new ODataSerializerContext { EntitySet = model.Customers, Model = model.Model }
+                SerializerContext = new ODataSerializerContext { NavigationSource = model.Customers, Model = model.Model }
             };
             ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, ordersProperty);
             TruncatedCollection<Order> orders = new TruncatedCollection<Order>(new[] { new Order(), new Order() }, pageSize: 1);
 
-            Mock<EntitySetLinkBuilderAnnotation> linkBuilder = new Mock<EntitySetLinkBuilderAnnotation>();
+            Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
             linkBuilder.Setup(l => l.BuildNavigationLink(entity, ordersProperty, ODataMetadataLevel.Default)).Returns(new Uri("http://navigation-link/"));
-            model.Model.SetEntitySetLinkBuilder(model.Customers, linkBuilder.Object);
-            model.Model.SetEntitySetLinkBuilder(model.Orders, new EntitySetLinkBuilderAnnotation());
+            model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
+            model.Model.SetNavigationSourceLinkBuilder(model.Orders, new NavigationSourceLinkBuilderAnnotation());
 
             // Act
             ODataFeed feed = serializer.CreateODataFeed(orders, _customersType, nestedContext);

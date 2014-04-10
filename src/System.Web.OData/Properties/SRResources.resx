@@ -705,7 +705,7 @@
   </data>
   <data name="InvalidPropertyMapping" xml:space="preserve">
     <value>The key mapping for the property '{0}' can't be null or empty.</value>
-  </data> 	
+  </data>
   <data name="InvalidSingletonName" xml:space="preserve">
     <value>'{0}' is not a valid singleton name. The singleton name cannot contain '.'.</value>
   </data>
@@ -741,5 +741,8 @@
   </data>
   <data name="InvalidPropertyInfoForDynamicPropertyAnnotation" xml:space="preserve">
     <value>Type '{0}' is not supported as dynamic property annotation. Referenced property must be of type '{1}'.</value>
+  </data>
+  <data name="DateTimeTypeNotSupported" xml:space="preserve">
+    <value>The type '{0}' of property '{1}' in the '{2}' type is not a supported type.</value>
   </data>
 </root>

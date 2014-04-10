@@ -36,5 +36,23 @@ namespace System.Web.OData.Builder
         {
             Assert.Reflection.BooleanProperty(_configuration, c => c.AddedExplicitly, true);
         }
+
+        [Fact]
+        public void Property_ThrowsIfTypeIsDateTime()
+        {
+            // Arrange
+            MockType type = new MockType("Customer", @namespace: "Contoso");
+            MockPropertyInfo property = new MockPropertyInfo(typeof(DateTime), "Birthday");
+            property.SetupGet(p => p.ReflectedType).Returns(type);
+            property.SetupGet(p => p.DeclaringType).Returns(type);
+
+            Mock<StructuralTypeConfiguration> mock = new Mock<StructuralTypeConfiguration> { CallBase = true };
+            StructuralTypeConfiguration configuration = mock.Object;
+            mock.SetupGet(c => c.ClrType).Returns(type);
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => configuration.AddProperty(property), "propertyInfo",
+                "The type 'System.DateTime' of property 'Birthday' in the 'Contoso.Customer' type is not a supported type.");
+        }
     }
 }

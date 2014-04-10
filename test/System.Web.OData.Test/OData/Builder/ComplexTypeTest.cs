@@ -116,7 +116,6 @@ namespace System.Web.OData.Builder
             Assert.False(complexType.Property(t => t.BoolProperty).OptionalProperty);
             Assert.False(complexType.Property(t => t.ByteProperty).OptionalProperty);
             Assert.False(complexType.Property(t => t.DateTimeOffsetProperty).OptionalProperty);
-            Assert.False(complexType.Property(t => t.DateTimeProperty).OptionalProperty);
             Assert.False(complexType.Property(t => t.DoubleProperty).OptionalProperty);
             Assert.False(complexType.Property(t => t.GuidProperty).OptionalProperty);
             Assert.False(complexType.Property(t => t.IntProperty).OptionalProperty);

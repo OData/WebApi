@@ -349,6 +349,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of property &apos;{1}&apos; in the &apos;{2}&apos; type is not a supported type..
+        /// </summary>
+        internal static string DateTimeTypeNotSupported {
+            get {
+                return ResourceManager.GetString("DateTimeTypeNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The actual entity type &apos;{0}&apos; is not assignable to the expected type &apos;{1}&apos;..
         /// </summary>
         internal static string DeltaEntityTypeNotAssignable {

@@ -195,6 +195,12 @@ namespace System.Web.OData.Builder
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
+            if (propertyInfo.PropertyType == typeof(DateTime))
+            {
+                throw Error.Argument("propertyInfo", SRResources.DateTimeTypeNotSupported,
+                    typeof(DateTime).FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName);
+            }
+
             // Remove from the ignored properties
             if (RemovedProperties.Contains(propertyInfo))
             {

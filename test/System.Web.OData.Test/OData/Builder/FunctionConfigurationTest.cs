@@ -35,8 +35,6 @@ namespace System.Web.OData.Builder
             Assert.False(function.IsBindable);
             Assert.False(function.SupportedInFilter);
             Assert.False(function.SupportedInOrderBy);
-            Assert.Equal("MyContainer.Format", function.ContainerQualifiedName);
-            Assert.Equal("MyContainer.Format", function.FullName);
             Assert.Equal("MyNamespace.Format", function.FullyQualifiedName);
             Assert.NotNull(builder.Procedures);
             Assert.Equal(1, builder.Procedures.Count());

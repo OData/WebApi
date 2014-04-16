@@ -38,8 +38,6 @@ namespace System.Web.OData.Builder
             Assert.True(action.IsSideEffecting);
             Assert.False(action.IsComposable);
             Assert.False(action.IsBindable);
-            Assert.Equal("MyContainer.Format", action.ContainerQualifiedName);
-            Assert.Equal("MyContainer.Format", action.FullName);
             Assert.Equal("MyNamespace.Format", action.FullyQualifiedName);
             Assert.NotNull(builder.Procedures);
             Assert.Equal(1, builder.Procedures.Count());

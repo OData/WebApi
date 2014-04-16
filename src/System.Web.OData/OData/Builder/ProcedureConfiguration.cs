@@ -68,28 +68,11 @@ namespace System.Web.OData.Builder
         public abstract bool IsSideEffecting { get; }
 
         /// <summary>
-        /// The qualified name of the procedure when used in OData URLs.
-        /// Qualification is required to distinguish the procedure from other possible single part identifiers.
-        /// </summary>
-        public string ContainerQualifiedName
-        {
-            get { return ModelBuilder.ContainerName + "." + Name; }
-        }
-
-        /// <summary>
         /// The FullyQualifiedName is the Name further qualified using the Namespace.
         /// </summary>
         public string FullyQualifiedName
         {
             get { return ModelBuilder.Namespace + "." + Name; }
-        }
-
-        /// <summary>
-        /// The FullName is the ContainerQualifiedName.
-        /// </summary>
-        public string FullName
-        {
-            get { return ContainerQualifiedName; }
         }
 
         /// <summary>

@@ -956,6 +956,24 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        public void ValidationSummaryWithOverriddenHeadingTag_UsesGivenTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+            htmlHelper.SetValidationSummaryMessageElement("h4");
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationSummary(true /* excludePropertyErrors */, "This is my message.");
+
+            // Assert
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\"><h4>This is my message.</h4>" + Environment.NewLine
+              + "<ul><li style=\"display:none\"></li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
         public void ValidationSummaryWithCustomHeadingTag()
         {
             // Arrange

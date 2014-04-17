@@ -14,7 +14,6 @@ namespace System.Web.Mvc.Html
     public static class ValidationExtensions
     {
         private const string HiddenListItem = @"<li style=""display:none""></li>";
-        private const string DefaultValidationSummaryHeadingTag = "span";
         private static string _resourceClassKey;
 
         public static string ResourceClassKey
@@ -244,7 +243,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, string message)
         {
-            return ValidationSummary(htmlHelper, excludePropertyErrors: false, message: message, htmlAttributes: (object)null, headingTag: DefaultValidationSummaryHeadingTag);
+            return ValidationSummary(htmlHelper, excludePropertyErrors: false, message: message, htmlAttributes: (object)null, headingTag: null);
         }
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, string message, string headingTag)
@@ -254,7 +253,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, bool excludePropertyErrors, string message)
         {
-            return ValidationSummary(htmlHelper, excludePropertyErrors, message, htmlAttributes: (object)null, headingTag: DefaultValidationSummaryHeadingTag);
+            return ValidationSummary(htmlHelper, excludePropertyErrors, message, htmlAttributes: (object)null, headingTag: null);
         }
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, bool excludePropertyErrors, string message, string headingTag)
@@ -264,7 +263,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, string message, object htmlAttributes)
         {
-            return ValidationSummary(htmlHelper, excludePropertyErrors: false, message: message, htmlAttributes: HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes), headingTag: DefaultValidationSummaryHeadingTag);
+            return ValidationSummary(htmlHelper, excludePropertyErrors: false, message: message, htmlAttributes: HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes), headingTag: null);
         }
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, string message, object htmlAttributes, string headingTag)
@@ -274,7 +273,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, bool excludePropertyErrors, string message, object htmlAttributes)
         {
-            return ValidationSummary(htmlHelper, excludePropertyErrors, message, HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes), DefaultValidationSummaryHeadingTag);
+            return ValidationSummary(htmlHelper, excludePropertyErrors, message, HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes), null);
         }
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, bool excludePropertyErrors, string message, object htmlAttributes, string headingTag)
@@ -284,7 +283,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, string message, IDictionary<string, object> htmlAttributes)
         {
-            return ValidationSummary(htmlHelper, excludePropertyErrors: false, message: message, htmlAttributes: htmlAttributes, headingTag: DefaultValidationSummaryHeadingTag);
+            return ValidationSummary(htmlHelper, excludePropertyErrors: false, message: message, htmlAttributes: htmlAttributes, headingTag: null);
         }
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, string message, IDictionary<string, object> htmlAttributes, string headingTag)
@@ -294,7 +293,7 @@ namespace System.Web.Mvc.Html
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, bool excludePropertyErrors, string message, IDictionary<string, object> htmlAttributes)
         {
-            return ValidationSummary(htmlHelper, excludePropertyErrors, message, htmlAttributes, DefaultValidationSummaryHeadingTag);
+            return ValidationSummary(htmlHelper, excludePropertyErrors, message, htmlAttributes, null);
         }
 
         public static MvcHtmlString ValidationSummary(this HtmlHelper htmlHelper, bool excludePropertyErrors, string message, IDictionary<string, object> htmlAttributes, string headingTag)
@@ -323,6 +322,11 @@ namespace System.Web.Mvc.Html
             string messageSpan;
             if (!String.IsNullOrEmpty(message))
             {
+                if (String.IsNullOrEmpty(headingTag))
+                {
+                    headingTag = htmlHelper.ViewContext.ValidationSummaryMessageElement;
+                }
+
                 TagBuilder spanTag = new TagBuilder(headingTag);
                 spanTag.SetInnerText(message);
                 messageSpan = spanTag.ToString(TagRenderMode.Normal) + Environment.NewLine;

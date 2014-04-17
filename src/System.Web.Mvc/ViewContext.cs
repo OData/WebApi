@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Web.Mvc.Html;
 using System.Web.WebPages.Scope;
 
 namespace System.Web.Mvc
@@ -20,6 +21,7 @@ window.mvcClientValidationMetadata.push({0});
 
         internal static readonly string ClientValidationKeyName = "ClientValidationEnabled";
         internal static readonly string UnobtrusiveJavaScriptKeyName = "UnobtrusiveJavaScriptEnabled";
+        internal static readonly string ValidationSummaryMessageElementKeyName = "ValidationSummaryMessageElement";
 
         // Some values have to be stored in HttpContext.Items in order to be propagated between calls
         // to RenderPartial(), RenderAction(), etc.
@@ -133,6 +135,24 @@ window.mvcClientValidationMetadata.push({0});
             set { SetUnobtrusiveJavaScriptEnabled(value, Scope, HttpContext); }
         }
 
+        /// <summary>
+        /// Element name used to wrap a top-level message in
+        /// <see cref="ValidationExtensions.ValidationSummary(HtmlHelper)"/> and other overloads.
+        /// </summary>
+        public virtual string ValidationSummaryMessageElement
+        {
+            get { return GetValidationSummaryMessageElement(Scope, HttpContext); }
+            set
+            {
+                if (String.IsNullOrEmpty(value))
+                {
+                    throw Error.ParameterCannotBeNullOrEmpty("value");
+                }
+
+                SetValidationSummaryMessageElement(value, Scope, HttpContext);
+            }
+        }
+
         public virtual IView View { get; set; }
 
         public dynamic ViewBag
@@ -173,6 +193,13 @@ window.mvcClientValidationMetadata.push({0});
             return ScopeCache.Get(scope, httpContext).UnobtrusiveJavaScriptEnabled;
         }
 
+        internal static string GetValidationSummaryMessageElement(
+            IDictionary<object, object> scope = null,
+            HttpContextBase httpContext = null)
+        {
+            return ScopeCache.Get(scope, httpContext).ValidationSummaryMessageElement;
+        }
+
         private static int IncrementFormCount(IDictionary items)
         {
             object lastFormNum = items[_lastFormNumKey];
@@ -206,6 +233,14 @@ window.mvcClientValidationMetadata.push({0});
             ScopeCache.Get(scope, httpContext).UnobtrusiveJavaScriptEnabled = enabled;
         }
 
+        internal static void SetValidationSummaryMessageElement(
+            string elementName,
+            IDictionary<object, object> scope = null,
+            HttpContextBase httpContext = null)
+        {
+            ScopeCache.Get(scope, httpContext).ValidationSummaryMessageElement = elementName;
+        }
+
         private static TValue ScopeGet<TValue>(IDictionary<object, object> scope, string name, TValue defaultValue = default(TValue))
         {
             object result;
@@ -222,6 +257,7 @@ window.mvcClientValidationMetadata.push({0});
             private bool _clientValidationEnabled;
             private IDictionary<object, object> _scope;
             private bool _unobtrusiveJavaScriptEnabled;
+            private string _validationSummaryMessageElement;
 
             private ScopeCache(IDictionary<object, object> scope)
             {
@@ -229,6 +265,7 @@ window.mvcClientValidationMetadata.push({0});
 
                 _clientValidationEnabled = ScopeGet(scope, ClientValidationKeyName, false);
                 _unobtrusiveJavaScriptEnabled = ScopeGet(scope, UnobtrusiveJavaScriptKeyName, false);
+                _validationSummaryMessageElement = ScopeGet(scope, ValidationSummaryMessageElementKeyName, "span");
             }
 
             public bool ClientValidationEnabled
@@ -248,6 +285,16 @@ window.mvcClientValidationMetadata.push({0});
                 {
                     _unobtrusiveJavaScriptEnabled = value;
                     _scope[UnobtrusiveJavaScriptKeyName] = value;
+                }
+            }
+
+            public string ValidationSummaryMessageElement
+            {
+                get { return _validationSummaryMessageElement; }
+                set
+                {
+                    _validationSummaryMessageElement = value;
+                    _scope[ValidationSummaryMessageElementKeyName] = value;
                 }
             }
 

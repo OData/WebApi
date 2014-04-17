@@ -89,6 +89,7 @@ namespace System.Web.Mvc.Test
             Assert.Equal(writer, viewContext.Writer);
             Assert.False(viewContext.UnobtrusiveJavaScriptEnabled); // Unobtrusive JavaScript should be off by default
             Assert.NotNull(viewContext.FormContext); // We get the default FormContext
+            Assert.Equal("span", viewContext.ValidationSummaryMessageElement); // gen a <span/> by default
         }
 
         [Fact]
@@ -127,6 +128,25 @@ namespace System.Web.Mvc.Test
             viewContext.UnobtrusiveJavaScriptEnabled = false;
             Assert.False(viewContext.UnobtrusiveJavaScriptEnabled);
             Assert.Equal(false, scope[ViewContext.UnobtrusiveJavaScriptKeyName]);
+        }
+
+        [Fact]
+        public void ViewContextUsesScopeThunkForValidationSummaryMessageElement()
+        {
+            // Arrange
+            var scope = new Dictionary<object, object>();
+            var httpContext = new Mock<HttpContextBase>();
+            var viewContext = new ViewContext { ScopeThunk = () => scope, HttpContext = httpContext.Object };
+            httpContext.Setup(c => c.Items).Returns(new Hashtable());
+
+            // Act & Assert
+            Assert.Equal("span", viewContext.ValidationSummaryMessageElement);
+            viewContext.ValidationSummaryMessageElement = "h4";
+            Assert.Equal("h4", viewContext.ValidationSummaryMessageElement);
+            Assert.Equal("h4", scope[ViewContext.ValidationSummaryMessageElementKeyName]);
+            viewContext.ValidationSummaryMessageElement = "div";
+            Assert.Equal("div", viewContext.ValidationSummaryMessageElement);
+            Assert.Equal("div", scope[ViewContext.ValidationSummaryMessageElementKeyName]);
         }
 
         [Fact]

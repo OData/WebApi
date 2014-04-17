@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web.Helpers;
+using System.Web.Mvc.Html;
 using System.Web.Mvc.Properties;
 using System.Web.Routing;
 using System.Web.WebPages;
@@ -74,6 +75,24 @@ namespace System.Web.Mvc
         {
             get { return ViewContext.GetUnobtrusiveJavaScriptEnabled(); }
             set { ViewContext.SetUnobtrusiveJavaScriptEnabled(value); }
+        }
+
+        /// <summary>
+        /// Element name used to wrap a top-level message in
+        /// <see cref="ValidationExtensions.ValidationSummary(HtmlHelper)"/> and other overloads.
+        /// </summary>
+        public static string ValidationSummaryMessageElement
+        {
+            get { return ViewContext.GetValidationSummaryMessageElement(); }
+            set
+            {
+                if (String.IsNullOrEmpty(value))
+                {
+                    throw Error.ParameterCannotBeNullOrEmpty("value");
+                }
+
+                ViewContext.SetValidationSummaryMessageElement(value);
+            }
         }
 
         public dynamic ViewBag
@@ -509,6 +528,20 @@ namespace System.Web.Mvc
             ViewContext newViewContext = new ViewContext(ViewContext, ViewContext.View, newViewData, ViewContext.TempData, writer);
             IView view = FindPartialView(newViewContext, partialViewName, viewEngineCollection);
             view.Render(newViewContext, writer);
+        }
+
+        /// <summary>
+        /// Set element name used to wrap a top-level message in
+        /// <see cref="ValidationExtensions.ValidationSummary(HtmlHelper)"/> and other overloads.
+        /// </summary>
+        public void SetValidationSummaryMessageElement(string elementName)
+        {
+            if (String.IsNullOrEmpty(elementName))
+            {
+                throw Error.ParameterCannotBeNullOrEmpty("elementName");
+            }
+
+            ViewContext.ValidationSummaryMessageElement = elementName;
         }
 
         /// <summary>

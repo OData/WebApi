@@ -556,4 +556,7 @@ Duplicates:
   <data name="DirectRoute_InvalidParameter_Controller" xml:space="preserve">
     <value>A direct route cannot use the parameter 'controller'. Specify a literal path in place of this parameter to create a route to a controller.</value>
   </data>
+  <data name="JQuerySyntaxMissingClosingBracket" xml:space="preserve">
+    <value>The key is invalid JQuery syntax because it is missing a closing bracket.</value>
+  </data>
 </root>

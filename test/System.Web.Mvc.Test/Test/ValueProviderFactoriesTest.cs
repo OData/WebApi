@@ -19,6 +19,7 @@ namespace System.Web.Mvc.Test
                 typeof(RouteDataValueProviderFactory),
                 typeof(QueryStringValueProviderFactory),
                 typeof(HttpFileCollectionValueProviderFactory),
+                typeof(JQueryFormValueProviderFactory),
             };
 
             // Act

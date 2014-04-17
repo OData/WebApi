@@ -754,6 +754,15 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The key is invalid JQuery syntax because it is missing a closing bracket..
+        /// </summary>
+        internal static string JQuerySyntaxMissingClosingBracket {
+            get {
+                return ResourceManager.GetString("JQuerySyntaxMissingClosingBracket", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This request has been blocked because sensitive information could be disclosed to third party web sites when this is used in a GET request. To allow GET requests, set JsonRequestBehavior to AllowGet..
         /// </summary>
         internal static string JsonRequest_GetNotAllowed {

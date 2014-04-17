@@ -117,6 +117,60 @@ namespace System.Web.Mvc.Test
             Assert.Equal(culture, vpResult.Culture);
         }
 
+        [Theory]
+        [InlineData("foo", "fooValue", "foo", "fooValue")]
+        [InlineData("fooArray[0][bar1][bar3]", "barValue1", "fooArray[0].bar1.bar3", "barValue1")]
+        [InlineData("fooArray[0][bar2]", "barValue2", "fooArray[0].bar2", "barValue2")]
+        [InlineData(
+            "fooArray[1][bar1][0][nested]", "nestedArrayValue", "fooArray[1].bar1[0].nested", "nestedArrayValue")]
+        [InlineData("fooArray[2].bar1", "noSquareBracesValue", "fooArray[2].bar1", "noSquareBracesValue")]
+        [InlineData("foo.bar", "fooBarValue", "foo.bar", "fooBarValue")]
+        public void GetValue_NonValidating_WithArraysInCollection(
+                            string name, string value, string index, string expectedAttemptedValue)
+        {
+            // Arrange
+            string[] expectedRawValue = new[] { expectedAttemptedValue };
+            NameValueCollection unvalidatedCollection = new NameValueCollection();
+            unvalidatedCollection.Add(name, value);
+
+            CultureInfo culture = CultureInfo.GetCultureInfo("fr-FR");
+            NameValueCollectionValueProvider valueProvider = 
+                    new NameValueCollectionValueProvider(_backingStore, unvalidatedCollection, culture, true);
+
+            // Act
+            ValueProviderResult vpResult = valueProvider.GetValue(index, skipValidation: true);
+            
+            // Asserts
+            Assert.NotNull(vpResult);
+            Assert.Equal(culture, vpResult.Culture);
+            Assert.Equal(expectedRawValue, (string[])vpResult.RawValue);
+            Assert.Equal(expectedAttemptedValue, vpResult.AttemptedValue);
+        }
+
+        [Fact]
+        public void GetValue_NonValidating_WithArraysInCollection_Error()
+        {
+            // Arrange
+            NameValueCollection unvalidatedCollection = new NameValueCollection()
+            {
+                { "foo", "fooValue3" },
+                { "fooArray[0][bar1", "barValue1" }
+            };
+
+            NameValueCollectionValueProvider valueProvider =
+                new NameValueCollectionValueProvider(
+                                    _backingStore,
+                                    unvalidatedCollection,
+                                    culture: null,
+                                    jQueryToMvcRequestNormalizationRequired: true);
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => valueProvider.GetValue("foo", skipValidation: true),
+                "key",
+                "The key is invalid JQuery syntax because it is missing a closing bracket.");
+        }
+
         [Fact]
         public void GetValue_ReturnsNullIfKeyNotFound()
         {

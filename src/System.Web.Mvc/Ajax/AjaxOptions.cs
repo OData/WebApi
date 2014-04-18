@@ -44,6 +44,7 @@ namespace System.Web.Mvc.Ajax
                     case InsertionMode.Replace:
                     case InsertionMode.InsertAfter:
                     case InsertionMode.InsertBefore:
+                    case InsertionMode.ReplaceWith:
                         _insertionMode = value;
                         return;
 
@@ -83,6 +84,8 @@ namespace System.Web.Mvc.Ajax
                         return "before";
                     case InsertionMode.InsertAfter:
                         return "after";
+                    case InsertionMode.ReplaceWith:
+                        return "replace-with";
                     default:
                         return ((int)InsertionMode).ToString(CultureInfo.InvariantCulture);
                 }

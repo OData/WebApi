@@ -40,13 +40,21 @@ namespace System.Web.Mvc.Ajax.Test
             Assert.Equal(new AjaxOptions { InsertionMode = InsertionMode.InsertBefore }.InsertionModeString, "Sys.Mvc.InsertionMode.insertBefore");
         }
 
-        [Fact]
-        public void InsertionModeUnobtrusiveTests()
+        [Theory]
+        [InlineData(InsertionMode.Replace, "replace")]
+        [InlineData(InsertionMode.InsertAfter, "after")]
+        [InlineData(InsertionMode.InsertBefore, "before")]
+        [InlineData(InsertionMode.ReplaceWith, "replace-with")]
+        public void InsertionModeUnobtrusiveTests(InsertionMode mode, string expected)
         {
-            // Act & Assert
-            Assert.Equal(new AjaxOptions { InsertionMode = InsertionMode.Replace }.InsertionModeUnobtrusive, "replace");
-            Assert.Equal(new AjaxOptions { InsertionMode = InsertionMode.InsertAfter }.InsertionModeUnobtrusive, "after");
-            Assert.Equal(new AjaxOptions { InsertionMode = InsertionMode.InsertBefore }.InsertionModeUnobtrusive, "before");
+            // Arrange
+            AjaxOptions options = new AjaxOptions { InsertionMode = mode };
+
+            // Act
+            string result = options.InsertionModeUnobtrusive;
+            
+            // Assert
+            Assert.Equal(expected, result);
         }
 
         [Fact]
@@ -329,13 +337,15 @@ namespace System.Web.Mvc.Ajax.Test
             Assert.Equal(expected, attributes["data-ajax-loading"]);
         }
 
-        [Fact]
-        public void ToUnobtrusiveHtmlAttributesWithUpdateTargetIdAndExplicitInsertionMode()
+        [Theory]
+        [InlineData(InsertionMode.InsertAfter, "after")]
+        [InlineData(InsertionMode.ReplaceWith, "replace-with")]
+        public void ToUnobtrusiveHtmlAttributesWithUpdateTargetIdAndExplicitInsertionMode(InsertionMode mode, string expectedMode)
         {
             // Arrange
             AjaxOptions options = new AjaxOptions
             {
-                InsertionMode = InsertionMode.InsertAfter,
+                InsertionMode = mode,
                 UpdateTargetId = "someId"
             };
 
@@ -346,7 +356,7 @@ namespace System.Web.Mvc.Ajax.Test
             Assert.Equal(3, attributes.Count);
             Assert.Equal("true", attributes["data-ajax"]);
             Assert.Equal("#someId", attributes["data-ajax-update"]);
-            Assert.Equal("after", attributes["data-ajax-mode"]);
+            Assert.Equal(expectedMode, attributes["data-ajax-mode"]);
         }
 
         [Fact]

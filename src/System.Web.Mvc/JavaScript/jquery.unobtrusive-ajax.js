@@ -56,6 +56,9 @@
                     update.appendChild(this);
                 });
                 break;
+            case "REPLACE-WITH":
+                $(update).replaceWith(data);
+                break;
             default:
                 $(update).html(data);
                 break;

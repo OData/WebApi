@@ -14,13 +14,13 @@ namespace System.Web.OData
     public class DollarFormatTest
     {
         [Theory]
-        [InlineData("FormatCustomers/?$format=application/json;odata.metadata=full")]
-        [InlineData("This/?$format=application/json;odata.metadata=full")]
-        public async Task DollarFormat_Applies_IfPresent(string path)
+        [InlineData("FormatCustomers", "application/json;odata.metadata=full")]
+        [InlineData("This", "application/json;odata.metadata=full")]
+        public async Task DollarFormat_Applies_IfPresent(string path, string mediaTypeFormat)
         {
             // Arrange
-            string url = "http://localhost/" + path;
-
+            MediaTypeHeaderValue expected = MediaTypeHeaderValue.Parse(mediaTypeFormat);
+            string url = string.Format("http://localhost/{0}?$format={1}", path, mediaTypeFormat);
             IEdmModel model = GetEdmModel();
             HttpConfiguration configuration = new HttpConfiguration();
             HttpServer server = new HttpServer(configuration);
@@ -34,8 +34,7 @@ namespace System.Web.OData
 
             // Assert
             response.EnsureSuccessStatusCode();
-            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
-            Assert.Equal(2, response.Content.Headers.ContentType.Parameters.Count);
+            Assert.Equal(expected, response.Content.Headers.ContentType);
         }
 
         private IEdmModel GetEdmModel()

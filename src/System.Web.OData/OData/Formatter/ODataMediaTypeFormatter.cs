@@ -30,6 +30,7 @@ namespace System.Web.OData.Formatter
     /// <summary>
     /// <see cref="MediaTypeFormatter"/> class to handle OData.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]   
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
         internal const ODataVersion DefaultODataVersion = ODataVersion.V4;
@@ -214,8 +215,51 @@ namespace System.Web.OData.Formatter
         /// <inheritdoc/>
         public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, MediaTypeHeaderValue mediaType)
         {
-            // call base to validate parameters and set Content-Type header based on mediaType parameter.
-            base.SetDefaultContentHeaders(type, headers, mediaType);
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+            if (headers == null)
+            {
+                throw Error.ArgumentNull("headers");
+            }
+
+            // When the user asks for application/json we really need to set the content type to
+            // application/json; odata.metadata=minimal. If the user provides the media type and is
+            // application/json we are going to add automatically odata.metadata=minimal. Otherwise we are
+            // going to fallback to the default implementation.
+
+            // When calling this formatter as part of content negotiation the content negotiator will always
+            // pick a non null media type. In case the user creates a new ObjectContent<T> and doesn't pass in a
+            // media type, we delegate to the base class to rely on the default behavior. It's the user's 
+            // responsibility to pass in the right media type.
+
+            if (mediaType != null)
+            {
+                if (mediaType.MediaType.Equals("application/json", StringComparison.OrdinalIgnoreCase) &&
+                    !mediaType.Parameters.Any(p => p.Name.Equals("odata.metadata", StringComparison.OrdinalIgnoreCase)))
+                {
+                    mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "minimal"));
+                }
+
+                headers.ContentType = (MediaTypeHeaderValue)((ICloneable)mediaType).Clone();
+            }
+            else
+            {
+                // This is the case when a user creates a new ObjectContent<T> passing in a null mediaType
+                base.SetDefaultContentHeaders(type, headers, mediaType);
+            }
+
+            // In general, in Web API we pick a default charset based on the supported character sets
+            // of the formatter. However, according to the OData spec, the service shouldn't be sending
+            // a character set unless explicitly specified, so if the client didn't send the charset we chose
+            // we just clean it.
+            if (headers.ContentType != null &&
+                !Request.Headers.AcceptCharset
+                    .Any(cs => cs.Value.Equals(headers.ContentType.CharSet, StringComparison.OrdinalIgnoreCase)))
+            {
+                headers.ContentType.CharSet = String.Empty;
+            }
 
             headers.TryAddWithoutValidation(ODataServiceVersion, ODataUtils.ODataVersionToString(_version));
         }
@@ -460,7 +504,7 @@ namespace System.Web.OData.Formatter
             writerSettings.ODataUri = new ODataUri
             {
                 ServiceRoot = baseAddress,
-                
+
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
                 SelectAndExpand = Request.ODataProperties().SelectExpandClause,
                 Path = GetODataPath(path, model, baseAddress),

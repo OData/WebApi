@@ -217,6 +217,59 @@ namespace System.Web.OData.Formatter
             Assert.Equal(new string[] { expectedDataServiceVersion }, headervalues);
         }
 
+        [Theory]
+        [InlineData(null, null, "application/json; odata.metadata=minimal")]
+        [InlineData(null, "utf-8", "application/json; odata.metadata=minimal; charset=utf-8")]
+        [InlineData(null, "utf-16", "application/json; odata.metadata=minimal; charset=utf-16")]
+        [InlineData("application/json", null, "application/json; odata.metadata=minimal")]
+        [InlineData("application/json", "utf-8", "application/json; odata.metadata=minimal; charset=utf-8")]
+        [InlineData("application/json", "utf-16", "application/json; odata.metadata=minimal; charset=utf-16")]
+        [InlineData("application/json;odata.metadata=minimal", null, "application/json; odata.metadata=minimal")]
+        [InlineData("application/json;odata.metadata=minimal", "utf-8", "application/json; odata.metadata=minimal; charset=utf-8")]
+        [InlineData("application/json;odata.metadata=minimal", "utf-16", "application/json; odata.metadata=minimal; charset=utf-16")]
+        [InlineData("application/json;odata.metadata=full", null, "application/json; odata.metadata=full")]
+        [InlineData("application/json;odata.metadata=full", "utf-8", "application/json; odata.metadata=full; charset=utf-8")]
+        [InlineData("application/json;odata.metadata=full", "utf-16", "application/json; odata.metadata=full; charset=utf-16")]
+        [InlineData("application/json;odata.metadata=none", null, "application/json; odata.metadata=none")]
+        [InlineData("application/json;odata.metadata=none", "utf-8", "application/json; odata.metadata=none; charset=utf-8")]
+        [InlineData("application/json;odata.metadata=none", "utf-16", "application/json; odata.metadata=none; charset=utf-16")]
+        public void SetDefaultContentHeaders_SetsRightContentType(string acceptHeader, string acceptCharset, string contentType)
+        {
+            // Arrange
+            MediaTypeHeaderValue expectedResult = MediaTypeHeaderValue.Parse(contentType);
+
+            // If no accept header is present the content negotiator will pick application/json; odata.metadata=minimal
+            // based on CanWriteType
+            MediaTypeHeaderValue mediaType = acceptHeader == null ?
+                MediaTypeHeaderValue.Parse("application/json; odata.metadata=minimal") :
+                MediaTypeHeaderValue.Parse(acceptHeader);
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            if (acceptHeader != null)
+            {
+                request.Headers.TryAddWithoutValidation("Accept", acceptHeader);
+            }
+            if (acceptCharset != null)
+            {
+                request.Headers.TryAddWithoutValidation("Accept-Charset", acceptCharset);
+                mediaType.CharSet = acceptCharset;
+            }
+
+            HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
+            contentHeaders.Clear();
+
+            MediaTypeFormatter formatter = ODataMediaTypeFormatters
+                .Create()
+                .First(f => f.SupportedMediaTypes.Contains(MediaTypeHeaderValue.Parse("application/json")));
+            formatter = formatter.GetPerRequestFormatterInstance(typeof(int), request, mediaType);
+
+            // Act
+            formatter.SetDefaultContentHeaders(typeof(int), contentHeaders, mediaType);
+
+            // Assert
+            Assert.Equal(expectedResult, contentHeaders.ContentType);
+        }
+
         [Fact]
         public void TryGetInnerTypeForDelta_ChangesRefToGenericParameter_ForDeltas()
         {
@@ -796,7 +849,7 @@ namespace System.Web.OData.Formatter
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomSvcXml);
             return formatter;
         }
-        
+
         private static ODataMediaTypeFormatter CreateFormatterWithJson(IEdmModel model, HttpRequestMessage request,
             params ODataPayloadKind[] payloadKinds)
         {

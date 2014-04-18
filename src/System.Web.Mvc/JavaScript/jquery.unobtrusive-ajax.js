@@ -85,7 +85,7 @@
             beforeSend: function (xhr) {
                 var result;
                 asyncOnBeforeSend(xhr, method);
-                result = getFunction(element.getAttribute("data-ajax-begin"), ["xhr"]).apply(this, arguments);
+                result = getFunction(element.getAttribute("data-ajax-begin"), ["xhr"]).apply(element, arguments);
                 if (result !== false) {
                     loading.show(duration);
                 }
@@ -93,13 +93,15 @@
             },
             complete: function () {
                 loading.hide(duration);
-                getFunction(element.getAttribute("data-ajax-complete"), ["xhr", "status"]).apply(this, arguments);
+                getFunction(element.getAttribute("data-ajax-complete"), ["xhr", "status"]).apply(element, arguments);
             },
             success: function (data, status, xhr) {
                 asyncOnSuccess(element, data, xhr.getResponseHeader("Content-Type") || "text/html");
-                getFunction(element.getAttribute("data-ajax-success"), ["data", "status", "xhr"]).apply(this, arguments);
+                getFunction(element.getAttribute("data-ajax-success"), ["data", "status", "xhr"]).apply(element, arguments);
             },
-            error: getFunction(element.getAttribute("data-ajax-failure"), ["xhr", "status", "error"])
+            error: function () {
+                getFunction(element.getAttribute("data-ajax-failure"), ["xhr", "status", "error"]).apply(element, arguments);
+            }
         });
 
         options.data.push({ name: "X-Requested-With", value: "XMLHttpRequest" });

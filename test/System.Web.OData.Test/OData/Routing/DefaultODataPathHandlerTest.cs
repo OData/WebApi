@@ -493,6 +493,38 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
+        [InlineData("RoutingCustomers(1)/Products/$ref?$id=../../Products(5)")]
+        [InlineData("VipCustomer/Products/$ref?$id=" + _serviceRoot + "Products(5)")]
+        public void CanParseDollarId(string odataPath)
+        {
+            // Arrange & Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
+
+            // Assert
+            KeyValuePathSegment keyValuePathSegment =
+                Assert.IsType<KeyValuePathSegment>(path.Segments[path.Segments.Count - 2]);
+            Assert.Equal("5", keyValuePathSegment.Value);
+            Assert.IsType<RefPathSegment>(path.Segments[path.Segments.Count - 1]);
+        }
+
+        [Theory]
+        [InlineData("RoutingCustomers(1)/Products/$ref?$id=5", "The value of $id '5' is invalid.")]
+        [InlineData("RoutingCustomers(1)/Products/$ref?$id=Products(5)", "The value of $id 'Products(5)' is invalid.")]
+        [InlineData("RoutingCustomers(1)/Products/$ref?$id=../../RoutingCustomers(5)", "The value of $id '../../RoutingCustomers(5)' is invalid.")]
+        [InlineData("VipCustomer/Products/$ref?$id=" + _serviceRoot + "RoutingCustomers(5)", "The value of $id '" + _serviceRoot + "RoutingCustomers(5)' is invalid.")]
+        [InlineData("RoutingCustomers(1)/Products/$ref?$id=../../RoutingCustomers", "The value of $id '../../RoutingCustomers' is invalid.")]
+        [InlineData("RoutingCustomers(1)/Products/$ref?$id=../../RoutingCustomers(1)/ID", "The value of $id '../../RoutingCustomers(1)/ID' is invalid.")]
+        [InlineData("RoutingCustomers(1)/Products/$ref?$id=../../RoutingCustomers(1)/Products", "The value of $id '../../RoutingCustomers(1)/Products' is invalid.")]
+        [InlineData("RoutingCustomers(1)/Products/$ref?$id=" + _serviceRoot, "The value of $id '" + _serviceRoot + "' is invalid.")]
+        [InlineData("RoutingCustomers(1)/Products/$ref?$id=../unknown", "The value of $id '../unknown' is invalid.")]
+        [InlineData("RoutingCustomers(1)/Products/$ref?$id=" + _serviceRoot + "unknown", "The value of $id '" + _serviceRoot + "unknown' is invalid.")]
+        public void CannotParseDollarId_ThrowsODataException_InvalidDollarId(string odataPath, string expectedError)
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath), expectedError);
+        }
+
+        [Theory]
         [InlineData("RoutingCustomers(1)/GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers")]
         [InlineData("RoutingCustomers(2)/System.Web.OData.Routing.VIP/GetMostProfitable", "GetMostProfitable")]
         [InlineData("Products(7)/TopProductId", "TopProductId")]

@@ -691,6 +691,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value of $id &apos;{0}&apos; is invalid..
+        /// </summary>
+        internal static string InvalidDollarId {
+            get {
+                return ResourceManager.GetString("InvalidDollarId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid entity set name..
         /// </summary>
         internal static string InvalidEntitySetName {

@@ -107,6 +107,8 @@ namespace System.Web.OData.Routing
         [InlineData("VipCustomer/Orders/$ref", "PUT", "CreateRef(Orders)")]
         [InlineData("VipCustomer/Orders/$ref", "DELETE", "DeleteRef(Orders)")]
         [InlineData("VipCustomer/Orders(2)/$ref", "DELETE", "DeleteRef(Orders)ByKey(2)")]
+        [InlineData("VipCustomer/Orders/$ref?$id=http://localhost/Orders(2)", "DELETE", "DeleteRef(Orders)ByKey(2)")]
+        [InlineData("VipCustomer/Orders/$ref?$id=../../Orders(2)", "DELETE", "DeleteRef(Orders)ByKey(2)")]
         [InlineData("VipCustomer/NS.SpecialCustomer/SpecialOrders/$ref", "POST", "CreateRef(SpecialOrders)")]
         [InlineData("VipCustomer/NS.SpecialCustomer/SpecialOrders/$ref", "PUT", "CreateRef(SpecialOrders)")]
         [InlineData("VipCustomer/NS.SpecialCustomer/SpecialOrders/$ref", "DELETE", "DeleteRef(SpecialOrders)")]

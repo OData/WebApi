@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
@@ -90,6 +91,8 @@ namespace System.Web.OData.Routing
             bool enableUriTemplateParsing)
         {
             ODataUriParser uriParser;
+            Uri serviceRootUri = null;
+            Uri fullUri = null;
 
             if (enableUriTemplateParsing)
             {
@@ -100,17 +103,18 @@ namespace System.Web.OData.Routing
             {
                 Contract.Assert(serviceRoot != null);
 
-                Uri serviceRootUri = new Uri(
+                serviceRootUri = new Uri(
                     serviceRoot.EndsWith("/", StringComparison.Ordinal) ?
                         serviceRoot :
                         serviceRoot + "/");
 
-                Uri fullUri = new Uri(serviceRootUri, odataPath);
+                fullUri = new Uri(serviceRootUri, odataPath);
                 uriParser = new ODataUriParser(model, serviceRootUri, fullUri);
             }
 
             Semantic.ODataPath path;
             UnresolvedPathSegment unresolvedPathSegment = null;
+            Semantic.KeySegment id = null;
             try
             {
                 path = uriParser.ParsePath();
@@ -142,7 +146,49 @@ namespace System.Web.OData.Routing
                 }
             }
 
-            return ODataPathSegmentTranslator.TranslateODLPathToWebAPIPath(path, model, unresolvedPathSegment, enableUriTemplateParsing);
+            if (!enableUriTemplateParsing && path.LastSegment is Semantic.NavigationPropertyLinkSegment)
+            {
+                IEdmCollectionType lastSegmentEdmType = path.LastSegment.EdmType as IEdmCollectionType;
+
+                if (lastSegmentEdmType != null)
+                {
+                    string idString = fullUri.ParseQueryString().Get("$id");
+                    Semantic.EntityIdSegment entityIdSegment = null;
+                    bool exceptionThrown = false;
+
+                    try
+                    {
+                        entityIdSegment = uriParser.ParseEntityId();
+
+                        if (entityIdSegment != null)
+                        {
+                            // Create another ODataUriParser to parse $id, which is absolute or relative.
+                            ODataUriParser parser = new ODataUriParser(model, serviceRootUri, entityIdSegment.Id);
+                            id = parser.ParsePath().LastSegment as Semantic.KeySegment;
+                        }
+                    }
+                    catch (ODataException)
+                    {
+                        // Exception was thrown while parsing the $id.
+                        // We will throw another exception about the invalid $id.
+                        exceptionThrown = true;
+                    }
+
+                    if (exceptionThrown ||
+                        (entityIdSegment != null &&
+                            (id == null || lastSegmentEdmType.ElementType.Definition != id.EdmType)))
+                    {
+                        throw new ODataException(Error.Format(SRResources.InvalidDollarId, idString));
+                    }
+                }
+            }
+
+            return ODataPathSegmentTranslator.TranslateODLPathToWebAPIPath(
+                path,
+                model, 
+                unresolvedPathSegment,
+                id, 
+                enableUriTemplateParsing);
         }
 
         private static ODataPathTemplate Templatify(ODataPath path, string pathTemplate)

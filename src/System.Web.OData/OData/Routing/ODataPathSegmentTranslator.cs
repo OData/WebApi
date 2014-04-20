@@ -28,12 +28,14 @@ namespace System.Web.OData.Routing
         /// <param name="path">The ODL path to be translated.</param>
         /// <param name="model">The model used to translate.</param>
         /// <param name="unresolvedPathSegment">Unresolved path segment.</param>
+        /// <param name="id">The key segment from $id.</param>
         /// <param name="enableUriTemplateParsing">Specifies the ODL path is template or not.</param>
         /// <returns>The translated Web API path.</returns>
         public static ODataPath TranslateODLPathToWebAPIPath(
             Semantic.ODataPath path,
             IEdmModel model,
-            UnresolvedPathSegment unresolvedPathSegment,
+            UnresolvedPathSegment unresolvedPathSegment,            
+            KeySegment id,
             bool enableUriTemplateParsing)
         {
             if (path == null)
@@ -51,6 +53,11 @@ namespace System.Web.OData.Routing
             if (unresolvedPathSegment != null)
             {
                 segments.Add(unresolvedPathSegment);
+            }
+
+            if (!enableUriTemplateParsing)
+            {
+                AppendIdForRef(segments, id);
             }
 
             ReverseRefPathSegmentAndKeyValuePathSegment(segments);
@@ -273,6 +280,17 @@ namespace System.Web.OData.Routing
         public override IEnumerable<ODataPathSegment> Translate(MetadataSegment segment)
         {
             yield return new MetadataPathSegment();
+        }
+
+        // We need to append the key value path segment from $id.
+        private static void AppendIdForRef(IList<ODataPathSegment> segments, KeySegment id)
+        {
+            if (id == null || !(segments.Last() is RefPathSegment))
+            {
+                return;
+            }
+
+            segments.Add(new KeyValuePathSegment(ConvertKeysToString(id.Keys, enableUriTemplateParsing: false)));
         }
 
         // We need to reverse the order of RefPathSegment and KeyValuePathSegment.

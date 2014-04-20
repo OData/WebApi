@@ -131,6 +131,52 @@ namespace System.Web.OData.Routing.Conventions
             Assert.Equal(relatedKey, routeData.Values["relatedKey"]);
         }
 
+        [Theory]
+        [InlineData("http://any/Customers(42)/Orders/$ref?$id=http://any/Orders(24)")]
+        [InlineData("http://any/Customers(42)/Orders/$ref?$id=../../Orders(24)")]
+        public void SelectAction_SetsRelatedKey_ForDeleteRefRequestsWithDollarId(string uri)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "http://any/", uri);
+            HttpControllerContext controllerContext = CreateControllerContext("DELETE");
+            var actionMap = GetMockActionMap("DeleteRef");
+
+            // Act
+            var actionName = new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            var routeData = controllerContext.RouteData;
+
+            // Assert
+            Assert.Equal("DeleteRef", actionName);
+            Assert.Equal("42", routeData.Values["key"]);
+            Assert.Equal("Orders", routeData.Values["navigationProperty"]);
+            Assert.Equal("24", routeData.Values["relatedKey"]);
+        }
+
+        [Theory]
+        [InlineData("GET")]
+        [InlineData("PUT")]
+        [InlineData("POST")]
+        public void SelectAction_ReturnsNull_ForNonDeleteRequestWithDollarId(string method)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(
+                model.Model,
+                "http://any/",
+                "http://any/Customers(42)/Orders/$ref?$id=http://any/Orders(24)");
+
+            HttpControllerContext controllerContext = CreateControllerContext(method);
+            var actionMap = GetMockActionMap("DeleteRef", "CreateRef", "GetRef", "PutRef", "PostRef");
+
+            // Act
+            string actionName = new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Null(actionName);
+        }
+
         [Fact]
         public void SelectAction_SetsRouteData_ForCreateRefRequests()
         {

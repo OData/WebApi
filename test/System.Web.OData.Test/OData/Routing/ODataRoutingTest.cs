@@ -72,6 +72,8 @@ namespace System.Web.OData.Routing
         [InlineData("POST", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)")]
         [InlineData("DELETE", "RoutingCustomers(1)/Products/$ref", "DeleteRef(1)(Products)")]
         [InlineData("DELETE", "RoutingCustomers(1)/Products(5)/$ref", "DeleteRef(1)(5)(Products)")]
+        [InlineData("DELETE", "RoutingCustomers(1)/Products/$ref?$id=http://localhost/Products(5)", "DeleteRef(1)(5)(Products)")]
+        [InlineData("DELETE", "RoutingCustomers(1)/Products/$ref?$id=../../Products(5)", "DeleteRef(1)(5)(Products)")]
         // raw value
         [InlineData("GET", "RoutingCustomers(10)/Name/$value", "GetName(10)")]
         [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Name/$value", "GetName(10)")]

@@ -207,6 +207,9 @@
   <data name="TargetKindNotImplemented" xml:space="preserve">
     <value>'{0}' of kind '{1}' is not implemented.</value>
   </data>
+  <data name="InvalidDollarId" xml:space="preserve">
+    <value>The value of $id '{0}' is invalid.</value>
+  </data>
   <data name="ErrorTypeMustBeODataErrorOrHttpError" xml:space="preserve">
     <value>The type '{0}' is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError.</value>
   </data>

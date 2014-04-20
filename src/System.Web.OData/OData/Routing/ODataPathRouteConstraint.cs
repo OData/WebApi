@@ -120,11 +120,16 @@ namespace System.Web.OData.Routing
                 object odataPathRouteValue;
                 if (values.TryGetValue(ODataRouteConstants.ODataPath, out odataPathRouteValue))
                 {
-                    string odataPath = odataPathRouteValue as string;
-                    if (odataPath == null)
+                    string pathAndQuery = odataPathRouteValue as string;
+                    if (pathAndQuery == null)
                     {
                         // No odataPath means the path is empty; this is necessary for service documents
-                        odataPath = String.Empty;
+                        pathAndQuery = String.Empty;
+                    }
+                    else if (!String.IsNullOrEmpty(request.RequestUri.Query))
+                    {
+                        // Ensure path handler receives the query string as well as the path.
+                        pathAndQuery += request.RequestUri.Query;
                     }
 
                     ODataPath path;
@@ -132,7 +137,7 @@ namespace System.Web.OData.Routing
                     {
                         UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
                         string serviceRoot = urlHelper.CreateODataLink(RouteName, PathHandler, new List<ODataPathSegment>());
-                        path = PathHandler.Parse(EdmModel, serviceRoot, odataPath);
+                        path = PathHandler.Parse(EdmModel, serviceRoot, pathAndQuery);
                     }
                     catch (ODataException)
                     {

@@ -105,11 +105,36 @@ namespace System.Web.Http.Dispatcher
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We report the error in the HTTP response.")]
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
             ExceptionDispatchInfo exceptionInfo;
+            HttpControllerContext controllerContext = null;
 
             try
             {
-                return await SendAsyncCore(request, cancellationToken);
+                HttpControllerDescriptor controllerDescriptor = ControllerSelector.SelectController(request);
+                if (controllerDescriptor == null)
+                {
+                    return request.CreateErrorResponse(
+                        HttpStatusCode.NotFound,
+                        Error.Format(SRResources.ResourceNotFound, request.RequestUri),
+                        SRResources.NoControllerSelected);
+                }
+
+                IHttpController controller = controllerDescriptor.CreateController(request);
+                if (controller == null)
+                {
+                    return request.CreateErrorResponse(
+                        HttpStatusCode.NotFound,
+                        Error.Format(SRResources.ResourceNotFound, request.RequestUri),
+                        SRResources.NoControllerCreated);
+                }
+
+                controllerContext = CreateControllerContext(request, controllerDescriptor, controller);
+                return await controller.ExecuteAsync(controllerContext, cancellationToken);
             }
             catch (HttpResponseException httpResponseException)
             {
@@ -122,8 +147,14 @@ namespace System.Web.Http.Dispatcher
 
             Debug.Assert(exceptionInfo.SourceException != null);
 
-            ExceptionContext exceptionContext = new ExceptionContext(exceptionInfo.SourceException,
-                ExceptionCatchBlocks.HttpControllerDispatcher, request);
+            ExceptionContext exceptionContext = new ExceptionContext(
+                exceptionInfo.SourceException,
+                ExceptionCatchBlocks.HttpControllerDispatcher,
+                request)
+                {
+                    ControllerContext = controllerContext,
+                };
+
             await ExceptionLogger.LogAsync(exceptionContext, cancellationToken);
             HttpResponseMessage response = await ExceptionHandler.HandleAsync(exceptionContext, cancellationToken);
 
@@ -135,36 +166,16 @@ namespace System.Web.Http.Dispatcher
             return response;
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner.")]
-        private Task<HttpResponseMessage> SendAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+        private static HttpControllerContext CreateControllerContext(
+            HttpRequestMessage request, 
+            HttpControllerDescriptor controllerDescriptor,
+            IHttpController controller)
         {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
+            Contract.Assert(request != null);
+            Contract.Assert(controllerDescriptor != null);
+            Contract.Assert(controller != null);
 
-            IHttpRouteData routeData = request.GetRouteData();
-            Contract.Assert(routeData != null);
-
-            HttpControllerDescriptor httpControllerDescriptor = ControllerSelector.SelectController(request);
-            if (httpControllerDescriptor == null)
-            {
-                return Task.FromResult(request.CreateErrorResponse(
-                    HttpStatusCode.NotFound,
-                    Error.Format(SRResources.ResourceNotFound, request.RequestUri),
-                    SRResources.NoControllerSelected));
-            }
-
-            IHttpController httpController = httpControllerDescriptor.CreateController(request);
-            if (httpController == null)
-            {
-                return Task.FromResult(request.CreateErrorResponse(
-                    HttpStatusCode.NotFound,
-                    Error.Format(SRResources.ResourceNotFound, request.RequestUri),
-                    SRResources.NoControllerCreated));
-            }
-
-            HttpConfiguration controllerConfiguration = httpControllerDescriptor.Configuration;
+            HttpConfiguration controllerConfiguration = controllerDescriptor.Configuration;
 
             // Set the controller configuration on the request properties
             HttpConfiguration requestConfig = request.GetConfiguration();
@@ -195,11 +206,7 @@ namespace System.Web.Http.Dispatcher
                 request.SetRequestContext(requestContext);
             }
 
-            // Create context
-            HttpControllerContext controllerContext = new HttpControllerContext(requestContext, request,
-                httpControllerDescriptor, httpController);
-
-            return httpController.ExecuteAsync(controllerContext, cancellationToken);
+            return new HttpControllerContext(requestContext, request, controllerDescriptor, controller);
         }
 
         private static HttpConfiguration EnsureNonNull(HttpConfiguration configuration)

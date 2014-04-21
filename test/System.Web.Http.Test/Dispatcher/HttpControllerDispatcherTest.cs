@@ -193,8 +193,10 @@ namespace System.Web.Http.Dispatcher
             Assert.Equal(HttpStatusCode.NotFound, resultTask.Result.StatusCode);
         }
 
+        // In this case the controller selector throws, so we don't get a controller context in the
+        // exception handlers. 
         [Fact]
-        public void SendAsync_IfSendAsyncCoreThrows_CallsExceptionServices()
+        public void SendAsync_IfSendAsyncThrows_InControllerSelector_CallsExceptionServices()
         {
             // Arrange
             Exception expectedException = CreateException();
@@ -225,7 +227,73 @@ namespace System.Web.Http.Dispatcher
                     c != null
                     && c.Exception == expectedException
                     && c.CatchBlock == ExceptionCatchBlocks.HttpControllerDispatcher
-                    && c.Request == expectedRequest;
+                    && c.Request == expectedRequest
+                    && c.ControllerContext == null;
+
+                exceptionLoggerMock.Verify(l => l.LogAsync(
+                    It.Is<ExceptionLoggerContext>(c => exceptionContextMatches(c.ExceptionContext)),
+                    cancellationToken), Times.Once());
+
+                exceptionHandlerMock.Verify(h => h.HandleAsync(
+                    It.Is<ExceptionHandlerContext>((c) => exceptionContextMatches(c.ExceptionContext)),
+                    cancellationToken), Times.Once());
+            }
+        }
+
+        // In this case the controller itself throws, so we get a controller context in the
+        // exception handlers. 
+        [Fact]
+        public void SendAsync_IfSendAsyncThrows_Controller_CallsExceptionServices()
+        {
+            // Arrange
+            Exception expectedException = CreateException();
+
+            Mock<IExceptionLogger> exceptionLoggerMock = CreateStubExceptionLoggerMock();
+            IExceptionLogger exceptionLogger = exceptionLoggerMock.Object;
+
+            Mock<IExceptionHandler> exceptionHandlerMock = CreateStubExceptionHandlerMock();
+            IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
+
+            var controller = new ThrowingController(expectedException);
+
+            var controllerActivator = new Mock<IHttpControllerActivator>();
+            controllerActivator
+                .Setup(
+                    activator => activator.Create(
+                        It.IsAny<HttpRequestMessage>(), 
+                        It.IsAny<HttpControllerDescriptor>(), 
+                        It.IsAny<Type>()))
+                .Returns(controller);
+
+            using (HttpRequestMessage expectedRequest = CreateRequestWithRouteData())
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpMessageHandler product = CreateProductUnderTest(configuration, exceptionLogger,
+                exceptionHandler))
+            {
+                var controllerSelector = new Mock<IHttpControllerSelector>(MockBehavior.Strict);
+                controllerSelector
+                    .Setup(selector => selector.SelectController(It.IsAny<HttpRequestMessage>()))
+                    .Returns(new HttpControllerDescriptor(configuration, "Throwing", controller.GetType()));
+
+                configuration.Services.Replace(typeof(IHttpControllerSelector), controllerSelector.Object);
+                configuration.Services.Replace(typeof(IHttpControllerActivator), controllerActivator.Object);
+
+                CancellationToken cancellationToken = CreateCancellationToken();
+
+                Task<HttpResponseMessage> task = product.SendAsync(expectedRequest, cancellationToken);
+
+                // Act
+                task.WaitUntilCompleted();
+
+                // Assert
+                Func<ExceptionContext, bool> exceptionContextMatches = (c) =>
+                    c != null
+                    && c.Exception == expectedException
+                    && c.CatchBlock == ExceptionCatchBlocks.HttpControllerDispatcher
+                    && c.Request == expectedRequest
+                    && c.ControllerContext != null
+                    && c.ControllerContext == controller.ControllerContext
+                    && c.ControllerContext.Controller == controller;
 
                 exceptionLoggerMock.Verify(l => l.LogAsync(
                     It.Is<ExceptionLoggerContext>(c => exceptionContextMatches(c.ExceptionContext)),
@@ -598,6 +666,24 @@ namespace System.Web.Http.Dispatcher
         }
     }
 
+    public class ThrowingController : ApiController
+    {
+        private readonly Exception _exception;
+
+        public ThrowingController(Exception exception)
+        {
+            _exception = exception;
+        }
+
+        public override Task<HttpResponseMessage> ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)
+        {
+            ControllerContext = controllerContext;
+            throw _exception;
+        }
+    }
+
+    // This is used in SendAsync_IfExceptionHandlerIsDefault_Returns500WithHttpErrorWhenControllerThrows
+    // Don't touch!
     public class HttpControllerDispatcherThrowingController : ApiController
     {
         public void Get()

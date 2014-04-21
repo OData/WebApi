@@ -46,6 +46,9 @@ namespace System.Web.Http.Cors
             if (corsRequestContext.IsPreflight)
             {
                 HttpRequestMessage targetRequest = new HttpRequestMessage(new HttpMethod(corsRequestContext.AccessControlRequestMethod), request.RequestUri);
+
+                request.RegisterForDispose(targetRequest);
+
                 try
                 {
                     foreach (var property in request.Properties)
@@ -82,13 +85,6 @@ namespace System.Web.Http.Cors
                         return DefaultPolicyProvider;
                     }
                     throw;
-                }
-                finally
-                {
-                    if (targetRequest != null)
-                    {
-                        request.RegisterForDispose(targetRequest);
-                    }
                 }
             }
             else

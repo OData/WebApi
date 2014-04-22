@@ -146,6 +146,167 @@ namespace System.Web.Http.Tracing
         }
 
         [Fact]
+        public void Initialize_Recreates_Tracers_ForGlobalMessageHandlers_WhenTracersAreNotProperlyInstalled()
+        {
+            // Arrange
+            MessageHandlerTracer tracer0 = null;
+            MessageHandlerTracer tracer1 = null;
+            MessageHandlerTracer tracer2 = null;
+            RequestMessageHandlerTracer requestMessageHandlerTracer = null;
+            try
+            {
+                HttpConfiguration config = new HttpConfiguration();
+                Mock<ITraceWriter> traceWriter = new Mock<ITraceWriter>() { CallBase = true };
+                config.Services.Replace(typeof(ITraceWriter), traceWriter.Object);
+                // Create handlers with tracers in a wrong order:
+                // [0] handler0
+                // [1] tracer0
+                // [2] handler1
+                // [3] tracer1
+                // [4] handler2
+                // [5] RequestMessageHandlerTracer
+                // [6] tracer2
+                Mock<DelegatingHandler> mockHandler0 = new Mock<DelegatingHandler>() { CallBase = true };
+                Mock<DelegatingHandler> mockHandler1 = new Mock<DelegatingHandler>() { CallBase = true };
+                Mock<DelegatingHandler> mockHandler2 = new Mock<DelegatingHandler>() { CallBase = true };
+                tracer0 = new MessageHandlerTracer(mockHandler0.Object, traceWriter.Object);
+                tracer1 = new MessageHandlerTracer(mockHandler1.Object, traceWriter.Object);
+                tracer2 = new MessageHandlerTracer(mockHandler2.Object, traceWriter.Object);
+                requestMessageHandlerTracer =
+                    new RequestMessageHandlerTracer(traceWriter.Object);
+                config.MessageHandlers.Add(mockHandler0.Object);
+                config.MessageHandlers.Add(tracer0);
+                config.MessageHandlers.Add(mockHandler1.Object);
+                config.MessageHandlers.Add(tracer1);
+                config.MessageHandlers.Add(mockHandler2.Object);
+                config.MessageHandlers.Add(requestMessageHandlerTracer);
+                config.MessageHandlers.Add(tracer2);
+
+                // Act
+                new TraceManager().Initialize(config);
+
+                // Assert
+                // Expected correct order:
+                // [0] RequestMessageHandlerTracer
+                // [1] tracer0
+                // [2] handler0
+                // [3] tracer1
+                // [4] handler1
+                // [5] tracer2
+                // [6] handler2
+                Collection<DelegatingHandler> handlers = config.MessageHandlers;
+                Assert.Equal(typeof(RequestMessageHandlerTracer), handlers[0].GetType());
+                Assert.Equal(typeof(MessageHandlerTracer), handlers[1].GetType());
+                Assert.Same(mockHandler0.Object, handlers[2]);
+                Assert.Equal(typeof(MessageHandlerTracer), handlers[3].GetType());
+                Assert.Same(mockHandler1.Object, handlers[4]);
+                Assert.Equal(typeof(MessageHandlerTracer), handlers[5].GetType());
+                Assert.Same(mockHandler2.Object, handlers[6]);
+                Assert.True(IsMessageHandlerCollectionValid(config.MessageHandlers));
+            }
+            finally
+            {
+                if (tracer0 != null)
+                {
+                    tracer0.Dispose();
+                }
+                if (tracer1 != null)
+                {
+                    tracer1.Dispose();
+                }
+                if (tracer2 != null)
+                {
+                    tracer2.Dispose();
+                }
+                if (requestMessageHandlerTracer != null)
+                {
+                    requestMessageHandlerTracer.Dispose();
+                }
+            }
+        }
+
+        [Fact]
+        public void Initialize_Recreates_Tracers_ForRouteSpecificHanlders_WhenTracersAreNotProperlyInstalled()
+        {
+            // Arrange
+            MessageHandlerTracer tracer0 = null;
+            MessageHandlerTracer tracer1 = null;
+            MessageHandlerTracer tracer2 = null;
+            try
+            {
+                HttpConfiguration config = new HttpConfiguration();
+                Mock<ITraceWriter> traceWriter = new Mock<ITraceWriter>() { CallBase = true };
+                config.Services.Replace(typeof(ITraceWriter), traceWriter.Object);
+                // Create handlers with tracers in a wrong order:
+                // [0] handler0
+                // [1] tracer0
+                // [2] tracer1
+                // [3] handler1
+                // [4] handler2
+                // [5] tracer2
+                Mock<DelegatingHandler> mockHandler0 = new Mock<DelegatingHandler>() { CallBase = true };
+                Mock<DelegatingHandler> mockHandler1 = new Mock<DelegatingHandler>() { CallBase = true };
+                Mock<DelegatingHandler> mockHandler2 = new Mock<DelegatingHandler>() { CallBase = true };
+                tracer0 = new MessageHandlerTracer(mockHandler0.Object, traceWriter.Object);
+                tracer1 = new MessageHandlerTracer(mockHandler1.Object, traceWriter.Object);
+                tracer2 = new MessageHandlerTracer(mockHandler2.Object, traceWriter.Object);
+                config.Routes.MapHttpRoute("route", "template", null, null,
+                    HttpClientFactory.CreatePipeline(innerHandler: new HttpControllerDispatcher(config),
+                        handlers:
+                            new DelegatingHandler[]
+                            {
+                                mockHandler0.Object,
+                                tracer0,
+                                tracer1,
+                                mockHandler1.Object,
+                                mockHandler2.Object,
+                                tracer2,
+                            }));
+                // Act
+                new TraceManager().Initialize(config);
+
+                // Assert
+                // Expected correct order:
+                // [0] tracer0
+                // [1] handler0
+                // [2] tracer1
+                // [3] handler1
+                // [4] tracer2
+                // [5] handler2
+                Collection<DelegatingHandler> handlers = new Collection<DelegatingHandler>();
+                HttpMessageHandler innerHandler = null;
+                DelegatingHandler delegatingHandler = config.Routes[0].Handler as DelegatingHandler;
+                while (delegatingHandler != null)
+                {
+                    handlers.Add(delegatingHandler);
+                    innerHandler = delegatingHandler.InnerHandler;
+                    delegatingHandler = innerHandler as DelegatingHandler;
+                }
+                Assert.Equal(typeof(MessageHandlerTracer), handlers[0].GetType());
+                Assert.Same(mockHandler0.Object, handlers[1]);
+                Assert.Equal(typeof(MessageHandlerTracer), handlers[2].GetType());
+                Assert.Same(mockHandler1.Object, handlers[3]);
+                Assert.Equal(typeof(MessageHandlerTracer), handlers[4].GetType());
+                Assert.Same(mockHandler2.Object, handlers[5]);
+            }
+            finally
+            {
+                if (tracer0 != null)
+                {
+                    tracer0.Dispose();
+                }
+                if (tracer1 != null)
+                {
+                    tracer1.Dispose();
+                }
+                if (tracer2 != null)
+                {
+                    tracer2.Dispose();
+                }
+            }
+        }
+
+        [Fact]
         public void Initialize_Does_Not_Alter_MediaTypeFormatters_When_No_TraceWriter_Present()
         {
             // Arrange

@@ -95,7 +95,7 @@ namespace System.Web.Http.Routing
             get { return _dataTokens; }
         }
 
-        public HttpMessageHandler Handler { get; private set; }
+        public HttpMessageHandler Handler { get; internal set; }
 
         public string RouteTemplate
         {

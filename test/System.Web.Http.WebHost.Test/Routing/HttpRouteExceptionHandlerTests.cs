@@ -396,6 +396,74 @@ namespace System.Web.Http.WebHost.Routing
             }
         }
 
+        // This scenario emulates what would happen if a route throws OperationCancelledException.
+        [Fact]
+        public void ProcessRequestAsync_RouteCancelled_CancelsRequest()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ExceptionDispatchInfo exceptionInfo = CreateExceptionInfo(new OperationCanceledException());
+                IExceptionLogger logger = CreateDummyLogger();
+                IExceptionHandler handler = CreateDummyHandler();
+
+                HttpRouteExceptionHandler product = CreateProductUnderTest(exceptionInfo, logger, handler);
+
+                Mock<HttpRequestBase> requestBase = new Mock<HttpRequestBase>(MockBehavior.Strict);
+                requestBase.Setup(r => r.Abort()).Verifiable();
+
+                Mock<HttpResponseBase> responseBase = new Mock<HttpResponseBase>(MockBehavior.Strict);
+
+                HttpContextBase contextBase = CreateStubContextBase(requestBase.Object, responseBase.Object);
+                contextBase.SetHttpRequestMessage(request);
+
+                // Act
+                Task task = product.ProcessRequestAsync(contextBase);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                requestBase.Verify(r => r.Abort(), Times.Once());
+            }
+        }
+
+        // This scenario emulates what would happen if the request is cancelled while trying to handle an http response exception
+        // thrown by routing.
+        [Fact]
+        public void ProcessRequestAsync_WritingResponseCancelled_CancelsRequest()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ExceptionDispatchInfo exceptionInfo = CreateExceptionInfo(new HttpResponseException(HttpStatusCode.OK));
+                IExceptionLogger logger = CreateDummyLogger();
+                IExceptionHandler handler = CreateDummyHandler();
+
+                HttpRouteExceptionHandler product = CreateProductUnderTest(exceptionInfo, logger, handler);
+
+                Mock<HttpRequestBase> requestBase = new Mock<HttpRequestBase>(MockBehavior.Strict);
+                requestBase.Setup(r => r.Abort()).Verifiable();
+
+                Mock<HttpResponseBase> responseBase = new Mock<HttpResponseBase>(MockBehavior.Strict);
+                responseBase.SetupSet(r => r.StatusCode = It.IsAny<int>()).Throws(new OperationCanceledException());
+
+                HttpContextBase contextBase = CreateStubContextBase(requestBase.Object, responseBase.Object);
+                contextBase.SetHttpRequestMessage(request);
+
+                // Act
+                Task task = product.ProcessRequestAsync(contextBase);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                requestBase.Verify(r => r.Abort(), Times.Once());
+            }
+        }
+
         private static IExceptionHandler CreateDummyHandler()
         {
             return new Mock<IExceptionHandler>(MockBehavior.Strict).Object;
@@ -466,10 +534,18 @@ namespace System.Web.Http.WebHost.Routing
 
         private static HttpContextBase CreateStubContextBase(HttpResponseBase response)
         {
+            return CreateStubContextBase(request: null, response: response);
+        }
+
+        private static HttpContextBase CreateStubContextBase(HttpRequestBase request, HttpResponseBase response)
+        {
             Mock<HttpContextBase> mock = new Mock<HttpContextBase>();
+            mock.SetupGet(m => m.Request).Returns(request);
             mock.SetupGet(m => m.Response).Returns(response);
+
             IDictionary items = new Dictionary<object, object>();
             mock.SetupGet(m => m.Items).Returns(items);
+
             return mock.Object;
         }
 

@@ -1651,6 +1651,29 @@ namespace System.Web.Http.WebHost
             }
         }
 
+        [Fact]
+        public void ProcessRequestAsync_Cancels_AbortsRequest()
+        {
+            // Arrange
+            var request = CreateStubRequestBaseMock("Ignore", new MemoryStream(), new MemoryStream());
+            request.Setup(r => r.Abort()).Verifiable();
+
+            var context = CreateStubContextBase(request.Object);
+
+            var messageHandler = new LambdaHttpMessageHandler((r, ct) => { throw new OperationCanceledException(); });
+
+            var handler = new HttpControllerHandler(new RouteData(), messageHandler);
+
+            // Act
+            var task = handler.ProcessRequestAsyncCore(context);
+
+            // Assert
+            task.WaitUntilCompleted();
+            Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+            request.Verify(r => r.Abort(), Times.Once());
+        }
+
         private static Task CopyResponseAsync(HttpContextBase contextBase, HttpRequestMessage request, HttpResponseMessage response)
         {
             IExceptionLogger exceptionLogger = CreateDummyExceptionLogger();

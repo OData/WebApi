@@ -59,6 +59,16 @@ namespace System.Web.Http.WebHost.Routing
             Exception exception = _exceptionInfo.SourceException;
             Contract.Assert(exception != null);
 
+            OperationCanceledException canceledException = exception as OperationCanceledException;
+            if (canceledException != null)
+            {
+                // If the route throws a cancelation exception, then we'll abort the request instead of
+                // reporting an 'error'. We don't expect this to happen, but aborting the request is 
+                // consistent with our behavior in other hosts.
+                context.Request.Abort();
+                return;
+            }
+
             HttpRequestMessage request = context.GetOrCreateHttpRequestMessage();
             HttpResponseMessage response = null;
             CancellationToken cancellationToken = context.Response.GetClientDisconnectedTokenWhenFixed();
@@ -90,6 +100,14 @@ namespace System.Web.Http.WebHost.Routing
                         _exceptionInfo.Throw();
                     }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                // This block handles cancellations that might occur while we're writing an 'error' response.
+                //
+                // HttpTaskAsyncHandler treats a canceled task as an unhandled exception (logged to Application event
+                // log). Instead of returning a canceled task, abort the request and return a completed task.
+                context.Request.Abort();
             }
             finally
             {

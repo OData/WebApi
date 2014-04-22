@@ -464,6 +464,73 @@ namespace System.Web.Http.WebHost.Routing
             }
         }
 
+		[Fact]
+        public void ProcessRequestAsync_RouteCanceled_CancelsRequest()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ExceptionDispatchInfo exceptionInfo = CreateExceptionInfo(new OperationCanceledException());
+                IExceptionLogger logger = CreateDummyLogger();
+                IExceptionHandler handler = CreateDummyHandler();
+
+                HttpRouteExceptionHandler product = CreateProductUnderTest(exceptionInfo, logger, handler);
+
+                Mock<HttpRequestBase> requestBase = new Mock<HttpRequestBase>(MockBehavior.Strict);
+                requestBase.Setup(r => r.Abort()).Verifiable();
+
+                Mock<HttpResponseBase> responseBase = new Mock<HttpResponseBase>(MockBehavior.Strict);
+
+                HttpContextBase contextBase = CreateStubContextBase(requestBase.Object, responseBase.Object);
+                contextBase.SetHttpRequestMessage(request);
+
+                // Act
+                Task task = product.ProcessRequestAsync(contextBase);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                requestBase.Verify(r => r.Abort(), Times.Once());
+            }
+        }
+
+        // This scenario emulates what would happen if the request is cancelled while trying to handle the error from
+        // routing.
+        [Fact]
+        public void ProcessRequestAsync_WritingResponseCanceled_CancelsRequest()
+        {
+            // Arrange
+            using (HttpRequestMessage request = CreateRequest())
+            {
+                ExceptionDispatchInfo exceptionInfo = CreateExceptionInfo(new HttpResponseException(HttpStatusCode.Ambiguous));
+                IExceptionLogger logger = CreateDummyLogger();
+                IExceptionHandler handler = CreateDummyHandler();
+
+                HttpRouteExceptionHandler product = CreateProductUnderTest(exceptionInfo, logger, handler);
+
+                Mock<HttpRequestBase> requestBase = new Mock<HttpRequestBase>(MockBehavior.Strict);
+                requestBase.Setup(r => r.Abort()).Verifiable();
+
+                Mock<HttpResponseBase> responseBase = new Mock<HttpResponseBase>(MockBehavior.Strict);
+                responseBase.SetupSet(r => r.StatusCode = It.IsAny<int>()).Throws(new OperationCanceledException());
+
+                HttpContextBase contextBase = CreateStubContextBase(requestBase.Object, responseBase.Object);
+                contextBase.SetHttpRequestMessage(request);
+
+                // Act
+                Task task = product.ProcessRequestAsync(contextBase);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+
+                requestBase.Verify(r => r.Abort(), Times.Once());
+            }
+        }
+
         private static IExceptionHandler CreateDummyHandler()
         {
             return new Mock<IExceptionHandler>(MockBehavior.Strict).Object;

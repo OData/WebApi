@@ -21,17 +21,26 @@ namespace System.Web.OData.Formatter
             EntityType = typeof(TEntity);
         }
 
-        /// <summary>
-        /// Apply the ETag to the given IQueryable.
-        /// </summary>
-        /// <param name="query">The original <see cref="IQueryable"/>.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the ETag has been applied to.</returns>
+        /// <inheritdoc />
         public override IQueryable ApplyTo(IQueryable query)
         {
             ValidateQuery(query);
-            IQueryable<TEntity> queryOfTEntity = query as IQueryable<TEntity>;
-            Contract.Assert(queryOfTEntity != null);
-            return base.ApplyTo(queryOfTEntity);
+            return base.ApplyTo(query);
+        }
+
+        /// <summary>
+        /// Apply the ETag to the given <see cref="IQueryable{T}"/>.
+        /// </summary>
+        /// <param name="query">The original <see cref="IQueryable{T}"/>.</param>
+        /// <returns>The new <see cref="IQueryable{T}"/> after the ETag has been applied.</returns>
+        public IQueryable<TEntity> ApplyTo(IQueryable<TEntity> query)
+        {
+            if (query == null)
+            {
+                throw Error.ArgumentNull("query");
+            }
+
+            return (IQueryable<TEntity>)base.ApplyTo(query);
         }
 
         private static void ValidateQuery(IQueryable query)

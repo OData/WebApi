@@ -85,7 +85,7 @@ namespace System.Web.OData.Formatter
                 @"Param_0 => Not((Param_0.LastName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty))",
                 methodCall.Arguments[1].ToString());
         }
-        
+
         [Fact]
         public void ApplyTo_NewQueryReturned_IsIfNoneMatchWithMultipleConcurrencyProperties()
         {
@@ -111,6 +111,20 @@ namespace System.Web.OData.Formatter
                 @"Param_0 => Not(((Param_0.FirstName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty) "
                 + "AndAlso (Param_0.LastName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty)))",
                 methodCall.Arguments[1].ToString());
+        }
+
+        [Fact]
+        public void ApplyToNonGenericThrows_IfPassedAnIQueryableOfTheWrongType()
+        {
+            // Arrange
+            ETag<Customer> etagCustomer = new ETag<Customer> { IsIfNoneMatch = true };
+            IQueryable query = Enumerable.Empty<int>().AsQueryable();
+
+            // Act & Assert
+            Assert.Throws<ArgumentException>(
+                () => etagCustomer.ApplyTo(query),
+                "Cannot apply ETag of 'System.Web.OData.Formatter.Serialization.Models.Customer' to IQueryable of " +
+                "'System.Int32'.\r\nParameter name: query");
         }
     }
 }

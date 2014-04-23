@@ -3,8 +3,11 @@
 using System.Globalization;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
+using System.Web.OData.TestCommon;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 
 namespace System.Web.OData.Routing
 {
@@ -16,7 +19,12 @@ namespace System.Web.OData.Routing
         public ODataRoutingTest()
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataServiceRoute(ODataRoutingModel.GetModel());
+            configuration.Routes.MapODataServiceRoute("RouteName", null, ODataRoutingModel.GetModel())
+                .MapODataRouteAttributes(configuration);
+
+            var controllers = new[] { typeof(RoutingCustomersController), typeof(ProductsController) };
+            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
+            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);
@@ -99,6 +107,13 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "RoutingCustomers(5)/Default.GetSpecialGuid()", "~/entityset/key/unresolved")]
         [InlineData("GET", "RoutingCustomers(5)/System.Web.OData.Routing.VIP/Default.GetSpecialGuid()", "~/entityset/key/cast/unresolved")]
         [InlineData("GET", "RoutingCustomers(5)/System.Web.OData.Routing.SpecialVIP/Default.GetSpecialGuid()", "GetSpecialGuid_5")]
+        // functions with enum type parameter
+        [InlineData("GET", "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum=Microsoft.TestCommon.Types.SimpleEnum'1'," +
+            "FlagsEnum=Microsoft.TestCommon.Types.FlagsEnum'One, Four')", "BoundFuncWithEnumParameters(Second,One, Four)")]
+        [InlineData("GET", "RoutingCustomers/Default.BoundFuncWithEnumParameterForAttributeRouting(SimpleEnum=Microsoft.TestCommon.Types.SimpleEnum'First')",
+            "BoundFuncWithEnumParameterForAttributeRouting(First)")]
+        [InlineData("GET", "UnboundFuncWithEnumParameters(LongEnum=Microsoft.TestCommon.Types.LongEnum'ThirdLong'," +
+            "FlagsEnum=Microsoft.TestCommon.Types.FlagsEnum'7')", "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)")]
         // unmapped requests
         [InlineData("GET", "RoutingCustomers(10)/Products(1)", "~/entityset/key/navigation/key")]
         [InlineData("CUSTOM", "RoutingCustomers(10)", "~/entityset/key")]
@@ -266,6 +281,26 @@ namespace System.Web.OData.Routing
         public string GetAllEmployeesOnCollectionOfVIP()
         {
             return "GetAllEmployeesOnCollectionOfVIP";
+        }
+
+        [HttpGet]
+        public string BoundFuncWithEnumParametersOnCollectionOfRoutingCustomer(SimpleEnum simpleEnum, FlagsEnum flagsEnum)
+        {
+            return "BoundFuncWithEnumParameters(" + simpleEnum + "," + flagsEnum + ")";
+        }
+
+        [HttpGet]
+        [ODataRoute("RoutingCustomers/Default.BoundFuncWithEnumParameterForAttributeRouting(SimpleEnum={p1})")]
+        public string BoundFuncWithEnumParameter(SimpleEnum p1)
+        {
+            return "BoundFuncWithEnumParameterForAttributeRouting(" + p1 + ")";
+        }
+
+        [HttpGet]
+        [ODataRoute("UnboundFuncWithEnumParameters(LongEnum={p1},FlagsEnum={p2})")]
+        public string UnoundFuncWithEnumParameter(LongEnum p1, FlagsEnum p2)
+        {
+            return "UnboundFuncWithEnumParameters(" + p1 + "," + p2 + ")";
         }
     }
 

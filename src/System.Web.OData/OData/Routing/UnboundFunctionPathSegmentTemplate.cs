@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing
 {
@@ -41,7 +43,8 @@ namespace System.Web.OData.Routing
                 UnboundFunctionPathSegment functionSegment = (UnboundFunctionPathSegment)pathSegment;
                 if (_functionName == functionSegment.FunctionName)
                 {
-                    return KeyValuePathSegmentTemplate.TryMatch(ParameterMappings, functionSegment.Values, values);
+                    var enumNames = functionSegment.Function.Function.Parameters.Where(p => p.Type.IsEnum()).Select(p => p.Name);
+                    return KeyValuePathSegmentTemplate.TryMatch(ParameterMappings, functionSegment.Values, values, enumNames);
                 }
             }
 

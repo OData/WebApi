@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
@@ -38,14 +39,17 @@ namespace System.Web.OData.Routing
             if (pathSegment.SegmentKind == ODataSegmentKinds.Key)
             {
                 KeyValuePathSegment keySegment = (KeyValuePathSegment)pathSegment;
-                return TryMatch(ParameterMappings, keySegment.Values, values);
+                return TryMatch(ParameterMappings, keySegment.Values, values, null);
             }
 
             return false;
         }
 
-        internal static bool TryMatch(IDictionary<string, string> parameterMappings,
-            IDictionary<string, string> parameterValues, IDictionary<string, object> matches)
+        internal static bool TryMatch(
+            IDictionary<string, string> parameterMappings,
+            IDictionary<string, string> parameterValues,
+            IDictionary<string, object> matches,
+            IEnumerable<string> enumNames)
         {
             Contract.Assert(parameterMappings != null);
             Contract.Assert(parameterValues != null);
@@ -56,6 +60,7 @@ namespace System.Web.OData.Routing
                 return false;
             }
 
+            enumNames = enumNames ?? new string[] { };
             Dictionary<string, string> routeData = new Dictionary<string, string>();
             foreach (KeyValuePair<string, string> parameter in parameterMappings)
             {
@@ -67,6 +72,17 @@ namespace System.Web.OData.Routing
                 {
                     // parameter not found. not a match.
                     return false;
+                }
+
+                if (enumNames.Contains(nameInSegment))
+                {
+                    string[] enumParts = value.Split(new[] { '\'' }, StringSplitOptions.None);
+
+                    if (enumParts.Length == 3 && String.IsNullOrEmpty(enumParts[2]))
+                    {
+                        // Remove the type name if the enum value is a fully qualified literal.
+                        value = enumParts[1];
+                    }
                 }
 
                 routeData.Add(nameInRouteData, value);

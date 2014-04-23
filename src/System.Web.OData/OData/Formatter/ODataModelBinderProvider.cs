@@ -114,11 +114,14 @@ namespace System.Web.OData.Formatter
                 if (TypeHelper.IsEnum(type))
                 {
                     string[] values = valueString.Split(new[] { '\'' }, StringSplitOptions.None);
-                    Contract.Assert(values.Length == 3 && String.IsNullOrEmpty(values[2]));
+                    if (values.Length == 3 && String.IsNullOrEmpty(values[2]))
+                    {
+                        // Remove the type name if the enum value is a fully qualified literal.
+                        valueString = values[1];
+                    }
 
-                    string enumValueString = values[1];
                     Type enumType = TypeHelper.GetUnderlyingTypeOrSelf(type);
-                    object[] parameters = new[] { enumValueString, Enum.ToObject(type, 0) };
+                    object[] parameters = new[] { valueString, Enum.ToObject(type, 0) };
                     bool isSuccessful = (bool)enumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
 
                     if (!isSuccessful)

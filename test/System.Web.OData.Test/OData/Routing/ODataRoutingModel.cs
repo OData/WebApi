@@ -9,6 +9,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
+using Microsoft.TestCommon.Types;
 
 namespace System.Web.OData.Routing
 {
@@ -105,6 +106,24 @@ namespace System.Web.OData.Routing
             // Function bound to the collection of the base and the derived entity type
             builder.EntityType<RoutingCustomer>().Collection.Function("GetAllEmployees").Returns<string>();
             builder.EntityType<VIP>().Collection.Function("GetAllEmployees").Returns<string>();
+
+            // Bound function with enum type parameters
+            var boundFunction = builder.EntityType<RoutingCustomer>().Collection.Function("BoundFuncWithEnumParameters");
+            boundFunction.Parameter<SimpleEnum>("SimpleEnum");
+            boundFunction.Parameter<FlagsEnum>("FlagsEnum");
+            boundFunction.Returns<string>();
+
+            // Bound function with enum type parameter for attribute routing
+            var boundFunctionForAttributeRouting = builder.EntityType<RoutingCustomer>().Collection
+                .Function("BoundFuncWithEnumParameterForAttributeRouting");
+            boundFunctionForAttributeRouting.Parameter<SimpleEnum>("SimpleEnum");
+            boundFunctionForAttributeRouting.Returns<string>();
+
+            // Unbound function with enum type parameters
+            var function = builder.Function("UnboundFuncWithEnumParameters");
+            function.Parameter<LongEnum>("LongEnum");
+            function.Parameter<FlagsEnum>("FlagsEnum");
+            function.Returns<string>();
 
             return builder.GetEdmModel();
         }

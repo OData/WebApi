@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Controllers;
+using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing.Conventions
@@ -77,6 +78,14 @@ namespace System.Web.OData.Routing.Conventions
                 {
                     value = unresolvedParameterValue.Resolve(controllerContext.Request.RequestUri);
                 }
+
+                ODataEnumValue enumValue = value as ODataEnumValue;
+                if (enumValue != null)
+                {
+                    // Remove the type name of the ODataEnumValue and keep the value.
+                    value = enumValue.Value;
+                }
+
                 controllerContext.RouteData.Values.Add(name, value);
             }
         }

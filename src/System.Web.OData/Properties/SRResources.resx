@@ -705,7 +705,7 @@
   </data>
   <data name="InvalidPropertyMapping" xml:space="preserve">
     <value>The key mapping for the property '{0}' can't be null or empty.</value>
-  </data>
+  </data> 	
   <data name="InvalidSingletonName" xml:space="preserve">
     <value>'{0}' is not a valid singleton name. The singleton name cannot contain '.'.</value>
   </data>
@@ -723,6 +723,9 @@
   </data>
   <data name="NavigationSourceMissingDuringDeserialization" xml:space="preserve">
     <value>The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to deserialize the payload.</value>
+  </data>
+  <data name="Object_NotYetInitialized" xml:space="preserve">
+    <value>The object has not yet been initialized. Ensure that HttpConfiguration.EnsureInitialized() is called in the application's startup code after all other initialization code.</value>
   </data>
   <data name="OpenEntityTypeNotSupported" xml:space="preserve">
     <value>'{0}' can not be added as dynamic property into entity type '{1}'. Open entity type is not supported.</value>

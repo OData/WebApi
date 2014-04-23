@@ -119,6 +119,11 @@ namespace System.Web.OData.Routing.Conventions
         {
             get
             {
+                if (_attributeMappingsFunc == null)
+                {
+                    throw Error.InvalidOperation(SRResources.Object_NotYetInitialized);
+                }
+
                 _attributeMappings = _attributeMappings ?? _attributeMappingsFunc();
                 return _attributeMappings;
             }

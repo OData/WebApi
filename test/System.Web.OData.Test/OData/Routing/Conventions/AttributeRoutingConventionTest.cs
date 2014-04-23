@@ -205,6 +205,21 @@ namespace System.Web.OData.Routing.Conventions
                 "tion([NS.Customer Nullable=False])'.");
         }
 
+        [Fact]
+        public void AttributeMappingsInitialization_ThrowsInvalidOperation_IfNoConfigEnsureInitialized()
+        {
+            // Arrange
+            HttpConfiguration configuration = new HttpConfiguration();
+            IEdmModel model = Mock.Of<IEdmModel>();
+            AttributeRoutingConvention convention = new AttributeRoutingConvention(model, configuration);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => convention.AttributeMappings,
+                "The object has not yet been initialized. Ensure that HttpConfiguration.EnsureInitialized() is called " +
+                "in the application's startup code after all other initialization code.");
+        }
+
         public class TestODataController : ODataController
         {
             [ODataRoute("Customers")]

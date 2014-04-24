@@ -2,6 +2,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Properties;
@@ -106,6 +108,12 @@ namespace System.Web.OData.Formatter.Serialization
                 }
             }
 
+            // Try to add the dynamic properties if the complex type is open.
+            if (complexType.ComplexDefinition().IsOpen)
+            {
+                AppendDynamicProperties(graph, complexType, writeContext, propertyCollection);
+            }
+
             string typeName = complexType.FullName();
 
             ODataComplexValue value = new ODataComplexValue()
@@ -116,6 +124,53 @@ namespace System.Web.OData.Formatter.Serialization
 
             AddTypeNameAnnotationAsNeeded(value, writeContext.MetadataLevel);
             return value;
+        }
+
+        internal void AppendDynamicProperties(object graph, IEdmComplexTypeReference complexType,
+            ODataSerializerContext writeContext, List<ODataProperty> propertyCollection)
+        {
+            PropertyInfo dynamicPropertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(complexType.ComplexDefinition(),
+                writeContext.Model);
+
+            if (dynamicPropertyInfo != null)
+            {
+                IDictionary<string, object> dynamicPropertyDictionary = dynamicPropertyInfo.GetValue(graph)
+                    as IDictionary<string, object>;
+
+                if (dynamicPropertyDictionary != null)
+                {
+                    // build a HashSet to store the declared property names.
+                    // It is used to make sure the dynamic property name is different with the declared property name.
+                    HashSet<string> declaredPropertyNameSet = new HashSet<string>(propertyCollection.Select(a => a.Name));
+
+                    foreach (KeyValuePair<string, object> dynamicProperty in dynamicPropertyDictionary)
+                    {
+                        if (dynamicProperty.Value == null)
+                        {
+                            continue; // skip the null object
+                        }
+
+                        Type valueType = dynamicProperty.Value.GetType();
+                        IEdmTypeReference edmTypeReference = writeContext.Model.GetEdmTypeReference(valueType);
+                        ODataEdmTypeSerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
+                        if (propertySerializer == null)
+                        {
+                            throw Error.NotSupported(SRResources.TypeCannotBeSerialized,
+                                valueType.FullName, typeof(ODataComplexTypeSerializer).Name);
+                        }
+
+                        // try to make sure the dynamic property name is not used as declared property name.
+                        if (declaredPropertyNameSet.Contains(dynamicProperty.Key))
+                        {
+                            throw Error.InvalidOperation(SRResources.DynamicPropertyNameAlreadyUsedAsDeclaredPropertyName,
+                                dynamicProperty.Key, complexType.FullName());
+                        }
+
+                        propertyCollection.Add(propertySerializer.CreateProperty(
+                            dynamicProperty.Value, edmTypeReference, dynamicProperty.Key, writeContext));
+                    }
+                }
+            }
         }
 
         internal static void AddTypeNameAnnotationAsNeeded(ODataComplexValue value, ODataMetadataLevel metadataLevel)

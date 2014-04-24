@@ -30,6 +30,11 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Represents an EDM enum property.
         /// </summary>
-        Enum = 4
+        Enum = 4,
+
+        /// <summary>
+        /// Represents a dynamic property dictionary for an open type.
+        /// </summary>
+        Dynamic = 5
     }
 }

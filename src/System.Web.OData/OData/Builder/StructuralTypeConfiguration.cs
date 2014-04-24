@@ -19,6 +19,7 @@ namespace System.Web.OData.Builder
         private const string DefaultNamespace = "Default";
         private string _namespace;
         private string _name;
+        private PropertyInfo _dynamicPropertyDictionary;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StructuralTypeConfiguration"/> class.
@@ -116,6 +117,22 @@ namespace System.Web.OData.Builder
                 _name = value;
                 AddedExplicitly = true;
             }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this type is open or not.
+        /// </summary>
+        public bool IsOpen
+        {
+            get { return _dynamicPropertyDictionary != null; }
+        }
+
+        /// <summary>
+        /// Gets the CLR property info of the dynamic property dictionary on this structural type.
+        /// </summary>
+        public PropertyInfo DynamicPropertyDictionary
+        {
+            get { return _dynamicPropertyDictionary; }
         }
 
         /// <summary>
@@ -360,6 +377,49 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Adds the property info of the dynamic properties to this structural type.
+        /// </summary>
+        /// <param name="propertyInfo">The property being added.</param>
+        public virtual void AddDynamicPropertyDictionary(PropertyInfo propertyInfo)
+        {
+            if (propertyInfo == null)
+            {
+                throw Error.ArgumentNull("propertyInfo");
+            }
+
+            if (!typeof(IDictionary<string, object>).IsAssignableFrom(propertyInfo.PropertyType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.ArgumentMustBeOfType,
+                    "IDictionary<string, object>");
+            }
+
+            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
+            }
+
+            // Throws NotSupported exception if attempting to add a dynamic property dictionary property
+            // on open entity type. Please remove this block after supporting the open entity type.
+            if (Kind == EdmTypeKind.Entity)
+            {
+                throw Error.NotSupported(SRResources.OpenEntityTypeNotSupported, propertyInfo.Name, Name);
+            }
+
+            // Remove from the ignored properties
+            if (IgnoredProperties.Contains(propertyInfo))
+            {
+                RemovedProperties.Remove(propertyInfo);
+            }
+
+            if (_dynamicPropertyDictionary != null)
+            {
+                throw Error.Argument("propertyInfo", SRResources.MoreThanOneDynamicPropertyContainerFound, ClrType.Name);
+            }
+
+            _dynamicPropertyDictionary = propertyInfo;
+        }
+
+        /// <summary>
         /// Removes the given property.
         /// </summary>
         /// <param name="propertyInfo">The property being removed.</param>
@@ -383,6 +443,11 @@ namespace System.Web.OData.Builder
             if (!RemovedProperties.Contains(propertyInfo))
             {
                 RemovedProperties.Add(propertyInfo);
+            }
+
+            if (_dynamicPropertyDictionary == propertyInfo)
+            {
+                _dynamicPropertyDictionary = null;
             }
         }
     }

@@ -468,6 +468,10 @@ namespace System.Web.OData.Builder
                 {
                     MapStructuralProperty(entity, property, propertyKind, isCollection);
                 }
+                else if (propertyKind == PropertyKind.Dynamic)
+                {
+                    // Skip the dynamic property for entity type because open entity type is not supported.
+                }
                 else
                 {
                     // don't add this property if the user has already added it.
@@ -510,6 +514,10 @@ namespace System.Web.OData.Builder
                 if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Enum)
                 {
                     MapStructuralProperty(complexType, property, propertyKind, isCollection);
+                }
+                else if (propertyKind == PropertyKind.Dynamic)
+                {
+                    complexType.AddDynamicPropertyDictionary(property);
                 }
                 else
                 {
@@ -593,6 +601,16 @@ namespace System.Web.OData.Builder
         private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out IEdmTypeConfiguration mappedType)
         {
             Contract.Assert(property != null);
+
+            // IDictionary<string, object> is used as a container to save/retrieve dynamic properties for an open type.
+            // It is different from other collections (for example, IEnumerable<T> or IDictionary<string, int>)
+            // which are used as navigation properties.
+            if (typeof(IDictionary<string, object>).IsAssignableFrom(property.PropertyType))
+            {
+                mappedType = null;
+                isCollection = false;
+                return PropertyKind.Dynamic;
+            }
 
             PropertyKind propertyKind;
             if (TryGetPropertyTypeKind(property.PropertyType, out mappedType, out propertyKind))

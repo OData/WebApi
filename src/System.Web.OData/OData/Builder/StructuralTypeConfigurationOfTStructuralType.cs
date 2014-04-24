@@ -81,6 +81,18 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Gets an indicator whether this EDM type is an open type or not.
+        /// Returns <c>true</c> if this is an open type; <c>false</c> otherwise.
+        /// </summary>
+        public bool IsOpen
+        {
+            get
+            {
+                return _configuration.IsOpen;
+            }
+        }
+
+        /// <summary>
         /// Excludes a property from the type.
         /// </summary>
         /// <typeparam name="TProperty">The property type.</typeparam>
@@ -215,6 +227,22 @@ namespace System.Web.OData.Builder
         public CollectionPropertyConfiguration CollectionProperty<TElementType>(Expression<Func<TStructuralType, IEnumerable<TElementType>>> propertyExpression)
         {
             return GetCollectionPropertyConfiguration(propertyExpression);
+        }
+
+        /// <summary>
+        /// Adds a dynamic property dictionary property.
+        /// </summary>
+        /// <param name="propertyExpression">A lambda expression representing the dynamic property dictionary for the relationship.
+        /// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Nested generics appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "More specific expression type is clearer")]
+        public void HasDynamicProperties(Expression<Func<TStructuralType, IDictionary<string, object>>> propertyExpression)
+        {
+            PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
+
+            _configuration.AddDynamicPropertyDictionary(propertyInfo);
         }
 
         private PrimitivePropertyConfiguration GetPrimitivePropertyConfiguration(Expression propertyExpression, bool optional)

@@ -367,6 +367,10 @@ namespace System.Web.OData.Builder
             Dictionary<PropertyInfo, IEdmProperty> edmProperties = edmTypeMap.EdmProperties;
             model.AddClrPropertyInfoAnnotations(edmProperties);
             model.AddPropertyRestrictionsAnnotations(edmTypeMap.EdmPropertiesRestrictions);
+
+            // add dynamic dictionary property annotation for open types
+            model.AddDynamicPropertyDictionaryAnnotations(edmTypeMap.OpenTypes);
+
             return edmTypes;
         }
 
@@ -432,6 +436,17 @@ namespace System.Web.OData.Builder
                 {
                     model.SetAnnotationValue(edmProperty, new ClrPropertyInfoAnnotation(clrProperty));
                 }
+            }
+        }
+
+        private static void AddDynamicPropertyDictionaryAnnotations(this EdmModel model,
+            Dictionary<IEdmStructuredType, PropertyInfo> openTypes)
+        {
+            foreach (KeyValuePair<IEdmStructuredType, PropertyInfo> openType in openTypes)
+            {
+                IEdmStructuredType edmStructuredType = openType.Key;
+                PropertyInfo propertyInfo = openType.Value;
+                model.SetAnnotationValue(edmStructuredType, new DynamicPropertyDictionaryAnnotation(propertyInfo));
             }
         }
 

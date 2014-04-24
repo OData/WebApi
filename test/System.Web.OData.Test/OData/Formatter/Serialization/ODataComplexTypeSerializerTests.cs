@@ -1,13 +1,16 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization.Models;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 using Moq;
 
 namespace System.Web.OData.Formatter.Serialization
@@ -163,6 +166,196 @@ namespace System.Web.OData.Formatter.Serialization
                     Tuple.Create("State","Washington"),
                     Tuple.Create("Country", "United States"),
                     Tuple.Create("ZipCode","98052") });
+        }
+
+        [Fact]
+        public void CreateODataComplexValue_WritesAllDeclaredAndDynamicProperties_ForOpenComplexType()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue<ClrTypeAnnotation>(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue<ClrTypeAnnotation>(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenAddress.GetProperty("Properties")));
+
+            IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
+
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
+            ODataSerializerContext context = new ODataSerializerContext
+            {
+                Model = model
+            };
+
+            SimpleOpenAddress address = new SimpleOpenAddress()
+            {
+                Street = "My Way",
+                City = "Redmond",
+                Properties = new Dictionary<string, object>()
+            };
+            address.Properties.Add("EnumProperty", SimpleEnum.Fourth);
+            address.Properties.Add("GuidProperty", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
+            address.Properties.Add("DoubleProperty", 99.109);
+
+            // Act
+            var odataValue = serializer.CreateODataComplexValue(address, addressTypeRef, context);
+
+            // Assert
+            ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
+
+            Assert.Equal(complexValue.TypeName, "Default.Address");
+            Assert.Equal(5, complexValue.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(complexValue.Properties.Where(p => p.Name == "Street"));
+            Assert.Equal("My Way", street.Value);
+
+            ODataProperty city = Assert.Single(complexValue.Properties.Where(p => p.Name == "City"));
+            Assert.Equal("Redmond", city.Value);
+
+            // Verify the dynamic properties
+            ODataProperty enumProperty = Assert.Single(complexValue.Properties.Where(p => p.Name == "EnumProperty"));
+            ODataEnumValue enumValue = Assert.IsType<ODataEnumValue>(enumProperty.Value);
+            Assert.Equal("Fourth", enumValue.Value);
+            Assert.Equal("Default.SimpleEnum", enumValue.TypeName);
+
+            ODataProperty guidProperty = Assert.Single(complexValue.Properties.Where(p => p.Name == "GuidProperty"));
+            Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), guidProperty.Value);
+
+            ODataProperty doubleProperty = Assert.Single(complexValue.Properties.Where(p => p.Name == "DoubleProperty"));
+            Assert.Equal(99.109, doubleProperty.Value);
+        }
+
+        [Fact]
+        public void CreateODataComplexValue_WritesNestedOpenComplexTypes()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+            
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue<ClrTypeAnnotation>(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+            model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenAddress.GetProperty("Properties")));
+
+            IEdmComplexType zipCodeType = model.FindDeclaredType("Default.ZipCode") as IEdmComplexType;
+            Type simpleOpenZipCode = typeof(SimpleOpenZipCode);
+            model.SetAnnotationValue<ClrTypeAnnotation>(zipCodeType, new ClrTypeAnnotation(simpleOpenZipCode));
+            model.SetAnnotationValue(zipCodeType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenZipCode.GetProperty("Properties")));
+
+            IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
+
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
+            ODataSerializerContext context = new ODataSerializerContext
+            {
+                Model = model
+            };
+
+            SimpleOpenAddress topAddress = new SimpleOpenAddress()
+            {
+                Street = "TopStreet",
+                City = "TopCity",
+                Properties = new Dictionary<string, object>() { { "PropertOfAddress", "Value1"} }
+            };
+
+            SimpleOpenZipCode zipCode = new SimpleOpenZipCode()
+            {
+                Code = 101,
+                Properties = new Dictionary<string, object>() { { "PropertyOfZipCode", "Value2"} }
+            };
+
+            SimpleOpenAddress subAddress = new SimpleOpenAddress()
+            {
+                Street = "SubStreet",
+                City = "SubCity",
+                Properties = new Dictionary<string, object>() { { "PropertOfSubAddress", "Value3" } }
+            };
+
+            //  TopAddress (SimpleOpenAddress)
+            //       |-- Street                               (declare property, string)
+            //       |-- City                                 (declare property, string)
+            //       |-- PropertyOfAddress                    (dynamic property, string)
+            //       |-- ZipCodeOfAddress                     (dynamic property, SimpleOpenZipCode)
+            //              |-- Code                          (declare property, int)
+            //              |-- PropertyOfZipCode             (dynamic property, string)
+            //              |-- SubAddressOfZipCode           (dynamic property, SimpleOpenAddress)
+            //                         |-- Street             (declare property, string)
+            //                         |-- City               (declare property, string)
+            //                         |-- PropertyOfAddress  (dynamic property, string)
+            zipCode.Properties.Add("SubAddressOfZipCode", subAddress);
+            topAddress.Properties.Add("ZipCodeOfAddress", zipCode);
+                         
+            // Act
+            var odataValue = serializer.CreateODataComplexValue(topAddress, addressTypeRef, context);
+
+            // Assert
+            ODataComplexValue topAddressComplexValue = Assert.IsType<ODataComplexValue>(odataValue);
+
+            Assert.Equal(topAddressComplexValue.TypeName, "Default.Address");
+            Assert.Equal(4, topAddressComplexValue.Properties.Count());
+
+            // Verify the dynamic "ZipCodeOfAddress" property, it's nested open complex type
+            ODataProperty dynamicProperty = Assert.Single(topAddressComplexValue.Properties.Where(p => p.Name == "ZipCodeOfAddress"));
+            ODataComplexValue zipCodeComplexValue = Assert.IsType<ODataComplexValue>(dynamicProperty.Value);
+
+            Assert.Equal(zipCodeComplexValue.TypeName, "Default.ZipCode");
+            Assert.Equal(3, zipCodeComplexValue.Properties.Count());
+
+            // Verify the declared "Code" property of ZipCode
+            ODataProperty code = Assert.Single(zipCodeComplexValue.Properties.Where(p => p.Name == "Code"));
+            Assert.Equal(101, code.Value);
+
+            // Verify the dynamic "SubAddressOfZipCode" property of ZipCode
+            dynamicProperty = Assert.Single(zipCodeComplexValue.Properties.Where(p => p.Name == "SubAddressOfZipCode"));
+            ODataComplexValue subAddressComplexValue = Assert.IsType<ODataComplexValue>(dynamicProperty.Value);
+
+            Assert.Equal(subAddressComplexValue.TypeName, "Default.Address");
+            Assert.Equal(3, subAddressComplexValue.Properties.Count());
+        }
+
+        [Fact]
+        public void CreateODataComplexValue_Throws_IfDynamicPropertyNameSameAsDeclaredPropertyName()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue<ClrTypeAnnotation>(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+            model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenAddress.GetProperty("Properties")));
+
+            IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
+
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
+            ODataSerializerContext context = new ODataSerializerContext
+            {
+                Model = model
+            };
+
+            SimpleOpenAddress address = new SimpleOpenAddress()
+            {
+                Street = "My Way",
+                City = "Redmond",
+                Properties = new Dictionary<string, object>()
+            };
+            address.Properties.Add("StringProperty", "My Country");
+            address.Properties.Add("Street", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => 
+                serializer.CreateODataComplexValue(address, addressTypeRef, context),
+                "The name of dynamic property 'Street' was already used as the declared property name " +
+                "of open complex type 'Default.Address'.");
         }
 
         [Fact]

@@ -97,6 +97,28 @@ namespace System.Web.OData.Builder
             AssertHasEntitySet(client, "http://localhost/v2/$metadata", "People2");
         }
 
+        [Fact]
+        public void DollarMetadata_Works_WithOpenComplexType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<FormatterAddress>();
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataServiceRoute(model);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains("<ComplexType Name=\"FormatterAddress\" OpenType=\"true\">",
+                response.Content.ReadAsStringAsync().Result);
+        }
+
         private static void AssertHasEntitySet(HttpClient client, string uri, string entitySetName)
         {
             var response = client.GetAsync(uri).Result;

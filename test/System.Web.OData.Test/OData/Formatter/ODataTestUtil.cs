@@ -195,4 +195,11 @@ namespace System.Web.OData.Formatter
         public int OrderAmount { get; set; }
         public string OrderName { get; set; }
     }
+
+    public class FormatterAddress
+    {
+        public string Street { get; set; }
+        public string City { get; set; }
+        public IDictionary<string, object> Properties { get; set; }
+    }
 }

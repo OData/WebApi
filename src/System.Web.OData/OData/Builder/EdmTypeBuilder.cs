@@ -24,6 +24,7 @@ namespace System.Web.OData.Builder
         private readonly Dictionary<PropertyInfo, IEdmProperty> _properties = new Dictionary<PropertyInfo, IEdmProperty>();
         private readonly Dictionary<IEdmProperty, QueryableRestrictions> _propertiesRestrictions = new Dictionary<IEdmProperty, QueryableRestrictions>();
         private readonly Dictionary<Enum, IEdmEnumMember> _members = new Dictionary<Enum, IEdmEnumMember>();
+        private readonly Dictionary<IEdmStructuredType, PropertyInfo> _openTypes = new Dictionary<IEdmStructuredType, PropertyInfo>();
 
         internal EdmTypeBuilder(IEnumerable<IEdmTypeConfiguration> configurations)
         {
@@ -36,6 +37,7 @@ namespace System.Web.OData.Builder
             _types.Clear();
             _properties.Clear();
             _members.Clear();
+            _openTypes.Clear();
 
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
             foreach (IEdmTypeConfiguration config in _configurations)
@@ -57,7 +59,18 @@ namespace System.Web.OData.Builder
             {
                 if (config.Kind == EdmTypeKind.Complex)
                 {
-                    _types.Add(config.ClrType, new EdmComplexType(config.Namespace, config.Name));
+                    ComplexTypeConfiguration complex = (ComplexTypeConfiguration)config;
+
+                    EdmComplexType complexType = new EdmComplexType(config.Namespace, config.Name, 
+                        null, false, complex.IsOpen);
+
+                    _types.Add(config.ClrType, complexType);
+
+                    if (complex.IsOpen)
+                    {
+                        // add a mapping between the open complex type and its dynamic property dictionary.
+                        _openTypes.Add(complexType, complex.DynamicPropertyDictionary);
+                    }
                 }
                 else if (config.Kind == EdmTypeKind.Entity)
                 {
@@ -326,7 +339,11 @@ namespace System.Web.OData.Builder
             }
 
             EdmTypeBuilder builder = new EdmTypeBuilder(configurations);
-            return new EdmTypeMap(builder.GetEdmTypes(), builder._properties, builder._propertiesRestrictions, builder._members);
+            return new EdmTypeMap(builder.GetEdmTypes(),
+                builder._properties,
+                builder._propertiesRestrictions,
+                builder._members,
+                builder._openTypes);
         }
 
         /// <summary>

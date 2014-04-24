@@ -1,9 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
+using System.Web.OData.Builder;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 using Moq;
 
 namespace System.Web.OData.Formatter.Deserialization
@@ -138,6 +141,171 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Null(address.Country);
             Assert.Null(address.State);
             Assert.Null(address.ZipCode);
+        }
+
+        [Fact]
+        public void ReadComplexValue_CanReadDynamicPropertiesForOpenComplexType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<SimpleOpenAddress>();
+            builder.EnumType<SimpleEnum>();
+            IEdmModel model = builder.GetEdmModel();
+            IEdmComplexTypeReference addressTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenAddress)).AsComplex();
+
+            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
+            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
+
+            ODataEnumValue enumValue = new ODataEnumValue("Third", typeof(SimpleEnum).FullName);
+
+            ODataComplexValue complexValue = new ODataComplexValue
+            {
+                Properties = new[]
+                {
+                    // declared properties
+                    new ODataProperty { Name = "Street", Value = "My Way #599" },
+                    new ODataProperty { Name = "City", Value = "Redmond & Shanghai" },
+
+                    // dynamic properties
+                    new ODataProperty { Name = "GuidProperty", Value = new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA") },
+                    new ODataProperty { Name = "EnumValue", Value = enumValue },
+                    new ODataProperty { Name = "DateTimeProperty", Value = new DateTimeOffset(new DateTime(1992, 1, 1)) }
+                },
+                TypeName = typeof(SimpleOpenAddress).FullName
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model
+            };
+
+            // Act
+            SimpleOpenAddress address = deserializer.ReadComplexValue(complexValue, addressTypeReference, readContext)
+                as SimpleOpenAddress;
+
+            // Assert
+            Assert.NotNull(address);
+
+            // Verify the declared properties
+            Assert.Equal("My Way #599", address.Street);
+            Assert.Equal("Redmond & Shanghai", address.City);
+
+            // Verify the dynamic properties
+            Assert.NotNull(address.Properties);
+            Assert.Equal(3, address.Properties.Count());
+            Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), address.Properties["GuidProperty"]);
+            Assert.Equal(SimpleEnum.Third, address.Properties["EnumValue"]);
+            Assert.Equal(new DateTimeOffset(new DateTime(1992, 1, 1)), address.Properties["DateTimeProperty"]);
+        }
+
+        [Fact]
+        public void ReadComplexValue_CanReadNestedOpenComplexType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<SimpleOpenAddress>();
+            builder.ComplexType<SimpleOpenZipCode>();
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmComplexTypeReference addressTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenAddress)).AsComplex();
+
+            var deserializerProvider = new DefaultODataDeserializerProvider();
+            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
+
+            ODataComplexValue zipCodeComplexValue = new ODataComplexValue
+            {
+                Properties = new[]
+                {
+                    // declared property
+                    new ODataProperty { Name = "Code", Value = 101 },
+
+                    // dynamic property
+                    new ODataProperty { Name = "DateTimeProperty", Value = new DateTimeOffset(new DateTime(2014, 4, 22)) }
+                },
+                TypeName = typeof(SimpleOpenZipCode).FullName
+            };
+
+            ODataComplexValue addressComplexValue = new ODataComplexValue
+            {
+                Properties = new[]
+                {
+                    // declared properties
+                    new ODataProperty { Name = "Street", Value = "TopStreet" },
+                    new ODataProperty { Name = "City", Value = "TopCity" },
+
+                    // dynamic properties
+                    new ODataProperty { Name = "DoubleProperty", Value = 1.179 },
+                    new ODataProperty { Name = "ZipCodeProperty", Value = zipCodeComplexValue }
+                },
+                TypeName = typeof(SimpleOpenAddress).FullName
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model
+            };
+
+            // Act
+            SimpleOpenAddress address = deserializer.ReadComplexValue(addressComplexValue, addressTypeReference, readContext)
+                as SimpleOpenAddress;
+
+            // Assert
+            Assert.NotNull(address);
+
+            // Verify the declared properties
+            Assert.Equal("TopStreet", address.Street);
+            Assert.Equal("TopCity", address.City);
+
+            // Verify the dynamic properties
+            Assert.NotNull(address.Properties);
+            Assert.Equal(2, address.Properties.Count());
+            
+            Assert.Equal(1.179, address.Properties["DoubleProperty"]);
+            
+            // nested open complex type
+            SimpleOpenZipCode zipCode = Assert.IsType<SimpleOpenZipCode>(address.Properties["ZipCodeProperty"]);
+            Assert.Equal(101, zipCode.Code);
+            Assert.Equal(1, zipCode.Properties.Count());
+            Assert.Equal(new DateTimeOffset(new DateTime(2014, 4, 22)), zipCode.Properties["DateTimeProperty"]);
+        }
+
+        [Fact]
+        public void ReadComplexValue_Throws_IfDuplicateDynamicPropertyNameFound()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<SimpleOpenAddress>();
+            IEdmModel model = builder.GetEdmModel();
+            IEdmComplexTypeReference addressTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenAddress)).AsComplex();
+
+            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
+            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
+
+            ODataComplexValue complexValue = new ODataComplexValue
+            {
+                Properties = new[]
+                {
+                    // declared properties
+                    new ODataProperty { Name = "Street", Value = "My Way #599" },
+                    new ODataProperty { Name = "City", Value = "Redmond & Shanghai" },
+
+                    // dynamic properties
+                    new ODataProperty { Name = "GuidProperty", Value = new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA") },
+                    new ODataProperty { Name = "GuidProperty", Value = new DateTimeOffset(new DateTime(1992, 1, 1)) }
+                },
+                TypeName = "ODataDemo.Address"
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model
+            };
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() =>
+                deserializer.ReadComplexValue(complexValue, addressTypeReference, readContext),
+                "Duplicate dynamic property name 'GuidProperty' found in open type 'System.Web.OData.SimpleOpenAddress'. " +
+                "Each dynamic property name must be unique.");
         }
 
         [Fact]

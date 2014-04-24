@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.OData.Builder.TestModels;
@@ -123,6 +124,92 @@ namespace System.Web.OData.Builder
             Assert.False(complexType.Property(t => t.ShortProperty).OptionalProperty);
             Assert.False(complexType.Property(t => t.TimeSpanProperty).OptionalProperty);
         }
+
+        [Fact]
+        public void DynamicDictionaryProperty_Works_ToSetOpenComplexType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            ComplexTypeConfiguration<SimpleOpenComplexType> complexType = builder.ComplexType<SimpleOpenComplexType>();
+            complexType.Property(c => c.IntProperty);
+            complexType.HasDynamicProperties(c => c.DynamicProperties);
+
+            // Act & Assert
+            Assert.True(complexType.IsOpen);
+        }
+
+        [Fact]
+        public void AddDynamicDictionary_ThrowsException_IfMoreThanOneDynamicPropertyInOpenComplexType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<BadOpenComplexType>();
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => builder.GetEdmModel(),
+                "propertyInfo",
+                "Found more than one dynamic property container in type 'BadOpenComplexType'. " +
+                "Each open type must have at most one dynamic property container.\r\n" +
+                "Parameter name: propertyInfo");
+        }
+
+        [Fact]
+        public void GetEdmModel_WorksOnModelBuilder_ForOpenComplexType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ComplexTypeConfiguration<SimpleOpenComplexType> complex = builder.ComplexType<SimpleOpenComplexType>();
+            complex.Property(c => c.IntProperty);
+            complex.HasDynamicProperties(c => c.DynamicProperties);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmComplexType complexType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
+            Assert.True(complexType.IsOpen);
+            IEdmProperty edmProperty = Assert.Single(complexType.Properties());
+            Assert.Equal("IntProperty", edmProperty.Name);
+        }
+
+        [Fact]
+        public void GetEdmModel_WorksOnConventionModelBuilder_ForOpenComplexType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<SimpleOpenComplexType>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmComplexType complexType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
+            Assert.True(complexType.IsOpen);
+            IEdmProperty edmProperty = Assert.Single(complexType.Properties());
+            Assert.Equal("IntProperty", edmProperty.Name);
+        }
+
+        [Fact]
+        public void GetEdmModel_Works_ForOpenComplexTypeWithDerivedDynamicProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<OpenComplexTypeWithDerivedDynamicProperty>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmComplexType complexType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
+            Assert.True(complexType.IsOpen);
+            IEdmProperty edmProperty = Assert.Single(complexType.Properties());
+            Assert.Equal("StringProperty", edmProperty.Name);
+        }
     }
 
     public class ComplexTypeTestModel
@@ -160,5 +247,27 @@ namespace System.Web.OData.Builder
         public string StringProperty { get; set; }
         public Stream StreamProperty { get; set; }
         public byte[] ByteArrayProperty { get; set; }
+    }
+
+    public class SimpleOpenComplexType
+    {
+        public int IntProperty { get; set; }
+        public IDictionary<string, object> DynamicProperties { get; set; }
+    }
+
+    public class BadOpenComplexType
+    {
+        public int IntProperty { get; set; }
+        public IDictionary<string, object> DynamicProperties1 { get; set; }
+        public IDictionary<string, object> DynamicProperties2 { get; set; }
+    }
+
+    public class MyDynamicProperty : Dictionary<string, object>
+    { }
+
+    public class OpenComplexTypeWithDerivedDynamicProperty
+    {
+        public string StringProperty { get; set; }
+        public MyDynamicProperty MyProperties { get; set; }
     }
 }

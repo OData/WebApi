@@ -724,4 +724,22 @@
   <data name="NavigationSourceMissingDuringDeserialization" xml:space="preserve">
     <value>The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to deserialize the payload.</value>
   </data>
+  <data name="OpenEntityTypeNotSupported" xml:space="preserve">
+    <value>'{0}' can not be added as dynamic property into entity type '{1}'. Open entity type is not supported.</value>
+  </data>
+  <data name="MoreThanOneDynamicPropertyContainerFound" xml:space="preserve">
+    <value>Found more than one dynamic property container in type '{0}'. Each open type must have at most one dynamic property container.</value>
+  </data>
+  <data name="DynamicPropertyNameAlreadyUsedAsDeclaredPropertyName" xml:space="preserve">
+    <value>The name of dynamic property '{0}' was already used as the declared property name of open complex type '{1}'.</value>
+  </data>
+  <data name="DuplicateDynamicPropertyNameFound" xml:space="preserve">
+    <value>Duplicate dynamic property name '{0}' found in open type '{1}'. Each dynamic property name must be unique.</value>
+  </data>
+  <data name="CollectionNotAllowedAsDynamicProperty" xml:space="preserve">
+    <value>Type '{0}' is not allowed as dynamic property. Only primitive type, complex type and enum type are supported.</value>
+  </data>
+  <data name="InvalidPropertyInfoForDynamicPropertyAnnotation" xml:space="preserve">
+    <value>Type '{0}' is not supported as dynamic property annotation. Referenced property must be of type '{1}'.</value>
+  </data>
 </root>

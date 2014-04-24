@@ -87,6 +87,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\ComplexTypeAttributeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConventionTests.cs" />
+    <Compile Include="OData\Builder\DynamicPropertyDictionaryAnnotationTest.cs" />
     <Compile Include="OData\Builder\SingletonLinkConfigurationTest.cs" />
     <Compile Include="OData\Builder\SingletonConfigurationTest.cs" />
     <Compile Include="OData\Builder\EnumTypeTest.cs" />
@@ -155,6 +156,7 @@
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="OData\PerRequestParameterBindingTest.cs" />
     <Compile Include="OData\ODataSingletonTest.cs" />
+    <Compile Include="OData\OpenComplexTypeTest.cs" />
     <Compile Include="OData\QueryableLimitationTest.cs" />
     <Compile Include="OData\Query\ODataSingletonQueryOptionTest.cs" />
     <Compile Include="OData\Query\TruncatedCollectionTest.cs" />
@@ -278,7 +280,9 @@
     <Compile Include="OData\SelectExpandTest.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="TestCommon\CustomersModelWithInheritance.cs" />
+    <Compile Include="TestCommon\SimpleOpenAddress.cs" />
     <Compile Include="TestCommon\ODataModelBuilderMocks.cs" />
+    <Compile Include="TestCommon\SimpleOpenZipCode.cs" />
     <Compile Include="TestCommon\TestAssemblyResolver.cs" />
     <Compile Include="TestCommon\MockAssembly.cs" />
     <Compile Include="TestCommon\MockPropertyInfo.cs" />

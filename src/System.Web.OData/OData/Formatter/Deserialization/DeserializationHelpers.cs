@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -18,6 +20,20 @@ namespace System.Web.OData.Formatter.Deserialization
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             IEdmProperty edmProperty = resourceType.FindProperty(property.Name);
+
+            // try to deserializer the dynamic properties for open type.
+            if (edmProperty == null)
+            {
+                // the logic here works for open complex type and open entity type.
+                IEdmStructuredType structuredType = resourceType.StructuredDefinition();
+                if (structuredType != null && structuredType.IsOpen)
+                {
+                    if (ApplyDynamicProperty(property, structuredType, resource, deserializerProvider, readContext))
+                    {
+                        return;
+                    }
+                }
+            }
 
             string propertyName = property.Name;
             if (edmProperty != null)
@@ -191,6 +207,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 IEdmType edmType = model.FindType(complexValue.TypeName);
                 Contract.Assert(edmType.TypeKind == EdmTypeKind.Complex, "ODataLib should have verified that complex value has a complex resource type.");
                 edmComplexType = new EdmComplexTypeReference(edmType as IEdmComplexType, isNullable: true);
+                propertyType = edmComplexType;
             }
             else
             {
@@ -240,6 +257,58 @@ namespace System.Web.OData.Formatter.Deserialization
 
             ODataEdmTypeDeserializer deserializer = deserializerProvider.GetEdmTypeDeserializer(collectionType);
             return deserializer.ReadInline(collection, collectionType, readContext);
+        }
+
+        private static bool ApplyDynamicProperty(ODataProperty property, IEdmStructuredType structuredType,
+            object resource, ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
+        {
+            PropertyInfo propertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(structuredType,
+                        readContext.Model);
+            if (propertyInfo == null)
+            {
+                return false;
+            }
+
+            IDictionary<string, object> dynamicPropertyDictionary = propertyInfo.GetValue(resource)
+                as IDictionary<string, object>;
+
+            if (dynamicPropertyDictionary == null)
+            {
+                dynamicPropertyDictionary = new Dictionary<string, object>();
+                propertyInfo.SetValue(resource, dynamicPropertyDictionary);
+            }
+
+            if (dynamicPropertyDictionary.ContainsKey(property.Name))
+            {
+                throw Error.InvalidOperation(SRResources.DuplicateDynamicPropertyNameFound,
+                    property.Name, structuredType.FullTypeName());
+            }
+
+            EdmTypeKind propertyKind;
+            IEdmTypeReference propertyType = null;
+            object value = ConvertValue(property.Value, ref propertyType, deserializerProvider, readContext, out propertyKind);
+
+            if (propertyKind == EdmTypeKind.Collection)
+            {
+                throw Error.InvalidOperation(SRResources.CollectionNotAllowedAsDynamicProperty, property.Name);
+            }
+
+            if (propertyKind == EdmTypeKind.Enum)
+            {
+                ODataEnumValue enumValue = (ODataEnumValue)value;
+                IEdmModel model = readContext.Model;
+                IEdmType edmType = model.FindType(enumValue.TypeName);
+                if (edmType == null)
+                {
+                    return false;
+                }
+
+                Type enumType = EdmLibHelpers.GetClrType(edmType, model);
+                value = Enum.Parse(enumType, enumValue.Value);
+            }
+
+            dynamicPropertyDictionary.Add(property.Name, value);
+            return true;
         }
     }
 }

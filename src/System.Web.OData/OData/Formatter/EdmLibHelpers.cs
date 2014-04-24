@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Builder;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
 using System.Xml.Linq;
@@ -318,6 +319,28 @@ namespace System.Web.OData.Formatter
             }
 
             return propertyName;
+        }
+
+        public static PropertyInfo GetDynamicPropertyDictionary(IEdmStructuredType edmType, IEdmModel edmModel)
+        {
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+
+            if (edmModel == null)
+            {
+                throw Error.ArgumentNull("edmModel");
+            }
+
+            DynamicPropertyDictionaryAnnotation annotation =
+                edmModel.GetAnnotationValue<DynamicPropertyDictionaryAnnotation>(edmType);
+            if (annotation != null)
+            {
+                return annotation.PropertyInfo;
+            }
+
+            return null;
         }
 
         public static IEdmPrimitiveType GetEdmPrimitiveTypeOrNull(Type clrType)

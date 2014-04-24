@@ -93,6 +93,7 @@
     <Compile Include="OData\Builder\NullableEnumTypeConfiguration.cs" />
     <Compile Include="OData\Builder\ODataConventionModelBuilderExtensions.cs" />
     <Compile Include="OData\Builder\OperationTitleAnnotation.cs" />
+    <Compile Include="OData\Builder\DynamicPropertyDictionaryAnnotation.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
     <Compile Include="OData\RequestPreferenceHelpers.cs" />

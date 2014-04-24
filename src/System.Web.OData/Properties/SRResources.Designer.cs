@@ -286,6 +286,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; is not allowed as dynamic property. Only primitive type, complex type and enum type are supported..
+        /// </summary>
+        internal static string CollectionNotAllowedAsDynamicProperty {
+            get {
+                return ResourceManager.GetString("CollectionNotAllowedAsDynamicProperty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CollectionProperties must implement IEnumerable&lt;&gt;. The property &apos;{0}&apos; declared on &apos;{1}&apos; does not implement IEnumerable&lt;&gt;..
         /// </summary>
         internal static string CollectionPropertiesMustReturnIEnumerable {
@@ -376,11 +385,29 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Duplicate dynamic property name &apos;{0}&apos; found in open type &apos;{1}&apos;. Each dynamic property name must be unique..
+        /// </summary>
+        internal static string DuplicateDynamicPropertyNameFound {
+            get {
+                return ResourceManager.GetString("DuplicateDynamicPropertyNameFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Duplicate key &apos;{0}&apos; found in segment &apos;{1}&apos;..
         /// </summary>
         internal static string DuplicateKeyInSegment {
             get {
                 return ResourceManager.GetString("DuplicateKeyInSegment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The name of dynamic property &apos;{0}&apos; was already used as the declared property name of open complex type &apos;{1}&apos;..
+        /// </summary>
+        internal static string DynamicPropertyNameAlreadyUsedAsDeclaredPropertyName {
+            get {
+                return ResourceManager.GetString("DynamicPropertyNameAlreadyUsedAsDeclaredPropertyName", resourceCulture);
             }
         }
         
@@ -727,6 +754,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; is not supported as dynamic property annotation. Referenced property must be of type &apos;{1}&apos;..
+        /// </summary>
+        internal static string InvalidPropertyInfoForDynamicPropertyAnnotation {
+            get {
+                return ResourceManager.GetString("InvalidPropertyInfoForDynamicPropertyAnnotation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The mapper provider must return a valid &apos;{0}&apos; instance for the given &apos;{1}&apos; IEdmType..
         /// </summary>
         internal static string InvalidPropertyMapper {
@@ -885,6 +921,15 @@ namespace System.Web.OData.Properties {
         internal static string ModelMissingFromReadContext {
             get {
                 return ResourceManager.GetString("ModelMissingFromReadContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Found more than one dynamic property container in type &apos;{0}&apos;. Each open type must have at most one dynamic property container..
+        /// </summary>
+        internal static string MoreThanOneDynamicPropertyContainerFound {
+            get {
+                return ResourceManager.GetString("MoreThanOneDynamicPropertyContainerFound", resourceCulture);
             }
         }
         
@@ -1245,6 +1290,15 @@ namespace System.Web.OData.Properties {
         internal static string ODataPathMissing {
             get {
                 return ResourceManager.GetString("ODataPathMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; can not be added as dynamic property into entity type &apos;{1}&apos;. Open entity type is not supported..
+        /// </summary>
+        internal static string OpenEntityTypeNotSupported {
+            get {
+                return ResourceManager.GetString("OpenEntityTypeNotSupported", resourceCulture);
             }
         }
         

@@ -136,6 +136,11 @@ namespace System.Web.Http.Dispatcher
                 controllerContext = CreateControllerContext(request, controllerDescriptor, controller);
                 return await controller.ExecuteAsync(controllerContext, cancellationToken);
             }
+            catch (OperationCanceledException)
+            {
+                // Propogate the canceled task without calling exception loggers or handlers.
+                throw;
+            }
             catch (HttpResponseException httpResponseException)
             {
                 return httpResponseException.Response;

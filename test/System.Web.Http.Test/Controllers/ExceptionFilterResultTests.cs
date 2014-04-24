@@ -52,14 +52,18 @@ namespace System.Web.Http.Controllers
             // Arrange
             List<string> log = new List<string>();
             HttpActionContext actionContext = ContextUtil.CreateActionContext();
+
+            // ExceptionFilters still have a chance to see the cancellation exception
             var exceptionFilter = CreateExceptionFilter((ec, ct) =>
             {
                 log.Add("exceptionFilter");
                 return Task.Factory.StartNew(() => { });
             });
+
             var filters = new IExceptionFilter[] { exceptionFilter };
-            IExceptionLogger exceptionLogger = CreateStubExceptionLogger();
-            IExceptionHandler exceptionHandler = CreateStubExceptionHandler();
+            IExceptionLogger exceptionLogger = new Mock<IExceptionLogger>(MockBehavior.Strict).Object;
+            IExceptionHandler exceptionHandler = new Mock<IExceptionHandler>(MockBehavior.Strict).Object;
+
             var actionResult = CreateStubActionResult(TaskHelpers.Canceled<HttpResponseMessage>());
 
             IHttpActionResult product = CreateProductUnderTest(actionContext, filters, exceptionLogger,

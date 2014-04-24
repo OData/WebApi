@@ -381,6 +381,11 @@ namespace System.Web.Http.WebHost
                 await response.Content.CopyToAsync(httpContextBase.Response.OutputStream);
                 return;
             }
+            catch (OperationCanceledException)
+            {
+                // Propogate the canceled task without calling exception loggers.
+                throw;
+            }
             catch (Exception ex)
             {
                 exception = ex;
@@ -423,6 +428,11 @@ namespace System.Web.Http.WebHost
                 // Copy the HttpContent into the output stream asynchronously.
                 await response.Content.CopyToAsync(httpResponseBase.OutputStream);
                 return;
+            }
+            catch (OperationCanceledException)
+            {
+                // Propogate the canceled task without calling exception loggers or handlers.
+                throw;
             }
             catch (Exception exception)
             {
@@ -532,6 +542,11 @@ namespace System.Web.Http.WebHost
                     // Asynchronously write the content of the new error HttpResponseMessage
                     await errorResponse.Content.CopyToAsync(httpResponseBase.OutputStream);
                     return;
+                }
+                catch (OperationCanceledException)
+                {
+                    // Propogate the canceled task without calling exception loggers.
+                    throw;
                 }
                 catch (Exception ex)
                 {

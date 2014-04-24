@@ -222,6 +222,11 @@ namespace System.Web.Http
                 {
                     return await base.SendAsync(request, cancellationToken);
                 }
+                catch (OperationCanceledException)
+                {
+                    // Propogate the canceled task without calling exception loggers or handlers.
+                    throw;
+                }
                 catch (HttpResponseException exception)
                 {
                     return exception.Response;

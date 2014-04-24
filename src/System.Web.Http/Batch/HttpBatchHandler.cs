@@ -88,6 +88,11 @@ namespace System.Web.Http.Batch
             {
                 return await ProcessBatchAsync(request, cancellationToken);
             }
+            catch (OperationCanceledException)
+            {
+                // Propogate the canceled task without calling exception loggers or handlers.
+                throw;
+            }
             catch (HttpResponseException httpResponseException)
             {
                 return httpResponseException.Response;

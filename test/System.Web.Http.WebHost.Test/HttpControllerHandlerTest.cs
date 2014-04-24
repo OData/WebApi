@@ -1233,6 +1233,37 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
+        public void WriteStreamedResponseContentAsync_IfCopyToAsyncCancells_DoesNotCallExceptionLogger()
+        {
+            // Arrange
+            Exception expectedException = new OperationCanceledException();
+
+            Mock<IExceptionLogger> mock = new Mock<IExceptionLogger>(MockBehavior.Strict);
+            IExceptionLogger logger = mock.Object;
+
+            using (HttpRequestMessage expectedRequest = new HttpRequestMessage())
+            using (HttpResponseMessage expectedResponse = new HttpResponseMessage())
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource())
+            {
+                expectedResponse.Content = CreateFaultingContent(expectedException);
+
+                HttpRequestBase requestBase = CreateStubRequestBase();
+                HttpResponseBase responseBase = CreateStubResponseBase(Stream.Null);
+                HttpContextBase contextBase = CreateStubContextBase(requestBase, responseBase);
+                CancellationToken expectedCancellationToken = tokenSource.Token;
+
+                // Act
+                Task task = HttpControllerHandler.WriteStreamedResponseContentAsync(contextBase, expectedRequest,
+                    expectedResponse, logger, expectedCancellationToken);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.Canceled, task.Status);
+            }
+        }
+
+        [Fact]
         public void WriteBufferedResponseContentAsync_IfCopyToAsyncThrows_CallsExceptionServices()
         {
             // Arrange
@@ -1274,6 +1305,39 @@ namespace System.Web.Http.WebHost
                     exceptionContextMatches(c.ExceptionContext)), expectedCancellationToken), Times.Once());
                 handlerMock.Verify(l => l.HandleAsync(It.Is<ExceptionHandlerContext>(c =>
                     exceptionContextMatches(c.ExceptionContext)), expectedCancellationToken), Times.Once());
+            }
+        }
+
+        [Fact]
+        public void WriteBufferedResponseContentAsync_IfCopyToAsyncCancels_DoesNotCallExceptionServices()
+        {
+            // Arrange
+            Exception expectedException = new OperationCanceledException();
+
+            Mock<IExceptionLogger> loggerMock = new Mock<IExceptionLogger>(MockBehavior.Strict);
+            IExceptionLogger logger = loggerMock.Object;
+            Mock<IExceptionHandler> handlerMock = new Mock<IExceptionHandler>(MockBehavior.Strict);
+            IExceptionHandler handler = handlerMock.Object;
+
+            using (HttpRequestMessage expectedRequest = new HttpRequestMessage())
+            using (HttpResponseMessage expectedResponse = new HttpResponseMessage())
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource())
+            {
+                expectedResponse.Content = CreateFaultingContent(expectedException);
+
+                HttpRequestBase requestBase = CreateStubRequestBase();
+                HttpResponseBase responseBase = CreateStubResponseBase(Stream.Null);
+                HttpContextBase contextBase = CreateStubContextBase(requestBase, responseBase);
+                CancellationToken expectedCancellationToken = tokenSource.Token;
+
+                // Act
+                Task task = HttpControllerHandler.WriteBufferedResponseContentAsync(contextBase, expectedRequest,
+                    expectedResponse, logger, handler, expectedCancellationToken);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.Canceled, task.Status);
             }
         }
 
@@ -1411,6 +1475,64 @@ namespace System.Web.Http.WebHost
                     && c.ExceptionContext.Request == expectedRequest
                     && c.ExceptionContext.Response == expectedErrorResponse),
                     expectedCancellationToken), Times.Once());
+            }
+        }
+
+        [Fact]
+        public void WriteBufferedResponseContentAsync_IfCopyToAsyncOnErrorResponseCancels_DoesNotCallCallsExceptionLogger()
+        {
+            // Arrange
+            Exception expectedOriginalException = CreateException();
+            Exception expectedErrorException = new OperationCanceledException();
+
+            using (HttpRequestMessage expectedRequest = new HttpRequestMessage())
+            using (HttpResponseMessage expectedOriginalResponse = new HttpResponseMessage())
+            using (HttpResponseMessage expectedErrorResponse = new HttpResponseMessage())
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource())
+            {
+                expectedOriginalResponse.Content = CreateFaultingContent(expectedOriginalException);
+                expectedErrorResponse.Content = CreateFaultingContent(expectedErrorException);
+
+                Mock<IExceptionLogger> loggerMock = CreateStubExceptionLoggerMock();
+                IExceptionLogger logger = loggerMock.Object;
+                Mock<IExceptionHandler> handlerMock = new Mock<IExceptionHandler>(MockBehavior.Strict);
+                handlerMock
+                    .Setup(h => h.HandleAsync(It.IsAny<ExceptionHandlerContext>(), It.IsAny<CancellationToken>()))
+                    .Returns<ExceptionHandlerContext, CancellationToken>((c, i) =>
+                    {
+                        c.Result = new ResponseMessageResult(expectedErrorResponse);
+                        return Task.FromResult(0);
+                    });
+                IExceptionHandler handler = handlerMock.Object;
+
+                HttpRequestBase requestBase = CreateStubRequestBase();
+                HttpResponseBase responseBase = CreateStubResponseBase(Stream.Null);
+                HttpContextBase contextBase = CreateStubContextBase(requestBase, responseBase);
+                CancellationToken expectedCancellationToken = tokenSource.Token;
+
+                // Act
+                Task task = HttpControllerHandler.WriteBufferedResponseContentAsync(contextBase, expectedRequest,
+                    expectedOriginalResponse, logger, handler, expectedCancellationToken);
+
+                // Assert
+                Assert.NotNull(task);
+                task.WaitUntilCompleted();
+                Assert.Equal(TaskStatus.Canceled, task.Status);
+
+                loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
+                    c.ExceptionContext != null
+                    && c.ExceptionContext.Exception == expectedOriginalException
+                    && c.ExceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpControllerHandlerBufferContent
+                    && c.ExceptionContext.Request == expectedRequest
+                    && c.ExceptionContext.Response == expectedOriginalResponse),
+                    expectedCancellationToken), Times.Once());
+                loggerMock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
+                    c.ExceptionContext != null
+                    && c.ExceptionContext.Exception == expectedErrorException
+                    && c.ExceptionContext.CatchBlock == WebHostExceptionCatchBlocks.HttpControllerHandlerBufferError
+                    && c.ExceptionContext.Request == expectedRequest
+                    && c.ExceptionContext.Response == expectedErrorResponse),
+                    expectedCancellationToken), Times.Never());
             }
         }
 

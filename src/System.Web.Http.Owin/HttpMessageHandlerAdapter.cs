@@ -366,6 +366,11 @@ namespace System.Web.Http.Owin
                 await response.Content.LoadIntoBufferAsync();
                 return response;
             }
+            catch (OperationCanceledException)
+            {
+                // Propogate the canceled task without calling exception loggers or handlers.
+                throw;
+            }
             catch (Exception exception)
             {
                 exceptionInfo = ExceptionDispatchInfo.Capture(exception);
@@ -403,6 +408,11 @@ namespace System.Web.Http.Owin
                 // Try to buffer the error response and send it back.
                 await response.Content.LoadIntoBufferAsync();
                 return response;
+            }
+            catch (OperationCanceledException)
+            {
+                // Propogate the canceled task without calling exception loggers.
+                throw;
             }
             catch (Exception exception)
             {
@@ -566,6 +576,11 @@ namespace System.Web.Http.Owin
             {
                 await response.Content.CopyToAsync(owinResponse.Body);
                 return;
+            }
+            catch (OperationCanceledException)
+            {
+                // Propogate the canceled task without calling exception loggers;
+                throw;
             }
             catch (Exception ex)
             {

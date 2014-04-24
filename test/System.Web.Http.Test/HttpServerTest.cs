@@ -428,6 +428,40 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void SendAsync_IfRequestCancelled_DoesNotCallExceptionServices()
+        {
+            // Arrange
+            Exception expectedException = new OperationCanceledException();
+
+            HttpMessageHandler dispatcher = CreateFaultingMessageHandler(expectedException);
+
+            Mock<IExceptionLogger> exceptionLoggerMock = new Mock<IExceptionLogger>(MockBehavior.Strict);
+            IExceptionLogger exceptionLogger = exceptionLoggerMock.Object;
+
+            Mock<IExceptionHandler> exceptionHandlerMock = new Mock<IExceptionHandler>(MockBehavior.Strict);
+            IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
+
+            using (HttpRequestMessage expectedRequest = CreateRequest())
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpServer product = CreateProductUnderTest(configuration, dispatcher, exceptionLogger,
+                exceptionHandler))
+            {
+                CancellationToken cancellationToken = CreateCancellationToken();
+
+                Task<HttpResponseMessage> task = product.SendAsync(expectedRequest, cancellationToken);
+
+                // Act
+                task.WaitUntilCompleted();
+
+                // Assert
+                Assert.Equal(TaskStatus.Canceled, task.Status);
+
+                // The mock handler and logger will throw if they are called, so this test verifies that
+                // they aren't called by construction.
+            }
+        }
+
+        [Fact]
         public void SendAsync_IfExceptionHandlerSetsNullResult_PropogatesFaultedTaskException()
         {
             // Arrange

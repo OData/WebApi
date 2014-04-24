@@ -204,6 +204,36 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void SendAsync_IfProcessBatchAsyncTaskIsCanceled_DoesNotCallExceptionServices()
+        {
+            // Arrange
+            Exception expectedException = new OperationCanceledException();
+
+            Mock<IExceptionLogger> exceptionLoggerMock = new Mock<IExceptionLogger>(MockBehavior.Strict);
+            IExceptionLogger exceptionLogger = exceptionLoggerMock.Object;
+
+            Mock<IExceptionHandler> exceptionHandlerMock = new Mock<IExceptionHandler>(MockBehavior.Strict);
+            IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
+
+            using (HttpRequestMessage expectedRequest = CreateRequest())
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpServer server = CreateServer(configuration))
+            using (HttpBatchHandler product = new LambdaHttpBatchHandler(server, exceptionLogger, exceptionHandler,
+                (i1, i2) => CreateFaultedTask<HttpResponseMessage>(expectedException)))
+            {
+                CancellationToken cancellationToken = CreateCancellationToken();
+
+                Task<HttpResponseMessage> task = product.SendAsync(expectedRequest, cancellationToken);
+
+                // Act
+                task.WaitUntilCompleted();
+
+                // Assert
+                Assert.Equal(TaskStatus.Canceled, task.Status);
+            }
+        }
+
+        [Fact]
         public void SendAsync_IfExceptionHandlerSetsNullResult_PropogatesFaultedTaskException()
         {
             // Arrange

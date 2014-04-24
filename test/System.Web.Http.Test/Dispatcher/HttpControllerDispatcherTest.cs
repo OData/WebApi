@@ -305,6 +305,39 @@ namespace System.Web.Http.Dispatcher
             }
         }
 
+
+        [Fact]
+        public void SendAsync_IfSendAsyncCancels_InControllerSelector_DoesNotCallExceptionServices()
+        {
+            // Arrange
+            Exception expectedException = new OperationCanceledException();
+
+            Mock<IExceptionLogger> exceptionLoggerMock = new Mock<IExceptionLogger>(MockBehavior.Strict);
+            IExceptionLogger exceptionLogger = exceptionLoggerMock.Object;
+
+            Mock<IExceptionHandler> exceptionHandlerMock = new Mock<IExceptionHandler>(MockBehavior.Strict);
+            IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
+
+            using (HttpRequestMessage expectedRequest = CreateRequestWithRouteData())
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpMessageHandler product = CreateProductUnderTest(configuration, exceptionLogger,
+                exceptionHandler))
+            {
+                configuration.Services.Replace(typeof(IHttpControllerSelector),
+                    CreateThrowingControllerSelector(expectedException));
+
+                CancellationToken cancellationToken = CreateCancellationToken();
+
+                Task<HttpResponseMessage> task = product.SendAsync(expectedRequest, cancellationToken);
+
+                // Act
+                task.WaitUntilCompleted();
+
+                // Assert
+                Assert.Equal(TaskStatus.Canceled, task.Status);
+            }
+        }
+
         [Fact]
         public void SendAsync_IfExceptionHandlerSetsNullResult_PropogatesFaultedTaskException()
         {

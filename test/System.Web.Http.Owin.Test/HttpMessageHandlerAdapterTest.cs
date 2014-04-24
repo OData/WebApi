@@ -1147,6 +1147,47 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
+        public void Invoke_IfBufferingCancels_DoesNotCallExceptionServices()
+        {
+            // Arrange
+            Exception expectedException = new OperationCanceledException();
+
+            using (HttpContent content = CreateFaultingContent(expectedException))
+            using (HttpResponseMessage expectedResponse = CreateResponse(content))
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(expectedResponse))
+            {
+                Mock<IExceptionLogger> exceptionLoggerMock = new Mock<IExceptionLogger>(MockBehavior.Strict);
+                IExceptionLogger exceptionLogger = exceptionLoggerMock.Object;
+
+                Mock<IExceptionHandler> exceptionHandlerMock = new Mock<IExceptionHandler>(MockBehavior.Strict);
+                IExceptionHandler exceptionHandler = exceptionHandlerMock.Object;
+
+                HttpMessageHandlerOptions options = CreateValidOptions(messageHandler);
+                options.BufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: true);
+                options.ExceptionLogger = exceptionLogger;
+                options.ExceptionHandler = exceptionHandler;
+
+                using (HttpMessageHandlerAdapter product = CreateProductUnderTest(options))
+                using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
+                {
+                    CancellationToken expectedCancellationToken = tokenSource.Token;
+                    IOwinRequest owinRequest = CreateFakeOwinRequest(expectedCancellationToken);
+                    IOwinResponse owinResponse = CreateFakeOwinResponse(Stream.Null);
+
+                    IOwinContext context = CreateStubOwinContext(owinRequest, owinResponse, isLocal: true);
+
+                    // Act
+                    Task task = product.Invoke(context);
+
+                    // Assert
+                    Assert.NotNull(task);
+                    task.WaitUntilCompleted();
+                    Assert.Equal(TaskStatus.Canceled, task.Status);
+                }
+            }
+        }
+
+        [Fact]
         public void Invoke_IfExceptionHandlerSetsNullResult_PropogatesFaultedTaskException()
         {
             // Arrange
@@ -1385,6 +1426,67 @@ namespace System.Web.Http.Owin
         }
 
         [Fact]
+        public void Invoke_IfBufferingErrorCancels_DoesNotCallExceptionLogger()
+        {
+            // Arrange
+            Exception expectedOriginalException = CreateException();
+            Exception expectedErrorException = new OperationCanceledException();
+
+            using (HttpContent content = CreateFaultingContent(expectedOriginalException))
+            using (HttpResponseMessage expectedOriginalResponse = CreateResponse(content))
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(expectedOriginalResponse))
+            using (HttpContent errorContent = CreateFaultingContent(expectedErrorException))
+            using (HttpResponseMessage expectedErrorResponse = CreateResponse(errorContent))
+            using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
+            {
+                Mock<IExceptionLogger> mock = CreateStubExceptionLoggerMock();
+                IExceptionLogger exceptionLogger = mock.Object;
+
+                HttpMessageHandlerOptions options = CreateValidOptions(messageHandler);
+                options.BufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: true);
+                options.ExceptionLogger = exceptionLogger;
+                options.ExceptionHandler = CreateExceptionHandler(new ResponseMessageResult(expectedErrorResponse));
+
+                using (HttpMessageHandlerAdapter product = CreateProductUnderTest(options))
+                {
+                    CancellationToken expectedCancellationToken = tokenSource.Token;
+                    IOwinRequest owinRequest = CreateFakeOwinRequest(expectedCancellationToken);
+                    IOwinResponse owinResponse = CreateFakeOwinResponse(Stream.Null);
+
+                    IOwinContext context = CreateStubOwinContext(owinRequest, owinResponse, isLocal: true);
+
+                    // Act
+                    Task task = product.Invoke(context);
+
+                    // Assert
+                    Assert.NotNull(task);
+                    task.WaitUntilCompleted();
+                    Assert.Equal(TaskStatus.Canceled, task.Status);
+
+                    mock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
+                        c.ExceptionContext != null
+                        && c.ExceptionContext.Exception == expectedOriginalException
+                        && c.ExceptionContext.CatchBlock ==
+                            OwinExceptionCatchBlocks.HttpMessageHandlerAdapterBufferContent
+                        && c.ExceptionContext.Request != null
+                        && c.ExceptionContext.Response == expectedOriginalResponse),
+                        expectedCancellationToken), Times.Once());
+
+                    // This shouldn't be called for 'HttpMessageHandlerAdapterBufferError' because that's what's being
+                    // cancelled.
+                    mock.Verify(l => l.LogAsync(It.Is<ExceptionLoggerContext>(c =>
+                        c.ExceptionContext != null
+                        && c.ExceptionContext.Exception == expectedErrorException
+                        && c.ExceptionContext.CatchBlock ==
+                            OwinExceptionCatchBlocks.HttpMessageHandlerAdapterBufferError
+                        && c.ExceptionContext.Request != null
+                        && c.ExceptionContext.Response == expectedErrorResponse),
+                        expectedCancellationToken), Times.Never());
+                }
+            }
+        }
+
+        [Fact]
         public void Invoke_IfBufferingErrorFaults_SendsEmptyErrorResponse()
         {
             // Arrange
@@ -1501,6 +1603,44 @@ namespace System.Web.Http.Owin
                         && c.ExceptionContext.Request != null
                         && c.ExceptionContext.Response == expectedResponse),
                         expectedCancellationToken), Times.Once());
+                }
+            }
+        }
+
+        [Fact]
+        public void Invoke_IfStreamingCancels_DoesNotCallExceptionLogger()
+        {
+            // Arrange
+            Exception expectedException = new OperationCanceledException();
+
+            using (HttpContent content = CreateFaultingContent(expectedException))
+            using (HttpResponseMessage expectedResponse = CreateResponse(content))
+            using (HttpMessageHandler messageHandler = CreateStubMessageHandler(expectedResponse))
+            {
+                Mock<IExceptionLogger> mock = new Mock<IExceptionLogger>(MockBehavior.Strict);
+                IExceptionLogger exceptionLogger = mock.Object;
+
+                HttpMessageHandlerOptions options = CreateValidOptions(messageHandler);
+                options.BufferPolicySelector = CreateBufferPolicySelector(bufferInput: false, bufferOutput: false);
+                options.ExceptionLogger = exceptionLogger;
+
+                using (HttpMessageHandlerAdapter product = CreateProductUnderTest(options))
+                using (CancellationTokenSource tokenSource = CreateCancellationTokenSource())
+                {
+                    CancellationToken expectedCancellationToken = tokenSource.Token;
+                    IOwinRequest owinRequest = CreateFakeOwinRequest(expectedCancellationToken);
+
+                    IOwinResponse owinResponse = CreateFakeOwinResponse(Stream.Null);
+
+                    IOwinContext context = CreateStubOwinContext(owinRequest, owinResponse);
+
+                    // Act
+                    Task task = product.Invoke(context);
+
+                    // Assert
+                    Assert.NotNull(task);
+                    task.WaitUntilCompleted();
+                    Assert.Equal(TaskStatus.Canceled, task.Status);
                 }
             }
         }

@@ -53,10 +53,18 @@ namespace System.Web.Http.Controllers
             Exception exception = exceptionInfo.SourceException;
             Debug.Assert(exception != null);
 
-            ExceptionContext exceptionContext = new ExceptionContext(exception, ExceptionCatchBlocks.IExceptionFilter,
+            bool isCancellationException = exception is OperationCanceledException;
+
+            ExceptionContext exceptionContext = new ExceptionContext(
+                exception,
+                ExceptionCatchBlocks.IExceptionFilter,
                 _context);
 
-            await _exceptionLogger.LogAsync(exceptionContext, cancellationToken);
+            if (!isCancellationException)
+            {
+                // We don't log cancellation exceptions because it doesn't represent an error.
+                await _exceptionLogger.LogAsync(exceptionContext, cancellationToken);
+            }
 
             HttpActionExecutedContext executedContext = new HttpActionExecutedContext(_context, exception);
 
@@ -68,8 +76,9 @@ namespace System.Web.Http.Controllers
                 await exceptionFilter.ExecuteExceptionFilterAsync(executedContext, cancellationToken);
             }
 
-            if (executedContext.Response == null)
+            if (executedContext.Response == null && !isCancellationException)
             {
+                // We don't log cancellation exceptions because it doesn't represent an error.
                 executedContext.Response = await _exceptionHandler.HandleAsync(exceptionContext, cancellationToken);
             }
 

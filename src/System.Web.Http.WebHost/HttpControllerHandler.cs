@@ -111,6 +111,12 @@ namespace System.Web.Http.WebHost
                 await CopyResponseAsync(contextBase, request, response, _exceptionLogger.Value, _exceptionHandler.Value,
                     cancellationToken);
             }
+            catch (OperationCanceledException)
+            {
+                // HttpTaskAsyncHandler treats a canceled task as an unhandled exception (logged to Application event
+                // log). Instead of returning a canceled task, abort the request and return a completed task.
+                contextBase.Request.Abort();
+            }
             finally
             {
                 // The other HttpTaskAsyncHandler is HttpRouteExceptionHandler; it has similar cleanup logic.
@@ -278,8 +284,8 @@ namespace System.Web.Http.WebHost
                     else
                     {
                         Contract.Assert(requestBase.ReadEntityBodyMode == ReadEntityBodyMode.Bufferless);
-                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, 
-                                                                          SRResources.RequestBodyAlreadyReadInMode, 
+                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
+                                                                          SRResources.RequestBodyAlreadyReadInMode,
                                                                           ReadEntityBodyMode.Bufferless));
                     }
                 });

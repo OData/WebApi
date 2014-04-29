@@ -16,6 +16,7 @@ namespace System.Web.OData.Routing.Conventions
     {
         private const string DeleteRefActionNamePrefix = "DeleteRef";
         private const string CreateRefActionNamePrefix = "CreateRef";
+        private const string GetRefActionNamePrefix = "GetRef";
 
         /// <inheritdoc/>
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
@@ -99,6 +100,10 @@ namespace System.Web.OData.Routing.Conventions
             {
                 actionNamePrefix = DeleteRefActionNamePrefix;
             }
+            else if (method == HttpMethod.Get)
+            {
+                actionNamePrefix = GetRefActionNamePrefix;
+            }
             else
             {
                 actionNamePrefix = CreateRefActionNamePrefix;
@@ -115,7 +120,8 @@ namespace System.Web.OData.Routing.Conventions
         {
             return (method == HttpMethod.Delete ||
                 method == HttpMethod.Put ||
-                method == HttpMethod.Post);
+                method == HttpMethod.Post ||
+                method == HttpMethod.Get);
         }
     }
 }

@@ -24,6 +24,11 @@ namespace System.Web.OData.Routing.Conventions
         [InlineData("POST", new[] { "CreateRefToOrders" }, "CreateRefToOrders")]
         [InlineData("POST", new[] { "CreateRefToOrders", "CreateRef" }, "CreateRefToOrders")]
         [InlineData("POST", new[] { "CreateRefToOrders", "CreateRefToOrdersFromCustomer" }, "CreateRefToOrdersFromCustomer")]
+        [InlineData("GET", new string[] { }, null)]
+        [InlineData("GET", new[] { "UnrelatedAction" }, null)]
+        [InlineData("GET", new[] { "GetRefToOrders" }, "GetRefToOrders")]
+        [InlineData("GET", new[] { "GetRefToOrders", "GetRef" }, "GetRefToOrders")]
+        [InlineData("GET", new[] { "GetRefToOrders", "GetRefToOrdersFromCustomer" }, "GetRefToOrdersFromCustomer")]
         public void SelectAction_Returns_ExpectedMethodOnBaseType(string method, string[] methodsInController,
             string expectedSelectedAction)
         {
@@ -66,6 +71,11 @@ namespace System.Web.OData.Routing.Conventions
         [InlineData("POST", new[] { "CreateRefToSpecialOrders" }, "CreateRefToSpecialOrders")]
         [InlineData("POST", new[] { "CreateRefToSpecialOrders", "CreateRefToOrders" }, "CreateRefToSpecialOrders")]
         [InlineData("POST", new[] { "CreateRefToSpecialOrders", "CreateRefToSpecialOrdersFromSpecialCustomer" }, "CreateRefToSpecialOrdersFromSpecialCustomer")]
+        [InlineData("GET", new string[] { }, null)]
+        [InlineData("GET", new[] { "UnrelatedAction" }, null)]
+        [InlineData("GET", new[] { "GetRefToSpecialOrders" }, "GetRefToSpecialOrders")]
+        [InlineData("GET", new[] { "GetRefToSpecialOrders", "GetRefToOrders" }, "GetRefToSpecialOrders")]
+        [InlineData("GET", new[] { "GetRefToSpecialOrders", "GetRefToSpecialOrdersFromSpecialCustomer" }, "GetRefToSpecialOrdersFromSpecialCustomer")]
         public void SelectAction_Returns_ExpectedMethodOnDerivedType(string method, string[] methodsInController,
             string expectedSelectedAction)
         {
@@ -177,8 +187,9 @@ namespace System.Web.OData.Routing.Conventions
             Assert.Null(actionName);
         }
 
-        [Fact]
-        public void SelectAction_SetsRouteData_ForCreateRefRequests()
+        [InlineData("POST", "CreateRef")]
+        [InlineData("GET", "GetRef")]
+        public void SelectAction_SetsRouteData_ForGetOrCreateRefRequests(string method, string actionName)
         {
             // Arrange
             string key = "42";
@@ -192,8 +203,8 @@ namespace System.Web.OData.Routing.Conventions
                 new NavigationPathSegment(specialOrdersProperty),
                 new RefPathSegment());
 
-            HttpControllerContext controllerContext = CreateControllerContext("POST");
-            var actionMap = new[] { GetMockActionDescriptor("CreateRef") }.ToLookup(a => a.ActionName);
+            HttpControllerContext controllerContext = CreateControllerContext(method);
+            var actionMap = new[] { GetMockActionDescriptor(actionName) }.ToLookup(a => a.ActionName);
 
             // Act
             new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);

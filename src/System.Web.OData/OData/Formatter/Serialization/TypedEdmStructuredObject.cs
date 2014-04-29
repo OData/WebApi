@@ -13,8 +13,8 @@ namespace System.Web.OData.Formatter.Serialization
     /// </summary>
     internal abstract class TypedEdmStructuredObject : IEdmStructuredObject
     {
-        private static readonly ConcurrentDictionary<Tuple<string, IEdmStructuredType>, Func<object, object>> _propertyGetterCache =
-            new ConcurrentDictionary<Tuple<string, IEdmStructuredType>, Func<object, object>>();
+        private static readonly ConcurrentDictionary<Tuple<string, Type>, Func<object, object>> _propertyGetterCache =
+            new ConcurrentDictionary<Tuple<string, Type>, Func<object, object>>();
 
         private IEdmStructuredTypeReference _edmType;
         private Type _type;
@@ -81,7 +81,7 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmStructuredTypeReference edmType,
             IEdmModel model)
         {
-            Tuple<string, IEdmStructuredType> key = Tuple.Create(propertyName, edmType.StructuredDefinition());
+            Tuple<string, Type> key = Tuple.Create(propertyName, type);
             Func<object, object> getter;
 
             if (!_propertyGetterCache.TryGetValue(key, out getter))

@@ -1,5 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Web.OData.Builder;
+using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -114,9 +117,91 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Same(getter1, getter2);
         }
 
+        [Fact]
+        public void GetPropertyGetter_WorksWithAliasedProperties()
+        {
+            // Arrange
+            IEdmModel model;
+            IEdmEntityTypeReference reference;
+            GetModel(out model, out reference);
+            string propertyName = "Alias";
+
+            // Act
+            Func<object, object> testEntityGetter = TypedEdmStructuredObject.GetOrCreatePropertyGetter(
+                typeof(TestEntity),
+                propertyName,
+                reference,
+                model);
+
+            // Assert
+            Assert.NotNull(testEntityGetter);
+        }
+
+        [Fact]
+        public void GetPropertyGetter_WorksWithAliasedPropertiesAndDynamicProxies()
+        {
+            // Arrange
+            IEdmModel model;
+            IEdmEntityTypeReference reference;
+            GetModel(out model, out reference);
+            string propertyName = "Alias";
+
+            // Act
+            Func<object, object> testEntityGetter = TypedEdmStructuredObject.GetOrCreatePropertyGetter(
+                typeof(TestEntityGeneratedProxy),
+                propertyName,
+                reference,
+                model);
+
+            // Assert
+            Assert.NotNull(testEntityGetter);
+        }
+
+        [Fact]
+        public void GetPropertyGetter_CreatesGetterPerType()
+        {
+            // Arrange
+            IEdmModel model;
+            IEdmEntityTypeReference reference;
+            GetModel(out model, out reference);
+            string propertyName = "Alias";
+
+            // Act
+            Func<object, object> testEntityGetter = TypedEdmStructuredObject.GetOrCreatePropertyGetter(
+                typeof(TestEntity),
+                propertyName,
+                reference,
+                model);
+
+            Func<object, object> proxyEntityGetter = TypedEdmStructuredObject.GetOrCreatePropertyGetter(
+                typeof(TestEntityGeneratedProxy),
+                propertyName,
+                reference,
+                model);
+
+            // Assert
+            Assert.NotSame(testEntityGetter, proxyEntityGetter);
+        }
+
+        private static void GetModel(out IEdmModel model, out IEdmEntityTypeReference reference)
+        {
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
+            EntityTypeConfiguration<TestEntity> entity = builder.EntityType<TestEntity>();
+            entity.Namespace = "Test";
+            entity.Name = "Entity";
+            NavigationPropertyConfiguration property = entity.HasOptional(p => p.Property);
+            property.Name = "Alias";
+            model = builder.GetEdmModel();
+            reference = new EdmEntityTypeReference((IEdmEntityType)model.FindType("Test.Entity"), false);
+        }
+
         public class TestEntity
         {
             public object Property { get; set; }
+        }
+
+        public class TestEntityGeneratedProxy : TestEntity
+        {
         }
     }
 }

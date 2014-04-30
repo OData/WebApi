@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -37,12 +38,14 @@ namespace System.Web.OData.Builder
             Assert.Reflection.BooleanProperty(_configuration, c => c.AddedExplicitly, true);
         }
 
-        [Fact]
-        public void Property_ThrowsIfTypeIsDateTime()
+        [Theory]
+        [InlineData(typeof(DateTime))]
+        [InlineData(typeof(DateTime?))]
+        public void AddProperty_ThrowsIfTypeIsDateTime(Type propertyType)
         {
             // Arrange
             MockType type = new MockType("Customer", @namespace: "Contoso");
-            MockPropertyInfo property = new MockPropertyInfo(typeof(DateTime), "Birthday");
+            MockPropertyInfo property = new MockPropertyInfo(propertyType, "Birthday");
             property.SetupGet(p => p.ReflectedType).Returns(type);
             property.SetupGet(p => p.DeclaringType).Returns(type);
 
@@ -51,8 +54,60 @@ namespace System.Web.OData.Builder
             mock.SetupGet(c => c.ClrType).Returns(type);
 
             // Act & Assert
-            Assert.ThrowsArgument(() => configuration.AddProperty(property), "propertyInfo",
-                "The type 'System.DateTime' of property 'Birthday' in the 'Contoso.Customer' type is not a supported type.");
+            Assert.ThrowsArgument(
+                () => configuration.AddProperty(property), 
+                "propertyInfo",
+                string.Format(
+                    "The type '{0}' of property 'Birthday' in the 'Contoso.Customer' type is not a supported type.", 
+                    propertyType.FullName));
+        }
+
+        [Theory]
+        [InlineData(typeof(DateTime))]
+        [InlineData(typeof(DateTime?))]
+        public void AddComplexProperty_ThrowsIfTypeIsDateTime(Type propertyType)
+        {
+            // Arrange
+            MockType type = new MockType("Customer", @namespace: "Contoso");
+            MockPropertyInfo property = new MockPropertyInfo(propertyType, "Birthday");
+            property.SetupGet(p => p.ReflectedType).Returns(type);
+            property.SetupGet(p => p.DeclaringType).Returns(type);
+
+            Mock<StructuralTypeConfiguration> mock = new Mock<StructuralTypeConfiguration> { CallBase = true };
+            StructuralTypeConfiguration configuration = mock.Object;
+            mock.SetupGet(c => c.ClrType).Returns(type);
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => configuration.AddComplexProperty(property),
+                "propertyInfo",
+                string.Format(
+                    "The type '{0}' of property 'Birthday' in the 'Contoso.Customer' type is not a supported type.",
+                    propertyType.FullName));
+        }
+
+        [Theory]
+        [InlineData(typeof(IEnumerable<DateTime>))]
+        [InlineData(typeof(IEnumerable<DateTime?>))]
+        public void AddCollectionProperty_ThrowsIfTypeIsDateTime(Type propertyType)
+        {
+            // Arrange
+            MockType type = new MockType("Customer", @namespace: "Contoso");
+            MockPropertyInfo property = new MockPropertyInfo(propertyType, "Birthday");
+            property.SetupGet(p => p.ReflectedType).Returns(type);
+            property.SetupGet(p => p.DeclaringType).Returns(type);
+
+            Mock<StructuralTypeConfiguration> mock = new Mock<StructuralTypeConfiguration> { CallBase = true };
+            StructuralTypeConfiguration configuration = mock.Object;
+            mock.SetupGet(c => c.ClrType).Returns(type);
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => configuration.AddCollectionProperty(property),
+                "propertyInfo",
+                string.Format(
+                    "The type '{0}' of property 'Birthday' in the 'Contoso.Customer' type is not a supported type.",
+                    propertyType.FullName));
         }
     }
 }

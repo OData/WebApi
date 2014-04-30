@@ -721,7 +721,16 @@
   <data name="InvalidPropertyInfoForDynamicPropertyAnnotation" xml:space="preserve">
     <value>Type '{0}' is not supported as dynamic property annotation. Referenced property must be of type '{1}'.</value>
   </data>
-  <data name="DateTimeTypeNotSupported" xml:space="preserve">
+  <data name="DateTimeTypePropertyNotSupported" xml:space="preserve">
     <value>The type '{0}' of property '{1}' in the '{2}' type is not a supported type.</value>
+  </data>
+  <data name="DateTimeTypeNotSupported" xml:space="preserve">
+    <value>The type '{0}' is not a supported type.</value>
+  </data>
+  <data name="DateTimeTypeParametersNotSupported" xml:space="preserve">
+    <value>The type '{0}' is not a supported parameter type for the parameter {1}.</value>
+  </data>
+  <data name="DateTimeTypeReturnTypeNotSupported" xml:space="preserve">
+    <value>The type '{0}' is not a supported return type.</value>
   </data>
 </root>

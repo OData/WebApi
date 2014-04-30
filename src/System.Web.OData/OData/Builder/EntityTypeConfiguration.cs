@@ -288,6 +288,15 @@ namespace System.Web.OData.Builder
                 throw Error.Argument("navigationProperty", SRResources.PropertyDoesNotBelongToType, navigationProperty.Name, ClrType.FullName);
             }
 
+            if (navigationProperty.PropertyType == typeof(IEnumerable<DateTime>) ||
+                navigationProperty.PropertyType == typeof(IEnumerable<DateTime?>) ||
+                navigationProperty.PropertyType == typeof(DateTime) ||
+                navigationProperty.PropertyType == typeof(DateTime?))
+            {
+                throw Error.Argument("navigationProperty", SRResources.DateTimeTypePropertyNotSupported,
+                    navigationProperty.PropertyType.FullName, navigationProperty.Name, navigationProperty.DeclaringType.FullName);
+            }
+
             ValidatePropertyNotAlreadyDefinedInBaseTypes(navigationProperty);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(navigationProperty);
 

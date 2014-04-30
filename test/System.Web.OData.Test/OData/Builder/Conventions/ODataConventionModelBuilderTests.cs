@@ -1536,6 +1536,57 @@ namespace System.Web.OData.Builder.Conventions
             ODataModelBuilderTest.AssertHasContainment(myOrder, model);
             ODataModelBuilderTest.AssertHasAdditionalContainment(myOrder, model);
         }
+
+        [Fact]
+        public void ODataConventionModelBuilder_SetIdWithTypeNamePrefixAsKey_IfNoKeyAttribute()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<EntityKeyConventionTests_Album1>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType entityType = model.AssertHasEntityType(typeof(EntityKeyConventionTests_Album1));
+            IEdmStructuralProperty keyProperty = Assert.Single(entityType.Key());
+            Assert.Equal("EntityKeyConventionTests_Album1Id", keyProperty.Name);
+            Assert.True(keyProperty.Type.IsInt64());
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_SetIdAsKey_IfNoKeyAttribute()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<EntityKeyConventionTests_Album2>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType entityType = model.AssertHasEntityType(typeof(EntityKeyConventionTests_Album2));
+            IEdmStructuralProperty keyProperty = Assert.Single(entityType.Key());
+            Assert.Equal("Id", keyProperty.Name);
+            Assert.True(keyProperty.Type.IsInt32());
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_EntityKeyConvention_DoesNothing_IfKeyAttribute()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<EntityKeyConventionTests_AlbumWithKey>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType entityType = model.AssertHasEntityType(typeof(EntityKeyConventionTests_AlbumWithKey));
+            IEdmStructuralProperty keyProperty = Assert.Single(entityType.Key());
+            Assert.Equal("Path", keyProperty.Name);
+            Assert.True(keyProperty.Type.IsString());
+        }
     }
 
     public class Product
@@ -1656,5 +1707,24 @@ namespace System.Web.OData.Builder.Conventions
 
         [Timestamp]
         public string Name { get; set; }
+    }
+
+    class EntityKeyConventionTests_Album1
+    {
+        public string Path { get; set; }
+        public long EntityKeyConventionTests_Album1Id { get; set; }
+    }
+
+    class EntityKeyConventionTests_Album2
+    {
+        public string Path { get; set; }
+        public int Id { get; set; }
+    }
+
+    class EntityKeyConventionTests_AlbumWithKey
+    {
+        [Key]
+        public string Path { get; set; }
+        public int Id { get; set; }
     }
 }

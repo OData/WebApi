@@ -25,6 +25,12 @@ namespace System.Web.OData.Builder.Conventions
                 throw Error.ArgumentNull("entity");
             }
 
+            // Suppress the EntityKeyConvention if there is any key in EntityTypeConfiguration.
+            if (entity.Keys.Any())
+            {
+                return;
+            }
+
             // Try to figure out keys only if there is no base type.
             if (entity.BaseType == null)
             {

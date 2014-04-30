@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.Dispatcher;
+using System.Web.Http.Tracing;
 using Microsoft.TestCommon;
 using Moq;
 
-namespace System.Web.Http.Tracing
+namespace System.Web.Http.ModelBinding
 {
     /// <summary>
     /// End to end functional tests for tracing.
@@ -97,52 +97,6 @@ namespace System.Web.Http.Tracing
             new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Action",       "ApiControllerActionInvoker",     "InvokeActionAsync"),
             new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Controllers",  "ValuesController",               "ExecuteAsync"),
             new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.MessageHandlers",  "DelegatingHandlerProxy",  "SendAsync"),
-            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Request",      string.Empty,                     string.Empty),
-            new ExpectedTraceRecord(TraceKind.Begin,    "System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "WriteToStreamAsync"),
-            new ExpectedTraceRecord(TraceKind.End,      "System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "WriteToStreamAsync"),
-        };
-
-        // These are all the Begin/End traces we expect in a successful ValuesController.Get(id).
-        public static List<ExpectedTraceRecord> ExpectedTraceRecordOrderIncludingRouteSpecificHandlers = new List<ExpectedTraceRecord>() {
-            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Request",      string.Empty,                     string.Empty),
-
-            // RouteSpecificHandlers
-            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.MessageHandlers",  "HandlerA",  "SendAsync"),
-            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.MessageHandlers",  "HandlerB0",  "SendAsync"),
-            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.MessageHandlers",  "HandlerB1",  "SendAsync"),
-            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.MessageHandlers",  "HandlerB2",  "SendAsync"),
-
-            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Controllers",  "DefaultHttpControllerSelector",  "SelectController"),
-            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Controllers",  "DefaultHttpControllerTypeResolver", "GetControllerTypes"),
-            new ExpectedTraceRecord(TraceKind.End,       "System.Web.Http.Controllers",  "DefaultHttpControllerTypeResolver", "GetControllerTypes"),
-            new ExpectedTraceRecord(TraceKind.End,       "System.Web.Http.Controllers",  "DefaultHttpControllerSelector",  "SelectController"),
-            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Controllers",  "HttpControllerDescriptor",       "CreateController"),
-            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Controllers",  "DefaultHttpControllerActivator", "Create"),
-            new ExpectedTraceRecord(TraceKind.End,       "System.Web.Http.Controllers",  "DefaultHttpControllerActivator", "Create"),
-            new ExpectedTraceRecord(TraceKind.End,       "System.Web.Http.Controllers",  "HttpControllerDescriptor",       "CreateController"),
-            new ExpectedTraceRecord(TraceKind.Begin,     "System.Web.Http.Controllers",  "ValuesController",               "ExecuteAsync"),
-            new ExpectedTraceRecord(TraceKind.Begin,    "System.Web.Http.Action",       "ApiControllerActionSelector",    "SelectAction"),
-            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Action",       "ApiControllerActionSelector",    "SelectAction"),
-            new ExpectedTraceRecord(TraceKind.Begin,    "System.Web.Http.ModelBinding", "HttpActionBinding",              "ExecuteBindingAsync"),
-            new ExpectedTraceRecord(TraceKind.Begin,    "System.Web.Http.ModelBinding", "ModelBinderParameterBinding",    "ExecuteBindingAsync"),
-            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.ModelBinding", "ModelBinderParameterBinding",    "ExecuteBindingAsync"),
-            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.ModelBinding", "HttpActionBinding",              "ExecuteBindingAsync"),
-            new ExpectedTraceRecord(TraceKind.Begin,    "System.Web.Http.Action",       "ApiControllerActionInvoker",     "InvokeActionAsync"),
-            new ExpectedTraceRecord(TraceKind.Begin,    "System.Web.Http.Action",       "ReflectedHttpActionDescriptor",  "ExecuteAsync"),     
-            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Action",       "ReflectedHttpActionDescriptor",  "ExecuteAsync"),
-            new ExpectedTraceRecord(TraceKind.Begin,    "System.Net.Http.Formatting",   "DefaultContentNegotiator",       "Negotiate"),
-            new ExpectedTraceRecord(TraceKind.Begin,    "System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "GetPerRequestFormatterInstance"),
-            new ExpectedTraceRecord(TraceKind.End,      "System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "GetPerRequestFormatterInstance"),
-            new ExpectedTraceRecord(TraceKind.End,      "System.Net.Http.Formatting",   "DefaultContentNegotiator",       "Negotiate"),
-            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Action",       "ApiControllerActionInvoker",     "InvokeActionAsync"),
-            new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Controllers",  "ValuesController",               "ExecuteAsync"),
-
-            // RouteSpecificHandlers
-            new ExpectedTraceRecord(TraceKind.End,     "System.Web.Http.MessageHandlers",  "HandlerB2",  "SendAsync"),
-            new ExpectedTraceRecord(TraceKind.End,     "System.Web.Http.MessageHandlers",  "HandlerB1",  "SendAsync"),
-            new ExpectedTraceRecord(TraceKind.End,     "System.Web.Http.MessageHandlers",  "HandlerB0",  "SendAsync"),
-            new ExpectedTraceRecord(TraceKind.End,     "System.Web.Http.MessageHandlers",  "HandlerA",  "SendAsync"),
-
             new ExpectedTraceRecord(TraceKind.End,      "System.Web.Http.Request",      string.Empty,                     string.Empty),
             new ExpectedTraceRecord(TraceKind.Begin,    "System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "WriteToStreamAsync"),
             new ExpectedTraceRecord(TraceKind.End,      "System.Net.Http.Formatting",   "JsonMediaTypeFormatter",         "WriteToStreamAsync"),
@@ -368,57 +322,6 @@ namespace System.Web.Http.Tracing
                 }
             }
         }
-
-        [Fact]
-        public void Trace_RouteSpecificMessageHandlers_As_Expected()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-            config.Routes.MapHttpRoute(
-                name: "RouteHavingMessageHandler",
-                routeTemplate: "RouteHandlerPipeLine/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional },
-                constraints: null,
-                handler:
-                    HttpClientFactory.CreatePipeline(
-                        innerHandler: new HttpControllerDispatcher(config),
-                        handlers: new DelegatingHandler[] { new HandlerB0(), new HandlerB1(), new HandlerB2(), }));
-                                                            // Route specific message handlers B0, B1, and B2.
-            config.MessageHandlers.Add(new HandlerA()); // Common for all routes message handler
-            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            MemoryTraceWriter traceWriter = new MemoryTraceWriter();
-            config.Services.Replace(typeof(ITraceWriter), traceWriter);
-
-            using (HttpServer server = new HttpServer(config))
-            {
-                using (HttpClient client = new HttpClient(server))
-                {
-                    string uri = _baseAddress + "/RouteHandlerPipeLine/Values?id=5";
-                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
-
-                    // Act
-                    traceWriter.Start();
-                    HttpResponseMessage response = client.SendAsync(request).Result;
-                    traceWriter.Finish();
-
-                    // Assert
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    IList<string> missingTraces = MissingTraces(ExpectedTraceRecordOrderIncludingRouteSpecificHandlers,
-                        traceWriter.Records);
-                    Assert.True(missingTraces.Count == 0,
-                        string.Format("These expected traces were missing:{0}    {1}",
-                            Environment.NewLine, string.Join(Environment.NewLine + "    ", missingTraces)));
-                    IList<string> unexpectedTraces =
-                        UnexpectedTraces(ExpectedTraceRecordOrderIncludingRouteSpecificHandlers, traceWriter.Records);
-                    Assert.True(unexpectedTraces.Count == 0,
-                        string.Format("These traces were not expected:{0}    {1}",
-                            Environment.NewLine, string.Join(Environment.NewLine + "    ", unexpectedTraces)));
-                    Assert.True(ConfirmTracingOrder(ExpectedTraceRecordOrderIncludingRouteSpecificHandlers,
-                        traceWriter.Records));
-                }
-            }
-        }
-
         // Returns a list of strings describing all of the expected trace records that were not
         // actually traced.
         // If you experience test failures from this list, it means someone stopped tracing or 
@@ -505,22 +408,6 @@ namespace System.Web.Http.Tracing
                 traceBeginPos++;
             }
             return true;
-        }
-
-        public class HandlerA : DelegatingHandler
-        {
-        }
-
-        public class HandlerB0 : DelegatingHandler
-        {
-        }
-
-        public class HandlerB1 : DelegatingHandler
-        {
-        }
-
-        public class HandlerB2 : DelegatingHandler
-        {
         }
     }
 

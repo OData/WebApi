@@ -104,12 +104,34 @@ namespace System.Web.Mvc.Html
 
         public static MvcHtmlString ValidationMessage(this HtmlHelper htmlHelper, string modelName)
         {
-            return ValidationMessage(htmlHelper, modelName, null /* validationMessage */, new RouteValueDictionary());
+            return ValidationMessage(htmlHelper, modelName, validationMessage: null, htmlAttributes: new RouteValueDictionary());
         }
 
         public static MvcHtmlString ValidationMessage(this HtmlHelper htmlHelper, string modelName, object htmlAttributes)
         {
-            return ValidationMessage(htmlHelper, modelName, null /* validationMessage */, HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
+            return ValidationMessage(htmlHelper, modelName, validationMessage: null, htmlAttributes: HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
+        }
+
+        /// <summary>
+        /// Displays a validation message if an error exists for the specified entry in the
+        /// <see cref="ModelStateDictionary"/> object.
+        /// </summary>
+        /// <param name="htmlHelper">The HTML helper instance that this method operates on.</param>
+        /// <param name="modelName">The name of the entry being validated.</param>
+        /// <param name="htmlAttributes">An object that contains the HTML attributes for the element.</param>
+        /// <param name="tag">The tag to be set for the wrapping HTML element of the validation message.</param>
+        /// <returns>null if the entry is valid and client-side validation is disabled.
+        /// Otherwise, a <paramref name="tag"/> element that contains an error message.</returns>
+        public static MvcHtmlString ValidationMessage(this HtmlHelper htmlHelper,
+                                                      string modelName,
+                                                      object htmlAttributes,
+                                                      string tag)
+        {
+            return ValidationMessage(htmlHelper,
+                                     modelName,
+                                     validationMessage: null,
+                                     htmlAttributes: HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes),
+                                     tag: tag);
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", Justification = "'validationMessage' refers to the message that will be rendered by the ValidationMessage helper.")]
@@ -124,13 +146,109 @@ namespace System.Web.Mvc.Html
             return ValidationMessage(htmlHelper, modelName, validationMessage, HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
+        /// <summary>
+        /// Displays a validation message if an error exists for the specified entry in the
+        /// <see cref="ModelStateDictionary"/> object.
+        /// </summary>
+        /// <param name="htmlHelper">The HTML helper instance that this method operates on.</param>
+        /// <param name="modelName">The name of the entry being validated.</param>
+        /// <param name="validationMessage">The message to display if the specified entry contains an error.</param>
+        /// <param name="htmlAttributes">An object that contains the HTML attributes for the element.</param>
+        /// <param name="tag">The tag to be set for the wrapping HTML element of the validation message.</param>
+        /// <returns>null if the entry is valid and client-side validation is disabled.
+        /// Otherwise, a <paramref name="tag"/> element that contains an error message.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", Justification =
+            "'validationMessage' refers to the message that will be rendered by the ValidationMessage helper.")]
+        public static MvcHtmlString ValidationMessage(this HtmlHelper htmlHelper,
+                                                      string modelName,
+                                                      string validationMessage,
+                                                      object htmlAttributes,
+                                                      string tag)
+        {
+            return ValidationMessage(htmlHelper,
+                                     modelName,
+                                     validationMessage,
+                                     HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes),
+                                     tag);
+        }
+
+        /// <summary>
+        /// Displays a validation message if an error exists for the specified entry in the
+        /// <see cref="ModelStateDictionary"/> object.
+        /// </summary>
+        /// <param name="htmlHelper">The HTML helper instance that this method operates on.</param>
+        /// <param name="modelName">The name of the entry being validated.</param>
+        /// <param name="validationMessage">The message to display if the specified entry contains an error.</param>
+        /// <param name="tag">The tag to be set for the wrapping HTML element of the validation message.</param>
+        /// <returns>null if the entry is valid and client-side validation is disabled.
+        /// Otherwise, a <paramref name="tag"/> element that contains an error message.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", Justification =
+            "'validationMessage' refers to the message that will be rendered by the ValidationMessage helper.")]
+        public static MvcHtmlString ValidationMessage(this HtmlHelper htmlHelper,
+                                                      string modelName,
+                                                      string validationMessage,
+                                                      string tag)
+        {
+            return ValidationMessage(htmlHelper,
+                                     modelName,
+                                     validationMessage,
+                                     htmlAttributes: new RouteValueDictionary(),
+                                     tag: tag);
+        }
+
         public static MvcHtmlString ValidationMessage(this HtmlHelper htmlHelper, string modelName, IDictionary<string, object> htmlAttributes)
         {
-            return ValidationMessage(htmlHelper, modelName, null /* validationMessage */, htmlAttributes);
+            return ValidationMessage(htmlHelper, modelName, validationMessage: null, htmlAttributes: htmlAttributes);
+        }
+
+        /// <summary>
+        /// Displays a validation message if an error exists for the specified entry in the
+        /// <see cref="ModelStateDictionary"/> object.
+        /// </summary>
+        /// <param name="htmlHelper">The HTML helper instance that this method operates on.</param>
+        /// <param name="modelName">The name of the entry being validated.</param>
+        /// <param name="htmlAttributes">An <see cref="IDictionary{TKey,TValue}"/> that contains the HTML attributes
+        /// for the element.</param>
+        /// <param name="tag">The tag to be set for the wrapping HTML element of the validation message.</param>
+        /// <returns>null if the entry is valid and client-side validation is disabled.
+        /// Otherwise, a <paramref name="tag"/> element that contains an error message.</returns>
+        public static MvcHtmlString ValidationMessage(this HtmlHelper htmlHelper,
+                                                      string modelName,
+                                                      IDictionary<string, object> htmlAttributes,
+                                                      string tag)
+        {
+            return ValidationMessage(htmlHelper,
+                                     modelName,
+                                     validationMessage: null,
+                                     htmlAttributes: htmlAttributes,
+                                     tag: tag);
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", Justification = "'validationMessage' refers to the message that will be rendered by the ValidationMessage helper.")]
         public static MvcHtmlString ValidationMessage(this HtmlHelper htmlHelper, string modelName, string validationMessage, IDictionary<string, object> htmlAttributes)
+        {
+            return ValidationMessage(htmlHelper, modelName, validationMessage, htmlAttributes, tag: null);
+        }
+
+        /// <summary>
+        /// Displays a validation message if an error exists for the specified entry in the
+        /// <see cref="ModelStateDictionary"/> object.
+        /// </summary>
+        /// <param name="htmlHelper">The HTML helper instance that this method operates on.</param>
+        /// <param name="modelName">The name of the model object being validated.</param>
+        /// <param name="validationMessage">The message to display if the specified entry contains an error.</param>
+        /// <param name="htmlAttributes">An <see cref="IDictionary{TKey,TValue}"/> that contains the HTML attributes
+        /// for the element.</param>
+        /// <param name="tag">The tag to be set for the wrapping HTML element of the validation message.</param>
+        /// <returns>null if the model object is valid and client-side validation is disabled.
+        /// Otherwise, a <paramref name="tag"/> element that contains an error message.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", Justification =
+            "'validationMessage' refers to the message that will be rendered by the ValidationMessage helper.")]
+        public static MvcHtmlString ValidationMessage(this HtmlHelper htmlHelper,
+                                                      string modelName,
+                                                      string validationMessage,
+                                                      IDictionary<string, object> htmlAttributes,
+                                                      string tag)
         {
             if (modelName == null)
             {
@@ -141,13 +259,14 @@ namespace System.Web.Mvc.Html
                                            ModelMetadata.FromStringExpression(modelName, htmlHelper.ViewContext.ViewData),
                                            modelName,
                                            validationMessage,
-                                           htmlAttributes);
+                                           htmlAttributes,
+                                           tag);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is an appropriate nesting of generic types")]
         public static MvcHtmlString ValidationMessageFor<TModel, TProperty>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TProperty>> expression)
         {
-            return ValidationMessageFor(htmlHelper, expression, null /* validationMessage */, new RouteValueDictionary());
+            return ValidationMessageFor(htmlHelper, expression, validationMessage: null, htmlAttributes: new RouteValueDictionary());
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is an appropriate nesting of generic types")]
@@ -165,15 +284,99 @@ namespace System.Web.Mvc.Html
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is an appropriate nesting of generic types")]
         public static MvcHtmlString ValidationMessageFor<TModel, TProperty>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TProperty>> expression, string validationMessage, IDictionary<string, object> htmlAttributes)
         {
+            return ValidationMessageFor(htmlHelper,
+                                        expression,
+                                        validationMessage,
+                                        htmlAttributes,
+                                        tag: null);
+        }
+
+        /// <summary>
+        /// Returns the HTML markup for a validation-error message for the specified expression.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the model.</typeparam>
+        /// <typeparam name="TProperty">The type of the property.</typeparam>
+        /// <param name="htmlHelper">The HTML helper instance that this method operates on.</param>
+        /// <param name="expression">An expression that identifies the object that contains the properties to render.
+        /// </param>
+        /// <param name="validationMessage">The message to display if a validation error occurs.</param>
+        /// <param name="tag">The tag to be set for the wrapping HTML element of the validation message.</param>
+        /// <returns>null if the model object is valid and client-side validation is disabled.
+        /// Otherwise, a <paramref name="tag"/> element that contains an error message.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification =
+            "This is an appropriate nesting of generic types")]
+        public static MvcHtmlString ValidationMessageFor<TModel, TProperty>(this HtmlHelper<TModel> htmlHelper,
+                                                                            Expression<Func<TModel, TProperty>> expression,
+                                                                            string validationMessage,
+                                                                            string tag)
+        {
+            return ValidationMessageFor(htmlHelper,
+                                        expression,
+                                        validationMessage,
+                                        htmlAttributes: null,
+                                        tag: tag);
+        }
+
+        /// <summary>
+        /// Returns the HTML markup for a validation-error message for the specified expression.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the model.</typeparam>
+        /// <typeparam name="TProperty">The type of the property.</typeparam>
+        /// <param name="htmlHelper">The HTML helper instance that this method operates on.</param>
+        /// <param name="expression">An expression that identifies the object that contains the properties to render.
+        /// </param>
+        /// <param name="validationMessage">The message to display if a validation error occurs.</param>
+        /// <param name="htmlAttributes">An object that contains the HTML attributes for the element.</param>
+        /// <param name="tag">The tag to be set for the wrapping HTML element of the validation message.</param>
+        /// <returns>null if the model object is valid and client-side validation is disabled.
+        /// Otherwise, a <paramref name="tag"/> element that contains an error message.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification =
+            "This is an appropriate nesting of generic types")]
+        public static MvcHtmlString ValidationMessageFor<TModel, TProperty>(this HtmlHelper<TModel> htmlHelper,
+                                                                            Expression<Func<TModel, TProperty>> expression,
+                                                                            string validationMessage,
+                                                                            object htmlAttributes,
+                                                                            string tag)
+        {
+            return ValidationMessageFor(htmlHelper,
+                                        expression,
+                                        validationMessage,
+                                        HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes),
+                                        tag);
+        }
+
+        /// <summary>
+        /// Returns the HTML markup for a validation-error message for the specified expression.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the model.</typeparam>
+        /// <typeparam name="TProperty">The type of the property.</typeparam>
+        /// <param name="htmlHelper">The HTML helper instance that this method operates on.</param>
+        /// <param name="expression">An expression that identifies the object that contains the properties to render.
+        /// </param>
+        /// <param name="validationMessage">The message to display if a validation error occurs.</param>
+        /// <param name="htmlAttributes">An <see cref="IDictionary{TKey,TValue}"/> that contains the HTML attributes
+        /// for the element.</param>
+        /// <param name="tag">The tag to be set for the wrapping HTML element of the validation message.</param>
+        /// <returns>null if the model object is valid and client-side validation is disabled.
+        /// Otherwise, a <paramref name="tag"/> element that contains an error message.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification =
+            "This is an appropriate nesting of generic types")]
+        public static MvcHtmlString ValidationMessageFor<TModel, TProperty>(this HtmlHelper<TModel> htmlHelper,
+                                                                            Expression<Func<TModel, TProperty>> expression,
+                                                                            string validationMessage,
+                                                                            IDictionary<string, object> htmlAttributes,
+                                                                            string tag)
+        {
             return ValidationMessageHelper(htmlHelper,
                                            ModelMetadata.FromLambdaExpression(expression, htmlHelper.ViewData),
                                            ExpressionHelper.GetExpressionText(expression),
                                            validationMessage,
-                                           htmlAttributes);
+                                           htmlAttributes,
+                                           tag);
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Normalization to lowercase is a common requirement for JavaScript and HTML values")]
-        private static MvcHtmlString ValidationMessageHelper(this HtmlHelper htmlHelper, ModelMetadata modelMetadata, string expression, string validationMessage, IDictionary<string, object> htmlAttributes)
+        private static MvcHtmlString ValidationMessageHelper(this HtmlHelper htmlHelper, ModelMetadata modelMetadata, string expression, string validationMessage, IDictionary<string, object> htmlAttributes, string tag)
         {
             string modelName = htmlHelper.ViewContext.ViewData.TemplateInfo.GetFullHtmlFieldName(expression);
             FormContext formContext = htmlHelper.ViewContext.GetFormContextForClientValidation();
@@ -192,7 +395,12 @@ namespace System.Web.Mvc.Html
                 return null;
             }
 
-            TagBuilder builder = new TagBuilder("span");
+            if (String.IsNullOrEmpty(tag))
+            {
+                tag = htmlHelper.ViewContext.ValidationMessageElement;
+            }
+
+            TagBuilder builder = new TagBuilder(tag);
             builder.MergeAttributes(htmlAttributes);
             builder.AddCssClass((modelError != null) ? HtmlHelper.ValidationMessageCssClassName : HtmlHelper.ValidationMessageValidCssClassName);
 

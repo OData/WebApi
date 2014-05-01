@@ -1121,6 +1121,21 @@ namespace System.Web.Mvc.Test
             mockViewContext.VerifySet(vc => vc.ValidationSummaryMessageElement = "label");
         }
 
+        [Fact]
+        public void SetValidationMessageElement()
+        {
+            // Arrange
+            var mockViewContext = new Mock<ViewContext>();
+            var viewDataContainer = new Mock<IViewDataContainer>().Object;
+            var htmlHelper = new HtmlHelper(mockViewContext.Object, viewDataContainer);
+
+            // Act
+            htmlHelper.SetValidationMessageElement("label");
+
+            // Act & assert
+            mockViewContext.VerifySet(vc => vc.ValidationMessageElement = "label");
+        }
+
         private class ObjectWithWrapperMarkup
         {
             public override string ToString()

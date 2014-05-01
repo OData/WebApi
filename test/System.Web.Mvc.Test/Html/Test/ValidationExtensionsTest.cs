@@ -285,6 +285,118 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal("<span class=\"field-validation-error\" foo-baz=\"baz\">bar error</span>", html.ToHtmlString());
         }
 
+
+        [Fact]
+        public void ValidationMessageWithOverriddenTag_UsesGivenTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+            htmlHelper.SetValidationMessageElement("label");
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessage("foo", "bar error");
+
+            // Assert
+            Assert.Equal(
+                "<label class=\"field-validation-error\">bar error</label>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationMessageWithOverriddenTag_SetPropertyInValidationMessageElement_UsesGivenTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+            htmlHelper.ViewContext.ValidationMessageElement = "label";
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessage("foo", "bar error");
+
+            // Assert
+            Assert.Equal(
+                "<label class=\"field-validation-error\">bar error</label>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationMessageWithCustomTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessage("foo", "bar error", "label");
+
+            // Assert
+            Assert.Equal(
+                "<label class=\"field-validation-error\">bar error</label>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationMessageWithObjectAttributesWithCustomTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessage("foo", "bar error", new { baz = "baz"}, "label");
+
+            // Assert
+            Assert.Equal(
+                "<label baz=\"baz\" class=\"field-validation-error\">bar error</label>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationMessageWithAttributesDictionaryWithCustomTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+            RouteValueDictionary htmlAttributes = new RouteValueDictionary();
+            htmlAttributes["baz"] = "baz";
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessage("foo", "bar error", htmlAttributes, "label");
+
+            // Assert
+            Assert.Equal(
+                "<label baz=\"baz\" class=\"field-validation-error\">bar error</label>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationMessageWithoutMessageWithAttributesDictionaryWithCustomTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+            RouteValueDictionary htmlAttributes = new RouteValueDictionary();
+            htmlAttributes["baz"] = "baz";
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessage("foo", htmlAttributes, "label");
+
+            // Assert
+            Assert.Equal(
+                "<label baz=\"baz\" class=\"field-validation-error\">foo error &lt;1&gt;</label>",
+                html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationMessageWithoutMessageWithObjectAttributesWithCustomTag()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessage("foo", new { bar = "bar", baz = "baz"}, "label");
+
+            // Assert
+            Assert.Equal(
+                "<label bar=\"bar\" baz=\"baz\" class=\"field-validation-error\">foo error &lt;1&gt;</label>",
+                html.ToHtmlString());
+        }
+
         [Fact]
         public void ValidationMessageThrowsIfModelNameIsNull()
         {
@@ -599,6 +711,61 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Equal("<span baz=\"baz\" class=\"field-validation-error\">bar error</span>", html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationMessageForWithOverriddenTag_UsesGivenTag()
+        {
+            // Arrange
+            HtmlHelper<ValidationModel> htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+            htmlHelper.SetValidationMessageElement("label");
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.foo, "bar error");
+
+            // Assert
+            Assert.Equal("<label class=\"field-validation-error\">bar error</label>", html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationMessageForWithCustomTag()
+        {
+            // Arrange
+            HtmlHelper<ValidationModel> htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.foo, "bar error", "label");
+
+            // Assert
+            Assert.Equal("<label class=\"field-validation-error\">bar error</label>", html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationMessageForWithDictionaryAndCustomTag()
+        {
+            // Arrange
+            HtmlHelper<ValidationModel> htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+            RouteValueDictionary htmlAttributes = new RouteValueDictionary();
+            htmlAttributes["class"] = "my-class";
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.foo, "bar error", htmlAttributes, "label");
+
+            // Assert
+            Assert.Equal("<label class=\"field-validation-error my-class\">bar error</label>", html.ToHtmlString());
+        }
+
+        [Fact]
+        public void ValidationMessageForWithObjectAttributesAndCustomTag()
+        {
+            // Arrange
+            HtmlHelper<ValidationModel> htmlHelper = MvcHelper.GetHtmlHelper(GetViewDataWithModelErrors());
+
+            // Act
+            MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.foo, "bar error", new { @class = "baz" }, "label");
+
+            // Assert
+            Assert.Equal("<label class=\"field-validation-error baz\">bar error</label>", html.ToHtmlString());
         }
 
         [Fact]

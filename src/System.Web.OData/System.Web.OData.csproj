@@ -159,7 +159,7 @@
     <Compile Include="OData\IEdmComplexObject.cs" />
     <Compile Include="OData\IEdmEntityObject.cs" />
     <Compile Include="OData\NullEdmComplexObject.cs" />
-    <Compile Include="OData\ODataNullValueAttribute.cs" />
+    <Compile Include="OData\ODataNullValueMessageHandler.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProviderExtensions.cs" />
     <Compile Include="OData\Formatter\Serialization\SelectExpandNode.cs" />
     <Compile Include="OData\IEdmObject.cs" />

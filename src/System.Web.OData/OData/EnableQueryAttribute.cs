@@ -397,8 +397,13 @@ namespace System.Web.OData
                     try
                     {
                         object queryResult = ExecuteQuery(responseContent.Value, request, actionDescriptor);
-                        if (queryResult == null)
+                        if (queryResult == null && request.ODataProperties().Path == null)
                         {
+                            // This is the case in which a regular OData service uses the EnableQuery attribute.
+                            // For OData services ODataNullValueMessageHandler should be plugged in for the service
+                            // if this behavior is desired.
+                            // For non OData services this behavior is equivalent as the one in the v3 version in order
+                            // to reduce the friction when they decide to move to use the v4 EnableQueryAttribute.
                             actionExecutedContext.Response = request.CreateResponse(HttpStatusCode.NotFound);
                         }
                         else

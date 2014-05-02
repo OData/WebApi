@@ -812,6 +812,25 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
+        public void OnActionExecuted_SingleResult_WithEmptyQueryResult_SetsContentNullIfODataPathIsPresent()
+        {
+            // Arrange
+            var customers = Enumerable.Empty<Customer>().AsQueryable();
+            SingleResult result = SingleResult.Create(customers);
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", result);
+            actionExecutedContext.Request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment("C"));
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
+            
+            // Act
+            attribute.OnActionExecuted(actionExecutedContext);
+
+            // Assert
+            ObjectContent content = actionExecutedContext.Response.Content as ObjectContent;
+            Assert.NotNull(content);
+            Assert.Null(content.Value);
+        }
+
+        [Fact]
         public void OnActionExecuted_SingleResult_WithMoreThanASingleQueryResult_ThrowsInvalidOperationException()
         {
             // Arrange

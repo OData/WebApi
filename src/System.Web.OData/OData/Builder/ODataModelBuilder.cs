@@ -52,7 +52,7 @@ namespace System.Web.OData.Builder
         public string ContainerName { get; set; }
 
         /// <summary>
-        /// Gets or sets the data service version of the model. The default value is 3.0.
+        /// Gets or sets the data service version of the model. The default value is 4.0.
         /// </summary>
         public Version DataServiceVersion
         {
@@ -71,7 +71,7 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets or sets the maximum data service version of the model. The default value is 3.0.
+        /// Gets or sets the maximum data service version of the model. The default value is 4.0.
         /// </summary>
         public Version MaxDataServiceVersion
         {

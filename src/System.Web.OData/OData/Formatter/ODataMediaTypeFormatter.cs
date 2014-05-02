@@ -33,8 +33,6 @@ namespace System.Web.OData.Formatter
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]   
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
-        internal const ODataVersion DefaultODataVersion = ODataVersion.V4;
-        internal const string ODataServiceVersion = "OData-Version";
         private readonly ODataVersion _version;
 
         /// <summary>
@@ -94,7 +92,7 @@ namespace System.Web.OData.Formatter
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
             };
 
-            _version = DefaultODataVersion;
+            _version = HttpRequestMessageProperties.DefaultODataVersion;
         }
 
         /// <summary>
@@ -207,7 +205,7 @@ namespace System.Web.OData.Formatter
             }
             else
             {
-                ODataVersion version = request.ODataProperties().Version;
+                ODataVersion version = GetODataResponseVersion(request);
                 return new ODataMediaTypeFormatter(this, version, request);
             }
         }
@@ -261,7 +259,9 @@ namespace System.Web.OData.Formatter
                 headers.ContentType.CharSet = String.Empty;
             }
 
-            headers.TryAddWithoutValidation(ODataServiceVersion, ODataUtils.ODataVersionToString(_version));
+            headers.TryAddWithoutValidation(
+                HttpRequestMessageProperties.ODataServiceVersionHeader,
+                ODataUtils.ODataVersionToString(_version));
         }
 
         /// <inheritdoc/>
@@ -741,6 +741,21 @@ namespace System.Web.OData.Formatter
             }
 
             return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
+        }
+
+        internal static ODataVersion GetODataResponseVersion(HttpRequestMessage request)
+        {
+            // OData protocol requires that you send the minimum version that the client needs to know to
+            // understand the response. There is no easy way we can figure out the minimum version that the client
+            // needs to understand our response. We send response headers much ahead generating the response. So if
+            // the requestMessage has a OData-MaxVersion, tell the client that our response is of the same
+            // version; else use the DataServiceVersionHeader. Our response might require a higher version of the
+            // client and it might fail. If the client doesn't send these headers respond with the default version
+            // (V4).
+            HttpRequestMessageProperties properties = request.ODataProperties();
+            return properties.ODataMaxServiceVersion ??
+                properties.ODataServiceVersion ??
+                HttpRequestMessageProperties.DefaultODataVersion;
         }
     }
 }

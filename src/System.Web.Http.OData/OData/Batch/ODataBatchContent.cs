@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Formatter;
 using Microsoft.Data.OData;
 
@@ -48,8 +49,8 @@ namespace System.Web.Http.OData.Batch
             Responses = responses;
             _writerSettings = writerSettings;
             Headers.ContentType = MediaTypeHeaderValue.Parse(String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid()));
-            ODataVersion version = _writerSettings.Version.HasValue ? _writerSettings.Version.Value : ODataMediaTypeFormatter.DefaultODataVersion;
-            Headers.TryAddWithoutValidation(ODataMediaTypeFormatter.ODataServiceVersion, ODataUtils.ODataVersionToString(version));
+            ODataVersion version = _writerSettings.Version ?? HttpRequestMessageProperties.DefaultODataVersion;
+            Headers.TryAddWithoutValidation(HttpRequestMessageProperties.ODataServiceVersionHeader, ODataUtils.ODataVersionToString(version));
         }
 
         /// <summary>

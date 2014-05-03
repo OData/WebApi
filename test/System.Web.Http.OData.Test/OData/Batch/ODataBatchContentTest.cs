@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.OData.Batch;
-using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Extensions;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
@@ -18,7 +18,7 @@ namespace System.Web.Http
             ODataBatchContent batchContent = new ODataBatchContent(new ODataBatchResponseItem[0]);
             var contentType = batchContent.Headers.ContentType;
             var boundary = contentType.Parameters.FirstOrDefault(p => String.Equals(p.Name, "boundary", StringComparison.OrdinalIgnoreCase));
-            var odataVersion = batchContent.Headers.FirstOrDefault(h => String.Equals(h.Key, ODataMediaTypeFormatter.ODataServiceVersion, StringComparison.OrdinalIgnoreCase));
+            var odataVersion = batchContent.Headers.FirstOrDefault(h => String.Equals(h.Key, HttpRequestMessageProperties.ODataServiceVersionHeader, StringComparison.OrdinalIgnoreCase));
 
             Assert.NotNull(boundary);
             Assert.NotEmpty(boundary.Value);
@@ -50,7 +50,7 @@ namespace System.Web.Http
             {
                 Version = ODataVersion.V2
             });
-            var odataVersion = batchContent.Headers.FirstOrDefault(h => String.Equals(h.Key, ODataMediaTypeFormatter.ODataServiceVersion, StringComparison.OrdinalIgnoreCase));
+            var odataVersion = batchContent.Headers.FirstOrDefault(h => String.Equals(h.Key, HttpRequestMessageProperties.ODataServiceVersionHeader, StringComparison.OrdinalIgnoreCase));
 
             Assert.NotNull(odataVersion);
             Assert.Equal("2.0", odataVersion.Value.FirstOrDefault());

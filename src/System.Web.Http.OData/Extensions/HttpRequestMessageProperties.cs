@@ -30,7 +30,10 @@ namespace System.Web.Http.OData.Extensions
         private const string SelectExpandClauseKey = "MS_SelectExpandClause";
         private const string TotalCountKey = "MS_InlineCount";
 
-        private const string ODataMaxServiceVersion = "MaxDataServiceVersion";
+        internal const string ODataServiceVersionHeader = "DataServiceVersion";
+        internal const string ODataMaxServiceVersionHeader = "MaxDataServiceVersion";
+
+        internal const ODataVersion DefaultODataVersion = ODataVersion.V3;
 
         private HttpRequestMessage _request;
 
@@ -214,42 +217,38 @@ namespace System.Web.Http.OData.Extensions
             }
         }
 
-        internal ODataVersion Version
+        internal ODataVersion? ODataServiceVersion
         {
             get
             {
-                // OData protocol requires that you send the minimum version that the client needs to know to
-                // understand the response. There is no easy way we can figure out the minimum version that the client
-                // needs to understand our response. We send response headers much ahead generating the response. So if
-                // the requestMessage has a MaxDataServiceVersion, tell the client that our response is of the same
-                // version; else use the DataServiceVersionHeader. Our response might require a higher version of the
-                // client and it might fail. If the client doesn't send these headers respond with the default version
-                // (V3).
-                return GetODataVersionFromHeaders(_request.Headers, ODataMaxServiceVersion,
-                    ODataMediaTypeFormatter.ODataServiceVersion)
-                    ?? ODataMediaTypeFormatter.DefaultODataVersion;
+                return GetODataVersionFromHeader(_request.Headers, ODataServiceVersionHeader);
             }
         }
 
-        private static ODataVersion? GetODataVersionFromHeaders(HttpHeaders headers, params string[] headerNames)
+        internal ODataVersion? ODataMaxServiceVersion
         {
-            foreach (string headerName in headerNames)
+            get
             {
-                IEnumerable<string> values;
-                if (headers.TryGetValues(headerName, out values))
+                return GetODataVersionFromHeader(_request.Headers, ODataMaxServiceVersionHeader);
+            }
+        }
+
+        private static ODataVersion? GetODataVersionFromHeader(HttpHeaders headers, string headerName)
+        {
+            IEnumerable<string> values;
+            if (headers.TryGetValues(headerName, out values))
+            {
+                string value = values.FirstOrDefault();
+                if (value != null)
                 {
-                    string value = values.FirstOrDefault();
-                    if (value != null)
+                    string trimmedValue = value.Trim(' ', ';');
+                    try
                     {
-                        string trimmedValue = value.Trim(' ', ';');
-                        try
-                        {
-                            return ODataUtils.StringToODataVersion(trimmedValue);
-                        }
-                        catch (ODataException)
-                        {
-                            // Parsing ODataVersion failed, try next header
-                        }
+                        return ODataUtils.StringToODataVersion(trimmedValue);
+                    }
+                    catch (ODataException)
+                    {
+                        // Parsing the odata version failed.
                     }
                 }
             }

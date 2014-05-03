@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http.OData.Extensions;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
@@ -142,7 +143,7 @@ namespace System.Web.Http.OData.Batch
         {
             Contract.Assert(request != null);
 
-            ODataVersion odataVersion = request.ODataProperties().Version;
+            ODataVersion odataVersion = ODataMediaTypeFormatter.GetODataResponseVersion(request);
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
             {
                 Version = odataVersion,

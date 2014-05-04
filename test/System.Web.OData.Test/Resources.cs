@@ -7,115 +7,59 @@ namespace System.Web.OData
 {
     internal static class Resources
     {
-        public static string ArrayOfBooleanInAtom
+        public static string ArrayOfBoolean
         {
             get
             {
-                return GetString("ArrayOfBooleanInAtom.xml");
+                return GetString("ArrayOfBoolean.json");
             }
         }
 
-        public static string ArrayOfBooleanInJsonLight
+        public static string ArrayOfInt32
         {
             get
             {
-                return GetString("ArrayOfBooleanInJsonLight.json");
+                return GetString("ArrayOfInt32.json");
             }
         }
 
-        public static string ArrayOfInt32InAtom
+        public static string CollectionOfPerson
         {
             get
             {
-                return GetString("ArrayOfInt32InAtom.xml");
+                return GetString("CollectionOfPerson.json");
             }
         }
 
-        public static string ArrayOfInt32InJsonLight
+        public static string EmployeeEntry
         {
             get
             {
-                return GetString("ArrayOfInt32InJsonLight.json");
+                return GetString("EmployeeEntry.json");
             }
         }
 
-        public static string CollectionOfPersonInAtom
+        public static string EnumComplexType
         {
             get
             {
-                return GetString("CollectionOfPersonInAtom.xml");
+                return GetString("EnumComplexType.json");
             }
         }
 
-        public static string CollectionOfPersonInJsonLight
+        public static string FeedOfEmployee
         {
             get
             {
-                return GetString("CollectionOfPersonInJsonLight.json");
+                return GetString("FeedOfEmployee.json");
             }
         }
 
-        public static string EmployeeEntryInAtom
+        public static string ListOfString
         {
             get
             {
-                return GetString("EmployeeEntryInAtom.xml");
-            }
-        }
-
-        public static string EmployeeEntryInJsonLight
-        {
-            get
-            {
-                return GetString("EmployeeEntryInJsonLight.json");
-            }
-        }
-
-        public static string EnumComplexTypeInAtom
-        {
-            get
-            {
-                return GetString("EnumComplexTypeInAtom.xml");
-            }
-        }
-
-        public static string EnumComplexTypeInJsonLight
-        {
-            get
-            {
-                return GetString("EnumComplexTypeInJsonLight.json");
-            }
-        }
-
-        public static string FeedOfEmployeeInAtom
-        {
-            get
-            {
-                return GetString("FeedOfEmployeeInAtom.xml");
-            }
-        }
-
-        public static string FeedOfEmployeeInJsonLight
-        {
-            get
-            {
-                return GetString("FeedOfEmployeeInJsonLight.json");
-            }
-        }
-
-        public static string ListOfStringInAtom
-        {
-            get
-            {
-                return GetString("ListOfStringInAtom.xml");
-            }
-        }
-
-        public static string ListOfStringInJsonLight
-        {
-            get
-            {
-                return GetString("ListOfStringInJsonLight.json");
+                return GetString("ListOfString.json");
             }
         }
 
@@ -135,27 +79,11 @@ namespace System.Web.OData
             }
         }
 
-        public static string PersonComplexTypeInAtom
+        public static string PersonComplexType
         {
             get
             {
-                return GetString("PersonComplexTypeInAtom.xml");
-            }
-        }
-
-        public static string PersonComplexTypeInJsonLight
-        {
-            get
-            {
-                return GetString("PersonComplexTypeInJsonLight.json");
-            }
-        }
-
-        public static string PersonEntryInAtom
-        {
-            get
-            {
-                return GetString("PersonEntryInAtom.xml");
+                return GetString("PersonComplexType.json");
             }
         }
 
@@ -199,19 +127,11 @@ namespace System.Web.OData
             }
         }
 
-        public static string ProductRequestEntryInAtom
+        public static string ProductRequestEntry
         {
             get
             {
-                return GetString("ProductRequestEntryInAtom.xml");
-            }
-        }
-
-        public static string ProductRequestEntryInPlainOldJson
-        {
-            get
-            {
-                return GetString("ProductRequestEntryInPlainOldJson.json");
+                return GetString("ProductRequestEntry.json");
             }
         }
 
@@ -223,51 +143,27 @@ namespace System.Web.OData
             }
         }
 
-        public static string SupplierPatchInAtom
+        public static string SupplierPatch
         {
             get
             {
-                return GetString("SupplierPatchInAtom.xml");
+                return GetString("SupplierPatch.json");
             }
         }
 
-        public static string SupplierPatchInPlainOldJson
+        public static string SupplierRequestEntry
         {
             get
             {
-                return GetString("SupplierPatchInPlainOldJson.json");
+                return GetString("SupplierRequestEntry.json");
             }
         }
 
-        public static string SupplierRequestEntryInAtom
+        public static string WorkItemEntry
         {
             get
             {
-                return GetString("SupplierRequestEntryInAtom.xml");
-            }
-        }
-
-        public static string SupplierRequestEntryInPlainOldJson
-        {
-            get
-            {
-                return GetString("SupplierRequestEntryInPlainOldJson.json");
-            }
-        }
-
-        public static string WorkItemEntryInAtom
-        {
-            get
-            {
-                return GetString("WorkItemEntryInAtom.xml");
-            }
-        }
-
-        public static string WorkItemEntryInJsonLight
-        {
-            get
-            {
-                return GetString("WorkItemEntryInJsonLight.json");
+                return GetString("WorkItemEntry.json");
             }
         }
 

@@ -11,14 +11,6 @@ namespace System.Web.OData.Formatter
     /// </summary>
     internal static class ODataMediaTypes
     {
-        private static readonly MediaTypeHeaderValue _applicationAtomSvcXml =
-            new MediaTypeHeaderValue("application/atomsvc+xml");
-        private static readonly MediaTypeHeaderValue _applicationAtomXml =
-            new MediaTypeHeaderValue("application/atom+xml");
-        private static readonly MediaTypeHeaderValue _applicationAtomXmlTypeEntry =
-            MediaTypeHeaderValue.Parse("application/atom+xml;type=entry");
-        private static readonly MediaTypeHeaderValue _applicationAtomXmlTypeFeed =
-            MediaTypeHeaderValue.Parse("application/atom+xml;type=feed");
         private static readonly MediaTypeHeaderValue _applicationJson = new MediaTypeHeaderValue("application/json");
         private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadata =
             MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
@@ -44,26 +36,6 @@ namespace System.Web.OData.Formatter
             MediaTypeHeaderValue.Parse("application/json;odata.streaming=true");
         private static readonly MediaTypeHeaderValue _applicationXml = new MediaTypeHeaderValue("application/xml");
         private static readonly MediaTypeHeaderValue _textXml = new MediaTypeHeaderValue("text/xml");
-
-        public static MediaTypeHeaderValue ApplicationAtomSvcXml
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationAtomSvcXml).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationAtomXml
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationAtomXml).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationAtomXmlTypeEntry
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationAtomXmlTypeEntry).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationAtomXmlTypeFeed
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationAtomXmlTypeFeed).Clone(); }
-        }
 
         public static MediaTypeHeaderValue ApplicationJson
         {

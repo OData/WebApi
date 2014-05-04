@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Http;
-using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
@@ -63,16 +61,16 @@ namespace System.Web.OData.Formatter.Serialization
             IODataResponseMessage message = new ODataMessageWrapper(stream);
             ODataError error = new ODataError { Message = "Error!!!" };
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
-            settings.SetContentType(ODataFormat.Atom);
+            settings.SetContentType(ODataFormat.Json);
             ODataMessageWriter writer = new ODataMessageWriter(message, settings);
 
             // Act
             serializer.WriteObject(error, typeof(ODataError), writer, new ODataSerializerContext());
+            stream.Seek(0, SeekOrigin.Begin);
+            string result = new StreamReader(stream).ReadToEnd();
 
             // Assert
-            stream.Seek(0, SeekOrigin.Begin);
-            XElement element = XElement.Load(stream);
-            Assert.Equal("Error!!!", element.Descendants().Single(e => e.Name.LocalName == "message").Value);
+            Assert.Equal("{\"error\":{\"code\":\"\",\"message\":\"Error!!!\"}}", result);
         }
     }
 }

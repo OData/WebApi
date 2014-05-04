@@ -81,19 +81,9 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void WriteToStreamAsyncReturnsODataRepresentationForJsonLight()
+        public void WriteToStreamAsyncReturnsODataRepresentation()
         {
-            WriteToStreamAsyncReturnsODataRepresentation(Resources.WorkItemEntryInJsonLight, true);
-        }
-
-        [Fact]
-        public void WriteToStreamAsyncReturnsODataRepresentationForAtom()
-        {
-            WriteToStreamAsyncReturnsODataRepresentation(Resources.WorkItemEntryInAtom, false);
-        }
-
-        private static void WriteToStreamAsyncReturnsODataRepresentation(string expectedContent, bool json)
-        {
+            // Arrange
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
@@ -108,32 +98,14 @@ namespace System.Web.OData.Formatter
             request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet), new KeyValuePathSegment("10"));
             request.ODataProperties().RouteName = routeName;
 
-            ODataMediaTypeFormatter formatter;
+            ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.Entry);
 
-            if (json)
-            {
-                formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.Entry);
-            }
-            else
-            {
-                formatter = CreateFormatterWithAtom(model, request, ODataPayloadKind.Entry);
-            }
-
+            // Act
             ObjectContent<WorkItem> content = new ObjectContent<WorkItem>(
                 (WorkItem)TypeInitializer.GetInstance(SupportedTypes.WorkItem), formatter);
 
-            string actualContent = content.ReadAsStringAsync().Result;
-
-            if (json)
-            {
-                JsonAssert.Equal(expectedContent, actualContent);
-            }
-            else
-            {
-                RegexReplacement replaceUpdateTime = new RegexReplacement(
-                    "<updated>*.*</updated>", "<updated>UpdatedTime</updated>");
-                Assert.Xml.Equal(expectedContent, actualContent, replaceUpdateTime);
-            }
+            // Assert
+            JsonAssert.Equal(Resources.WorkItemEntry, content.ReadAsStringAsync().Result);
         }
 
         [Theory]
@@ -156,11 +128,12 @@ namespace System.Web.OData.Formatter
             routeData.Values.Add("b", "prefix2");
             request.SetRouteData(routeData);
 
-            ODataMediaTypeFormatter formatter = CreateFormatterWithAtomSvcXml(model, request, ODataPayloadKind.ServiceDocument);
+            ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.ServiceDocument);
             var content = new ObjectContent<ODataServiceDocument>(new ODataServiceDocument(), formatter);
 
             string actualContent = content.ReadAsStringAsync().Result;
-            Assert.Contains("xml:base=\"" + baseUri + "/\"", actualContent);
+
+            Assert.Contains("\"@odata.context\":\"" + baseUri + "/$metadata\"", actualContent);
         }
 
         [Fact]
@@ -302,7 +275,7 @@ namespace System.Web.OData.Formatter
             Mock<Stream> mockStream = new Mock<Stream>();
             mockStream.Setup(s => s.CanWrite).Returns(true);
             HttpContent content = new StringContent(String.Empty);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/atom+xml");
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             // Act 
             return formatter.WriteToStreamAsync(typeof(SampleType), null, mockStream.Object, content, null).ContinueWith(
@@ -494,7 +467,7 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void InvalidXmlCharacters_CanBeWrittenByDefault_InAtom()
+        public void InvalidXmlCharacters_CanBeWrittenByDefault()
         {
             ODataMediaTypeFormatter formatter = CreateFormatter();
             Stream stream = new MemoryStream();
@@ -506,7 +479,7 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void InvalidXmlCharacters_RaiseExceptionsIfCheckCharactersIsTrue_InAtom()
+        public void InvalidXmlCharacters_RaiseExceptionsIfCheckCharactersIsTrue()
         {
             ODataMediaTypeFormatter formatter = CreateFormatter();
             formatter.MessageWriterSettings.CheckCharacters = true;
@@ -815,7 +788,7 @@ namespace System.Web.OData.Formatter
 
         protected override MediaTypeHeaderValue CreateSupportedMediaType()
         {
-            return new MediaTypeHeaderValue("application/atom+xml");
+            return MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
         }
 
         private static ODataMediaTypeFormatter CreateFormatter(IEdmModel model)
@@ -832,22 +805,6 @@ namespace System.Web.OData.Formatter
         private static ODataMediaTypeFormatter CreateFormatterWithoutRequest()
         {
             return CreateFormatter(CreateModel());
-        }
-
-        private static ODataMediaTypeFormatter CreateFormatterWithAtom(IEdmModel model, HttpRequestMessage request,
-            params ODataPayloadKind[] payloadKinds)
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, payloadKinds);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXml);
-            return formatter;
-        }
-
-        private static ODataMediaTypeFormatter CreateFormatterWithAtomSvcXml(IEdmModel model, HttpRequestMessage request,
-            params ODataPayloadKind[] payloadKinds)
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, payloadKinds);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomSvcXml);
-            return formatter;
         }
 
         private static ODataMediaTypeFormatter CreateFormatterWithJson(IEdmModel model, HttpRequestMessage request,
@@ -908,21 +865,13 @@ namespace System.Web.OData.Formatter
             get
             {
                 return Encoding.UTF8.GetBytes(
-                  @"<entry xml:base=""http://localhost/"" xmlns=""http://www.w3.org/2005/Atom"" xmlns:d=""http://docs.oasis-open.org/odata/ns/data"" xmlns:m=""http://docs.oasis-open.org/odata/ns/metadata"" xmlns:georss=""http://www.georss.org/georss"" xmlns:gml=""http://www.opengis.net/gml"">
-                      <category term=""#System.Net.Http.Formatting.SampleType"" scheme=""http://docs.oasis-open.org/odata/ns/scheme"" />
-                      <id />
-                      <title />
-                      <updated>2012-08-17T00:16:14Z</updated>
-                      <author>
-                        <name />
-                      </author>
-                      <content type=""application/xml"">
-                        <m:properties>
-                          <d:Number m:type=""Int32"">42</d:Number>
-                        </m:properties>
-                      </content>
-                    </entry>"
-                );
+                    "{" +
+                        "\"@odata.context\":\"http://localhost/$metadata#sampleTypes/$entity\"," +
+                        "\"@odata.type\":\"#System.Net.Http.Formatting.SampleType\"," +
+                        "\"@odata.id\":\"http://localhost/sampleTypes(42)\"," +
+                        "\"@odata.editLink\":\"http://localhost/sampleTypes(42)\"," +
+                        "\"Number\":42" +
+                     "}");
             }
         }
 

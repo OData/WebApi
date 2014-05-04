@@ -12,7 +12,7 @@ namespace System.Web.OData.Formatter.Serialization
     public enum TestODataMetadataLevel
     {
         /// <summary>
-        /// Normal metadata; used for anything other than JSON (Atom/XML)
+        /// Normal metadata; used for anything other than JSON
         /// </summary>
         Default = 0,
 

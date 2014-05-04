@@ -366,55 +366,46 @@
     <Compile Include="TypeHelperTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\SByteInXml.xml" />
-    <EmbeddedResource Include="Resources\SingleInXml.xml" />
-    <EmbeddedResource Include="Resources\StringInXml.xml" />
-    <EmbeddedResource Include="Resources\SupplierPatchInAtom.xml" />
-    <EmbeddedResource Include="Resources\SupplierRequestEntryInAtom.xml">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\TimeSpanInXml.xml" />
-    <EmbeddedResource Include="Resources\WorkItemEntryInAtom.xml" />
     <Compile Include="OData\Builder\Conventions\Attributes\KeyAttributeEdmPropertyConventionTests.cs" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <EmbeddedResource Include="Resources\ArrayOfBooleanInJsonLight.json" />
-    <EmbeddedResource Include="Resources\ArrayOfByteInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\ArrayOfInt32InJsonLight.json" />
-    <EmbeddedResource Include="Resources\BooleanInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\ByteInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\CollectionOfPersonInJsonLight.json" />
-    <EmbeddedResource Include="Resources\DateTimeOffsetInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\DecimalInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\DoubleInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\EmployeeEntryInJsonLight.json" />
-    <EmbeddedResource Include="Resources\EnumComplexTypeInJsonLight.json" />
-    <EmbeddedResource Include="Resources\FeedOfEmployeeInJsonLight.json" />
-    <EmbeddedResource Include="Resources\GuidInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\Int16InJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\Int32InJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\Int64InJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\ListOfStringInJsonLight.json" />
+    <EmbeddedResource Include="Resources\ArrayOfBoolean.json" />
+    <EmbeddedResource Include="Resources\ArrayOfByteFullMetadata.json" />
+    <EmbeddedResource Include="Resources\ArrayOfInt32.json" />
+    <EmbeddedResource Include="Resources\BooleanFullMetadata.json" />
+    <EmbeddedResource Include="Resources\ByteFullMetadata.json" />
+    <EmbeddedResource Include="Resources\CollectionOfPerson.json" />
+    <EmbeddedResource Include="Resources\DateTimeOffsetFullMetadata.json" />
+    <EmbeddedResource Include="Resources\DecimalFullMetadata.json" />
+    <EmbeddedResource Include="Resources\DoubleFullMetadata.json" />
+    <EmbeddedResource Include="Resources\EmployeeEntry.json" />
+    <EmbeddedResource Include="Resources\EnumComplexType.json" />
+    <EmbeddedResource Include="Resources\FeedOfEmployee.json" />
+    <EmbeddedResource Include="Resources\GuidFullMetadata.json" />
+    <EmbeddedResource Include="Resources\Int16FullMetadata.json" />
+    <EmbeddedResource Include="Resources\Int32FullMetadata.json" />
+    <EmbeddedResource Include="Resources\Int64FullMetadata.json" />
+    <EmbeddedResource Include="Resources\ListOfString.json" />
     <EmbeddedResource Include="Resources\MainEntryFeedInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\MainEntryFeedInJsonNoMetadata.json" />
-    <EmbeddedResource Include="Resources\NullableBooleanInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\NullableInt32InJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\NullableInt32InJsonNoMetadata.json" />
-    <EmbeddedResource Include="Resources\PersonComplexTypeInJsonLight.json" />
+    <EmbeddedResource Include="Resources\NullableBooleanFullMetadata.json" />
+    <EmbeddedResource Include="Resources\NullableInt32FullMetadata.json" />
+    <EmbeddedResource Include="Resources\NullableInt32NoMetadata.json" />
+    <EmbeddedResource Include="Resources\PersonComplexType.json" />
     <EmbeddedResource Include="Resources\PersonEntryInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\PersonEntryInPlainOldJson.json" />
     <EmbeddedResource Include="Resources\PersonRequestEntryInPlainOldJson.json" />
-    <EmbeddedResource Include="Resources\ProductRequestEntryInPlainOldJson.json" />
+    <EmbeddedResource Include="Resources\ProductRequestEntry.json" />
     <EmbeddedResource Include="Resources\ProductsCsdl.xml" />
-    <EmbeddedResource Include="Resources\SByteInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\SingleInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\StringInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\StringInJsonNoMetadata.json" />
-    <EmbeddedResource Include="Resources\SupplierPatchInPlainOldJson.json" />
-    <EmbeddedResource Include="Resources\SupplierRequestEntryInPlainOldJson.json" />
-    <EmbeddedResource Include="Resources\TimeSpanInJsonFullMetadata.json" />
-    <EmbeddedResource Include="Resources\WorkItemEntryInJsonLight.json" />
+    <EmbeddedResource Include="Resources\SByteFullMetadata.json" />
+    <EmbeddedResource Include="Resources\SingleFullMetadata.json" />
+    <EmbeddedResource Include="Resources\StringFullMetadata.json" />
+    <EmbeddedResource Include="Resources\StringNoMetadata.json" />
+    <EmbeddedResource Include="Resources\SupplierPatch.json" />
+    <EmbeddedResource Include="Resources\SupplierRequestEntry.json" />
+    <EmbeddedResource Include="Resources\TimeSpanFullMetadata.json" />
+    <EmbeddedResource Include="Resources\WorkItemEntry.json" />
     <EmbeddedResource Include="Resources\PersonEntryInJsonLightFullMetadata.json" />
     <EmbeddedResource Include="Resources\PersonEntryInJsonLightMinimalMetadata.json" />
     <EmbeddedResource Include="Resources\PersonEntryInJsonLightNoMetadata.json" />
@@ -450,32 +441,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\ArrayOfBooleanInAtom.xml" />
-    <EmbeddedResource Include="Resources\ArrayOfByteInXml.xml">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ArrayOfInt32InAtom.xml" />
-    <EmbeddedResource Include="Resources\BooleanInXml.xml" />
-    <EmbeddedResource Include="Resources\ByteInXml.xml" />
-    <EmbeddedResource Include="Resources\CollectionOfPersonInAtom.xml" />
-    <EmbeddedResource Include="Resources\DateTimeOffsetInXml.xml" />
-    <EmbeddedResource Include="Resources\DecimalInXml.xml" />
-    <EmbeddedResource Include="Resources\DoubleInXml.xml" />
-    <EmbeddedResource Include="Resources\EmployeeEntryInAtom.xml" />
-    <EmbeddedResource Include="Resources\EnumComplexTypeInAtom.xml" />
-    <EmbeddedResource Include="Resources\FeedOfEmployeeInAtom.xml" />
-    <EmbeddedResource Include="Resources\GuidInXml.xml" />
-    <EmbeddedResource Include="Resources\Int16InXml.xml" />
-    <EmbeddedResource Include="Resources\Int32InXml.xml" />
-    <EmbeddedResource Include="Resources\Int64InXml.xml" />
-    <EmbeddedResource Include="Resources\ListOfStringInAtom.xml" />
-    <EmbeddedResource Include="Resources\NullableBooleanInXml.xml" />
-    <EmbeddedResource Include="Resources\NullableInt32InXml.xml" />
-    <EmbeddedResource Include="Resources\PersonComplexTypeInAtom.xml" />
-    <EmbeddedResource Include="Resources\PersonEntryInAtom.xml" />
-    <EmbeddedResource Include="Resources\ProductRequestEntryInAtom.xml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

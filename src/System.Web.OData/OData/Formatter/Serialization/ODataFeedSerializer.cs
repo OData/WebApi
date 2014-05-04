@@ -9,7 +9,6 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using Microsoft.OData.Core;
-using Microsoft.OData.Core.Atom;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter.Serialization
@@ -151,28 +150,6 @@ namespace System.Web.OData.Formatter.Serialization
             ODataSerializerContext writeContext)
         {
             ODataFeed feed = new ODataFeed();
-
-            if (writeContext.NavigationSource != null)
-            {
-                IEdmModel model = writeContext.Model;
-                NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(writeContext.NavigationSource);
-                FeedContext feedContext = new FeedContext
-                {
-                    Request = writeContext.Request,
-                    RequestContext = writeContext.RequestContext,
-                    EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
-                    Url = writeContext.Url,
-                    FeedInstance = feedInstance
-                };
-
-                Uri feedSelfLink = linkBuilder.BuildFeedSelfLink(feedContext);
-                if (feedSelfLink != null)
-                {
-                    feed.SetAnnotation(new AtomFeedMetadata() { SelfLink = new AtomLinkMetadata() { Relation = "self", Href = feedSelfLink } });
-                }
-            }
-
-            feed.Id = new Uri("http://schemas.datacontract.org/2004/07/" + feedType.FullName());
 
             if (writeContext.ExpandedEntity == null)
             {

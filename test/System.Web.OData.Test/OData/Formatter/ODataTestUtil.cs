@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
@@ -14,7 +13,6 @@ using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
 using Moq;
 
 namespace System.Web.OData.Formatter
@@ -25,29 +23,18 @@ namespace System.Web.OData.Formatter
 
         public const string Version4NumberString = "4.0";
         public static MediaTypeHeaderValue ApplicationJsonMediaType = MediaTypeHeaderValue.Parse("application/json");
-        public static MediaTypeHeaderValue ApplicationAtomMediaType = MediaTypeHeaderValue.Parse("application/atom+xml");
         public static MediaTypeWithQualityHeaderValue ApplicationJsonMediaTypeWithQuality = MediaTypeWithQualityHeaderValue.Parse("application/json");
-        public static MediaTypeWithQualityHeaderValue ApplicationAtomMediaTypeWithQuality = MediaTypeWithQualityHeaderValue.Parse("application/atom+xml");
 
-        public static void VerifyResponse(HttpContent responseContent, string expected)
-        {
-            string response = responseContent.ReadAsStringAsync().Result;
-            Regex updatedRegEx = new Regex("<updated>*.*</updated>");
-            response = updatedRegEx.Replace(response, "<updated>UpdatedTime</updated>");
-            Assert.Xml.Equal(expected, response);
-        }
-
-        public static void VerifyJsonResponse(HttpContent actualContent, string expected)
+        public static void VerifyResponse(HttpContent actualContent, string expected)
         {
             string actual = actualContent.ReadAsStringAsync().Result;
             JsonAssert.Equal(expected, actual);
         }
 
-        public static HttpRequestMessage GenerateRequestMessage(Uri address, bool isAtom)
+        public static HttpRequestMessage GenerateRequestMessage(Uri address)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, address);
-            MediaTypeWithQualityHeaderValue mediaType = isAtom ? ApplicationAtomMediaTypeWithQuality : ApplicationJsonMediaTypeWithQuality;
-            requestMessage.Headers.Accept.Add(mediaType);
+            requestMessage.Headers.Accept.Add(ApplicationJsonMediaTypeWithQuality);
             requestMessage.Headers.Add("OData-Version", "4.0");
             requestMessage.Headers.Add("OData-MaxVersion", "4.0");
             return requestMessage;

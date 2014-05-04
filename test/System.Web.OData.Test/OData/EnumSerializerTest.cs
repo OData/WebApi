@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
@@ -97,18 +96,7 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void EnumTypeSerializerTestForODataJsonLight()
-        {
-            EnumTypeSerializerTestForOData(Resources.EnumComplexTypeInJsonLight, true);
-        }
-
-        [Fact]
-        public void EnumTypeSerializerTestForODataAtom()
-        {
-            EnumTypeSerializerTestForOData(Resources.EnumComplexTypeInAtom, false);
-        }
-
-        private void EnumTypeSerializerTestForOData(string expectedContent, bool isJson)
+        public void EnumTypeSerializerTestForOData()
         {
             // Arrange
             ODataMediaTypeFormatter formatter = GetFormatter();
@@ -120,10 +108,10 @@ namespace System.Web.OData
                     UndefinedColor = (Color)123
                 },
                 formatter,
-                GetMediaType(isJson));
+                ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
 
             // Act & Assert
-            AssertEqual(isJson, expectedContent, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(Resources.EnumComplexType, content.ReadAsStringAsync().Result);
         }
 
         private static ODataMediaTypeFormatter GetFormatter()
@@ -160,23 +148,6 @@ namespace System.Web.OData
             public Color RequiredColor { get; set; }
             public Color? NullableColor { get; set; }
             public Color UndefinedColor { get; set; }
-        }
-
-        private static MediaTypeHeaderValue GetMediaType(bool jsJson)
-        {
-            return jsJson ? ODataMediaTypes.ApplicationJsonODataMinimalMetadata : ODataMediaTypes.ApplicationXml;
-        }
-
-        private static void AssertEqual(bool jsJson, string expected, string actual)
-        {
-            if (jsJson)
-            {
-                JsonAssert.Equal(expected, actual);
-            }
-            else
-            {
-                Assert.Xml.Equal(expected, actual);
-            }
         }
     }
 }

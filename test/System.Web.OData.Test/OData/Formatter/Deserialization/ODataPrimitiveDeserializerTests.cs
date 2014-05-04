@@ -2,8 +2,9 @@
 
 using System.Data.Linq;
 using System.IO;
+using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization;
-using System.Xml.Linq;
+using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -29,7 +30,6 @@ namespace System.Web.OData.Formatter.Deserialization
                     { (UInt32)1, (long)1 },
                     { (UInt64)1, (long)1 },
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
-                    { new XElement(XName.Get("element","namespace")), new XElement(XName.Get("element","namespace")).ToString() },
                     { new Binary(new byte[] {1}), new byte[] {1} }
                 };
             }
@@ -100,27 +100,30 @@ namespace System.Web.OData.Formatter.Deserialization
         public void Read_Primitive(object obj)
         {
             // Arrange
-            IEdmModel model = EdmCoreModel.Instance;
+            IEdmModel model = CreateModel();
             ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
             ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer();
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
+
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings
             {
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
             };
-            settings.SetContentType(ODataFormat.Atom);
+            settings.SetContentType(ODataFormat.Json);
+
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
 
-            serializer.WriteObject(obj, typeof(int), messageWriter, writeContext);
+            Type type = obj == null ? typeof(int) : obj.GetType();
+            serializer.WriteObject(obj, type, messageWriter, writeContext);
             stream.Seek(0, SeekOrigin.Begin);
 
             // Act & Assert
-            Assert.Equal(obj, deserializer.Read(messageReader, typeof(int), readContext));
+            Assert.Equal(obj, deserializer.Read(messageReader, type, readContext));
         }
 
         [Theory]
@@ -129,27 +132,37 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             IEdmPrimitiveTypeReference primitive = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
-            IEdmModel model = EdmCoreModel.Instance;
+            IEdmModel model = CreateModel();
             ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
             ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer();
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
+
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings
             {
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
             };
-            settings.SetContentType(ODataFormat.Atom);
+            settings.SetContentType(ODataFormat.Json);
+
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
 
-            serializer.WriteObject(obj, typeof(int), messageWriter, writeContext);
+            Type type = obj == null ? typeof(int) : expected.GetType();
+            serializer.WriteObject(obj, type, messageWriter, writeContext);
             stream.Seek(0, SeekOrigin.Begin);
 
             // Act && Assert
-            Assert.Equal(expected, deserializer.Read(messageReader, typeof(int), readContext));
+            Assert.Equal(expected, deserializer.Read(messageReader, type, readContext));
+        }
+
+        private static IEdmModel CreateModel()
+        {
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            return builder.GetEdmModel();
         }
     }
 }

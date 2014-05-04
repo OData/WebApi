@@ -3,10 +3,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.OData.Formatter.Serialization.Models;
-using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -70,8 +68,13 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
-            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
-            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings()
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/") }
+            };
+
+            settings.SetContentType(ODataFormat.Json);
+
             ODataMessageWriter messageWriter = new ODataMessageWriter(message, settings);
             Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(new DefaultODataSerializerProvider());
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "CollectionName", Model = _model };
@@ -89,10 +92,8 @@ namespace System.Web.OData.Formatter.Serialization
             // Assert
             serializer.Verify();
             stream.Seek(0, SeekOrigin.Begin);
-            XElement element = XElement.Load(stream);
-            Assert.Equal("value", element.Name.LocalName);
-            Assert.Equal(3, element.Descendants().Count());
-            Assert.Equal(new[] { "0", "1", "2" }, element.Descendants().Select(e => e.Value));
+            string result = new StreamReader(stream).ReadToEnd();
+            Assert.Equal("{\"@odata.context\":\"http://any/$metadata#Collection(Edm.Int32)\",\"value\":[0,1,2]}", result);
         }
 
         [Fact]

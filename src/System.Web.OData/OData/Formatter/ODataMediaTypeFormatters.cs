@@ -17,14 +17,14 @@ namespace System.Web.OData.Formatter
     {
         private const string DollarFormat = "$format";
 
-        private const string AtomFormat = "atom";
-
         private const string JsonFormat = "json";
 
         private const string XmlFormat = "xml";
 
         /// <summary>
         /// Creates a list of media type formatters to handle OData.
+        /// The default serializer provider is <see cref="DefaultODataSerializerProvider"/> and the default deserializer provider is
+        /// <see cref="DefaultODataDeserializerProvider"/>.
         /// </summary>
         /// <returns>A list of media type formatters to handle OData.</returns>
         public static IList<ODataMediaTypeFormatter> Create()
@@ -39,18 +39,12 @@ namespace System.Web.OData.Formatter
         /// <param name="serializerProvider">The serializer provider to use.</param>
         /// <param name="deserializerProvider">The deserializer provider to use.</param>
         /// <returns>A list of media type formatters to handle OData.</returns>
-        /// <remarks>The default serializer provider is <see cref="DefaultODataSerializerProvider"/> and the default deserializer provider is
-        /// <see cref="DefaultODataDeserializerProvider"/>.</remarks>
         public static IList<ODataMediaTypeFormatter> Create(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
         {
             return new List<ODataMediaTypeFormatter>()
             {
-                // Create atomsvc+xml formatter first to handle service document requests without an Accept header in an XML format
-                CreateApplicationAtomSvcXml(serializerProvider, deserializerProvider),
-                // Create JSON formatter next so it gets used when the request doesn't ask for a specific content type
+                // Place JSON formatter first so it gets used when the request doesn't ask for a specific content type
                 CreateApplicationJson(serializerProvider, deserializerProvider),
-                CreateApplicationAtomXmlTypeFeed(serializerProvider, deserializerProvider),
-                CreateApplicationAtomXmlTypeEntry(serializerProvider, deserializerProvider),
                 CreateApplicationXml(serializerProvider, deserializerProvider),
                 CreateTextXml(serializerProvider, deserializerProvider),
                 CreateRawValue(serializerProvider, deserializerProvider)
@@ -71,40 +65,6 @@ namespace System.Web.OData.Formatter
             formatter.MediaTypeMappings.Add(new ODataPrimitiveValueMediaTypeMapping());
             formatter.MediaTypeMappings.Add(new ODataEnumValueMediaTypeMapping());
             formatter.MediaTypeMappings.Add(new ODataBinaryValueMediaTypeMapping());
-            return formatter;
-        }
-
-        private static ODataMediaTypeFormatter CreateApplicationAtomSvcXml(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(serializerProvider, deserializerProvider, ODataPayloadKind.ServiceDocument);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomSvcXml);
-
-            formatter.AddDollarFormatQueryStringMappings();
-
-            return formatter;
-        }
-
-        private static ODataMediaTypeFormatter CreateApplicationAtomXmlTypeEntry(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(serializerProvider, deserializerProvider, ODataPayloadKind.Entry);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXmlTypeEntry);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXml);
-
-            formatter.AddDollarFormatQueryStringMappings();
-            formatter.AddQueryStringMapping(DollarFormat, AtomFormat, ODataMediaTypes.ApplicationAtomXml);
-
-            return formatter;
-        }
-
-        private static ODataMediaTypeFormatter CreateApplicationAtomXmlTypeFeed(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(serializerProvider, deserializerProvider, ODataPayloadKind.Feed);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXmlTypeFeed);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXml);
-
-            formatter.AddDollarFormatQueryStringMappings();
-            formatter.AddQueryStringMapping(DollarFormat, AtomFormat, ODataMediaTypes.ApplicationAtomXml);
-
             return formatter;
         }
 

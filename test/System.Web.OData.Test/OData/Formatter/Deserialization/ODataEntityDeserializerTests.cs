@@ -641,23 +641,17 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void ReadFromStreamAsync_ForJsonLight()
+        public void ReadFromStreamAsync()
         {
-            ReadFromStreamAsync(Resources.ProductRequestEntryInPlainOldJson, true);
-        }
-
-        [Fact]
-        public void ReadFromStreamAsync_ForAtom()
-        {
-            ReadFromStreamAsync(Resources.ProductRequestEntryInAtom, false);
-        }
-
-        private void ReadFromStreamAsync(string content, bool json)
-        {
+            // Arrange
+            string content = Resources.ProductRequestEntry;
             ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_deserializerProvider);
-            Product product = deserializer.Read(GetODataMessageReader(GetODataMessage(content, json), _edmModel),
+
+            // Act
+            Product product = deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
                 typeof(Product), _readContext) as Product;
 
+            // Assert
             Assert.Equal(product.ID, 0);
             Assert.Equal(product.Rating, 4);
             Assert.Equal(product.Price, 2.5m);
@@ -666,19 +660,10 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void ReadFromStreamAsync_ComplexTypeAndInlineData_ForJsonLight()
+        public void ReadFromStreamAsync_ComplexTypeAndInlineData()
         {
-            ReadFromStreamAsync_ComplexTypeAndInlineData(Resources.SupplierRequestEntryInPlainOldJson, true);
-        }
-
-        [Fact]
-        public void ReadFromStreamAsync_ComplexTypeAndInlineData_ForAtom()
-        {
-            ReadFromStreamAsync_ComplexTypeAndInlineData(Resources.SupplierRequestEntryInAtom, false);
-        }
-
-        private void ReadFromStreamAsync_ComplexTypeAndInlineData(string content, bool json)
-        {
+            // Arrange
+            string content = Resources.SupplierRequestEntry;
             IEdmEntityType supplierEntityType =
                 EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
 
@@ -691,9 +676,11 @@ namespace System.Web.OData.Formatter.Deserialization
                 ResourceType = typeof(Supplier)
             };
 
-            Supplier supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(content, json), _edmModel),
+            // Act
+            Supplier supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
                 typeof(Supplier), readContext) as Supplier;
 
+            // Assert
             Assert.Equal(supplier.Name, "Supplier Name");
 
             Assert.NotNull(supplier.Products);
@@ -706,19 +693,10 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void Read_PatchMode_ForJsonLight()
+        public void Read_PatchMode()
         {
-            Read_PatchMode(Resources.SupplierPatchInPlainOldJson, true);
-        }
-
-        [Fact]
-        public void Read_PatchMode_ForAtom()
-        {
-            Read_PatchMode(Resources.SupplierPatchInAtom, false);
-        }
-
-        private void Read_PatchMode(string content, bool json)
-        {
+            // Arrange
+            string content = Resources.SupplierPatch;
             IEdmEntityType supplierEntityType =
                 EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
 
@@ -731,9 +709,12 @@ namespace System.Web.OData.Formatter.Deserialization
 
             ODataEntityDeserializer deserializer =
                 new ODataEntityDeserializer(_deserializerProvider);
-            Delta<Supplier> supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(content, json), _edmModel),
+
+            // Act
+            Delta<Supplier> supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
                 typeof(Delta<Supplier>), readContext) as Delta<Supplier>;
 
+            // Assert
             Assert.NotNull(supplier);
             Assert.Equal(supplier.GetChangedPropertyNames(), new string[] { "ID", "Name", "Address" });
 
@@ -743,28 +724,18 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void Read_ThrowsOnUnknownEntityType_ForJsonLight()
+        public void Read_ThrowsOnUnknownEntityType()
         {
-            Read_ThrowsOnUnknownEntityType(Resources.SupplierRequestEntryInPlainOldJson, true,
-                "The property 'Concurrency' does not exist on type 'ODataDemo.Product'. Make sure to only use property names that are defined by the type.");
-        }
-
-        [Fact]
-        public void Read_ThrowsOnUnknownEntityType_ForAtom()
-        {
-            Read_ThrowsOnUnknownEntityType(Resources.SupplierRequestEntryInAtom, false,
-                "An entry with type 'ODataDemo.Supplier' was found, but it is not assignable to the expected type 'ODataDemo.Product'. The type specified in the entry must be equal to either the expected type or a derived type.");
-        }
-
-        private void Read_ThrowsOnUnknownEntityType(string content, bool json, string expectedMessage)
-        {
+            // Arrange
+            string content = Resources.SupplierRequestEntry;
             IEdmEntityType supplierEntityType =
                 EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
 
             ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_deserializerProvider);
 
-            Assert.Throws<ODataException>(() => deserializer.Read(GetODataMessageReader(GetODataMessage(content, json), _edmModel),
-                typeof(Product), _readContext), expectedMessage);
+            // Act & Assert
+            Assert.Throws<ODataException>(() => deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
+                typeof(Product), _readContext), "The property 'Concurrency' does not exist on type 'ODataDemo.Product'. Make sure to only use property names that are defined by the type.");
         }
 
         private static Type EdmTypeResolver(IEdmTypeReference edmType)
@@ -777,25 +748,17 @@ namespace System.Web.OData.Formatter.Deserialization
             return new ODataMessageReader(oDataRequestMessage, new ODataMessageReaderSettings(), edmModel);
         }
 
-        private static IODataRequestMessage GetODataMessage(string content, bool json)
+        private static IODataRequestMessage GetODataMessage(string content)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/OData/OData.svc/Products");
 
             request.Content = new StringContent(content);
             request.Headers.Add("OData-Version", "4.0");
 
-            if (json)
-            {
-                MediaTypeWithQualityHeaderValue mediaType = new MediaTypeWithQualityHeaderValue("application/json");
-                mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "full"));
-                request.Headers.Accept.Add(mediaType);
-                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            }
-            else
-            {
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/atom+xml");
-            }
+            MediaTypeWithQualityHeaderValue mediaType = new MediaTypeWithQualityHeaderValue("application/json");
+            mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "full"));
+            request.Headers.Accept.Add(mediaType);
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             return new HttpRequestODataMessage(request);
         }

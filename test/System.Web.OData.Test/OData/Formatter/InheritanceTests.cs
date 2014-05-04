@@ -106,13 +106,13 @@ namespace System.Web.OData.Formatter
         public void Action_Can_Take_Entity_In_Inheritance()
         {
             // Arrange
-            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/atom+xml");
+            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Motorcycle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             AddRequestInfo(request);
             request.Content = new StreamContent(body);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
             HttpResponseMessage response = _client.SendAsync(request).Result;
@@ -148,13 +148,13 @@ namespace System.Web.OData.Formatter
         public void Can_Post_DerivedType_To_Action_Expecting_BaseType()
         {
             // Arrange
-            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/atom+xml");
+            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Vehicle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
             AddRequestInfo(request);
             request.Content = new StreamContent(body);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
             HttpResponseMessage response = _client.SendAsync(request).Result;

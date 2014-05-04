@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization.Models;
-using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -80,11 +79,13 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
+
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings
             {
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
             };
-            settings.SetContentType(ODataFormat.Atom);
+            settings.SetContentType(ODataFormat.Json);
+
             ODataMessageWriter messageWriter = new ODataMessageWriter(message, settings);
             Mock<ODataComplexTypeSerializer> serializer = new Mock<ODataComplexTypeSerializer>(new DefaultODataSerializerProvider());
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "ComplexPropertyName", Model = _model };
@@ -105,12 +106,8 @@ namespace System.Web.OData.Formatter.Serialization
             // Assert
             serializer.Verify();
             stream.Seek(0, SeekOrigin.Begin);
-            XElement element = XElement.Load(stream);
-            Assert.Equal("value", element.Name.LocalName);
-            Assert.Equal("#NS.Name", element.Attributes().Single(a => a.Name.LocalName == "type").Value);
-            Assert.Equal(1, element.Descendants().Count());
-            Assert.Equal("42", element.Descendants().Single().Value);
-            Assert.Equal("Property1", element.Descendants().Single().Name.LocalName);
+            string result = new StreamReader(stream).ReadToEnd();
+            Assert.Equal("{\"@odata.context\":\"http://any/$metadata#NS.Name\",\"Property1\":42}", result);
         }
 
         [Fact]

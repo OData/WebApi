@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<m:value xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata">
-  <m:element>Frank</m:element>
-  <m:element>Steve</m:element>
-  <m:element>Tom</m:element>
-  <m:element>Chandler</m:element>
-</m:value>

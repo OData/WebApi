@@ -133,7 +133,7 @@ namespace System.Web.OData.Routing
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             request.Content = new StringContent(message);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/atom+xml"));
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
 
             // Act
             var response = await _client.SendAsync(request);
@@ -141,7 +141,7 @@ namespace System.Web.OData.Routing
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Contains("<d:ID m:type=\"Int32\">908</d:ID>", responseString);
+            Assert.Contains("\"ID\":908", responseString);
         }
 
         private IEdmModel GetEdmModel(HttpConfiguration configuration)

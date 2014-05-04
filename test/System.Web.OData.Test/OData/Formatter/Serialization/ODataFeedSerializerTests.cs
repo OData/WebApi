@@ -4,14 +4,12 @@ using System.Collections;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
-using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization.Models;
 using System.Web.OData.Query;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
-using Microsoft.OData.Core.Atom;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -385,37 +383,6 @@ namespace System.Web.OData.Formatter.Serialization
 
             // Assert
             Assert.Equal(expectedNextLink, feed.NextPageLink);
-        }
-
-        [Fact]
-        public void CreateODataFeed_Sets_FeedSelfLink()
-        {
-            // Arrange
-            var feedInstance = new object[0];
-            ODataSerializerContext writeContext = new ODataSerializerContext { NavigationSource = _customerSet, Model = _model, Request = new HttpRequestMessage() };
-            writeContext.Url = new UrlHelper(writeContext.Request);
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
-            Uri feedSelfLink = new Uri("http://feed_self_link/");
-            NavigationSourceLinkBuilderAnnotation linkBuilder = new MockNavigationSourceLinkBuilderAnnotation
-            {
-                FeedSelfLinkBuilder = (context) =>
-                    {
-                        Assert.Equal(_customerSet, context.EntitySetBase);
-                        Assert.Equal(feedInstance, context.FeedInstance);
-                        Assert.Equal(writeContext.Request, context.Request);
-                        Assert.Equal(writeContext.Url, context.Url);
-                        return feedSelfLink;
-                    }
-            };
-            _model.SetNavigationSourceLinkBuilder(_customerSet, linkBuilder);
-
-            // Act
-            ODataFeed feed = serializer.CreateODataFeed(feedInstance, _customersType, writeContext);
-
-            // Assert
-            AtomFeedMetadata feedMetadata = feed.GetAnnotation<AtomFeedMetadata>();
-            Assert.Equal(feedSelfLink, feedMetadata.SelfLink.Href);
-            Assert.Equal("self", feedMetadata.SelfLink.Relation);
         }
 
         [Fact]

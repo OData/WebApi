@@ -13,19 +13,7 @@ namespace System.Web.OData.Builder
 
         public SelfLinkBuilder<Uri> ReadLinkBuilder { get; set; }
 
-        public Func<FeedContext, Uri> FeedSelfLinkBuilder { get; set; }
-
         public Func<EntityInstanceContext, IEdmNavigationProperty, ODataMetadataLevel, Uri> NavigationLinkBuilder { get; set; }
-
-
-        public override Uri BuildFeedSelfLink(FeedContext context)
-        {
-            if (FeedSelfLinkBuilder != null)
-            {
-                return FeedSelfLinkBuilder(context);
-            }
-            return null;
-        }
 
         public override Uri BuildEditLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, Uri idLink)
         {

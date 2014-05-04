@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<m:value xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata">
-  <m:element m:type="Int32">10</m:element>
-  <m:element m:type="Int32">20</m:element>
-  <m:element m:type="Int32">30</m:element>
-  <m:element m:type="Int32">40</m:element>
-  <m:element m:type="Int32">50</m:element>
-</m:value>

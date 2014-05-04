@@ -91,23 +91,6 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Generates a feed self link following the OData URL conventions for the feed represented by <paramref name="feedContext"/>.
-        /// </summary>
-        /// <param name="feedContext">The <see cref="FeedContext"/> representing the feed for which the self link needs to be generated.</param>
-        /// <returns>The generated feed self link following the OData URL conventions.</returns>
-        public static Uri GenerateFeedSelfLink(this FeedContext feedContext)
-        {
-            if (feedContext == null)
-            {
-                throw Error.ArgumentNull("feedContext");
-            }
-
-            string selfLink = feedContext.Url.CreateODataLink(new EntitySetPathSegment(feedContext.EntitySetBase));
-
-            return selfLink == null ? null : new Uri(selfLink);
-        }
-
-        /// <summary>
         /// Generates an action link following the OData URL conventions for the action <paramref name="action"/> and bound to the entity
         /// represented by <paramref name="entityContext"/>.
         /// </summary>

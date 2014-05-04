@@ -3,27 +3,27 @@
 namespace System.Web.OData.Formatter
 {
     /// <summary>
-    /// The amount of metadata information to serialize in an OData response (for JSON light).
+    /// The amount of metadata information to serialize in an OData response (for JSON).
     /// </summary>
     public enum ODataMetadataLevel
     {
         /// <summary>
-        /// Normal metadata; used for anything other than JSON light (Atom/XML, JSON verbose).
+        /// Normal metadata; used for anything other than JSON.
         /// </summary>
         Default = 0,
 
         /// <summary>
-        /// JSON light full metadata.
+        /// JSON full metadata.
         /// </summary>
         FullMetadata = 1,
 
         /// <summary>
-        /// JSON light minimal metadata.
+        /// JSON minimal metadata.
         /// </summary>
         MinimalMetadata = 2,
 
         /// <summary>
-        /// JSON light no metadata.
+        /// JSON no metadata.
         /// </summary>
         NoMetadata = 3
     }

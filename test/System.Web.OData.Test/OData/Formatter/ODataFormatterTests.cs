@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,10 +16,8 @@ using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Query;
 using System.Web.OData.TestCommon;
-using System.Xml;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
-using Microsoft.OData.Core.Atom;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -29,49 +28,6 @@ namespace System.Web.OData.Formatter
     public class ODataFormatterTests
     {
         private const string baseAddress = "http://localhost:8081/";
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GetEntryInODataAtomFormat(bool tracingEnabled)
-        {
-            // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration(tracingEnabled))
-            using (HttpServer host = new HttpServer(configuration))
-            using (HttpClient client = new HttpClient(host))
-            using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
-                ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
-
-            // Act
-            using (HttpResponseMessage response = client.SendAsync(request).Result)
-            {
-                // Assert
-                AssertODataVersion4AtomResponse(Resources.PersonEntryInAtom, response);
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void PostEntryInODataAtomFormat(bool tracingEnabled)
-        {
-            // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration(tracingEnabled))
-            using (HttpServer host = new HttpServer(configuration))
-            using (HttpClient client = new HttpClient(host))
-            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, baseAddress + "People"))
-            {
-                request.Content = new StringContent(Resources.PersonEntryInAtom);
-                request.Content.Headers.ContentType = ODataTestUtil.ApplicationAtomMediaTypeWithQuality;
-
-                // Act
-                using (HttpResponseMessage response = client.SendAsync(request).Result)
-                {
-                    // Assert
-                    AssertODataVersion4AtomResponse(Resources.PersonEntryInAtom, response, HttpStatusCode.Created);
-                }
-            }
-        }
 
         [Theory]
         [InlineData("application/json;odata.metadata=none", "PersonEntryInJsonLightNoMetadata.json")]
@@ -202,9 +158,9 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void SupportOnlyODataAtomFormat()
+        public void SupportOnlyODataFormat()
         {
-            // Arrange #1 and #2
+            // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
             {
                 foreach (ODataMediaTypeFormatter odataFormatter in
@@ -216,28 +172,18 @@ namespace System.Web.OData.Formatter
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 {
-                    // Arrange #1
-                    using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
-                        ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
-                    // Act #1
-                    using (HttpResponseMessage response = client.SendAsync(request).Result)
-                    {
-                        // Assert #1
-                        AssertODataVersion4AtomResponse(Resources.PersonEntryInAtom, response);
-                    }
-
-                    // Arrange #2
                     using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
                         ODataTestUtil.ApplicationJsonMediaTypeWithQuality))
-                    // Act #2
+
+                    // Act
                     using (HttpResponseMessage response = client.SendAsync(request).Result)
                     {
-                        // Assert #2
+                        // Assert
                         Assert.NotNull(response);
                         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                         Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
                             response.Content.Headers.ContentType.MediaType);
-                        ODataTestUtil.VerifyJsonResponse(response.Content, Resources.PersonEntryInPlainOldJson);
+                        ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
                     }
                 }
             }
@@ -246,64 +192,53 @@ namespace System.Web.OData.Formatter
         [Fact]
         public void ConditionallySupportODataIfQueryStringPresent()
         {
-            // Arrange #1, #2, #3 and #4
+            // Arrange #1, #2 and #3
             using (HttpConfiguration configuration = CreateConfiguration())
             {
                 foreach (ODataMediaTypeFormatter odataFormatter in
                     configuration.Formatters.OfType<ODataMediaTypeFormatter>())
                 {
                     odataFormatter.SupportedMediaTypes.Clear();
-                    odataFormatter.MediaTypeMappings.Add(new ODataMediaTypeMapping(ODataTestUtil.ApplicationAtomMediaTypeWithQuality));
                     odataFormatter.MediaTypeMappings.Add(new ODataMediaTypeMapping(ODataTestUtil.ApplicationJsonMediaTypeWithQuality));
                 }
 
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 {
-                    // Arrange #1 this request should return response in OData atom format
-                    using (HttpRequestMessage request = ODataTestUtil.GenerateRequestMessage(
-                        CreateAbsoluteUri("People(10)?$format=atom"), isAtom: true))
-                    // Act #1
-                    using (HttpResponseMessage response = client.SendAsync(request).Result)
-                    {
-                        // Assert #1
-                        AssertODataVersion4AtomResponse(Resources.PersonEntryInAtom, response);
-                    }
-
-                    // Arrange #2: this request should return response in OData json format
+                    // Arrange #1: this request should return response in OData json format
                     using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                        CreateAbsoluteUri("People(10)?$format=application/json"), isAtom: false))
-                    // Act #2
+                        CreateAbsoluteUri("People(10)?$format=application/json")))
+                    // Act #1
                     using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
                     {
-                        // Assert #2
+                        // Assert #1
                         AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonLight, response);
                     }
 
-                    // Arrange #3: when the query string is not present, request should be handled by the regular Json
+                    // Arrange #2: when the query string is not present, request should be handled by the regular Json
                     // Formatter
                     using (HttpRequestMessage requestWithNonODataJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                        CreateAbsoluteUri("People(10)"), isAtom: false))
-                    // Act #3
+                        CreateAbsoluteUri("People(10)")))
+                    // Act #2
                     using (HttpResponseMessage response = client.SendAsync(requestWithNonODataJsonHeader).Result)
                     {
-                        // Assert #3
+                        // Assert #2
                         Assert.NotNull(response);
                         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                         Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
                             response.Content.Headers.ContentType.MediaType);
                         Assert.Null(ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
 
-                        ODataTestUtil.VerifyJsonResponse(response.Content, Resources.PersonEntryInPlainOldJson);
+                        ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
                     }
 
-                    // Arrange #4: this request should return response in OData json format
+                    // Arrange #3: this request should return response in OData json format
                     using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                        CreateAbsoluteUri("President?$format=application/json"), isAtom: false))
-                    // Act #4
+                        CreateAbsoluteUri("President?$format=application/json")))
+                    // Act #3
                     using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
                     {
-                        // Assert #4
+                        // Assert #3
                         AssertODataVersion4JsonResponse(Resources.GetString("PresidentInJsonLightMinimalMetadata.json"),
                             response);
                     }
@@ -312,37 +247,14 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void GetFeedInODataAtomFormat_HasSelfLink()
-        {
-            // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration())
-            using (HttpServer host = new HttpServer(configuration))
-            using (HttpClient client = new HttpClient(host))
-            using (HttpRequestMessage request = CreateRequest("People",
-                ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
-            // Act
-            using (HttpResponseMessage response = client.SendAsync(request).Result)
-            {
-                // Assert
-                Assert.NotNull(response);
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-                XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
-                XElement[] links = xml.Elements(XName.Get("link", "http://www.w3.org/2005/Atom")).ToArray();
-                Assert.Equal("self", links.First().Attribute("rel").Value);
-                Assert.Equal(baseAddress + "People", links.First().Attribute("href").Value);
-            }
-        }
-
-        [Fact]
-        public void GetFeedInODataAtomFormat_LimitsResults()
+        public void GetFeedInODataJsonFormat_LimitsResults()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequest("People?$orderby=Name&$count=true",
-                    ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
+                    ODataTestUtil.ApplicationJsonMediaTypeWithQuality))
             // Act
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
@@ -350,19 +262,16 @@ namespace System.Web.OData.Formatter
                 Assert.NotNull(response);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
-                XElement[] entries = xml.Elements(XName.Get("entry", "http://www.w3.org/2005/Atom")).ToArray();
-                XElement nextPageLink = xml.Elements(XName.Get("link", "http://www.w3.org/2005/Atom"))
-                    .Where(link => link.Attribute(XName.Get("rel")).Value == "next")
-                    .SingleOrDefault();
-                XElement count = xml.Element(XName.Get("count", "http://docs.oasis-open.org/odata/ns/metadata"));
+                string result = response.Content.ReadAsStringAsync().Result;
+                dynamic json = JToken.Parse(result);
 
                 // Assert the PageSize correctly limits three results to two
-                Assert.Equal(2, entries.Length);
+                Assert.Equal(2, json["value"].Count);
                 // Assert there is a next page link
-                Assert.NotNull(nextPageLink);
+                Assert.NotNull(json["@odata.nextLink"]);
+                Assert.Equal("http://localhost:8081/People?$orderby=Name&$count=true&$skip=2", json["@odata.nextLink"].Value);
                 // Assert the count is included with the number of entities (3)
-                Assert.Equal("3", count.Value);
+                Assert.Equal(3, json["@odata.count"].Value);
             }
         }
 
@@ -411,17 +320,18 @@ namespace System.Web.OData.Formatter
                     ODataMediaTypeFormatters.Create(new CustomSerializerProvider(), new DefaultODataDeserializerProvider()));
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
-                using (HttpRequestMessage request = CreateRequest("People", MediaTypeWithQualityHeaderValue.Parse("application/atom+xml")))
+                using (HttpRequestMessage request = CreateRequest("People", MediaTypeWithQualityHeaderValue.Parse("application/json")))
                 // Act
                 using (HttpResponseMessage response = client.SendAsync(request).Result)
                 {
                     // Assert
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    string payload = response.Content.ReadAsStringAsync().Result;
 
-                    XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
-
-                    Assert.Equal("My amazing feed", xml.Elements().Single(e => e.Name.LocalName == "title").Value);
+                    // Change DoesNotContain() as Contain() after fix https://aspnetwebstack.codeplex.com/workitem/1880
+                    Assert.DoesNotContain("\"@Custom.Int32Annotation\":321", payload);
+                    Assert.DoesNotContain("\"@Custom.StringAnnotation\":\"My amazing feed\"", payload);
                 }
             }
         }
@@ -518,7 +428,7 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void EnumSerializer_HasMetadataType_InAtom()
+        public void EnumSerializer_HasMetadataType()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -536,28 +446,17 @@ namespace System.Web.OData.Formatter
                         string.Format(@"{{'@odata.type':'#System.Web.OData.Formatter.EnumCustomer',
                             'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
                     request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-                    request.Headers.Accept.ParseAdd("application/atom+xml");
+                    request.Headers.Accept.ParseAdd("application/json;odata.metadata=full");
 
                     // Act
                     using (HttpResponseMessage response = client.SendAsync(request).Result)
                     {
                         // Assert
                         response.EnsureSuccessStatusCode();
-                        var atomResult = response.Content.ReadAsStreamAsync().Result;
-                        var atomXmlDocument = new XmlDocument();
-                        atomXmlDocument.Load(atomResult);
-
-                        XmlNamespaceManager namespaceManager = new XmlNamespaceManager(atomXmlDocument.NameTable);
-                        namespaceManager.AddNamespace("ns", atomXmlDocument.DocumentElement.NamespaceURI);
-                        namespaceManager.AddNamespace("m", atomXmlDocument.DocumentElement.GetNamespaceOfPrefix("m"));
-                        namespaceManager.AddNamespace("d", atomXmlDocument.DocumentElement.GetNamespaceOfPrefix("d"));
-
-                        var colorMetadataType = atomXmlDocument.DocumentElement.SelectNodes(
-                            "ns:content/m:properties/d:Color/attribute::m:type", namespaceManager).Cast<XmlNode>().Select(e => e.Value);
-                        var colorsMetadataType = atomXmlDocument.DocumentElement.SelectNodes(
-                            "ns:content/m:properties/d:Colors/attribute::m:type", namespaceManager).Cast<XmlNode>().Select(e => e.Value);
-                        Assert.Equal("#System.Web.OData.Builder.TestModels.Color", colorMetadataType.Single());
-                        Assert.Equal("#Collection(System.Web.OData.Builder.TestModels.Color)", colorsMetadataType.Single());
+                        dynamic payload = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+                        Assert.Equal("#System.Web.OData.Formatter.EnumCustomer", payload["@odata.type"].Value);
+                        Assert.Equal("#System.Web.OData.Builder.TestModels.Color", payload["Color@odata.type"].Value);
+                        Assert.Equal("#Collection(System.Web.OData.Builder.TestModels.Color)", payload["Colors@odata.type"].Value);
                     }
                 }
             }
@@ -632,22 +531,6 @@ namespace System.Web.OData.Formatter
             request.Headers.Add("OData-MaxVersion", "4.0");
         }
 
-        private static void AssertODataVersion4AtomResponse(string expectedContent, HttpResponseMessage actual)
-        {
-            AssertODataVersion4AtomResponse(expectedContent, actual, HttpStatusCode.OK);
-        }
-
-        private static void AssertODataVersion4AtomResponse(string expectedContent, HttpResponseMessage actual, HttpStatusCode statusCode)
-        {
-            Assert.NotNull(actual);
-            Assert.Equal(statusCode, actual.StatusCode);
-            Assert.Equal(ODataTestUtil.ApplicationAtomMediaTypeWithQuality.MediaType,
-                actual.Content.Headers.ContentType.MediaType);
-            Assert.Equal(ODataTestUtil.Version4NumberString,
-                ODataTestUtil.GetDataServiceVersion(actual.Content.Headers));
-            ODataTestUtil.VerifyResponse(actual.Content, expectedContent);
-        }
-
         private static void AssertODataVersion4JsonResponse(string expectedContent, HttpResponseMessage actual)
         {
             Assert.NotNull(actual);
@@ -656,7 +539,7 @@ namespace System.Web.OData.Formatter
                 actual.Content.Headers.ContentType.MediaType);
             Assert.Equal(ODataTestUtil.Version4NumberString,
                 ODataTestUtil.GetDataServiceVersion(actual.Content.Headers));
-            ODataTestUtil.VerifyJsonResponse(actual.Content, expectedContent);
+            ODataTestUtil.VerifyResponse(actual.Content, expectedContent);
         }
 
         private static string CreateAbsoluteLink(string relativeUri)
@@ -764,7 +647,14 @@ namespace System.Web.OData.Formatter
                 ODataSerializerContext writeContext)
             {
                 ODataFeed feed = base.CreateODataFeed(feedInstance, feedType, writeContext);
-                feed.Atom().Title = new AtomTextConstruct { Kind = AtomTextConstructKind.Text, Text = "My amazing feed" };
+
+                // Int32
+                ODataPrimitiveValue intValue = new ODataPrimitiveValue(321);
+                feed.InstanceAnnotations.Add(new ODataInstanceAnnotation("Custom.Int32Annotation", intValue));
+
+                // String
+                ODataPrimitiveValue stringValue = new ODataPrimitiveValue("My amazing feed");
+                feed.InstanceAnnotations.Add(new ODataInstanceAnnotation("Custom.StringAnnotation", stringValue));
                 return feed;
             }
         }

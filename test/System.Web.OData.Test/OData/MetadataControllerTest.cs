@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Tracing;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
@@ -139,8 +137,8 @@ namespace System.Web.OData.Builder
             var response = client.SendAsync(request).Result;
 
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("application/atomsvc+xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains("<workspace>", response.Content.ReadAsStringAsync().Result);
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", response.Content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -177,8 +175,8 @@ namespace System.Web.OData.Builder
             var responseString = client.GetStringAsync("http://localhost/").Result;
 
             // Assert
-            Assert.Contains("<m:function-import href=\"GetPerson\">", responseString);
-            Assert.Contains("<m:function-import href=\"GetVipPerson\">", responseString);
+            Assert.Contains("\"name\":\"GetPerson\",\"kind\":\"FunctionImport\",\"url\":\"GetPerson\"", responseString);
+            Assert.Contains("\"name\":\"GetVipPerson\",\"kind\":\"FunctionImport\",\"url\":\"GetVipPerson\"", responseString);
         }
 
         [Fact]
@@ -200,8 +198,8 @@ namespace System.Web.OData.Builder
             var functionImport = Assert.Single(functionImports);
             Assert.Equal("Default.GetSalary", functionImport.Function.FullName());
             Assert.True(functionImport.IncludeInServiceDocument);
-            Assert.Contains("<service xml:base=\"http://localhost/\"", responseString);
-            Assert.DoesNotContain("<m:function-import href=\"GetSalary\">", responseString);
+            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", responseString);
+            Assert.DoesNotContain("\"name\":\"GetSalary\",\"kind\":\"FunctionImport\",\"url\":\"GetSalary\"", responseString);
         }
 
         [Fact]
@@ -231,8 +229,8 @@ namespace System.Web.OData.Builder
             Assert.Empty(functionImports[0].Function.Parameters);
             Assert.Equal("AddressId", functionImports[1].Function.Parameters.First().Name);
 
-            Assert.Contains("<service xml:base=\"http://localhost/\"", responseString);
-            Assert.DoesNotContain("<m:function-import href=\"GetAddress\">", responseString);
+            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", responseString);
+            Assert.DoesNotContain("\"name\":\"GetAddress\",\"kind\":\"FunctionImport\",\"url\":\"GetAddress\"", responseString);
         }
 
         [Fact]
@@ -261,8 +259,8 @@ namespace System.Web.OData.Builder
             Assert.Empty(functionImports[1].Function.Parameters);
             Assert.Equal(2, functionImports[2].Function.Parameters.Count());
 
-            Assert.Contains("<service xml:base=\"http://localhost/\"", responseString);
-            Assert.Contains("<m:function-import href=\"GetVipPerson\">", responseString);
+            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", responseString);
+            Assert.Contains("\"name\":\"GetVipPerson\",\"kind\":\"FunctionImport\",\"url\":\"GetVipPerson\"", responseString);
         }
 
         [Fact]

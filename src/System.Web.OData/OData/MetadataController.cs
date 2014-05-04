@@ -8,7 +8,6 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
-using Microsoft.OData.Core.Atom;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 
@@ -76,8 +75,6 @@ namespace System.Web.OData
                 Name = name, // Required for JSON support
                 Url = new Uri(url, UriKind.Relative)
             };
-
-            info.SetAnnotation<AtomResourceCollectionMetadata>(new AtomResourceCollectionMetadata { Title = name });
 
             return info;
         }

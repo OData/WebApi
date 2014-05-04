@@ -23,24 +23,14 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void ComplexTypeSerializesAsODataForJsonLight()
+        public void ComplexTypeSerializesAsOData()
         {
-            ComplexTypeSerializesAsOData(Resources.PersonComplexTypeInJsonLight, true);
-        }
-
-        [Fact]
-        public void ComplexTypeSerializesAsODataForAtom()
-        {
-            ComplexTypeSerializesAsOData(Resources.PersonComplexTypeInAtom, false);
-        }
-
-        private void ComplexTypeSerializesAsOData(string expectedContent, bool json)
-        {
+            // Arrange
             ObjectContent<Person> content = new ObjectContent<Person>(new Person(0, new ReferenceDepthContext(7)),
-                _formatter, CollectionTest.GetMediaType(json));
+                _formatter, ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
 
-
-            CollectionTest.AssertEqual(json, expectedContent, content.ReadAsStringAsync().Result);
+            // Act & Assert
+            JsonAssert.Equal(Resources.PersonComplexType, content.ReadAsStringAsync().Result);
         }
 
         private static HttpRequestMessage GetSampleRequest()

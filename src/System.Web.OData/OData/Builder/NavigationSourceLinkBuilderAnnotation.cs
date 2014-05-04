@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Formatter;
@@ -17,8 +16,6 @@ namespace System.Web.OData.Builder
     /// </summary>
     public class NavigationSourceLinkBuilderAnnotation
     {
-        private readonly Func<FeedContext, Uri> _feedSelfLinkBuilder;
-
         private readonly SelfLinkBuilder<Uri> _idLinkBuilder;
         private readonly SelfLinkBuilder<Uri> _editLinkBuilder;
         private readonly SelfLinkBuilder<Uri> _readLinkBuilder;
@@ -77,7 +74,6 @@ namespace System.Web.OData.Builder
             }
 
             _navigationSourceName = navigationSource.Name;
-            _feedSelfLinkBuilder = (feedContext) => feedContext.GenerateFeedSelfLink();
 
             Func<EntityInstanceContext, Uri> selfLinkFactory =
                 (entityInstanceContext) => entityInstanceContext.GenerateSelfLink(includeCast: derivedTypesDefineNavigationProperty);
@@ -88,13 +84,11 @@ namespace System.Web.OData.Builder
         /// Constructs an instance of an <see cref="NavigationSourceLinkBuilderAnnotation" /> class.
         /// </summary>
         /// <param name="navigationSource">The navigation source for which the link builder is being constructed.</param>
-        /// <param name="feedSelfLinkBuilder">The feed sellf link builder which is used to build the feed self link.</param>
         /// <param name="idLinkBuilder">The ID link builder which is used to build the ID link.</param>
         /// <param name="editLinkBuilder">The Edit link builder which is used to build the Edit link.</param>
         /// <param name="readLinkBuilder">The Read link builder which is used to build the Read link.</param>
         public NavigationSourceLinkBuilderAnnotation(
             IEdmNavigationSource navigationSource,
-            Func<FeedContext, Uri> feedSelfLinkBuilder,
             SelfLinkBuilder<Uri> idLinkBuilder,
             SelfLinkBuilder<Uri> editLinkBuilder,
             SelfLinkBuilder<Uri> readLinkBuilder)
@@ -105,7 +99,6 @@ namespace System.Web.OData.Builder
             }
 
             _navigationSourceName = navigationSource.Name;
-            _feedSelfLinkBuilder = feedSelfLinkBuilder;
             _idLinkBuilder = idLinkBuilder;
             _editLinkBuilder = editLinkBuilder;
             _readLinkBuilder = readLinkBuilder;
@@ -122,16 +115,6 @@ namespace System.Web.OData.Builder
             }
 
             _navigationSourceName = navigationSource.Name;
-            EntitySetConfiguration entitySet = navigationSource as EntitySetConfiguration;
-            if (entitySet != null)
-            {
-                _feedSelfLinkBuilder = entitySet.GetFeedSelfLink();
-            }
-            else
-            {
-                _feedSelfLinkBuilder = null;
-            }
-
             _idLinkBuilder = navigationSource.GetIdLink();
             _editLinkBuilder = navigationSource.GetEditLink();
             _readLinkBuilder = navigationSource.GetReadLink();
@@ -143,24 +126,6 @@ namespace System.Web.OData.Builder
         public void AddNavigationPropertyLinkBuilder(IEdmNavigationProperty navigationProperty, NavigationLinkBuilder linkBuilder)
         {
             _navigationPropertyLinkBuilderLookup[navigationProperty] = linkBuilder;
-        }
-
-        /// <summary>
-        /// Build a self-link URI given a <see cref="FeedContext" />.
-        /// </summary>
-        public virtual Uri BuildFeedSelfLink(FeedContext context)
-        {
-            if (context == null)
-            {
-                throw Error.ArgumentNull("context");
-            }
-
-            if (_feedSelfLinkBuilder == null)
-            {
-                return null;
-            }
-
-            return _feedSelfLinkBuilder(context);
         }
 
         /// <summary>

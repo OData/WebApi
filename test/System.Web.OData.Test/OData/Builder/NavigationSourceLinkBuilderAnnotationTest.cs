@@ -383,21 +383,6 @@ namespace System.Web.OData.Builder
             Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/SpecialOrders", result.AbsoluteUri);
         }
 
-        [Fact]
-        public void Ctor_FollowingConventions_GeneratesFeedSelfLinkFollowingConventions()
-        {
-            // Arrange
-            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            HttpRequestMessage request = GetODataRequest(model.Model);
-
-            // Act
-            NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(model.Customers, model.Model);
-            Uri result = linkBuilder.BuildFeedSelfLink(new FeedContext { EntitySetBase = model.Customers, Url = request.GetUrlHelper() });
-
-            // Assert
-            Assert.Equal("http://localhost/Customers", result.AbsoluteUri);
-        }
-
         private static HttpRequestMessage GetODataRequest(IEdmModel model)
         {
             HttpConfiguration configuration = new HttpConfiguration();

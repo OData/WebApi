@@ -2,7 +2,6 @@
 
 using System.IO;
 using System.Runtime.Serialization;
-using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
@@ -40,26 +39,28 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void ODataWorkspaceSerializer_Works()
+        public void ODataServiceDocumentSerializer_Works()
         {
             // Arrange
             ODataServiceDocumentSerializer serializer = new ODataServiceDocumentSerializer();
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
+
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings
             {
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
             };
-            settings.SetContentType(ODataFormat.Atom);
+            settings.SetContentType(ODataFormat.Json);
+
             ODataMessageWriter writer = new ODataMessageWriter(message, settings);
 
             // Act
             serializer.WriteObject(new ODataServiceDocument(), _workspaceType, writer, new ODataSerializerContext());
+            stream.Seek(0, SeekOrigin.Begin);
+            string result = new StreamReader(stream).ReadToEnd();
 
             // Assert
-            stream.Seek(0, SeekOrigin.Begin);
-            XElement element = XElement.Load(stream);
-            Assert.Equal("service", element.Name.LocalName);
+            Assert.Equal("{\"@odata.context\":\"http://any/$metadata\",\"value\":[]}", result);
         }
     }
 }

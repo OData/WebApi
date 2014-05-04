@@ -79,19 +79,21 @@ namespace System.Web.OData.Formatter.Serialization
             ODataSerializerContext writeContext = new ODataSerializerContext();
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);
+
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings
             {
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/") }
             };
+
             settings.SetContentType(ODataFormat.Json);
             ODataMessageWriter writer = new ODataMessageWriter(message, settings);
 
             // Act
             serializer.WriteObject(uris, typeof(ODataEntityReferenceLinks), writer, writeContext);
-
-            // Assert
             stream.Seek(0, SeekOrigin.Begin);
             string result = new StreamReader(stream).ReadToEnd();
+
+            // Assert
             Assert.Equal("{\"@odata.context\":\"http://any/$metadata#Collection($ref)\"," +
                 "\"value\":[{\"@odata.id\":\"http://uri1/\"},{\"@odata.id\":\"http://uri2/\"}]}",
                 result);

@@ -1,6 +1,0 @@
-﻿<m:value xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata">
-  <m:element m:type="Boolean">true</m:element>
-  <m:element m:type="Boolean">false</m:element>
-  <m:element m:type="Boolean">true</m:element>
-  <m:element m:type="Boolean">false</m:element>
-</m:value>

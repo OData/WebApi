@@ -44,7 +44,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// The Title of the procedure. When customized, the title of the procedure
         /// will be sent back when the OData client asks for an entity or a feed in
-        /// JSON full metadata or Atom.
+        /// JSON full metadata.
         /// </summary>
         public string Title { get; set; }
 

@@ -921,7 +921,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateODataAction_ForAtom_IncludesEverything()
+        public void CreateODataAction_IncludesEverything_ForFullMetadata()
         {
             // Arrange
             string expectedContainerName = "Container";
@@ -942,7 +942,7 @@ namespace System.Web.OData.Formatter.Serialization
             UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
 
             EntityInstanceContext context = CreateContext(model, url);
-            context.SerializerContext.MetadataLevel = ODataMetadataLevel.Default;
+            context.SerializerContext.MetadataLevel = ODataMetadataLevel.FullMetadata;
 
             // Act
             ODataAction actualAction = _serializer.CreateODataAction(action, context);

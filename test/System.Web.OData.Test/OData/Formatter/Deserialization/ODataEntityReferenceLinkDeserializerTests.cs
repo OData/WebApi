@@ -2,7 +2,6 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.Serialization;
 using System.Web.OData.Builder;
 using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
@@ -47,17 +46,24 @@ namespace System.Web.OData.Formatter.Deserialization
         public void Read_RoundTrips()
         {
             // Arrange
+            IEdmModel model = CreateModel();
             var deserializer = new ODataEntityReferenceLinkDeserializer();
             MockODataRequestMessage requestMessage = new MockODataRequestMessage();
-            ODataMessageWriterSettings settings = new ODataMessageWriterSettings();
-            settings.SetContentType(ODataFormat.Atom);
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings()
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/") }
+            };
+            settings.SetContentType(ODataFormat.Json);
+
             ODataMessageWriter messageWriter = new ODataMessageWriter(requestMessage, settings);
             messageWriter.WriteEntityReferenceLink(new ODataEntityReferenceLink { Url = new Uri("http://localhost/samplelink") });
-            ODataMessageReader messageReader = new ODataMessageReader(new MockODataRequestMessage(requestMessage));
+
+            ODataMessageReaderSettings readSettings = new ODataMessageReaderSettings();
+            ODataMessageReader messageReader = new ODataMessageReader(new MockODataRequestMessage(requestMessage), readSettings, model);
             ODataDeserializerContext context = new ODataDeserializerContext
             {
                 Request = new HttpRequestMessage(),
-                Path = new ODataPath(new NavigationPathSegment(GetNavigationProperty(CreateModel())))
+                Path = new ODataPath(new NavigationPathSegment(GetNavigationProperty(model)))
             };
 
             // Act

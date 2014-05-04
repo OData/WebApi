@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Builder;
@@ -18,36 +17,16 @@ namespace System.Web.OData.Formatter.Serialization
         private IEdmModel _model = GetSampleModel();
 
         [Fact]
-        public void EntityTypeSerializesAsODataEntryForJsonLight()
+        public void EntityTypeSerializesAsODataEntry()
         {
-            EntityTypeSerializesAsODataEntry(Resources.EmployeeEntryInJsonLight, true);
-        }
-
-        [Fact]
-        public void EntityTypeSerializesAsODataEntryForAtom()
-        {
-            EntityTypeSerializesAsODataEntry(Resources.EmployeeEntryInAtom, false);
-        }
-
-        private void EntityTypeSerializesAsODataEntry(string expectedContent, bool json)
-        {
+            // Arrange
             ODataMediaTypeFormatter formatter = CreateFormatter();
             Employee employee = (Employee)TypeInitializer.GetInstance(SupportedTypes.Employee);
-            ObjectContent<Employee> content = new ObjectContent<Employee>(employee, formatter, json ?
-                ODataMediaTypes.ApplicationJsonODataMinimalMetadata : ODataMediaTypes.ApplicationAtomXmlTypeEntry);
+            ObjectContent<Employee> content = new ObjectContent<Employee>(employee, formatter,
+                ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
 
-            string actualContent = content.ReadAsStringAsync().Result;
-
-            if (json)
-            {
-                JsonAssert.Equal(expectedContent, actualContent);
-            }
-            else
-            {
-                RegexReplacement replaceUpdateTime = new RegexReplacement(
-                    "<updated>*.*</updated>", "<updated>UpdatedTime</updated>");
-                Assert.Xml.Equal(expectedContent, actualContent, replaceUpdateTime);
-            }
+            // Act & Assert
+            JsonAssert.Equal(Resources.EmployeeEntry, content.ReadAsStringAsync().Result);
         }
 
         private ODataMediaTypeFormatter CreateFormatter()
@@ -55,7 +34,6 @@ namespace System.Web.OData.Formatter.Serialization
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Entry });
             formatter.Request = GetSampleRequest();
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXmlTypeEntry);
             return formatter;
         }
 

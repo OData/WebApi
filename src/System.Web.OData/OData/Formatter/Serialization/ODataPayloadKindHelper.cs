@@ -23,6 +23,7 @@ namespace System.Web.OData.Formatter.Serialization
                 || payloadKind == ODataPayloadKind.ServiceDocument
                 || payloadKind == ODataPayloadKind.Value
                 || payloadKind == ODataPayloadKind.IndividualProperty
+                || payloadKind == ODataPayloadKind.Delta
                 || payloadKind == ODataPayloadKind.Unsupported;
         }
 

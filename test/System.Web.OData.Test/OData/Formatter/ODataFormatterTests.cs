@@ -2,7 +2,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -16,7 +15,6 @@ using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Query;
 using System.Web.OData.TestCommon;
-using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -286,7 +284,7 @@ namespace System.Web.OData.Formatter
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = CreateRequest("People?$filter=abc+eq+null",
-                    MediaTypeWithQualityHeaderValue.Parse("application/xml")))
+                    MediaTypeWithQualityHeaderValue.Parse("application/json")))
                 // Act
                 using (HttpResponseMessage response = client.SendAsync(request).Result)
                 {
@@ -294,17 +292,18 @@ namespace System.Web.OData.Formatter
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-                    XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
+                    string result = response.Content.ReadAsStringAsync().Result;
+                    dynamic json = JToken.Parse(result);
 
-                    Assert.Equal("error", xml.Name.LocalName);
-                    Assert.Equal("The query specified in the URI is not valid. Could not find a property named 'abc' on type 'System.Web.OData.Formatter.FormatterPerson'.",
-                        xml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}message")).Value);
-                    XElement innerErrorXml = xml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}innererror"));
-                    Assert.NotNull(innerErrorXml);
+                    Assert.Equal("The query specified in the URI is not valid. " +
+                        "Could not find a property named 'abc' on type 'System.Web.OData.Formatter.FormatterPerson'.",
+                        json["error"]["message"].Value);
+
                     Assert.Equal("Could not find a property named 'abc' on type 'System.Web.OData.Formatter.FormatterPerson'.",
-                        innerErrorXml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}message")).Value);
+                        json["error"]["innererror"]["message"].Value);
+
                     Assert.Equal("Microsoft.OData.Core.ODataException",
-                        innerErrorXml.Element(XName.Get("{http://docs.oasis-open.org/odata/ns/metadata}type")).Value);
+                        json["error"]["innererror"]["type"].Value);
                 }
             }
         }

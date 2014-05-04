@@ -467,33 +467,6 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void InvalidXmlCharacters_CanBeWrittenByDefault()
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            Stream stream = new MemoryStream();
-            HttpContent content = new StreamContent(stream);
-            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/xml");
-
-            Assert.DoesNotThrow(
-                () => formatter.WriteToStreamAsync(typeof(string), "Hello\x16", stream, content, null));
-        }
-
-        [Fact]
-        public void InvalidXmlCharacters_RaiseExceptionsIfCheckCharactersIsTrue()
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            formatter.MessageWriterSettings.CheckCharacters = true;
-            Stream stream = new MemoryStream();
-            HttpContent content = new StreamContent(stream);
-            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/xml");
-
-            //formatter.WriteToStreamAsync(typeof(string), "Hello\x16", stream, content, null).Wait();
-            Assert.Throws<ArgumentException>(
-                () => formatter.WriteToStreamAsync(typeof(string), "Hello\x16", stream, content, null).Wait(),
-                 "'\x16', hexadecimal value 0x16, is an invalid character.");
-        }
-
-        [Fact]
         public void Request_IsPassedThroughDeserializerContext()
         {
             // Arrange

@@ -614,13 +614,9 @@ namespace System.Web.OData.Query
         }
 
         [Theory]
-        [InlineData(
-            "Simple eq Microsoft.TestCommon.Types.SimpleEnum'4'",
-            "The string 'Microsoft.TestCommon.Types.SimpleEnum'4'' is not a valid enumeration type constant.")]
-        [InlineData(
-            "Flag eq Microsoft.TestCommon.Types.FlagsEnum'8'",
-            "The string 'Microsoft.TestCommon.Types.FlagsEnum'8'' is not a valid enumeration type constant.")]
-        public void ApplyToEnums_ThrowsNotValidEnumTypeConst_ForUndefinedValue(string filter, string exceptionMessage)
+        [InlineData("Simple eq Microsoft.TestCommon.Types.SimpleEnum'4'")]
+        [InlineData("Flag eq Microsoft.TestCommon.Types.FlagsEnum'8'")]
+        public void ApplyToEnums_DoesnotThrow_ForUndefinedValue(string filter)
         {
             // Arrange
             var model = GetEnumModel();
@@ -629,9 +625,12 @@ namespace System.Web.OData.Query
             IEnumerable<EnumModel> enumModels = EnumModelTestData;
 
             // Act
-            Assert.Throws<ODataException>(
-                () => filterOption.ApplyTo(enumModels.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }),
-                exceptionMessage
+            Assert.DoesNotThrow(
+                () => filterOption.ApplyTo(enumModels.AsQueryable(),
+                    new ODataQuerySettings
+                    {
+                        HandleNullPropagation = HandleNullPropagationOption.True
+                    })
             );
         }
 

@@ -1522,6 +1522,8 @@ namespace System.Web.OData.Query.Expressions
         [InlineData("cast(null,Edm.String) ne '123'", "$it => (null != \"123\")")]
         [InlineData("cast(null,Edm.DateTimeOffset) eq 2001-01-01T12:00:00.000+08:00", "$it => (null == Convert(1/1/2001 12:00:00 PM +08:00))")]
         [InlineData("cast(null,Edm.Duration) eq duration'P8DT23H59M59.9999S'", "$it => (null == Convert(8.23:59:59.9999000))")]
+        [InlineData("cast(null,'Microsoft.TestCommon.Types.SimpleEnum') eq null", "$it => (null == null)")]
+        [InlineData("cast(null,'Microsoft.TestCommon.Types.FlagsEnum') eq null", "$it => (null == null)")]
         [InlineData("cast(IntProp,Edm.String) eq '123'", "$it => (Convert($it.IntProp.ToString()) == \"123\")")]
         [InlineData("cast(LongProp,Edm.String) eq '123'", "$it => (Convert($it.LongProp.ToString()) == \"123\")")]
         [InlineData("cast(SingleProp,Edm.String) eq '123'", "$it => (Convert($it.SingleProp.ToString()) == \"123\")")]
@@ -1578,8 +1580,6 @@ namespace System.Web.OData.Query.Expressions
         [InlineData("cast(NullableSimpleEnumProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
         [InlineData("cast(IntProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
         [InlineData("cast(DateTimeOffsetProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast(null,'Microsoft.TestCommon.Types.SimpleEnum') eq null")]
-        [InlineData("cast(null,'Microsoft.TestCommon.Types.FlagsEnum') eq null")]
         [InlineData("cast(FlagsEnumProp,Edm.Int32) eq 123")]
         [InlineData("cast(NullableSimpleEnumProp,Edm.Guid) ne null")]
         public void CastFails_UnsupportedSourceOrTargetForEnumCast_Throws(string filter)
@@ -1610,7 +1610,7 @@ namespace System.Web.OData.Query.Expressions
 
         [Theory]
         [InlineData("cast(null,System.Web.OData.Query.Expressions.Address) ne null",
-            "The child type 'System.Web.OData.Query.Expressions.Address' in a cast was not an entity type. Casts can only be performed on entity types.")]
+            "Encountered invalid type cast. 'System.Web.OData.Query.Expressions.Address' is not assignable from 'System.Web.OData.Query.Expressions.DataTypes'.")]
         [InlineData("cast(null,System.Web.OData.Query.Expressions.DataTypes) ne null",
             "Cast or IsOf Function must have a type in its arguments.")]
         public void CastFails_NonPrimitiveTarget_Throws(string filter, string expectErrorMessage)

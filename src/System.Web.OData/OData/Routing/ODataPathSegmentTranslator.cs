@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
@@ -21,6 +22,8 @@ namespace System.Web.OData.Routing
     {
         private readonly IEdmModel _model;
         private readonly bool _enableUriTemplateParsing;
+        private IDictionary<string, SingleValueNode> _parameterAliasValueNodes;
+        private NameValueCollection _queryString;
 
         /// <summary>
         /// Translates an ODL path to Web API path.
@@ -30,13 +33,17 @@ namespace System.Web.OData.Routing
         /// <param name="unresolvedPathSegment">Unresolved path segment.</param>
         /// <param name="id">The key segment from $id.</param>
         /// <param name="enableUriTemplateParsing">Specifies the ODL path is template or not.</param>
+        /// <param name="parameterAliasNodes">The parameter alias nodes info.</param>
+        /// <param name="queryString">The query string.</param>
         /// <returns>The translated Web API path.</returns>
         public static ODataPath TranslateODLPathToWebAPIPath(
             Semantic.ODataPath path,
             IEdmModel model,
             UnresolvedPathSegment unresolvedPathSegment,            
             KeySegment id,
-            bool enableUriTemplateParsing)
+            bool enableUriTemplateParsing,
+            IDictionary<string, SingleValueNode> parameterAliasNodes,
+            NameValueCollection queryString)
         {
             if (path == null)
             {
@@ -46,9 +53,14 @@ namespace System.Web.OData.Routing
             {
                 throw Error.ArgumentNull("model");
             }
+            if (parameterAliasNodes == null)
+            {
+                throw Error.ArgumentNull("parameterAliasNodes");
+            }
 
             IList<ODataPathSegment> segments = path.WalkWith(
-                new ODataPathSegmentTranslator(model, enableUriTemplateParsing)).SelectMany(s => s).ToList();
+                new ODataPathSegmentTranslator(model, enableUriTemplateParsing, parameterAliasNodes, queryString))
+                .SelectMany(s => s).ToList();
 
             if (unresolvedPathSegment != null)
             {
@@ -71,15 +83,74 @@ namespace System.Web.OData.Routing
         /// </summary>
         /// <param name="model">The model used to parse the path.</param>
         /// <param name="enableUriTemplateParsing">Specifies parsing path template or not.</param>
-        public ODataPathSegmentTranslator(IEdmModel model, bool enableUriTemplateParsing)
+        /// <param name="parameterAliasNodes">The parameter alias nodes info.</param>
+        /// <param name="queryString">The query string.</param>
+        public ODataPathSegmentTranslator(
+            IEdmModel model,
+            bool enableUriTemplateParsing,
+            IDictionary<string, SingleValueNode> parameterAliasNodes,
+            NameValueCollection queryString)
         {
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
 
+            if (parameterAliasNodes == null)
+            {
+                throw Error.ArgumentNull("parameterAliasNodes");
+            }
+
             _model = model;
             _enableUriTemplateParsing = enableUriTemplateParsing;
+            _parameterAliasValueNodes = parameterAliasNodes;
+            _queryString = queryString;
+        }
+
+        /// <summary>
+        /// Translate parameter alias node to corresponding single value node.
+        /// </summary>
+        /// <param name="node">The node to be translated.</param>
+        /// <param name="parameterAliasNodes">The parameter alias node mapping.</param>
+        /// <returns>The translated node.</returns>
+        public static SingleValueNode TranslateParameterAlias(
+            SingleValueNode node,
+            IDictionary<string, SingleValueNode> parameterAliasNodes)
+        {
+            if (node == null)
+            {
+                throw Error.ArgumentNull("node");
+            }
+
+            if (parameterAliasNodes == null)
+            {
+                throw Error.ArgumentNull("parameterAliasNodes");
+            }
+
+            ParameterAliasNode parameterAliasNode = node as ParameterAliasNode;
+
+            if (parameterAliasNode == null)
+            {
+                return node;
+            }
+
+            SingleValueNode singleValueNode;
+
+            if (parameterAliasNodes.TryGetValue(parameterAliasNode.Alias, out singleValueNode) &&
+                singleValueNode != null)
+            {
+                if (singleValueNode is ParameterAliasNode)
+                {
+                    singleValueNode = TranslateParameterAlias(singleValueNode, parameterAliasNodes);
+                }
+
+                return singleValueNode;
+            }
+
+            // Parameter alias value is assumed to be null if it is not found.
+            // Do not need to translate the parameter alias node from the query string
+            // because this method only deals with the parameter alias node mapping from ODL parser.
+            return null;
         }
 
         /// <summary>
@@ -391,13 +462,55 @@ namespace System.Web.OData.Routing
             ParameterAliasNode parameterAliasNode = node as ParameterAliasNode;
             if (parameterAliasNode != null)
             {
-                return parameterAliasNode.Alias;
+                return TranslateParameterAlias(parameterAliasNode.Alias);
             }
 
             throw Error.NotSupported(
                 SRResources.CannotRecognizeNodeType, 
                 typeof(ODataPathSegmentTranslator),
                 node.GetType().FullName);
+        }
+
+        // Translate parameter alias to string literal.
+        // Use the query string to do the translataion if it is not null,
+        // otherwise use the parameter alias node mapping from ODL parser.
+        // The query string is not null if and only if there is some unresolved path segment.
+        private string TranslateParameterAlias(string alias)
+        {
+            if (alias == null)
+            {
+                throw Error.ArgumentNull("alias");
+            }
+
+            if (_queryString != null)
+            {
+                string value = _queryString.Get(alias);
+
+                if (value == null)
+                {
+                    return null;
+                }
+
+                value = value.Trim();
+
+                if (value.StartsWith("@", StringComparison.Ordinal))
+                {
+                    return TranslateParameterAlias(value);
+                }
+                else
+                {
+                    return value;
+                }
+            }
+
+            SingleValueNode singleValueNode;
+
+            if (_parameterAliasValueNodes.TryGetValue(alias, out singleValueNode) && singleValueNode != null)
+            {
+                return TranslateNode(singleValueNode);
+            }
+
+            return null;
         }
     }
 }

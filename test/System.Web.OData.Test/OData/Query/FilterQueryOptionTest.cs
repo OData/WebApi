@@ -10,6 +10,7 @@ using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
@@ -333,6 +334,64 @@ namespace System.Web.OData.Query
                         DateTimeOffsetProp = new DateTimeOffset(new DateTime(2003, 3, 3, 3, 3, 3, DateTimeKind.Utc)),
                         GuidProp = Guid.Empty,
                         EntityProp = new Product()
+                    }
+                };
+            }
+        }
+
+        // Legal filter queries usable against ParameterAliasTestData.
+        // Tuple is: filter, parameter alias value, expected list of Id's
+        public static TheoryDataSet<string, string, int[]> ParameterAliasTestFilters
+        {
+            get
+            {
+                return new TheoryDataSet<string, string, int[]>
+                {
+                    { "IntProp gt @p", "1.5", new int[] { 2, 3 }},
+                    { "NullableIntProp lt @p", "1.5", new int[] { 1}},
+                    { "contains(StringProp,@p)", "'3'", new int[] { 3 } },
+                    { "FlagsEnumProp has @p", "Microsoft.TestCommon.Types.FlagsEnum'Two'", new int[] { 2, 3 } },
+                    { "NullableSimpleEnumProp ne @p", "Microsoft.TestCommon.Types.SimpleEnum'1'", new int[] { 1, 3 } },
+                    { "DateTimeOffsetProp ne @p", "2001-01-01T01:01:01.000+00:00", new int[] { 2, 3 } },
+                    { "GuidProp eq @p", "00000000-0000-0000-0000-000000000000", new int[] { 1, 3 } }
+                };
+            }
+        }
+
+        // Test data used by ParameterAliasTestFilters TheoryDataSet
+        public static List<DataTypes> ParameterAliasTestData
+        {
+            get
+            {
+                return new List<DataTypes>()
+                {
+                    new DataTypes()
+                    {
+                        IntProp = 1,
+                        NullableIntProp = 1,
+                        StringProp = "String 1",
+                        FlagsEnumProp = FlagsEnum.One | FlagsEnum.Four,
+                        NullableSimpleEnumProp = SimpleEnum.First,
+                        DateTimeOffsetProp = new DateTimeOffset(new DateTime(2001, 1, 1, 1, 1, 1, DateTimeKind.Utc)),
+                        GuidProp = Guid.Empty
+                    },
+                    new DataTypes()
+                    {
+                        IntProp = 2,
+                        NullableIntProp = 2,
+                        FlagsEnumProp = FlagsEnum.Two,
+                        NullableSimpleEnumProp = SimpleEnum.Second,
+                        DateTimeOffsetProp = new DateTimeOffset(new DateTime(2002, 2, 2, 2, 2, 2, DateTimeKind.Utc)),
+                        GuidProp = Guid.NewGuid()
+                    },
+                    new DataTypes()
+                    {
+                        IntProp = 3,
+                        StringProp = "String 3",
+                        FlagsEnumProp = FlagsEnum.Two | FlagsEnum.Four,
+                        NullableSimpleEnumProp = SimpleEnum.Third,
+                        DateTimeOffsetProp = new DateTimeOffset(new DateTime(2003, 3, 3, 3, 3, 3, DateTimeKind.Utc)),
+                        GuidProp = Guid.Empty
                     }
                 };
             }
@@ -736,6 +795,36 @@ namespace System.Web.OData.Query
         }
 
         [Theory]
+        [PropertyData("ParameterAliasTestFilters")]
+        public void ApplyWithParameterAlias_ReturnsCorrectQueryable(string filter, string parameterAliasValue, int[] parameterAliasModelIds)
+        {
+            // Arrange
+            var model = GetParameterAliasModel();
+            var context = new ODataQueryContext(model, typeof(DataTypes));
+            IEdmType targetEdmType = model.FindType("System.Web.OData.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("System.Web.OData.Query.Expressions.Products");
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(
+                model,
+                targetEdmType,
+                targetNavigationSource,
+                new Dictionary<string, string> { { "$filter", filter }, { "@p", parameterAliasValue } });
+
+            var filterOption = new FilterQueryOption(filter, context, parser);
+            IEnumerable<DataTypes> parameterAliasModels = ParameterAliasTestData;
+
+            // Act
+            IQueryable queryable = filterOption.ApplyTo(parameterAliasModels.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+
+            // Assert
+            Assert.NotNull(queryable);
+            IEnumerable<DataTypes> actualResult = Assert.IsAssignableFrom<IEnumerable<DataTypes>>(queryable);
+            Assert.Equal(
+                parameterAliasModelIds,
+                actualResult.Select(result => result.IntProp));
+        }
+
+        [Theory]
         [PropertyData("PropertyAliasTestFilters")]
         public void ApplyTo_ReturnsCorrectQueryable_PropertyAlias(string filter, int[] propertyAliasIds)
         {
@@ -797,6 +886,15 @@ namespace System.Web.OData.Query
             config.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(DataTypes)));
             var builder = new ODataConventionModelBuilder(config);
             builder.EntitySet<DataTypes>("CastModels");
+            return builder.GetEdmModel();
+        }
+
+        private static IEdmModel GetParameterAliasModel()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(DataTypes)));
+            var builder = new ODataConventionModelBuilder(config);
+            builder.EntitySet<DataTypes>("ParameterAliasModels");
             return builder.GetEdmModel();
         }
 

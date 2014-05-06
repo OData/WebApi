@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.OData.Builder;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -252,17 +253,41 @@ namespace System.Web.OData.Query.Validators
                 "Order by 'Value' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on EnableQueryAttribute or QueryValidationSettings.");
         }
 
+        [Fact]
+        public void Validate_NoException_ForParameterAlias()
+        {
+            // Arrange
+            IEdmModel model = GetEdmModel();
+            IEdmEntityType edmType = model.SchemaElements.OfType<IEdmEntityType>().Single(t => t.Name == "LimitedEntity");
+            IEdmEntitySet entitySet = model.FindDeclaredEntitySet("System.Web.OData.Query.Validators.LimitedEntities");
+            ODataQueryContext context = new ODataQueryContext(model, edmType);
+
+            OrderByQueryOption option = new OrderByQueryOption(
+                "@p,@q desc",
+                context,
+                new ODataQueryOptionParser(
+                    model,
+                    edmType,
+                    entitySet,
+                    new Dictionary<string, string> { { "$orderby", "@p,@q desc" }, { "@p", "Id" }, { "@q", "RelatedEntity/Id" } }));
+
+            ODataValidationSettings settings = new ODataValidationSettings();
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
         private static IEdmModel GetEdmModel()
         {
             ODataModelBuilder builder = new ODataModelBuilder();
-            
+
             // Configure LimitedEntity
             EntitySetConfiguration<LimitedEntity> limitedEntities = builder.EntitySet<LimitedEntity>("LimitedEntities");
             limitedEntities.EntityType.HasKey(p => p.Id);
             limitedEntities.EntityType.ComplexProperty(c => c.ComplexProperty).IsUnsortable();
             limitedEntities.EntityType.HasOptional(l => l.RelatedEntity);
             limitedEntities.EntityType.CollectionProperty(cp => cp.Integers);
-            
+
             // Configure LimitedRelatedEntity
             EntitySetConfiguration<LimitedRelatedEntity> limitedRelatedEntities =
                 builder.EntitySet<LimitedRelatedEntity>("LimitedRelatedEntities");

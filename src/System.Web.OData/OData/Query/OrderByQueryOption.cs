@@ -7,6 +7,7 @@ using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
@@ -116,7 +117,9 @@ namespace System.Web.OData.Query
                 if (_orderByClause == null)
                 {
                     _orderByClause = _queryOptionParser.ParseOrderBy();
+                    _orderByClause = TranslateParameterAlias(_orderByClause);
                 }
+
                 return _orderByClause;
             }
         }
@@ -246,6 +249,24 @@ namespace System.Web.OData.Query
             }
 
             return querySoFar as IOrderedQueryable;
+        }
+
+        private OrderByClause TranslateParameterAlias(OrderByClause orderBy)
+        {
+            if (orderBy == null)
+            {
+                return null;
+            }
+
+            SingleValueNode orderByExpression = orderBy.Expression.Accept(
+                new ParameterAliasNodeTranslator(_queryOptionParser.ParameterAliasNodes)) as SingleValueNode;
+            orderByExpression = orderByExpression ?? new ConstantNode(null, "null");
+
+            return new OrderByClause(
+                TranslateParameterAlias(orderBy.ThenBy),
+                orderByExpression,
+                orderBy.Direction,
+                orderBy.RangeVariable);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.OData.Query.Expressions;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -391,6 +392,30 @@ namespace System.Web.OData.Query.Validators
 
             // Act & Assert
             Assert.DoesNotThrow(() => _validator.Validate(option, _settings));
+        }
+
+        [Fact]
+        public void Validator_Doesnot_Throw_For_ParameterAlias()
+        {
+            // Arrange
+            FilterQueryOption option = new FilterQueryOption(
+                "Id eq @p",
+                _context,
+                new ODataQueryOptionParser(
+                    _context.Model,
+                    _context.ElementType,
+                    _context.NavigationSource,
+                    new Dictionary<string, string> { { "$filter", "Id eq @p" }, { "@p", "1" } }));
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, _settings));
+            Assert.Equal(6, _validator.Times.Keys.Count);
+            Assert.Equal(1, _validator.Times["Validate"]); // entry
+            Assert.Equal(1, _validator.Times["ValidateParameterQueryNode"]); // $it
+            Assert.Equal(1, _validator.Times["ValidateSingleValuePropertyAccessNode"]); // Id
+            Assert.Equal(1, _validator.Times["ValidateBinaryOperatorQueryNode"]); // eq
+            Assert.Equal(1, _validator.Times["ValidateLogicalOperator"]); // eq
+            Assert.Equal(1, _validator.Times["ValidateConstantQueryNode"]); // 1
         }
 
         private static TheoryDataSet<string> GetLongInputsTestData(int maxCount)

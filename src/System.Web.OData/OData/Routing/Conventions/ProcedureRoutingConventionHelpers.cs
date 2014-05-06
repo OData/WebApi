@@ -73,11 +73,6 @@ namespace System.Web.OData.Routing.Conventions
             {
                 string name = nameAndValue.Key;
                 object value = functionSegment.GetParameterValue(name);
-                UnresolvedParameterValue unresolvedParameterValue = value as UnresolvedParameterValue;
-                if (unresolvedParameterValue != null)
-                {
-                    value = unresolvedParameterValue.Resolve(controllerContext.Request.RequestUri);
-                }
 
                 ODataEnumValue enumValue = value as ODataEnumValue;
                 if (enumValue != null)

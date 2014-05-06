@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -93,6 +94,7 @@ namespace System.Web.OData.Routing
             ODataUriParser uriParser;
             Uri serviceRootUri = null;
             Uri fullUri = null;
+            NameValueCollection queryString = null;
 
             if (enableUriTemplateParsing)
             {
@@ -109,6 +111,7 @@ namespace System.Web.OData.Routing
                         serviceRoot + "/");
 
                 fullUri = new Uri(serviceRootUri, odataPath);
+                queryString = fullUri.ParseQueryString();
                 uriParser = new ODataUriParser(model, serviceRootUri, fullUri);
             }
 
@@ -152,7 +155,6 @@ namespace System.Web.OData.Routing
 
                 if (lastSegmentEdmType != null)
                 {
-                    string idString = fullUri.ParseQueryString().Get("$id");
                     Semantic.EntityIdSegment entityIdSegment = null;
                     bool exceptionThrown = false;
 
@@ -178,17 +180,22 @@ namespace System.Web.OData.Routing
                         (entityIdSegment != null &&
                             (id == null || lastSegmentEdmType.ElementType.Definition != id.EdmType)))
                     {
-                        throw new ODataException(Error.Format(SRResources.InvalidDollarId, idString));
+                        throw new ODataException(Error.Format(SRResources.InvalidDollarId, queryString.Get("$id")));
                     }
                 }
             }
 
             return ODataPathSegmentTranslator.TranslateODLPathToWebAPIPath(
                 path,
-                model, 
+                model,
                 unresolvedPathSegment,
-                id, 
-                enableUriTemplateParsing);
+                id,
+                enableUriTemplateParsing,
+                unresolvedPathSegment == null ? 
+                    uriParser.ParameterAliasNodes :
+                    // We can't get parameter alias if ODataUnrecognizedPathException was thrown.
+                    new Dictionary<string, Semantic.SingleValueNode>(),
+                unresolvedPathSegment == null ? null : queryString);
         }
 
         private static ODataPathTemplate Templatify(ODataPath path, string pathTemplate)

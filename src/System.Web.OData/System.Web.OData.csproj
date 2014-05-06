@@ -96,6 +96,7 @@
     <Compile Include="OData\Builder\DynamicPropertyDictionaryAnnotation.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
+    <Compile Include="OData\Query\ParameterAliasNodeTranslator.cs" />
     <Compile Include="OData\RequestPreferenceHelpers.cs" />
     <Compile Include="OData\FunctionImportComparer.cs" />
     <Compile Include="OData\Formatter\Deserialization\EnumDeserializationHelpers.cs" />
@@ -256,7 +257,6 @@
     <Compile Include="OData\Routing\ODataSegmentKinds.cs" />
     <Compile Include="OData\Routing\KeyValuePathSegment.cs" />
     <Compile Include="OData\Routing\RefPathSegment.cs" />
-    <Compile Include="OData\Routing\UnresolvedParameterValue.cs" />
     <Compile Include="OData\Routing\ODataValueProviderFactory.cs" />
     <Compile Include="OData\Routing\UnresolvedPathSegment.cs" />
     <Compile Include="OData\Routing\ValuePathSegment.cs" />

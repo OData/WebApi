@@ -1621,6 +1621,147 @@ namespace System.Web.OData.Query.Expressions
 
         #endregion
 
+        #region parameter alias for filter query option
+
+        [Theory]
+        // Parameter alias value is not null.
+        [InlineData("IntProp eq @p", "1", "$it => ($it.IntProp == 1)")]
+        [InlineData("BoolProp eq @p", "true", "$it => ($it.BoolProp == True)")]
+        [InlineData("LongProp eq @p", "-123", "$it => ($it.LongProp == Convert(-123))")]
+        [InlineData("FloatProp eq @p", "1.23", "$it => ($it.FloatProp == 1.23)")]
+        [InlineData("DoubleProp eq @p", "4.56", "$it => ($it.DoubleProp == Convert(4.56))")]
+        [InlineData("StringProp eq @p", "'abc'", "$it => ($it.StringProp == \"abc\")")]
+        [InlineData("DateTimeOffsetProp eq @p", "2001-01-01T12:00:00.000+08:00", "$it => ($it.DateTimeOffsetProp == 1/1/2001 12:00:00 PM +08:00)")]
+        [InlineData("TimeSpanProp eq @p", "duration'P8DT23H59M59.9999S'", "$it => ($it.TimeSpanProp == 8.23:59:59.9999000)")]
+        [InlineData("GuidProp eq @p", "00000000-0000-0000-0000-000000000000", "$it => ($it.GuidProp == 00000000-0000-0000-0000-000000000000)")]
+        [InlineData("SimpleEnumProp eq @p", "Microsoft.TestCommon.Types.SimpleEnum'First'", "$it => (Convert($it.SimpleEnumProp) == 0)")]
+        // Parameter alias value is null.
+        [InlineData("NullableIntProp eq @p", "null", "$it => ($it.NullableIntProp == null)")]
+        [InlineData("NullableBoolProp eq @p", "null", "$it => ($it.NullableBoolProp == null)")]
+        [InlineData("NullableLongProp eq @p", "null", "$it => ($it.NullableLongProp == null)")]
+        [InlineData("NullableSingleProp eq @p", "null", "$it => ($it.NullableSingleProp == null)")]
+        [InlineData("NullableDoubleProp eq @p", "null", "$it => ($it.NullableDoubleProp == null)")]
+        [InlineData("StringProp eq @p", "null", "$it => ($it.StringProp == null)")]
+        [InlineData("NullableDateTimeOffsetProp eq @p", "null", "$it => ($it.NullableDateTimeOffsetProp == null)")]
+        [InlineData("NullableTimeSpanProp eq @p", "null", "$it => ($it.NullableTimeSpanProp == null)")]
+        [InlineData("NullableGuidProp eq @p", "null", "$it => ($it.NullableGuidProp == null)")]
+        [InlineData("NullableSimpleEnumProp eq @p", "null", "$it => (Convert($it.NullableSimpleEnumProp) == null)")]
+        // Parameter alias value is property.
+        [InlineData("@p eq 1", "IntProp", "$it => ($it.IntProp == 1)")]
+        [InlineData("@p eq true", "NullableBoolProp", "$it => ($it.NullableBoolProp == Convert(True))")]
+        [InlineData("@p eq -123", "LongProp", "$it => ($it.LongProp == -123)")]
+        [InlineData("@p eq 1.23", "FloatProp", "$it => ($it.FloatProp == 1.23)")]
+        [InlineData("@p eq 4.56", "NullableDoubleProp", "$it => ($it.NullableDoubleProp == Convert(4.56))")]
+        [InlineData("@p eq 'abc'", "StringProp", "$it => ($it.StringProp == \"abc\")")]
+        [InlineData("@p eq 2001-01-01T12:00:00.000+08:00", "DateTimeOffsetProp", "$it => ($it.DateTimeOffsetProp == 1/1/2001 12:00:00 PM +08:00)")]
+        [InlineData("@p eq duration'P8DT23H59M59.9999S'", "TimeSpanProp", "$it => ($it.TimeSpanProp == 8.23:59:59.9999000)")]
+        [InlineData("@p eq 00000000-0000-0000-0000-000000000000", "GuidProp", "$it => ($it.GuidProp == 00000000-0000-0000-0000-000000000000)")]
+        [InlineData("@p eq Microsoft.TestCommon.Types.SimpleEnum'First'", "SimpleEnumProp", "$it => (Convert($it.SimpleEnumProp) == 0)")]
+        // Parameter alias value has built-in functions.
+        [InlineData("@p eq 'abc'", "substring(StringProp,5)", "$it => ($it.StringProp.Substring(5) == \"abc\")")]
+        [InlineData("2 eq @p", "IntProp add 1", "$it => (2 == ($it.IntProp + 1))")]
+        public void ParameterAlias_Succeeds(string filter, string parameterAliasValue, string expectedResult)
+        {
+            // Arrange
+            IEdmModel model = GetModel<DataTypes>();
+            IEdmType targetEdmType = model.FindType("System.Web.OData.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("System.Web.OData.Query.Expressions.Products");
+            IDictionary<string, string> queryOptions = new Dictionary<string, string> { { "$filter", filter } };
+            queryOptions.Add("@p", parameterAliasValue);
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(model, targetEdmType, targetNavigationSource, queryOptions);
+            FilterClause filterClause = new FilterQueryOption(filter, new ODataQueryContext(model, typeof(DataTypes)), parser).FilterClause;
+            
+            // Act
+            Expression actualExpression = FilterBinder.Bind(
+                filterClause,
+                typeof(DataTypes),
+                model,
+                CreateFakeAssembliesResolver(),
+                new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False });
+
+            // Assert
+            VerifyExpression(actualExpression, expectedResult);
+        }
+
+        [Theory]
+        [InlineData("NullableIntProp eq @p", "$it => ($it.NullableIntProp == null)")]
+        [InlineData("NullableBoolProp eq @p", "$it => ($it.NullableBoolProp == null)")]
+        [InlineData("NullableDoubleProp eq @p", "$it => ($it.NullableDoubleProp == null)")]
+        [InlineData("StringProp eq @p", "$it => ($it.StringProp == null)")]
+        [InlineData("NullableDateTimeOffsetProp eq @p", "$it => ($it.NullableDateTimeOffsetProp == null)")]
+        [InlineData("NullableSimpleEnumProp eq @p", "$it => (Convert($it.NullableSimpleEnumProp) == null)")]
+        public void ParameterAlias_AssumedToBeNull_ValueNotFound(string filter, string expectedResult)
+        {
+            // Arrange
+            IEdmModel model = GetModel<DataTypes>();
+            IEdmType targetEdmType = model.FindType("System.Web.OData.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("System.Web.OData.Query.Expressions.Products");
+            IDictionary<string, string> queryOptions = new Dictionary<string, string> { { "$filter", filter } };
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(model, targetEdmType, targetNavigationSource, queryOptions);
+            FilterClause filterClause = new FilterQueryOption(filter, new ODataQueryContext(model, typeof(DataTypes)), parser).FilterClause;
+
+            // Act
+            Expression actualExpression = FilterBinder.Bind(
+                filterClause,
+                typeof(DataTypes),
+                model,
+                CreateFakeAssembliesResolver(),
+                new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False });
+
+            // Assert
+            VerifyExpression(actualExpression, expectedResult);
+        }
+
+        [Fact]
+        public void ParameterAlias_NestedCase_Succeeds()
+        {
+            // Arrange
+            IEdmModel model = GetModel<DataTypes>();
+            IEdmType targetEdmType = model.FindType("System.Web.OData.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("System.Web.OData.Query.Expressions.Products");
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(
+                model,
+                targetEdmType,
+                targetNavigationSource,
+                new Dictionary<string, string> { { "$filter", "IntProp eq @p1" }, { "@p1", "@p2" }, { "@p2", "123" } });
+
+            FilterClause filterClause = new FilterQueryOption("IntProp eq @p1", new ODataQueryContext(model, typeof(DataTypes)), parser).FilterClause;
+
+            // Act
+            Expression actualExpression = FilterBinder.Bind(
+                filterClause,
+                typeof(DataTypes),
+                model,
+                CreateFakeAssembliesResolver(),
+                new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False });
+
+            // Assert
+            VerifyExpression(actualExpression, "$it => ($it.IntProp == 123)");
+        }
+
+        [Fact]
+        public void ParameterAlias_Throws_NotStartWithAt()
+        {
+            // Arrange
+            IEdmModel model = GetModel<DataTypes>();
+            IEdmType targetEdmType = model.FindType("System.Web.OData.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("System.Web.OData.Query.Expressions.Products");
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(
+                model,
+                targetEdmType,
+                targetNavigationSource,
+                new Dictionary<string, string> { { "$filter", "IntProp eq #p" }, { "#p", "123" } });
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => parser.ParseFilter(),
+                "Syntax error: character '#' is not valid at position 11 in 'IntProp eq #p'.");
+        }
+
+        #endregion
+
         [Theory]
         [InlineData("UShortProp eq 12", "$it => (Convert($it.UShortProp) == 12)")]
         [InlineData("ULongProp eq 12L", "$it => (Convert($it.ULongProp) == 12)")]

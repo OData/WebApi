@@ -138,9 +138,7 @@ namespace System.Web.OData.Routing
                 IEdmOperationParameter edmParam = Function.Function.FindParameter(parameterName);
                 if (edmParam != null)
                 {
-                    return paramValue.StartsWith("@", StringComparison.Ordinal) ?
-                        new UnresolvedParameterValue(edmParam.Type, paramValue, _edmModel) :
-                        ODataUriUtils.ConvertFromUriLiteral(paramValue, ODataVersion.V4, _edmModel, edmParam.Type);
+                    return ODataUriUtils.ConvertFromUriLiteral(paramValue, ODataVersion.V4, _edmModel, edmParam.Type);
                 }
             }
 

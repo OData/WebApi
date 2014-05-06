@@ -22,6 +22,66 @@ namespace System.Web.OData.Routing
         private static IEdmModel _model = ODataRoutingModel.GetModel();
         private const string _serviceRoot = "http://any/";
 
+        public static TheoryDataSet<object, Type> ParameterAliasWithNullForFunctionParameterData
+        {
+            get
+            {
+                TheoryDataSet<object, Type> data = new TheoryDataSet<object, Type>();
+
+                data.Add(null, typeof(int?));
+                data.Add(null, typeof(bool?));
+                data.Add(null, typeof(long?));
+                data.Add(null, typeof(Single?));
+                data.Add(null, typeof(double?));
+                data.Add(null, typeof(string));
+                data.Add(null, typeof(DateTimeOffset?));
+                data.Add(null, typeof(TimeSpan?));
+                data.Add(null, typeof(Guid?));
+                data.Add(null, typeof(SimpleEnum?));
+
+                return data;
+            }
+        }
+
+        public static TheoryDataSet<object, Type> ParameterAliasWithEnumForFunctionParameterData
+        {
+            get
+            {
+                TheoryDataSet<object, Type> data = new TheoryDataSet<object, Type>();
+                data.Add(new ODataEnumValue("1", "NS.SimpleEnum"), typeof(SimpleEnum));
+                data.Add(new ODataEnumValue("0", "NS.SimpleEnum"), typeof(SimpleEnum?));
+                return data;
+            }
+        }
+
+        public static TheoryDataSet<object, Type> ParameterAliasForFunctionParameterData
+        {
+            get
+            {
+                TheoryDataSet<object, Type> data = new TheoryDataSet<object, Type>();
+
+                data.Add(1, typeof(int));
+                data.Add(true, typeof(bool));
+                data.Add((long)-123, typeof(long));
+                data.Add((Single)1.23, typeof(Single));
+                data.Add(4.56, typeof(double));
+                data.Add(new DateTimeOffset(new DateTime(2000, 1, 2, 3, 4, 5, DateTimeKind.Utc)), typeof(DateTimeOffset));
+                data.Add(new TimeSpan(23, 59, 59), typeof(TimeSpan));
+                data.Add(Guid.NewGuid(), typeof(Guid));
+
+                data.Add(-1, typeof(int?));
+                data.Add(false, typeof(bool?));
+                data.Add((long)123, typeof(long?));
+                data.Add((Single)123, typeof(Single?));
+                data.Add(1.23, typeof(double?));
+                data.Add("abc", typeof(string));
+                data.Add(new DateTimeOffset(new DateTime(2000, 1, 1, 1, 1, 1, DateTimeKind.Utc)), typeof(DateTimeOffset?));
+                data.Add(new TimeSpan(1, 2, 3), typeof(TimeSpan?));
+                data.Add(Guid.Empty, typeof(Guid?));
+                return data;
+            }
+        }
+
         [Fact]
         public void Parse_WorksOnEncodedCharacters()
         {
@@ -940,10 +1000,43 @@ namespace System.Web.OData.Routing
             Assert.Equal(1, intParameter);
         }
 
-        [Fact]
-        public void CanParse_FunctionParameters_CanResolveAliasedParameterValue()
+        [Theory]
+        [PropertyData("ParameterAliasWithNullForFunctionParameterData")]
+        public void CanParse_FunctionParameters_CanResolveAliasedParameterValueWithNull(object value, Type type)
         {
-            // Arrange
+            // Arrange & Act
+            object parameter = GetAliasedParameterValue(value, type);
+
+            // Assert
+            Assert.IsType<ODataNullValue>(parameter);
+        }
+
+        [Theory]
+        [PropertyData("ParameterAliasWithEnumForFunctionParameterData")]
+        public void CanParse_FunctionParameters_CanResolveAliasedParameterValueWithEnum(object value, Type type)
+        {
+            // Arrange & Act
+            object parameter = GetAliasedParameterValue(value, type);
+
+            // Assert
+            Assert.IsType<ODataEnumValue>(parameter);
+            Assert.Equal(((ODataEnumValue)value).Value, ((ODataEnumValue)parameter).Value);
+            Assert.Equal(((ODataEnumValue)value).TypeName, ((ODataEnumValue)parameter).TypeName);
+        }
+
+        [Theory]
+        [PropertyData("ParameterAliasForFunctionParameterData")]
+        public void CanParse_FunctionParameters_CanResolveAliasedParameterValue(object value, Type type)
+        {
+            // Arrange & Act
+            object parameter = GetAliasedParameterValue(value, type);
+
+            // Assert
+            Assert.Equal(value, parameter);
+        }
+
+        private object GetAliasedParameterValue(object value, Type type)
+        {
             var model = new CustomersModelWithInheritance();
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
             var function = new EdmFunction(
@@ -953,17 +1046,96 @@ namespace System.Web.OData.Routing
                 isBound: false,
                 entitySetPathExpression: null,
                 isComposable: true);
-            function.AddParameter("IntParameter", EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false));
+
+            model.Model.SetAnnotationValue(model.Model.FindType("NS.SimpleEnum"), new ClrTypeAnnotation(typeof(SimpleEnum)));
+            function.AddParameter("Parameter", model.Model.GetEdmTypeReference(type));
             model.Container.AddFunctionImport("FunctionAtRoot", function, entitySet: null);
 
-            // Act
-            ODataPath path = _parser.Parse(model.Model, _serviceRoot, "FunctionAtRoot(IntParameter=@p1)");
+            ODataPath path = _parser.Parse(
+                model.Model,
+                _serviceRoot,
+                "FunctionAtRoot(Parameter=@param)?@param=" + ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4));
             UnboundFunctionPathSegment functionSegment = (UnboundFunctionPathSegment)path.Segments.Last();
 
+            return functionSegment.GetParameterValue("Parameter");
+        }
+
+        [Fact]
+        public void CanParse_FunctionParameters_CanResolveNestedAliasedParameterValues()
+        {
+            // Arrange
+            var model = new CustomersModelWithInheritance();
+            IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
+            var function = new EdmFunction(
+                model.Container.Namespace,
+                "BoundFunction",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: true);
+
+            model.Model.SetAnnotationValue(model.Model.FindType("NS.SimpleEnum"), new ClrTypeAnnotation(typeof(SimpleEnum)));
+            function.AddParameter("bindingParameter", model.Customer.ToEdmTypeReference(false));
+            function.AddParameter("IntParameter", model.Model.GetEdmTypeReference(typeof(int)));
+            function.AddParameter("NullableDoubleParameter", model.Model.GetEdmTypeReference(typeof(double?)));
+            function.AddParameter("StringParameter", model.Model.GetEdmTypeReference(typeof(string)));
+            function.AddParameter("GuidParameter", model.Model.GetEdmTypeReference(typeof(Guid)));
+            function.AddParameter("EnumParameter", model.Model.GetEdmTypeReference(typeof(SimpleEnum)));
+            model.Model.AddElement(function);
+
+            // Act
+            ODataPath path = _parser.Parse(model.Model, _serviceRoot, String.Format(
+                "Customers(1)/NS.BoundFunction(StringParameter=@p2,IntParameter=@p0,NullableDoubleParameter=@p1," +
+                "EnumParameter=@p4,GuidParameter=@p3)?@p2={2}&@p4={4}&@p1={1}&@p0={0}&@p999={3}&@p3=@p999",
+                ODataUriUtils.ConvertToUriLiteral(123, ODataVersion.V4),
+                ODataUriUtils.ConvertToUriLiteral(null, ODataVersion.V4),
+                ODataUriUtils.ConvertToUriLiteral("123", ODataVersion.V4),
+                ODataUriUtils.ConvertToUriLiteral(Guid.Empty, ODataVersion.V4),
+                ODataUriUtils.ConvertToUriLiteral(new ODataEnumValue("Third", "NS.SimpleEnum"), ODataVersion.V4)));
+
+            BoundFunctionPathSegment functionSegment = (BoundFunctionPathSegment)path.Segments.Last();
+            object intParameter = functionSegment.GetParameterValue("IntParameter");
+            object nullableDoubleParameter = functionSegment.GetParameterValue("NullableDoubleParameter");
+            object stringParameter = functionSegment.GetParameterValue("StringParameter");
+            object guidParameter = functionSegment.GetParameterValue("GuidParameter");
+            object enumParameter = functionSegment.GetParameterValue("EnumParameter");
+
             // Assert
-            UnresolvedParameterValue unresolvedParamValue = functionSegment.GetParameterValue("IntParameter") as UnresolvedParameterValue;
-            int intParameter = (int)unresolvedParamValue.Resolve(new Uri("http://services.odata.org/FunctionAtRoot(IntParameter=@p1)?@p1=1"));
-            Assert.Equal(1, intParameter);
+            Assert.Equal(123, intParameter);
+            Assert.IsType<ODataNullValue>(nullableDoubleParameter);
+            Assert.Equal("123", stringParameter);
+            Assert.Equal(Guid.Empty, guidParameter);
+            Assert.IsType<ODataEnumValue>(enumParameter);
+            Assert.Equal("2", ((ODataEnumValue)enumParameter).Value);
+            Assert.Equal("NS.SimpleEnum", ((ODataEnumValue)enumParameter).TypeName);
+        }
+
+        [Fact]
+        public void CanParse_FunctionParametersAlias_WithUnresolvedPathSegment()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ConventionCustomer>("Customers");
+            FunctionConfiguration function = builder.Function("UnboundFunction");
+            function.Parameter<int>("P1");
+            function.Parameter<int>("P2");
+            function.ReturnsFromEntitySet<ConventionCustomer>("Customers");
+            function.IsComposable = true;
+            IEdmModel model = builder.GetEdmModel();
+
+            // Act
+            ODataPath path = _parser.Parse(
+                model,
+                _serviceRoot,
+                "UnboundFunction(P1=@p1,P2=@p2)/unknown?@p1=1&@p3=2&@p2=@p3");
+
+            var functionSegment = (UnboundFunctionPathSegment)path.Segments.First();
+            object p1 = functionSegment.GetParameterValue("P1");
+            object p2 = functionSegment.GetParameterValue("P2");
+
+            // Assert
+            Assert.Equal(1, p1);
+            Assert.Equal(2, p2);
         }
 
         [Theory]

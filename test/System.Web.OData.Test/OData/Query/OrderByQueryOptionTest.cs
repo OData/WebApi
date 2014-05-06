@@ -7,6 +7,8 @@ using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Query.Validators;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
@@ -411,6 +413,81 @@ namespace System.Web.OData.Query
             // Act & Assert
             Assert.Throws<NotSupportedException>(() => orderBy.ApplyTo(queryable),
                 "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
+        }
+
+        [Fact]
+        public void CanApplyOrderBy_WithParameterAlias()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType_With_Address().Add_Address_ComplexType().GetServiceModel();
+
+            var parser = new ODataQueryOptionParser(
+                model,
+                model.FindType("System.Web.OData.Builder.TestModels.Customer"),
+                model.FindDeclaredNavigationSource("Default.Container.Customers"),
+                new Dictionary<string, string> { { "$orderby", "@q desc,@p asc" }, { "@q", "Address/HouseNumber" }, { "@p", "CustomerId" } });
+
+            var orderByOption = new OrderByQueryOption("@q desc,@p asc", new ODataQueryContext(model, typeof(Customer)), parser);
+
+            var customers = (new List<Customer>{
+                new Customer { CustomerId = 1, Address = new Address{HouseNumber = 2}},
+                new Customer { CustomerId = 2, Address = new Address{HouseNumber = 1}},
+                new Customer { CustomerId = 3, Address = new Address{HouseNumber = 3}},
+                new Customer { CustomerId = 4, Address = new Address{HouseNumber = 2}},
+                new Customer { CustomerId = 5, Address = new Address{HouseNumber = 1}},
+            }).AsQueryable();
+
+            // Act
+            var results = orderByOption.ApplyTo(customers).ToArray();
+
+            // Assert
+            Assert.Equal(3, results[0].CustomerId);
+            Assert.Equal(1, results[1].CustomerId);
+            Assert.Equal(4, results[2].CustomerId);
+            Assert.Equal(2, results[3].CustomerId);
+            Assert.Equal(5, results[4].CustomerId);
+        }
+
+        [Fact]
+        public void CanApplyOrderBy_WithNestedParameterAlias()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
+
+            var parser = new ODataQueryOptionParser(
+                model,
+                model.FindType("System.Web.OData.Builder.TestModels.Customer"),
+                model.FindDeclaredNavigationSource("Default.Container.Customers"),
+                new Dictionary<string, string> { { "$orderby", "@p1" }, { "@p2", "Name" }, { "@p1", "@p2" } });
+
+            var orderByOption = new OrderByQueryOption("@p1", new ODataQueryContext(model, typeof(Customer)), parser);
+
+            var customers = (new List<Customer>{
+                new Customer { CustomerId = 1, Name = "Andy" },
+                new Customer { CustomerId = 2, Name = "Aaron" },
+                new Customer { CustomerId = 3, Name = "Alex" }
+            }).AsQueryable();
+
+            // Act
+            var results = orderByOption.ApplyTo(customers).ToArray();
+
+            // Assert
+            Assert.Equal(2, results[0].CustomerId);
+            Assert.Equal(3, results[1].CustomerId);
+            Assert.Equal(1, results[2].CustomerId);
+        }
+
+        [Fact]
+        public void OrderBy_Throws_ParameterAliasNotFound()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
+            var orderByOption = new OrderByQueryOption("@p", new ODataQueryContext(model, typeof(Customer)));
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => orderByOption.OrderByNodes,
+                "Only ordering by properties is supported for non-primitive collections. Expressions are not supported.");
         }
     }
 }

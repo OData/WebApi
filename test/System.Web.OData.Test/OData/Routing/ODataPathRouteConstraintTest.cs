@@ -53,7 +53,7 @@ namespace System.Web.OData.Routing
             var constraint = new ODataPathRouteConstraint(_pathHandler, _model, _routeName, _conventions);
 
             // Act & Assert
-            Assert.False(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
+            Assert.False(constraint.Match(request, new HttpRoute(), null, values, HttpRouteDirection.UriResolution));
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace System.Web.OData.Routing
             var constraint = new ODataPathRouteConstraint(_pathHandler, _model, _routeName, _conventions);
 
             // Act & Assert
-            Assert.True(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
+            Assert.True(constraint.Match(request, new HttpRoute(), null, values, HttpRouteDirection.UriResolution));
 
             Assert.Equal("Metadata", values["controller"]);
             Assert.Same(_model, request.ODataProperties().Model);
@@ -94,7 +94,7 @@ namespace System.Web.OData.Routing
             var constraint = new ODataPathRouteConstraint(_pathHandler, model, _routeName, _conventions);
 
             // Act & Assert
-            Assert.False(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
+            Assert.False(constraint.Match(request, new HttpRoute(), null, values, HttpRouteDirection.UriResolution));
         }
     }
 }

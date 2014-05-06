@@ -136,6 +136,19 @@ namespace System.Web.OData.Routing
             response.EnsureSuccessStatusCode();
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
+
+        [Fact]
+        public void RoutesCorrectly_WithParameterInRoutePrefix()
+        {
+            // Arrange
+            _server.Configuration.Routes.MapODataServiceRoute("parameterInPrefix", "{a}", ODataRoutingModel.GetModel());
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync("http://localhost/parameter/RoutingCustomers").Result;
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+        }
     }
 
     public class DateTimeOffsetKeyCustomersController : ODataController

@@ -1670,7 +1670,7 @@ namespace System.Web.OData.Query.Expressions
             queryOptions.Add("@p", parameterAliasValue);
             ODataQueryOptionParser parser = new ODataQueryOptionParser(model, targetEdmType, targetNavigationSource, queryOptions);
             FilterClause filterClause = new FilterQueryOption(filter, new ODataQueryContext(model, typeof(DataTypes)), parser).FilterClause;
-            
+
             // Act
             Expression actualExpression = FilterBinder.Bind(
                 filterClause,

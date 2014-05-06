@@ -138,7 +138,7 @@ namespace System.Web.OData.Routing
                     {
                         // Throw ODataException if there is some segment following the unresolved segment.
                         throw new ODataException(Error.Format(
-                            SRResources.InvalidPathSegment, 
+                            SRResources.InvalidPathSegment,
                             ex.UnparsedSegments.First(), 
                             ex.CurrentSegment));
                     }

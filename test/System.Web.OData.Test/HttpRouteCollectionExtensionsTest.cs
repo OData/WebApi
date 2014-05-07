@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
@@ -9,6 +10,7 @@ using System.Web.OData.Batch;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -18,28 +20,37 @@ namespace System.Web.OData
     public class HttpRouteCollectionExtensionsTest
     {
         [Fact]
-        public void MapODataServiceRoute_ConfiguresARoute_WithAnODataRouteConstraint()
+        public void MapODataServiceRoute_ConfiguresARoute_WithAnODataRouteAndVersionConstraints()
         {
+            // Arrange
             HttpRouteCollection routes = new HttpRouteCollection();
             IEdmModel model = new EdmModel();
             string routeName = "name";
             string routePrefix = "prefix";
 
+            // Act
             routes.MapODataServiceRoute(routeName, routePrefix, model);
 
+            // Assert
             IHttpRoute odataRoute = routes[routeName];
             Assert.Single(routes);
             Assert.Equal(routePrefix + "/{*odataPath}", odataRoute.RouteTemplate);
-            var constraint = Assert.Single(odataRoute.Constraints);
-            var odataConstraint = Assert.IsType<ODataPathRouteConstraint>(constraint.Value);
-            Assert.Same(model, odataConstraint.EdmModel);
-            Assert.IsType<DefaultODataPathHandler>(odataConstraint.PathHandler);
-            Assert.NotNull(odataConstraint.RoutingConventions);
+            Assert.Equal(2, odataRoute.Constraints.Count);
+
+            var odataPathConstraint = Assert.Single(odataRoute.Constraints.Values.OfType<ODataPathRouteConstraint>());
+            Assert.Same(model, odataPathConstraint.EdmModel);
+            Assert.IsType<DefaultODataPathHandler>(odataPathConstraint.PathHandler);
+            Assert.NotNull(odataPathConstraint.RoutingConventions);
+
+            var odataVersionConstraint = Assert.Single(odataRoute.Constraints.Values.OfType<ODataVersionConstraint>());
+            Assert.NotNull(odataVersionConstraint.Version);
+            Assert.Equal(ODataVersion.V4, odataVersionConstraint.Version);
         }
 
         [Fact]
-        public void AdvancedMapODataServiceRoute_ConfiguresARoute_WithAnODataRouteConstraint()
+        public void AdvancedMapODataServiceRoute_ConfiguresARoute_WithAnODataRouteAndVersionConstraints()
         {
+            // Arrange
             HttpRouteCollection routes = new HttpRouteCollection();
             IEdmModel model = new EdmModel();
             string routeName = "name";
@@ -47,16 +58,23 @@ namespace System.Web.OData
             var pathHandler = new DefaultODataPathHandler();
             var conventions = new List<IODataRoutingConvention>();
 
+            // Act
             routes.MapODataServiceRoute(routeName, routePrefix, model, pathHandler, conventions);
 
+            // Assert
             IHttpRoute odataRoute = routes[routeName];
             Assert.Single(routes);
             Assert.Equal(routePrefix + "/{*odataPath}", odataRoute.RouteTemplate);
-            var constraint = Assert.Single(odataRoute.Constraints);
-            var odataConstraint = Assert.IsType<ODataPathRouteConstraint>(constraint.Value);
-            Assert.Same(model, odataConstraint.EdmModel);
-            Assert.Same(pathHandler, odataConstraint.PathHandler);
-            Assert.Equal(conventions, odataConstraint.RoutingConventions);
+            Assert.Equal(2, odataRoute.Constraints.Count);
+
+            var odataPathConstraint = Assert.Single(odataRoute.Constraints.Values.OfType<ODataPathRouteConstraint>());
+            Assert.Same(model, odataPathConstraint.EdmModel);
+            Assert.IsType<DefaultODataPathHandler>(odataPathConstraint.PathHandler);
+            Assert.NotNull(odataPathConstraint.RoutingConventions);
+
+            var odataVersionConstraint = Assert.Single(odataRoute.Constraints.Values.OfType<ODataVersionConstraint>());
+            Assert.NotNull(odataVersionConstraint.Version);
+            Assert.Equal(ODataVersion.V4, odataVersionConstraint.Version);
         }
 
         [Fact]

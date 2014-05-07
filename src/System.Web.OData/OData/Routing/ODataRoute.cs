@@ -59,6 +59,8 @@ namespace System.Web.OData.Routing
             {
                 Constraints.Add(ODataRouteConstants.ConstraintName, pathConstraint);
             }
+
+            Constraints.Add(ODataRouteConstants.VersionConstraintName, new ODataVersionConstraint());
         }
 
         /// <summary>

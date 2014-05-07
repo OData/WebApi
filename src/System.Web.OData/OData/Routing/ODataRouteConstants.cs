@@ -23,6 +23,11 @@ namespace System.Web.OData.Routing
         public static readonly string ConstraintName = "ODataConstraint";
 
         /// <summary>
+        /// Parameter name to use for the OData version route constraint.
+        /// </summary>
+        public static readonly string VersionConstraintName = "ODataVersionConstraint";
+
+        /// <summary>
         /// Route data key for the action name.
         /// </summary>
         public static readonly string Action = "action";

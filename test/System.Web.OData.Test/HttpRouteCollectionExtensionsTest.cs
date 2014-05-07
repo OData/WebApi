@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.Routing;
 using System.Web.OData.Batch;
 using System.Web.OData.Extensions;
@@ -72,6 +74,39 @@ namespace System.Web.OData
             Assert.NotNull(batchRoute);
             Assert.Same(batchHandler, batchRoute.Handler);
             Assert.Equal("prefix/$batch", batchRoute.RouteTemplate);
+        }
+
+        [Fact]
+        public void MapODataServiceRoute_MapsBatchRouteWhenBatchHandlerIsProvidedToGeneralOverload()
+        {
+            HttpRouteCollection routes = new HttpRouteCollection();
+            IEdmModel model = new EdmModel();
+            string routeName = "name";
+            string routePrefix = "prefix";
+
+            HttpMessageHandler batchHandler = new DefaultODataBatchHandler(new HttpServer());
+            routes.MapODataServiceRoute(routeName, routePrefix, model, batchHandler);
+
+            IHttpRoute batchRoute = routes["nameBatch"];
+            Assert.NotNull(batchRoute);
+            Assert.Same(batchHandler, batchRoute.Handler);
+            Assert.Equal("prefix/$batch", batchRoute.RouteTemplate);
+        }
+
+        [Fact]
+        public void MapODataServiceRoute_MapsHandlerWhenAHandlerIsProvided()
+        {
+            // Arrange
+            HttpRouteCollection routes = new HttpRouteCollection();
+            IEdmModel model = new EdmModel();
+            HttpMessageHandler handler = new HttpControllerDispatcher(new HttpConfiguration());
+
+            // Act
+            ODataRoute route = routes.MapODataServiceRoute("odata", "odata", model, handler);
+
+            // Assert
+            Assert.NotNull(route);
+            Assert.Same(handler, route.Handler);
         }
 
         [Fact]

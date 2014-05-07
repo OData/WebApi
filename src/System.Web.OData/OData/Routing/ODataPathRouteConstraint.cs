@@ -135,7 +135,8 @@ namespace System.Web.OData.Routing
                     ODataPath path;
                     try
                     {
-                        string serviceRoot = GetServiceRoot(request, route, values);
+                        UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
+                        string serviceRoot = urlHelper.CreateODataLink(RouteName, PathHandler, new List<ODataPathSegment>());
                         path = PathHandler.Parse(EdmModel, serviceRoot, pathAndQuery);
                     }
                     catch (ODataException)
@@ -192,18 +193,6 @@ namespace System.Web.OData.Routing
             }
 
             return null;
-        }
-
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The Dispose on values doesn't do anything by default.")]
-        private string GetServiceRoot(HttpRequestMessage request, IHttpRoute route, IDictionary<string, object> values)
-        {
-            var newRequest = new HttpRequestMessage(request.Method, request.RequestUri);
-            newRequest.SetRouteData(new HttpRouteData(route, new HttpRouteValueDictionary(values)));
-            var httpRouteCollection = new HttpRouteCollection { { RouteName, route } };
-            newRequest.SetConfiguration(new HttpConfiguration(httpRouteCollection));
-
-            var urlHelper = new UrlHelper(newRequest);
-            return urlHelper.CreateODataLink(RouteName, PathHandler, new List<ODataPathSegment>());
         }
     }
 }

@@ -114,8 +114,7 @@ namespace System.Web.OData.Query
                     { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'Fourth'", new int[] { } },
                     { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'3'", new int[] { } },
                     { "Microsoft.TestCommon.Types.SimpleEnum'First' eq Simple", new int[] { 1, 3 } },
-                    // TODO: 1826 Remove single quotes on enumeration types in cast.
-                    { "Simple eq cast('0','Microsoft.TestCommon.Types.SimpleEnum')", new int[] { 1, 3} },
+                    { "Simple eq cast('0',Microsoft.TestCommon.Types.SimpleEnum)", new int[] { 1, 3} },
                     { "Simple eq cast('First','Microsoft.TestCommon.Types.SimpleEnum')", new int[] { 1, 3} },
                     { "Simple eq null", new int[] { } },
                     { "null eq Simple", new int[] { } },
@@ -272,8 +271,7 @@ namespace System.Web.OData.Query
                     { "cast(IntProp,Edm.String) eq '3'", new int[] { 3 } },
                     { "cast(NullableIntProp,Edm.Int64) eq 1", new int[] { 1 }},
                     { "cast(NullableIntProp,Edm.String) eq null", new int[] { 3 }},
-                    // TODO: 1826 Remove single quotes on enumeration types in cast.
-                    { "cast('Two, Four','Microsoft.TestCommon.Types.FlagsEnum') has FlagsEnumProp", new int[] { 2, 3 } },
+                    { "cast('Two, Four',Microsoft.TestCommon.Types.FlagsEnum) has FlagsEnumProp", new int[] { 2, 3 } },
                     { "contains(cast(StringProp,Edm.String),'String')", new int[] { 1, 3 } },
                     { "cast(NullableSimpleEnumProp,Edm.String) ne '0'", new int[] { 2, 3 } },
                     { "cast(DateTimeOffsetProp,Edm.DateTimeOffset) eq 2001-01-01T01:01:01.000+00:00", new int[] { 1 } },
@@ -285,8 +283,7 @@ namespace System.Web.OData.Query
                     { "cast(IntProp,Edm.DateTimeOffset) eq null", new int[] { 1, 2, 3 } },
                     { "cast(NullableIntProp,Edm.Guid) eq null", new int[] { 1, 2, 3 } },
                     { "cast(StringProp,Edm.Double) eq null", new int[] { 1, 2, 3 } },
-                    // TODO: 1826 Remove single quotes on enumeration types in cast.
-                    { "cast(StringProp,'Microsoft.TestCommon.Types.SimpleEnum') eq null", new int[] { 1, 2, 3 } },
+                    { "cast(StringProp,Microsoft.TestCommon.Types.SimpleEnum) eq null", new int[] { 1, 2, 3 } },
                     { "cast(DateTimeOffsetProp,Edm.Int32) eq null", new int[] { 1, 2, 3 } },
                     { "cast(Edm.Int32) eq null", new int[] { 1, 2, 3 } },
                     { "cast($it,Edm.String) ne null", new int[] { } },

@@ -1555,8 +1555,7 @@ namespace System.Web.OData.Query.Expressions
         [InlineData("cast(2147483647,Edm.Int16) ne null", "$it => (Convert(Convert(2147483647)) != null)")]
         [InlineData("cast(Microsoft.TestCommon.Types.SimpleEnum'1',Edm.String) eq '1'", "$it => (Convert(Convert(Second).ToString()) == \"1\")")]
         [InlineData("cast(cast(cast(IntProp,Edm.Int64),Edm.Int16),Edm.String) eq '123'", "$it => (Convert(Convert(Convert($it.IntProp)).ToString()) == \"123\")")]
-        // TODO: 1826 Remove single quotes on enumeration types in cast.
-        [InlineData("cast('123','Microsoft.TestCommon.Types.SimpleEnum') ne null", "$it => (Convert(123) != null)")]
+        [InlineData("cast('123',Microsoft.TestCommon.Types.SimpleEnum) ne null", "$it => (Convert(123) != null)")]
         public void CastMethod_Succeeds(string filter, string expectedResult)
         {
             VerifyQueryDeserialization<DataTypes>(
@@ -1574,12 +1573,11 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Theory]
-        // TODO: 1826 Remove single quotes on enumeration types in cast.
-        [InlineData("cast(SimpleEnumProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast(FlagsEnumProp,'Microsoft.TestCommon.Types.FlagsEnum') ne null")]
-        [InlineData("cast(NullableSimpleEnumProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast(IntProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast(DateTimeOffsetProp,'Microsoft.TestCommon.Types.SimpleEnum') ne null")]
+        [InlineData("cast(SimpleEnumProp,Microsoft.TestCommon.Types.SimpleEnum) ne null")]
+        [InlineData("cast(FlagsEnumProp,Microsoft.TestCommon.Types.FlagsEnum) ne null")]
+        [InlineData("cast(NullableSimpleEnumProp,Microsoft.TestCommon.Types.SimpleEnum) ne null")]
+        [InlineData("cast(IntProp,Microsoft.TestCommon.Types.SimpleEnum) ne null")]
+        [InlineData("cast(DateTimeOffsetProp,Microsoft.TestCommon.Types.SimpleEnum) ne null")]
         [InlineData("cast(FlagsEnumProp,Edm.Int32) eq 123")]
         [InlineData("cast(NullableSimpleEnumProp,Edm.Guid) ne null")]
         public void CastFails_UnsupportedSourceOrTargetForEnumCast_Throws(string filter)
@@ -1600,9 +1598,8 @@ namespace System.Web.OData.Query.Expressions
         [InlineData("cast($it,Edm.String) eq null")]
         [InlineData("cast(ComplexProp,Edm.Double) eq null")]
         [InlineData("cast(ComplexProp,Edm.String) eq null")]
-        // TODO: 1826 Remove single quotes on enumeration types in cast.
-        [InlineData("cast(StringProp,'Microsoft.TestCommon.Types.SimpleEnum') eq null")]
-        [InlineData("cast(StringProp,'Microsoft.TestCommon.Types.FlagsEnum') eq null")]
+        [InlineData("cast(StringProp,Microsoft.TestCommon.Types.SimpleEnum) eq null")]
+        [InlineData("cast(StringProp,Microsoft.TestCommon.Types.FlagsEnum) eq null")]
         public void CastFails_UnsupportedTarget_ReturnsNull(string filter)
         {
             VerifyQueryDeserialization<DataTypes>(filter, "$it => (null == null)");
@@ -1617,6 +1614,54 @@ namespace System.Web.OData.Query.Expressions
         {
             // TODO : 1827 Should not throw when the target type of cast is not primitive or enumeration type.
             Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), expectErrorMessage);
+        }
+
+        [Theory]
+        [InlineData("cast(null,'Edm.Int32') ne null")]
+        [InlineData("cast(StringProp,'Microsoft.TestCommon.Types.SimpleEnum') eq null")]
+        [InlineData("cast(IntProp,'Edm.String') eq '123'")]
+        [InlineData("cast('System.Web.OData.Query.Expressions.DataTypes') eq null")]
+        [InlineData("cast($it,'System.Web.OData.Query.Expressions.DataTypes') eq null")]
+        public void SingleQuotesOnTypeNameOfCast_WorksForNow(string filter)
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<DataTypes>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntitySet entitySet = model.FindDeclaredEntitySet("Customers");
+            IEdmEntityType entityType = entitySet.EntityType();
+            var parser = new ODataQueryOptionParser(model, entityType, entitySet,
+                new Dictionary<string, string> { { "$filter", filter } });
+
+            // Act & Assert
+            // TODO : 1927 ODL parser should throw when there are single quotes on type name of cast.
+            Assert.NotNull(parser.ParseFilter());
+        }
+
+        [Fact]
+        public void SingleQuotesOnEnumTypeNameOfCast_WorksForNow()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<DataTypes>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntitySet entitySet = model.FindDeclaredEntitySet("Customers");
+            IEdmEntityType entityType = entitySet.EntityType();
+            var parser = new ODataQueryOptionParser(model, entityType, entitySet,
+                new Dictionary<string, string>
+                {
+                    { "$filter", "cast(StringProp,'Microsoft.TestCommon.Types.SimpleEnum') eq null" }
+                });
+
+            // Act
+            // TODO : 1927 ODL parser should throw when there are single quotes on type name of cast.
+            FilterClause filterClause = parser.ParseFilter();
+
+            // Assert
+            Assert.NotNull(filterClause);
+            var castNode = Assert.IsType<SingleValueFunctionCallNode>(((BinaryOperatorNode)filterClause.Expression).Left);
+            Assert.Equal("cast", castNode.Name);
+            Assert.Equal("Microsoft.TestCommon.Types.SimpleEnum", ((ConstantNode)castNode.Parameters.Last()).Value);
         }
 
         #endregion

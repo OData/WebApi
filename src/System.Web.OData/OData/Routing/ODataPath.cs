@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using System.Text;
 using System.Web.Http;
 using Microsoft.OData.Edm;
+using Semantic = Microsoft.OData.Core.UriParser.Semantic;
 
 namespace System.Web.OData.Routing
 {
@@ -102,6 +103,8 @@ namespace System.Web.OData.Routing
                 return _segments;
             }
         }
+
+        internal Semantic.ODataPath ODLPath { get; set; }
 
         /// <inheritdoc />
         public override string ToString()

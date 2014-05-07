@@ -462,6 +462,31 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
+        public void RequestProperty_HasCorrectContextUrl()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<EnumCustomer>("EnumCustomers");
+            IEdmModel model = builder.GetEdmModel();
+
+            using (HttpConfiguration configuration = new HttpConfiguration())
+            {
+                configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
+                using (HttpServer host = new HttpServer(configuration))
+                using (HttpClient client = new HttpClient(host))
+
+                // Act
+                using (HttpResponseMessage response = client.GetAsync("http://localhost/EnumCustomers(5)/Color").Result)
+                {
+                    // Assert
+                    response.EnsureSuccessStatusCode();
+                    JObject payload = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                    Assert.Equal("http://localhost/$metadata#EnumCustomers(5)/Color", payload.GetValue("@odata.context"));
+                }
+            }
+        }
+
+        [Fact]
         public void ODataCollectionSerializer_SerializeIQueryableOfIEdmEntityObject()
         {
             // Arrange
@@ -498,6 +523,11 @@ namespace System.Web.OData.Formatter
             public IHttpActionResult Post(EnumCustomer customer)
             {
                 return Ok(customer);
+            }
+
+            public IHttpActionResult GetColor(int key)
+            {
+                return Ok(Color.Green);
             }
         }
 

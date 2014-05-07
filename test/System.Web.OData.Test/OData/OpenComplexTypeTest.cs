@@ -34,7 +34,7 @@ namespace System.Web.OData
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Assert.Equal("http://localhost/odata/$metadata#System.Web.OData.OpenAddress", result["@odata.context"]);
+            Assert.Equal("http://localhost/odata/$metadata#OpenCustomers(2)/Address", result["@odata.context"]);
             Assert.Equal("Street 2", result["Street"]);
             Assert.Equal("City 2", result["City"]);
             Assert.Equal("300", result["IntProp"]);

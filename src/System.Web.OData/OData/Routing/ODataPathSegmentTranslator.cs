@@ -74,6 +74,7 @@ namespace System.Web.OData.Routing
 
             ReverseRefPathSegmentAndKeyValuePathSegment(segments);
             ODataPath odataPath = new ODataPath(segments);
+            odataPath.ODLPath = path;
 
             return odataPath;
         }

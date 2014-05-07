@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.TestCommon;
-using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
 using Microsoft.TestCommon;
@@ -14,6 +15,80 @@ namespace System.Web.OData.Builder
 {
     public class FunctionConfigurationTest
     {
+        [Theory]
+        [InlineData(typeof(DateTime))]
+        [InlineData(typeof(DateTime?))]
+        public void Parameter_ThrowsInvalidOperationIfGenericArgumentIsDateTime(Type type)
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("Format");
+            MethodInfo method = typeof(FunctionConfiguration)
+                .GetMethod("Parameter", new[] { typeof(string) })
+                .MakeGenericMethod(type);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => method.Invoke(function, new[] { "test" }),
+                string.Format("The type '{0}' is not a supported parameter type for the parameter test.", type.FullName));
+        }
+
+        [Theory]
+        [InlineData(typeof(DateTime))]
+        [InlineData(typeof(DateTime?))]
+        public void CollectionParameter_ThrowsInvalidOperationIfGenericArgumentIsDateTime(Type type)
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("Format");
+            MethodInfo method = typeof(FunctionConfiguration)
+                .GetMethod("CollectionParameter", new[] { typeof(string) })
+                .MakeGenericMethod(type);
+            string typeName = typeof(IEnumerable<>).MakeGenericType(type).FullName;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => method.Invoke(function, new[] { "test" }),
+                string.Format("The type '{0}' is not a supported parameter type for the parameter test.", typeName));
+        }
+
+        [Theory]
+        [InlineData(typeof(DateTime))]
+        [InlineData(typeof(DateTime?))]
+        public void Returns_ThrowsInvalidOperationIfGenericArgumentIsDateTime(Type type)
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("Format");
+            MethodInfo method = typeof(FunctionConfiguration)
+                .GetMethod("Returns")
+                .MakeGenericMethod(type);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => method.Invoke(function, new object[] { }),
+                string.Format("The type '{0}' is not a supported return type.", type.FullName));
+        }
+
+        [Theory]
+        [InlineData(typeof(DateTime))]
+        [InlineData(typeof(DateTime?))]
+        public void ReturnsCollection_ThrowsInvalidOperationIfGenericArgumentIsDateTime(Type type)
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("Format");
+            MethodInfo method = typeof(FunctionConfiguration)
+                .GetMethod("ReturnsCollection")
+                .MakeGenericMethod(type);
+            string typeName = typeof(IEnumerable<>).MakeGenericType(type).FullName;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => method.Invoke(function, new object[] { }),
+                string.Format("The type '{0}' is not a supported return type.", typeName));
+        }
+
         [Fact]
         public void CanCreateFunctionWithNoArguments()
         {
@@ -376,7 +451,6 @@ namespace System.Web.OData.Builder
             var functionBuilder = movie.Function("Watch");
             functionBuilder.Parameter<int>("int");
             functionBuilder.Parameter<Nullable<int>>("nullableOfInt");
-            functionBuilder.Parameter<DateTime>("dateTime");
             functionBuilder.Parameter<string>("string");
             functionBuilder.Returns<int>();
 
@@ -387,7 +461,6 @@ namespace System.Web.OData.Builder
             var function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
             Assert.False(function.FindParameter("int").Type.IsNullable);
             Assert.True(function.FindParameter("nullableOfInt").Type.IsNullable);
-            Assert.False(function.FindParameter("dateTime").Type.IsNullable);
             Assert.True(function.FindParameter("string").Type.IsNullable);
         }
 

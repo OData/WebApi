@@ -3,7 +3,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Web.Http;
 using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
 
 namespace System.Web.OData.Builder
 {
@@ -207,6 +209,11 @@ namespace System.Web.OData.Builder
         internal void ReturnsImplementation<TReturnType>()
         {
             Type returnType = typeof(TReturnType);
+            if (returnType == typeof(DateTime) || returnType == typeof(DateTime?))
+            {
+                throw Error.InvalidOperation(SRResources.DateTimeTypeReturnTypeNotSupported, returnType.FullName);
+            }
+
             IEdmTypeConfiguration configuration = GetProcedureTypeConfiguration(returnType);
             ReturnType = configuration;
         }
@@ -224,6 +231,11 @@ namespace System.Web.OData.Builder
             // You can imagine the override of this that takes a delegate using the correct CLR type for the return type.
             Type clrCollectionType = typeof(IEnumerable<TReturnElementType>);
             Type clrElementType = typeof(TReturnElementType);
+            if (clrElementType == typeof(DateTime) || clrElementType == typeof(DateTime?))
+            {
+                throw Error.InvalidOperation(SRResources.DateTimeTypeReturnTypeNotSupported, clrCollectionType.FullName);
+            }
+
             IEdmTypeConfiguration edmElementType = GetProcedureTypeConfiguration(clrElementType);
             ReturnType = new CollectionTypeConfiguration(edmElementType, clrCollectionType);
         }
@@ -253,6 +265,11 @@ namespace System.Web.OData.Builder
         public ParameterConfiguration Parameter<TParameter>(string name)
         {
             Type type = typeof(TParameter);
+            if (type == typeof(DateTime) || type == typeof(DateTime?))
+            {
+                throw Error.InvalidOperation(SRResources.DateTimeTypeParametersNotSupported, type.FullName, name);
+            }
+
             IEdmTypeConfiguration parameterType = GetProcedureTypeConfiguration(type);
             return AddParameter(name, parameterType);
         }
@@ -264,6 +281,12 @@ namespace System.Web.OData.Builder
         public ParameterConfiguration CollectionParameter<TElementType>(string name)
         {
             Type elementType = typeof(TElementType);
+            if (elementType == typeof(DateTime) || elementType == typeof(DateTime?))
+            {
+                string typeName = typeof(IEnumerable<TElementType>).FullName;
+                throw Error.InvalidOperation(SRResources.DateTimeTypeParametersNotSupported, typeName, name);
+            }
+
             IEdmTypeConfiguration elementTypeConfiguration = GetProcedureTypeConfiguration(elementType);
             CollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration, typeof(IEnumerable<>).MakeGenericType(elementType));
             return AddParameter(name, parameterType);

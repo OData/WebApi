@@ -93,7 +93,6 @@ namespace System.Web.OData.Builder
             Assert.True(complexType.Property(t => t.NullableBoolProperty).OptionalProperty);
             Assert.True(complexType.Property(t => t.NullableByteProperty).OptionalProperty);
             Assert.True(complexType.Property(t => t.NullableDateTimeOffsetProperty).OptionalProperty);
-            Assert.True(complexType.Property(t => t.NullableDateTimeProperty).OptionalProperty);
             Assert.True(complexType.Property(t => t.NullableDoubleProperty).OptionalProperty);
             Assert.True(complexType.Property(t => t.NullableGuidProperty).OptionalProperty);
             Assert.True(complexType.Property(t => t.NullableIntProperty).OptionalProperty);
@@ -227,9 +226,6 @@ namespace System.Web.OData.Builder
 
         public byte ByteProperty { get; set; }
         public byte? NullableByteProperty { get; set; }
-
-        public DateTime DateTimeProperty { get; set; }
-        public DateTime? NullableDateTimeProperty { get; set; }
 
         public double DoubleProperty { get; set; }
         public double? NullableDoubleProperty { get; set; }

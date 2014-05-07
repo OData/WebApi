@@ -349,11 +349,38 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The type &apos;{0}&apos; of property &apos;{1}&apos; in the &apos;{2}&apos; type is not a supported type..
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; is not a supported type..
         /// </summary>
         internal static string DateTimeTypeNotSupported {
             get {
                 return ResourceManager.GetString("DateTimeTypeNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; is not a supported parameter type for the parameter {1}..
+        /// </summary>
+        internal static string DateTimeTypeParametersNotSupported {
+            get {
+                return ResourceManager.GetString("DateTimeTypeParametersNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of property &apos;{1}&apos; in the &apos;{2}&apos; type is not a supported type..
+        /// </summary>
+        internal static string DateTimeTypePropertyNotSupported {
+            get {
+                return ResourceManager.GetString("DateTimeTypePropertyNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; is not a supported return type..
+        /// </summary>
+        internal static string DateTimeTypeReturnTypeNotSupported {
+            get {
+                return ResourceManager.GetString("DateTimeTypeReturnTypeNotSupported", resourceCulture);
             }
         }
         

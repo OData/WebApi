@@ -540,10 +540,6 @@ namespace System.Web.OData
 
             public Guid? NullableGuidProperty { get; set; }
 
-            public DateTime DateTimeProperty { get; set; }
-
-            public DateTime? NullableDateTimeProperty { get; set; }
-
             public DateTimeOffset DateTimeOffsetProperty { get; set; }
 
             public DateTimeOffset? NullableDateTimeOffsetProperty { get; set; }

@@ -1312,6 +1312,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Request URI &apos;{0}&apos; does not contain OData path &apos;{1}&apos;..
+        /// </summary>
+        internal static string ODataPathNotFound {
+            get {
+                return ResourceManager.GetString("ODataPathNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; can not be added as dynamic property into entity type &apos;{1}&apos;. Open entity type is not supported..
         /// </summary>
         internal static string OpenEntityTypeNotSupported {
@@ -1560,6 +1569,15 @@ namespace System.Web.OData.Properties {
         internal static string RequestNotActionInvocation {
             get {
                 return ResourceManager.GetString("RequestNotActionInvocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Request URI &apos;{0}&apos; too short to contain OData path &apos;{1}&apos;..
+        /// </summary>
+        internal static string RequestUriTooShortForODataPath {
+            get {
+                return ResourceManager.GetString("RequestUriTooShortForODataPath", resourceCulture);
             }
         }
         

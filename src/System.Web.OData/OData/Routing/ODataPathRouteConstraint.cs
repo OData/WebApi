@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Extensions;
+using System.Web.OData.Properties;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -20,6 +21,9 @@ namespace System.Web.OData.Routing
     /// </summary>
     public class ODataPathRouteConstraint : IHttpRouteConstraint
     {
+        // "%2F"
+        private static readonly string _escapedSlash = Uri.HexEscape('/');
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataPathRouteConstraint" /> class.
         /// </summary>
@@ -117,16 +121,14 @@ namespace System.Web.OData.Routing
 
             if (routeDirection == HttpRouteDirection.UriResolution)
             {
-                object odataPathRouteValue;
-                if (values.TryGetValue(ODataRouteConstants.ODataPath, out odataPathRouteValue))
+                object oDataPathValue;
+                if (values.TryGetValue(ODataRouteConstants.ODataPath, out oDataPathValue))
                 {
-                    string pathAndQuery = odataPathRouteValue as string;
-                    if (pathAndQuery == null)
-                    {
-                        // No odataPath means the path is empty; this is necessary for service documents
-                        pathAndQuery = String.Empty;
-                    }
-                    else if (!String.IsNullOrEmpty(request.RequestUri.Query))
+                    string oDataPathString = oDataPathValue as string;
+
+                    // No ODataPath means the path is empty; this is necessary for service documents
+                    string pathAndQuery = oDataPathString ?? String.Empty;
+                    if (!String.IsNullOrEmpty(request.RequestUri.Query))
                     {
                         // Ensure path handler receives the query string as well as the path.
                         pathAndQuery += request.RequestUri.Query;
@@ -135,8 +137,29 @@ namespace System.Web.OData.Routing
                     ODataPath path;
                     try
                     {
-                        UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
-                        string serviceRoot = urlHelper.CreateODataLink(RouteName, PathHandler, new List<ODataPathSegment>());
+                        // Service root is the current RequestUri, less the query string and the ODataPath (always the
+                        // last segment of the absolute path).  ODL expects an escaped service root and other service
+                        // root calculations are calculated using AbsoluteUri (also escaped).  But routing exclusively
+                        // uses unescaped strings, determined using
+                        //    address.GetComponents(UriComponents.Path, UriFormat.Unescaped)
+                        //
+                        // Due to this decoding, there's no reliable way to determine the original string from which
+                        // oDataPathString was derived.  Therefore a straightforward string comparison won't always
+                        // work.  See RemoveODataPath() for details of chosen approach.
+                        string serviceRoot = request.RequestUri.GetLeftPart(UriPartial.Path);
+                        if (!String.IsNullOrEmpty(oDataPathString))
+                        {
+                            serviceRoot = RemoveODataPath(serviceRoot, oDataPathString);
+                        }
+
+                        // Leave an escaped '/' out of the service route because DefaultODataPathHandler will add a
+                        // literal '/' to the end of this string if not already present. That would double the slash
+                        // in response links and potentially lead to later 404s.
+                        if (serviceRoot.EndsWith(_escapedSlash, StringComparison.OrdinalIgnoreCase))
+                        {
+                            serviceRoot = serviceRoot.Substring(0, serviceRoot.Length - 3);
+                        }
+
                         path = PathHandler.Parse(EdmModel, serviceRoot, pathAndQuery);
                     }
                     catch (ODataException)
@@ -166,6 +189,7 @@ namespace System.Web.OData.Routing
                         return true;
                     }
                 }
+
                 return false;
             }
             else
@@ -193,6 +217,77 @@ namespace System.Web.OData.Routing
             }
 
             return null;
+        }
+
+        // Find the substring of the given URI string before the given ODataPath.  Tests rely on the following:
+        // 1. ODataPath comes at the end of the processed Path
+        // 2. Virtual path root, if any, comes at the beginning of the Path and a '/' separates it from the rest
+        // 3. OData prefix, if any, comes between the virtual path root and the ODataPath and '/' characters separate
+        //    it from the rest
+        // 4. Even in the case of Unicode character corrections, the only differences between the escaped Path and the
+        //    unescaped string used for routing are %-escape sequences which may be present in the Path
+        //
+        // Therefore, look for the '/' character at which to lop off the ODataPath.  Can't just unescape the given
+        // uriString because subsequent comparisons would only help to check wehther a match is _possible_, not where
+        // to do the lopping.
+        private static string RemoveODataPath(string uriString, string oDataPathString)
+        {
+            // Potential index of oDataPathString within uriString.
+            int endIndex = uriString.Length - oDataPathString.Length - 1;
+            if (endIndex <= 0)
+            {
+                // Bizarre: oDataPathString is longer than uriString.  Or were passed a Path, not the espected
+                // AbsoluteUri, and there's no room for '/' before ODataPath.
+                throw Error.InvalidOperation(SRResources.RequestUriTooShortForODataPath, uriString, oDataPathString);
+            }
+
+            string startString = uriString.Substring(0, endIndex + 1);  // Potential return value.
+            string endString = uriString.Substring(endIndex + 1);       // Potential oDataPathString match.
+            if (String.Equals(endString, oDataPathString, StringComparison.Ordinal))
+            {
+                // Simple case, no escaping in the ODataPathString portion of the Path.  In this case, don't do extra
+                // work to look for trailing '/' in startString.
+                return startString;
+            }
+
+            while (true)
+            {
+                // Escaped '/' is a derivative case but certainly possible.
+                int slashIndex = startString.LastIndexOf('/', endIndex - 1);
+                int escapedSlashIndex =
+                    startString.LastIndexOf(_escapedSlash, endIndex - 1, StringComparison.OrdinalIgnoreCase);
+                if (slashIndex > escapedSlashIndex)
+                {
+                    endIndex = slashIndex;
+                }
+                else if (escapedSlashIndex >= 0)
+                {
+                    // Include the escaped '/' (three characters) in the potential return value.
+                    endIndex = escapedSlashIndex + 2;
+                }
+                else
+                {
+                    // Failure, unable to find the expected '/' or escaped '/' separator.
+                    throw Error.InvalidOperation(SRResources.ODataPathNotFound, uriString, oDataPathString);
+                }
+
+                startString = uriString.Substring(0, endIndex + 1);
+                endString = uriString.Substring(endIndex + 1);
+
+                // Compare unescaped strings to avoid both arbitrary escaping and use of lowercase 'a' through 'f' in
+                // %-escape sequences.
+                endString = Uri.UnescapeDataString(endString);
+                if (String.Equals(endString, oDataPathString, StringComparison.Ordinal))
+                {
+                    return startString;
+                }
+
+                if (endIndex == 0)
+                {
+                    // Failure, could not match oDataPathString after an initial '/' or escaped '/'.
+                    throw Error.InvalidOperation(SRResources.ODataPathNotFound, uriString, oDataPathString);
+                }
+            }
         }
     }
 }

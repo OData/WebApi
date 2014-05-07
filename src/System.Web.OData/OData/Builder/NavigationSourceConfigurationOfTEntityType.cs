@@ -562,24 +562,6 @@ namespace System.Web.OData.Builder
         /// otherwise, <see langword="false"/>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
-        public void HasEditLink(Func<EntityInstanceContext<TEntityType>, string> editLinkFactory, bool followsConventions)
-        {
-            if (editLinkFactory == null)
-            {
-                throw Error.ArgumentNull("editLinkFactory");
-            }
-
-            HasEditLink(entityInstanceContext => new Uri(editLinkFactory(entityInstanceContext)), followsConventions);
-        }
-
-        /// <summary>
-        /// Configures the edit link for the entities from this navigation source.
-        /// </summary>
-        /// <param name="editLinkFactory">The factory used to generate the edit link.</param>
-        /// <param name="followsConventions"><see langword="true"/> if the factory follows OData edit link conventions;
-        /// otherwise, <see langword="false"/>.</param>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
-            Justification = "Nested generic appropriate here")]
         public void HasEditLink(Func<EntityInstanceContext<TEntityType>, Uri> editLinkFactory, bool followsConventions)
         {
             if (editLinkFactory == null)
@@ -588,24 +570,6 @@ namespace System.Web.OData.Builder
             }
 
             _configuration.HasEditLink(new SelfLinkBuilder<Uri>((entity) => editLinkFactory(UpCastEntityInstanceContext(entity)), followsConventions));
-        }
-
-        /// <summary>
-        /// Configures the read link for the entities from this navigation source.
-        /// </summary>
-        /// <param name="readLinkFactory">The factory used to generate the read link.</param>
-        /// <param name="followsConventions"><see langword="true"/> if the factory follows OData read link conventions;
-        /// otherwise, <see langword="false"/>.</param>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
-            Justification = "Nested generic appropriate here")]
-        public void HasReadLink(Func<EntityInstanceContext<TEntityType>, string> readLinkFactory, bool followsConventions)
-        {
-            if (readLinkFactory == null)
-            {
-                throw Error.ArgumentNull("readLinkFactory");
-            }
-
-            HasReadLink(entityInstanceContext => new Uri(readLinkFactory(entityInstanceContext)), followsConventions);
         }
 
         /// <summary>

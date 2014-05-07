@@ -541,11 +541,6 @@ namespace System.Web.OData.Formatter
             ODataTestUtil.VerifyResponse(actual.Content, expectedContent);
         }
 
-        private static string CreateAbsoluteLink(string relativeUri)
-        {
-            return CreateAbsoluteUri(relativeUri).AbsoluteUri;
-        }
-
         private static Uri CreateAbsoluteUri(string relativeUri)
         {
             return new Uri(new Uri(baseAddress), relativeUri);
@@ -582,19 +577,17 @@ namespace System.Web.OData.Formatter
                 CreateAbsoluteUri("/MainEntity/id/" + e.GetPropertyValue("Id").ToString());
             mainSet.HasIdLink(idLinkFactory, followsConventions: true);
 
-            Func<EntityInstanceContext<MainEntity>, string> editLinkFactory;
-
             if (!sameLinksForIdAndEdit)
             {
-                editLinkFactory = (e) => CreateAbsoluteLink("/MainEntity/edit/" + e.GetPropertyValue("Id").ToString());
+                Func<EntityInstanceContext<MainEntity>, Uri> editLinkFactory =
+                    (e) => CreateAbsoluteUri("/MainEntity/edit/" + e.GetPropertyValue("Id").ToString());
                 mainSet.HasEditLink(editLinkFactory, followsConventions: false);
             }
 
-            Func<EntityInstanceContext<MainEntity>, string> readLinkFactory;
-
             if (!sameLinksForEditAndRead)
             {
-                readLinkFactory = (e) => CreateAbsoluteLink("/MainEntity/read/" + e.GetPropertyValue("Id").ToString());
+                Func<EntityInstanceContext<MainEntity>, Uri> readLinkFactory =
+                    (e) => CreateAbsoluteUri("/MainEntity/read/" + e.GetPropertyValue("Id").ToString());
                 mainSet.HasReadLink(readLinkFactory, followsConventions: false);
             }
 

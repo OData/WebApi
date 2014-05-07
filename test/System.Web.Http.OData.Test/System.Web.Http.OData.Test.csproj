@@ -215,6 +215,7 @@
     <Compile Include="OData\Query\Validators\FilterQueryValidatorTest.cs" />
     <Compile Include="OData\Query\Validators\TopQueryValidatorTest.cs" />
     <Compile Include="OData\Routing\ODataValueProviderFactoryTest.cs" />
+    <Compile Include="OData\Routing\ODataVersionConstraintTests.cs" />
     <Compile Include="OData\SelectExpandTest.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="TestCommon\CustomersModelWithInheritance.cs" />

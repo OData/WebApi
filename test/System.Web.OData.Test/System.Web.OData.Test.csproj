@@ -151,7 +151,6 @@
     <Compile Include="OData\Formatter\Serialization\ODataSingletonSerializerTest.cs" />
     <Compile Include="OData\NullEdmComplexObjectTest.cs" />
     <Compile Include="OData\ETagMessageHandlerTest.cs" />
-    <Compile Include="OData\ODataNullValueAttributeTests.cs" />
     <Compile Include="OData\ODataNullValueMessageHandlerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\SelectExpandNodeTest.cs" />
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />

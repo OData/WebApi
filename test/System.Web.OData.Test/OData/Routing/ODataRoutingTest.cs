@@ -21,17 +21,7 @@ namespace System.Web.OData.Routing
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.MapODataServiceRoute("RouteName", null, ODataRoutingModel.GetModel());
 
-            var controllers = new[]
-            {
-                typeof(DateTimeOffsetKeyCustomersController),
-                typeof(RoutingCustomersController),
-                typeof(ProductsController)
-            };
-
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
-
-            _server = new HttpServer(configuration);
+            _server = CreateServer(configuration);
             _client = new HttpClient(_server);
         }
 
@@ -140,13 +130,32 @@ namespace System.Web.OData.Routing
         public void RoutesCorrectly_WithParameterInRoutePrefix()
         {
             // Arrange
-            _server.Configuration.MapODataServiceRoute("parameterInPrefix", "{a}", ODataRoutingModel.GetModel());
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.MapODataServiceRoute("parameterInPrefix", "{a}", ODataRoutingModel.GetModel());
+
+            HttpServer server = CreateServer(configuration);
+            HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/parameter/RoutingCustomers").Result;
+            HttpResponseMessage response = client.GetAsync("http://localhost/parameter/RoutingCustomers").Result;
 
             // Assert
             response.EnsureSuccessStatusCode();
+        }
+
+        private static HttpServer CreateServer(HttpConfiguration configuration)
+        {
+            var controllers = new[]
+            {
+                typeof(DateTimeOffsetKeyCustomersController),
+                typeof(RoutingCustomersController),
+                typeof(ProductsController)
+            };
+
+            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
+            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+
+            return new HttpServer(configuration);
         }
     }
 

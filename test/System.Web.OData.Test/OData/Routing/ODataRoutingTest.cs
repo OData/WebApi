@@ -2,6 +2,7 @@
 
 using System.Globalization;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
@@ -13,131 +14,294 @@ namespace System.Web.OData.Routing
 {
     public class ODataRoutingTest
     {
-        private HttpServer _server;
-        private HttpClient _client;
+        private readonly HttpServer _nullPrefixServer;
+        private readonly HttpClient _nullPrefixClient;
+        private readonly HttpServer _fixedPrefixServer;
+        private readonly HttpClient _fixedPrefixClient;
+        private readonly HttpServer _parameterizedPrefixServer;
+        private readonly HttpClient _parameterizedPrefixClient;
 
         public ODataRoutingTest()
         {
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataServiceRoute("RouteName", null, ODataRoutingModel.GetModel());
+            var model = ODataRoutingModel.GetModel();
 
-            _server = CreateServer(configuration);
-            _client = new HttpClient(_server);
+            // Separate clients and servers so routes are not ambiguous.
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.MapODataServiceRoute("NullPrefixRoute", null, model);
+
+            _nullPrefixServer = CreateServer(configuration);
+            _nullPrefixClient = new HttpClient(_nullPrefixServer);
+
+            // FixedPrefixRoute has both a non-empty virtual path root and a fixed route prefix.
+            configuration = new HttpConfiguration(new HttpRouteCollection("MyRoot"));
+            configuration.MapODataServiceRoute("FixedPrefixRoute", "odata", model);
+
+            _fixedPrefixServer = CreateServer(configuration);
+            _fixedPrefixClient = new HttpClient(_fixedPrefixServer);
+
+            configuration = new HttpConfiguration();
+            configuration.MapODataServiceRoute("ParameterizedPrefixRoute", "{a}", model);
+
+            _parameterizedPrefixServer = CreateServer(configuration);
+            _parameterizedPrefixClient = new HttpClient(_parameterizedPrefixServer);
+        }
+
+        public static TheoryDataSet<string, string, string> ServiceAndMetadataRoutes
+        {
+            get
+            {
+                return new TheoryDataSet<string, string, string>
+                {
+                    // service document
+                    { "GET", "", null },
+                    { "GET", "?hello=goodbye", null },
+                    { "GET", "?hello= good bye", null },
+                    { "GET", "?hello= good+bye", null },
+                    { "GET", "?hello = good%20bye", null },
+                    // metadata document
+                    { "GET", "$metadata", null },
+                    { "GET", "$metadata?hello = good%20bye", null },
+                };
+            }
+        }
+
+        public static TheoryDataSet<string, string, string> ControllerRoutes
+        {
+            get
+            {
+                return new TheoryDataSet<string, string, string>
+                {
+                    // entity set defaults
+                    { "GET", "Products", "Get" },
+                    { "POST", "Products", "Post" },
+                    // entity set
+                    { "GET", "RoutingCustomers", "GetRoutingCustomers" },
+                    { "POST", "RoutingCustomers", "PostRoutingCustomer" },
+                    { "GET", "RoutingCustomers?hello = good bye", "GetRoutingCustomers" },
+                    { "GET", "RoutingCustomers/", "GetRoutingCustomers" },
+                    { "GET", "RoutingCustomers/?hello=goodbye", "GetRoutingCustomers" },
+                    // entity set / cast
+                    { "GET", "RoutingCustomers/System.Web.OData.Routing.VIP", "GetRoutingCustomersFromVIP" },
+                    { "POST", "RoutingCustomers/System.Web.OData.Routing.VIP", "PostRoutingCustomerFromVIP" },
+                    // entity by key defaults
+                    { "GET", "Products(10)", "Get(10)" },
+                    { "PUT", "Products(10)", "Put(10)" },
+                    { "PATCH", "Products(10)", "Patch(10)" },
+                    { "MERGE", "Products(10)", "Patch(10)" },
+                    { "DELETE", "Products(10)", "Delete(10)" },
+                    // entity by key
+                    { "GET", "RoutingCustomers(10)", "GetRoutingCustomer(10)" },
+                    { "PUT", "RoutingCustomers(10)", "PutRoutingCustomer(10)" },
+                    { "PATCH", "RoutingCustomers(10)", "PatchRoutingCustomer(10)" },
+                    { "MERGE", "RoutingCustomers(10)", "PatchRoutingCustomer(10)" },
+                    { "DELETE", "RoutingCustomers(10)", "DeleteRoutingCustomer(10)" },
+                    // navigation properties
+                    { "GET", "RoutingCustomers(10)/Products", "GetProducts(10)" },
+                    { "GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Products", "GetProducts(10)" },
+                    { "GET",
+                        "RoutingCustomers(10)/System.Web.OData.Routing.VIP/RelationshipManager",
+                        "GetRelationshipManagerFromVIP(10)" },
+                    // structural properties
+                    { "GET", "RoutingCustomers(10)/Name", "GetName(10)" },
+                    { "GET", "RoutingCustomers(10)/Address", "GetAddress(10)" },
+                    { "GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Name", "GetName(10)" },
+                    { "GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Company", "GetCompanyFromVIP(10)" },
+                    // refs
+                    { "PUT", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)" },
+                    { "POST", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)" },
+                    { "DELETE", "RoutingCustomers(1)/Products/$ref", "DeleteRef(1)(Products)" },
+                    { "DELETE", "RoutingCustomers(1)/Products(5)/$ref", "DeleteRef(1)(5)(Products)" },
+                    { "DELETE", "RoutingCustomers(1)/Products/$ref?$id=../../Products(5)", "DeleteRef(1)(5)(Products)" },
+                    // raw value
+                    { "GET", "RoutingCustomers(10)/Name/$value", "GetName(10)" },
+                    { "GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Name/$value", "GetName(10)" },
+                    { "GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Company/$value", "GetCompanyFromVIP(10)" },
+                    // actions on entities by key
+                    { "POST", "RoutingCustomers(1)/Default.GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers(1)" },
+                    { "POST",
+                        "RoutingCustomers(1)/System.Web.OData.Routing.VIP/Default.GetRelatedRoutingCustomers",
+                        "GetRelatedRoutingCustomers(1)" },
+                    { "POST",
+                        "RoutingCustomers(1)/System.Web.OData.Routing.VIP/Default.GetSalesPerson",
+                        "GetSalesPersonOnVIP(1)" },
+                    // actions on entity sets
+                    { "POST", "RoutingCustomers/Default.GetProducts", "GetProducts" },
+                    { "POST", "RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetProducts", "GetProducts" },
+                    { "POST",
+                        "RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetMostProfitable",
+                        "GetMostProfitableOnCollectionOfVIP" },
+                    // functions on entities by key
+                    { "GET", "Products(1)/Default.TopProductId", "TopProductId(1)" },
+                    { "GET", "Products(1)/Default.TopProductIdByCity(city='any')", "TopProductIdByCity(1, any)" },
+                    { "GET",
+                        "Products(1)/Default.TopProductIdByCity(city=@city)?@city='any'",
+                        "TopProductIdByCity(1, any)" },
+                    { "GET",
+                        "Products(1)/Default.TopProductIdByCityAndModel(city='any',model=2)",
+                        "TopProductIdByCityAndModel(1, any, 2)" },
+                    { "GET",
+                        "Products(1)/Default.TopProductIdByCityAndModel(city=@city,model=@model)?@city='any'&@model=2",
+                        "TopProductIdByCityAndModel(1, any, 2)" },
+                    { "GET",
+                        "Products(1)/System.Web.OData.Routing.ImportantProduct/Default.TopProductId",
+                        "TopProductId(1)" },
+                    // functions on entity sets
+                    { "GET", "Products/Default.TopProductOfAll", "TopProductOfAll" },
+                    { "GET", "Products/Default.TopProductOfAllByCity(city='any')", "TopProductOfAllByCity(any)" },
+                    { "GET",
+                        "Products/Default.TopProductOfAllByCity(city=@city)?@city='any'",
+                        "TopProductOfAllByCity(any)" },
+                    { "GET",
+                        "Products/Default.TopProductOfAllByCityAndModel(city='any',model=2)",
+                        "TopProductOfAllByCityAndModel(any, 2)" },
+                    { "GET",
+                        "Products/Default.TopProductOfAllByCityAndModel(city=@city,model=@model)?@city='any'&@model=2",
+                        "TopProductOfAllByCityAndModel(any, 2)" },
+                    { "GET",
+                        "Products/System.Web.OData.Routing.ImportantProduct/Default.TopProductOfAllByCity(city='any')",
+                        "TopProductOfAllByCity(any)" },
+                    // functions bound to the base and derived type
+                    { "GET", "RoutingCustomers(4)/Default.GetOrdersCount()", "GetOrdersCount_4" },
+                    { "GET",
+                        "RoutingCustomers(5)/System.Web.OData.Routing.VIP/Default.GetOrdersCount()",
+                        "GetOrdersCountOnVIP_5" },
+                    { "GET",
+                        "RoutingCustomers(6)/System.Web.OData.Routing.SpecialVIP/Default.GetOrdersCount()",
+                        "GetOrdersCountOnVIP_6" },
+                    { "GET", "RoutingCustomers(7)/Default.GetOrdersCount(factor=3)", "GetOrdersCount_(7,3)" },
+                    { "GET",
+                        "RoutingCustomers(8)/System.Web.OData.Routing.VIP/Default.GetOrdersCount(factor=4)",
+                        "GetOrdersCount_(8,4)" },
+                    { "GET",
+                        "RoutingCustomers(9)/System.Web.OData.Routing.SpecialVIP/Default.GetOrdersCount(factor=5)",
+                        "GetOrdersCount_(9,5)" },
+                    // functions bound to the collection of the base and the derived type
+                    { "GET", "RoutingCustomers/Default.GetAllEmployees()", "GetAllEmployees" },
+                    { "GET",
+                        "RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetAllEmployees()",
+                        "GetAllEmployeesOnCollectionOfVIP" },
+                    { "GET",
+                        "RoutingCustomers/System.Web.OData.Routing.SpecialVIP/Default.GetAllEmployees()",
+                        "GetAllEmployeesOnCollectionOfVIP" },
+                    // functions only bound to derived type
+                    { "GET", "RoutingCustomers(5)/Default.GetSpecialGuid()", "~/entityset/key/unresolved" },
+                    { "GET",
+                        "RoutingCustomers(5)/System.Web.OData.Routing.VIP/Default.GetSpecialGuid()",
+                        "~/entityset/key/cast/unresolved" },
+                    { "GET",
+                        "RoutingCustomers(5)/System.Web.OData.Routing.SpecialVIP/Default.GetSpecialGuid()",
+                        "GetSpecialGuid_5" },
+                    // functions with enum type parameter
+                    { "GET",
+                        "RoutingCustomers/Default.BoundFuncWithEnumParameters(" +
+                            "SimpleEnum=Microsoft.TestCommon.Types.SimpleEnum'1'," +
+                            "FlagsEnum=Microsoft.TestCommon.Types.FlagsEnum'One, Four')",
+                        "BoundFuncWithEnumParameters(Second,One, Four)" },
+                    { "GET",
+                        "RoutingCustomers/Default.BoundFuncWithEnumParameterForAttributeRouting(" +
+                            "SimpleEnum=Microsoft.TestCommon.Types.SimpleEnum'First')",
+                        "BoundFuncWithEnumParameterForAttributeRouting(First)" },
+                    { "GET",
+                        "UnboundFuncWithEnumParameters(LongEnum=Microsoft.TestCommon.Types.LongEnum'ThirdLong'," +
+                            "FlagsEnum=Microsoft.TestCommon.Types.FlagsEnum'7')",
+                        "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
+                    // The OData ABNF doesn't allow spaces within enum literals. But ODL _requires_ spaces after commas.
+                    { "GET",
+                        "UnboundFuncWithEnumParameters(LongEnum=Microsoft.TestCommon.Types.LongEnum'ThirdLong'," +
+                            "FlagsEnum=Microsoft.TestCommon.Types.FlagsEnum'One, Two, Four')",
+                        "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
+                    { "GET",
+                        "UnboundFuncWithEnumParameters(LongEnum=@long,FlagsEnum=@flags)?" +
+                            "@long=Microsoft.TestCommon.Types.LongEnum'ThirdLong'&" +
+                            "@flags=Microsoft.TestCommon.Types.FlagsEnum'7'",
+                        "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
+                    { "GET",
+                        "UnboundFuncWithEnumParameters(LongEnum=@long,FlagsEnum=@flags)?" +
+                            "@long=Microsoft.TestCommon.Types.LongEnum'ThirdLong'&" +
+                            "@flags=Microsoft.TestCommon.Types.FlagsEnum'One, Two, Four'",
+                        "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
+                    // unmapped requests
+                    { "GET", "RoutingCustomers(10)/Products(1)", "~/entityset/key/navigation/key" },
+                    { "CUSTOM", "RoutingCustomers(10)", "~/entityset/key" },
+                    // entity by key with type DateTimeOffset
+                    { "GET",
+                        "DateTimeOffsetKeyCustomers(2001-01-01T12:00:00.000+08:00)",
+                        "GetDateTimeOffsetKeyCustomer(01/01/2001 12:00:00 +08:00)" },
+                };
+            }
         }
 
         [Theory]
-        // entity set defaults
-        [InlineData("GET", "Products", "Get")]
-        [InlineData("POST", "Products", "Post")]
-        // entity set
-        [InlineData("GET", "RoutingCustomers", "GetRoutingCustomers")]
-        [InlineData("POST", "RoutingCustomers", "PostRoutingCustomer")]
-        // entity set / cast
-        [InlineData("GET", "RoutingCustomers/System.Web.OData.Routing.VIP", "GetRoutingCustomersFromVIP")]
-        [InlineData("POST", "RoutingCustomers/System.Web.OData.Routing.VIP", "PostRoutingCustomerFromVIP")]
-        // entity by key defaults
-        [InlineData("GET", "Products(10)", "Get(10)")]
-        [InlineData("PUT", "Products(10)", "Put(10)")]
-        [InlineData("PATCH", "Products(10)", "Patch(10)")]
-        [InlineData("MERGE", "Products(10)", "Patch(10)")]
-        [InlineData("DELETE", "Products(10)", "Delete(10)")]
-        // entity by key
-        [InlineData("GET", "RoutingCustomers(10)", "GetRoutingCustomer(10)")]
-        [InlineData("PUT", "RoutingCustomers(10)", "PutRoutingCustomer(10)")]
-        [InlineData("PATCH", "RoutingCustomers(10)", "PatchRoutingCustomer(10)")]
-        [InlineData("MERGE", "RoutingCustomers(10)", "PatchRoutingCustomer(10)")]
-        [InlineData("DELETE", "RoutingCustomers(10)", "DeleteRoutingCustomer(10)")]
-        // navigation properties
-        [InlineData("GET", "RoutingCustomers(10)/Products", "GetProducts(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Products", "GetProducts(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/RelationshipManager", "GetRelationshipManagerFromVIP(10)")]
-        // structural properties
-        [InlineData("GET", "RoutingCustomers(10)/Name", "GetName(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/Address", "GetAddress(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Name", "GetName(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Company", "GetCompanyFromVIP(10)")]
-        // refs
-        [InlineData("PUT", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)")]
-        [InlineData("POST", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)")]
-        [InlineData("DELETE", "RoutingCustomers(1)/Products/$ref", "DeleteRef(1)(Products)")]
-        [InlineData("DELETE", "RoutingCustomers(1)/Products(5)/$ref", "DeleteRef(1)(5)(Products)")]
-        [InlineData("DELETE", "RoutingCustomers(1)/Products/$ref?$id=http://localhost/Products(5)", "DeleteRef(1)(5)(Products)")]
-        [InlineData("DELETE", "RoutingCustomers(1)/Products/$ref?$id=../../Products(5)", "DeleteRef(1)(5)(Products)")]
-        // raw value
-        [InlineData("GET", "RoutingCustomers(10)/Name/$value", "GetName(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Name/$value", "GetName(10)")]
-        [InlineData("GET", "RoutingCustomers(10)/System.Web.OData.Routing.VIP/Company/$value", "GetCompanyFromVIP(10)")]
-        // actions on entities by key
-        [InlineData("POST", "RoutingCustomers(1)/Default.GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers(1)")]
-        [InlineData("POST", "RoutingCustomers(1)/System.Web.OData.Routing.VIP/Default.GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers(1)")]
-        [InlineData("POST", "RoutingCustomers(1)/System.Web.OData.Routing.VIP/Default.GetSalesPerson", "GetSalesPersonOnVIP(1)")]
-        // actions on entity sets
-        [InlineData("POST", "RoutingCustomers/Default.GetProducts", "GetProducts")]
-        [InlineData("POST", "RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetProducts", "GetProducts")]
-        [InlineData("POST", "RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetMostProfitable", "GetMostProfitableOnCollectionOfVIP")]
-        // functions on entities by key
-        [InlineData("GET", "Products(1)/Default.TopProductId", "TopProductId(1)")]
-        [InlineData("GET", "Products(1)/Default.TopProductIdByCity(city='any')", "TopProductIdByCity(1, any)")]
-        [InlineData("GET", "Products(1)/Default.TopProductIdByCity(city=@city)?@city='any'", "TopProductIdByCity(1, any)")]
-        [InlineData("GET", "Products(1)/Default.TopProductIdByCityAndModel(city='any',model=2)", "TopProductIdByCityAndModel(1, any, 2)")]
-        [InlineData("GET", "Products(1)/Default.TopProductIdByCityAndModel(city=@city,model=@model)?@city='any'&@model=2", "TopProductIdByCityAndModel(1, any, 2)")]
-        [InlineData("GET", "Products(1)/System.Web.OData.Routing.ImportantProduct/Default.TopProductId", "TopProductId(1)")]
-        // functions on entity sets
-        [InlineData("GET", "Products/Default.TopProductOfAll", "TopProductOfAll")]
-        [InlineData("GET", "Products/Default.TopProductOfAllByCity(city='any')", "TopProductOfAllByCity(any)")]
-        [InlineData("GET", "Products/Default.TopProductOfAllByCity(city=@city)?@city='any'", "TopProductOfAllByCity(any)")]
-        [InlineData("GET", "Products/Default.TopProductOfAllByCityAndModel(city='any',model=2)", "TopProductOfAllByCityAndModel(any, 2)")]
-        [InlineData("GET", "Products/Default.TopProductOfAllByCityAndModel(city=@city,model=@model)?@city='any'&@model=2", "TopProductOfAllByCityAndModel(any, 2)")]
-        [InlineData("GET", "Products/System.Web.OData.Routing.ImportantProduct/Default.TopProductOfAllByCity(city='any')", "TopProductOfAllByCity(any)")]
-        // functions bound to the base and derived type
-        [InlineData("GET", "RoutingCustomers(4)/Default.GetOrdersCount()", "GetOrdersCount_4")]
-        [InlineData("GET", "RoutingCustomers(5)/System.Web.OData.Routing.VIP/Default.GetOrdersCount()", "GetOrdersCountOnVIP_5")]
-        [InlineData("GET", "RoutingCustomers(6)/System.Web.OData.Routing.SpecialVIP/Default.GetOrdersCount()", "GetOrdersCountOnVIP_6")]
-        [InlineData("GET", "RoutingCustomers(7)/Default.GetOrdersCount(factor=3)", "GetOrdersCount_(7,3)")]
-        [InlineData("GET", "RoutingCustomers(8)/System.Web.OData.Routing.VIP/Default.GetOrdersCount(factor=4)", "GetOrdersCount_(8,4)")]
-        [InlineData("GET", "RoutingCustomers(9)/System.Web.OData.Routing.SpecialVIP/Default.GetOrdersCount(factor=5)", "GetOrdersCount_(9,5)")]
-        // functions bound to the collection of the base and the derived type
-        [InlineData("GET", "RoutingCustomers/Default.GetAllEmployees()", "GetAllEmployees")]
-        [InlineData("GET", "RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetAllEmployees()", "GetAllEmployeesOnCollectionOfVIP")]
-        [InlineData("GET", "RoutingCustomers/System.Web.OData.Routing.SpecialVIP/Default.GetAllEmployees()", "GetAllEmployeesOnCollectionOfVIP")]
-        // functions only bound to derived type
-        [InlineData("GET", "RoutingCustomers(5)/Default.GetSpecialGuid()", "~/entityset/key/unresolved")]
-        [InlineData("GET", "RoutingCustomers(5)/System.Web.OData.Routing.VIP/Default.GetSpecialGuid()", "~/entityset/key/cast/unresolved")]
-        [InlineData("GET", "RoutingCustomers(5)/System.Web.OData.Routing.SpecialVIP/Default.GetSpecialGuid()", "GetSpecialGuid_5")]
-        // functions with enum type parameter
-        [InlineData("GET", "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum=Microsoft.TestCommon.Types.SimpleEnum'1'," +
-            "FlagsEnum=Microsoft.TestCommon.Types.FlagsEnum'One, Four')", "BoundFuncWithEnumParameters(Second,One, Four)")]
-        [InlineData("GET", "RoutingCustomers/Default.BoundFuncWithEnumParameterForAttributeRouting(SimpleEnum=Microsoft.TestCommon.Types.SimpleEnum'First')",
-            "BoundFuncWithEnumParameterForAttributeRouting(First)")]
-        [InlineData("GET", "UnboundFuncWithEnumParameters(LongEnum=Microsoft.TestCommon.Types.LongEnum'ThirdLong'," +
-            "FlagsEnum=Microsoft.TestCommon.Types.FlagsEnum'7')", "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)")]
-        // unmapped requests
-        [InlineData("GET", "RoutingCustomers(10)/Products(1)", "~/entityset/key/navigation/key")]
-        [InlineData("CUSTOM", "RoutingCustomers(10)", "~/entityset/key")]
-        // entity by key with type DateTimeOffset
-        [InlineData("GET", "DateTimeOffsetKeyCustomers(2001-01-01T12:00:00.000+08:00)", "GetDateTimeOffsetKeyCustomer(01/01/2001 12:00:00 +08:00)")]
-        public void RoutesCorrectly(string httpMethod, string uri, string expectedResponse)
+        [PropertyData("ControllerRoutes")]
+        [InlineData("DELETE",
+            "RoutingCustomers(1)/Products/$ref?$id=http://localhost/Products(5)",
+            "DeleteRef(1)(5)(Products)")]
+        public async Task RoutesCorrectly(string httpMethod, string uri, string expectedResponse)
         {
-            // Arrange
-            HttpResponseMessage response = _client.SendAsync(new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + uri)).Result;
+            // Arrange & Act
+            HttpResponseMessage response = await _nullPrefixClient.SendAsync(new HttpRequestMessage(
+                new HttpMethod(httpMethod), "http://localhost/" + uri));
 
-            // Act & Assert
+            // Assert
             response.EnsureSuccessStatusCode();
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
 
-        [Fact]
-        public void RoutesCorrectly_WithParameterInRoutePrefix()
+        [Theory]
+        [PropertyData("ServiceAndMetadataRoutes")]
+        public async Task RoutesCorrectly_WithServiceAndMetadataRoutes(string httpMethod, string uri, string unused)
         {
-            // Arrange
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataServiceRoute("parameterInPrefix", "{a}", ODataRoutingModel.GetModel());
+            // Arrange & Act
+            HttpResponseMessage response = await _nullPrefixClient.SendAsync(new HttpRequestMessage(
+                new HttpMethod(httpMethod), "http://localhost/" + uri));
 
-            HttpServer server = CreateServer(configuration);
-            HttpClient client = new HttpClient(server);
+            // Assert
+            response.EnsureSuccessStatusCode();
+        }
 
-            // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/parameter/RoutingCustomers").Result;
+        [Theory]
+        [PropertyData("ServiceAndMetadataRoutes")]
+        [PropertyData("ControllerRoutes")]
+        [InlineData("DELETE",
+            "RoutingCustomers(1)/Products/$ref?$id=http://localhost/MyRoot/odata/Products(5)",
+            "DeleteRef(1)(5)(Products)")]
+        public async Task RoutesCorrectly_WithFixedPrefix(string httpMethod, string uri, string unused)
+        {
+            // Arrange & Act
+            HttpResponseMessage response = await _fixedPrefixClient.SendAsync(new HttpRequestMessage(
+                new HttpMethod(httpMethod), "http://localhost/MyRoot/odata/" + uri));
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+        }
+
+        [Theory]
+        [PropertyData("ServiceAndMetadataRoutes")]
+        [PropertyData("ControllerRoutes")]
+        [InlineData("DELETE",
+            "RoutingCustomers(1)/Products/$ref?$id=http://localhost/parameter/Products(5)",
+            "DeleteRef(1)(5)(Products)")]
+        public async Task RoutesCorrectly_WithParameterizedPrefix(string httpMethod, string uri, string unused)
+        {
+            // Arrange & Act
+            HttpResponseMessage response = await _parameterizedPrefixClient.SendAsync(new HttpRequestMessage(
+                new HttpMethod(httpMethod), "http://localhost/parameter/" + uri));
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+        }
+
+        [Theory]
+        [InlineData("parameter with spaces")]
+        [InlineData("parameter with+spaces")]
+        [InlineData("parameter with%20spaces")]
+        [InlineData("parameter with spaces/?hello=goodbye")]
+        [InlineData("parameter+with spaces/RoutingCustomers")]
+        [InlineData("parameter%20with spaces/RoutingCustomers/?hello = good bye")]
+        public async Task RoutesCorrectly_WithSpacesInPrefixParameter(string uri)
+        {
+            // Arrange & Act
+            HttpResponseMessage response = await _parameterizedPrefixClient.GetAsync("http://localhost/" + uri);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -145,9 +309,11 @@ namespace System.Web.OData.Routing
 
         private static HttpServer CreateServer(HttpConfiguration configuration)
         {
+            // Need the MetadataController to resolve the service document as well as $metadata.
             var controllers = new[]
             {
                 typeof(DateTimeOffsetKeyCustomersController),
+                typeof(MetadataController),
                 typeof(RoutingCustomersController),
                 typeof(ProductsController)
             };

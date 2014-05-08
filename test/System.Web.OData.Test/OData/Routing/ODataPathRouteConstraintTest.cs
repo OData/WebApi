@@ -21,6 +21,78 @@ namespace System.Web.OData.Routing
         IEnumerable<IODataRoutingConvention> _conventions = ODataRoutingConventions.CreateDefault();
         HttpRequestMessage _request = new HttpRequestMessage();
 
+        private static IList<string> _stringsWithGenDelims = new List<string>
+        {
+            { "virtualRoot/odata" },
+            { "virtualRoot/prefix/odata" },
+            { "some%2Fescaped%2Fslashes" },                     // "some/escaped/slashes"
+            { "some%23hashes" },                                // "some#hashes"
+            { "some%3Fquestion%3Fmarks" },                      // "some?question?marks"
+            { "some%3flower%23escapes" },                       // "some?lower#escapes"
+        };
+
+        private static IList<string> _stringsWithoutGenDelims = new List<string>
+        {
+            { "" },
+            { "odata" },
+            { "some%20spaces" },                                // "some spaces"
+            { "_some+plus+signs_" },
+            { "some(sub)and&other=delims" },
+            { "some(delims)but%2Bupper:escaped" },              // "some(delims)but+upper:escaped"
+            { "some(delims)but%2blower:escaped" },              // "some(delims)but+lower:escaped"
+            { ":[]@" },                                         // general delimeters that work
+            { "Chinese%E8%A5%BF%E9%9B%85%E5%9B%BEChars" },      // "Chinese西雅图Chars"
+            { "Unicode%D8%83Format%D8%83Char" },                // "Unicode؃Format؃Char", class Cf
+            { "Unicode%E1%BF%BCTitlecase%E1%BF%BCChar" },       // "UnicodeῼTitlecaseῼChar", class Lt
+            { "Unicode%E0%A4%83Combining%E0%A4%83Char" },       // "UnicodeःCombiningःChar", class Mc
+        };
+
+        public static TheoryDataSet<string> PrefixStrings
+        {
+            get
+            {
+                var dataSet = new TheoryDataSet<string>();
+                foreach (var item in _stringsWithGenDelims)
+                {
+                    dataSet.Add(item);
+                }
+
+                foreach (var item in _stringsWithoutGenDelims)
+                {
+                    dataSet.Add(item);
+                }
+
+                return dataSet;
+            }
+        }
+
+        // Cross product of prefixes (all of _stringsWithGenDelims and all _stringsWithoutGenDelims) with OData paths (all
+        // of _stringsWithoutGenDelims).
+        public static TheoryDataSet<string, string> PrefixAndODataStrings
+        {
+            get
+            {
+                var dataSet = new TheoryDataSet<string, string>();
+                foreach (var prefix in _stringsWithGenDelims)
+                {
+                    foreach (var oDataPath in _stringsWithoutGenDelims)
+                    {
+                        dataSet.Add(prefix, oDataPath);
+                    }
+                }
+
+                foreach (var prefix in _stringsWithoutGenDelims)
+                {
+                    foreach (var oDataPath in _stringsWithoutGenDelims)
+                    {
+                        dataSet.Add(prefix, oDataPath);
+                    }
+                }
+
+                return dataSet;
+            }
+        }
+
         [Fact]
         public void Match_ReturnsTrue_ForUriGeneration()
         {            
@@ -97,21 +169,21 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("")]
-        [InlineData("odata/")]
-        [InlineData("virtualRoot/odata/")]
-        [InlineData("virtualRoot/prefix/odata/")]
-        [InlineData("some%20spaces")]
-        [InlineData("some+significant+spaces/")]
-        [InlineData("some%23hashes/")]
-        [InlineData("some%3Fquestion%3Fmarks/")]
-        public void Match_DeterminesExpectedServiceRoot(string precedingSegments)
+        [PropertyData("PrefixStrings")]
+        public void Match_DeterminesExpectedServiceRoot_ForMetadata(string prefixString)
         {
             // Arrange
-            var expectedRoot = "http://any/" + precedingSegments;
+            var expectedRoot = "http://any/" + prefixString;
+            if (!String.IsNullOrEmpty(prefixString))
+            {
+                expectedRoot += '/';
+            }
+
             var request = new HttpRequestMessage(HttpMethod.Get, expectedRoot + "$metadata");
-            var httpRouteCollection = new HttpRouteCollection();
-            httpRouteCollection.Add(_routeName, new HttpRoute());
+            var httpRouteCollection = new HttpRouteCollection
+            {
+                { _routeName, new HttpRoute() },
+            };
             request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
 
             var pathHandler = new TestPathHandler();
@@ -119,6 +191,123 @@ namespace System.Web.OData.Routing
             var values = new Dictionary<string, object>
             {
                 { ODataRouteConstants.ODataPath, "$metadata" },
+            };
+
+            // Act
+            var matched = constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution);
+
+            // Assert
+            Assert.True(matched);
+            Assert.NotNull(pathHandler.ServiceRoot);
+            Assert.Equal(expectedRoot, pathHandler.ServiceRoot);
+        }
+
+        [Theory]
+        [PropertyData("PrefixStrings")]
+        public void Match_DeterminesExpectedServiceRoot_ForMetadataWithEscapedSeparator(string prefixString)
+        {
+            // Arrange
+            var originalRoot = "http://any/" + prefixString;
+            var expectedRoot = originalRoot;
+            if (!String.IsNullOrEmpty(prefixString))
+            {
+                originalRoot += "%2F";  // Escaped '/'
+            }
+
+            var request = new HttpRequestMessage(HttpMethod.Get, originalRoot + "$metadata");
+            var httpRouteCollection = new HttpRouteCollection
+            {
+                { _routeName, new HttpRoute() },
+            };
+            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
+
+            var pathHandler = new TestPathHandler();
+            var constraint = new ODataPathRouteConstraint(pathHandler, _model, _routeName, _conventions);
+            var values = new Dictionary<string, object>
+            {
+                { ODataRouteConstants.ODataPath, "$metadata" },
+            };
+
+            // Act
+            var matched = constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution);
+
+            // Assert
+            Assert.True(matched);
+            Assert.NotNull(pathHandler.ServiceRoot);
+            Assert.Equal(expectedRoot, pathHandler.ServiceRoot);
+        }
+
+        [Theory]
+        [PropertyData("PrefixAndODataStrings")]
+        public void Match_DeterminesExpectedServiceRoot_ForFunctionCall(string prefixString, string oDataString)
+        {
+            // Arrange
+            var expectedRoot = "http://any/" + prefixString;
+            if (!String.IsNullOrEmpty(prefixString))
+            {
+                expectedRoot += '/';
+            }
+
+            var oDataPath = String.Format("Unbound(p0='{0}')", oDataString);
+            var request = new HttpRequestMessage(HttpMethod.Get, expectedRoot + oDataPath);
+            var httpRouteCollection = new HttpRouteCollection
+            {
+                { _routeName, new HttpRoute() },
+            };
+            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
+
+            var builder = new ODataModelBuilder();
+            builder.Function("Unbound").Returns<string>().Parameter<string>("p0");
+            var model = builder.GetEdmModel();
+
+            var pathHandler = new TestPathHandler();
+            var constraint = new ODataPathRouteConstraint(pathHandler, model, _routeName, _conventions);
+            var values = new Dictionary<string, object>
+            {
+                { ODataRouteConstants.ODataPath, Uri.UnescapeDataString(oDataPath) },
+            };
+
+            // Act
+            var matched = constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution);
+
+            // Assert
+            Assert.True(matched);
+            Assert.NotNull(pathHandler.ServiceRoot);
+            Assert.Equal(expectedRoot, pathHandler.ServiceRoot);
+        }
+
+        [Theory]
+        [PropertyData("PrefixAndODataStrings")]
+        public void Match_DeterminesExpectedServiceRoot_ForFunctionCallWithEscapedSeparator(
+            string prefixString,
+            string oDataString)
+        {
+
+            // Arrange
+            var originalRoot = "http://any/" + prefixString;
+            var expectedRoot = originalRoot;
+            if (!String.IsNullOrEmpty(prefixString))
+            {
+                originalRoot += "%2F";  // Escaped '/'
+            }
+
+            var oDataPath = String.Format("Unbound(p0='{0}')", oDataString);
+            var request = new HttpRequestMessage(HttpMethod.Get, originalRoot + oDataPath);
+            var httpRouteCollection = new HttpRouteCollection
+            {
+                { _routeName, new HttpRoute() },
+            };
+            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
+
+            var builder = new ODataModelBuilder();
+            builder.Function("Unbound").Returns<string>().Parameter<string>("p0");
+            var model = builder.GetEdmModel();
+
+            var pathHandler = new TestPathHandler();
+            var constraint = new ODataPathRouteConstraint(pathHandler, model, _routeName, _conventions);
+            var values = new Dictionary<string, object>
+            {
+                { ODataRouteConstants.ODataPath, Uri.UnescapeDataString(oDataPath) },
             };
 
             // Act

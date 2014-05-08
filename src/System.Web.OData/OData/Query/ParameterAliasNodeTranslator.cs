@@ -40,7 +40,7 @@ namespace System.Web.OData.Query
         {
             return new AllNode(nodeIn.RangeVariables, nodeIn.CurrentRangeVariable)
             {
-                Source = nodeIn.Source,
+                Source = (CollectionNode)nodeIn.Source.Accept(this),
                 Body = (SingleValueNode)nodeIn.Body.Accept(this)
             };
         }
@@ -54,7 +54,7 @@ namespace System.Web.OData.Query
         {
             return new AnyNode(nodeIn.RangeVariables, nodeIn.CurrentRangeVariable)
             {
-                Source = nodeIn.Source,
+                Source = (CollectionNode)nodeIn.Source.Accept(this),
                 Body = (SingleValueNode)nodeIn.Body.Accept(this)
             };
         }

@@ -353,7 +353,9 @@ namespace System.Web.OData.Query
                     { "FlagsEnumProp has @p", "Microsoft.TestCommon.Types.FlagsEnum'Two'", new int[] { 2, 3 } },
                     { "NullableSimpleEnumProp ne @p", "Microsoft.TestCommon.Types.SimpleEnum'1'", new int[] { 1, 3 } },
                     { "DateTimeOffsetProp ne @p", "2001-01-01T01:01:01.000+00:00", new int[] { 2, 3 } },
-                    { "GuidProp eq @p", "00000000-0000-0000-0000-000000000000", new int[] { 1, 3 } }
+                    { "GuidProp eq @p", "00000000-0000-0000-0000-000000000000", new int[] { 1, 3 } },
+                    { "EntityProp/AlternateAddresses/all(a: a/City ne @p)", "'bc'", new int[] { 1 } },
+                    { "EntityProp/AlternateAddresses/any(a: a/City eq @p)", "'bc'", new int[] { 2, 3 } }
                 };
             }
         }
@@ -373,7 +375,11 @@ namespace System.Web.OData.Query
                         FlagsEnumProp = FlagsEnum.One | FlagsEnum.Four,
                         NullableSimpleEnumProp = SimpleEnum.First,
                         DateTimeOffsetProp = new DateTimeOffset(new DateTime(2001, 1, 1, 1, 1, 1, DateTimeKind.Utc)),
-                        GuidProp = Guid.Empty
+                        GuidProp = Guid.Empty,
+                        EntityProp = new Product { AlternateAddresses = new[]
+                        {
+                            new Expressions.Address { City = "a" },
+                        }}
                     },
                     new DataTypes()
                     {
@@ -382,7 +388,12 @@ namespace System.Web.OData.Query
                         FlagsEnumProp = FlagsEnum.Two,
                         NullableSimpleEnumProp = SimpleEnum.Second,
                         DateTimeOffsetProp = new DateTimeOffset(new DateTime(2002, 2, 2, 2, 2, 2, DateTimeKind.Utc)),
-                        GuidProp = Guid.NewGuid()
+                        GuidProp = Guid.NewGuid(),
+                        EntityProp = new Product { AlternateAddresses = new[]
+                        {
+                            new Expressions.Address { City = "a" },
+                            new Expressions.Address { City = "bc" },
+                        }}
                     },
                     new DataTypes()
                     {
@@ -391,7 +402,11 @@ namespace System.Web.OData.Query
                         FlagsEnumProp = FlagsEnum.Two | FlagsEnum.Four,
                         NullableSimpleEnumProp = SimpleEnum.Third,
                         DateTimeOffsetProp = new DateTimeOffset(new DateTime(2003, 3, 3, 3, 3, 3, DateTimeKind.Utc)),
-                        GuidProp = Guid.Empty
+                        GuidProp = Guid.Empty,
+                        EntityProp = new Product { AlternateAddresses = new[]
+                        {
+                            new Expressions.Address { City = "bc" },
+                        }}
                     }
                 };
             }

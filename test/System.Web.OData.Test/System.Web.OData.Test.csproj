@@ -162,6 +162,7 @@
     <Compile Include="OData\OpenComplexTypeTest.cs" />
     <Compile Include="OData\QueryableLimitationTest.cs" />
     <Compile Include="OData\Query\ODataSingletonQueryOptionTest.cs" />
+    <Compile Include="OData\Query\ParameterAliasNodeTranslatorTest.cs" />
     <Compile Include="OData\Query\TruncatedCollectionTest.cs" />
     <Compile Include="OData\Results\CreatedODataResultTest.cs" />
     <Compile Include="OData\Results\UpdatedODataResultTest.cs" />

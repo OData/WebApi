@@ -1660,6 +1660,7 @@ namespace System.Web.OData.Query.Expressions
         // Parameter alias value has built-in functions.
         [InlineData("@p eq 'abc'", "substring(StringProp,5)", "$it => ($it.StringProp.Substring(5) == \"abc\")")]
         [InlineData("2 eq @p", "IntProp add 1", "$it => (2 == ($it.IntProp + 1))")]
+        [InlineData("EntityProp/AlternateAddresses/all(a: a/City ne @p)", "'abc'", "$it => $it.EntityProp.AlternateAddresses.All(a => (a.City != \"abc\"))")]
         public void ParameterAlias_Succeeds(string filter, string parameterAliasValue, string expectedResult)
         {
             // Arrange
@@ -1690,6 +1691,7 @@ namespace System.Web.OData.Query.Expressions
         [InlineData("StringProp eq @p", "$it => ($it.StringProp == null)")]
         [InlineData("NullableDateTimeOffsetProp eq @p", "$it => ($it.NullableDateTimeOffsetProp == null)")]
         [InlineData("NullableSimpleEnumProp eq @p", "$it => (Convert($it.NullableSimpleEnumProp) == null)")]
+        [InlineData("EntityProp/AlternateAddresses/any(a: a/City eq @p)", "$it => $it.EntityProp.AlternateAddresses.Any(a => (a.City == null))")]
         public void ParameterAlias_AssumedToBeNull_ValueNotFound(string filter, string expectedResult)
         {
             // Arrange

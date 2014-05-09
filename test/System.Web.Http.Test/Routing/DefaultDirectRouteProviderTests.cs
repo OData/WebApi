@@ -265,18 +265,18 @@ namespace System.Web.Http.Routing
                 return base.GetActionRouteFactories(actionDescriptor);
             }
 
-            public new IReadOnlyCollection<RouteEntry> GetControllerDirectRoutes(
+            public new IReadOnlyList<RouteEntry> GetControllerDirectRoutes(
                 HttpControllerDescriptor controllerDescriptor,
-                IReadOnlyCollection<HttpActionDescriptor> actionDescriptors,
-                IReadOnlyCollection<IDirectRouteFactory> factories,
+                IReadOnlyList<HttpActionDescriptor> actionDescriptors,
+                IReadOnlyList<IDirectRouteFactory> factories,
                 IInlineConstraintResolver constraintResolver)
             {
                 return base.GetControllerDirectRoutes(controllerDescriptor, actionDescriptors, factories, constraintResolver);
             }
 
-            public new IReadOnlyCollection<RouteEntry> GetActionDirectRoutes(
+            public new IReadOnlyList<RouteEntry> GetActionDirectRoutes(
                 HttpActionDescriptor actionDescriptor,
-                IReadOnlyCollection<IDirectRouteFactory> factories,
+                IReadOnlyList<IDirectRouteFactory> factories,
                 IInlineConstraintResolver constraintResolver)
             {
                 return base.GetActionDirectRoutes(actionDescriptor, factories, constraintResolver);

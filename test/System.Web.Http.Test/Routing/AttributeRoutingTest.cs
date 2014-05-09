@@ -278,14 +278,14 @@ namespace System.Web.Http.Routing
                 _actionRouteFactories = actionRouteFactories ?? new Dictionary<string, IEnumerable<IDirectRouteFactory>>();
             }
 
-            protected override IReadOnlyCollection<IDirectRouteFactory> GetControllerRouteFactories(HttpControllerDescriptor controllerDescriptor)
+            protected override IReadOnlyList<IDirectRouteFactory> GetControllerRouteFactories(HttpControllerDescriptor controllerDescriptor)
             {
                 IEnumerable<IDirectRouteFactory> factories;
                 _controllerRouteFactories.TryGetValue(controllerDescriptor.ControllerType, out factories);
                 return factories == null ? null : factories.ToList();
             }
 
-            protected override IReadOnlyCollection<IDirectRouteFactory> GetActionRouteFactories(HttpActionDescriptor actionDescriptor)
+            protected override IReadOnlyList<IDirectRouteFactory> GetActionRouteFactories(HttpActionDescriptor actionDescriptor)
             {
                 IEnumerable<IDirectRouteFactory> factories;
                 _actionRouteFactories.TryGetValue(actionDescriptor.ActionName, out factories);

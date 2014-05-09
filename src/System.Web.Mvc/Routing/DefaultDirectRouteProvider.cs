@@ -29,9 +29,9 @@ namespace System.Web.Mvc.Routing
         /// associated with the controller. If the controller has any associated <see cref="IDirectRouteProvider"/>
         /// instances, then route entries will be created for the controller and associated actions.
         /// </remarks>
-        public virtual IReadOnlyCollection<RouteEntry> GetDirectRoutes(
+        public virtual IReadOnlyList<RouteEntry> GetDirectRoutes(
             ControllerDescriptor controllerDescriptor,
-            IReadOnlyCollection<ActionDescriptor> actionDescriptors,
+            IReadOnlyList<ActionDescriptor> actionDescriptors,
             IInlineConstraintResolver constraintResolver)
         {
             List<RouteEntry> entries = new List<RouteEntry>();
@@ -40,7 +40,7 @@ namespace System.Web.Mvc.Routing
 
             foreach (ActionDescriptor action in actionDescriptors)
             {
-                IReadOnlyCollection<IDirectRouteFactory> factories = GetActionRouteFactories(action);
+                IReadOnlyList<IDirectRouteFactory> factories = GetActionRouteFactories(action);
 
                 if (factories != null && factories.Count > 0)
                 {
@@ -59,7 +59,7 @@ namespace System.Web.Mvc.Routing
 
             if (actionsWithoutRoutes.Count > 0)
             {
-                IReadOnlyCollection<IDirectRouteFactory> controllerFactories = GetControllerRouteFactories(controllerDescriptor);
+                IReadOnlyList<IDirectRouteFactory> controllerFactories = GetControllerRouteFactories(controllerDescriptor);
                 if (controllerFactories != null && controllerFactories.Count > 0)
                 {
                     IReadOnlyCollection<RouteEntry> controllerEntries = GetControllerDirectRoutes(
@@ -86,7 +86,7 @@ namespace System.Web.Mvc.Routing
         /// <remarks>
         /// The implementation returns <see cref="IDirectRouteFactory"/> instances based on attributes on the controller.
         /// </remarks>
-        protected virtual IReadOnlyCollection<IDirectRouteFactory> GetControllerRouteFactories(ControllerDescriptor controllerDescriptor)
+        protected virtual IReadOnlyList<IDirectRouteFactory> GetControllerRouteFactories(ControllerDescriptor controllerDescriptor)
         {
             object[] attributes = controllerDescriptor.GetCustomAttributes(inherit: false);
             IEnumerable<IDirectRouteFactory> newFactories = attributes.OfType<IDirectRouteFactory>();
@@ -117,7 +117,7 @@ namespace System.Web.Mvc.Routing
         /// The implementation returns <see cref="IDirectRouteFactory"/> instances based on attributes on the action. Returns
         /// null if the action was defined on a base class of this controller.
         /// </remarks>
-        protected virtual IReadOnlyCollection<IDirectRouteFactory> GetActionRouteFactories(ActionDescriptor actionDescriptor)
+        protected virtual IReadOnlyList<IDirectRouteFactory> GetActionRouteFactories(ActionDescriptor actionDescriptor)
         {
             // Skip Route attributes on inherited actions.
             IMethodInfoActionDescriptor methodInfoActionDescriptor = actionDescriptor as IMethodInfoActionDescriptor;
@@ -158,10 +158,10 @@ namespace System.Web.Mvc.Routing
         /// <param name="factories">The direct route factories.</param>
         /// <param name="constraintResolver">The constraint resolver.</param>
         /// <returns>A set of route entries.</returns>
-        protected virtual IReadOnlyCollection<RouteEntry> GetControllerDirectRoutes(
+        protected virtual IReadOnlyList<RouteEntry> GetControllerDirectRoutes(
             ControllerDescriptor controllerDescriptor,
-            IReadOnlyCollection<ActionDescriptor> actionDescriptors,
-            IReadOnlyCollection<IDirectRouteFactory> factories,
+            IReadOnlyList<ActionDescriptor> actionDescriptors,
+            IReadOnlyList<IDirectRouteFactory> factories,
             IInlineConstraintResolver constraintResolver)
         {
             return CreateRouteEntries(
@@ -181,9 +181,9 @@ namespace System.Web.Mvc.Routing
         /// <param name="factories">The direct route factories.</param>
         /// <param name="constraintResolver">The constraint resolver.</param>
         /// <returns>A set of route entries.</returns>
-        protected virtual IReadOnlyCollection<RouteEntry> GetActionDirectRoutes(
+        protected virtual IReadOnlyList<RouteEntry> GetActionDirectRoutes(
             ActionDescriptor actionDescriptor,
-            IReadOnlyCollection<IDirectRouteFactory> factories,
+            IReadOnlyList<IDirectRouteFactory> factories,
             IInlineConstraintResolver constraintResolver)
         {
             return CreateRouteEntries(
@@ -264,7 +264,7 @@ namespace System.Web.Mvc.Routing
             return areaPrefix;
         }
 
-        private static IReadOnlyCollection<RouteEntry> CreateRouteEntries(
+        private static IReadOnlyList<RouteEntry> CreateRouteEntries(
             string areaPrefix,
             string controllerPrefix,
             IReadOnlyCollection<IDirectRouteFactory> factories,

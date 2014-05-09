@@ -22,14 +22,14 @@ namespace System.Web.Mvc.Routing
         /// <param name="constraintResolver">The inline constraint resolver.</param>
         /// <returns>A set of route entries for the controller.</returns>
 #if ASPNETWEBAPI
-        IReadOnlyCollection<RouteEntry> GetDirectRoutes(
+        IReadOnlyList<RouteEntry> GetDirectRoutes(
             HttpControllerDescriptor controllerDescriptor, 
-            IReadOnlyCollection<HttpActionDescriptor> actionDescriptors,
+            IReadOnlyList<HttpActionDescriptor> actionDescriptors,
             IInlineConstraintResolver constraintResolver);
 #else
-        IReadOnlyCollection<RouteEntry> GetDirectRoutes(
+        IReadOnlyList<RouteEntry> GetDirectRoutes(
             ControllerDescriptor controllerDescriptor,
-            IReadOnlyCollection<ActionDescriptor> actionDescriptors,
+            IReadOnlyList<ActionDescriptor> actionDescriptors,
             IInlineConstraintResolver constraintResolver);
 #endif
     }

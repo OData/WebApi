@@ -26,6 +26,7 @@ namespace System.Web.OData.Batch
     {
         private const string BatchIdKey = "BatchId";
         private const string ChangeSetIdKey = "ChangesetId";
+        private const string ContentIdKey = "ContentId";
         private const string ContentIdMappingKey = "ContentIdMapping";
         private const string BatchMediaType = "multipart/mixed";
         private const string Boundary = "boundary";
@@ -100,6 +101,42 @@ namespace System.Web.OData.Batch
             }
 
             request.Properties[ChangeSetIdKey] = changeSetId;
+        }
+
+        /// <summary>
+        /// Retrieves the Content-ID associated with the sub-request of a batch.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The Content-ID associated with this request, or <c>null</c> if there isn't one.</returns>
+        public static string GetODataContentId(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            object contentId;
+            if (request.Properties.TryGetValue(ContentIdKey, out contentId))
+            {
+                return (string)contentId;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Associates a given Content-ID with the sub-request of a batch.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="contentId">The Content-ID.</param>
+        public static void SetODataContentId(this HttpRequestMessage request, string contentId)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            request.Properties[ContentIdKey] = contentId;
         }
 
         /// <summary>

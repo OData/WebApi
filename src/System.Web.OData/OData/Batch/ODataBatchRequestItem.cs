@@ -42,11 +42,11 @@ namespace System.Web.OData.Batch
             }
 
             HttpResponseMessage response = await invoker.SendAsync(request, cancellationToken);
-            ContentIdHelpers.CopyContentIdToResponse(request, response);
+            string contentId = request.GetODataContentId();
 
-            if (contentIdToLocationMapping != null)
+            if (contentIdToLocationMapping != null && contentId != null)
             {
-                ContentIdHelpers.AddLocationHeaderToMapping(response, contentIdToLocationMapping);
+                ContentIdHelpers.AddLocationHeaderToMapping(response, contentIdToLocationMapping, contentId);
             }
 
             return response;

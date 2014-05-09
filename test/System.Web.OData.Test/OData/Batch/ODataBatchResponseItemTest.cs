@@ -63,5 +63,37 @@ namespace System.Web.OData.Test
             Assert.Contains("customHeader", result);
             Assert.Contains("bar", result);
         }
+
+        [Fact]
+        public void WriteMessageAsync_ResponseContainsContentId_IfHasContentIdInRequestChangeSet()
+        {
+            MemoryStream ms = new MemoryStream();
+            HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
+            content.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
+            IODataResponseMessage odataResponse = new ODataMessageWrapper(ms, content.Headers);
+            var batchWriter = new ODataMessageWriter(odataResponse).CreateODataBatchWriter();
+            HttpResponseMessage response = new HttpResponseMessage
+            {
+                Content = new StringContent("any", Encoding.UTF8, "text/example")
+            };
+            var request = new HttpRequestMessage();
+            var contentId = Guid.NewGuid().ToString();
+            request.SetODataContentId(contentId);
+            response.RequestMessage = request;
+
+            batchWriter.WriteStartBatch();
+            batchWriter.WriteStartChangeset();
+            ODataBatchResponseItem.WriteMessageAsync(batchWriter, response, CancellationToken.None).Wait();
+            batchWriter.WriteEndChangeset();
+            batchWriter.WriteEndBatch();
+
+            ms.Position = 0;
+            string result = new StreamReader(ms).ReadToEnd();
+
+            Assert.Contains("any", result);
+            Assert.Contains("text/example", result);
+            Assert.Contains("Content-ID", result);
+            Assert.Contains(contentId, result);
+        }
     }
 }

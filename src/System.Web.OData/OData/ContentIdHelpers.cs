@@ -2,15 +2,12 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Net.Http;
 
 namespace System.Web.OData
 {
     internal static class ContentIdHelpers
     {
-        private const string ContentId = "Content-ID";
-
         public static string ResolveContentId(string url, IDictionary<string, string> contentIdToLocationMapping)
         {
             Contract.Assert(url != null);
@@ -30,45 +27,19 @@ namespace System.Web.OData
             return url;
         }
 
-        public static void CopyContentIdToResponse(HttpRequestMessage request, HttpResponseMessage response)
-        {
-            Contract.Assert(request != null);
-            Contract.Assert(response != null);
-
-            IEnumerable<string> values;
-            if (request.Headers.TryGetValues(ContentId, out values))
-            {
-                response.Headers.TryAddWithoutValidation(ContentId, values);
-            }
-        }
-
-        public static void AddLocationHeaderToMapping(HttpResponseMessage response, IDictionary<string, string> contentIdToLocationMapping)
+        public static void AddLocationHeaderToMapping(
+            HttpResponseMessage response,
+            IDictionary<string, string> contentIdToLocationMapping,
+            string contentId)
         {
             Contract.Assert(response != null);
             Contract.Assert(contentIdToLocationMapping != null);
+            Contract.Assert(contentId != null);
 
-            IEnumerable<string> values;
-            if (response.Headers.TryGetValues(ContentId, out values))
+            if (response.Headers.Location != null)
             {
-                if (response.Headers.Location != null)
-                {
-                    contentIdToLocationMapping.Add(values.First(), response.Headers.Location.AbsoluteUri);
-                }
+                contentIdToLocationMapping.Add(contentId, response.Headers.Location.AbsoluteUri);
             }
-        }
-
-        public static string ReadContentId(HttpResponseMessage response)
-        {
-            Contract.Assert(response != null);
-
-            string contentId = String.Empty;
-            IEnumerable<string> values;
-            if (response.Headers.TryGetValues(ContentId, out values))
-            {
-                contentId = values.FirstOrDefault();
-            }
-
-            return contentId ?? String.Empty;
         }
     }
 }

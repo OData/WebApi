@@ -94,7 +94,7 @@ namespace System.Web.OData.Test
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            var responses = new ODataBatchResponseItem[] {};
+            var responses = new ODataBatchResponseItem[] { };
             var quotas = new ODataMessageQuotas();
 
             // Act
@@ -102,6 +102,32 @@ namespace System.Web.OData.Test
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public void GetODataContentId_NullRequest_Throws()
+        {
+            Assert.ThrowsArgumentNull(
+                () => ODataBatchHttpRequestMessageExtensions.GetODataContentId(null),
+                "request");
+        }
+
+        [Fact]
+        public void SetODataContentId_NullRequest_Throws()
+        {
+            Assert.ThrowsArgumentNull(
+                () => ODataBatchHttpRequestMessageExtensions.SetODataContentId(null, Guid.NewGuid().ToString()),
+                "request");
+        }
+
+        [Fact]
+        public void SetODataContentId_SetsTheContentIdOnTheRequest()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            var id = Guid.NewGuid().ToString();
+            request.SetODataContentId(id);
+
+            Assert.Equal(id, request.GetODataContentId());
         }
     }
 }

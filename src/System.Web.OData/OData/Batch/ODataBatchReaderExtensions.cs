@@ -178,6 +178,7 @@ namespace System.Web.OData.Batch
             }
 
             request.SetODataBatchId(batchId);
+            request.SetODataContentId(batchRequest.ContentId);
 
             if (changeSetId != null && changeSetId.HasValue)
             {

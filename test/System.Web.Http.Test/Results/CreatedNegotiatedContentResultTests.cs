@@ -661,20 +661,22 @@ namespace System.Web.Http.Results
             Assert.ThrowsArgumentNull(() => { controller.Created(location, content); }, "location");
         }
 
-        [Fact]
-        public void ApiControllerCreated_WithStringAndContent_CreatesCorrectResult()
+        [Theory]
+        [InlineData("/example/yes")] // Absolute path
+        [InlineData("relative/relative")] // Relative path
+        [InlineData("http://example.com")] // Absolute URL with host
+        public void ApiControllerCreated_WithStringAndContent_CreatesCorrectResult(string location)
         {
             // Arrange
-            string expectedLocation = CreateLocation().OriginalString;
             object expectedContent = CreateContent();
             ApiController controller = CreateController();
 
             // Act
-            CreatedNegotiatedContentResult<object> result = controller.Created(expectedLocation, expectedContent);
+            CreatedNegotiatedContentResult<object> result = controller.Created(location, expectedContent);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Same(expectedLocation, result.Location.OriginalString);
+            Assert.Same(location, result.Location.OriginalString);
             Assert.Same(expectedContent, result.Content);
 
             using (HttpConfiguration configuration = CreateConfiguration(CreateFormatter(),

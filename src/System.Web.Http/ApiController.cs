@@ -361,7 +361,9 @@ namespace System.Web.Http
         /// Creates a <see cref="CreatedNegotiatedContentResult{T}"/> (201 Created) with the specified values.
         /// </summary>
         /// <typeparam name="T">The type of content in the entity body.</typeparam>
-        /// <param name="location">The location at which the content has been created.</param>
+        /// <param name="location">
+        /// The location at which the content has been created. Must be a relative or absolute URL.
+        /// </param>
         /// <param name="content">The content value to negotiate and format in the entity body.</param>
         /// <returns>A <see cref="CreatedNegotiatedContentResult{T}"/> with the specified values.</returns>
         protected internal CreatedNegotiatedContentResult<T> Created<T>(string location, T content)
@@ -371,7 +373,7 @@ namespace System.Web.Http
                 throw new ArgumentNullException("location");
             }
 
-            return Created<T>(new Uri(location), content);
+            return Created<T>(new Uri(location, UriKind.RelativeOrAbsolute), content);
         }
 
         /// <summary>

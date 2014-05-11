@@ -152,7 +152,7 @@ namespace System.Web.OData.Batch
                 MessageQuotas = messageQuotas
             };
 
-            HttpResponseMessage response = request.CreateResponse(HttpStatusCode.Accepted);
+            HttpResponseMessage response = request.CreateResponse(HttpStatusCode.OK);
             response.Content = new ODataBatchContent(responses, writerSettings);
             return Task.FromResult(response);
         }

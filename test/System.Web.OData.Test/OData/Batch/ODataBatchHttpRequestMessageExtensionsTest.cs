@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Web.OData.Batch;
+using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Test
@@ -85,6 +87,21 @@ namespace System.Web.OData.Test
             request.SetODataContentIdMapping(mapping);
 
             Assert.Equal(mapping, request.GetODataContentIdMapping());
+        }
+
+        [Fact]
+        public void CreateODataBatchResponseAsync_ReturnsHttpStatusCodeOK()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            var responses = new ODataBatchResponseItem[] {};
+            var quotas = new ODataMessageQuotas();
+
+            // Act
+            var response = request.CreateODataBatchResponseAsync(responses, quotas).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
     }
 }

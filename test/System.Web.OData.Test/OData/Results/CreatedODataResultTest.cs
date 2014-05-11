@@ -7,6 +7,7 @@ using System.Net.Http.Formatting;
 using System.Web.Http;
 using System.Web.Http.Results;
 using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
@@ -285,6 +286,34 @@ namespace System.Web.OData.Results
         }
 
         [Fact]
+        public void GenerateLocationHeader_ForContainment()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            model.Model.SetAnnotationValue(model.OrderLine, new ClrTypeAnnotation(typeof(OrderLine)));
+            var path = new DefaultODataPathHandler().Parse(
+                model.Model,
+                "http://localhost/",
+                "MyOrders(1)/OrderLines");
+            var request = GetODataRequest(model.Model);
+            request.ODataProperties().Model = model.Model;
+            request.ODataProperties().Path = path;
+            var orderLine = new OrderLine { ID = 2 };
+            var createdODataResult = new CreatedODataResult<OrderLine>(
+                orderLine,
+                _contentNegotiator,
+                request,
+                _formatters,
+                _locationHeader);
+
+            // Act
+            var locationHeader = createdODataResult.GenerateLocationHeader();
+
+            // Assert
+            Assert.Equal("http://localhost/MyOrders(1)/OrderLines(2)", locationHeader.ToString());
+        }
+
+        [Fact]
         public void GenerateLocationHeader_ThrowsEditLinkNullForLocationHeader_IfEntitySetLinkBuilderReturnsNull()
         {
             // Arrange
@@ -362,6 +391,18 @@ namespace System.Web.OData.Results
         private CreatedODataResult<TestEntity> GetCreatedODataResult(HttpRequestMessage request)
         {
             return new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, request, _formatters, _locationHeader);
+        }
+
+        private static HttpRequestMessage GetODataRequest(IEdmModel model)
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
+            string routeName = "Route";
+            configuration.MapODataServiceRoute(routeName, null, model);
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
+            request.SetConfiguration(configuration);
+            request.ODataProperties().RouteName = routeName;
+            return request;
         }
 
         private class TestEntity

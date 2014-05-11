@@ -233,6 +233,7 @@ namespace System.Web.OData
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            Assert.Equal("http://localhost/odata/MyOrders(1)/OrderLines(3)", response.Headers.Location.ToString());
             Assert.Equal("http://localhost/odata/$metadata#MyOrders(1)/OrderLines/$entity", (string)result["@odata.context"]);
         }
 

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -153,6 +155,31 @@ namespace System.Web.OData.Routing.Conventions
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
             Assert.Empty(controllerContext.RouteData.Values);
+        }
+
+        [Theory]
+        [InlineData("Companies(1)/CEO")]
+        [InlineData("MyCompany/CEO")]
+        [InlineData("Employees(1)/WorkCompany")]
+        public void SelectAction_ReturnsNull_IfPostToNavigationPropertyBindingToNonCollectionValuedNavigationProperty(string path)
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Company>("Companies");
+            builder.Singleton<Company>("MyCompany");
+            builder.EntitySet<Employee>("Employees");
+            builder.Singleton<Employee>("Tony");
+            IEdmModel model = builder.GetEdmModel();
+
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, "http://any/", path);
+            HttpControllerContext controllerContext = CreateControllerContext("Post");
+            var actionMap = GetMockActionMap();
+
+            // Act
+            string selectedAction = new NavigationRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Null(selectedAction);
         }
 
         private static ILookup<string, HttpActionDescriptor> GetMockActionMap(params string[] actionNames)

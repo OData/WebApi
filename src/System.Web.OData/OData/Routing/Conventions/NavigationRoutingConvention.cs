@@ -43,6 +43,13 @@ namespace System.Web.OData.Routing.Conventions
                 IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
                 IEdmEntityType declaringType = navigationProperty.DeclaringType as IEdmEntityType;
 
+                // It is not valid to *Post* to any non-collection valued navigation property.
+                if (navigationProperty.TargetMultiplicity() != EdmMultiplicity.Many &&
+                    method == HttpMethod.Post)
+                {
+                    return null;
+                }
+
                 if (declaringType != null)
                 {
                     string actionNamePrefix = (method == HttpMethod.Get) ? "Get" : "PostTo";

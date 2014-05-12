@@ -32,38 +32,54 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Visit an AllNode.
+        /// Translate an AllNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(AllNode nodeIn)
         {
-            return new AllNode(nodeIn.RangeVariables, nodeIn.CurrentRangeVariable)
+            AllNode allNode = new AllNode(nodeIn.RangeVariables, nodeIn.CurrentRangeVariable);
+
+            if (nodeIn.Source != null)
             {
-                Source = (CollectionNode)nodeIn.Source.Accept(this),
-                Body = (SingleValueNode)nodeIn.Body.Accept(this)
-            };
+                allNode.Source = (CollectionNode)nodeIn.Source.Accept(this);
+            }
+
+            if (nodeIn.Body != null)
+            {
+                allNode.Body = (SingleValueNode)nodeIn.Body.Accept(this);
+            }
+
+            return allNode;
         }
 
         /// <summary>
-        /// Visit an AnyNode.
+        /// Translate an AnyNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(AnyNode nodeIn)
         {
-            return new AnyNode(nodeIn.RangeVariables, nodeIn.CurrentRangeVariable)
+            AnyNode anyNode = new AnyNode(nodeIn.RangeVariables, nodeIn.CurrentRangeVariable);
+
+            if (nodeIn.Source != null)
             {
-                Source = (CollectionNode)nodeIn.Source.Accept(this),
-                Body = (SingleValueNode)nodeIn.Body.Accept(this)
-            };
+                anyNode.Source = (CollectionNode)nodeIn.Source.Accept(this);
+            }
+
+            if (nodeIn.Body != null)
+            {
+                anyNode.Body = (SingleValueNode)nodeIn.Body.Accept(this);
+            }
+
+            return anyNode;
         }
 
         /// <summary>
-        /// Visit a BinaryOperatorNode.
+        /// Translate a BinaryOperatorNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(BinaryOperatorNode nodeIn)
         {
             return new BinaryOperatorNode(
@@ -73,10 +89,10 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Visit a CollectionFunctionCallNode.
+        /// Translate a CollectionFunctionCallNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(CollectionFunctionCallNode nodeIn)
         {
             return new CollectionFunctionCallNode(
@@ -84,84 +100,96 @@ namespace System.Web.OData.Query
                 nodeIn.Functions,
                 nodeIn.Parameters.Select(p => p.Accept(this)),
                 nodeIn.CollectionType,
-                nodeIn.Source);
+                nodeIn.Source == null ? null : nodeIn.Source.Accept(this));
         }
 
         /// <summary>
-        /// Visit a CollectionNavigationNode.
+        /// Translate a CollectionNavigationNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(CollectionNavigationNode nodeIn)
         {
-            return nodeIn;
+            return nodeIn.Source == null ?
+                nodeIn :
+                new CollectionNavigationNode(
+                    nodeIn.NavigationProperty,
+                    (SingleEntityNode)nodeIn.Source.Accept(this));
         }
 
         /// <summary>
-        /// Visit a CollectionOpenPropertyAccessNode.
+        /// Translate a CollectionOpenPropertyAccessNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(CollectionOpenPropertyAccessNode nodeIn)
         {
-            return nodeIn;
+            return new CollectionOpenPropertyAccessNode(
+                (SingleValueNode)nodeIn.Source.Accept(this),
+                nodeIn.Name);
         }
 
         /// <summary>
-        /// Visit a CollectionPropertyAccessNode.
+        /// Translate a CollectionPropertyAccessNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(CollectionPropertyAccessNode nodeIn)
         {
-            return nodeIn;
+            return new CollectionPropertyAccessNode(
+                (SingleValueNode)nodeIn.Source.Accept(this),
+                nodeIn.Property);
         }
 
         /// <summary>
-        /// Visit a CollectionPropertyCastNode.
+        /// Translate a CollectionPropertyCastNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(CollectionPropertyCastNode nodeIn)
         {
-            return nodeIn;
+            return new CollectionPropertyCastNode(
+                (CollectionPropertyAccessNode)nodeIn.Source.Accept(this),
+                (IEdmComplexType)nodeIn.ItemType.Definition);
         }
 
         /// <summary>
-        /// Visit a ConstantNode.
+        /// Translate a ConstantNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The original node.</returns>
         public override QueryNode Visit(ConstantNode nodeIn)
         {
             return nodeIn;
         }
 
         /// <summary>
-        /// Visit a ConvertNode.
+        /// Translate a ConvertNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(ConvertNode nodeIn)
         {
             return new ConvertNode((SingleValueNode)nodeIn.Source.Accept(this), nodeIn.TypeReference);
         }
 
         /// <summary>
-        /// Visit an EntityCollectionCastNode.
+        /// Translate an EntityCollectionCastNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(EntityCollectionCastNode nodeIn)
         {
-            return nodeIn;
+            return new EntityCollectionCastNode(
+                (EntityCollectionNode)nodeIn.Source.Accept(this),
+                (IEdmEntityType)nodeIn.ItemType.Definition);
         }
 
         /// <summary>
-        /// Visit an EntityCollectionFunctionCallNode.
+        /// Translate an EntityCollectionFunctionCallNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(EntityCollectionFunctionCallNode nodeIn)
         {
             return new EntityCollectionFunctionCallNode(
@@ -170,44 +198,46 @@ namespace System.Web.OData.Query
                 nodeIn.Parameters.Select(p => p.Accept(this)),
                 nodeIn.CollectionType,
                 (IEdmEntitySetBase)nodeIn.NavigationSource,
-                nodeIn.Source);
+                nodeIn.Source == null ? null : nodeIn.Source.Accept(this));
         }
 
         /// <summary>
-        /// Visit an EntityRangeVariableReferenceNode.
+        /// Translate an EntityRangeVariableReferenceNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The original node.</returns>
         public override QueryNode Visit(EntityRangeVariableReferenceNode nodeIn)
         {
             return nodeIn;
         }
 
         /// <summary>
-        /// Visit a NamedFunctionParameterNode.
+        /// Translate a NamedFunctionParameterNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(NamedFunctionParameterNode nodeIn)
         {
-            return new NamedFunctionParameterNode(nodeIn.Name, nodeIn.Value.Accept(this));
+            return new NamedFunctionParameterNode(
+                nodeIn.Name,
+                nodeIn.Value == null ? null : nodeIn.Value.Accept(this));
         }
 
         /// <summary>
-        /// Visit a NonentityRangeVariableReferenceNode.
+        /// Translate a NonentityRangeVariableReferenceNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The original node.</returns>
         public override QueryNode Visit(NonentityRangeVariableReferenceNode nodeIn)
         {
             return nodeIn;
         }
 
         /// <summary>
-        /// Visit a ParameterAliasNode.
+        /// Translate a ParameterAliasNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(ParameterAliasNode nodeIn)
         {
             SingleValueNode node = ODataPathSegmentTranslator.TranslateParameterAlias(nodeIn, _parameterAliasNode);
@@ -223,66 +253,79 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Visit a SearchTermNode.
+        /// Translate a SearchTermNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The original node.</returns>
         public override QueryNode Visit(SearchTermNode nodeIn)
         {
             return nodeIn;
         }
 
         /// <summary>
-        /// Visit a SingleEntityCastNode.
+        /// Translate a SingleEntityCastNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(SingleEntityCastNode nodeIn)
         {
-            return nodeIn;
+            return nodeIn.Source == null ?
+                nodeIn :
+                new SingleEntityCastNode(
+                    (SingleEntityNode)nodeIn.Source.Accept(this),
+                    (IEdmEntityType)nodeIn.TypeReference.Definition);
         }
 
         /// <summary>
-        /// Visit a SingleEntityFunctionCallNode.
+        /// Translate a SingleEntityFunctionCallNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(SingleEntityFunctionCallNode nodeIn)
         {
             return new SingleEntityFunctionCallNode(
                 nodeIn.Name,
                 nodeIn.Functions,
-                nodeIn.Parameters.Select(p => p.Accept(this)),
+                // TODO 1941: Parameters property of SingleEntityFunctionCallNode should never be null.
+                nodeIn.Parameters == null ? null : nodeIn.Parameters.Select(p => p.Accept(this)),
                 nodeIn.EntityTypeReference,
                 nodeIn.NavigationSource,
-                nodeIn.Source);
+                nodeIn.Source == null ? null : nodeIn.Source.Accept(this));
         }
 
         /// <summary>
-        /// Visit a SingleNavigationNode.
+        /// Translate a SingleNavigationNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(SingleNavigationNode nodeIn)
         {
-            return nodeIn;
+            return nodeIn.Source == null ?
+                nodeIn :
+                new SingleNavigationNode(
+                    nodeIn.NavigationProperty,
+                    (SingleEntityNode)nodeIn.Source.Accept(this));
         }
 
         /// <summary>
-        /// Visit a SingleValueCastNode.
+        /// Translate a SingleValueCastNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(SingleValueCastNode nodeIn)
         {
-            return nodeIn;
+            return nodeIn.Source == null ?
+                nodeIn :
+                new SingleValueCastNode(
+                    (SingleValueNode)nodeIn.Source.Accept(this),
+                    (IEdmComplexType)nodeIn.TypeReference.Definition);
         }
 
         /// <summary>
-        /// Visit a SingleValueFunctionCallNode.
+        /// Translate a SingleValueFunctionCallNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(SingleValueFunctionCallNode nodeIn)
         {
             return new SingleValueFunctionCallNode(
@@ -290,34 +333,38 @@ namespace System.Web.OData.Query
                 nodeIn.Functions,
                 nodeIn.Parameters.Select(p => p.Accept(this)),
                 nodeIn.TypeReference,
-                nodeIn.Source);
+                nodeIn.Source == null ? null : nodeIn.Source.Accept(this));
         }
 
         /// <summary>
-        /// Visit a SingleValueOpenPropertyAccessNode.
+        /// Translate a SingleValueOpenPropertyAccessNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(SingleValueOpenPropertyAccessNode nodeIn)
         {
-            return nodeIn;
+            return new SingleValueOpenPropertyAccessNode(
+                (SingleValueNode)nodeIn.Source.Accept(this),
+                nodeIn.Name);
         }
 
         /// <summary>
-        /// Visit a SingleValuePropertyAccessNode.
+        /// Translate a SingleValuePropertyAccessNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(SingleValuePropertyAccessNode nodeIn)
         {
-            return nodeIn;
+            return new SingleValuePropertyAccessNode(
+                (SingleValueNode)nodeIn.Source.Accept(this),
+                nodeIn.Property);
         }
 
         /// <summary>
-        /// Visit an UnaryOperatorNode.
+        /// Translate an UnaryOperatorNode.
         /// </summary>
-        /// <param name="nodeIn">The node to be visited.</param>
-        /// <returns>The visited node.</returns>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
         public override QueryNode Visit(UnaryOperatorNode nodeIn)
         {
             return new UnaryOperatorNode(nodeIn.OperatorKind, (SingleValueNode)nodeIn.Operand.Accept(this));

@@ -27,10 +27,10 @@ namespace System.Web.OData.Formatter
             builder.EntitySet<Vehicle>("vehicles");
             IEdmModel model = builder.GetEdmModel();
 
-            HttpConfiguration configuration = new HttpConfiguration();
+            HttpConfiguration configuration = new[] { typeof(CollectionsTestsController) }.GetHttpConfiguration();
             configuration.Formatters.Clear();
             configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create());
-            configuration.Routes.MapODataServiceRoute(model);
+            configuration.MapODataServiceRoute(model);
 
             HttpServer server = new HttpServer(configuration);
             _client = new HttpClient(server);

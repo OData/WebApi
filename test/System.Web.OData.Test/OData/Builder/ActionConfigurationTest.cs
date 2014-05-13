@@ -443,7 +443,7 @@ namespace System.Web.OData.Builder
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://server/Movies");
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataServiceRoute(routeName, null, model);
+            configuration.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
             request.ODataProperties().RouteName = routeName;
             UrlHelper urlHelper = new UrlHelper(request);

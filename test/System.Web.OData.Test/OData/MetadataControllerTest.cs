@@ -21,8 +21,7 @@ namespace System.Web.OData.Builder
         public void DollarMetaData_Works_WithoutAcceptHeader()
         {
             // Arrange
-            HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
+            HttpServer server = new HttpServer(GetConfiguration());
             HttpClient client = new HttpClient(server);
 
             // Act
@@ -63,8 +62,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void DollarMetaDataWorks_AfterTracingIsEnabled()
         {
-            HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
+            HttpServer server = new HttpServer(GetConfiguration());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
@@ -86,9 +84,10 @@ namespace System.Web.OData.Builder
             builder2.EntitySet<FormatterPerson>("People2");
             var model2 = builder2.GetEdmModel();
 
-            HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataServiceRoute("OData1", "v1", model1);
-            server.Configuration.Routes.MapODataServiceRoute("OData2", "v2", model2);
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            HttpServer server = new HttpServer(config);
+            config.MapODataServiceRoute("OData1", "v1", model1);
+            config.MapODataServiceRoute("OData2", "v2", model2);
 
             HttpClient client = new HttpClient(server);
             AssertHasEntitySet(client, "http://localhost/v1/$metadata", "People1");
@@ -103,8 +102,9 @@ namespace System.Web.OData.Builder
             builder.ComplexType<FormatterAddress>();
             IEdmModel model = builder.GetEdmModel();
 
-            HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataServiceRoute(model);
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(config);
             HttpClient client = new HttpClient(server);
 
             // Act
@@ -128,8 +128,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void ServiceDocumentWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
         {
-            HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
+            HttpServer server = new HttpServer(GetConfiguration());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
@@ -145,8 +144,7 @@ namespace System.Web.OData.Builder
         public void ServiceDocumentWorks_OutputSingleton()
         {
             // Arrange
-            HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
+            HttpServer server = new HttpServer(GetConfiguration());
 
             HttpClient client = new HttpClient(server);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
@@ -167,8 +165,7 @@ namespace System.Web.OData.Builder
         public void ServiceDocument_ContainsFunctonImport()
         {
             // Arrange
-            HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
+            HttpServer server = new HttpServer(GetConfiguration());
             HttpClient client = new HttpClient(server);
 
             // Act
@@ -187,8 +184,7 @@ namespace System.Web.OData.Builder
             IEnumerable<IEdmFunctionImport> functionImports = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
                 .Where(f => f.Name == "GetSalary");
 
-            HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(GetConfiguration());
             HttpClient client = new HttpClient(server);
 
             // Act
@@ -210,8 +206,7 @@ namespace System.Web.OData.Builder
             IEdmFunctionImport[] functionImports = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
                 .Where(f => f.Name == "GetAddress").ToArray();
 
-            HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(GetConfiguration());
             HttpClient client = new HttpClient(server);
 
             // Act
@@ -241,8 +236,7 @@ namespace System.Web.OData.Builder
             IEdmFunctionImport[] functionImports = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
                 .Where(f => f.Name == "GetVipPerson").ToArray();
 
-            HttpServer server = new HttpServer();
-            server.Configuration.Routes.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(GetConfiguration());
             HttpClient client = new HttpClient(server);
 
             // Act
@@ -266,14 +260,21 @@ namespace System.Web.OData.Builder
         [Fact]
         public void Controller_DoesNotAppear_InApiDescriptions()
         {
-            var config = new HttpConfiguration();
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
-            config.Routes.MapODataServiceRoute(new ODataConventionModelBuilder().GetEdmModel());
+            config.MapODataServiceRoute(new ODataConventionModelBuilder().GetEdmModel());
             var explorer = config.Services.GetApiExplorer();
 
             var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
 
             Assert.DoesNotContain("ODataMetadata", apis);
+        }
+
+        private HttpConfiguration GetConfiguration()
+        {
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
+            return config;
         }
     }
 }

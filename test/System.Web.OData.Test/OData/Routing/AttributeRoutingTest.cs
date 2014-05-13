@@ -46,9 +46,7 @@ namespace System.Web.OData.Routing
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             config.Services.Replace(typeof(IAssembliesResolver), resolver);
 
-            config.Routes
-                .MapODataServiceRoute("odata", "", model.Model)
-                .MapODataRouteAttributes(config);
+            config.MapODataServiceRoute("odata", "", model.Model);
 
             HttpServer server = new HttpServer(config);
             config.EnsureInitialized();

@@ -21,8 +21,9 @@ namespace System.Web.OData
 
         public QueryableLimitationTest()
         {
-            _configuration = new HttpConfiguration();
-            _configuration.Routes.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            _configuration =
+                new[] { typeof(QueryLimitCustomersController), typeof(OpenCustomersController) }.GetHttpConfiguration();
+            _configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);
         }

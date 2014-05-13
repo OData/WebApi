@@ -24,12 +24,13 @@ namespace System.Web.OData
         {
             // Arrange
             HttpRouteCollection routes = new HttpRouteCollection();
+            HttpConfiguration config = new HttpConfiguration(routes);
             IEdmModel model = new EdmModel();
             string routeName = "name";
             string routePrefix = "prefix";
 
             // Act
-            routes.MapODataServiceRoute(routeName, routePrefix, model);
+            config.MapODataServiceRoute(routeName, routePrefix, model);
 
             // Assert
             IHttpRoute odataRoute = routes[routeName];
@@ -52,6 +53,7 @@ namespace System.Web.OData
         {
             // Arrange
             HttpRouteCollection routes = new HttpRouteCollection();
+            HttpConfiguration config = new HttpConfiguration(routes);
             IEdmModel model = new EdmModel();
             string routeName = "name";
             string routePrefix = "prefix";
@@ -59,7 +61,7 @@ namespace System.Web.OData
             var conventions = new List<IODataRoutingConvention>();
 
             // Act
-            routes.MapODataServiceRoute(routeName, routePrefix, model, pathHandler, conventions);
+            config.MapODataServiceRoute(routeName, routePrefix, model, pathHandler, conventions);
 
             // Assert
             IHttpRoute odataRoute = routes[routeName];
@@ -81,12 +83,13 @@ namespace System.Web.OData
         public void MapODataServiceRoute_AddsBatchRoute_WhenBatchHandlerIsProvided()
         {
             HttpRouteCollection routes = new HttpRouteCollection();
+            HttpConfiguration config = new HttpConfiguration(routes);
             IEdmModel model = new EdmModel();
             string routeName = "name";
             string routePrefix = "prefix";
 
             var batchHandler = new DefaultODataBatchHandler(new HttpServer());
-            routes.MapODataServiceRoute(routeName, routePrefix, model, batchHandler);
+            config.MapODataServiceRoute(routeName, routePrefix, model, batchHandler);
 
             IHttpRoute batchRoute = routes["nameBatch"];
             Assert.NotNull(batchRoute);
@@ -98,12 +101,13 @@ namespace System.Web.OData
         public void MapODataServiceRoute_MapsBatchRouteWhenBatchHandlerIsProvidedToGeneralOverload()
         {
             HttpRouteCollection routes = new HttpRouteCollection();
+            HttpConfiguration config = new HttpConfiguration(routes);
             IEdmModel model = new EdmModel();
             string routeName = "name";
             string routePrefix = "prefix";
 
             HttpMessageHandler batchHandler = new DefaultODataBatchHandler(new HttpServer());
-            routes.MapODataServiceRoute(routeName, routePrefix, model, batchHandler);
+            config.MapODataServiceRoute(routeName, routePrefix, model, batchHandler);
 
             IHttpRoute batchRoute = routes["nameBatch"];
             Assert.NotNull(batchRoute);
@@ -116,11 +120,12 @@ namespace System.Web.OData
         {
             // Arrange
             HttpRouteCollection routes = new HttpRouteCollection();
+            HttpConfiguration config = new HttpConfiguration(routes);
             IEdmModel model = new EdmModel();
             HttpMessageHandler handler = new HttpControllerDispatcher(new HttpConfiguration());
 
             // Act
-            ODataRoute route = routes.MapODataServiceRoute("odata", "odata", model, handler);
+            ODataRoute route = config.MapODataServiceRoute("odata", "odata", model, handler);
 
             // Assert
             Assert.NotNull(route);
@@ -132,10 +137,11 @@ namespace System.Web.OData
         {
             // Arrange
             HttpRouteCollection routes = new HttpRouteCollection();
+            HttpConfiguration config = new HttpConfiguration(routes);
             IEdmModel model = new EdmModel();
 
             // Act
-            ODataRoute route = routes.MapODataServiceRoute("odata", "odata", model);
+            ODataRoute route = config.MapODataServiceRoute("odata", "odata", model);
 
             // Assert
             Assert.NotNull(route);

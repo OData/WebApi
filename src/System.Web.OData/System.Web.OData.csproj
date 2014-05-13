@@ -67,7 +67,6 @@
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
-    <Compile Include="Extensions\HttpRouteCollectionExtensions.cs" />
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />

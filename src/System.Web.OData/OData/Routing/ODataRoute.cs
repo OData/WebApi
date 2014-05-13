@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
-using System.Web.OData.Routing.Conventions;
 
 namespace System.Web.OData.Routing
 {
@@ -78,16 +77,6 @@ namespace System.Web.OData.Routing
             return String.IsNullOrEmpty(prefix) ?
                 ODataRouteConstants.ODataPathTemplate :
                 prefix + '/' + ODataRouteConstants.ODataPathTemplate;
-        }
-
-        /// <summary>
-        /// Maps the OData route attributes.
-        /// </summary>
-        /// <param name="configuration">The http configuration used to search for all the OData controllers to map.</param>
-        public void MapODataRouteAttributes(HttpConfiguration configuration)
-        {
-            AttributeRoutingConvention routingConvention = new AttributeRoutingConvention(PathRouteConstraint.EdmModel, configuration);
-            PathRouteConstraint.RoutingConventions.Insert(0, routingConvention);
         }
 
         /// <inheritdoc />

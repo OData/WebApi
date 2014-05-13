@@ -87,9 +87,9 @@ namespace System.Web.OData.Formatter
             builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => new Uri("http://link/"), false);
             var model2 = builder2.GetEdmModel();
 
-            var config = new HttpConfiguration();
-            config.Routes.MapODataServiceRoute("OData1", "v1", model1);
-            config.Routes.MapODataServiceRoute("OData2", "v2", model2);
+            var config = new[] { typeof(PeopleController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute("OData1", "v1", model1);
+            config.MapODataServiceRoute("OData2", "v2", model2);
 
             using (HttpServer host = new HttpServer(config))
             using (HttpClient client = new HttpClient(host))
@@ -342,10 +342,11 @@ namespace System.Web.OData.Formatter
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<EnumCustomer>("EnumCustomers");
             IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(EnumCustomersController) };
 
-            using (HttpConfiguration configuration = new HttpConfiguration())
+            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
             {
-                configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
+                configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
@@ -410,8 +411,8 @@ namespace System.Web.OData.Formatter
             builder.EntitySet<EnumCustomer>("EnumCustomers");
             IEdmModel model = builder.GetEdmModel();
 
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
+            HttpConfiguration configuration = new[] { typeof(EnumCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
             HttpServer host = new HttpServer(configuration);
             HttpClient client = new HttpClient(host);
 
@@ -433,10 +434,11 @@ namespace System.Web.OData.Formatter
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<EnumCustomer>("EnumCustomers");
             IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(EnumCustomersController) };
 
-            using (HttpConfiguration configuration = new HttpConfiguration())
+            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
             {
-                configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
+                configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
@@ -468,10 +470,11 @@ namespace System.Web.OData.Formatter
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<EnumCustomer>("EnumCustomers");
             IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(EnumCustomersController) };
 
-            using (HttpConfiguration configuration = new HttpConfiguration())
+            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
             {
-                configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
+                configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
 
@@ -493,10 +496,11 @@ namespace System.Web.OData.Formatter
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<CollectionSerializerCustomer>("CollectionSerializerCustomers");
             IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(CollectionSerializerCustomersController) };
 
-            using (HttpConfiguration configuration = new HttpConfiguration())
+            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
             {
-                configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
+                configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/CollectionSerializerCustomers?$select=ID"))
@@ -591,8 +595,13 @@ namespace System.Web.OData.Formatter
 
         private static HttpConfiguration CreateConfiguration(IEdmModel model)
         {
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataServiceRoute(model);
+            HttpConfiguration configuration =
+                new[]
+                {
+                    typeof(MainEntityController), typeof(PeopleController), typeof(EnumCustomersController),
+                    typeof(CollectionSerializerCustomersController), typeof(PresidentController)
+                }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute(model);
             configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
             return configuration;
         }

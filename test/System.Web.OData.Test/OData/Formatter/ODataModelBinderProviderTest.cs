@@ -218,8 +218,7 @@ namespace System.Web.OData.Formatter
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
-            configuration.Routes.MapODataServiceRoute("odata", "", GetEdmModel())
-                .MapODataRouteAttributes(configuration);
+            configuration.MapODataServiceRoute("odata", "", GetEdmModel());
 
             var controllers = new[] { typeof(ODataModelBinderProviderTestODataController) };
             TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
@@ -250,8 +249,7 @@ namespace System.Web.OData.Formatter
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
-            configuration.Routes.MapODataServiceRoute("odata", "", GetEdmModel())
-                .MapODataRouteAttributes(configuration);
+            configuration.MapODataServiceRoute("odata", "", GetEdmModel());
 
             var controllers = new[] { typeof(ODataModelBinderProviderTestODataController) };
             TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));

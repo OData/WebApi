@@ -47,7 +47,7 @@ namespace System.Web.OData.Routing
 
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<TestClass>("Test");
-            server.Configuration.Routes.MapODataServiceRoute("odata", "", builder.GetEdmModel());
+            server.Configuration.MapODataServiceRoute("odata", "", builder.GetEdmModel());
             HttpClient client = new HttpClient(server);
 
             // Act

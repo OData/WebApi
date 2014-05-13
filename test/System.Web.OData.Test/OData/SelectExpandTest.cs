@@ -27,17 +27,26 @@ namespace System.Web.OData
 
         public SelectExpandTest()
         {
-            _configuration = new HttpConfiguration();
+            _configuration =
+                new[]
+                {
+                    typeof(SelectExpandTestCustomersController), typeof(SelectExpandTestCustomersAliasController),
+                    typeof(PlayersController), typeof(NonODataSelectExpandTestCustomersController),
+                    typeof(AttributedSelectExpandCustomersController), typeof(SelectExpandTestCustomer),
+                    typeof(SelectExpandTestSpecialCustomer), typeof(SelectExpandTestCustomerWithAlias),
+                    typeof(SelectExpandTestOrder), typeof(SelectExpandTestSpecialOrder),
+                    typeof(SelectExpandTestSpecialOrderWithAlias)
+                }.GetHttpConfiguration();
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
-            _configuration.Routes.MapODataServiceRoute("odata", "odata", GetModel());
-            _configuration.Routes.MapODataServiceRoute("odata-inheritance", "odata-inheritance", GetModelWithInheritance());
-            _configuration.Routes.MapODataServiceRoute("odata-alias", "odata-alias", GetModelWithCustomerAlias());
-            _configuration.Routes.MapODataServiceRoute(
+            _configuration.MapODataServiceRoute("odata", "odata", GetModel());
+            _configuration.MapODataServiceRoute("odata-inheritance", "odata-inheritance", GetModelWithInheritance());
+            _configuration.MapODataServiceRoute("odata-alias", "odata-alias", GetModelWithCustomerAlias());
+            _configuration.MapODataServiceRoute(
                 "odata-alias2-inheritance",
                 "odata-alias2-inheritance",
                 GetModelWithCustomerAliasAndInheritance());
-            _configuration.Routes.MapODataServiceRoute("odata2", "odata2", GetModelWithProcedures());
+            _configuration.MapODataServiceRoute("odata2", "odata2", GetModelWithProcedures());
             _configuration.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers" });
 
             HttpServer server = new HttpServer(_configuration);

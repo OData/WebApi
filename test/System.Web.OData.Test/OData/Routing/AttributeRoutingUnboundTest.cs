@@ -25,8 +25,7 @@ namespace System.Web.OData.Routing
         {
             _configuration = new HttpConfiguration();
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            _configuration.Routes.MapODataServiceRoute("odata", "", GetEdmModel(_configuration))
-                .MapODataRouteAttributes(_configuration); // enable attribute routing
+            _configuration.MapODataServiceRoute("odata", "", GetEdmModel(_configuration));
 
             var controllers = new[] { typeof(ConventionCustomersController) };
             TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));

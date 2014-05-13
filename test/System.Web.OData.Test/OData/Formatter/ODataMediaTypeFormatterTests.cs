@@ -91,7 +91,7 @@ namespace System.Web.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)");
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataServiceRoute(routeName, null, model);
+            configuration.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
             request.ODataProperties().Model = model;
             IEdmEntitySet entitySet = model.EntityContainer.EntitySets().Single();
@@ -118,7 +118,7 @@ namespace System.Web.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, baseUri);
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataServiceRoute(routeName, routePrefix, model);
+            configuration.MapODataServiceRoute(routeName, routePrefix, model);
             request.SetConfiguration(configuration);
             request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();

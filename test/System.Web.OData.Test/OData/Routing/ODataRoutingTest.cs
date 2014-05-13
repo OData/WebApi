@@ -19,8 +19,7 @@ namespace System.Web.OData.Routing
         public ODataRoutingTest()
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataServiceRoute("RouteName", null, ODataRoutingModel.GetModel())
-                .MapODataRouteAttributes(configuration);
+            configuration.MapODataServiceRoute("RouteName", null, ODataRoutingModel.GetModel());
 
             var controllers = new[]
             {
@@ -141,7 +140,7 @@ namespace System.Web.OData.Routing
         public void RoutesCorrectly_WithParameterInRoutePrefix()
         {
             // Arrange
-            _server.Configuration.Routes.MapODataServiceRoute("parameterInPrefix", "{a}", ODataRoutingModel.GetModel());
+            _server.Configuration.MapODataServiceRoute("parameterInPrefix", "{a}", ODataRoutingModel.GetModel());
 
             // Act
             HttpResponseMessage response = _client.GetAsync("http://localhost/parameter/RoutingCustomers").Result;

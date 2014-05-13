@@ -36,7 +36,7 @@ namespace System.Web.OData.Builder.Conventions
             Assert.NotNull(paintEdmAction);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataServiceRoute(model);
+            configuration.MapODataServiceRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);

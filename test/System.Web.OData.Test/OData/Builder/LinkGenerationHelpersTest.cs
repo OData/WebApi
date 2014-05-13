@@ -333,7 +333,7 @@ namespace System.Web.OData.Builder
         {
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataServiceRoute(routeName, null, model);
+            configuration.MapODataServiceRoute(routeName, null, model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);

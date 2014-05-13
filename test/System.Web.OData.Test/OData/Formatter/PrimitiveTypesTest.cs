@@ -120,7 +120,7 @@ namespace System.Web.OData.Formatter
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID"))
             {
                 HttpConfiguration config = new HttpConfiguration();
-                config.Routes.MapODataServiceRoute("default", "", model);
+                config.MapODataServiceRoute("default", "", model);
                 request.SetConfiguration(config);
                 request.ODataProperties().RouteName = "default";
                 request.ODataProperties().Model = model;

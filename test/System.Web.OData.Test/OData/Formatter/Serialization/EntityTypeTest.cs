@@ -43,7 +43,7 @@ namespace System.Web.OData.Formatter.Serialization
             request.ODataProperties().Model = _model;
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataServiceRoute(routeName, null, _model);
+            configuration.MapODataServiceRoute(routeName, null, _model);
             request.SetConfiguration(configuration);
             IEdmEntitySet entitySet = _model.EntityContainer.FindEntitySet("employees");
             request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet));

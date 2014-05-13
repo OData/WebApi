@@ -5,11 +5,11 @@ using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Extensions
 {
-    internal static class HttpRouteCollectionExtensions
+    internal static class HttpConfigurationExtensions
     {
-        public static void MapODataServiceRoute(this HttpRouteCollection routes, IEdmModel model)
+        public static void MapODataServiceRoute(this HttpConfiguration configuration, IEdmModel model)
         {
-            routes.MapODataServiceRoute("IgnoredRouteName", null, model);
+            configuration.MapODataServiceRoute("IgnoredRouteName", null, model);
         }
     }
 }

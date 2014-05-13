@@ -17,8 +17,9 @@ namespace System.Web.OData.Routing
 
         public ODataSingletonRoutingTest()
         {
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataServiceRoute(new CustomersModelWithInheritance().Model);
+            var controllers = new[] { typeof(VipCustomerController) };
+            var configuration = controllers.GetHttpConfiguration();
+            configuration.MapODataServiceRoute(new CustomersModelWithInheritance().Model);
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);

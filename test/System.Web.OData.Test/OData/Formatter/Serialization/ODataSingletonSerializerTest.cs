@@ -63,7 +63,7 @@ namespace System.Web.OData.Formatter.Deserialization
         private HttpRequestMessage GetRequest(IEdmModel model, IEdmSingleton singleton)
         {
             HttpConfiguration config = new HttpConfiguration();
-            config.Routes.MapODataServiceRoute("odata", "odata", model);
+            config.MapODataServiceRoute("odata", "odata", model);
             HttpRequestMessage request = new HttpRequestMessage();
             request.SetConfiguration(config);
             request.ODataProperties().PathHandler = new DefaultODataPathHandler();

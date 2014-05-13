@@ -21,8 +21,8 @@ namespace System.Web.OData
         {
             // Arrange
             const string RequestUri = "http://localhost/odata/OpenCustomers(2)/Address";
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            var configuration = new[] { typeof(OpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
 
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
@@ -58,8 +58,8 @@ namespace System.Web.OData
 
             const string RequestUri = "http://localhost/odata/OpenCustomers";
 
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            HttpConfiguration configuration = new[] { typeof(OpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
             // Act

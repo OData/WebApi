@@ -30,8 +30,7 @@ namespace System.Web.OData
             _configuration = new HttpConfiguration { IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always };
             _configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
-            _configuration.Routes.MapODataServiceRoute("odata", "odata", GetEdmModel())
-                .MapODataRouteAttributes(_configuration);
+            _configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
             var server = new HttpServer(_configuration);
             _client = new HttpClient(server);
         }

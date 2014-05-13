@@ -50,7 +50,7 @@ namespace System.Web.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/employees");
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
-            configuration.Routes.MapODataServiceRoute(routeName, null, GetSampleModel());
+            configuration.MapODataServiceRoute(routeName, null, GetSampleModel());
             request.SetConfiguration(configuration);
             IEdmEntitySet entitySet = _model.EntityContainer.FindEntitySet("employees");
             request.ODataProperties().Model = _model;

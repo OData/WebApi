@@ -98,9 +98,9 @@ namespace System.Web.OData.Query
             builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => new Uri("http://link/"), false);
             var model2 = builder2.GetEdmModel();
 
-            var config = new HttpConfiguration();
-            config.Routes.MapODataServiceRoute("OData1", "v1", model1);
-            config.Routes.MapODataServiceRoute("OData2", "v2", model2);
+            var config = new[] { typeof(PeopleController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute("OData1", "v1", model1);
+            config.MapODataServiceRoute("OData2", "v2", model2);
 
             using (HttpServer host = new HttpServer(config))
             using (HttpClient client = new HttpClient(host))
@@ -166,7 +166,17 @@ namespace System.Web.OData.Query
 
         private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel)
         {
-            HttpConfiguration config = new HttpConfiguration();
+            var controllers = new[]
+            {
+                typeof(QueryCompositionPrimitiveController), typeof(QueryCompositionCustomerController),
+                typeof(QueryCompositionCustomerQueryableController),
+                typeof(QueryCompositionCustomerWithTaskOfIEnumerableController),
+                typeof(QueryCompositionCustomerGlobalController), typeof(QueryCompositionCustomerValidationController),
+                typeof(QueryCompositionCustomerLowLevelController),
+                typeof(QueryCompositionCustomerLowLevel_ODataQueryOptionsOfTController),
+                typeof(QueryCompositionCategoryController), typeof(QueryCompositionAnonymousTypesController)
+            };
+            HttpConfiguration config = controllers.GetHttpConfiguration();
             config.Routes.MapHttpRoute("default", "{controller}/{key}", new { key = RouteParameter.Optional });
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 

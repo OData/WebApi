@@ -27,7 +27,7 @@ namespace System.Web.OData.Formatter
             _model = GetModel();
             configuration.Formatters.Clear();
             configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create());
-            configuration.Routes.MapODataServiceRoute(_model);
+            configuration.MapODataServiceRoute(_model);
             var controllers = new[] { typeof(CustomersController) };
             var assembliesResolver = new TestAssemblyResolver(new MockAssembly(controllers));
             configuration.Services.Replace(typeof(IAssembliesResolver), assembliesResolver);

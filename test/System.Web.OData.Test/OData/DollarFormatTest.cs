@@ -22,10 +22,11 @@ namespace System.Web.OData
             MediaTypeHeaderValue expected = MediaTypeHeaderValue.Parse(mediaTypeFormat);
             string url = string.Format("http://localhost/{0}?$format={1}", path, mediaTypeFormat);
             IEdmModel model = GetEdmModel();
-            HttpConfiguration configuration = new HttpConfiguration();
+            var configuration =
+                new[] { typeof(FormatCustomersController), typeof(ThisController) }.GetHttpConfiguration();
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
-            configuration.Routes.MapODataServiceRoute("odata", routePrefix: null, model: model);
+            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);

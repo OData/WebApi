@@ -23,8 +23,8 @@ namespace System.Web.OData
 
         public ODataSingletonTest()
         {
-            _configuration = new HttpConfiguration();
-            _configuration.Routes.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            _configuration = new[] { typeof(OscorpController), typeof(OscorpSubsController) }.GetHttpConfiguration();
+            _configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);
         }

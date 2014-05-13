@@ -18,8 +18,9 @@ namespace System.Web.OData.Query
 
         public ODataSingletonQueryOptionTest()
         {
-            _configuration = new HttpConfiguration();
-            _configuration.Routes.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            var controllers = new[] { typeof(MeController) };
+            _configuration = controllers.GetHttpConfiguration();
+            _configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);
         }

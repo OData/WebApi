@@ -78,7 +78,6 @@
         duration = parseInt(element.getAttribute("data-ajax-loading-duration"), 10) || 0;
 
         $.extend(options, {
-            context: element,
             type: element.getAttribute("data-ajax-method") || undefined,
             url: element.getAttribute("data-ajax-url") || undefined,
             cache: !!element.getAttribute("data-ajax-cache"),

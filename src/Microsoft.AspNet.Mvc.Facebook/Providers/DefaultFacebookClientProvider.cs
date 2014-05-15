@@ -29,6 +29,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Providers
 
         /// <summary>
         /// Creates a <see cref="FacebookClient"/> with AppId and AppSecret that uses Json.NET for serialization and deserialization.
+        /// Does not have an access token associated with it by default.
         /// </summary>
         /// <returns>The <see cref="FacebookClient"/> instance.</returns>
         public virtual FacebookClient CreateClient()

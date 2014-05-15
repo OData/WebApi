@@ -14,6 +14,8 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
     /// </summary>
     public static class FacebookClientExtensions
     {
+        private const string PermissionsEndPoint = "me/permissions";
+
         /// <summary>
         /// Gets the Facebook object located at a given path.
         /// </summary>
@@ -102,8 +104,11 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Using tasks")]
         public static async Task<IList<string>> GetCurrentUserPermissionsAsync(this FacebookClient client)
         {
-            FacebookGroupConnection<IDictionary<string, int>> permissionResults = await client.GetTaskAsync<FacebookGroupConnection<IDictionary<string, int>>>("me/permissions");
-            return ParsePermissions(permissionResults.Data);
+            FacebookGroupConnection<IDictionary<string, string>> permissionResults = 
+                await client.GetTaskAsync<FacebookGroupConnection<IDictionary<string, string>>>(PermissionsEndPoint);
+            PermissionsStatus permissionsStatus = new PermissionsStatus(permissionResults.Data);
+
+            return PermissionHelper.GetGrantedPermissions(permissionsStatus).ToList();
         }
 
         /// <summary>
@@ -158,24 +163,12 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
             return client.GetLoginUrl(loginUrlParameters);
         }
 
-        internal static IList<string> GetCurrentUserPermissions(this FacebookClient client)
+        internal static IList<IDictionary<string, string>> GetCurrentUserPermissionsStatus(this FacebookClient client)
         {
-            FacebookGroupConnection<IDictionary<string, int>> permissionResults = client.Get<FacebookGroupConnection<IDictionary<string, int>>>("me/permissions");
-            return ParsePermissions(permissionResults.Data);
-        }
+            FacebookGroupConnection<IDictionary<string, string>> permissionResults = 
+                client.Get<FacebookGroupConnection<IDictionary<string, string>>>(PermissionsEndPoint);
 
-        private static IList<string> ParsePermissions(IList<IDictionary<string, int>> permissionResults)
-        {
-            if (permissionResults != null)
-            {
-                IDictionary<string, int> permissionResult = permissionResults.FirstOrDefault();
-                if (permissionResult != null)
-                {
-                    return permissionResult.Where(kvp => kvp.Value == 1).Select(kvp => kvp.Key).ToList();
-                }
-            }
-
-            return new string[0];
+            return permissionResults.Data;
         }
     }
 }

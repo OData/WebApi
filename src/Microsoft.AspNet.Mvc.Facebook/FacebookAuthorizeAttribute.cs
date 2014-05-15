@@ -3,6 +3,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Linq;
 
 namespace Microsoft.AspNet.Mvc.Facebook
 {
@@ -34,6 +36,20 @@ namespace Microsoft.AspNet.Mvc.Facebook
             {
                 throw new ArgumentNullException("permissions");
             }
+
+            foreach (string permission in permissions)
+            {
+                if (permission.Contains(','))
+                {
+                    throw new ArgumentException(
+                        String.Format(
+                            CultureInfo.CurrentCulture,
+                            Resources.PermissionStringShouldNotContainComma,
+                            permission),
+                            "permissions");
+                }
+            }
+
             _permissions = new ReadOnlyCollection<string>(permissions);
         }
 

@@ -34,8 +34,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\FacebookRequestHelper.cs" />
+    <Compile Include="PermissionContext.cs" />
+    <Compile Include="PermissionHelper.cs" />
     <Compile Include="FacebookAppSettingKeys.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="PermissionsStatus.cs" />
+    <Compile Include="PermissionStatus.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
     <Compile Include="FacebookAuthenticationModule.cs" />
     <Compile Include="FacebookHtmlHelperExtensions.cs" />

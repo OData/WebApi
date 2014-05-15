@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using Facebook;
 using Microsoft.AspNet.Mvc.Facebook.Client;
-using Microsoft.AspNet.Mvc.Facebook.Models;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Providers
 {
@@ -47,9 +46,36 @@ namespace Microsoft.AspNet.Mvc.Facebook.Providers
                 throw new ArgumentNullException("accessToken");
             }
 
+            PermissionsStatus permissionsStatus = GetUserPermissionsStatus(userId, accessToken);
+
+            return PermissionHelper.GetGrantedPermissions(permissionsStatus);
+        }
+
+        /// <summary>
+        /// Gets the users permission status by calling the Facebook graph API.
+        /// </summary>
+        /// <param name="userId">The user id.</param>
+        /// <param name="accessToken">The access token.</param>
+        /// <returns>The users permission status is in the following format { { "permissionName", "granted|declined" } }.</returns>
+        public virtual PermissionsStatus GetUserPermissionsStatus(string userId, string accessToken)
+        {
+            if (userId == null)
+            {
+                throw new ArgumentNullException("userId");
+            }
+
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException("accessToken");
+            }
+
             FacebookClient client = _config.ClientProvider.CreateClient();
             client.AccessToken = accessToken;
-            return client.GetCurrentUserPermissions();
+
+            IList<IDictionary<string, string>> rawPermissionsStatus = client.GetCurrentUserPermissionsStatus();
+            PermissionsStatus permissionsStatus = new PermissionsStatus(rawPermissionsStatus);
+
+            return permissionsStatus;
         }
     }
 }

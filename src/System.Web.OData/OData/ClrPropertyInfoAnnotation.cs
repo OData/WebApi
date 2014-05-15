@@ -11,8 +11,6 @@ namespace System.Web.OData
     /// </summary>
     public class ClrPropertyInfoAnnotation
     {
-        private PropertyInfo _clrPropertyInfo;
-
         /// <summary>
         /// Initializes a new instance of <see cref="ClrPropertyInfoAnnotation"/> class.
         /// </summary>
@@ -28,23 +26,8 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Gets or sets the backing CLR property info for the EDM property.
+        /// Gets the backing CLR property info for the EDM property.
         /// </summary>
-        public PropertyInfo ClrPropertyInfo
-        {
-            get
-            {
-                return _clrPropertyInfo;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-
-                _clrPropertyInfo = value;
-            }
-        }
+        public PropertyInfo ClrPropertyInfo { get; private set; }
     }
 }

@@ -19,8 +19,8 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// The backing CLR type for the EDM type.
+        /// Gets the backing CLR type for the EDM type.
         /// </summary>
-        public Type ClrType { get; set; }
+        public Type ClrType { get; private set; }
     }
 }

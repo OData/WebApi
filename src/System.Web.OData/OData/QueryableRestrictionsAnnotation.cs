@@ -24,8 +24,8 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Gets or sets the restrictions for the EDM property.
+        /// Gets the restrictions for the EDM property.
         /// </summary>
-        public QueryableRestrictions Restrictions { get; set; }
+        public QueryableRestrictions Restrictions { get; private set; }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Dynamic;
+using System.Web;
 using System.Web.Mvc;
 using Facebook;
 using Microsoft.AspNet.Mvc.Facebook.Providers;
@@ -13,14 +14,20 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test.Helpers
 {
     internal class MockHelpers
     {
-        public static ControllerContext CreateControllerContext(NameValueCollection requestFormData = null, NameValueCollection requestQueryData = null, Uri requestUrl = null)
+        public static ControllerContext CreateControllerContext(NameValueCollection requestFormData = null,
+                                                                NameValueCollection requestQueryData = null,
+                                                                Uri requestUrl = null,
+                                                                HttpCookieCollection requestCookies = null)
         {
             Mock<ControllerContext> controllerContext = new Mock<ControllerContext>();
+            controllerContext.Setup(c => c.HttpContext.Response).Returns(new EmptyHttpResponse());
+            controllerContext.Setup(c => c.HttpContext.Response.Cookies).Returns(new HttpCookieCollection());
             controllerContext.Setup(c => c.HttpContext.Items).Returns(new Dictionary<object, object>());
             controllerContext.Setup(c => c.HttpContext.Request.Url).Returns(requestUrl ?? new Uri("http://example.com"));
             controllerContext.Setup(c => c.HttpContext.Request.AppRelativeCurrentExecutionFilePath).Returns("~/");
             controllerContext.Setup(c => c.HttpContext.Request.Form).Returns(requestFormData ?? new NameValueCollection());
             controllerContext.Setup(c => c.HttpContext.Request.QueryString).Returns(requestQueryData ?? new NameValueCollection());
+            controllerContext.Setup(c => c.HttpContext.Request.Cookies).Returns(requestCookies ?? new HttpCookieCollection());
             return controllerContext.Object;
         }
 
@@ -65,11 +72,20 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test.Helpers
             return client.Object;
         }
 
-        public static IFacebookPermissionService CreatePermissionService(string[] permissionsToReturn)
+        public static IFacebookPermissionService CreatePermissionService(string[] permissionsToReturn,
+                                                                         PermissionsStatus permissionsStatusToReturn = null)
         {
-            Mock<IFacebookPermissionService> client = new Mock<IFacebookPermissionService>();
+            var client = new Mock<IFacebookPermissionService>();
+            permissionsStatusToReturn = permissionsStatusToReturn ?? new PermissionsStatus(apiResult: null);
+
             client.Setup(p => p.GetUserPermissions(It.IsAny<string>(), It.IsAny<string>())).Returns(permissionsToReturn);
+            client.Setup(p => p.GetUserPermissionsStatus(It.IsAny<string>(), It.IsAny<string>())).Returns(permissionsStatusToReturn);
+
             return client.Object;
+        }
+
+        private sealed class EmptyHttpResponse : HttpResponseBase
+        {
         }
     }
 }

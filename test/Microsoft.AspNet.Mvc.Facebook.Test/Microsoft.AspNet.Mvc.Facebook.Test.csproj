@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FacebookAuthorizeAttributeTest.cs" />
+    <Compile Include="FacebookAuthorizeFilterHookTest.cs" />
     <Compile Include="GlobalFacebookConfigurationTest.cs" />
     <Compile Include="FacebookAuthorizeFilterTest.cs" />
     <Compile Include="FacebookClientExtensionsTest.cs" />

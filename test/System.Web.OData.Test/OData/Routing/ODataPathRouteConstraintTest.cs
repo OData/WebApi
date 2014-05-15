@@ -282,7 +282,6 @@ namespace System.Web.OData.Routing
             string prefixString,
             string oDataString)
         {
-
             // Arrange
             var originalRoot = "http://any/" + prefixString;
             var expectedRoot = originalRoot;

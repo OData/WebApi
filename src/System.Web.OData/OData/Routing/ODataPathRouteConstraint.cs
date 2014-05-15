@@ -138,14 +138,19 @@ namespace System.Web.OData.Routing
                     try
                     {
                         // Service root is the current RequestUri, less the query string and the ODataPath (always the
-                        // last segment of the absolute path).  ODL expects an escaped service root and other service
+                        // last portion of the absolute path).  ODL expects an escaped service root and other service
                         // root calculations are calculated using AbsoluteUri (also escaped).  But routing exclusively
                         // uses unescaped strings, determined using
                         //    address.GetComponents(UriComponents.Path, UriFormat.Unescaped)
                         //
-                        // Due to this decoding, there's no reliable way to determine the original string from which
-                        // oDataPathString was derived.  Therefore a straightforward string comparison won't always
-                        // work.  See RemoveODataPath() for details of chosen approach.
+                        // For example if the AbsoluteUri is
+                        // <http://localhost/odata/FunctionCall(p0='Chinese%E8%A5%BF%E9%9B%85%E5%9B%BEChars')>, the
+                        // oDataPathString will contain "FunctionCall(p0='Chinese西雅图Chars')".
+                        //
+                        // Due to this decoding and the possibility of unecessarily-escaped characters, there's no
+                        // reliable way to determine the original string from which oDataPathString was derived.
+                        // Therefore a straightforward string comparison won't always work.  See RemoveODataPath() for
+                        // details of chosen approach.
                         string serviceRoot = request.RequestUri.GetLeftPart(UriPartial.Path);
                         if (!String.IsNullOrEmpty(oDataPathString))
                         {
@@ -236,8 +241,8 @@ namespace System.Web.OData.Routing
             int endIndex = uriString.Length - oDataPathString.Length - 1;
             if (endIndex <= 0)
             {
-                // Bizarre: oDataPathString is longer than uriString.  Or were passed a Path, not the espected
-                // AbsoluteUri, and there's no room for '/' before ODataPath.
+                // Bizarre: oDataPathString is longer than uriString.  Likely the values collection passed to Match()
+                // is corrupt.
                 throw Error.InvalidOperation(SRResources.RequestUriTooShortForODataPath, uriString, oDataPathString);
             }
 

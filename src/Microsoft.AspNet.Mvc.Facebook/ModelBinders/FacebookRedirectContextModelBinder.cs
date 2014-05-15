@@ -58,18 +58,13 @@ namespace Microsoft.AspNet.Mvc.Facebook.ModelBinders
                     String.Format(CultureInfo.CurrentCulture, Resources.ParameterIsRequired, "originUrl"));
             }
 
-            if (String.IsNullOrEmpty(permissions))
-            {
-                bindingContext.ModelState.AddModelError(bindingContext.ModelName,
-                    String.Format(CultureInfo.CurrentCulture, Resources.ParameterIsRequired, "permissions"));
-            }
-
             string redirectUrl = null;
             string[] requiredPermissions = permissions != null ? permissions.Split(',') : new string[0];
             if (bindingContext.ModelState.IsValid)
             {
                 FacebookClient client = _config.ClientProvider.CreateClient();
-                redirectUrl = client.GetLoginUrl(originUrl, _config.AppId, permissions).AbsoluteUri;
+                // Don't want to redirect to a permissioned URL, the action authorize filters take care of that.
+                redirectUrl = client.GetLoginUrl(originUrl, _config.AppId, String.Empty).AbsoluteUri;
             }
 
             return new FacebookRedirectContext

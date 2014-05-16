@@ -37,6 +37,12 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("3.0.0.0")] // ASPNETWEBPAGES
 #endif
 [assembly: AssemblyProduct("Microsoft ASP.NET Web Pages")]
+#elif ASPNETFACEBOOK
+#if !BUILD_GENERATED_VERSION
+[assembly: AssemblyVersion("1.0.0.0")] // ASPNETFACEBOOK
+[assembly: AssemblyFileVersion("1.0.0.0")] // ASPNETFACEBOOK
+#endif
+[assembly: AssemblyProduct("Microsoft ASP.NET Facebook")]
 #else
 #error Runtime projects must define either ASPNETMVC or ASPNETWEBPAGES
 #endif

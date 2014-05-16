@@ -183,18 +183,6 @@ namespace System.Web.OData.Formatter
             Assert.NotSame(ODataMediaTypes.ApplicationXml, ODataMediaTypes.ApplicationXml);
         }
 
-        [Fact]
-        public void TextXml_Value()
-        {
-            Assert.Equal("text/xml", ODataMediaTypes.TextXml.ToString());
-        }
-
-        [Fact]
-        public void TextXml_ReturnsDifferentInstances()
-        {
-            Assert.NotSame(ODataMediaTypes.TextXml, ODataMediaTypes.TextXml);
-        }
-
         [Theory]
         [InlineData("application/xml", ODataMetadataLevel.Default)]
         [InlineData("application/json;randomparameter=randomvalue", ODataMetadataLevel.MinimalMetadata)]

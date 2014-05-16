@@ -35,7 +35,6 @@ namespace System.Web.OData.Formatter
         private static readonly MediaTypeHeaderValue _applicationJsonStreamingTrue =
             MediaTypeHeaderValue.Parse("application/json;odata.streaming=true");
         private static readonly MediaTypeHeaderValue _applicationXml = new MediaTypeHeaderValue("application/xml");
-        private static readonly MediaTypeHeaderValue _textXml = new MediaTypeHeaderValue("text/xml");
 
         public static MediaTypeHeaderValue ApplicationJson
         {
@@ -106,11 +105,6 @@ namespace System.Web.OData.Formatter
         public static MediaTypeHeaderValue ApplicationXml
         {
             get { return (MediaTypeHeaderValue)((ICloneable)_applicationXml).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue TextXml
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_textXml).Clone(); }
         }
 
         public static ODataMetadataLevel GetMetadataLevel(MediaTypeHeaderValue contentType)

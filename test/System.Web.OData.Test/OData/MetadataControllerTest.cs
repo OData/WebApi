@@ -2,7 +2,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Tracing;
@@ -160,6 +162,25 @@ namespace System.Web.OData.Builder
                 repsoneString);
         }
 
+        [Theory]
+        [InlineData("application/xml")]
+        [InlineData("application/abcd")]
+        public void ServiceDocument_Returns_NotAcceptable_ForNonJsonMediaType(string mediaType)
+        {
+            // Arrange
+            HttpServer server = new HttpServer(GetConfiguration());
+            server.Configuration.Services.Replace(typeof(IContentNegotiator), new DefaultContentNegotiator(true));
+
+            HttpClient client = new HttpClient(server);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(mediaType));
+
+            // Act
+            var response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
+        }
 
         [Fact]
         public void ServiceDocument_ContainsFunctonImport()

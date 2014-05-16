@@ -46,7 +46,6 @@ namespace System.Web.OData.Formatter
                 // Place JSON formatter first so it gets used when the request doesn't ask for a specific content type
                 CreateApplicationJson(serializerProvider, deserializerProvider),
                 CreateApplicationXml(serializerProvider, deserializerProvider),
-                CreateTextXml(serializerProvider, deserializerProvider),
                 CreateRawValue(serializerProvider, deserializerProvider)
             };
         }
@@ -109,13 +108,7 @@ namespace System.Web.OData.Formatter
             ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
                 serializerProvider,
                 deserializerProvider,
-                ODataPayloadKind.Property,
-                ODataPayloadKind.EntityReferenceLink,
-                ODataPayloadKind.EntityReferenceLinks,
-                ODataPayloadKind.Collection,
-                ODataPayloadKind.ServiceDocument,
-                ODataPayloadKind.MetadataDocument,
-                ODataPayloadKind.Error);
+                ODataPayloadKind.MetadataDocument);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
 
             formatter.AddDollarFormatQueryStringMappings();
@@ -128,22 +121,6 @@ namespace System.Web.OData.Formatter
         {
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(deserializerProvider, serializerProvider, payloadKinds);
             AddSupportedEncodings(formatter);
-            return formatter;
-        }
-
-        private static ODataMediaTypeFormatter CreateTextXml(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
-                serializerProvider,
-                deserializerProvider,
-                ODataPayloadKind.Property,
-                ODataPayloadKind.EntityReferenceLink,
-                ODataPayloadKind.EntityReferenceLinks,
-                ODataPayloadKind.Collection);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.TextXml);
-
-            formatter.AddDollarFormatQueryStringMappings();
-
             return formatter;
         }
 

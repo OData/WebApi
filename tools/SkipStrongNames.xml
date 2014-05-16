@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <assemblies defaultPublicKeyToken="31bf3856ad364e35">
   <!-- Production assemblies -->
-  <assembly name="Microsoft.AspNet.Mvc.Facebook"/>
+  <assembly name="Microsoft.AspNet.Facebook"/>
   <assembly name="System.Web.Cors"/>
   <assembly name="Microsoft.Web.Helpers"/>
   <assembly name="Microsoft.Web.Http.Data"/>
@@ -33,7 +33,7 @@
   <assembly name="WebMatrix.WebData"/>
 
   <!-- Unit test assemblies and helpers -->
-  <assembly name="Microsoft.AspNet.Mvc.Facebook.Test"/>
+  <assembly name="Microsoft.AspNet.Facebook.Test"/>
   <assembly name="Microsoft.TestCommon"/>
   <assembly name="Microsoft.Web.Helpers.Test"/>
   <assembly name="Microsoft.Web.Http.Data.Test"/>

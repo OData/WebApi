@@ -7,12 +7,11 @@ mkdir bin
 
 :Build
 
-REM Find the most recent 32bit MSBuild.exe on the system. If v12.0 (installed with VS2013) does not exist, fall back to
-REM v4.0. Also handle x86 operating systems, where %ProgramFiles(x86)% is not defined. Always quote the %MSBuild% value
-REM when setting the variable and never quote %MSBuild% references.
+REM Find the most recent 32bit MSBuild.exe on the system. Require v12.0 (installed with VS2013) or later since .NET 4.0
+REM is not supported. Also handle x86 operating systems, where %ProgramFiles(x86)% is not defined. Always quote the
+REM %MSBuild% value when setting the variable and never quote %MSBuild% references.
 set MSBuild="%ProgramFiles(x86)%\MSBuild\12.0\Bin\MSBuild.exe"
 if not exist %MSBuild% @set MSBuild="%ProgramFiles%\MSBuild\12.0\Bin\MSBuild.exe"
-if not exist %MSBuild% @set MSBuild="%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
 
 if "%1" == "" goto BuildDefaults
 

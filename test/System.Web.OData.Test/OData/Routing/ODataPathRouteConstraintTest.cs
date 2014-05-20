@@ -25,6 +25,7 @@ namespace System.Web.OData.Routing
         {
             { "virtualRoot/odata" },
             { "virtualRoot/prefix/odata" },
+            { "some%2Fescaped%2Fslashes" },                     // "some/escaped/slashes"
             { "some%23hashes" },                                // "some#hashes"
             { "some%3Fquestion%3Fmarks" },                      // "some?question?marks"
             { "some%3flower%23escapes" },                       // "some?lower#escapes"
@@ -39,7 +40,7 @@ namespace System.Web.OData.Routing
             { "some(sub)and&other=delims" },
             { "some(delims)but%2Bupper:escaped" },              // "some(delims)but+upper:escaped"
             { "some(delims)but%2blower:escaped" },              // "some(delims)but+lower:escaped"
-            { ":@" },                                           // general delimeters that work
+            { ":[]@" },                                         // general delimeters that work
             { "Chinese%E8%A5%BF%E9%9B%85%E5%9B%BEChars" },      // "Chinese西雅图Chars"
             { "Unicode%D8%83Format%D8%83Char" },                // "Unicode؃Format؃Char", class Cf
             { "Unicode%E1%BF%BCTitlecase%E1%BF%BCChar" },       // "UnicodeῼTitlecaseῼChar", class Lt
@@ -201,6 +202,7 @@ namespace System.Web.OData.Routing
             Assert.Equal(expectedRoot, pathHandler.ServiceRoot);
         }
 
+        [Theory]
         [PropertyData("PrefixStrings")]
         public void Match_DeterminesExpectedServiceRoot_ForMetadataWithEscapedSeparator(string prefixString)
         {
@@ -274,6 +276,7 @@ namespace System.Web.OData.Routing
             Assert.Equal(expectedRoot, pathHandler.ServiceRoot);
         }
 
+        [Theory]
         [PropertyData("PrefixAndODataStrings")]
         public void Match_DeterminesExpectedServiceRoot_ForFunctionCallWithEscapedSeparator(
             string prefixString,

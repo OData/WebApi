@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
@@ -125,16 +124,8 @@ namespace System.Web.OData.Routing
                 if (values.TryGetValue(ODataRouteConstants.ODataPath, out oDataPathValue))
                 {
                     string oDataPathString = oDataPathValue as string;
-
-                    // No ODataPath means the path is empty; this is necessary for service documents
-                    string pathAndQuery = oDataPathString ?? String.Empty;
-                    if (!String.IsNullOrEmpty(request.RequestUri.Query))
-                    {
-                        // Ensure path handler receives the query string as well as the path.
-                        pathAndQuery += request.RequestUri.Query;
-                    }
-
                     ODataPath path;
+
                     try
                     {
                         // Service root is the current RequestUri, less the query string and the ODataPath (always the
@@ -151,10 +142,21 @@ namespace System.Web.OData.Routing
                         // reliable way to determine the original string from which oDataPathString was derived.
                         // Therefore a straightforward string comparison won't always work.  See RemoveODataPath() for
                         // details of chosen approach.
-                        string serviceRoot = request.RequestUri.GetLeftPart(UriPartial.Path);
+                        string requestLeftPart = request.RequestUri.GetLeftPart(UriPartial.Path);
+                        string serviceRoot = requestLeftPart;
                         if (!String.IsNullOrEmpty(oDataPathString))
                         {
                             serviceRoot = RemoveODataPath(serviceRoot, oDataPathString);
+                        }
+
+                        // As mentioned above, we also need escaped ODataPath.
+                        // The requestLeftPart and request.RequestUri.Query are both escaped.
+                        // The ODataPath for service documents is empty.
+                        string oDataPathAndQuery = requestLeftPart.Substring(serviceRoot.Length);
+                        if (!String.IsNullOrEmpty(request.RequestUri.Query))
+                        {
+                            // Ensure path handler receives the query string as well as the path.
+                            oDataPathAndQuery += request.RequestUri.Query;
                         }
 
                         // Leave an escaped '/' out of the service route because DefaultODataPathHandler will add a
@@ -165,7 +167,7 @@ namespace System.Web.OData.Routing
                             serviceRoot = serviceRoot.Substring(0, serviceRoot.Length - 3);
                         }
 
-                        path = PathHandler.Parse(EdmModel, serviceRoot, pathAndQuery);
+                        path = PathHandler.Parse(EdmModel, serviceRoot, oDataPathAndQuery);
                     }
                     catch (ODataException)
                     {

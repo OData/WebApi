@@ -21,18 +21,18 @@ namespace System.Web.OData.Routing
         IEnumerable<IODataRoutingConvention> _conventions = ODataRoutingConventions.CreateDefault();
         HttpRequestMessage _request = new HttpRequestMessage();
 
-        private static IList<string> _stringsWithGenDelims = new List<string>
+        private static IList<string> _stringsWithUnescapedSlashes = new List<string>
         {
             { "virtualRoot/odata" },
-            { "virtualRoot/prefix/odata" },
-            { "some%2Fescaped%2Fslashes" },                     // "some/escaped/slashes"
-            { "some%23hashes" },                                // "some#hashes"
-            { "some%3Fquestion%3Fmarks" },                      // "some?question?marks"
-            { "some%3flower%23escapes" },                       // "some?lower#escapes"
+            { "virtualRoot/prefix/odata" }
         };
 
-        private static IList<string> _stringsWithoutGenDelims = new List<string>
+        private static IList<string> _stringsLegalEverywhere = new List<string>
         {
+            { "some%23hashes" },                                // "some#hashes"
+            { "some%2fslashes" },                               // "some/slashes"
+            { "some%3Fquestion%3Fmarks" },                      // "some?question?marks"
+            { "some%3flower%23escapes" },                       // "some?lower#escapes"
             { "" },
             { "odata" },
             { "some%20spaces" },                                // "some spaces"
@@ -52,12 +52,12 @@ namespace System.Web.OData.Routing
             get
             {
                 var dataSet = new TheoryDataSet<string>();
-                foreach (var item in _stringsWithGenDelims)
+                foreach (var item in _stringsWithUnescapedSlashes)
                 {
                     dataSet.Add(item);
                 }
 
-                foreach (var item in _stringsWithoutGenDelims)
+                foreach (var item in _stringsLegalEverywhere)
                 {
                     dataSet.Add(item);
                 }
@@ -66,24 +66,24 @@ namespace System.Web.OData.Routing
             }
         }
 
-        // Cross product of prefixes (all of _stringsWithGenDelims and all _stringsWithoutGenDelims) with OData paths (all
-        // of _stringsWithoutGenDelims).
+        // Cross product of prefixes (all of _stringsWithUnescapedSlashes and all _stringsLegalEverywhere) with OData paths (all
+        // of _stringsLegalEverywhere).
         public static TheoryDataSet<string, string> PrefixAndODataStrings
         {
             get
             {
                 var dataSet = new TheoryDataSet<string, string>();
-                foreach (var prefix in _stringsWithGenDelims)
+                foreach (var prefix in _stringsWithUnescapedSlashes)
                 {
-                    foreach (var oDataPath in _stringsWithoutGenDelims)
+                    foreach (var oDataPath in _stringsLegalEverywhere)
                     {
                         dataSet.Add(prefix, oDataPath);
                     }
                 }
 
-                foreach (var prefix in _stringsWithoutGenDelims)
+                foreach (var prefix in _stringsLegalEverywhere)
                 {
-                    foreach (var oDataPath in _stringsWithoutGenDelims)
+                    foreach (var oDataPath in _stringsLegalEverywhere)
                     {
                         dataSet.Add(prefix, oDataPath);
                     }
@@ -95,7 +95,7 @@ namespace System.Web.OData.Routing
 
         [Fact]
         public void Match_ReturnsTrue_ForUriGeneration()
-        {            
+        {
             var values = new Dictionary<string, object>();
 
             var constraint = new ODataPathRouteConstraint(_pathHandler, _model, _routeName, _conventions);
@@ -200,6 +200,8 @@ namespace System.Web.OData.Routing
             Assert.True(matched);
             Assert.NotNull(pathHandler.ServiceRoot);
             Assert.Equal(expectedRoot, pathHandler.ServiceRoot);
+            Assert.NotNull(pathHandler.ODataPath);
+            Assert.Equal("$metadata", pathHandler.ODataPath);
         }
 
         [Theory]
@@ -235,6 +237,8 @@ namespace System.Web.OData.Routing
             Assert.True(matched);
             Assert.NotNull(pathHandler.ServiceRoot);
             Assert.Equal(expectedRoot, pathHandler.ServiceRoot);
+            Assert.NotNull(pathHandler.ODataPath);
+            Assert.Equal("$metadata", pathHandler.ODataPath);
         }
 
         [Theory]
@@ -274,6 +278,8 @@ namespace System.Web.OData.Routing
             Assert.True(matched);
             Assert.NotNull(pathHandler.ServiceRoot);
             Assert.Equal(expectedRoot, pathHandler.ServiceRoot);
+            Assert.NotNull(pathHandler.ODataPath);
+            Assert.Equal(oDataPath, pathHandler.ODataPath);
         }
 
         [Theory]
@@ -316,16 +322,20 @@ namespace System.Web.OData.Routing
             Assert.True(matched);
             Assert.NotNull(pathHandler.ServiceRoot);
             Assert.Equal(expectedRoot, pathHandler.ServiceRoot);
+            Assert.NotNull(pathHandler.ODataPath);
+            Assert.Equal(oDataPath, pathHandler.ODataPath);
         }
 
         // Wrap a PathHandler to allow us to check serviceRoot the constraint calculates.
         private class TestPathHandler : DefaultODataPathHandler
         {
             public string ServiceRoot { get; private set; }
+            public string ODataPath { get; private set; }
 
             public override ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath)
             {
                 ServiceRoot = serviceRoot;
+                ODataPath = odataPath;
                 return base.Parse(model, serviceRoot, odataPath);
             }
         }

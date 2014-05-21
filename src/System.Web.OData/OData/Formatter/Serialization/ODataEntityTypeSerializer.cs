@@ -276,7 +276,26 @@ namespace System.Web.OData.Formatter.Serialization
             SelectExpandClause selectExpandClause = navigationPropertyToExpand.Value;
 
             object propertyValue = entityInstanceContext.GetPropertyValue(navigationProperty.Name);
-            if (propertyValue != null)
+
+            if (propertyValue == null)
+            {
+                if (navigationProperty.Type.IsCollection())
+                {
+                    // A navigation property whose Type attribute specifies a collection, the collection always exists,
+                    // it may just be empty.
+                    // If a collection of entities can be related, it is represented as a JSON array. An empty
+                    // collection of entities (one that contains no entities) is represented as an empty JSON array.
+                    writer.WriteStart(new ODataFeed());
+                }
+                else
+                {
+                    // If at most one entity can be related, the value is null if no entity is currently related.
+                    writer.WriteStart(entry: null);
+                }
+
+                writer.WriteEnd();
+            }
+            else
             {
                 // create the serializer context for the expanded item.
                 ODataSerializerContext nestedWriteContext = new ODataSerializerContext(entityInstanceContext, selectExpandClause, navigationProperty);

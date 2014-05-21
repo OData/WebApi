@@ -28,12 +28,17 @@ namespace System.Web.OData.Formatter.Serialization
     {
         private IEdmModel _model;
         private IEdmEntitySet _customerSet;
+        private IEdmEntitySet _orderSet;
         private Customer _customer;
+        private Order _order;
         private ODataEntityTypeSerializer _serializer;
         private ODataSerializerContext _writeContext;
         private EntityInstanceContext _entityInstanceContext;
         private ODataSerializerProvider _serializerProvider;
         private IEdmEntityTypeReference _customerType;
+        private IEdmEntityTypeReference _orderType;
+        private IEdmEntityTypeReference _specialCustomerType;
+        private IEdmEntityTypeReference _specialOrderType;
         private ODataPath _path;
 
         public ODataEntityTypeSerializerTests()
@@ -42,6 +47,12 @@ namespace System.Web.OData.Formatter.Serialization
 
             _model.SetAnnotationValue<ClrTypeAnnotation>(_model.FindType("Default.Customer"), new ClrTypeAnnotation(typeof(Customer)));
             _model.SetAnnotationValue<ClrTypeAnnotation>(_model.FindType("Default.Order"), new ClrTypeAnnotation(typeof(Order)));
+            _model.SetAnnotationValue(
+                _model.FindType("Default.SpecialCustomer"),
+                new ClrTypeAnnotation(typeof(SpecialCustomer)));
+            _model.SetAnnotationValue(
+                _model.FindType("Default.SpecialOrder"),
+                new ClrTypeAnnotation(typeof(SpecialOrder)));
 
             _customerSet = _model.EntityContainer.FindEntitySet("Customers");
             _customer = new Customer()
@@ -51,8 +62,17 @@ namespace System.Web.OData.Formatter.Serialization
                 ID = 10,
             };
 
+            _orderSet = _model.EntityContainer.FindEntitySet("Orders");
+            _order = new Order
+            {
+                ID = 20,
+            };
+
             _serializerProvider = new DefaultODataSerializerProvider();
             _customerType = _model.GetEdmTypeReference(typeof(Customer)).AsEntity();
+            _orderType = _model.GetEdmTypeReference(typeof(Order)).AsEntity();
+            _specialCustomerType = _model.GetEdmTypeReference(typeof(SpecialCustomer)).AsEntity();
+            _specialOrderType = _model.GetEdmTypeReference(typeof(SpecialOrder)).AsEntity();
             _serializer = new ODataEntityTypeSerializer(_serializerProvider);
             _path = new ODataPath(new EntitySetPathSegment(_customerSet));
             _writeContext = new ODataSerializerContext() { NavigationSource = _customerSet, Model = _model, Path = _path };
@@ -373,6 +393,193 @@ namespace System.Web.OData.Formatter.Serialization
 
             //Assert
             ordersSerializer.Verify();
+        }
+
+        [Fact]
+        public void WriteObjectInline_CanWriteExpandedNavigationProperty_ExpandedCollectionValuedNavigationPropertyIsNull()
+        {
+            // Arrange
+            IEdmEntityType customerType = _customerSet.EntityType();
+            IEdmNavigationProperty ordersProperty = customerType.NavigationProperties().Single(p => p.Name == "Orders");
+
+            Mock<IEdmEntityObject> customer = new Mock<IEdmEntityObject>();
+            object ordersValue = null;
+            customer.Setup(c => c.TryGetPropertyValue("Orders", out ordersValue)).Returns(true);
+            customer.Setup(c => c.GetEdmType()).Returns(customerType.AsReference());
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model, customerType, _customerSet,
+                new Dictionary<string, string> { { "$select", "Orders" }, { "$expand", "Orders" } });
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode();
+            selectExpandNode.ExpandedNavigationProperties[ordersProperty] =
+                selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand;
+
+            Mock<ODataWriter> writer = new Mock<ODataWriter>();
+            writer.Setup(w => w.WriteStart(It.IsAny<ODataFeed>())).Callback(
+                (ODataFeed feed) =>
+                {
+                    Assert.Null(feed.Count);
+                    Assert.Null(feed.DeltaLink);
+                    Assert.Null(feed.Id);
+                    Assert.Empty(feed.InstanceAnnotations);
+                    Assert.Null(feed.NextPageLink);
+                }).Verifiable();
+            Mock<ODataEdmTypeSerializer> ordersSerializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Entry);
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
+            serializerProvider.Setup(p => p.GetEdmTypeSerializer(ordersProperty.Type)).Returns(ordersSerializer.Object);
+
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(serializerProvider.Object);
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
+            serializer.CallBase = true;
+
+            // Act
+            serializer.Object.WriteObjectInline(customer.Object, _customerType, writer.Object, _writeContext);
+
+            // Assert
+            writer.Verify();
+        }
+
+        [Fact]
+        public void WriteObjectInline_CanWriteExpandedNavigationProperty_ExpandedSingleValuedNavigationPropertyIsNull()
+        {
+            // Arrange
+            IEdmEntityType orderType = _orderSet.EntityType();
+            IEdmNavigationProperty customerProperty = orderType.NavigationProperties().Single(p => p.Name == "Customer");
+
+            Mock<IEdmEntityObject> order = new Mock<IEdmEntityObject>();
+            object customerValue = null;
+            order.Setup(c => c.TryGetPropertyValue("Customer", out customerValue)).Returns(true);
+            order.Setup(c => c.GetEdmType()).Returns(orderType.AsReference());
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model, orderType, _orderSet,
+                new Dictionary<string, string> { { "$select", "Customer" }, { "$expand", "Customer" } });
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode();
+            selectExpandNode.ExpandedNavigationProperties[customerProperty] =
+                selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand;
+
+            Mock<ODataWriter> writer = new Mock<ODataWriter>();
+
+            writer.Setup(w => w.WriteStart(null as ODataEntry)).Verifiable();
+            Mock<ODataEdmTypeSerializer> ordersSerializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Entry);
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
+            serializerProvider.Setup(p => p.GetEdmTypeSerializer(customerProperty.Type))
+                .Returns(ordersSerializer.Object);
+
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(serializerProvider.Object);
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
+            serializer.CallBase = true;
+
+            // Act
+            serializer.Object.WriteObjectInline(order.Object, _orderType, writer.Object, _writeContext);
+
+            // Assert
+            writer.Verify();
+        }
+
+        [Fact]
+        public void WriteObjectInline_CanWriteExpandedNavigationProperty_DerivedExpandedCollectionValuedNavigationPropertyIsNull()
+        {
+            // Arrange
+            IEdmEntityType specialCustomerType = (IEdmEntityType)_specialCustomerType.Definition;
+            IEdmNavigationProperty specialOrdersProperty =
+                specialCustomerType.NavigationProperties().Single(p => p.Name == "SpecialOrders");
+
+            Mock<IEdmEntityObject> customer = new Mock<IEdmEntityObject>();
+            object specialOrdersValue = null;
+            customer.Setup(c => c.TryGetPropertyValue("SpecialOrders", out specialOrdersValue)).Returns(true);
+            customer.Setup(c => c.GetEdmType()).Returns(_specialCustomerType);
+
+            IEdmEntityType customerType = _customerSet.EntityType();
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(
+                _model,
+                customerType,
+                _customerSet,
+                new Dictionary<string, string>
+                {
+                    { "$select", "Default.SpecialCustomer/SpecialOrders" },
+                    { "$expand", "Default.SpecialCustomer/SpecialOrders" }
+                });
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode();
+            selectExpandNode.ExpandedNavigationProperties[specialOrdersProperty] =
+                selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand;
+
+            Mock<ODataWriter> writer = new Mock<ODataWriter>();
+            writer.Setup(w => w.WriteStart(It.IsAny<ODataFeed>())).Callback(
+                (ODataFeed feed) =>
+                {
+                    Assert.Null(feed.Count);
+                    Assert.Null(feed.DeltaLink);
+                    Assert.Null(feed.Id);
+                    Assert.Empty(feed.InstanceAnnotations);
+                    Assert.Null(feed.NextPageLink);
+                }).Verifiable();
+            Mock<ODataEdmTypeSerializer> ordersSerializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Entry);
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
+            serializerProvider.Setup(p => p.GetEdmTypeSerializer(specialOrdersProperty.Type))
+                .Returns(ordersSerializer.Object);
+
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(serializerProvider.Object);
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
+            serializer.CallBase = true;
+
+            // Act
+            serializer.Object.WriteObjectInline(customer.Object, _customerType, writer.Object, _writeContext);
+
+            // Assert
+            writer.Verify();
+        }
+
+        [Fact]
+        public void WriteObjectInline_CanWriteExpandedNavigationProperty_DerivedExpandedSingleValuedNavigationPropertyIsNull()
+        {
+            // Arrange
+            IEdmEntityType specialOrderType = (IEdmEntityType)_specialOrderType.Definition;
+            IEdmNavigationProperty customerProperty =
+                specialOrderType.NavigationProperties().Single(p => p.Name == "SpecialCustomer");
+
+            Mock<IEdmEntityObject> order = new Mock<IEdmEntityObject>();
+            object customerValue = null;
+            order.Setup(c => c.TryGetPropertyValue("SpecialCustomer", out customerValue)).Returns(true);
+            order.Setup(c => c.GetEdmType()).Returns(_specialOrderType);
+
+            IEdmEntityType orderType = (IEdmEntityType)_orderType.Definition;
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(
+                _model,
+                orderType,
+                _orderSet,
+                new Dictionary<string, string>
+                {
+                    { "$select", "Default.SpecialOrder/SpecialCustomer" },
+                    { "$expand", "Default.SpecialOrder/SpecialCustomer" }
+                });
+            SelectExpandClause selectExpandClause = parser.ParseSelectAndExpand();
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode();
+            selectExpandNode.ExpandedNavigationProperties[customerProperty] =
+                selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand;
+
+            Mock<ODataWriter> writer = new Mock<ODataWriter>();
+
+            writer.Setup(w => w.WriteStart(null as ODataEntry)).Verifiable();
+            Mock<ODataEdmTypeSerializer> ordersSerializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Entry);
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
+            serializerProvider.Setup(p => p.GetEdmTypeSerializer(customerProperty.Type))
+                .Returns(ordersSerializer.Object);
+
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(serializerProvider.Object);
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<EntityInstanceContext>())).Returns(selectExpandNode);
+            serializer.CallBase = true;
+
+            // Act
+            serializer.Object.WriteObjectInline(order.Object, _orderType, writer.Object, _writeContext);
+
+            // Assert
+            writer.Verify();
         }
 
         [Fact]
@@ -1488,12 +1695,22 @@ namespace System.Web.OData.Formatter.Serialization
             public IList<Order> Orders { get; private set; }
         }
 
+        private class SpecialCustomer
+        {
+            public IList<SpecialOrder> SpecialOrders { get; private set; }
+        }
+
         private class Order
         {
             public int ID { get; set; }
             public string Name { get; set; }
             public string Shipment { get; set; }
             public Customer Customer { get; set; }
+        }
+
+        private class SpecialOrder
+        {
+            public SpecialCustomer SpecialCustomer { get; set; }
         }
 
         private class FakeBindableProcedureFinder : BindableProcedureFinder

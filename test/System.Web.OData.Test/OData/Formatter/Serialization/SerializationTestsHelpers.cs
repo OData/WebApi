@@ -27,11 +27,17 @@ namespace System.Web.OData.Formatter.Serialization
                 concurrencyMode: EdmConcurrencyMode.Fixed);
             model.AddElement(customerType);
 
+            var specialCustomerType = new EdmEntityType("Default", "SpecialCustomer", customerType);
+            model.AddElement(specialCustomerType);
+
             var orderType = new EdmEntityType("Default", "Order");
             orderType.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32);
             orderType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
             orderType.AddStructuralProperty("Shipment", EdmPrimitiveTypeKind.String);
             model.AddElement(orderType);
+
+            var specialOrderType = new EdmEntityType("Default", "SpecialOrder", orderType);
+            model.AddElement(specialOrderType);
 
             var addressType = new EdmComplexType("Default", "Address");
             addressType.AddStructuralProperty("Street", EdmPrimitiveTypeKind.String);
@@ -44,13 +50,33 @@ namespace System.Web.OData.Formatter.Serialization
             // Add navigations
             customerType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Orders", Target = orderType, TargetMultiplicity = EdmMultiplicity.Many });
             orderType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Customer", Target = customerType, TargetMultiplicity = EdmMultiplicity.One });
+            specialCustomerType.AddUnidirectionalNavigation(
+                new EdmNavigationPropertyInfo
+                {
+                    Name = "SpecialOrders",
+                    Target = specialOrderType,
+                    TargetMultiplicity = EdmMultiplicity.Many
+                });
+            orderType.AddUnidirectionalNavigation(
+                new EdmNavigationPropertyInfo
+                {
+                    Name = "SpecialCustomer",
+                    Target = specialCustomerType,
+                    TargetMultiplicity = EdmMultiplicity.One
+                });
 
             // Add Entity set
             var container = new EdmEntityContainer("Default", "Container");
             var customerSet = container.AddEntitySet("Customers", customerType);
             var orderSet = container.AddEntitySet("Orders", orderType);
             customerSet.AddNavigationTarget(customerType.NavigationProperties().Single(np => np.Name == "Orders"), orderSet);
+            customerSet.AddNavigationTarget(
+                specialCustomerType.NavigationProperties().Single(np => np.Name == "SpecialOrders"),
+                orderSet);
             orderSet.AddNavigationTarget(orderType.NavigationProperties().Single(np => np.Name == "Customer"), customerSet);
+            orderSet.AddNavigationTarget(
+                specialOrderType.NavigationProperties().Single(np => np.Name == "SpecialCustomer"),
+                customerSet);
 
             NavigationSourceLinkBuilderAnnotation linkAnnotation = new MockNavigationSourceLinkBuilderAnnotation();
             model.SetNavigationSourceLinkBuilder(customerSet, linkAnnotation);

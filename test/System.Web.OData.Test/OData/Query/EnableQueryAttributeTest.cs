@@ -376,6 +376,35 @@ namespace System.Web.OData.Query
                 "Queries can not be applied to a response content of type 'System.Net.Http.StreamContent'. The response content must be an ObjectContent.");
         }
 
+        [Fact]
+        public void NullContentResponse_DoesNotThrow()
+        {
+            // Arrange
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$skip=1");
+            HttpConfiguration config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            HttpControllerContext controllerContext = new HttpControllerContext(
+                config,
+                new HttpRouteData(new HttpRoute()),
+                request);
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(
+                new HttpConfiguration(),
+                "CustomerHighLevel",
+                typeof(CustomerHighLevelController));
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(
+                controllerDescriptor,
+                typeof(CustomerHighLevelController).GetMethod("GetIEnumerableOfCustomer"));
+            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
+            HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null)
+            {
+                Response = new HttpResponseMessage(HttpStatusCode.OK) { Content = null }
+            };
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => attribute.OnActionExecuted(context));
+        }
+
         [Theory]
         [InlineData("$top=1")]
         [InlineData("$skip=1")]

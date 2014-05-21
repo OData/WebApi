@@ -379,7 +379,7 @@ namespace System.Web.OData
 
             HttpResponseMessage response = actionExecutedContext.Response;
 
-            if (response != null && response.IsSuccessStatusCode)
+            if (response != null && response.IsSuccessStatusCode && response.Content != null)
             {
                 ObjectContent responseContent = response.Content as ObjectContent;
                 if (responseContent == null)

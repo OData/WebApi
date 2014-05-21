@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -72,21 +73,24 @@ namespace System.Web.OData.Query.Expressions
             else
             {
                 LinqParameterContainer container = node.Value as LinqParameterContainer;
+                string stringValue;
                 if (container != null)
                 {
-                    string stringValue = container.Property as string;
+                    stringValue = container.Property as string;
                     if (stringValue != null)
                     {
                         Out("\"" + stringValue + "\"");
                     }
                     else
                     {
-                        Out(container.Property.ToString());
+                        stringValue = String.Format(CultureInfo.InvariantCulture, "{0}", container.Property);
+                        Out(stringValue);
                     }
                 }
                 else
                 {
-                    Out(node.Value.ToString());
+                    stringValue = String.Format(CultureInfo.InvariantCulture, "{0}", node.Value);
+                    Out(stringValue);
                 }
             }
 

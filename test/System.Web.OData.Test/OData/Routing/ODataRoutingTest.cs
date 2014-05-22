@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Globalization;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.TestCommon;
 using Microsoft.TestCommon;
@@ -321,6 +323,21 @@ namespace System.Web.OData.Routing
             response.EnsureSuccessStatusCode();
         }
 
+        [Theory]
+        [InlineData("EnumCustomers?$filter=System.Web.OData.Builder.TestModels.Color'Unknown' eq null", "The string 'System.Web.OData.Builder.TestModels.Color'Unknown'' is not a valid enumeration type constant.")]
+        [InlineData("EnumCustomers?$filter=geo.length(null) eq null", "Unknown function 'geo.length'.")]
+        [InlineData("EnumCustomers?$filter=Default.OverloadUnboundFunction() eq null", "Unknown function 'Default.OverloadUnboundFunction'.")]
+        public async Task BadQueryString_ReturnsBadRequest(string uri, string expectedError)
+        {
+            // Arrange & Act
+            HttpResponseMessage response = await _nullPrefixClient.GetAsync("http://localhost/" + uri);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            string responseString = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains(expectedError, responseString);
+        }
+
         private static HttpServer CreateServer(HttpConfiguration configuration)
         {
             // Need the MetadataController to resolve the service document as well as $metadata.
@@ -329,7 +346,8 @@ namespace System.Web.OData.Routing
                 typeof(DateTimeOffsetKeyCustomersController),
                 typeof(MetadataController),
                 typeof(RoutingCustomersController),
-                typeof(ProductsController)
+                typeof(ProductsController),
+                typeof(EnumCustomersController)
             };
 
             TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
@@ -590,6 +608,27 @@ namespace System.Web.OData.Routing
         public string TopProductOfAllByCityAndModel(string city, int model)
         {
             return String.Format(CultureInfo.InvariantCulture, "TopProductOfAllByCityAndModel({0}, {1})", city, model);
+        }
+    }
+
+    public class EnumCustomersController : ODataController
+    {
+        [EnableQuery]
+        public IHttpActionResult Get()
+        {
+            return Ok(new[]
+            {
+                new ODataRoutingModel.EnumCustomer
+                {
+                    ID = 1,
+                    Color = Color.Green
+                },
+                new ODataRoutingModel.EnumCustomer
+                {
+                    ID = 2,
+                    Color = Color.Red | Color.Blue
+                }
+            });
         }
     }
 }

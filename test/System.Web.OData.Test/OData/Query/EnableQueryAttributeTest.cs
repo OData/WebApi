@@ -326,7 +326,7 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
-        public void NonGenericEnumerableReturnTypeThrows()
+        public void NonGenericEnumerableReturnType_ReturnsBadRequest()
         {
             // Arrange
             EnableQueryAttribute attribute = new EnableQueryAttribute();
@@ -342,10 +342,15 @@ namespace System.Web.OData.Query
             context.Response = new HttpResponseMessage(HttpStatusCode.OK);
             context.Response.Content = new ObjectContent(typeof(IEnumerable), new NonGenericEnumerable(), new JsonMediaTypeFormatter());
 
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => attribute.OnActionExecuted(context),
-                "Cannot create an EDM model as the action 'EnableQueryAttribute' on controller 'GetNonGenericEnumerable' has a return type 'CustomerHighLevel' that does not implement IEnumerable<T>.");
+            // Act
+            attribute.OnActionExecuted(context);
+            string responseString = context.Response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, context.Response.StatusCode);
+            Assert.Contains("The query specified in the URI is not valid. Cannot create an EDM model as the action 'EnableQueryAttribute' " +
+                "on controller 'GetNonGenericEnumerable' has a return type 'CustomerHighLevel' that does not implement IEnumerable<T>.",
+                responseString);
         }
 
         [Fact]
@@ -820,7 +825,7 @@ namespace System.Web.OData.Query
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", result);
             actionExecutedContext.Request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment("C"));
             EnableQueryAttribute attribute = new EnableQueryAttribute();
-            
+
             // Act
             attribute.OnActionExecuted(actionExecutedContext);
 
@@ -831,7 +836,7 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
-        public void OnActionExecuted_SingleResult_WithMoreThanASingleQueryResult_ThrowsInvalidOperationException()
+        public void OnActionExecuted_SingleResult_WithMoreThanASingleQueryResult_ReturnsBadRequest()
         {
             // Arrange
             var customers = CustomerList.AsQueryable();
@@ -839,8 +844,15 @@ namespace System.Web.OData.Query
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", result);
             EnableQueryAttribute attribute = new EnableQueryAttribute();
 
-            // Act and Assert
-            Assert.Throws<InvalidOperationException>(() => attribute.OnActionExecuted(actionExecutedContext));
+            // Act
+            attribute.OnActionExecuted(actionExecutedContext);
+            string responseString = actionExecutedContext.Response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, actionExecutedContext.Response.StatusCode);
+            Assert.Contains("The query specified in the URI is not valid. The action 'Bar' on controller 'FooController' " +
+                "returned a SingleResult containing more than one element. SingleResult must have zero or one elements.",
+                responseString);
         }
 
         [Theory]

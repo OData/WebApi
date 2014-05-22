@@ -411,13 +411,27 @@ namespace System.Web.OData
                             responseContent.Value = queryResult;
                         }
                     }
-                    catch (ODataException e)
+                    catch (NotImplementedException e)
                     {
                         actionExecutedContext.Response = request.CreateErrorResponse(
                             HttpStatusCode.BadRequest,
                             Error.Format(SRResources.UriQueryStringInvalid, e.Message),
                             e);
-                        return;
+                    }
+                    catch (NotSupportedException e)
+                    {
+                        actionExecutedContext.Response = request.CreateErrorResponse(
+                            HttpStatusCode.BadRequest,
+                            Error.Format(SRResources.UriQueryStringInvalid, e.Message),
+                            e);
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        // Will also catch ODataException here because ODataException derives from InvalidOperationException.
+                        actionExecutedContext.Response = request.CreateErrorResponse(
+                            HttpStatusCode.BadRequest,
+                            Error.Format(SRResources.UriQueryStringInvalid, e.Message),
+                            e);
                     }
                 }
             }

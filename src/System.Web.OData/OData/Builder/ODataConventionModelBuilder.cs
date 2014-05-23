@@ -352,7 +352,8 @@ namespace System.Web.OData.Builder
             {
                 foreach (EntityTypeConfiguration entity in typesToLift)
                 {
-                    PropertyConfiguration derivedPropertyToRemove = entity.Properties.Where(p => p.Name == property.Name).SingleOrDefault();
+                    PropertyConfiguration derivedPropertyToRemove = entity.Properties.SingleOrDefault(
+                        p => p.PropertyInfo.Name == property.PropertyInfo.Name);
                     if (derivedPropertyToRemove != null)
                     {
                         entity.RemoveProperty(derivedPropertyToRemove.PropertyInfo);
@@ -364,7 +365,8 @@ namespace System.Web.OData.Builder
             {
                 foreach (EntityTypeConfiguration entity in typesToLift)
                 {
-                    PropertyConfiguration derivedPropertyToRemove = entity.Properties.Where(p => p.Name == ignoredProperty.Name).SingleOrDefault();
+                    PropertyConfiguration derivedPropertyToRemove = entity.Properties.SingleOrDefault(
+                        p => p.PropertyInfo.Name == ignoredProperty.Name);
                     if (derivedPropertyToRemove != null)
                     {
                         entity.RemoveProperty(derivedPropertyToRemove.PropertyInfo);

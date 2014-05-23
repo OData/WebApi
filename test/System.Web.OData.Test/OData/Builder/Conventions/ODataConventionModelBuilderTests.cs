@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder.TestModels;
@@ -1587,6 +1588,25 @@ namespace System.Web.OData.Builder.Conventions
             Assert.Equal("Path", keyProperty.Name);
             Assert.True(keyProperty.Type.IsString());
         }
+
+        [Fact]
+        public void ODataConventionModelBuilder_MappedDerivedTypeHasNoAliasedBaseProperties()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            EntitySetConfiguration<BaseEmployee> employees = builder.EntitySet<BaseEmployee>("Employees");
+            EntityTypeConfiguration<BaseEmployee> employee = employees.EntityType;
+            employee.EnumProperty<Gender>(e => e.Sex).Name = "gender";
+            employee.Ignore(e=>e.FullName);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType derivedEntityType = model.AssertHasEntityType(typeof(DerivedManager));
+            IEdmProperty property = Assert.Single(derivedEntityType.DeclaredProperties);
+            Assert.Equal("Heads", property.Name);
+        }
     }
 
     public class Product
@@ -1726,5 +1746,29 @@ namespace System.Web.OData.Builder.Conventions
         [Key]
         public string Path { get; set; }
         public int Id { get; set; }
+    }
+
+    [DataContract]
+    public class BaseEmployee
+    {
+        [DataMember]
+        public int ID { get; set; }
+
+        [DataMember(Name = "name")]
+        public string FullName { get; set; }
+
+        [DataMember]
+        public Gender Sex { get; set; }
+    }
+
+    public class DerivedManager : BaseEmployee
+    {
+        public int Heads { get; set; }
+    }
+
+    public enum Gender
+    {
+        Male = 1,
+        Female = 2
     }
 }

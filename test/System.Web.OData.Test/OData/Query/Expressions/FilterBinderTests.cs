@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Data.Linq;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -118,8 +119,8 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "UnitPrice gt 5.00m",
-                Error.Format("$it => ($it.UnitPrice > Convert({0:0.00}))", 5.0),
-                Error.Format("$it => (($it.UnitPrice > Convert({0:0.00})) == True)", 5.0));
+                String.Format(CultureInfo.InvariantCulture, "$it => ($it.UnitPrice > Convert({0:0.00}))", 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice > Convert({0:0.00})) == True)", 5.0));
 
             RunFilters(filters,
                 new Product { UnitPrice = ToNullable<decimal>(unitPrice) },
@@ -134,8 +135,8 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "UnitPrice ge 5.00m",
-                Error.Format("$it => ($it.UnitPrice >= Convert({0:0.00}))", 5.0),
-                Error.Format("$it => (($it.UnitPrice >= Convert({0:0.00})) == True)", 5.0));
+                String.Format(CultureInfo.InvariantCulture, "$it => ($it.UnitPrice >= Convert({0:0.00}))", 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice >= Convert({0:0.00})) == True)", 5.0));
 
             RunFilters(filters,
                 new Product { UnitPrice = ToNullable<decimal>(unitPrice) },
@@ -150,7 +151,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "UnitPrice lt 5.00m",
-                Error.Format("$it => ($it.UnitPrice < Convert({0:0.00}))", 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => ($it.UnitPrice < Convert({0:0.00}))", 5.0),
                 NotTesting);
 
             RunFilters(filters,
@@ -166,7 +167,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "UnitPrice le 5.00m",
-                Error.Format("$it => ($it.UnitPrice <= Convert({0:0.00}))", 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => ($it.UnitPrice <= Convert({0:0.00}))", 5.0),
                 NotTesting);
 
             RunFilters(filters,
@@ -179,7 +180,7 @@ namespace System.Web.OData.Query.Expressions
         {
             VerifyQueryDeserialization(
                 "UnitPrice le -5.00m",
-                Error.Format("$it => ($it.UnitPrice <= Convert({0:0.00}))", -5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => ($it.UnitPrice <= Convert({0:0.00}))", -5.0),
                 NotTesting);
         }
 
@@ -222,7 +223,7 @@ namespace System.Web.OData.Query.Expressions
         {
             VerifyQueryDeserialization(
                 "UnitPrice eq 5.00m or CategoryID eq 0",
-                Error.Format("$it => (($it.UnitPrice == Convert(5.00)) OrElse ($it.CategoryID == 0))", 5.0, 0),
+                "$it => (($it.UnitPrice == Convert(5.00)) OrElse ($it.CategoryID == 0))",
                 NotTesting);
         }
 
@@ -252,7 +253,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "UnitPrice eq 5.00m or UnitsInStock eq 0",
-                Error.Format("$it => (($it.UnitPrice == Convert({0:0.00})) OrElse (Convert($it.UnitsInStock) == Convert({1})))", 5.0, 0),
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice == Convert({0:0.00})) OrElse (Convert($it.UnitsInStock) == Convert({1})))", 5.0, 0),
                 NotTesting);
 
             RunFilters(filters,
@@ -268,7 +269,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "UnitPrice eq 5.00m and UnitsInStock eq 10.00m",
-                Error.Format("$it => (($it.UnitPrice == Convert({0:0.00})) AndAlso (Convert($it.UnitsInStock) == Convert({1:0.00})))", 5.0, 10.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice == Convert({0:0.00})) AndAlso (Convert($it.UnitsInStock) == Convert({1:0.00})))", 5.0, 10.0),
                 NotTesting);
 
             RunFilters(filters,
@@ -284,7 +285,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "not (UnitPrice eq 5.00m)",
-                Error.Format("$it => Not(($it.UnitPrice == Convert({0:0.00})))", 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => Not(($it.UnitPrice == Convert({0:0.00})))", 5.0),
                 NotTesting);
 
             RunFilters(filters,
@@ -327,8 +328,8 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "UnitPrice sub 1.00m lt 5.00m",
-                Error.Format("$it => (($it.UnitPrice - Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
-                Error.Format("$it => ((($it.UnitPrice - Convert({0:0.00})) < Convert({1:0.00})) == True)", 1.0, 5.0));
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice - Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => ((($it.UnitPrice - Convert({0:0.00})) < Convert({1:0.00})) == True)", 1.0, 5.0));
 
             RunFilters(filters,
                new Product { UnitPrice = ToNullable<decimal>(unitPrice) },
@@ -340,7 +341,7 @@ namespace System.Web.OData.Query.Expressions
         {
             VerifyQueryDeserialization(
                 "UnitPrice add 1.00m lt 5.00m",
-                Error.Format("$it => (($it.UnitPrice + Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice + Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 NotTesting);
         }
 
@@ -349,7 +350,7 @@ namespace System.Web.OData.Query.Expressions
         {
             VerifyQueryDeserialization(
                 "UnitPrice mul 1.00m lt 5.00m",
-                Error.Format("$it => (($it.UnitPrice * Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice * Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 NotTesting);
         }
 
@@ -358,7 +359,7 @@ namespace System.Web.OData.Query.Expressions
         {
             VerifyQueryDeserialization(
                 "UnitPrice div 1.00m lt 5.00m",
-                Error.Format("$it => (($it.UnitPrice / Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice / Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 NotTesting);
         }
 
@@ -367,7 +368,7 @@ namespace System.Web.OData.Query.Expressions
         {
             VerifyQueryDeserialization(
                 "UnitPrice mod 1.00m lt 5.00m",
-                Error.Format("$it => (($it.UnitPrice % Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice % Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 NotTesting);
         }
         #endregion
@@ -452,7 +453,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "((ProductName ne 'Doritos') or (UnitPrice lt 5.00m))",
-                Error.Format("$it => (($it.ProductName != \"Doritos\") OrElse ($it.UnitPrice < Convert({0:0.00})))", 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.ProductName != \"Doritos\") OrElse ($it.UnitPrice < Convert({0:0.00})))", 5.0),
                 NotTesting);
 
             RunFilters(filters,
@@ -1118,7 +1119,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "round(UnitPrice) gt 5.00m",
-                Error.Format("$it => ($it.UnitPrice.Value.Round() > {0:0.00})", 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => ($it.UnitPrice.Value.Round() > {0:0.00})", 5.0),
                 NotTesting);
 
             RunFilters(filters,
@@ -1134,7 +1135,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "round(Weight) gt 5d",
-                Error.Format("$it => ($it.Weight.Value.Round() > {0})", 5),
+                String.Format(CultureInfo.InvariantCulture, "$it => ($it.Weight.Value.Round() > {0})", 5),
                 NotTesting);
 
             RunFilters(filters,
@@ -1150,7 +1151,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "round(Width) gt 5f",
-                Error.Format("$it => (Convert($it.Width).Value.Round() > {0})", 5),
+                String.Format(CultureInfo.InvariantCulture, "$it => (Convert($it.Width).Value.Round() > {0})", 5),
                 NotTesting);
 
             RunFilters(filters,
@@ -1288,7 +1289,7 @@ namespace System.Web.OData.Query.Expressions
             var dateTime = new DateTimeOffset(new DateTime(2000, 12, 12, 12, 0, 0), TimeSpan.Zero);
             VerifyQueryDeserialization<DataTypes>(
                 "" + clause,
-                Error.Format(expectedExpression, dateTime));
+                String.Format(CultureInfo.InvariantCulture, expectedExpression, dateTime));
         }
 
         [Theory]
@@ -1312,7 +1313,7 @@ namespace System.Web.OData.Query.Expressions
             // The following call shows the behavior without the bug, and should be enabled once the bug is fixed.
             //VerifyQueryDeserialization<DataTypes>(
             //    "" + clause,
-            //    Error.Format(expectedExpression, dateTimeOffset));
+            //    String.Format(CultureInfo.InvariantCulture, expectedExpression, dateTimeOffset));
         }
 
         [Fact]
@@ -1334,12 +1335,12 @@ namespace System.Web.OData.Query.Expressions
             // Float F
             VerifyQueryDeserialization<DataTypes>(
                 "FloatProp lt 4321.56F and FloatProp gt 1234.56f",
-                Error.Format("$it => (($it.FloatProp < {0:0.00}) AndAlso ($it.FloatProp > {1:0.00}))", 4321.56, 1234.56));
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.FloatProp < {0:0.00}) AndAlso ($it.FloatProp > {1:0.00}))", 4321.56, 1234.56));
 
             // Decimal M
             VerifyQueryDeserialization<DataTypes>(
                 "DecimalProp lt 4321.56M and DecimalProp gt 1234.56m",
-                Error.Format("$it => (($it.DecimalProp < {0:0.00}) AndAlso ($it.DecimalProp > {1:0.00}))", 4321.56, 1234.56));
+                String.Format(CultureInfo.InvariantCulture, "$it => (($it.DecimalProp < {0:0.00}) AndAlso ($it.DecimalProp > {1:0.00}))", 4321.56, 1234.56));
         }
 
         [Theory]
@@ -1873,7 +1874,7 @@ namespace System.Web.OData.Query.Expressions
         {
             Assert.Throws<ODataException>(
                 () => Bind<DataTypes>(filter),
-                Error.Format("A binary operator with incompatible types was detected. Found operand types 'Edm.Binary' and 'Edm.Binary' for operator kind '{0}'.", op));
+                String.Format(CultureInfo.InvariantCulture, "A binary operator with incompatible types was detected. Found operand types 'Edm.Binary' and 'Edm.Binary' for operator kind '{0}'.", op));
         }
 
         [Theory]

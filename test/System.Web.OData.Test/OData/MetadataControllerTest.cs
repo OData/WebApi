@@ -284,6 +284,7 @@ namespace System.Web.OData.Builder
             var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
             config.MapODataServiceRoute(new ODataConventionModelBuilder().GetEdmModel());
+            config.EnsureInitialized();
             var explorer = config.Services.GetApiExplorer();
 
             var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);

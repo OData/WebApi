@@ -7,6 +7,7 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Routing;
 using System.Web.OData.Batch;
+using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
@@ -147,6 +148,54 @@ namespace System.Web.OData
             Assert.NotNull(route);
             Assert.Same(model, route.PathRouteConstraint.EdmModel);
             Assert.Equal("odata", route.PathRouteConstraint.RouteName);
+        }
+
+        [Fact]
+        public void MapODataServiceRoute_ConfigEnsureInitialized_DoesNotThrowForValidPathTemplateWithAttributeRouting()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            HttpConfiguration configuration = new[] { typeof(CustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute(model);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => configuration.EnsureInitialized());
+        }
+
+        [Fact]
+        public void MapODataServiceRoute_ConfigEnsureInitialized_DoesNotThrowForInvalidPathTemplateWithoutAttributeRouting()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers").EntityType.Ignore(c => c.Name);
+            IEdmModel model = builder.GetEdmModel();
+            HttpConfiguration configuration = new[] { typeof(CustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute(
+                "RouteName",
+                "RoutePrefix",
+                model,
+                new DefaultODataPathHandler(),
+                ODataRoutingConventions.CreateDefault());
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => configuration.EnsureInitialized());
+        }
+
+        public class Customer
+        {
+            public int ID { get; set; }
+            public string Name { get; set; }
+        }
+
+        public class CustomersController : ODataController
+        {
+            [ODataRoute("Customers({ID})/Name")]
+            public IHttpActionResult Get(int ID)
+            {
+                return Ok();
+            }
         }
     }
 }

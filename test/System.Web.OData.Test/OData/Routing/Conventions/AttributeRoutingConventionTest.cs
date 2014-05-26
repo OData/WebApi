@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -188,18 +189,16 @@ namespace System.Web.OData.Routing.Conventions
         }
 
         [Fact]
-        public void AttributeMappingsInitialization_ThrowsInvalidOperation_IfFailsToParsePathTemplate()
+        public void Constructor_ThrowsInvalidOperation_IfFailsToParsePathTemplate()
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             HttpControllerDescriptor controller = new HttpControllerDescriptor(new HttpConfiguration(), "TestController",
                 typeof(InvalidPathTemplateController));
 
-            AttributeRoutingConvention convention = new AttributeRoutingConvention(model.Model, new[] { controller });
-
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => convention.SelectController(new ODataPath(), new HttpRequestMessage()),
+                () => new AttributeRoutingConvention(model.Model, new[] { controller }),
                 "The path template 'Customers/Order' on the action 'GetCustomers' in controller 'TestController' is not " +
                 "a valid OData path template. The request URI is not valid. Since the segment 'Customers' refers to a " +
                 "collection, this must be the last segment in the request URI or it must be followed by an function or " +
@@ -219,6 +218,33 @@ namespace System.Web.OData.Routing.Conventions
                 () => convention.AttributeMappings,
                 "The object has not yet been initialized. Ensure that HttpConfiguration.EnsureInitialized() is called " +
                 "in the application's startup code after all other initialization code.");
+        }
+
+        [Fact]
+        public void AttributeRoutingConvention_ConfigEnsureInitialized_ThrowsForInvalidPathTemplate()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+            HttpConfiguration configuration = new[] { typeof(TestODataController) }.GetHttpConfiguration();
+            AttributeRoutingConvention convention = new AttributeRoutingConvention(model, configuration);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => configuration.EnsureInitialized(),
+                "The path template 'Customers' on the action 'GetCustomers' in controller 'TestOData' is not a valid OData path template. " +
+                "The operation import overloads matching 'Customers' are invalid. This is most likely an error in the IEdmModel.");
+        }
+
+        [Fact]
+        public void AttributeRoutingConvention_ConfigEnsureInitialized_DoesNotThrowForValidPathTemplate()
+        {
+            // Arrange
+            IEdmModel model = new CustomersModelWithInheritance().Model;
+            HttpConfiguration configuration = new[] { typeof(TestODataController) }.GetHttpConfiguration();
+            AttributeRoutingConvention convention = new AttributeRoutingConvention(model, configuration);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => configuration.EnsureInitialized());
         }
 
         public class TestODataController : ODataController

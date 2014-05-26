@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
@@ -22,7 +23,6 @@ namespace System.Web.OData.Routing.Conventions
         private static readonly DefaultODataPathHandler _defaultPathHandler = new DefaultODataPathHandler();
 
         private IDictionary<ODataPathTemplate, HttpActionDescriptor> _attributeMappings;
-        private Func<IDictionary<ODataPathTemplate, HttpActionDescriptor>> _attributeMappingsFunc;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AttributeRoutingConvention"/> class.
@@ -52,12 +52,16 @@ namespace System.Web.OData.Routing.Conventions
             }
 
             Action<HttpConfiguration> oldInitializer = configuration.Initializer;
+            bool initialized = false;    
             configuration.Initializer = (config) =>
             {
-                oldInitializer(config);
-                IHttpControllerSelector controllerSelector = config.Services.GetHttpControllerSelector();
-                _attributeMappingsFunc =
-                    () => BuildAttributeMappings(controllerSelector.GetControllerMapping().Values);
+                if (!initialized)
+                {
+                    initialized = true;
+                    oldInitializer(config);
+                    IHttpControllerSelector controllerSelector = config.Services.GetHttpControllerSelector();
+                    _attributeMappings = BuildAttributeMappings(controllerSelector.GetControllerMapping().Values);
+                }
             };
         }
 
@@ -77,6 +81,8 @@ namespace System.Web.OData.Routing.Conventions
         /// <param name="model">The <see cref="IEdmModel"/> to be used for parsing the route templates.</param>
         /// <param name="controllers">The collection of controllers to search for a match.</param>
         /// <param name="pathTemplateHandler">The path template handler to be used for parsing the path templates.</param>
+        [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors",
+            Justification = "See note on <see cref=\"ShouldMapController()\"> method.")]
         public AttributeRoutingConvention(IEdmModel model, IEnumerable<HttpControllerDescriptor> controllers,
             IODataPathTemplateHandler pathTemplateHandler)
             : this(model, pathTemplateHandler)
@@ -86,8 +92,7 @@ namespace System.Web.OData.Routing.Conventions
                 throw Error.ArgumentNull("controllers");
             }
 
-            _attributeMappingsFunc =
-                 () => BuildAttributeMappings(controllers);
+            _attributeMappings = BuildAttributeMappings(controllers);
         }
 
         private AttributeRoutingConvention(IEdmModel model, IODataPathTemplateHandler pathTemplateHandler)
@@ -119,18 +124,22 @@ namespace System.Web.OData.Routing.Conventions
         {
             get
             {
-                if (_attributeMappingsFunc == null)
+                if (_attributeMappings == null)
                 {
+                    // Will throw an InvalidOperationException if this class is constructed with an HttpConfiguration
+                    // but EnsureInitialized() hasn't been called yet. 
                     throw Error.InvalidOperation(SRResources.Object_NotYetInitialized);
                 }
 
-                _attributeMappings = _attributeMappings ?? _attributeMappingsFunc();
                 return _attributeMappings;
             }
         }
 
         /// <summary>
         /// Specifies whether OData route attributes on this controller should be mapped.
+        /// This method will execute before the derived type's instance constructor executes. Derived types must
+        /// be aware of this and should plan accordingly. For example, the logic in ShouldMapController() should be simple
+        /// enough so as not to depend on the "this" pointer referencing a fully constructed object.
         /// </summary>
         /// <param name="controller">The controller.</param>
         /// <returns><see langword="true"/> if this controller should be included in the map; <see langword="false"/> otherwise.</returns>

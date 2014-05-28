@@ -182,6 +182,52 @@ namespace System.Web.OData.Routing.Conventions
             Assert.Null(selectedAction);
         }
 
+        [Theory]
+        [InlineData("Put")]
+        [InlineData("Patch")]
+        public void SelectAction_ReturnsNull_IfToCollectionValuedNavigationProperty(string method)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            var ordersProperty = model.Customer.FindProperty("Orders") as IEdmNavigationProperty;
+
+            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment("1"),
+                new NavigationPathSegment(ordersProperty));
+
+            HttpControllerContext controllerContext = CreateControllerContext(method);
+            var actionMap = GetMockActionMap();
+
+            // Act
+            string selectedAction = new NavigationRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Null(selectedAction);
+        }
+
+        [Theory]
+        [InlineData("Patch", new[] { "PatchToCustomer" }, "PatchToCustomer")]
+        [InlineData("Put", new[] { "PutToCustomer" }, "PutToCustomer")]
+        public void SelectAction_Returns_ExpectedMethod_OnNonCollectionValuedNavigationProperty(string method, string[] methodsInController,
+            string expectedSelectedAction)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            var customerProperty = model.Order.FindProperty("Customer") as IEdmNavigationProperty;
+
+            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Orders), new KeyValuePathSegment("1"),
+                new NavigationPathSegment(customerProperty));
+
+            HttpControllerContext controllerContext = CreateControllerContext(method);
+            var actionMap = GetMockActionMap(methodsInController);
+
+            // Act
+            string selectedAction = new NavigationRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Equal(expectedSelectedAction, selectedAction);
+            Assert.Equal("1", controllerContext.RouteData.Values["key"]);
+        }
+
         private static ILookup<string, HttpActionDescriptor> GetMockActionMap(params string[] actionNames)
         {
             return actionNames.Select(name => GetMockActionDescriptor(name)).ToLookup(a => a.ActionName);

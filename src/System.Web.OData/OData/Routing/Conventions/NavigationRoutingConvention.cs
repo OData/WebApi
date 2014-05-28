@@ -32,12 +32,16 @@ namespace System.Web.OData.Routing.Conventions
             }
 
             HttpMethod method = controllerContext.Request.Method;
+            string actionNamePrefix = GetActionMethodPrefix(method);
+            if (actionNamePrefix == null)
+            {
+                return null;
+            }
 
-            if ((method == HttpMethod.Get || method == HttpMethod.Post) && (
-                odataPath.PathTemplate == "~/entityset/key/navigation" ||
+            if (odataPath.PathTemplate == "~/entityset/key/navigation" ||
                 odataPath.PathTemplate == "~/entityset/key/cast/navigation" ||
                 odataPath.PathTemplate == "~/singleton/navigation" ||
-                odataPath.PathTemplate == "~/singleton/cast/navigation"))
+                odataPath.PathTemplate == "~/singleton/cast/navigation")
             {
                 NavigationPathSegment navigationSegment = odataPath.Segments.Last() as NavigationPathSegment;
                 IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
@@ -50,10 +54,15 @@ namespace System.Web.OData.Routing.Conventions
                     return null;
                 }
 
+                // It is not valid to *Put/Patch" to any collection-valued navigation property.
+                if (navigationProperty.TargetMultiplicity() == EdmMultiplicity.Many &&
+                    (method == HttpMethod.Put || "PATCH" == method.Method.ToUpperInvariant()))
+                {
+                    return null;
+                }
+
                 if (declaringType != null)
                 {
-                    string actionNamePrefix = (method == HttpMethod.Get) ? "Get" : "PostTo";
-
                     // e.g. Try GetNavigationPropertyFromDeclaringType first, then fallback on GetNavigationProperty action name
                     string actionName = actionMap.FindMatchingAction(
                         actionNamePrefix + navigationProperty.Name + "From" + declaringType.Name,
@@ -73,6 +82,23 @@ namespace System.Web.OData.Routing.Conventions
             }
 
             return null;
+        }
+
+        private static string GetActionMethodPrefix(HttpMethod method)
+        {
+            switch (method.Method.ToUpperInvariant())
+            {
+                case "GET":
+                    return "Get";
+                case "POST":
+                    return "PostTo";
+                case "PUT":
+                    return "PutTo";
+                case "PATCH":
+                    return "PatchTo";
+                default:
+                    return null;
+            }
         }
     }
 }

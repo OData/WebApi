@@ -123,19 +123,22 @@ namespace Microsoft.AspNet.Facebook.Test
         }
 
         [Fact]
-        public void OnAuthorization_PreHookMustReturnActionResult()
+        public void OnAuthorization_PreHookNullTreatedLikeIgnoreResult()
         {
             // Arrange
             var config = BuildConfiguration("~/home/permissions");
             var authorizeFilter = new CustomInvalidAuthorizeFilter(config);
             var context = BuildSignedAuthorizationContext("http://www.example.com", "email");
 
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => authorizeFilter.OnAuthorization(context));
+            // Act
+            authorizeFilter.OnAuthorization(context);
+
+            // Assert
+            Assert.Null(context.Result);
         }
 
         [Fact]
-        public void OnAuthorization_DeniedHookMustReturnActionResult()
+        public void OnAuthorization_DeniedHookNullTreatedLikeIgnoreResult()
         {
             // Arrange
             var config = BuildConfiguration("~/home/permissions");
@@ -146,8 +149,11 @@ namespace Microsoft.AspNet.Facebook.Test
                     PermissionHelper.RequestedPermissionCookieName, "email"));
             var context = BuildSignedAuthorizationContext("http://www.example.com", "email", persistedCookies);
 
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => authorizeFilter.OnAuthorization(context));
+            // Act
+            authorizeFilter.OnAuthorization(context);
+
+            // Assert
+            Assert.Null(context.Result);
         }
 
         [Fact]
@@ -229,14 +235,14 @@ namespace Microsoft.AspNet.Facebook.Test
                 : base(config)
             { }
 
-            protected override ActionResult OnPermissionPrompt(PermissionsContext context)
+            protected override void OnPermissionPrompt(PermissionContext context)
             {
-                return null;
+                context.Result = null;
             }
 
-            protected override ActionResult OnDeniedPermissionPrompt(PermissionsContext context)
+            protected override void OnDeniedPermissionPrompt(PermissionContext context)
             {
-                return null;
+                context.Result = null;
             }
         }
 
@@ -249,18 +255,18 @@ namespace Microsoft.AspNet.Facebook.Test
             public bool PermissionPromptHookTriggered { get; private set; }
             public bool DeniedPermissionPromptHookTriggered { get; private set; }
 
-            protected override ActionResult OnPermissionPrompt(PermissionsContext context)
+            protected override void OnPermissionPrompt(PermissionContext context)
             {
                 PermissionPromptHookTriggered = true;
 
-                return base.OnPermissionPrompt(context);
+                base.OnPermissionPrompt(context);
             }
 
-            protected override ActionResult OnDeniedPermissionPrompt(PermissionsContext context)
+            protected override void OnDeniedPermissionPrompt(PermissionContext context)
             {
                 DeniedPermissionPromptHookTriggered = true;
 
-                return base.OnDeniedPermissionPrompt(context);
+                base.OnDeniedPermissionPrompt(context);
             }
         }
 
@@ -278,14 +284,14 @@ namespace Microsoft.AspNet.Facebook.Test
                 _deniedPermissionPromptHookResult = deniedPermissionPromptHookResult;
             }
 
-            protected override ActionResult OnPermissionPrompt(PermissionsContext context)
+            protected override void OnPermissionPrompt(PermissionContext context)
             {
-                return _promptPermissionHookResult;
+                context.Result = _promptPermissionHookResult;
             }
 
-            protected override ActionResult OnDeniedPermissionPrompt(PermissionsContext context)
+            protected override void OnDeniedPermissionPrompt(PermissionContext context)
             {
-                return _deniedPermissionPromptHookResult;
+                context.Result = _deniedPermissionPromptHookResult;
             }
         }
     }

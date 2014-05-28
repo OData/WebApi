@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\FacebookRequestHelper.cs" />
+    <Compile Include="JavaScriptRedirectResult.cs" />
     <Compile Include="PermissionContext.cs" />
     <Compile Include="PermissionHelper.cs" />
     <Compile Include="FacebookAppSettingKeys.cs" />
@@ -80,6 +81,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ShowPromptResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml" />

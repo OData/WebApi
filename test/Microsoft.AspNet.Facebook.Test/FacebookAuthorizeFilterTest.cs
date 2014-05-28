@@ -41,7 +41,7 @@ namespace Microsoft.AspNet.Facebook.Test
             FacebookConfiguration config = MockHelpers.CreateConfiguration();
             FacebookAuthorizeFilter authorizeFilter = new FacebookAuthorizeFilter(config);
 
-            ContentResult result = Assert.IsType<ContentResult>(authorizeFilter.CreateRedirectResult(uri));
+            ContentResult result = Assert.IsType<JavaScriptRedirectResult>(authorizeFilter.CreateRedirectResult(uri));
             Assert.Equal("text/html", result.ContentType);
             Assert.Equal(@"<script>window.top.location = 'http://example.com/?query=4\u0027;%20alert(\u0027hello%20world\u0027)';</script>", result.Content);
         }
@@ -57,7 +57,7 @@ namespace Microsoft.AspNet.Facebook.Test
 
             authorizeFilter.OnAuthorization(context);
 
-            ContentResult result = Assert.IsType<ContentResult>(context.Result);
+            ContentResult result = Assert.IsType<JavaScriptRedirectResult>(context.Result);
             Assert.Equal("text/html", result.ContentType);
             Assert.Equal(
                 "<script>window.top.location = 'https://www.facebook.com/dialog/oauth?redirect_uri=https%3A%2F%2Fapps.facebook.com%2FDefaultAppId%2F\\u0026client_id=DefaultAppId';</script>",
@@ -80,7 +80,7 @@ namespace Microsoft.AspNet.Facebook.Test
 
             authorizeFilter.OnAuthorization(context);
 
-            ContentResult result = Assert.IsType<ContentResult>(context.Result);
+            ContentResult result = Assert.IsType<ShowPromptResult>(context.Result);
             Assert.Equal("text/html", result.ContentType);
             Assert.Equal(
                 "<script>window.top.location = 'https://www.facebook.com/dialog/oauth?redirect_uri=example.com';</script>",
@@ -108,7 +108,8 @@ namespace Microsoft.AspNet.Facebook.Test
 
             authorizeFilter.OnAuthorization(context);
 
-            ContentResult result = Assert.IsType<ContentResult>(context.Result);
+            ContentResult result = Assert.IsAssignableFrom<JavaScriptRedirectResult>(context.Result);
+
             Assert.Equal("text/html", result.ContentType);
             Assert.Equal(
                 String.Format("<script>window.top.location = '{0}';</script>", expectedRedirectUrl),

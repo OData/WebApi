@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -112,7 +111,7 @@ namespace Microsoft.AspNet.Facebook.Authorization
                 Configuration = _config
             };
 
-            PermissionsContext permissionsContext = new PermissionsContext
+            PermissionContext permissionContext = new PermissionContext
             {
                 FacebookContext = facebookContext,
                 FilterContext = filterContext,
@@ -122,7 +121,7 @@ namespace Microsoft.AspNet.Facebook.Authorization
             // Check if we need to prompt for default permissions.
             if (signedRequest == null || String.IsNullOrEmpty(userId) || String.IsNullOrEmpty(accessToken))
             {
-                PromptDefaultPermissions(permissionsContext, redirectUrl);
+                PromptDefaultPermissions(permissionContext, redirectUrl);
             }
             else if (requiredPermissions.Any())
             {
@@ -135,14 +134,14 @@ namespace Microsoft.AspNet.Facebook.Authorization
                 // page if there's an error.
                 if (missingPermissions.Any())
                 {
-                    permissionsContext.MissingPermissions = missingPermissions;
-                    permissionsContext.DeclinedPermissions = PermissionHelper.GetDeclinedPermissions(currentPermissionsStatus);
-                    permissionsContext.SkippedPermissions = PermissionHelper.GetSkippedPermissions(
+                    permissionContext.MissingPermissions = missingPermissions;
+                    permissionContext.DeclinedPermissions = PermissionHelper.GetDeclinedPermissions(currentPermissionsStatus);
+                    permissionContext.SkippedPermissions = PermissionHelper.GetSkippedPermissions(
                         filterContext.HttpContext.Request,
                         missingPermissions,
-                        permissionsContext.DeclinedPermissions);
+                        permissionContext.DeclinedPermissions);
 
-                    PromptMissingPermissions(permissionsContext, redirectUrl);
+                    PromptMissingPermissions(permissionContext, redirectUrl);
                 }
             }
         }
@@ -152,32 +151,14 @@ namespace Microsoft.AspNet.Facebook.Authorization
         /// </summary>
         /// <param name="redirectUrl">The redirect URL.</param>
         /// <returns>The <see cref="ActionResult"/>.</returns>
-        public virtual ActionResult CreateRedirectResult(Uri redirectUrl)
+        public virtual JavaScriptRedirectResult CreateRedirectResult(Uri redirectUrl)
         {
             if (redirectUrl == null)
             {
                 throw new ArgumentNullException("redirectUrl");
             }
 
-            ContentResult facebookAuthResult = new ContentResult();
-            facebookAuthResult.ContentType = "text/html";
-
-            // Even though we're only JavaScript encoding the redirectUrl, the result is guaranteed to be HTML-safe as well
-            facebookAuthResult.Content = String.Format(
-                CultureInfo.InvariantCulture,
-                "<script>window.top.location = '{0}';</script>",
-                HttpUtility.JavaScriptStringEncode(redirectUrl.AbsoluteUri));
-            return facebookAuthResult;
-        }
-
-        /// <summary>
-        /// Returns an <see cref="ActionResult"/> that indicates we want to ignore a permission prompt.  Should only be used as
-        /// a return value within the <see cref="OnPermissionPrompt"/> and <see cref="OnDeniedPermissionPrompt"/> methods.
-        /// </summary>
-        /// <returns>An <see cref="ActionResult"/> that indicates that we want to ignore a permission prompt.</returns>
-        protected static ActionResult IgnorePrompt()
-        {
-            return new IgnorePromptResult();
+            return new JavaScriptRedirectResult(redirectUrl);
         }
 
         /// <summary>
@@ -185,68 +166,33 @@ namespace Microsoft.AspNet.Facebook.Authorization
         /// return value within the <see cref="OnPermissionPrompt"/> and <see cref="OnDeniedPermissionPrompt"/> methods.
         /// </summary>
         /// <returns>An <see cref="ActionResult"/> that indicates that we want to show a permission prompt.</returns>
-        protected static ActionResult ShowPrompt()
+        protected ShowPromptResult ShowPrompt(PermissionContext context)
         {
-            return new ShowPromptResult();
+            FacebookClient client = context.FacebookContext.Client;
+            Uri navigationUrl = client.GetLoginUrl(context.RedirectUrl,
+                                                   _config.AppId,
+                                                   permissions: String.Join(",", context.RequiredPermissions));
+
+            return new ShowPromptResult(navigationUrl);
         }
 
         /// <summary>
-        /// Invoked during <see cref="OnAuthorization"/> prior to a permission prompt that requests permissions that were skipped 
-        /// or revoked. Occurs before the <see cref="OnPermissionPrompt"/> and short circuits the pipeline by default via
-        /// returning an <see cref="IgnorePrompt"/> result.
+        /// Invoked during <see cref="OnAuthorization"/> when a prompt requests permissions that were skipped or revoked.
+        /// Set the <paramref name="context"/>'s Result property to modify login flow.
         /// </summary>
         /// <param name="context">Provides access to permission information associated with the user.</param>
-        /// <returns>An <see cref="ActionResult"/> for how to handle the denied permissions. Defaults to ignoring the coming prompt 
-        /// via the <see cref="IgnorePrompt"/> result.</returns>
-        protected virtual ActionResult OnDeniedPermissionPrompt(PermissionsContext context)
+        protected virtual void OnDeniedPermissionPrompt(PermissionContext context)
         {
-            return IgnorePrompt();
         }
 
         /// <summary>
-        /// Invoked during <see cref="OnAuthorization"/> prior to a permission prompt.
+        /// Invoked during <see cref="OnAuthorization"/> prior to a permission prompt that is requesting permissions that have
+        /// not been requested before. Set the <paramref name="context"/>'s Result property to modify login flow.
         /// </summary>
         /// <param name="context">Provides access to permission information associated with the user.</param>
-        /// <returns>An <see cref="ActionResult"/> for how to handle the coming permission prompt. Defaults to showing the prompt  
-        /// via the <see cref="ShowPrompt"/> result.</returns>
-        protected virtual ActionResult OnPermissionPrompt(PermissionsContext context)
+        protected virtual void OnPermissionPrompt(PermissionContext context)
         {
-            return ShowPrompt();
-        }
-
-        private static PermissionPromptResult ConvertActionResult(ActionResult result)
-        {
-            if (result is ShowPromptResult)
-            {
-                return PermissionPromptResult.Default;
-            }
-            else if (result is IgnorePromptResult)
-            {
-                return PermissionPromptResult.Ignore;
-            }
-            else if (result is ActionResult)
-            {
-                return PermissionPromptResult.Custom;
-            }
-
-            throw new ArgumentNullException("result");
-        }
-
-        private static bool HandleParsedHookResult(AuthorizationContext context, ActionResult result)
-        {
-            PermissionPromptResult hookResult = ConvertActionResult(result);
-
-            if (hookResult == PermissionPromptResult.Ignore)
-            {
-                return true;
-            }
-            else if (hookResult == PermissionPromptResult.Custom)
-            {
-                context.Result = result;
-                return true;
-            }
-
-            return false;
+            context.Result = ShowPrompt(context);
         }
 
         private Uri GetErroredAuthorizeUri(string originUrl, HashSet<string> requiredPermissions)
@@ -296,29 +242,28 @@ namespace Microsoft.AspNet.Facebook.Authorization
             return redirectUrl;
         }
 
-        private void PromptDefaultPermissions(PermissionsContext permissionsContext, string redirectUrl)
+        private void PromptDefaultPermissions(PermissionContext permissionContext, string redirectUrl)
         {
-            FacebookClient client = permissionsContext.FacebookContext.Client;
+            FacebookClient client = permissionContext.FacebookContext.Client;
             // Cannot obtain user information from signed_request, redirect to Facebook OAuth dialog.
             Uri navigationUrl = client.GetLoginUrl(redirectUrl,
                                                    _config.AppId,
                                                    permissions: null);
 
-            permissionsContext.FilterContext.Result = CreateRedirectResult(navigationUrl);
+            permissionContext.FilterContext.Result = CreateRedirectResult(navigationUrl);
         }
 
-        private void PromptMissingPermissions(PermissionsContext permissionsContext, string redirectUrl)
+        private void PromptMissingPermissions(PermissionContext permissionContext, string redirectUrl)
         {
-            AuthorizationContext filterContext = permissionsContext.FilterContext;
-            HashSet<string> requiredPermissions = permissionsContext.RequiredPermissions;
+            AuthorizationContext filterContext = permissionContext.FilterContext;
+            HashSet<string> requiredPermissions = permissionContext.RequiredPermissions;
 
             // If there were no errors it means that we will be prompted with a permission prompt.
             // Therefore, invoke the permission prompt hooks and navigate to the prompt.
 
-            IEnumerable<string> declinedPermissions = permissionsContext.DeclinedPermissions;
-            IEnumerable<string> skippedPermissions = permissionsContext.SkippedPermissions;
-            FacebookContext facebookContext = permissionsContext.FacebookContext;
-            IEnumerable<string> missingPermissions = permissionsContext.MissingPermissions;
+            IEnumerable<string> declinedPermissions = permissionContext.DeclinedPermissions;
+            IEnumerable<string> skippedPermissions = permissionContext.SkippedPermissions;
+            IEnumerable<string> missingPermissions = permissionContext.MissingPermissions;
 
             // Declined permissions and skipped permissions can persist through multiple pages.  So we need to cross check
             // them against the current pages permissions, this will determine if we should invoke the denied permission hook.
@@ -326,73 +271,25 @@ namespace Microsoft.AspNet.Facebook.Authorization
                 permission => declinedPermissions.Contains(permission) ||
                               skippedPermissions.Contains(permission)).Any();
 
+            permissionContext.RedirectUrl = redirectUrl;
+
             // The DeniedPermissionPromptHook will only be invoked if we detect there are denied permissions.
-            // It is attempted PRIOR to the pre hook to allow app creators to handle situations when a user
+            // It is attempted instead of the permission hook to allow app creators to handle situations when a user
             // skip's or revokes previously prompted permissions. Ex: redirect to a different page.
-            if (deniedPermissions && InvokeDeniedPermissionPromptHook(permissionsContext))
+            if (deniedPermissions)
             {
-                return;
+                OnDeniedPermissionPrompt(permissionContext);
             }
-            else if (InvokePrePermissionPromptHook(permissionsContext))
+            else
             {
-                return;
+                OnPermissionPrompt(permissionContext);
             }
 
             // We persist the requested permissions in a cookie to know if a permission was denied in any way.
             // The persisted data allows us to detect skipping of permissions.
             PermissionHelper.PersistRequestedPermissions(filterContext, requiredPermissions);
 
-            FacebookClient client = facebookContext.Client;
-            Uri navigationUrl = client.GetLoginUrl(redirectUrl,
-                                                   _config.AppId,
-                                                   permissions: String.Join(",", requiredPermissions));
-
-            filterContext.Result = CreateRedirectResult(navigationUrl);
-        }
-
-        private bool InvokeDeniedPermissionPromptHook(PermissionsContext context)
-        {
-            ActionResult postResult = OnDeniedPermissionPrompt(context);
-
-            return HandleParsedHookResult(context.FilterContext, postResult);
-        }
-
-        private bool InvokePrePermissionPromptHook(PermissionsContext context)
-        {
-            ActionResult preResult = OnPermissionPrompt(context);
-
-            return HandleParsedHookResult(context.FilterContext, preResult);
-        }
-
-        private enum PermissionPromptResult
-        {
-            Default,
-            Ignore,
-            Custom,
-        }
-
-        private class IgnorePromptResult : ActionResult
-        {
-            public override void ExecuteResult(ControllerContext context)
-            {
-                Debug.Fail(
-                    String.Format(
-                        CultureInfo.CurrentCulture,
-                        ExecuteMethodCannotBeCalledFormat,
-                        typeof(IgnorePromptResult).Name));
-            }
-        }
-
-        private class ShowPromptResult : ActionResult
-        {
-            public override void ExecuteResult(ControllerContext context)
-            {
-                Debug.Fail(
-                    String.Format(
-                        CultureInfo.CurrentCulture,
-                        ExecuteMethodCannotBeCalledFormat,
-                        typeof(IgnorePromptResult).Name));
-            }
+            filterContext.Result = permissionContext.Result;
         }
     }
 }

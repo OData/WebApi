@@ -9,11 +9,11 @@ namespace Microsoft.AspNet.Facebook
     /// <summary>
     /// Provides access to permission information associated with a user.
     /// </summary>
-    public class PermissionsContext
+    public class PermissionContext
     {
         /// <summary>
         /// Permissions that were previously requested for but not granted for the lifetime of this application. This can happen
-        /// by a user revoking permissions or chosing not to allow permissions in the Facebook login dialog.
+        /// by a user revoking, skipping or choosing not to allow permissions in the Facebook login dialog.
         /// </summary>
         /// <remarks>
         /// This should only ever be "set" or modified within tests.
@@ -56,6 +56,12 @@ namespace Microsoft.AspNet.Facebook
         public HashSet<string> RequiredPermissions { get; set; }
 
         /// <summary>
+        /// The <see cref="ActionResult" /> that should be used to control the login flow.  If value is null then we will continue
+        /// onto the action that is intended to be invoked.  Non-null values short-circuit the action.
+        /// </summary>
+        public ActionResult Result { get; set; }
+
+        /// <summary>
         /// Permissions that were previously requested for but skipped for the current page. This can happen from a user hitting
         /// the "skip" button when requesting permissions.
         /// </summary>
@@ -64,5 +70,7 @@ namespace Microsoft.AspNet.Facebook
         /// This should only ever be "set" or modified within tests.
         /// </remarks>
         public IEnumerable<string> SkippedPermissions { get; set; }
+
+        internal string RedirectUrl { get; set; }
     }
 }

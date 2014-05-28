@@ -7,6 +7,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
@@ -139,7 +140,7 @@ namespace System.Web.OData.Routing
                         // Throw ODataException if there is some segment following the unresolved segment.
                         throw new ODataException(Error.Format(
                             SRResources.InvalidPathSegment,
-                            ex.UnparsedSegments.First(), 
+                            ex.UnparsedSegments.First(),
                             ex.CurrentSegment));
                     }
                 }
@@ -185,17 +186,20 @@ namespace System.Web.OData.Routing
                 }
             }
 
-            return ODataPathSegmentTranslator.TranslateODLPathToWebAPIPath(
+            ODataPath webAPIPath = ODataPathSegmentTranslator.TranslateODLPathToWebAPIPath(
                 path,
                 model,
                 unresolvedPathSegment,
                 id,
                 enableUriTemplateParsing,
-                unresolvedPathSegment == null ? 
+                unresolvedPathSegment == null ?
                     uriParser.ParameterAliasNodes :
                     // We can't get parameter alias if ODataUnrecognizedPathException was thrown.
                     new Dictionary<string, Semantic.SingleValueNode>(),
                 unresolvedPathSegment == null ? null : queryString);
+
+            CheckNavigableProperty(webAPIPath, model);
+            return webAPIPath;
         }
 
         private static ODataPathTemplate Templatify(ODataPath path, string pathTemplate)
@@ -233,6 +237,27 @@ namespace System.Web.OData.Routing
             }
 
             return new ODataPathTemplate(templateSegments);
+        }
+
+        private static void CheckNavigableProperty(ODataPath path, IEdmModel model)
+        {
+            Contract.Assert(path != null);
+            Contract.Assert(model != null);
+
+            foreach (ODataPathSegment segment in path.Segments)
+            {
+                NavigationPathSegment navigationPathSegment = segment as NavigationPathSegment;
+
+                if (navigationPathSegment != null)
+                {
+                    if (EdmLibHelpers.IsNotNavigable(navigationPathSegment.NavigationProperty, model))
+                    {
+                        throw new ODataException(Error.Format(
+                            SRResources.NotNavigablePropertyUsedInNavigation,
+                            navigationPathSegment.NavigationProperty.Name));
+                    }
+                }
+            }
         }
     }
 }

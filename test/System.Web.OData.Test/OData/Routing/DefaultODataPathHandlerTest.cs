@@ -1511,6 +1511,27 @@ namespace System.Web.OData.Routing
             Assert.Equal(expectedEntityBound, actionSegment.Action.Parameters.First().Type.Definition.ToTraceString());
         }
 
+        [Theory]
+        [InlineData("Customers(1)/Products")]
+        [InlineData("Customers(1)/Products(5)")]
+        [InlineData("Customers(1)/Products(5)/ID")]
+        [InlineData("Customers(1)/Products/$ref")]
+        [InlineData("Customers(1)/Products(5)/$ref")]
+        public void DefaultODataPathHandler_Throws_NotNavigablePropertyInPath(string path)
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            var customer = builder.EntitySet<ODataRoutingModel.RoutingCustomer>("Customers").EntityType;
+            customer.HasMany(c => c.Products).IsNotNavigable();
+            builder.EntitySet<ODataRoutingModel.Product>("Products");
+            var model = builder.GetEdmModel();
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _parser.Parse(model, _serviceRoot, path),
+                "The property 'Products' cannot be used for navigation.");
+        }
+
         private static IEdmActionImport AddUnboundAction(EdmEntityContainer container, string name, IEdmEntityType bindingType, bool isCollection)
         {
             var action = new EdmAction(

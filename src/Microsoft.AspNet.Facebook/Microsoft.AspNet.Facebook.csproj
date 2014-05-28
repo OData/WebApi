@@ -49,7 +49,6 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="PermissionsStatus.cs" />
     <Compile Include="PermissionStatus.cs" />
-    <Compile Include="PreApplicationStartCode.cs" />
     <Compile Include="FacebookAuthenticationModule.cs" />
     <Compile Include="FacebookHtmlHelperExtensions.cs" />
     <Compile Include="GlobalFacebookConfiguration.cs" />

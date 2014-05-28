@@ -294,7 +294,9 @@ namespace System.Web.OData.Builder
                 navigationProperty.PropertyType == typeof(DateTime?))
             {
                 throw Error.Argument("navigationProperty", SRResources.DateTimeTypePropertyNotSupported,
-                    navigationProperty.PropertyType.FullName, navigationProperty.Name, navigationProperty.DeclaringType.FullName);
+                    navigationProperty.PropertyType.FullName, navigationProperty.Name,
+                    navigationProperty.DeclaringType.FullName,
+                    typeof(DateTimeOffset).FullName, typeof(ODataModelBuilder).FullName);
             }
 
             ValidatePropertyNotAlreadyDefinedInBaseTypes(navigationProperty);

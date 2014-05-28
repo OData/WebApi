@@ -1597,7 +1597,7 @@ namespace System.Web.OData.Builder.Conventions
             EntitySetConfiguration<BaseEmployee> employees = builder.EntitySet<BaseEmployee>("Employees");
             EntityTypeConfiguration<BaseEmployee> employee = employees.EntityType;
             employee.EnumProperty<Gender>(e => e.Sex).Name = "gender";
-            employee.Ignore(e=>e.FullName);
+            employee.Ignore(e => e.FullName);
 
             // Act
             IEdmModel model = builder.GetEdmModel();
@@ -1606,6 +1606,21 @@ namespace System.Web.OData.Builder.Conventions
             IEdmEntityType derivedEntityType = model.AssertHasEntityType(typeof(DerivedManager));
             IEdmProperty property = Assert.Single(derivedEntityType.DeclaredProperties);
             Assert.Equal("Heads", property.Name);
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_GetEdmModel_ThrowsException_IfHasDateTimeProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<EntityTypeWithDateTime>();
+
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => builder.GetEdmModel(),
+                "The type 'System.DateTime' of property 'ReleaseDate' in the 'System.Web.OData.Builder.Conventions.EntityTypeWithDateTime' " +
+                "type is not a supported type. Change to use 'System.DateTimeOffset' or ignore this type by calling " +
+                "Ignore<System.Web.OData.Builder.Conventions.EntityTypeWithDateTime>() on " +
+                "'System.Web.OData.Builder.ODataModelBuilder'.\r\nParameter name: navigationProperty");
         }
     }
 
@@ -1770,5 +1785,14 @@ namespace System.Web.OData.Builder.Conventions
     {
         Male = 1,
         Female = 2
+    }
+
+    public class EntityTypeWithDateTime
+    {
+        public int ID { get; set; }
+
+        public string Name { get; set; }
+
+        public DateTime ReleaseDate { get; set; }
     }
 }

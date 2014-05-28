@@ -722,7 +722,7 @@
     <value>Type '{0}' is not supported as dynamic property annotation. Referenced property must be of type '{1}'.</value>
   </data>
   <data name="DateTimeTypePropertyNotSupported" xml:space="preserve">
-    <value>The type '{0}' of property '{1}' in the '{2}' type is not a supported type.</value>
+    <value>The type '{0}' of property '{1}' in the '{2}' type is not a supported type. Change to use '{3}' or ignore this type by calling Ignore&lt;{2}&gt;() on '{4}'.</value>
   </data>
   <data name="DateTimeTypeNotSupported" xml:space="preserve">
     <value>The type '{0}' is not a supported type.</value>

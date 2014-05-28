@@ -367,7 +367,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The type &apos;{0}&apos; of property &apos;{1}&apos; in the &apos;{2}&apos; type is not a supported type..
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of property &apos;{1}&apos; in the &apos;{2}&apos; type is not a supported type. Change to use &apos;{3}&apos; or ignore this type by calling Ignore&lt;{2}&gt;() on &apos;{4}&apos;..
         /// </summary>
         internal static string DateTimeTypePropertyNotSupported {
             get {

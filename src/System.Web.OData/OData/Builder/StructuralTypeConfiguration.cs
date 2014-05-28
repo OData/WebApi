@@ -203,7 +203,8 @@ namespace System.Web.OData.Builder
             if (propertyInfo.PropertyType == typeof(DateTime) || propertyInfo.PropertyType == typeof(DateTime?))
             {
                 throw Error.Argument("propertyInfo", SRResources.DateTimeTypePropertyNotSupported,
-                    propertyInfo.PropertyType.FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName);
+                    propertyInfo.PropertyType.FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName,
+                    typeof(DateTimeOffset).FullName, typeof(ODataModelBuilder).FullName);
             }
 
             // Remove from the ignored properties
@@ -302,7 +303,8 @@ namespace System.Web.OData.Builder
             if (propertyInfo.PropertyType == typeof(DateTime) || propertyInfo.PropertyType == typeof(DateTime?))
             {
                 throw Error.Argument("propertyInfo", SRResources.DateTimeTypePropertyNotSupported,
-                    propertyInfo.PropertyType.FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName);
+                    propertyInfo.PropertyType.FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName,
+                    typeof(DateTimeOffset).FullName, typeof(ODataModelBuilder).FullName);
             }
 
             // Remove from the ignored properties
@@ -371,7 +373,8 @@ namespace System.Web.OData.Builder
                     elementType == typeof(DateTime) || elementType == typeof(DateTime?)))
                 {
                     throw Error.Argument("propertyInfo", SRResources.DateTimeTypePropertyNotSupported,
-                        propertyInfo.PropertyType.FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName);
+                        propertyInfo.PropertyType.FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName,
+                        typeof(DateTimeOffset).FullName, typeof(ODataModelBuilder).FullName);
                 }
 
                 propertyConfiguration = new CollectionPropertyConfiguration(propertyInfo, this);

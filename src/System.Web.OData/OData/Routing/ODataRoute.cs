@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
@@ -52,7 +53,7 @@ namespace System.Web.OData.Routing
 
             // We can only use our fast-path for link generation if there are no open brackets in the route prefix
             // that need to be replaced. If there are, fall back to the slow path.
-            _canGenerateDirectLink = routePrefix != null && RoutePrefix.IndexOf('{') == -1;
+            _canGenerateDirectLink = routePrefix == null || routePrefix.IndexOf('{') == -1;
 
             if (pathConstraint != null)
             {
@@ -71,6 +72,14 @@ namespace System.Web.OData.Routing
         /// Gets the <see cref="ODataPathRouteConstraint"/> on this route.
         /// </summary>
         public ODataPathRouteConstraint PathRouteConstraint { get; private set; }
+
+        internal bool CanGenerateDirectLink
+        {
+            get
+            {
+                return _canGenerateDirectLink;
+            }
+        }
 
         private static string GetRouteTemplate(string prefix)
         {
@@ -98,7 +107,9 @@ namespace System.Web.OData.Routing
                     {
                         // Try to generate an optimized direct link
                         // Otherwise, fall back to the base implementation
-                        return GenerateLinkDirectly(request, odataPath) ?? base.GetVirtualPath(request, values);
+                        return _canGenerateDirectLink
+                            ? GenerateLinkDirectly(odataPath)
+                            : base.GetVirtualPath(request, values);
                     }
                 }
             }
@@ -106,17 +117,14 @@ namespace System.Web.OData.Routing
             return null;
         }
 
-        internal HttpVirtualPathData GenerateLinkDirectly(HttpRequestMessage request, string odataPath)
+        internal HttpVirtualPathData GenerateLinkDirectly(string odataPath)
         {
-            HttpConfiguration configuration = request.GetConfiguration();
-            if (configuration != null && _canGenerateDirectLink)
-            {
-                string link = CombinePathSegments(RoutePrefix, odataPath);
-                link = UriEncode(link);
-                return new HttpVirtualPathData(this, link);
-            }
+            Contract.Assert(odataPath != null);
+            Contract.Assert(_canGenerateDirectLink);
 
-            return null;
+            string link = CombinePathSegments(RoutePrefix, odataPath);
+            link = UriEncode(link);
+            return new HttpVirtualPathData(this, link);
         }
 
         private static string CombinePathSegments(string routePrefix, string odataPath)
@@ -133,6 +141,8 @@ namespace System.Web.OData.Routing
 
         private static string UriEncode(string str)
         {
+            Contract.Assert(str != null);
+
             string escape = Uri.EscapeUriString(str);
             escape = escape.Replace("#", _escapedHashMark);
             escape = escape.Replace("?", _escapedQuestionMark);

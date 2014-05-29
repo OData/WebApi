@@ -10,23 +10,65 @@ namespace System.Web.OData.Routing
     public class ODataRouteTest
     {
         [Fact]
-        public void GenerateLinkDirectly_ReturnsNull_IfHelperRequestHasNoConfiguration()
+        public void GenerateLinkDirectly_DoesNotReturnNull_IfHelperRequestHasNoConfiguration()
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/vpath/prefix/Customers");
+            // Arrange
             ODataRoute odataRoute = new ODataRoute("prefix", pathConstraint: null);
 
-            Assert.Null(odataRoute.GenerateLinkDirectly(request, "odataPath"));
+            // Act
+            var virtualPathData = odataRoute.GenerateLinkDirectly("odataPath");
+
+            // Assert
+            Assert.True(odataRoute.CanGenerateDirectLink);
+            Assert.NotNull(virtualPathData);
+            Assert.Equal("prefix/odataPath", virtualPathData.VirtualPath);
         }
 
         [Fact]
-        public void GenerateLinkDirectly_ReturnsNull_IfRouteTemplateHasParameterInPrefix()
+        public void CanGenerateDirectLink_IsFalse_IfRouteTemplateHasParameterInPrefix()
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/vpath/prefix/Customers");
-            HttpConfiguration config = new HttpConfiguration(new HttpRouteCollection("http://localhost/vpath"));
-            request.SetConfiguration(config);
+            // Arrange && Act
             ODataRoute odataRoute = new ODataRoute("{prefix}", pathConstraint: null);
 
-            Assert.Null(odataRoute.GenerateLinkDirectly(request, "odataPath"));
+            // Assert
+            Assert.False(odataRoute.CanGenerateDirectLink);
+        }
+
+        [Fact]
+        public void GenerateLinkDirectly_DoesNotReturnNull_IfRoutePrefixIsNull()
+        {
+            // Arrange
+            ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null);
+            
+            // Act
+            var virtualPathData = odataRoute.GenerateLinkDirectly("odataPath");
+
+            // Assert
+            Assert.True(odataRoute.CanGenerateDirectLink);
+            Assert.NotNull(virtualPathData);
+            Assert.Equal("odataPath", virtualPathData.VirtualPath);
+        }
+
+        [Fact]
+        public void GetVirtualPath_CanGenerateDirectLinkIsTrue_IfRoutePrefixIsNull()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "http://localhost/vpath/prefix/Customers");
+            HttpConfiguration config = new HttpConfiguration(new HttpRouteCollection("http://localhost/vpath"));
+            request.SetConfiguration(config);
+            ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null);
+
+            // Act
+            var virtualPathData = odataRoute.GetVirtualPath(
+                request,
+                new HttpRouteValueDictionary { { "odataPath", "odataPath" }, { "httproute", true } });
+
+            // Assert
+            Assert.True(odataRoute.CanGenerateDirectLink);
+            Assert.NotNull(virtualPathData);
+            Assert.Equal("odataPath", virtualPathData.VirtualPath);
         }
 
         [Theory]

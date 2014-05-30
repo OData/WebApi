@@ -1241,6 +1241,41 @@ namespace System.Web.OData.Routing
                 "The number of keys specified in the URI does not match number of key properties for the resource 'NS.CustomerWithMultiKeys'.");
         }
 
+        [Theory]
+        [InlineData("RoutingCustomers(1)/Products/$ref/$value")]
+        [InlineData("RoutingCustomers(1)/Products/$ref/$value/$value")]
+        [InlineData("RoutingCustomers(1)/Products/$ref/$ref")]
+        [InlineData("RoutingCustomers(1)/Products/$ref/$ref/something")]
+        [InlineData("RoutingCustomers(1)/Products/$ref/something")]
+        [InlineData("RoutingCustomers(1)/Products/$ref/5")]
+        [InlineData("RoutingCustomers(1)/Products/$ref/$count")]
+        public void DefaultODataPathHandler_ThrowsIfDollarRefIsNotTheLastSegment(string path)
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => _parser.Parse(_model, _serviceRoot, path),
+                "The request URI is not valid. The segment '$ref' must be the last segment in the URI because " +
+                "it is one of the following: $batch, $value, $metadata, a collection property, a named media resource, " +
+                "an action, a noncomposable function, an action import, or a noncomposable function import.");
+        }
+
+        [Theory]
+        [InlineData("RoutingCustomers(1)/ID/$value/$ref")]
+        [InlineData("RoutingCustomers(1)/ID/$value/$count")]
+        [InlineData("RoutingCustomers(1)/ID/$value/$value")]
+        [InlineData("RoutingCustomers(1)/ID/$value/$value/something")]
+        [InlineData("RoutingCustomers(1)/ID/$value/something")]
+        [InlineData("RoutingCustomers(1)/ID/$value/GetSpecialGuid()")]
+        public void DefaultODataPathHandler_ThrowsIfDollarValueIsNotTheLastSegment(string path)
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => _parser.Parse(_model, _serviceRoot, path),
+                "The request URI is not valid. The segment '$value' must be the last segment in the URI because " +
+                "it is one of the following: $batch, $value, $metadata, a collection property, a named media resource, " +
+                "an action, a noncomposable function, an action import, or a noncomposable function import.");
+        }
+
         private static IEdmModel GetModelWithFunctions()
         {
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();

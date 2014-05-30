@@ -21,6 +21,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.WebRequest" />
@@ -57,6 +58,7 @@
     <Compile Include="Helpers\ApiDescriptionHelpers.cs" />
     <Compile Include="HelppageSampleGeneratorTest.cs" />
     <Compile Include="HelpControllerTest.cs" />
+    <Compile Include="WebConfigTest.cs" />
     <Compile Include="XmlDocumentationProviderTest.cs" />
     <Compile Include="HelpPageConfigurationExtensionsTest.cs" />
   </ItemGroup>
@@ -64,6 +66,11 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\WebApiHelpPage\Areas\HelpPage\Views\Web.config">
+      <Link>TestFiles\Web.config</Link>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">

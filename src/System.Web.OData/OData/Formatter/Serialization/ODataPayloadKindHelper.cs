@@ -24,6 +24,7 @@ namespace System.Web.OData.Formatter.Serialization
                 || payloadKind == ODataPayloadKind.Value
                 || payloadKind == ODataPayloadKind.IndividualProperty
                 || payloadKind == ODataPayloadKind.Delta
+                || payloadKind == ODataPayloadKind.Asynchronous
                 || payloadKind == ODataPayloadKind.Unsupported;
         }
 

@@ -45,7 +45,6 @@
     <Compile Include="FacebookRedirectContextModelBinderTest.cs" />
     <Compile Include="FacebookConfigurationTest.cs" />
     <Compile Include="FacebookContextModelBinderTest.cs" />
-    <Compile Include="PreApplicationStartCodeTest.cs" />
     <Compile Include="FacebookRealtimeControllerTest.cs" />
     <Compile Include="Helpers\MockHelpers.cs" />
     <Compile Include="Helpers\LocalFacebookClient.cs" />

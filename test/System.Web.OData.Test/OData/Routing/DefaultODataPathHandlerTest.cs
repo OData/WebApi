@@ -22,7 +22,7 @@ namespace System.Web.OData.Routing
         private static IEdmModel _model = ODataRoutingModel.GetModel();
         private const string _serviceRoot = "http://any/";
 
-        public static TheoryDataSet<object, Type> ParameterAliasWithNullForFunctionParameterData
+        public static TheoryDataSet<object, Type> NullFunctionParameterData
         {
             get
             {
@@ -43,7 +43,7 @@ namespace System.Web.OData.Routing
             }
         }
 
-        public static TheoryDataSet<object, Type> ParameterAliasWithEnumForFunctionParameterData
+        public static TheoryDataSet<object, Type> EnumFunctionParameterData
         {
             get
             {
@@ -54,7 +54,7 @@ namespace System.Web.OData.Routing
             }
         }
 
-        public static TheoryDataSet<object, Type> ParameterAliasForFunctionParameterData
+        public static TheoryDataSet<object, Type> FunctionParameterData
         {
             get
             {
@@ -1001,7 +1001,7 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [PropertyData("ParameterAliasWithNullForFunctionParameterData")]
+        [PropertyData("NullFunctionParameterData")]
         public void CanParse_FunctionParameters_CanResolveAliasedParameterValueWithNull(object value, Type type)
         {
             // Arrange & Act
@@ -1012,7 +1012,7 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [PropertyData("ParameterAliasWithEnumForFunctionParameterData")]
+        [PropertyData("EnumFunctionParameterData")]
         public void CanParse_FunctionParameters_CanResolveAliasedParameterValueWithEnum(object value, Type type)
         {
             // Arrange & Act
@@ -1025,7 +1025,7 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [PropertyData("ParameterAliasForFunctionParameterData")]
+        [PropertyData("FunctionParameterData")]
         public void CanParse_FunctionParameters_CanResolveAliasedParameterValue(object value, Type type)
         {
             // Arrange & Act
@@ -1136,6 +1136,66 @@ namespace System.Web.OData.Routing
             // Assert
             Assert.Equal(1, p1);
             Assert.Equal(2, p2);
+        }
+
+        [Theory]
+        [PropertyData("NullFunctionParameterData")]
+        public void CanParse_NullFunctionParameters(object value, Type type)
+        {
+            // Arrange & Act
+            object parameter = GetParameterValue(value, type);
+
+            // Assert
+            Assert.IsType<ODataNullValue>(parameter);
+        }
+
+        [Theory]
+        [PropertyData("EnumFunctionParameterData")]
+        public void CanParse_EnumFunctionParameters(object value, Type type)
+        {
+            // Arrange & Act
+            object parameter = GetParameterValue(value, type);
+
+            // Assert
+            Assert.IsType<ODataEnumValue>(parameter);
+            Assert.Equal(((ODataEnumValue)value).Value, ((ODataEnumValue)parameter).Value);
+            Assert.Equal(((ODataEnumValue)value).TypeName, ((ODataEnumValue)parameter).TypeName);
+        }
+
+        [Theory]
+        [PropertyData("FunctionParameterData")]
+        public void CanParse_FunctionParameters(object value, Type type)
+        {
+            // Arrange & Act
+            object parameter = GetParameterValue(value, type);
+
+            // Assert
+            Assert.Equal(value, parameter);
+        }
+
+        private object GetParameterValue(object value, Type type)
+        {
+            var model = new CustomersModelWithInheritance();
+            IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
+            var function = new EdmFunction(
+                model.Container.Namespace,
+                "FunctionAtRoot",
+                returnType,
+                isBound: false,
+                entitySetPathExpression: null,
+                isComposable: true);
+
+            model.Model.SetAnnotationValue(model.Model.FindType("NS.SimpleEnum"), new ClrTypeAnnotation(typeof(SimpleEnum)));
+            function.AddParameter("Parameter", model.Model.GetEdmTypeReference(type));
+            model.Container.AddFunctionImport("FunctionAtRoot", function, entitySet: null);
+
+            ODataPath path = _parser.Parse(
+                model.Model,
+                _serviceRoot,
+                "FunctionAtRoot(Parameter=" + ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4) + ")");
+            UnboundFunctionPathSegment functionSegment = (UnboundFunctionPathSegment)path.Segments.Last();
+
+            return functionSegment.GetParameterValue("Parameter");
         }
 
         [Theory]

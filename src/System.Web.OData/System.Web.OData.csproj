@@ -79,6 +79,7 @@
     <Compile Include="OData\Builder\INavigationSourceConfiguration.cs" />
     <Compile Include="OData\Builder\NavigationSourceConfigurationOfTEntityType.cs" />
     <Compile Include="OData\Builder\NavigationSourceLinkBuilderAnnotation.cs" />
+    <Compile Include="OData\Builder\ReturnedEntitySetAnnotation.cs" />
     <Compile Include="OData\Builder\SingletonAttribute.cs" />
     <Compile Include="OData\Builder\SingletonConfigurationOfTEntityType.cs" />
     <Compile Include="OData\Builder\NavigationSourceConfiguration.cs" />

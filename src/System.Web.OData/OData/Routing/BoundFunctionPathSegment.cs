@@ -5,10 +5,12 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Web.Http;
+using System.Web.OData.Builder;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Validation;
 
 namespace System.Web.OData.Routing
 {
@@ -87,8 +89,52 @@ namespace System.Web.OData.Routing
         /// <inheritdoc/>
         public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
         {
-            // For bound function, the previous navigation source is the bounding navigation source.
-            return previousNavigationSource;
+            if (_edmModel == null)
+            {
+                return null;
+            }
+
+            // Try to use the entity set annotation to get the target navigation source.
+            ReturnedEntitySetAnnotation entitySetAnnotation =
+                    _edmModel.GetAnnotationValue<ReturnedEntitySetAnnotation>(Function);
+
+            if (entitySetAnnotation != null)
+            {
+                return _edmModel.EntityContainer.FindEntitySet(entitySetAnnotation.EntitySetName);
+            }
+
+            // Try to use the entity set path to get the target navigation source.
+            // An entity set path is a string list seperated by '/', for example "bindingParameter/Orders".
+            // The first segment must be the binding parameter name, while the orthers must be the navigation property
+            // name. ODL can use the entity set path expression and the bound navigation source to calucate the target
+            // navigation source. for example:
+            // ~/CustomersA(1)/GetRelatedOrders() will return OrdersA
+            // ~/CustomersB(1)/GetRelatedOrders() will return OrdersB
+            if (previousNavigationSource != null && _edmModel != null && Function != null)
+            {
+                IEdmOperationParameter parameter;
+                IEnumerable<IEdmNavigationProperty> navigationProperties;
+                IEdmEntityType lastEntityType;
+                IEnumerable<EdmError> errors;
+
+                if (Function.TryGetRelativeEntitySetPath(_edmModel, out parameter, out navigationProperties,
+                    out lastEntityType, out errors))
+                {
+                    IEdmNavigationSource targetNavigationSource = previousNavigationSource;
+                    foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
+                    {
+                        targetNavigationSource = targetNavigationSource.FindNavigationTarget(navigationProperty);
+                        if (targetNavigationSource == null)
+                        {
+                            return null;
+                        }
+                    }
+
+                    return targetNavigationSource;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

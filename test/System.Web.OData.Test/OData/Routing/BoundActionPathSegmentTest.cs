@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -13,7 +16,7 @@ namespace System.Web.OData.Routing
         [Fact]
         public void Ctor_ThrowsArgumentNull_Action()
         {
-            Assert.ThrowsArgumentNull(() => new BoundActionPathSegment(action: null), "action");
+            Assert.ThrowsArgumentNull(() => new BoundActionPathSegment(action: null, model: null), "action");
         }
 
         [Fact]
@@ -25,7 +28,7 @@ namespace System.Web.OData.Routing
             edmAction.Setup(a => a.Name).Returns("SomeAction");
 
             // Act
-            BoundActionPathSegment actionPathSegment = new BoundActionPathSegment(edmAction.Object);
+            BoundActionPathSegment actionPathSegment = new BoundActionPathSegment(edmAction.Object, null);
 
             // Assert
             Assert.Same(edmAction.Object, actionPathSegment.Action);
@@ -40,7 +43,7 @@ namespace System.Web.OData.Routing
             edmAction.Setup(a => a.Name).Returns("SomeAction");
 
             // Act
-            BoundActionPathSegment actionPathSegment = new BoundActionPathSegment(edmAction.Object);
+            BoundActionPathSegment actionPathSegment = new BoundActionPathSegment(edmAction.Object, null);
 
             // Assert
             Assert.Equal("NS.SomeAction", actionPathSegment.ActionName);
@@ -78,26 +81,42 @@ namespace System.Web.OData.Routing
             edmAction.Setup(a => a.ReturnType).Returns(new EdmEntityTypeReference(returnType.Object, isNullable: false));
 
             // Act
-            BoundActionPathSegment segment = new BoundActionPathSegment(edmAction.Object);
+            BoundActionPathSegment segment = new BoundActionPathSegment(edmAction.Object, null);
 
             // Assert
             Assert.Same(returnType.Object, segment.GetEdmType(previousEdmType: null));
         }
 
         [Fact]
-        public void GetNavigationSource_Returns_ActionTargetEntitySet()
+        public void GetNavigationSource_Returns_ActionTargetEntitySet_EntitySetPathExpression()
         {
             // Arrange
-            Mock<IEdmEntitySet> targetEntitySet = new Mock<IEdmEntitySet>();
-            Mock<IEdmAction> edmAction = new Mock<IEdmAction>();
-            edmAction.Setup(a => a.Namespace).Returns("NS");
-            edmAction.Setup(a => a.Name).Returns("SomeAction");
+            IEdmModel model = GetEdmModel();
+            IEdmAction action = model.SchemaElements.OfType<IEdmAction>().First(c => c.Name == "GetMyOrders1");
+            IEdmEntitySet previouseEntitySet = model.EntityContainer.FindEntitySet("MyCustomers");
+            IEdmEntitySet expectedEntitySet = model.EntityContainer.FindEntitySet("MyOrders");
 
             // Act
-            BoundActionPathSegment segment = new BoundActionPathSegment(edmAction.Object);
+            BoundActionPathSegment segment = new BoundActionPathSegment(action, model);
 
             // Assert
-            Assert.Same(targetEntitySet.Object, segment.GetNavigationSource(targetEntitySet.Object));
+            Assert.Same(expectedEntitySet, segment.GetNavigationSource(previouseEntitySet));
+        }
+
+        [Fact]
+        public void GetNavigationSource_Returns_ActionTargetEntitySet_Annotation()
+        {
+            // Arrange
+            IEdmModel model = GetEdmModel();
+            IEdmAction action = model.SchemaElements.OfType<IEdmAction>().First(c => c.Name == "GetMyOrders2");
+            IEdmEntitySet previouseEntitySet = model.EntityContainer.FindEntitySet("MyCustomers");
+            IEdmEntitySet expectedEntitySet = model.EntityContainer.FindEntitySet("MyOrders");
+
+            // Act
+            BoundActionPathSegment segment = new BoundActionPathSegment(action, model);
+
+            // Assert
+            Assert.Same(expectedEntitySet, segment.GetNavigationSource(previouseEntitySet));
         }
 
         [Fact]
@@ -115,13 +134,27 @@ namespace System.Web.OData.Routing
             edmAction.Setup(a => a.Namespace).Returns("NS");
             edmAction.Setup(a => a.Name).Returns("SomeAction");
 
-            BoundActionPathSegment pathSegmentTemplate = new BoundActionPathSegment(edmAction.Object);
-            BoundActionPathSegment pathSegment = new BoundActionPathSegment(edmAction.Object);
+            BoundActionPathSegment pathSegmentTemplate = new BoundActionPathSegment(edmAction.Object, null);
+            BoundActionPathSegment pathSegment = new BoundActionPathSegment(edmAction.Object, null);
             Dictionary<string, object> values = new Dictionary<string, object>();
 
             // Act & Assert
             Assert.True(pathSegmentTemplate.TryMatch(pathSegment, values));
             Assert.Empty(values);
+        }
+
+        private IEdmModel GetEdmModel()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("MyCustomers");
+            builder.EntitySet<Order>("MyOrders");
+
+            builder.EntityType<Customer>()
+                .Action("GetMyOrders1")
+                .ReturnsEntityViaEntitySetPath<Order>("bindingParameter/Orders");
+
+            builder.EntityType<Customer>().Action("GetMyOrders2").ReturnsFromEntitySet<Order>("MyOrders");
+            return builder.GetEdmModel();
         }
     }
 }

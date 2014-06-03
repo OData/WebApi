@@ -260,7 +260,7 @@ namespace System.Web.OData.Routing
 
             if (action != null)
             {
-                yield return new BoundActionPathSegment(action);
+                yield return new BoundActionPathSegment(action, _model);
             }
             else
             {

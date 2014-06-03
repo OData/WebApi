@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -81,19 +84,37 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
-        public void GetNavigationSource_Returns_FunctionTargetNavigationSource()
+        public void GetNavigationSource_Returns_FunctionTargetNavigationSource_EntitySetPathExpression()
         {
             // Arrange
-            Mock<IEdmNavigationSource> targetNavigationSource = new Mock<IEdmNavigationSource>();
-            Mock<IEdmFunction> edmFuncton = new Mock<IEdmFunction>();
-            edmFuncton.Setup(a => a.Namespace).Returns("NS");
-            edmFuncton.Setup(a => a.Name).Returns("Funtion");
+            IEdmModel model = GetEdmModel();
+            IEdmFunction function = model.SchemaElements.OfType<IEdmFunction>().First(c => c.Name == "GetMyOrders1");
+            IEdmEntitySet previouseEntitySet = model.EntityContainer.FindEntitySet("MyCustomers");
+            IEdmEntitySet expectedEntitySet = model.EntityContainer.FindEntitySet("MyOrders");
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
 
             // Act
-            BoundFunctionPathSegment segment = new BoundFunctionPathSegment(edmFuncton.Object, null, null);
+            BoundFunctionPathSegment segment = new BoundFunctionPathSegment(function, model, parameters);
 
             // Assert
-            Assert.Same(targetNavigationSource.Object, segment.GetNavigationSource(targetNavigationSource.Object));
+            Assert.Same(expectedEntitySet, segment.GetNavigationSource(previouseEntitySet));
+        }
+
+        [Fact]
+        public void GetNavigationSource_Returns_FunctionTargetNavigationSource_Annotation()
+        {
+            // Arrange
+            IEdmModel model = GetEdmModel();
+            IEdmFunction function = model.SchemaElements.OfType<IEdmFunction>().First(c => c.Name == "GetMyOrders2");
+            IEdmEntitySet previouseEntitySet = model.EntityContainer.FindEntitySet("MyCustomers");
+            IEdmEntitySet expectedEntitySet = model.EntityContainer.FindEntitySet("MyOrders");
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+
+            // Act
+            BoundFunctionPathSegment segment = new BoundFunctionPathSegment(function, model, parameters);
+
+            // Assert
+            Assert.Same(expectedEntitySet, segment.GetNavigationSource(previouseEntitySet));
         }
 
         [Fact]
@@ -158,6 +179,20 @@ namespace System.Web.OData.Routing
             // Assert
             Assert.True(result);
             Assert.Empty(values);
+        }
+
+        private IEdmModel GetEdmModel()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("MyCustomers");
+            builder.EntitySet<Order>("MyOrders");
+
+            builder.EntityType<Customer>()
+                .Function("GetMyOrders1")
+                .ReturnsEntityViaEntitySetPath<Order>("bindingParameter/Orders");
+
+            builder.EntityType<Customer>().Function("GetMyOrders2").ReturnsFromEntitySet<Order>("MyOrders");
+            return builder.GetEdmModel();
         }
     }
 }

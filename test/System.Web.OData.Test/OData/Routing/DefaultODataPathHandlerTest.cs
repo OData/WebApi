@@ -639,7 +639,7 @@ namespace System.Web.OData.Routing
 
             IEdmAction expectedEdmElement = _model.SchemaElements.OfType<IEdmAction>()
                 .SingleOrDefault(e => e.Name == "GetRelatedRoutingCustomers");
-            IEdmSingleton expectedSingleton = _model.EntityContainer.FindSingleton("VipCustomer");
+            IEdmEntitySet expectedEntitySet = _model.EntityContainer.FindEntitySet("RoutingCustomers");
             IEdmType expectedType = expectedEdmElement.ReturnType.Definition;
 
             // Act
@@ -649,7 +649,7 @@ namespace System.Web.OData.Routing
             // Assert
             Assert.NotNull(segment);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Same(expectedSingleton, path.NavigationSource);
+            Assert.Same(expectedEntitySet, path.NavigationSource);
             Assert.Same(expectedType, path.EdmType);
             BoundActionPathSegment action = Assert.IsType<BoundActionPathSegment>(segment);
             Assert.Same(expectedEdmElement, action.Action);
@@ -1463,28 +1463,28 @@ namespace System.Web.OData.Routing
         [Theory]
         [InlineData("RoutingCustomers(1)/Default.GetRelatedRoutingCustomers", "RoutingCustomer", "RoutingCustomers", true)]
         [InlineData("RoutingCustomers(1)/Default.GetBestRelatedRoutingCustomer", "VIP", "RoutingCustomers", false)]
-        [InlineData("RoutingCustomers(1)/System.Web.OData.Routing.VIP/Default.GetSalesPerson", "SalesPerson", "RoutingCustomers", false)]
-        [InlineData("SalesPeople(1)/Default.GetVIPRoutingCustomers", "VIP", "SalesPeople", true)]
+        [InlineData("RoutingCustomers(1)/System.Web.OData.Routing.VIP/Default.GetSalesPerson", "SalesPerson", "SalesPeople", false)]
+        [InlineData("SalesPeople(1)/Default.GetVIPRoutingCustomers", "VIP", "RoutingCustomers", true)]
         public void CanResolveSetAndTypeViaEntityActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
         }
 
         [Theory]
-        [InlineData("VipCustomer/Default.GetRelatedRoutingCustomers", "RoutingCustomer", "VipCustomer", true)]
-        [InlineData("VipCustomer/System.Web.OData.Routing.VIP/Default.GetSalesPerson", "SalesPerson", "VipCustomer", false)]
+        [InlineData("VipCustomer/Default.GetRelatedRoutingCustomers", "RoutingCustomer", "RoutingCustomers", true)]
+        [InlineData("VipCustomer/System.Web.OData.Routing.VIP/Default.GetSalesPerson", "SalesPerson", "SalesPeople", false)]
         public void CanResolveSetAndTypeViaSingletonSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
-            AssertTypeMatchesExpectedTypeForSingleton(odataPath, expectedSetName, expectedTypeName, isCollection);
+            AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
         }
 
         [Theory]
         [InlineData("RoutingCustomers/Default.GetVIPs", "VIP", "RoutingCustomers", true)]
-        [InlineData("RoutingCustomers/Default.GetProducts", "Product", "RoutingCustomers", true)]
-        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetProducts", "Product", "RoutingCustomers", true)]
-        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "RoutingCustomers", true)]
-        [InlineData("MyProduct/RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "RoutingCustomers", true)]
-        [InlineData("SalesPeople/Default.GetVIPRoutingCustomers", "VIP", "SalesPeople", true)]
+        [InlineData("RoutingCustomers/Default.GetProducts", "Product", "Products", true)]
+        [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetProducts", "Product", "Products", true)]
+        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "SalesPeople", true)]
+        [InlineData("MyProduct/RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "SalesPeople", true)]
+        [InlineData("SalesPeople/Default.GetVIPRoutingCustomers", "VIP", "RoutingCustomers", true)]
         [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/Default.GetMostProfitable", "VIP", "RoutingCustomers", false)]
         public void CanResolveSetAndTypeViaCollectionActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {

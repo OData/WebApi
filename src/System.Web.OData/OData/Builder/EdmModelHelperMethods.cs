@@ -245,7 +245,15 @@ namespace System.Web.OData.Builder
                     model.SetOperationTitleAnnotation(operation, new OperationTitleAnnotation(procedure.Title));
                 }
 
+                if (procedure.IsBindable &&
+                    procedure.NavigationSource != null &&
+                    edmNavigationSourceMap.ContainsKey(procedure.NavigationSource.Name))
+                {
+                    model.SetAnnotationValue(operation, new ReturnedEntitySetAnnotation(procedure.NavigationSource.Name));
+                }
+
                 AddProcedureParameters(operation, procedure, edmTypeMap);
+
                 if (procedure.IsBindable)
                 {
                     AddProcedureLinkBuilder(model, operation, procedure);
@@ -255,6 +263,7 @@ namespace System.Web.OData.Builder
                 {
                     container.AddElement(operationImport);
                 }
+
                 model.AddElement(operation);
             }
         }

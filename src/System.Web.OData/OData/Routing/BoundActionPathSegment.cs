@@ -3,7 +3,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Web.Http;
+using System.Web.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Validation;
 
 namespace System.Web.OData.Routing
 {
@@ -12,11 +14,9 @@ namespace System.Web.OData.Routing
     /// </summary>
     public class BoundActionPathSegment : ODataPathSegment
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BoundActionPathSegment" /> class.
-        /// </summary>
-        /// <param name="action">The action being invoked.</param>
-        public BoundActionPathSegment(IEdmAction action)
+        private readonly IEdmModel _edmModel;
+
+        internal BoundActionPathSegment(IEdmAction action, IEdmModel model)
         {
             if (action == null)
             {
@@ -25,6 +25,7 @@ namespace System.Web.OData.Routing
 
             Action = action;
             ActionName = Action.FullName();
+            _edmModel = model;
         }
 
         internal BoundActionPathSegment(string actionName)
@@ -73,8 +74,46 @@ namespace System.Web.OData.Routing
         /// <inheritdoc/>
         public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
         {
-            // For bound action, the previous navigation source is the bounding navigation source.
-            return previousNavigationSource;
+            if (_edmModel == null)
+            {
+                return null;
+            }
+
+            // Try to use the entity set annotation to get the target navigation source.
+            ReturnedEntitySetAnnotation entitySetAnnotation =
+                    _edmModel.GetAnnotationValue<ReturnedEntitySetAnnotation>(Action);
+
+            if (entitySetAnnotation != null)
+            {
+                return _edmModel.EntityContainer.FindEntitySet(entitySetAnnotation.EntitySetName);
+            }
+
+            // Try to use the entity set path to get the target navigation source.
+            if (previousNavigationSource != null && Action != null)
+            {
+                IEdmOperationParameter parameter;
+                IEnumerable<IEdmNavigationProperty> navigationProperties;
+                IEdmEntityType lastEntityType;
+                IEnumerable<EdmError> errors;
+
+                if (Action.TryGetRelativeEntitySetPath(_edmModel, out parameter, out navigationProperties,
+                    out lastEntityType, out errors))
+                {
+                    IEdmNavigationSource targetNavigationSource = previousNavigationSource;
+                    foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
+                    {
+                        targetNavigationSource = targetNavigationSource.FindNavigationTarget(navigationProperty);
+                        if (targetNavigationSource == null)
+                        {
+                            return null;
+                        }
+                    }
+
+                    return targetNavigationSource;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

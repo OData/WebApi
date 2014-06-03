@@ -1,10 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Razor.Parser;
 using System.Web.Razor.Parser.SyntaxTree;
 using System.Web.Razor.Test.Framework;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Razor.Test.Parser
 {
@@ -40,6 +43,71 @@ namespace System.Web.Razor.Test.Parser
                                .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
                                .Accepts(AcceptedCharacters.NonWhiteSpace)),
                     factory.Markup(" baz")));
+        }
+
+        [Fact]
+        public void Parse_ParsesDocumentAndInvokesVisitor()
+        {
+            // Arrange
+            var factory = SpanFactory.CreateCsHtml();
+            var visitor = new Mock<ParserVisitor> { CallBase = true };
+            var parser = new RazorParser(new CSharpCodeParser(), new HtmlMarkupParser());
+
+            // Act
+            parser.Parse(new StringReader("foo @bar baz"), visitor.Object);
+
+            // Assert
+            visitor.Verify(v => v.VisitSpan(It.Is<Span>(s => s.Kind == SpanKind.Markup && s.Content == "foo ")));
+            visitor.Verify(v => v.VisitSpan(It.Is<Span>(s => s.Kind == SpanKind.Transition && s.Content == "@")));
+            visitor.Verify(v => v.VisitSpan(It.Is<Span>(s => s.Kind == SpanKind.Code && s.Content == "bar")));
+            visitor.Verify(v => v.VisitSpan(It.Is<Span>(s => s.Kind == SpanKind.Markup && s.Content == " baz")));
+        }
+
+        [Fact]
+        public async Task CreateParseTask_ParsesDocumentAndInvokesVisitor()
+        {
+            // Arrange
+            var factory = SpanFactory.CreateCsHtml();
+            var visitor = new Mock<ParserVisitor> { CallBase = true };
+            var parser = new RazorParser(new CSharpCodeParser(), new HtmlMarkupParser());
+
+            // Act
+            var task = parser.CreateParseTask(new StringReader("foo @bar baz"), visitor.Object);
+            task.Start();
+            await task;
+
+            // Assert
+            visitor.Verify(v => v.VisitSpan(It.Is<Span>(s => s.Kind == SpanKind.Markup && s.Content == "foo ")));
+            visitor.Verify(v => v.VisitSpan(It.Is<Span>(s => s.Kind == SpanKind.Transition && s.Content == "@")));
+            visitor.Verify(v => v.VisitSpan(It.Is<Span>(s => s.Kind == SpanKind.Code && s.Content == "bar")));
+            visitor.Verify(v => v.VisitSpan(It.Is<Span>(s => s.Kind == SpanKind.Markup && s.Content == " baz")));
+        }
+
+        [Fact]
+        public async Task CreateParseTask_ReturnsWithoutThrowingIfTaskIsCancelled()
+        {
+            // Arrange
+            var factory = SpanFactory.CreateCsHtml();
+            var visitor = new Mock<ParserVisitor> { CallBase = true };
+            var parser = new RazorParser(new CSharpCodeParser(), new HtmlMarkupParser());
+            var cancelTokenSource = new CancellationTokenSource();
+            var visited = false;
+
+            // Act
+            var task = parser.CreateParseTask(new StringReader("foo @bar baz"),
+                                              (span) =>
+                                              {
+                                                  visited = true;
+                                                  Assert.Equal("foo ", span.Content);
+                                                  cancelTokenSource.Cancel();
+                                              },
+                                              errorCallback: null,
+                                              cancelToken: cancelTokenSource.Token);
+            task.Start();
+            await task;
+
+            // Assert
+            Assert.True(visited);
         }
 
         [Fact]

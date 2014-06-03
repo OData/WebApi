@@ -43,7 +43,10 @@ namespace System.Web.Razor.Parser
 
         public virtual void Parse(TextReader input, ParserVisitor visitor)
         {
-            Parse(new SeekableTextReader(input), visitor);
+            ParserResults results = ParseCore(new SeekableTextReader(input));
+
+            // Replay the results on the visitor
+            visitor.Visit(results);
         }
 
         public virtual ParserResults Parse(TextReader input)

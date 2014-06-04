@@ -16,15 +16,39 @@ namespace System.Web.Http.OData
             Contract.Assert(url != null);
             Contract.Assert(contentIdToLocationMapping != null);
 
-            foreach (KeyValuePair<string, string> location in contentIdToLocationMapping)
+            int startIndex = 0;
+
+            while (true)
             {
-                int index = url.IndexOf("$" + location.Key, StringComparison.Ordinal);
-                if (index != -1)
+                startIndex = url.IndexOf('$', startIndex);
+
+                if (startIndex == -1)
                 {
-                    // As location headers MUST be absolute URL's, we can ignore everything 
-                    // before the $content-id while resolving it.
-                    return location.Value + url.Substring(index + 1 + location.Key.Length);
+                    break;
                 }
+
+                int keyLength = 0;
+
+                while (startIndex + keyLength < url.Length - 1 && IsContentIdCharacter(url[startIndex + keyLength + 1]))
+                {
+                    keyLength++;
+                }
+
+                if (keyLength > 0)
+                {
+                    // Might have matched a $<content-id> alias.
+                    string locationKey = url.Substring(startIndex + 1, keyLength);
+                    string locationValue;
+
+                    if (contentIdToLocationMapping.TryGetValue(locationKey, out locationValue))
+                    {
+                        // As location headers MUST be absolute URL's, we can ignore everything 
+                        // before the $content-id while resolving it.
+                        return locationValue + url.Substring(startIndex + 1 + keyLength);
+                    }
+                }
+
+                startIndex++;
             }
 
             return url;
@@ -54,6 +78,23 @@ namespace System.Web.Http.OData
                 {
                     contentIdToLocationMapping.Add(values.First(), response.Headers.Location.AbsoluteUri);
                 }
+            }
+        }
+
+        private static bool IsContentIdCharacter(char c)
+        {
+            // According to the OData ABNF grammar, Content-IDs follow the scheme.
+            // content-id = "Content-ID" ":" OWS 1*unreserved
+            // unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+            switch (c)
+            {
+                case '-':
+                case '.':
+                case '_':
+                case '~':
+                    return true;
+                default:
+                    return Char.IsLetterOrDigit(c);
             }
         }
     }

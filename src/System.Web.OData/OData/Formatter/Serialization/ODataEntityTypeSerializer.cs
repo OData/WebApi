@@ -484,8 +484,7 @@ namespace System.Web.OData.Formatter.Serialization
                 Metadata = metadata,
             };
 
-            bool alwaysIncludeDetails = metadataLevel == ODataMetadataLevel.Default ||
-                metadataLevel == ODataMetadataLevel.FullMetadata;
+            bool alwaysIncludeDetails = metadataLevel == ODataMetadataLevel.FullMetadata;
 
             // Always omit the title in minimal/no metadata modes.
             if (alwaysIncludeDetails)
@@ -504,7 +503,7 @@ namespace System.Web.OData.Formatter.Serialization
 
         internal static void EmitTitle(IEdmModel model, IEdmOperation operation, ODataOperation odataAction)
         {
-            // The title should only be emitted in full metadata, Atom and Json Verbose.
+            // The title should only be emitted in full metadata.
             OperationTitleAnnotation titleAnnotation = model.GetOperationTitleAnnotation(operation);
             if (titleAnnotation != null)
             {
@@ -555,41 +554,24 @@ namespace System.Web.OData.Formatter.Serialization
             // provided to ODataLib to enable model validation. A separate annotation is used to decide whether or not
             // to serialize the type name (a null value prevents serialization).
 
-            // Note that this annotation should not be used for Atom or JSON verbose formats, as it will interfere with
-            // the correct default behavior for those formats.
-
-            Contract.Assert(entry != null);
-
-            // Only add an annotation if we want to override ODataLib's default type name serialization behavior.
-            if (ShouldAddTypeNameAnnotation(metadataLevel))
-            {
-                string typeName;
-
-                // Provide the type name to serialize (or null to force it not to serialize).
-                if (ShouldSuppressTypeNameSerialization(entry, odataPathType, metadataLevel))
-                {
-                    typeName = null;
-                }
-                else
-                {
-                    typeName = entry.TypeName;
-                }
-
-                entry.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
-                {
-                    TypeName = typeName
-                });
-            }
-        }
-
-        internal static bool ShouldAddTypeNameAnnotation(ODataMetadataLevel metadataLevel)
-        {
-            // Don't interfere with the correct default behavior in non-JSON light formats.
-            // In all JSON light modes, take control of type name serialization.
             // Note: In the current version of ODataLib the default behavior likely now matches the requirements for
             // minimal metadata mode. However, there have been behavior changes/bugs there in the past, so the safer
             // option is for this class to take control of type name serialization in minimal metadata mode.
-            return metadataLevel != ODataMetadataLevel.Default;
+
+            Contract.Assert(entry != null);
+
+            string typeName = null; // Set null to force the type name not to serialize.
+
+            // Provide the type name to serialize.
+            if (!ShouldSuppressTypeNameSerialization(entry, odataPathType, metadataLevel))
+            {
+                typeName = entry.TypeName;
+            }
+
+            entry.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
+            {
+                TypeName = typeName
+            });
         }
 
         internal static bool ShouldOmitAction(IEdmAction action, ActionLinkBuilder builder,
@@ -603,7 +585,6 @@ namespace System.Web.OData.Formatter.Serialization
                 case ODataMetadataLevel.NoMetadata:
                     return action.IsBound && builder.FollowsConventions;
 
-                case ODataMetadataLevel.Default:
                 case ODataMetadataLevel.FullMetadata:
                 default: // All values already specified; just keeping the compiler happy.
                     return false;
@@ -614,8 +595,6 @@ namespace System.Web.OData.Formatter.Serialization
             ODataMetadataLevel metadataLevel)
         {
             Contract.Assert(entry != null);
-
-            Contract.Assert(metadataLevel != ODataMetadataLevel.Default);
 
             switch (metadataLevel)
             {

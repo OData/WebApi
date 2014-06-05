@@ -5,7 +5,6 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
-using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -21,7 +20,6 @@ namespace System.Web.OData.Builder
         private readonly SelfLinkBuilder<Uri> _readLinkBuilder;
 
         private readonly Dictionary<IEdmNavigationProperty, NavigationLinkBuilder> _navigationPropertyLinkBuilderLookup = new Dictionary<IEdmNavigationProperty, NavigationLinkBuilder>();
-        private readonly string _navigationSourceName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NavigationSourceLinkBuilderAnnotation" /> class.
@@ -73,8 +71,6 @@ namespace System.Web.OData.Builder
                 }
             }
 
-            _navigationSourceName = navigationSource.Name;
-
             Func<EntityInstanceContext, Uri> selfLinkFactory =
                 (entityInstanceContext) => entityInstanceContext.GenerateSelfLink(includeCast: derivedTypesDefineNavigationProperty);
             _idLinkBuilder = new SelfLinkBuilder<Uri>(selfLinkFactory, followsConventions: true);
@@ -98,7 +94,6 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("navigationSource");
             }
 
-            _navigationSourceName = navigationSource.Name;
             _idLinkBuilder = idLinkBuilder;
             _editLinkBuilder = editLinkBuilder;
             _readLinkBuilder = readLinkBuilder;
@@ -114,7 +109,6 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("navigationSource");
             }
 
-            _navigationSourceName = navigationSource.Name;
             _idLinkBuilder = navigationSource.GetIdLink();
             _editLinkBuilder = navigationSource.GetEditLink();
             _readLinkBuilder = navigationSource.GetReadLink();
@@ -150,25 +144,21 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("instanceContext");
             }
 
-            if (_idLinkBuilder == null)
-            {
-                if (metadataLevel == ODataMetadataLevel.Default)
-                {
-                    throw Error.InvalidOperation(SRResources.NoIdLinkFactoryFound, _navigationSourceName);
-                }
-
-                return null;
-            }
-
-            if (IsDefaultOrFull(metadataLevel) || (IsMinimal(metadataLevel) && !_idLinkBuilder.FollowsConventions))
+            if (_idLinkBuilder != null &&
+                (metadataLevel == ODataMetadataLevel.FullMetadata ||
+                (metadataLevel == ODataMetadataLevel.MinimalMetadata && !_idLinkBuilder.FollowsConventions)))
             {
                 return _idLinkBuilder.Factory(instanceContext);
             }
-            else
-            {
-                // client can infer it and didn't ask for it.
-                return null;
-            }
+
+            // Return null to let ODL decide when and how to build the id link.
+            return null;
+        }
+
+        // Build an id link unconditionally, it doesn't depend on metadata level but does require a non-null link builder.
+        internal Uri BuildIdLink(EntityInstanceContext instanceContext)
+        {
+            return BuildIdLink(instanceContext, ODataMetadataLevel.FullMetadata);
         }
 
         /// <summary>
@@ -181,24 +171,23 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("instanceContext");
             }
 
-            if (_editLinkBuilder == null)
-            {
-                // edit link is the same as id link. emit only in default metadata mode.
-                if (metadataLevel == ODataMetadataLevel.Default)
-                {
-                    return idLink;
-                }
-            }
-            else if (IsDefaultOrFull(metadataLevel) ||
-                (IsMinimal(metadataLevel) && !_editLinkBuilder.FollowsConventions))
+            if (_editLinkBuilder != null &&
+                (metadataLevel == ODataMetadataLevel.FullMetadata ||
+                (metadataLevel == ODataMetadataLevel.MinimalMetadata && !_editLinkBuilder.FollowsConventions)))
             {
                 // edit link is the not the same as id link. Generate if the client asked for it (full metadata modes) or
                 // if the client cannot infer it (not follow conventions).
                 return _editLinkBuilder.Factory(instanceContext);
             }
 
-            // client can infer it and didn't ask for it.
+            // Return null to let ODL decide when and how to build the edit link.
             return null;
+        }
+
+        // Build an edit link unconditionally, it doesn't depend on metadata level but does require a non-null link builder.
+        internal Uri BuildEditLink(EntityInstanceContext instanceContext)
+        {
+            return BuildEditLink(instanceContext, ODataMetadataLevel.FullMetadata, null);
         }
 
         /// <summary>
@@ -211,24 +200,23 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("instanceContext");
             }
 
-            if (_readLinkBuilder == null)
-            {
-                // read link is the same as edit link. emit only in default metadata mode.
-                if (metadataLevel == ODataMetadataLevel.Default)
-                {
-                    return editLink;
-                }
-            }
-            else if (IsDefaultOrFull(metadataLevel) ||
-                (IsMinimal(metadataLevel) && !_readLinkBuilder.FollowsConventions))
+            if (_readLinkBuilder != null &&
+                (metadataLevel == ODataMetadataLevel.FullMetadata ||
+                (metadataLevel == ODataMetadataLevel.MinimalMetadata && !_readLinkBuilder.FollowsConventions)))
             {
                 // read link is not the same as edit link. Generate if the client asked for it (full metadata modes) or
                 // if the client cannot infer it (not follow conventions).
                 return _readLinkBuilder.Factory(instanceContext);
             }
 
-            // client can infer it and didn't ask for it.
+            // Return null to let ODL decide when and how to build the read link.
             return null;
+        }
+
+        // Build a read link unconditionally, it doesn't depend on metadata level but does require a non-null link builder.
+        internal Uri BuildReadLink(EntityInstanceContext instanceContext)
+        {
+            return BuildReadLink(instanceContext, ODataMetadataLevel.FullMetadata, null);
         }
 
         /// <summary>
@@ -247,36 +235,21 @@ namespace System.Web.OData.Builder
             }
 
             NavigationLinkBuilder navigationLinkBuilder;
-            if (!_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder))
-            {
-                if (metadataLevel == ODataMetadataLevel.Default)
-                {
-                    throw Error.Argument("navigationProperty", SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _navigationSourceName);
-                }
-
-                return null;
-            }
-
-            if (IsDefaultOrFull(metadataLevel) ||
-                (IsMinimal(metadataLevel) && !navigationLinkBuilder.FollowsConventions))
+            if (_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder) &&
+                (metadataLevel == ODataMetadataLevel.FullMetadata ||
+                (metadataLevel == ODataMetadataLevel.MinimalMetadata && !navigationLinkBuilder.FollowsConventions)))
             {
                 return navigationLinkBuilder.Factory(instanceContext, navigationProperty);
             }
-            else
-            {
-                // client can infer it and didn't ask for it.
-                return null;
-            }
+
+            // Return null to let ODL decide when and how to build the navigation link.
+            return null;
         }
 
-        private static bool IsDefaultOrFull(ODataMetadataLevel level)
+        // Build a naviation link unconditionally, it doesn't depend on metadata level but does require a non-null link builder.
+        internal Uri BuildNavigationLink(EntityInstanceContext instanceContext, IEdmNavigationProperty navigationProperty)
         {
-            return level == ODataMetadataLevel.Default || level == ODataMetadataLevel.FullMetadata;
-        }
-
-        private static bool IsMinimal(ODataMetadataLevel level)
-        {
-            return level == ODataMetadataLevel.MinimalMetadata;
+            return BuildNavigationLink(instanceContext, navigationProperty, ODataMetadataLevel.FullMetadata);
         }
     }
 }

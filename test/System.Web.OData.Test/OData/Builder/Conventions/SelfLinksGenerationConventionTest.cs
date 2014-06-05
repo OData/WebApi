@@ -69,7 +69,7 @@ namespace System.Web.OData.Builder.Conventions
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Contoso" });
 
-            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
+            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.FullMetadata);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')", selfLinks.IdLink.ToString());
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')/System.Web.OData.Builder.TestModels.Car", selfLinks.EditLink.ToString());
@@ -92,7 +92,7 @@ namespace System.Web.OData.Builder.Conventions
             var entityContext = new EntityInstanceContext(serializerContext, carType.AsReference(), new Car { Model = 2014, Name = "Contoso" });
 
             // Act
-            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
+            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.FullMetadata);
 
             // Assert
             Assert.Equal("http://localhost/MyVehicle", selfLinks.IdLink.ToString());
@@ -114,7 +114,7 @@ namespace System.Web.OData.Builder.Conventions
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
             var entityContext = new EntityInstanceContext(serializerContext, sportbikeType.AsReference(), new SportBike { Model = 2009, Name = "Ninja" });
 
-            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
+            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.FullMetadata);
 
             Assert.Equal("http://localhost/motorcycles(Model=2009,Name='Ninja')", selfLinks.IdLink.ToString());
         }
@@ -136,7 +136,7 @@ namespace System.Web.OData.Builder.Conventions
             var entityContext = new EntityInstanceContext(serializerContext, sportbikeType.AsReference(), new SportBike { Model = 2014, Name = "Ninja" });
 
             // Act
-            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
+            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.FullMetadata);
 
             // Assert
             Assert.Equal("http://localhost/MyMotor", selfLinks.IdLink.ToString());

@@ -240,7 +240,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataCollectionValue value = new ODataCollectionValue();
 
             // Act
-            ODataCollectionSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.Default);
+            ODataCollectionSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.MinimalMetadata);
 
             // Assert
             Assert.Null(value.GetAnnotation<SerializationTypeNameAnnotation>());
@@ -285,7 +285,6 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(TestODataMetadataLevel.Default, false)]
         [InlineData(TestODataMetadataLevel.FullMetadata, true)]
         [InlineData(TestODataMetadataLevel.MinimalMetadata, false)]
         [InlineData(TestODataMetadataLevel.NoMetadata, true)]

@@ -9,10 +9,8 @@ namespace System.Web.OData.Formatter.Serialization
 {
     public class ODataEnumTypeSerializerTests
     {
-        [Theory]
-        [InlineData(ODataMetadataLevel.Default)]
-        [InlineData(ODataMetadataLevel.MinimalMetadata)]
-        public void AddTypeNameAnnotationAsNeeded_DoesNotAddAnnotation(ODataMetadataLevel metadataLevel)
+        [Fact]
+        public void AddTypeNameAnnotationAsNeeded_DoesNotAddAnnotation()
         {
             // Arrange
             ODataEnumValue enumValue = new ODataEnumValue("value");
@@ -20,7 +18,7 @@ namespace System.Web.OData.Formatter.Serialization
                 new EdmEnumType("TestModel", "EnumType"), isNullable: false);
 
             // Act
-            ODataEnumSerializer.AddTypeNameAnnotationAsNeeded(enumValue, enumType, metadataLevel);
+            ODataEnumSerializer.AddTypeNameAnnotationAsNeeded(enumValue, enumType, ODataMetadataLevel.MinimalMetadata);
 
             // Assert
             SerializationTypeNameAnnotation annotation = enumValue.GetAnnotation<SerializationTypeNameAnnotation>();

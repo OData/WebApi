@@ -11,7 +11,7 @@ namespace System.Web.OData.Builder
     public class SingletonLinkConfigurationTest
     {
         [Fact]
-        public void Singleton_CanConfigureAllLinksViaIdLink()
+        public void Singleton_CanOnlyConfigureIdLinkViaIdLinkFactory()
         {
             // Arrange
             ODataModelBuilder builder = GetSingletonModel();
@@ -31,15 +31,13 @@ namespace System.Web.OData.Builder
             var linkBuilderAnnotation = new NavigationSourceLinkBuilderAnnotation(exchange);
 
             // Act
-            var selfLinks = linkBuilderAnnotation.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
+            var selfLinks = linkBuilderAnnotation.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.FullMetadata);
 
             // Assert
-            Assert.NotNull(selfLinks.EditLink);
-            Assert.Equal(ExpectedEditLink, selfLinks.EditLink.ToString());
-            Assert.NotNull(selfLinks.ReadLink);
-            Assert.Equal(ExpectedEditLink, selfLinks.ReadLink.ToString());
             Assert.NotNull(selfLinks.IdLink);
             Assert.Equal(ExpectedEditLink, selfLinks.IdLink.ToString());
+            Assert.Null(selfLinks.ReadLink);
+            Assert.Null(selfLinks.EditLink);
         }
 
         [Fact]
@@ -93,28 +91,6 @@ namespace System.Web.OData.Builder
             Assert.Null(exchange.GetEditLink());
             Assert.Null(exchange.GetReadLink());
             Assert.Null(exchange.GetIdLink());
-        }
-
-        [Fact]
-        public void FailingToConfigureNavigationLinks_Results_In_ArgumentException_When_BuildingNavigationLink()
-        {
-            // Arrange
-            ODataModelBuilder builder = GetSingletonModel();
-            builder.Singleton<SingletonProduct>("Exchange").HasManyBinding(p => p.Orders, "Orders");
-            builder.EntitySet<SingletonOrder>("Orders").EntityType.HasKey(p => p.ID);
-            var model = builder.GetEdmModel();
-
-            IEdmSingleton exchange = model.EntityContainer.FindSingleton("Exchange");
-            IEdmNavigationProperty ordersProperty = exchange.EntityType().DeclaredNavigationProperties().Single();
-            var linkBuilder = model.GetNavigationSourceLinkBuilder(exchange);
-
-            // Act & Assert
-            Assert.ThrowsArgument(
-                () => linkBuilder.BuildNavigationLink(new EntityInstanceContext(), ordersProperty, ODataMetadataLevel.Default),
-                "navigationProperty",
-                "No NavigationLink factory was found for the navigation property 'Orders' from entity type " +
-                "'System.Web.OData.Builder.SingletonProduct' on entity set or singleton 'Exchange'. " +
-                "Try calling HasNavigationPropertyLink on the NavigationSourceConfiguration.");
         }
 
         private ODataModelBuilder GetSingletonModel()

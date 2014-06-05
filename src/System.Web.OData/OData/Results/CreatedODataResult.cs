@@ -152,10 +152,15 @@ namespace System.Web.OData.Results
             NavigationSourceLinkBuilderAnnotation linkBuilder = entityContext.EdmModel.GetNavigationSourceLinkBuilder(entityContext.NavigationSource);
             Contract.Assert(linkBuilder != null);
 
-            Uri idLink = linkBuilder.BuildIdLink(entityContext, ODataMetadataLevel.Default);
-            Uri editLink = linkBuilder.BuildEditLink(entityContext, ODataMetadataLevel.Default, idLink);
+            Uri idLink = linkBuilder.BuildIdLink(entityContext);
+            Uri editLink = linkBuilder.BuildEditLink(entityContext);
             if (editLink == null)
             {
+                if (idLink != null)
+                {
+                    return idLink;
+                }
+
                 throw Error.InvalidOperation(SRResources.EditLinkNullForLocationHeader, entityContext.NavigationSource.Name);
             }
 
@@ -187,7 +192,7 @@ namespace System.Web.OData.Results
                 NavigationSource = navigationSource,
                 Model = model,
                 Url = request.GetUrlHelper() ?? new UrlHelper(request),
-                MetadataLevel = ODataMetadataLevel.Default,
+                MetadataLevel = ODataMetadataLevel.FullMetadata, // Used internally to always calculate the links.
                 Request = request,
                 RequestContext = request.GetRequestContext(),
                 Path = path

@@ -85,7 +85,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             ODataMetadataLevel metadataLevel = writeContext != null
                 ? writeContext.MetadataLevel
-                : ODataMetadataLevel.Default;
+                : ODataMetadataLevel.MinimalMetadata;
             AddTypeNameAnnotationAsNeeded(enumValue, enumType, metadataLevel);
 
             return enumValue;
@@ -97,9 +97,6 @@ namespace System.Web.OData.Formatter.Serialization
             // null when values should not be serialized. The TypeName property is different and should always be
             // provided to ODataLib to enable model validation. A separate annotation is used to decide whether or not
             // to serialize the type name (a null value prevents serialization).
-
-            // Note that this annotation should not be used for Atom or JSON verbose formats, as it will interfere with
-            // the correct default behavior for those formats.
 
             Contract.Assert(enumValue != null);
 
@@ -129,7 +126,6 @@ namespace System.Web.OData.Formatter.Serialization
         {
             switch (metadataLevel)
             {
-                case ODataMetadataLevel.Default:
                 case ODataMetadataLevel.MinimalMetadata:
                     return false;
                 case ODataMetadataLevel.FullMetadata:
@@ -141,7 +137,6 @@ namespace System.Web.OData.Formatter.Serialization
 
         private static bool ShouldSuppressTypeNameSerialization(ODataMetadataLevel metadataLevel)
         {
-            Contract.Assert(metadataLevel != ODataMetadataLevel.Default);
             Contract.Assert(metadataLevel != ODataMetadataLevel.MinimalMetadata);
 
             switch (metadataLevel)

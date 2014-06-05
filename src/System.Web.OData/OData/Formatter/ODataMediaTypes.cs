@@ -111,18 +111,19 @@ namespace System.Web.OData.Formatter
         {
             if (contentType == null)
             {
-                return ODataMetadataLevel.Default;
+                return ODataMetadataLevel.MinimalMetadata;
             }
 
             if (!String.Equals(ODataMediaTypes.ApplicationJson.MediaType, contentType.MediaType,
                 StringComparison.Ordinal))
             {
-                return ODataMetadataLevel.Default;
+                return ODataMetadataLevel.MinimalMetadata;
             }
 
             Contract.Assert(contentType.Parameters != null);
-            NameValueHeaderValue odataParameter = contentType.Parameters.FirstOrDefault((p) => String.Equals("odata.metadata",
-                p.Name, StringComparison.OrdinalIgnoreCase));
+            NameValueHeaderValue odataParameter =
+                contentType.Parameters.FirstOrDefault(
+                    (p) => String.Equals("odata.metadata", p.Name, StringComparison.OrdinalIgnoreCase));
 
             if (odataParameter != null)
             {
@@ -136,6 +137,7 @@ namespace System.Web.OData.Formatter
                 }
             }
 
+            // Minimal is the default metadata level
             return ODataMetadataLevel.MinimalMetadata;
         }
     }

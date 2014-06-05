@@ -72,10 +72,8 @@ namespace System.Web.OData.Formatter.Serialization
         public virtual ODataPrimitiveValue CreateODataPrimitiveValue(object graph, IEdmPrimitiveTypeReference primitiveType,
             ODataSerializerContext writeContext)
         {
-            ODataMetadataLevel metadataLevel = writeContext != null ? writeContext.MetadataLevel : ODataMetadataLevel.Default;
-
             // TODO: Bug 467598: validate the type of the object being passed in here with the underlying primitive type. 
-            return CreatePrimitive(graph, primitiveType, metadataLevel);
+            return CreatePrimitive(graph, primitiveType, writeContext);
         }
 
         internal static void AddTypeNameAnnotationAsNeeded(ODataPrimitiveValue primitive, IEdmPrimitiveTypeReference primitiveType,
@@ -86,46 +84,25 @@ namespace System.Web.OData.Formatter.Serialization
             // provided to ODataLib to enable model validation. A separate annotation is used to decide whether or not
             // to serialize the type name (a null value prevents serialization).
 
-            // Note that this annotation should not be used for Atom or JSON verbose formats, as it will interfere with
-            // the correct default behavior for those formats.
-
             Contract.Assert(primitive != null);
 
             object value = primitive.Value;
+            string typeName = null; // Set null to force the type name not to serialize.
 
-            // Only add an annotation if we want to override ODataLib's default type name serialization behavior.
-            if (ShouldAddTypeNameAnnotation(metadataLevel))
+            // Provide the type name to serialize.
+            if (!ShouldSuppressTypeNameSerialization(value, metadataLevel))
             {
-                string typeName;
-
-                // Provide the type name to serialize (or null to force it not to serialize).
-                if (ShouldSuppressTypeNameSerialization(value, metadataLevel))
-                {
-                    typeName = null;
-                }
-                else
-                {
-                    typeName = primitiveType.FullName();
-                }
-
-                primitive.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
-                {
-                    TypeName = typeName
-                });
+                typeName = primitiveType.FullName();
             }
-        }
 
-        private static bool ShouldAddTypeNameAnnotation(ODataMetadataLevel metadataLevel)
-        {
-            // Don't interfere with the correct default behavior in non-JSON light formats.
-            // In all JSON light modes, take control of type name serialization.
-            // For primitives (unlike other types), the default behavior does not matches the requirements for minimal
-            // metadata mode, so the annotation is needed even in minimal metadata mode.
-            return metadataLevel != ODataMetadataLevel.Default;
+            primitive.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
+            {
+                TypeName = typeName
+            });
         }
 
         internal static ODataPrimitiveValue CreatePrimitive(object value, IEdmPrimitiveTypeReference primitveType,
-            ODataMetadataLevel metadataLevel)
+            ODataSerializerContext writeContext)
         {
             if (value == null)
             {
@@ -134,7 +111,12 @@ namespace System.Web.OData.Formatter.Serialization
 
             object supportedValue = ConvertUnsupportedPrimitives(value);
             ODataPrimitiveValue primitive = new ODataPrimitiveValue(supportedValue);
-            AddTypeNameAnnotationAsNeeded(primitive, primitveType, metadataLevel);
+
+            if (writeContext != null)
+            {
+                AddTypeNameAnnotationAsNeeded(primitive, primitveType, writeContext.MetadataLevel);
+            }
+
             return primitive;
         }
 
@@ -211,21 +193,13 @@ namespace System.Web.OData.Formatter.Serialization
 
         internal static bool ShouldSuppressTypeNameSerialization(object value, ODataMetadataLevel metadataLevel)
         {
-            Contract.Assert(metadataLevel != ODataMetadataLevel.Default);
-
-            switch (metadataLevel)
+            // For dynamic properties in minimal metadata level, the type name always appears as declared property.
+            if (metadataLevel != ODataMetadataLevel.FullMetadata)
             {
-                case ODataMetadataLevel.NoMetadata:
-                    return true;
-                case ODataMetadataLevel.MinimalMetadata:
-                    // Currently open properties are not supported, so the type for each property always appears in
-                    // metadata.
-                    const bool PropertyTypeAppearsInMetadata = true;
-                    return PropertyTypeAppearsInMetadata;
-                case ODataMetadataLevel.FullMetadata:
-                default: // All values already specified; just keeping the compiler happy.
-                    return CanTypeBeInferredInJson(value);
+                return true;
             }
+
+            return CanTypeBeInferredInJson(value);
         }
     }
 }

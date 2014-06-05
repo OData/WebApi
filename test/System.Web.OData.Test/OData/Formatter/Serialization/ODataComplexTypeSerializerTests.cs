@@ -414,7 +414,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataComplexValue value = new ODataComplexValue();
 
             // Act
-            ODataComplexTypeSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.Default);
+            ODataComplexTypeSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.MinimalMetadata);
 
             // Assert
             Assert.Null(value.GetAnnotation<SerializationTypeNameAnnotation>());
@@ -459,7 +459,6 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(TestODataMetadataLevel.Default, false)]
         [InlineData(TestODataMetadataLevel.FullMetadata, true)]
         [InlineData(TestODataMetadataLevel.MinimalMetadata, false)]
         [InlineData(TestODataMetadataLevel.NoMetadata, true)]

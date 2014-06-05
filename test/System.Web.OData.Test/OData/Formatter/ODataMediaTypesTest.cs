@@ -184,7 +184,7 @@ namespace System.Web.OData.Formatter
         }
 
         [Theory]
-        [InlineData("application/xml", ODataMetadataLevel.Default)]
+        [InlineData("application/xml", ODataMetadataLevel.MinimalMetadata)]
         [InlineData("application/json;randomparameter=randomvalue", ODataMetadataLevel.MinimalMetadata)]
         [InlineData("application/json;odata.metadata=full", ODataMetadataLevel.FullMetadata)]
         [InlineData("application/json;odata.metadata=none", ODataMetadataLevel.NoMetadata)]
@@ -193,7 +193,7 @@ namespace System.Web.OData.Formatter
         [InlineData("application/json;odata.metadata=none", ODataMetadataLevel.NoMetadata)]
         [InlineData("application/json", ODataMetadataLevel.MinimalMetadata)]
         [InlineData("application/json;randomparameter=randomvalue", ODataMetadataLevel.MinimalMetadata)]
-        [InlineData("application/random", ODataMetadataLevel.Default)]
+        [InlineData("application/random", ODataMetadataLevel.MinimalMetadata)]
         public void GetMetadataLevel_Returns_Correct_MetadataLevel(string contentType, object metadataLevel)
         {
             Assert.Equal(

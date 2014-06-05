@@ -450,9 +450,12 @@ namespace System.Web.OData.Formatter.Serialization
             ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, ordersProperty);
             TruncatedCollection<Order> orders = new TruncatedCollection<Order>(new[] { new Order(), new Order() }, pageSize: 1);
 
-            Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
-            linkBuilder.Setup(l => l.BuildNavigationLink(entity, ordersProperty, ODataMetadataLevel.Default)).Returns(new Uri("http://navigation-link/"));
-            model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
+            NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation();
+            linkBuilder.AddNavigationPropertyLinkBuilder(ordersProperty,
+                new NavigationLinkBuilder((entityContext, navigationProperty) => new Uri("http://navigation-link/"),
+                    false));
+
+            model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder);
             model.Model.SetNavigationSourceLinkBuilder(model.Orders, new NavigationSourceLinkBuilderAnnotation());
 
             // Act

@@ -147,20 +147,6 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void AddTypeNameAnnotationAsNeeded_DoesNotAddAnnotation_InDefaultMetadataMode()
-        {
-            // Arrange
-            IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
-            ODataPrimitiveValue primitive = new ODataPrimitiveValue(0);
-
-            // Act
-            ODataPrimitiveSerializer.AddTypeNameAnnotationAsNeeded(primitive, edmPrimitiveType, ODataMetadataLevel.Default);
-
-            // Assert
-            Assert.Null(primitive.GetAnnotation<SerializationTypeNameAnnotation>());
-        }
-
-        [Fact]
         public void AddTypeNameAnnotationAsNeeded_AddsAnnotation_InJsonLightMetadataMode()
         {
             // Arrange
@@ -199,7 +185,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Act
             IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
-            ODataValue value = ODataPrimitiveSerializer.CreatePrimitive(null, edmPrimitiveType, ODataMetadataLevel.Default);
+            ODataValue value = ODataPrimitiveSerializer.CreatePrimitive(null, edmPrimitiveType, writeContext: null);
 
             // Assert
             Assert.Null(value);

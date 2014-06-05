@@ -168,9 +168,6 @@ namespace System.Web.OData.Formatter.Serialization
             // provided to ODataLib to enable model validation. A separate annotation is used to decide whether or not
             // to serialize the type name (a null value prevents serialization).
 
-            // Note that this annotation should not be used for Atom or JSON verbose formats, as it will interfere with
-            // the correct default behavior for those formats.
-
             Contract.Assert(value != null);
 
             // Only add an annotation if we want to override ODataLib's default type name serialization behavior.
@@ -199,8 +196,6 @@ namespace System.Web.OData.Formatter.Serialization
         {
             switch (metadataLevel)
             {
-                // Don't interfere with the correct default behavior in non-JSON light formats.
-                case ODataMetadataLevel.Default:
                 // For collections, the default behavior matches the requirements for minimal metadata mode, so no
                 // annotation is necessary.
                 case ODataMetadataLevel.MinimalMetadata:
@@ -215,7 +210,6 @@ namespace System.Web.OData.Formatter.Serialization
 
         internal static bool ShouldSuppressTypeNameSerialization(ODataMetadataLevel metadataLevel)
         {
-            Contract.Assert(metadataLevel != ODataMetadataLevel.Default);
             Contract.Assert(metadataLevel != ODataMetadataLevel.MinimalMetadata);
 
             switch (metadataLevel)

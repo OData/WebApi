@@ -8,9 +8,9 @@ namespace System.Web.OData.Formatter
     public enum ODataMetadataLevel
     {
         /// <summary>
-        /// Normal metadata; used for anything other than JSON.
+        /// JSON minimal metadata.
         /// </summary>
-        Default = 0,
+        MinimalMetadata = 0,
 
         /// <summary>
         /// JSON full metadata.
@@ -18,13 +18,8 @@ namespace System.Web.OData.Formatter
         FullMetadata = 1,
 
         /// <summary>
-        /// JSON minimal metadata.
-        /// </summary>
-        MinimalMetadata = 2,
-
-        /// <summary>
         /// JSON no metadata.
         /// </summary>
-        NoMetadata = 3
+        NoMetadata = 2
     }
 }

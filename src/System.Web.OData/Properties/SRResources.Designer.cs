@@ -1105,15 +1105,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No IdLink factory was found. Try calling HasIdLink on the NavigationSourceConfiguration for &apos;{0}&apos;..
-        /// </summary>
-        internal static string NoIdLinkFactoryFound {
-            get {
-                return ResourceManager.GetString("NoIdLinkFactoryFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No key name was found at {0} in segment &apos;{1}&apos;..
         /// </summary>
         internal static string NoKeyNameFoundInSegment {
@@ -1137,15 +1128,6 @@ namespace System.Web.OData.Properties {
         internal static string NoMatchingResource {
             get {
                 return ResourceManager.GetString("NoMatchingResource", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No NavigationLink factory was found for the navigation property &apos;{0}&apos; from entity type &apos;{1}&apos; on entity set or singleton &apos;{2}&apos;. Try calling HasNavigationPropertyLink on the NavigationSourceConfiguration..
-        /// </summary>
-        internal static string NoNavigationLinkFactoryFound {
-            get {
-                return ResourceManager.GetString("NoNavigationLinkFactoryFound", resourceCulture);
             }
         }
         

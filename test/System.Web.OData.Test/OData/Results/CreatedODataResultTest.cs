@@ -263,9 +263,9 @@ namespace System.Web.OData.Results
             Uri idLink = new Uri("http://id-link");
             Uri editLink = idLink;
             Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
-            linkBuilder.Setup(b => b.BuildIdLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.Default))
+            linkBuilder.Setup(b => b.BuildIdLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata))
                 .Returns(idLink);
-            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.Default, idLink))
+            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata, idLink))
                 .Returns(editLink);
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
@@ -309,7 +309,7 @@ namespace System.Web.OData.Results
             // Arrange
             Uri editLink = new Uri("http://edit-link");
             Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
-            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.Default, null))
+            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata, null))
                 .Returns(editLink);
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
@@ -337,7 +337,7 @@ namespace System.Web.OData.Results
             // Arrange
             Uri editLink = new Uri("http://edit-link");
             Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
-            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.Default, null))
+            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata, null))
                 .Returns(editLink);
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
@@ -355,7 +355,7 @@ namespace System.Web.OData.Results
 
             // Assert
             linkBuilder.Verify(
-                (b) => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.Default, null),
+                (b) => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata, null),
                 Times.Once());
         }
 

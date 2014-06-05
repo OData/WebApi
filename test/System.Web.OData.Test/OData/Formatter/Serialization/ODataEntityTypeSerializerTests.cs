@@ -1036,19 +1036,6 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void AddTypeNameAnnotationAsNeeded_DoesNotAddAnnotation_InDefaultMetadataMode()
-        {
-            // Arrange
-            ODataEntry entry = new ODataEntry();
-
-            // Act
-            ODataEntityTypeSerializer.AddTypeNameAnnotationAsNeeded(entry, null, ODataMetadataLevel.Default);
-
-            // Assert
-            Assert.Null(entry.GetAnnotation<SerializationTypeNameAnnotation>());
-        }
-
-        [Fact]
         public void AddTypeNameAnnotationAsNeeded_AddsAnnotation_IfTypeOfPathDoesNotMatchEntryType()
         {
             // Arrange
@@ -1084,21 +1071,6 @@ namespace System.Web.OData.Formatter.Serialization
             SerializationTypeNameAnnotation annotation = entry.GetAnnotation<SerializationTypeNameAnnotation>();
             Assert.NotNull(annotation); // Guard
             Assert.Null(annotation.TypeName);
-        }
-
-        [Theory]
-        [InlineData(TestODataMetadataLevel.Default, false)]
-        [InlineData(TestODataMetadataLevel.FullMetadata, true)]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata, true)]
-        [InlineData(TestODataMetadataLevel.NoMetadata, true)]
-        public void ShouldAddTypeNameAnnotation(TestODataMetadataLevel metadataLevel, bool expectedResult)
-        {
-            // Act
-            bool actualResult = ODataEntityTypeSerializer.ShouldAddTypeNameAnnotation(
-                (ODataMetadataLevel)metadataLevel);
-
-            // Assert
-            Assert.Equal(expectedResult, actualResult);
         }
 
         [Theory]
@@ -1243,10 +1215,8 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Null(actualAction);
         }
 
-        [Theory]
-        [InlineData(TestODataMetadataLevel.Default)]
-        [InlineData(TestODataMetadataLevel.FullMetadata)]
-        public void CreateODataAction_IncludesTitle(TestODataMetadataLevel metadataLevel)
+        [Fact]
+        public void CreateODataAction_IncludesTitle()
         {
             // Arrange
             string expectedActionName = "Action";
@@ -1262,7 +1232,7 @@ namespace System.Web.OData.Formatter.Serialization
             UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
             EntityInstanceContext context = CreateContext(model, url);
-            context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
+            context.SerializerContext.MetadataLevel = (ODataMetadataLevel)TestODataMetadataLevel.FullMetadata;
 
             // Act
             ODataAction actualAction = _serializer.CreateODataAction(action, context);
@@ -1300,8 +1270,6 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(TestODataMetadataLevel.Default, false)]
-        [InlineData(TestODataMetadataLevel.Default, true)]
         [InlineData(TestODataMetadataLevel.FullMetadata, false)]
         [InlineData(TestODataMetadataLevel.FullMetadata, true)]
         [InlineData(TestODataMetadataLevel.MinimalMetadata, false)]
@@ -1378,8 +1346,6 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(TestODataMetadataLevel.Default, false, false)]
-        [InlineData(TestODataMetadataLevel.Default, true, false)]
         [InlineData(TestODataMetadataLevel.FullMetadata, false, false)]
         [InlineData(TestODataMetadataLevel.FullMetadata, true, false)]
         [InlineData(TestODataMetadataLevel.MinimalMetadata, false, false)]

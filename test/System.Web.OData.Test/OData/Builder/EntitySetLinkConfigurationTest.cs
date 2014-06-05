@@ -12,7 +12,7 @@ namespace System.Web.OData.Builder
     public class EntitySetLinkConfigurationTest
     {
         [Fact]
-        public void CanConfigureAllLinksViaIdLink()
+        public void CanConfigureOnIdLinkViaIdLinkFactory()
         {
             // Arrange
             ODataModelBuilder builder = GetCommonModel();
@@ -36,13 +36,11 @@ namespace System.Web.OData.Builder
             var linkBuilderAnnotation = new NavigationSourceLinkBuilderAnnotation(actor);
 
             // Act
-            var selfLinks = linkBuilderAnnotation.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
+            var selfLinks = linkBuilderAnnotation.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.FullMetadata);
 
             // Assert
-            Assert.NotNull(selfLinks.EditLink);
-            Assert.Equal(expectedEditLink, selfLinks.EditLink.ToString());
-            Assert.NotNull(selfLinks.ReadLink);
-            Assert.Equal(expectedEditLink, selfLinks.ReadLink.ToString());
+            Assert.Null(selfLinks.EditLink);
+            Assert.Null(selfLinks.ReadLink);
             Assert.NotNull(selfLinks.IdLink);
             Assert.Equal(expectedEditLink, selfLinks.IdLink.ToString());
         }
@@ -113,26 +111,6 @@ namespace System.Web.OData.Builder
             Assert.Null(actor.GetEditLink());
             Assert.Null(actor.GetReadLink());
             Assert.Null(actor.GetIdLink());
-        }
-
-        [Fact]
-        public void FailingToConfigureNavigationLinks_Results_In_ArgumentException_When_BuildingNavigationLink()
-        {
-            // Arrange
-            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
-            builder.EntitySet<EntitySetLinkConfigurationTest_Product>("Products").HasManyBinding(p => p.Orders, "Orders");
-            var model = builder.GetEdmModel();
-
-            IEdmEntitySet products = model.EntityContainer.EntitySets().Single(s => s.Name == "Products");
-            IEdmNavigationProperty ordersProperty = products.EntityType().DeclaredNavigationProperties().Single();
-            var linkBuilder = model.GetNavigationSourceLinkBuilder(products);
-
-            // Act & Assert
-            Assert.ThrowsArgument(
-                () => linkBuilder.BuildNavigationLink(new EntityInstanceContext(), ordersProperty, ODataMetadataLevel.Default),
-                "navigationProperty",
-                "No NavigationLink factory was found for the navigation property 'Orders' from entity type 'System.Web.OData.Builder.EntitySetLinkConfigurationTest_Product' on entity set or singleton 'Products'. " +
-                "Try calling HasNavigationPropertyLink on the NavigationSourceConfiguration.");
         }
 
         private ODataModelBuilder GetCommonModel()

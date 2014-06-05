@@ -191,7 +191,7 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedEntity.NavigationSource;
             NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
             Uri navigationLink =
-                linkBuilder.BuildNavigationLink(writeContext.ExpandedEntity, writeContext.NavigationProperty, ODataMetadataLevel.Default);
+                linkBuilder.BuildNavigationLink(writeContext.ExpandedEntity, writeContext.NavigationProperty);
 
             if (navigationLink != null)
             {

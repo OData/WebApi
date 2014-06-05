@@ -297,7 +297,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(model.GetNavigationSourceLinkBuilder(edmContoso));
             Assert.Equal(
                 "http://works/",
-                model.GetNavigationSourceLinkBuilder(edmContoso).BuildNavigationLink(new EntityInstanceContext(), edmNavProperty, ODataMetadataLevel.Default).AbsoluteUri);
+                model.GetNavigationSourceLinkBuilder(edmContoso).BuildNavigationLink(new EntityInstanceContext(), edmNavProperty, ODataMetadataLevel.FullMetadata).AbsoluteUri);
         }
 
         [Fact]

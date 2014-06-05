@@ -246,9 +246,6 @@
   <data name="MappingDoesNotContainEntityType" xml:space="preserve">
     <value>The provided mapping does not contain an entry for the entity type '{0}'.</value>
   </data>
-  <data name="NoIdLinkFactoryFound" xml:space="preserve">
-    <value>No IdLink factory was found. Try calling HasIdLink on the NavigationSourceConfiguration for '{0}'.</value>
-  </data>
   <data name="ManyToManyNavigationPropertyMustReturnCollection" xml:space="preserve">
     <value>The property '{0}' on the type '{1}' is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections.</value>
   </data>
@@ -281,9 +278,6 @@
   </data>
   <data name="MaxNodeLimitExceeded" xml:space="preserve">
     <value>The node count limit of '{0}' has been exceeded. To increase the limit, set the '{1}' property on EnableQueryAttribute or ODataValidationSettings.</value>
-  </data>
-  <data name="NoNavigationLinkFactoryFound" xml:space="preserve">
-    <value>No NavigationLink factory was found for the navigation property '{0}' from entity type '{1}' on entity set or singleton '{2}'. Try calling HasNavigationPropertyLink on the NavigationSourceConfiguration.</value>
   </data>
   <data name="InvalidEntitySetName" xml:space="preserve">
     <value>'{0}' is not a valid entity set name.</value>

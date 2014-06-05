@@ -25,8 +25,6 @@ namespace System.Web.OData.Formatter.Deserialization
             // Arrange
             const string expect = "{" +
                 "\"@odata.context\":\"http://localhost/odata/$metadata#Boss\"," +
-                "\"@odata.id\":\"http://localhost/odata/Boss\"," +
-                "\"@odata.editLink\":\"http://localhost/odata/Boss\"," +
                 "\"EmployeeId\":987,\"EmployeeName\":\"John Mountain\"}";
 
             IEdmModel model = GetEdmModel();

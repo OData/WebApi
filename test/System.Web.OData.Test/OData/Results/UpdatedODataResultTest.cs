@@ -122,7 +122,7 @@ namespace System.Web.OData.Results
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.TryAddWithoutValidation("Prefer", "return-no-content");
+            request.Headers.TryAddWithoutValidation("Prefer", "return=minimal");
             UpdatedODataResult<TestEntity> updatedODataResult = new UpdatedODataResult<TestEntity>(_entity,
                 _contentNegotiator, request, _formatters);
 
@@ -140,7 +140,7 @@ namespace System.Web.OData.Results
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.TryAddWithoutValidation("Prefer", "return-content");
+            request.Headers.TryAddWithoutValidation("Prefer", "return=representation");
             UpdatedODataResult<TestEntity> updatedODataResult = new UpdatedODataResult<TestEntity>(_entity,
                 _contentNegotiator, request, _formatters);
 

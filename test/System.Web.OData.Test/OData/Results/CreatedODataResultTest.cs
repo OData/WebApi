@@ -152,7 +152,7 @@ namespace System.Web.OData.Results
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.TryAddWithoutValidation("Prefer", "return-no-content");
+            request.Headers.TryAddWithoutValidation("Prefer", "return=minimal");
             CreatedODataResult<TestEntity> createdODataResult =
                 new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, request, _formatters, _locationHeader);
 
@@ -170,7 +170,7 @@ namespace System.Web.OData.Results
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.TryAddWithoutValidation("Prefer", "return-content");
+            request.Headers.TryAddWithoutValidation("Prefer", "return=representation");
             CreatedODataResult<TestEntity> createdODataResult =
                 new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, request, _formatters, _locationHeader);
 
@@ -261,12 +261,11 @@ namespace System.Web.OData.Results
         public void GenerateLocationHeader_UsesEntitySetLinkBuilder_ToGenerateLocationHeader()
         {
             // Arrange
-            Uri idLink = new Uri("http://id-link");
-            Uri editLink = idLink;
+            Uri editLink = new Uri("http://id-link");
             Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
-            linkBuilder.Setup(b => b.BuildIdLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata))
-                .Returns(idLink);
-            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata, idLink))
+            linkBuilder.CallBase = true;
+            linkBuilder.Setup(
+                b => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata, null))
                 .Returns(editLink);
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
@@ -385,6 +384,37 @@ namespace System.Web.OData.Results
             // Assert
             linkBuilder.Verify(
                 (b) => b.BuildEditLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata, null),
+                Times.Once());
+        }
+
+        [Fact]
+        public void Property_EntityIdHeader_IsEvaluatedLazilyAndOnlyOnce()
+        {
+            // Arrange
+            Uri idLink = new Uri("http://id-link");
+            Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
+            linkBuilder.CallBase = true;
+            linkBuilder.Setup(b => b.BuildIdLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata))
+                .Returns(idLink);
+
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
+            model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
+            ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.ODataProperties().Model = model.Model;
+            request.ODataProperties().Path = path;
+            TestController controller = new TestController { Configuration = new HttpConfiguration() };
+            CreatedODataResult<TestEntity> createdODataResult = new CreatedODataResult<TestEntity>(_entity, controller);
+
+            // Act
+            controller.Request = request;
+            Uri entityIdHeader = createdODataResult.EntityId;
+
+            // Assert
+            Assert.Same(idLink, entityIdHeader);
+            linkBuilder.Verify(
+                b => b.BuildIdLink(It.IsAny<EntityInstanceContext>(), ODataMetadataLevel.FullMetadata),
                 Times.Once());
         }
 

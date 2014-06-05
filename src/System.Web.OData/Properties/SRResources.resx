@@ -675,7 +675,7 @@
   </data>
   <data name="InvalidPropertyMapping" xml:space="preserve">
     <value>The key mapping for the property '{0}' can't be null or empty.</value>
-  </data> 	
+  </data>
   <data name="InvalidSingletonName" xml:space="preserve">
     <value>'{0}' is not a valid singleton name. The singleton name cannot contain '.'.</value>
   </data>
@@ -732,5 +732,8 @@
   </data>
   <data name="ODataPathNotFound" xml:space="preserve">
     <value>Request URI '{0}' does not contain OData path '{1}'.</value>
+  </data>
+  <data name="IdLinkNullForEntityIdHeader" xml:space="preserve">
+    <value>The Id link builder for the entity set '{0}' returned null. An Id link is required for the OData-EntityId header.</value>
   </data>
 </root>

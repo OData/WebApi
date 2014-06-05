@@ -700,6 +700,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The Id link builder for the entity set &apos;{0}&apos; returned null. An Id link is required for the OData-EntityId header..
+        /// </summary>
+        internal static string IdLinkNullForEntityIdHeader {
+            get {
+                return ResourceManager.GetString("IdLinkNullForEntityIdHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The current batch reader state &apos;{0}&apos; is invalid. The expected state is &apos;{1}&apos;..
         /// </summary>
         internal static string InvalidBatchReaderState {

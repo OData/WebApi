@@ -9,8 +9,8 @@ namespace System.Web.OData
     internal static class RequestPreferenceHelpers
     {
         private const string PreferHeaderName = "Prefer";
-        private const string ReturnContentHeaderValue = "return-content";
-        private const string ReturnNoContentHeaderValue = "return-no-content";
+        private const string ReturnContentHeaderValue = "return=representation";
+        private const string ReturnNoContentHeaderValue = "return=minimal";
 
         internal static bool RequestPrefersReturnContent(HttpRequestMessage request)
         {

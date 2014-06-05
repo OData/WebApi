@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Web.Http.Batch;
 using Microsoft.Data.OData;
 
@@ -34,5 +35,17 @@ namespace System.Web.Http.OData.Batch
         /// Gets or sets the name of the OData route associated with this batch handler.
         /// </summary>
         public string ODataRouteName { get; set; }
+
+        internal static Uri EnsureTrailingSlash(Uri uri)
+        {
+            Contract.Assert(uri != null);
+
+            if (!uri.OriginalString.EndsWith("/", StringComparison.Ordinal))
+            {
+                return new Uri(uri.OriginalString + "/");
+            }
+
+            return uri;
+        }
     }
 }

@@ -38,7 +38,7 @@ namespace System.Web.Http.OData.Batch
             {
                 DisableMessageStreamDisposal = true,
                 MessageQuotas = MessageQuotas,
-                BaseUri = GetBaseUri(request)
+                BaseUri = EnsureTrailingSlash(GetBaseUri(request))
             };
 
             ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(oDataReaderSettings, cancellationToken);

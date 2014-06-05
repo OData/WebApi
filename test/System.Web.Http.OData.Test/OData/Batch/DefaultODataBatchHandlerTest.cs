@@ -6,8 +6,12 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
+using System.Web.Http.OData;
 using System.Web.Http.OData.Batch;
+using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.Routing;
+using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http
@@ -323,6 +327,69 @@ namespace System.Web.Http
             Assert.Equal(HttpStatusCode.BadRequest, errorResponse.Response.StatusCode);
             Assert.Equal("The batch request must have a boundary specification in the \"Content-Type\" header.",
                 errorResponse.Response.Content.ReadAsAsync<HttpError>().Result.Message);
+        }
+
+        [Fact]
+        public void BatchRequest_Works_AbsoluteAndRelativeUri()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<BatchCustomer>("BatchCustomers");
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            HttpServer server = new HttpServer(configuration);
+            HttpClient client = new HttpClient(server);
+            configuration.Routes.MapODataServiceRoute("odata", "odata", model, new DefaultODataBatchHandler(server));
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/odata/$batch");
+            request.Content = new StringContent(
+@"--batch_36522ad7-fc75-4b56-8c71-56071383e77b
+Content-Type: application/http
+Content-Transfer-Encoding:binary
+
+GET http://localhost/odata/BatchCustomers(5) HTTP/1.1
+
+--batch_36522ad7-fc75-4b56-8c71-56071383e77b
+Content-Type: application/http
+Content-Transfer-Encoding:binary
+
+GET /odata/BatchCustomers(6) HTTP/1.1
+Host: localhost
+
+--batch_36522ad7-fc75-4b56-8c71-56071383e77b
+Content-Type: application/http
+Content-Transfer-Encoding:binary
+
+GET BatchCustomers(7) HTTP/1.1
+
+--batch_36522ad7-fc75-4b56-8c71-56071383e77b--
+");
+            request.Content.Headers.ContentType =
+                MediaTypeHeaderValue.Parse("multipart/mixed;boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77b");
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+            Assert.Contains("\"odata.metadata\":\"http://localhost/odata/$metadata#BatchCustomers/@Element\",\"ID\":5", responseString);
+            Assert.Contains("\"odata.metadata\":\"http://localhost/odata/$metadata#BatchCustomers/@Element\",\"ID\":6", responseString);
+            Assert.Contains("\"odata.metadata\":\"http://localhost/odata/$metadata#BatchCustomers/@Element\",\"ID\":7", responseString);
+        }
+
+        public class BatchCustomersController : ODataController
+        {
+            public IHttpActionResult Get(int key)
+            {
+                return Ok(new BatchCustomer { ID = key });
+            }
+        }
+
+        public class BatchCustomer
+        {
+            public int ID { get; set; }
         }
     }
 }

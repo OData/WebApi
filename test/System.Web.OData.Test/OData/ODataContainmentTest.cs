@@ -325,7 +325,7 @@ namespace System.Web.OData
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("http://localhost/odata/$metadata#MyOrders/ns.TopOrder/OrderLines", (string)result["@odata.context"]);
+            Assert.Equal("http://localhost/odata/$metadata#OrderLines", (string)result["@odata.context"]);
         }
 
         [Fact]

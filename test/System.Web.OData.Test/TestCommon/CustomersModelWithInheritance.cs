@@ -209,6 +209,17 @@ namespace System.Web.OData.TestCommon
             isCustomerLocal.AddParameter("entity", new EdmEntityTypeReference(customer, false));
             model.AddElement(isCustomerLocal);
 
+            EdmFunction getOrder = new EdmFunction(
+                "NS",
+                "GetOrder",
+                order.ToEdmTypeReference(false),
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: true); // Composable
+            getOrder.AddParameter("entity", new EdmEntityTypeReference(customer, false));
+            getOrder.AddParameter("orderId", intType);
+            model.AddElement(getOrder);
+
             // navigation properties
             EdmNavigationProperty ordersNavProp = customer.AddUnidirectionalNavigation(
                 new EdmNavigationPropertyInfo

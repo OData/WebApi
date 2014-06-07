@@ -143,6 +143,24 @@ namespace System.Web.OData.Routing
             Assert.Contains("\"ID\":908", responseString);
         }
 
+        [Fact]
+        public async Task AttributeRouting_QueryProperty_AfterCallUnboundFunction()
+        {
+            // Arrange
+            const string ExpectPayload = "{\r\n  \"@odata.context\":\"http://localhost/$metadata#Edm.String\",\"value\":\"Name 7\"\r\n}";
+
+            string requestUri = "http://localhost/GetConventionCustomerById(CustomerId=407)/Name";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            // Act
+            var response = await _client.SendAsync(request);
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(ExpectPayload, responseString);
+        }
+
         private IEdmModel GetEdmModel(HttpConfiguration configuration)
         {
             ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>(configuration);
@@ -166,6 +184,7 @@ namespace System.Web.OData.Routing
 
             // Top level function import with one parameter
             FunctionConfiguration getCustomersById = builder.Function("GetConventionCustomerById");
+            getCustomersById.IsComposable = true;
             getCustomersById.Parameter<int>("CustomerId");
             getCustomersById.ReturnsFromEntitySet<ConventionCustomer>("ConventionCustomers");
 
@@ -194,6 +213,18 @@ namespace System.Web.OData.Routing
         public ConventionCustomer GetConventionCustomerById([FromODataUri]int CustomerId)
         {
             return ModelDataBase.Instance.Customers.Where(c => c.ID == CustomerId).FirstOrDefault();
+        }
+
+        [ODataRoute("GetConventionCustomerById(CustomerId={CustomerId})/Name")]
+        public IHttpActionResult GetNameById([FromODataUri]int CustomerId)
+        {
+            ConventionCustomer customer = ModelDataBase.Instance.Customers.Where(c => c.ID == CustomerId).FirstOrDefault();
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(customer.Name);
         }
 
         // TODO: Remove [FromODataUri] after issue 1734 is fixed

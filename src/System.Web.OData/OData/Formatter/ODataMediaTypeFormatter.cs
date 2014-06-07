@@ -505,7 +505,7 @@ namespace System.Web.OData.Formatter
 
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
                 SelectAndExpand = Request.ODataProperties().SelectExpandClause,
-                Path = path == null ? null : path.ODLPath,
+                Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
             };
 
             MediaTypeHeaderValue contentType = null;
@@ -727,6 +727,32 @@ namespace System.Web.OData.Formatter
             return properties.ODataMaxServiceVersion ??
                 properties.ODataServiceVersion ??
                 HttpRequestMessageProperties.DefaultODataVersion;
+        }
+
+        // This function is used to determine whether an OData path includes operation (import) path segments.
+        // We use this function to make sure the value of ODataUri.Path in ODataMessageWriterSettings is null
+        // when any path segment is an operation. ODL will try to calculate the context URL if the ODataUri.Path
+        // equals to null.
+        private static bool IsOperationPath(ODataPath path)
+        {
+            if (path == null)
+            {
+                return false;
+            }
+
+            foreach (ODataPathSegment segment in path.Segments)
+            {
+                switch (segment.SegmentKind)
+                {
+                    case ODataSegmentKinds._Action:
+                    case ODataSegmentKinds._Function:
+                    case ODataSegmentKinds._UnboundAction:
+                    case ODataSegmentKinds._UnboundFunction:
+                        return true;
+                }
+            }
+
+            return false;
         }
     }
 }

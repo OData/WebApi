@@ -33,7 +33,7 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "http://localhost/Customers(42)/NS.SpecialCustomer/NS.IsSpecialUpgraded()", "IsSpecialUpgraded_42")] // function bound to derived entity type
         [InlineData("GET", "http://localhost/Customers(22)/NS.GetSalary()", "GetSalary_22")] // call function on base entity type
         [InlineData("GET", "http://localhost/Customers(12)/NS.SpecialCustomer/NS.GetSalary()", "GetSalaryFromSpecialCustomer_12")] // call function on derived entity type
-        public async Task AttriubteRouting_SelectsExpectedControllerAndAction(string method, string requestUri,
+        public async Task AttributeRouting_SelectsExpectedControllerAndAction(string method, string requestUri,
             string expectedResult)
         {
             // Arrange
@@ -64,6 +64,33 @@ namespace System.Web.OData.Routing
             }
             var result = await response.Content.ReadAsAsync<AttributeRoutingTestODataResponse>();
             Assert.Equal(expectedResult, result.Value);
+        }
+
+        [Fact]
+        public async Task AttributeRouting_QueryProperty_AfterCallBoundFunction()
+        {
+            // Arrange
+            const string RequestUri = @"http://localhost/Customers(12)/NS.GetOrder(orderId=4)/Amount";
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+
+            HttpConfiguration config = new[] { typeof(CustomersController) }.GetHttpConfiguration();
+            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            config.MapODataServiceRoute("odata", "", model.Model);
+
+            HttpServer server = new HttpServer(config);
+            config.EnsureInitialized();
+
+            HttpClient client = new HttpClient(server);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("{\r\n  \"@odata.context\":\"http://localhost/$metadata#Edm.Int32\",\"value\":56\r\n}",
+                responseString);
         }
 
         private class AttributeRoutingTestODataResponse
@@ -163,6 +190,13 @@ namespace System.Web.OData.Routing
             public string GetSalaryFromSpecialCustomer([FromODataUri] int id)
             {
                 return "GetSalaryFromSpecialCustomer_" + id;
+            }
+
+            [HttpGet]
+            [ODataRoute("Customers({id})/NS.GetOrder(orderId={orderId})/Amount")]
+            public IHttpActionResult GetAmountFromOrder(int id, int orderId)
+            {
+                return Ok(id + (orderId * 11));
             }
         }
 

@@ -29,7 +29,7 @@ namespace System.Web.OData.Builder
             customer.Action("InCache2_CustomerAction");
             movie.Action("InCache3_MovieAction");
             ActionConfiguration incache4_MovieAction = builder.Action("InCache4_MovieAction");
-            incache4_MovieAction.SetBindingParameter("bindingParameter", movieConfiguration, true);
+            incache4_MovieAction.SetBindingParameter("bindingParameter", movieConfiguration);
             blockBuster.Action("InCache5_BlockbusterAction");
 
             // build actions that are either: bindable to a collection of entities, have no parameter, have only complex parameter 

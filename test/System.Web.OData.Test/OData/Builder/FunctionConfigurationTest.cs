@@ -263,7 +263,6 @@ namespace System.Web.OData.Builder
 
             // Assert
             Assert.True(sendEmail.IsBindable);
-            Assert.True(sendEmail.IsAlwaysBindable);
             Assert.NotNull(sendEmail.Parameters);
             Assert.Equal(1, sendEmail.Parameters.Count());
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, sendEmail.Parameters.Single().Name);
@@ -281,24 +280,10 @@ namespace System.Web.OData.Builder
 
             // Assert
             Assert.True(sendEmail.IsBindable);
-            Assert.True(sendEmail.IsAlwaysBindable);
             Assert.NotNull(sendEmail.Parameters);
             Assert.Equal(1, sendEmail.Parameters.Count());
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, sendEmail.Parameters.Single().Name);
             Assert.Equal(string.Format("Collection({0})", typeof(Customer).FullName), sendEmail.Parameters.Single().TypeConfiguration.FullName);
-        }
-
-        [Fact]
-        public void CanCreateTransientFunction()
-        {
-            ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
-            customer.TransientFunction("Reward");
-
-            ProcedureConfiguration function = builder.Procedures.SingleOrDefault();
-            Assert.NotNull(function);
-            Assert.True(function.IsBindable);
-            Assert.False(function.IsAlwaysBindable);
         }
 
         [Fact]
@@ -393,26 +378,6 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void CanCreateEdmModel_WithTransientBindableFunction()
-        {
-            // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
-            customer.HasKey(c => c.CustomerId);
-            customer.Property(c => c.Name);
-
-            // Act
-            FunctionConfiguration sendEmail = customer.TransientFunction("FunctionName");
-            sendEmail.Returns<bool>();
-            IEdmModel model = builder.GetEdmModel();
-
-            // Assert
-            Assert.Equal(1, model.SchemaElements.OfType<IEdmFunction>().Count());
-            IEdmFunction function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
-            Assert.True(function.IsBound);
-        }
-
-        [Fact]
         public void CanManuallyConfigureFunctionLinkFactory()
         {
             // Arrange
@@ -475,7 +440,7 @@ namespace System.Web.OData.Builder
             Mock<IEdmTypeConfiguration> bindingParameterTypeMock = new Mock<IEdmTypeConfiguration>();
             bindingParameterTypeMock.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
             IEdmTypeConfiguration bindingParameterType = bindingParameterTypeMock.Object;
-            function.SetBindingParameter("IgnoreParameter", bindingParameterType, alwaysBindable: false);
+            function.SetBindingParameter("IgnoreParameter", bindingParameterType);
 
             // Act
             function.HasFunctionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);

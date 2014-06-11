@@ -79,7 +79,7 @@ namespace System.Web.OData.Builder.Conventions
             ActionConfiguration action = new ActionConfiguration(builder, "IgnoreAction");
             Mock<IEdmTypeConfiguration> mockBindingParameterType = new Mock<IEdmTypeConfiguration>();
             mockBindingParameterType.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
-            action.SetBindingParameter("IgnoreParameter", mockBindingParameterType.Object, alwaysBindable: false);
+            action.SetBindingParameter("IgnoreParameter", mockBindingParameterType.Object);
             ActionLinkGenerationConvention convention = new ActionLinkGenerationConvention();
 
             // Act

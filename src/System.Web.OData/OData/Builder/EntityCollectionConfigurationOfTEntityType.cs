@@ -26,7 +26,7 @@ namespace System.Web.OData.Builder
         {
             Contract.Assert(ModelBuilder != null);
             ActionConfiguration configuration = ModelBuilder.Action(name);
-            configuration.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, this, alwaysBindable: true);
+            configuration.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, this);
             return configuration;
         }
 
@@ -39,33 +39,7 @@ namespace System.Web.OData.Builder
         {
             Contract.Assert(ModelBuilder != null);
             FunctionConfiguration configuration = ModelBuilder.Function(name);
-            configuration.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, this, alwaysBindable: true);
-            return configuration;
-        }
-
-        /// <summary>
-        /// Creates a new Action that sometimes binds to Collection(EntityType).
-        /// </summary>
-        /// <param name="name">The name of the Action</param>
-        /// <returns>An <see cref="ActionConfiguration"/> to allow further configuration of the Action.</returns>
-        public ActionConfiguration TransientAction(string name)
-        {
-            Contract.Assert(ModelBuilder != null);
-            ActionConfiguration configuration = ModelBuilder.Action(name);
-            configuration.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, this, alwaysBindable: false);
-            return configuration;
-        }
-
-        /// <summary>
-        /// Creates a new Function that sometimes binds to Collection(EntityType).
-        /// </summary>
-        /// <param name="name">The name of the Function</param>
-        /// <returns>A <see cref="FunctionConfiguration"/> to allow further configuration of the Function.</returns>
-        public FunctionConfiguration TransientFunction(string name)
-        {
-            Contract.Assert(ModelBuilder != null);
-            FunctionConfiguration configuration = ModelBuilder.Function(name);
-            configuration.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, this, alwaysBindable: false);
+            configuration.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, this);
             return configuration;
         }
     }

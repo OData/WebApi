@@ -16,7 +16,12 @@ namespace System.Web.OData.Routing
     {
         private readonly IEdmModel _edmModel;
 
-        internal BoundActionPathSegment(IEdmAction action, IEdmModel model)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BoundActionPathSegment" /> class.
+        /// </summary>
+        /// <param name="action">The action being invoked.</param>
+        /// <param name="model">The edm model containing the action.</param>
+        public BoundActionPathSegment(IEdmAction action, IEdmModel model)
         {
             if (action == null)
             {

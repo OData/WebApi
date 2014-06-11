@@ -139,9 +139,9 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Specifies the bindingParameter name, type and whether it is alwaysBindable, use only if the Function "isBindable".
         /// </summary>
-        public FunctionConfiguration SetBindingParameter(string name, IEdmTypeConfiguration bindingParameterType, bool alwaysBindable)
+        public FunctionConfiguration SetBindingParameter(string name, IEdmTypeConfiguration bindingParameterType)
         {
-            SetBindingParameterImplementation(name, bindingParameterType, alwaysBindable);
+            SetBindingParameterImplementation(name, bindingParameterType);
             return this;
         }
 

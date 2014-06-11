@@ -131,25 +131,6 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Whether this procedure can always be bound.
-        /// <example>
-        /// For example imagine an Watch action that can be bound to a Movie, it might not always be possible to Watch a movie,
-        /// in which case IsAlwaysBindable would return false.
-        /// </example>
-        /// </summary>
-        public virtual bool IsAlwaysBindable
-        {
-            get
-            {
-                if (IsBindable)
-                {
-                    return _bindingParameter.AlwaysBindable;
-                }
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Sets the return type to a single EntityType instance.
         /// </summary>
         /// <typeparam name="TEntityType">The type that is an EntityType</typeparam>
@@ -243,9 +224,9 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Specifies the bindingParameter name, type and whether it is alwaysBindable, use only if the procedure "isBindable".
         /// </summary>
-        internal void SetBindingParameterImplementation(string name, IEdmTypeConfiguration bindingParameterType, bool alwaysBindable)
+        internal void SetBindingParameterImplementation(string name, IEdmTypeConfiguration bindingParameterType)
         {
-            _bindingParameter = new BindingParameterConfiguration(name, bindingParameterType, alwaysBindable);
+            _bindingParameter = new BindingParameterConfiguration(name, bindingParameterType);
         }
 
         /// <summary>

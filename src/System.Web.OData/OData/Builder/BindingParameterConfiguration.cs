@@ -28,15 +28,12 @@ namespace System.Web.OData.Builder
         /// </summary>
         public const string DefaultBindingParameterName = "bindingParameter";
 
-        private bool _alwaysBindable;
-
         /// <summary>
         /// Create a BindingParameterConfiguration
         /// </summary>
         /// <param name="name">The name of the Binding Parameter</param>
         /// <param name="parameterType">The type of the Binding Parameter</param>
-        /// <param name="alwaysBindable">Whether the action can always be bound to instances of the binding parameter.</param>
-        public BindingParameterConfiguration(string name, IEdmTypeConfiguration parameterType, bool alwaysBindable)
+        public BindingParameterConfiguration(string name, IEdmTypeConfiguration parameterType)
             : base(name, parameterType)
         {
             EdmTypeKind kind = parameterType.Kind;
@@ -48,16 +45,6 @@ namespace System.Web.OData.Builder
             {
                 throw Error.Argument("parameterType", SRResources.InvalidBindingParameterType, parameterType.FullName);
             }
-            _alwaysBindable = alwaysBindable;
-        }
-
-        /// <summary>
-        /// Indicates whether the BindingParameter is always bindable or not.
-        /// For example some actions are always available some are only available at certain times or in certain states.
-        /// </summary>
-        public bool AlwaysBindable
-        {
-            get { return _alwaysBindable; }
         }
     }
 }

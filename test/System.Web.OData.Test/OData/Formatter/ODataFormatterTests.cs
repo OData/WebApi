@@ -639,7 +639,7 @@ namespace System.Web.OData.Formatter
             main.Action("DoAlways").ReturnsCollectionFromEntitySet<MainEntity>("MainEntity").HasActionLink((c) =>
                 CreateAbsoluteUri("/MainEntity/DoAlways/" + c.GetPropertyValue("Id")),
                 followsConventions: true);
-            main.TransientAction("DoSometimes").ReturnsCollectionFromEntitySet<MainEntity>(
+            main.Action("DoSometimes").ReturnsCollectionFromEntitySet<MainEntity>(
                 "MainEntity").HasActionLink((c) =>
                     CreateAbsoluteUri("/MainEntity/DoSometimes/" + c.GetPropertyValue("Id")),
                     followsConventions: false);

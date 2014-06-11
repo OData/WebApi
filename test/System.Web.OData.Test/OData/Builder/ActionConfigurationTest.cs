@@ -225,7 +225,6 @@ namespace System.Web.OData.Builder
 
             // Assert
             Assert.True(sendEmail.IsBindable);
-            Assert.True(sendEmail.IsAlwaysBindable);
             Assert.NotNull(sendEmail.Parameters);
             Assert.Equal(1, sendEmail.Parameters.Count());
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, sendEmail.Parameters.Single().Name);
@@ -243,24 +242,10 @@ namespace System.Web.OData.Builder
 
             // Assert
             Assert.True(sendEmail.IsBindable);
-            Assert.True(sendEmail.IsAlwaysBindable);
             Assert.NotNull(sendEmail.Parameters);
             Assert.Equal(1, sendEmail.Parameters.Count());
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, sendEmail.Parameters.Single().Name);
             Assert.Equal(string.Format("Collection({0})", typeof(Customer).FullName), sendEmail.Parameters.Single().TypeConfiguration.FullName);
-        }
-
-        [Fact]
-        public void CanCreateTransientAction()
-        {
-            ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
-            customer.TransientAction("Reward");
-
-            ProcedureConfiguration action = builder.Procedures.SingleOrDefault();
-            Assert.NotNull(action);
-            Assert.True(action.IsBindable);
-            Assert.False(action.IsAlwaysBindable);
         }
 
         [Fact]
@@ -348,24 +333,6 @@ namespace System.Web.OData.Builder
                 typeof(Customer).FullName,
                 (action.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.EntityType().FullName());
             Assert.Empty(action.Action.Parameters);
-        }
-
-        [Fact]
-        public void CanCreateEdmModel_WithTransientBindableAction()
-        {
-            // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
-            customer.HasKey(c => c.CustomerId);
-            customer.Property(c => c.Name);
-
-            // Act
-            ActionConfiguration sendEmail = customer.TransientAction("ActionName");
-            IEdmModel model = builder.GetEdmModel();
-
-            // Assert
-            IEdmAction action = Assert.Single(model.SchemaElements.OfType<IEdmAction>());
-            Assert.True(action.IsBound);
         }
 
         [Fact]
@@ -496,7 +463,7 @@ namespace System.Web.OData.Builder
             Mock<IEdmTypeConfiguration> bindingParameterTypeMock = new Mock<IEdmTypeConfiguration>();
             bindingParameterTypeMock.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
             IEdmTypeConfiguration bindingParameterType = bindingParameterTypeMock.Object;
-            action.SetBindingParameter("IgnoreParameter", bindingParameterType, alwaysBindable: false);
+            action.SetBindingParameter("IgnoreParameter", bindingParameterType);
 
             // Act
             action.HasActionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);

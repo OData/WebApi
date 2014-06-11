@@ -223,7 +223,7 @@ namespace System.Web.OData.Builder
             Contract.Assert(_configuration != null && _configuration.ModelBuilder != null);
 
             ActionConfiguration action = _configuration.ModelBuilder.Action(name);
-            action.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration, alwaysBindable: true);
+            action.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration);
             return action;
         }
 
@@ -237,35 +237,7 @@ namespace System.Web.OData.Builder
             Contract.Assert(_configuration != null && _configuration.ModelBuilder != null);
 
             FunctionConfiguration function = _configuration.ModelBuilder.Function(name);
-            function.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration, alwaysBindable: true);
-            return function;
-        }
-
-        /// <summary>
-        /// Create an Action that sometimes binds to this EntityType
-        /// </summary>
-        /// <param name="name">The name of the action.</param>
-        /// <returns>The ActionConfiguration to allow further configuration of the new 'transient' Action.</returns>
-        public ActionConfiguration TransientAction(string name)
-        {
-            Contract.Assert(_configuration != null && _configuration.ModelBuilder != null);
-
-            ActionConfiguration action = _configuration.ModelBuilder.Action(name);
-            action.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration, alwaysBindable: false);
-            return action;
-        }
-
-        /// <summary>
-        /// Create a Function that sometimes binds to this EntityType
-        /// </summary>
-        /// <param name="name">The name of the function.</param>
-        /// <returns>The FunctionConfiguration to allow further configuration of the new 'transient' Function.</returns>
-        public FunctionConfiguration TransientFunction(string name)
-        {
-            Contract.Assert(_configuration != null && _configuration.ModelBuilder != null);
-
-            FunctionConfiguration function = _configuration.ModelBuilder.Function(name);
-            function.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration, alwaysBindable: false);
+            function.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration);
             return function;
         }
 

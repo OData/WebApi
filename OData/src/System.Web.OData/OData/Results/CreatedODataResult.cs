@@ -13,11 +13,12 @@ using System.Web.Http.Results;
 namespace System.Web.OData.Results
 {
     /// <summary>
-    /// Represents an action result that is a response to a POST operation with an entity to an entity set.
+    /// Represents an action result that is a response to a create operation that adds an entity to an entity set.
     /// </summary>
     /// <typeparam name="T">The entity type.</typeparam>
-    /// <remarks>This action result handles content negotiation and the HTTP prefer header and generates a location header
-    /// that is the same as the edit link of the created entity.</remarks>
+    /// <remarks>This action result handles content negotiation and the HTTP prefer header. It generates a location
+    /// header containing the edit link of the created entity and, if response has status code: NoContent, also
+    /// generates an OData-EntityId header.</remarks>
     public class CreatedODataResult<T> : IHttpActionResult
     {
         private readonly NegotiatedContentResult<T> _innerResult;

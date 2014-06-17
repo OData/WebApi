@@ -286,8 +286,7 @@ namespace System.Web.OData.Query
             return new SingleEntityFunctionCallNode(
                 nodeIn.Name,
                 nodeIn.Functions,
-                // TODO 1941: Parameters property of SingleEntityFunctionCallNode should never be null.
-                nodeIn.Parameters == null ? null : nodeIn.Parameters.Select(p => p.Accept(this)),
+                nodeIn.Parameters.Select(p => p.Accept(this)),
                 nodeIn.EntityTypeReference,
                 nodeIn.NavigationSource,
                 nodeIn.Source == null ? null : nodeIn.Source.Accept(this));

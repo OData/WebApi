@@ -32,6 +32,9 @@ namespace System.Web.OData.Query
             builder.EntityType<ParameterAliasCustomer>().Function("SingleEntityFunctionCall")
                 .Returns<ParameterAliasCustomer>().Parameter<int>("p1");
 
+            builder.EntityType<ParameterAliasCustomer>().Function("SingleEntityFunctionCallWithoutParameters")
+                .Returns<ParameterAliasCustomer>();
+
             builder.EntityType<ParameterAliasCustomer>().Function("SingleValueFunctionCall")
                 .Returns<int>().Parameter<int>("p1");
 
@@ -239,6 +242,21 @@ namespace System.Web.OData.Query
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
             namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
+        }
+
+        [Fact]
+        public void CanTranslate_SingleEntityFunctionCallNodeWithoutParameters()
+        {
+            // Arrange & Act
+            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Default.SingleEntityFunctionCallWithoutParameters() eq null");
+
+            // Assert
+            var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(binaryOperatorNode.Left);
+            var singleEntityFunctionCallSourceNode = Assert.IsType<SingleEntityFunctionCallNode>(singleEntityFunctionCallNode.Source);
+            var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallSourceNode.Parameters.Single());
+            Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
+            Assert.Empty(singleEntityFunctionCallNode.Parameters);
         }
 
         [Fact]

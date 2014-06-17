@@ -230,8 +230,19 @@ namespace System.Web.Mvc.Html
 
             if (templateInfo.TemplateDepth > 1)
             {
+                if (modelMetadata.Model == null)
+                {
+                    return modelMetadata.NullDisplayText;
+                }
+
                 // DDB #224751
-                return modelMetadata.Model == null ? modelMetadata.NullDisplayText : modelMetadata.SimpleDisplayText;
+                string text = modelMetadata.SimpleDisplayText;
+                if (modelMetadata.HtmlEncode)
+                {
+                    text = html.Encode(text);
+                }
+
+                return text;
             }
 
             foreach (ModelMetadata propertyMetadata in modelMetadata.Properties.Where(pm => ShouldShow(pm, templateInfo)))

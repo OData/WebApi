@@ -697,8 +697,12 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(metadata.NullDisplayText, result);
         }
 
-        [Fact]
-        public void ObjectTemplateDisplaysSimpleDisplayTextWithNonNullModelTemplateDepthGreaterThanOne()
+        [Theory]
+        [PropertyData("DisplayTextData", PropertyType = typeof(DisplayTextExtensionsTest))]
+        public void ObjectTemplateDisplaysSimpleDisplayTextWithNonNullModelTemplateDepthGreaterThanOne(
+            string simpleDisplayText,
+            bool htmlEncode,
+            string expectedResult)
         {
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -706,7 +710,9 @@ namespace System.Web.Mvc.Html.Test
             ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForType(() => model, typeof(ObjectTemplateModel));
             html.ViewData.ModelMetadata = metadata;
             metadata.NullDisplayText = "Null Display Text";
-            metadata.SimpleDisplayText = "Simple Display Text";
+            metadata.SimpleDisplayText = simpleDisplayText;
+            metadata.HtmlEncode = htmlEncode;
+
             html.ViewData.TemplateInfo.VisitedObjects.Add("foo");
             html.ViewData.TemplateInfo.VisitedObjects.Add("bar");
 
@@ -714,7 +720,7 @@ namespace System.Web.Mvc.Html.Test
             string result = DefaultEditorTemplates.ObjectTemplate(html, SpyCallback);
 
             // Assert
-            Assert.Equal(metadata.SimpleDisplayText, result);
+            Assert.Equal(expectedResult, result);
         }
 
         // PasswordTemplate

@@ -400,6 +400,23 @@ namespace System.Web.Mvc.Test
             Assert.Equal(expectedHasNonDefaultEditFormat, hasNonDefaultEditFormat);
         }
 
+        [Theory]
+        [InlineData("NoAttribute", true)]
+        [InlineData("HtmlEncodeTrue", true)]
+        [InlineData("HtmlEncodeFalse", false)]
+        [InlineData("HtmlEncodeFalseWithDataType", false)]
+        public void DisplayFormatSetsHtmlEncode(string propertyName, bool expectedHtmlEncode)
+        {
+            // Arrange
+            AssociatedMetadataProvider provider = MakeProvider();
+
+            // Act
+            bool htmlEncode = provider.GetMetadataForProperty(null, typeof(DisplayFormatModel), propertyName).HtmlEncode;
+
+            // Assert
+            Assert.Equal(expectedHtmlEncode, htmlEncode);
+        }
+
         // [ScaffoldColumn] tests
 
         class ScaffoldColumnModel

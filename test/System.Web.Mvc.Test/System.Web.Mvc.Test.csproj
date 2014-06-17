@@ -48,6 +48,8 @@
     <Compile Include="Async\Test\TaskAsyncActionDescriptorTest.cs" />
     <Compile Include="Async\Test\TaskWrapperAsyncResultTest.cs" />
     <Compile Include="Html\Test\DisplayNameExtensionsTest.cs" />
+    <Compile Include="Html\Test\DisplayTextExtensionsTest.cs" />
+    <Compile Include="Html\Test\EnumHelperTest.cs" />
     <Compile Include="Html\Test\NameExtensionsTest.cs" />
     <Compile Include="Html\Test\ValueExtensionsTest.cs" />
     <Compile Include="Razor\Test\MvcCSharpRazorCodeGeneratorTest.cs" />

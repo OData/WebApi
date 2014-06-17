@@ -54,6 +54,7 @@ namespace System.Web.Mvc.Test
             Assert.Null(metadata.DisplayName);
             Assert.Null(metadata.EditFormatString);
             Assert.False(metadata.HideSurroundingHtml);
+            Assert.True(metadata.HtmlEncode);
             Assert.Equal("model", metadata.Model);
             Assert.Equal(typeof(string), metadata.ModelType);
             Assert.Null(metadata.NullDisplayText);

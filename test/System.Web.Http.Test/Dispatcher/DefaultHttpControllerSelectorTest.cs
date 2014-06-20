@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
@@ -290,6 +291,77 @@ namespace System.Web.Http.Dispatcher
             Assert.Equal(HttpStatusCode.NotFound, ex.Response.StatusCode);
         }
 
+        // We ignore attribute routes when RouteData.Route is null
+        // See: https://aspnetwebstack.codeplex.com/workitem/1996
+        [Fact]
+        public void SelectController_WhenRouteData_RouteIsNull_FindsController()
+        {
+            // Arrange
+            HttpConfiguration configuration = new HttpConfiguration();
+            Mock<IHttpControllerTypeResolver> controllerTypeResolver = new Mock<IHttpControllerTypeResolver>();
+            configuration.Services.Replace(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
+
+            Type controllerType = GetMockControllerType("Sample");
+            controllerTypeResolver
+                .Setup(c => c.GetControllerTypes(It.IsAny<IAssembliesResolver>()))
+                .Returns(new Collection<Type> { controllerType });
+
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            var routeValues = new Dictionary<string, object>(StringComparer.Ordinal)
+            {
+                { "controller", "Sample" }
+            };
+
+            var routeData = new Mock<IHttpRouteData>();
+            routeData.SetupGet(rd => rd.Values).Returns(routeValues);
+            routeData.SetupGet(rd => rd.Route).Returns((IHttpRoute)null);
+            request.SetRouteData(routeData.Object);
+
+            DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
+
+            // Act 
+            var controller = selector.SelectController(request);
+
+            // Assert
+            Assert.Equal(controllerType, controller.ControllerType);
+        }
+
+        // We ignore attribute routes when RouteData.Route is null
+        // See: https://aspnetwebstack.codeplex.com/workitem/1996
+        [Fact]
+        public void SelectController_WhenRouteData_RouteIsNull_DoesNotFindController()
+        {
+            // Arrange
+            HttpConfiguration configuration = new HttpConfiguration();
+            Mock<IHttpControllerTypeResolver> controllerTypeResolver = new Mock<IHttpControllerTypeResolver>();
+            configuration.Services.Replace(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
+
+            controllerTypeResolver
+                .Setup(c => c.GetControllerTypes(It.IsAny<IAssembliesResolver>()))
+                .Returns(new Collection<Type> {}); // No controllers here
+
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            var routeValues = new Dictionary<string, object>(StringComparer.Ordinal)
+            {
+                { "controller", "Sample" }
+            };
+
+            var routeData = new Mock<IHttpRouteData>();
+            routeData.SetupGet(rd => rd.Values).Returns(routeValues);
+            routeData.SetupGet(rd => rd.Route).Returns((IHttpRoute)null);
+            request.SetRouteData(routeData.Object);
+
+            DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
+
+            // Act 
+            var ex = Assert.Throws<HttpResponseException>(
+                () => selector.SelectController(request));
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, ex.Response.StatusCode);
+        }
 
         [Fact]
         public void SelectController_Throws_NotFound_NoMatchingControllerType()

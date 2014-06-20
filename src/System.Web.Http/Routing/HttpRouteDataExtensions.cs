@@ -72,10 +72,22 @@ namespace System.Web.Http.Routing
         {
             Contract.Assert(routeData != null);
             IEnumerable<IHttpRouteData> subRoutes = routeData.GetSubRoutes();
+
+            // Possible this is being called on a subroute. This can happen after ElevateRouteData. Just chain. 
             if (subRoutes == null)
             {
-                // Possible this is being called on a subroute. This can happen after ElevateRouteData. Just chain. 
-                return routeData.Route.GetDirectRouteCandidates();
+                if (routeData.Route == null)
+                {
+                    // If the matched route is a System.Web.Routing.Route (in web host) then routeData.Route
+                    // will be null. Normally a System.Web.Routing.Route match would go through an MVC handler
+                    // but we can get here through HttpRoutingDispatcher in WebAPI batching. If that happens, 
+                    // then obviously it's not a WebAPI attribute routing match.
+                    return null;
+                }
+                else
+                {
+                    return routeData.Route.GetDirectRouteCandidates();
+                }
             }
 
             var list = new List<CandidateAction>();

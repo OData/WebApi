@@ -455,7 +455,7 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Theory]
-        [PropertyData("DisplayTextData", PropertyType = typeof(DisplayTextExtensionsTest))]
+        [PropertyData("ConditionallyHtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
         public void ObjectTemplateDisplaysSimpleDisplayTextWhenTemplateDepthGreaterThanOne(
             string text,
             bool htmlEncode,

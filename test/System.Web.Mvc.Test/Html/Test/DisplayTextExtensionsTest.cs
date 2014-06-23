@@ -9,32 +9,6 @@ namespace System.Web.Mvc.Html.Test
 {
     public class DisplayTextExtensionsTest
     {
-        public static TheoryDataSet<string, bool, string> DisplayTextData
-        {
-            get
-            {
-                return new TheoryDataSet<string, bool, string>
-                {
-                    { "Simple Display Text", false, "Simple Display Text" },
-                    { "Simple Display Text", true, "Simple Display Text" },
-                    { "<blink>text</blink>", false, "<blink>text</blink>" },
-                    { "<blink>text</blink>", true, "&lt;blink&gt;text&lt;/blink&gt;" },
-                    { "&'\"", false, "&'\"" },
-                    { "&'\"", true, "&amp;&#39;&quot;" },
-                    { " ¡ÿĀ", false, " ¡ÿĀ" },                                           // high ASCII
-                    { " ¡ÿĀ", true, "&#160;&#161;&#255;Ā" },
-                    { "Chinese西雅图Chars", false, "Chinese西雅图Chars" },
-                    { "Chinese西雅图Chars", true, "Chinese西雅图Chars" },
-                    { "Unicode؃Format؃Char", false, "Unicode؃Format؃Char" },            // class Cf
-                    { "Unicode؃Format؃Char", true, "Unicode؃Format؃Char" },
-                    { "UnicodeῼTitlecaseῼChar", false, "UnicodeῼTitlecaseῼChar" },       // class Lt
-                    { "UnicodeῼTitlecaseῼChar", true, "UnicodeῼTitlecaseῼChar" },
-                    { "UnicodeःCombiningःChar", false, "UnicodeःCombiningःChar" },    // class Mc
-                    { "UnicodeःCombiningःChar", true, "UnicodeःCombiningःChar" },
-                };
-            }
-        }
-
         [Fact]
         public void DisplayText_ThrowsArgumentNull_IfNameNull()
         {
@@ -166,7 +140,7 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Theory]
-        [PropertyData("DisplayTextData")]
+        [PropertyData("ConditionallyHtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
         public void DisplayText_HonoursHtmlEncode_IfOverridden(string text, bool htmlEncode, string expectedResult)
         {
             // Arrange
@@ -183,7 +157,7 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Theory]
-        [PropertyData("DisplayTextData")]
+        [PropertyData("ConditionallyHtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
         public void DisplayTextFor_HonoursHtmlEncode_IfOverridden(string text, bool htmlEncode, string expectedResult)
         {
             // Arrange
@@ -200,7 +174,7 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Theory]
-        [PropertyData("DisplayTextData")]
+        [PropertyData("ConditionallyHtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
         public void DisplayText_HonoursHtmlEncode_ForProperty(string text, bool htmlEncode, string expectedResult)
         {
             // Arrange
@@ -221,7 +195,7 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Theory]
-        [PropertyData("DisplayTextData")]
+        [PropertyData("ConditionallyHtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
         public void DisplayTextFor_HonoursHtmlEncode_ForProperty(string text, bool htmlEncode, string expectedResult)
         {
             // Arrange
@@ -426,7 +400,7 @@ namespace System.Web.Mvc.Html.Test
             public string NotEncoded { get; set; }
         }
 
-        // ModelMetadata.SimpleDisplayText returns ToString() result if that method has been overridden.
+        // ModelMetadata.SimpleDisplayText returns ToString() displayForModelResult if that method has been overridden.
         private sealed class OverriddenToStringModel
         {
             private readonly string _simpleDisplayText;

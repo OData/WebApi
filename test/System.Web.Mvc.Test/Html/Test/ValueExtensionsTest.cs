@@ -139,6 +139,26 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal("AttemptedValueBar &lt;&quot;>", helper.ValueFor(m => m.bar).ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValueHelpers_AttributeEncode_Value(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(text);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var valueResult = helper.Value("").ToHtmlString();
+            var valueForResult = helper.ValueFor(m => m).ToHtmlString();
+            var valueForModelResult = helper.ValueForModel().ToHtmlString();
+
+            // Assert
+            Assert.Equal(encodedText, valueResult);
+            Assert.Equal(encodedText, valueForResult);
+            Assert.Equal(encodedText, valueForModelResult);
+        }
+
         private sealed class FooBarModel
         {
             public string foo { get; set; }

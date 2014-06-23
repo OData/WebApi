@@ -209,6 +209,27 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal("Id", result.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void DisplayNameHelpers_EncodeValue(string text, bool htmlEncode, string expectedResult)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<Cart>(model: null);
+            viewData.ModelMetadata.DisplayName = text;
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var nameResult = helper.DisplayName("").ToHtmlString();
+            var nameForResult = helper.DisplayNameFor(m => m).ToHtmlString();
+            var nameForModelResult = helper.DisplayNameForModel().ToHtmlString();
+
+            // Assert
+            Assert.Equal(expectedResult, nameResult);
+            Assert.Equal(expectedResult, nameForResult);
+            Assert.Equal(expectedResult, nameForModelResult);
+        }
+
         private class Product
         {
             public int Id { get; set; }

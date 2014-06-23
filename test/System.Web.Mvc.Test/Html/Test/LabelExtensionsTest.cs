@@ -121,6 +121,21 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(@"<label for=""PropertyName"">Label Text</label>", result.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Label_HtmlEncodes_LabelText(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange & Act
+            var result =
+                html.Label("PropertyName", text, htmlAttributes: null, metadataProvider: metadataProvider.Object);
+
+            // Assert
+            Assert.Equal(@"<label for=""PropertyName"">" + expectedText + "</label>", result.ToHtmlString());
+        }
+
         [Fact]
         public void LabelUsesMetadataForDisplayTextWhenLabelTextIsNull()
         {
@@ -180,6 +195,22 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Equal(@"<label for=""attrFor"">Label Text</label>", result.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void LabelWithAnonymousValues_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange & Act
+            var result = html.Label("PropertyName", "text", new { attribute = text }, metadataProvider.Object);
+
+            // Assert
+            Assert.Equal(
+                @"<label attribute=""" + expectedText + @""" for=""PropertyName"">text</label>",
+                result.ToHtmlString());
         }
 
         [Fact]
@@ -277,6 +308,24 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(@"<label for=""unknownKey"">Label Text</label>", result.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void LabelFor_HtmlEncodes_LabelText(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange
+            var dummy = "this is a dummy parameter value";
+
+            // Arrange & Act
+            var result =
+                html.LabelFor(m => dummy, text, htmlAttributes: null, metadataProvider: metadataProvider.Object);
+
+            // Assert
+            Assert.Equal(@"<label for=""dummy"">" + expectedText + "</label>", result.ToHtmlString());
+        }
+
         [Fact]
         public void LabelForUsesModelMetadata()
         {
@@ -316,6 +365,26 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Equal(@"<label for=""attrFor"">unknownKey</label>", result.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void LabeForlWithAnonymousValues_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange
+            var dummy = "this is a dummy parameter value";
+
+            // Act
+            var result =
+                html.LabelFor(m => dummy, "text", new { attribute = text }, metadataProvider.Object);
+
+            // Assert
+            Assert.Equal(
+                @"<label attribute=""" + expectedText + @""" for=""dummy"">text</label>",
+                result.ToHtmlString());
         }
 
         [Fact]

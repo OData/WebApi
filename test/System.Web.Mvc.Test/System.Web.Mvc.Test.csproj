@@ -52,8 +52,10 @@
     </Compile>
     <Compile Include="Async\Test\TaskAsyncActionDescriptorTest.cs" />
     <Compile Include="Async\Test\TaskWrapperAsyncResultTest.cs" />
+    <Compile Include="Html\Test\DisplayExtensionsTest.cs" />
     <Compile Include="Html\Test\DisplayNameExtensionsTest.cs" />
     <Compile Include="Html\Test\DisplayTextExtensionsTest.cs" />
+    <Compile Include="Html\Test\EditorExtensionsTest.cs" />
     <Compile Include="Html\Test\EncodedDataSets.cs" />
     <Compile Include="Html\Test\EnumHelperTest.cs" />
     <Compile Include="Html\Test\MetadataOverrideScope.cs" />

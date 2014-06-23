@@ -23,6 +23,25 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(@"<a href=""" + AppPathModifier + @"/app/home/newaction"">linktext</a>", html.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("UrlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ActionLink_UrlEncodesAction(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange
+            var helper = MvcHelper.GetHtmlHelper();
+
+            // Act
+            var result = helper.ActionLink(linkText: "link", actionName: text);
+
+            // Assert
+            Assert.Equal(
+                @"<a href=""" + AppPathModifier + @"/app/home/" + expectedText + @""">link</a>",
+                result.ToHtmlString());
+        }
+
         [Fact]
         public void ActionLinkDictionaryOverridesImplicitValues()
         {
@@ -101,6 +120,25 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(@"<a href=""" + AppPathModifier + @"/app/home2/newaction"">linktext</a>", html.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("UrlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ActionLinkWithControllerName_UrlEncodesController(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange
+            var helper = MvcHelper.GetHtmlHelper();
+
+            // Act
+            var result = helper.ActionLink(linkText: "link", actionName: "newAction", controllerName: text);
+
+            // Assert
+            Assert.Equal(
+                @"<a href=""" + AppPathModifier + @"/app/" + expectedText + @"/newAction"">link</a>",
+                result.ToHtmlString());
+        }
+
         [Fact]
         public void ActionLinkWithControllerNameAndDictionary()
         {
@@ -125,6 +163,26 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Equal(@"<a baz=""baz"" href=""" + AppPathModifier + @"/app/home2/newaction/someid"">linktext</a>", html.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ActionLinkWithControllerNameAndObjectProperties_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange
+            var helper = MvcHelper.GetHtmlHelper();
+
+            // Act
+            var result =
+                helper.ActionLink("text", "action", "controller", routeValues: null, htmlAttributes: new { attribute = text });
+
+            // Assert
+            Assert.Equal(
+                @"<a attribute=""" + expectedText + @""" href=""" + AppPathModifier + @"/app/controller/action"">text</a>",
+                result.ToHtmlString());
         }
 
         [Fact]
@@ -497,6 +555,25 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Equal(@"<a baz=""baz"" href=""" + AppPathModifier + @"/app/home2/newaction/someid"">linktext</a>", html.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void RouteLinkWithObjectProperties_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange
+            var helper = MvcHelper.GetHtmlHelper();
+
+            // Act
+            var result = helper.RouteLink("text", routeValues: null, htmlAttributes: new { attribute = text });
+
+            // Assert
+            Assert.Equal(
+                @"<a attribute=""" + expectedText + @""" href=""" + AppPathModifier + @"/app/home/oldaction"">text</a>",
+                result.ToHtmlString());
         }
 
         [Fact]

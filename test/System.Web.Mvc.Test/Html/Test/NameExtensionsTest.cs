@@ -89,6 +89,90 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal("prefix[0].Inner.StringValue", html.NameFor(m => m[0].Inner.StringValue).ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("IdEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Id_IdEncodes_PropertyName(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            var helper = MvcHelper.GetHtmlHelper<string>(viewData);
+
+            // Act
+            var result = helper.Id(text);
+
+            // Assert
+            Assert.Equal(expectedText, result.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("IdEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void IdHelpers_IdEncode_Prefix(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper<string>(viewData);
+
+            // Act
+            var idResult = helper.Id("");
+            var idForResult = helper.IdFor(m => m);
+            var idForModelResult = helper.IdForModel();
+
+
+            // Assert
+            Assert.Equal(expectedText, idResult.ToHtmlString());
+            Assert.Equal(expectedText, idForResult.ToHtmlString());
+            Assert.Equal(expectedText, idForModelResult.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Name_AttributeEncodes_PropertyName(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            var helper = MvcHelper.GetHtmlHelper<string>(viewData);
+
+            // Act
+            var result = helper.Name(text);
+
+            // Assert
+            Assert.Equal(expectedText, result.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void NameHelpers_AttributeEncode_Prefix(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper<string>(viewData);
+
+            // Act
+            var nameResult = helper.Name("");
+            var nameForResult = helper.NameFor(m => m);
+            var nameForModelResult = helper.NameForModel();
+
+
+            // Assert
+            Assert.Equal(expectedText, nameResult.ToHtmlString());
+            Assert.Equal(expectedText, nameForResult.ToHtmlString());
+            Assert.Equal(expectedText, nameForModelResult.ToHtmlString());
+        }
+
         private sealed class OuterClass
         {
             public InnerClass Inner { get; set; }

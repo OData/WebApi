@@ -254,6 +254,74 @@ namespace System.Web.Mvc.Html.Test
                          html.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void CheckBox_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.CheckBox(name: "name", htmlAttributes: new { attribute = text, }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input attribute=""" +
+                    encodedText +
+                    @""" id=""name"" name=""name"" type=""checkbox"" value=""true"" />" +
+                @"<input name=""name"" type=""hidden"" value=""false"" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void CheckBox_AttributeEncodes_Name(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.CheckBox(text, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""id"" name=""" + encodedText + @""" type=""checkbox"" value=""true"" />" +
+                @"<input name=""" + encodedText + @""" type=""hidden"" value=""false"" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void CheckBox_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.CheckBox(name: String.Empty, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""id"" name=""" + encodedText + @""" type=""checkbox"" value=""true"" />" +
+                @"<input name=""" + encodedText + @""" type=""hidden"" value=""false"" />",
+                result);
+        }
+
+        // No need for CheckBox_AttributeEncodes_Value() because CheckBox value is always true and hidden value
+        // is always false.
+
         // CheckBoxFor
 
         [Fact]
@@ -420,6 +488,56 @@ namespace System.Web.Mvc.Html.Test
                          @"<input name=""MyPrefix.foo"" type=""hidden"" value=""false"" />",
                          html.ToHtmlString());
         }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void CheckBoxFor_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            var dummy = false;
+
+            // Act
+            var result = helper.CheckBoxFor(m => dummy, htmlAttributes: new { attribute = text, }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input attribute=""" +
+                    encodedText +
+                    @""" id=""dummy"" name=""dummy"" type=""checkbox"" value=""true"" />" +
+                @"<input name=""dummy"" type=""hidden"" value=""false"" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void CheckBoxFor_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            var dummy = false;
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.CheckBoxFor(m => dummy, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""id"" name=""" + encodedText + @".dummy"" type=""checkbox"" value=""true"" />" +
+                @"<input name=""" + encodedText + @".dummy"" type=""hidden"" value=""false"" />",
+                result);
+        }
+
+        // No need for CheckBoxFor_AttributeEncodes_Value() because CheckBox value is always true and hidden value
+        // is always false.
 
         // Culture tests
 
@@ -762,6 +880,85 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(@"<input class=""input-validation-error foo-class"" id=""foo"" name=""foo"" type=""hidden"" value=""AttemptedValueFoo"" />", html.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Hidden_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.Hidden(name: "name", value: null, htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input attribute=""" + encodedText + @""" id=""name"" name=""name"" type=""hidden"" value="""" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Hidden_AttributeEncodes_Name(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.Hidden(text, value: null, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""hidden"" value="""" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Hidden_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.Hidden(name: String.Empty, value: null, htmlAttributes: new { id = "id", })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""hidden"" value="""" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Hidden_AttributeEncodes_Value(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.Hidden("name", value: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""name"" name=""name"" type=""hidden"" value=""" + encodedText + @""" />",
+                result);
+        }
+
         // HiddenFor
 
         [Fact]
@@ -914,6 +1111,67 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Equal(@"<input class=""input-validation-error foo-class"" id=""foo"" name=""foo"" type=""hidden"" value=""AttemptedValueFoo"" />", html.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void HiddenFor_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = "name";
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.HiddenFor(m => m, htmlAttributes: new { attribute = text, }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input attribute=""" + encodedText + @""" id=""name"" name=""name"" type=""hidden"" value="""" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void HiddenFor_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.HiddenFor(m => m, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""hidden"" value="""" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void HiddenFor_AttributeEncodes_Value(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.HiddenFor(m => text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""text"" name=""text"" type=""hidden"" value=""" + encodedText + @""" />",
+                result);
         }
 
         // Password
@@ -1169,6 +1427,85 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(@"<input class=""input-validation-error foo-class"" id=""foo"" name=""foo"" type=""password"" />", html.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Password_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.Password(name: "name", value: null, htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input attribute=""" + encodedText + @""" id=""name"" name=""name"" type=""password"" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Password_AttributeEncodes_Name(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.Password(text, value: null, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""password"" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Password_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.Password(name: String.Empty, value: null, htmlAttributes: new { id = "id", })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""password"" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void Password_AttributeEncodes_Value(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.Password("name", value: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""name"" name=""name"" type=""password"" value=""" + encodedText + @""" />",
+                result);
+        }
+
         // PasswordFor
 
         [Fact]
@@ -1336,6 +1673,48 @@ namespace System.Web.Mvc.Html.Test
             // Assert
             Assert.Equal(@"<input class=""input-validation-error foo-class"" id=""foo"" name=""foo"" type=""password"" />", html.ToHtmlString());
         }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void PasswordFor_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = "name";
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.PasswordFor(m => m, htmlAttributes: new { attribute = text, }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input attribute=""" + encodedText + @""" id=""name"" name=""name"" type=""password"" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void PasswordFor_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.PasswordFor(m => m, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""password"" />", result);
+        }
+
+        // No need for PasswordFor_AttributeEncodes_Value() because PasswordFor() always uses a null value.
 
         // RadioButton
 
@@ -1606,6 +1985,86 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(@"<input baz=""BazValue"" id=""foo"" name=""foo"" type=""radio"" value=""bar"" />", html.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void RadioButton_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.RadioButton(name: "name", value: "value", htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input attribute=""" + encodedText + @""" id=""name"" name=""name"" type=""radio"" value=""value"" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void RadioButton_AttributeEncodes_Name(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.RadioButton(text, value: "value", htmlAttributes: new { id = "id", })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""radio"" value=""value"" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void RadioButton_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.RadioButton(name: String.Empty, value: String.Empty, htmlAttributes: new { id = "id", })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""radio"" value="""" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void RadioButton_AttributeEncodes_Value(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.RadioButton("name", value: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""name"" name=""name"" type=""radio"" value=""" + encodedText + @""" />",
+                result);
+        }
+
         // RadioButtonFor
 
         [Fact]
@@ -1766,6 +2225,70 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Equal(@"<input baz=""BazValue"" id=""bar"" name=""bar"" type=""radio"" value=""barValue"" />", html.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void RadioButtonFor_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = "name";
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.RadioButtonFor(m => m, value: String.Empty, htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input attribute=""" + encodedText + @""" id=""name"" name=""name"" type=""radio"" value="""" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void RadioButtonFor_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.RadioButtonFor(m => m, value: String.Empty, htmlAttributes: new { id = "id", })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""radio"" value="""" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void RadioButtonFor_AttributeEncodes_Value(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = "name";
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.RadioButtonFor(m => m, value: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""name"" name=""name"" type=""radio"" value=""" + encodedText + @""" />",
+                result);
         }
 
         // TextBox
@@ -2034,6 +2557,106 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(@"<input class=""input-validation-error foo-class"" id=""foo"" name=""foo"" type=""text"" value=""AttemptedValueFoo"" />", html.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextBox_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextBox(name: "name", value: null, htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input attribute=""" + encodedText + @""" id=""name"" name=""name"" type=""text"" value="""" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextBox_AttributeEncodes_Format(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextBox("name", value: String.Empty, format: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""name"" name=""name"" type=""text"" value=""" + encodedText + @""" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextBox_AttributeEncodes_Name(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.TextBox(text, value: null, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""text"" value="""" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextBox_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.TextBox(name: String.Empty, value: null, htmlAttributes: new { id = "id", })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""text"" value="""" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextBox_AttributeEncodes_Value(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextBox("name", value: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""name"" name=""name"" type=""text"" value=""" + encodedText + @""" />",
+                result);
+        }
+
         // TextBoxFor
 
         [Fact]
@@ -2234,6 +2857,89 @@ namespace System.Web.Mvc.Html.Test
             {
                 Assert.Equal(test.Html, test.Action().ToHtmlString());
             }
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextBoxFor_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = "name";
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextBoxFor(m => m, htmlAttributes: new { attribute = text, }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input attribute=""" + encodedText + @""" id=""name"" name=""name"" type=""text"" value="""" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextBoxFor_AttributeEncodes_Format(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: String.Empty);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = "name";
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextBoxFor(m => m, format: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""name"" name=""name"" type=""text"" value=""" + encodedText + @""" />",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextBoxFor_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.TextBoxFor(m => m, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(@"<input id=""id"" name=""" + encodedText + @""" type=""text"" value="""" />", result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextBoxFor_AttributeEncodes_Value(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextBoxFor(m => text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                @"<input id=""text"" name=""text"" type=""text"" value=""" + encodedText + @""" />",
+                result);
         }
 
         // MODELS

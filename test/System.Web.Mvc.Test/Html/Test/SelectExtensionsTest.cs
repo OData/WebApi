@@ -778,6 +778,193 @@ namespace System.Web.Mvc.Html.Test
                 html.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void DropDownList_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var selectList = new List<SelectListItem>
+            {
+                new SelectListItem { Text = "text", },
+            };
+            var helper = MvcHelper.GetHtmlHelper();
+
+            // Act
+            var result =
+                helper.DropDownList(name: "name", selectList: selectList, htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<select attribute=\"" +
+                    encodedText +
+                    "\" id=\"name\" name=\"name\"><option>text</option>" +
+                    Environment.NewLine +
+                    "</select>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void DropDownList_AttributeEncodes_Name(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var selectList = new List<SelectListItem>
+            {
+                new SelectListItem { Text = "text", },
+            };
+            var helper = MvcHelper.GetHtmlHelper();
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result =
+                helper.DropDownList(name: text, selectList: selectList, htmlAttributes: new { id = "id", })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"id\" name=\"" +
+                    encodedText +
+                    "\"><option>text</option>" +
+                    Environment.NewLine +
+                    "</select>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void DropDownList_AttributeEncodes_OptGroupLabel(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var selectList = new List<SelectListItem>
+            {
+                new SelectListItem { Group = new SelectListGroup { Name = text, }, Text = "text", },
+            };
+            var helper = MvcHelper.GetHtmlHelper();
+
+            // Act
+            var result = helper.DropDownList(name: "name", selectList: selectList).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"name\" name=\"name\"><optgroup label=\"" +
+                    encodedText +
+                    "\">" +
+                    Environment.NewLine +
+                    "<option>text</option>" +
+                    Environment.NewLine +
+                    "</optgroup>" +
+                    Environment.NewLine +
+                    "</select>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void DropDownList_HtmlEncodes_OptionLabel(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var selectList = new List<SelectListItem>
+            {
+                new SelectListItem { Text = "text", },
+            };
+            var helper = MvcHelper.GetHtmlHelper();
+
+            // Act
+            var result = helper.DropDownList(name: "name", selectList: selectList, optionLabel: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"name\" name=\"name\"><option value=\"\">" +
+                    encodedText +
+                    "</option>" +
+                    Environment.NewLine +
+                    "<option>text</option>" +
+                    Environment.NewLine +
+                    "</select>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void DropDownList_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var selectList = new List<SelectListItem>
+            {
+                new SelectListItem { Text = "text", },
+            };
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result =
+                helper.DropDownList(name: String.Empty, selectList: selectList, htmlAttributes: new { id = "id", })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"id\" name=\"" +
+                    encodedText +
+                    "\"><option>text</option>" +
+                    Environment.NewLine +
+                    "</select>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void DropDownList_HtmlEncodes_Text(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var selectList = new List<SelectListItem>
+            {
+                new SelectListItem { Text = text, },
+            };
+            var helper = MvcHelper.GetHtmlHelper();
+
+            // Act
+            var result = helper.DropDownList(name: "name", selectList: selectList).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"name\" name=\"name\"><option>" +
+                    encodedText +
+                    "</option>" +
+                    Environment.NewLine +
+                    "</select>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void DropDownList_AttributeEncodes_Value(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var selectList = new List<SelectListItem>
+            {
+                new SelectListItem { Text = "text", Value = text },
+            };
+            var helper = MvcHelper.GetHtmlHelper();
+
+            // Act
+            var result = helper.DropDownList(name: "name", selectList: selectList).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<select id=\"name\" name=\"name\"><option value=\"" +
+                    encodedText +
+                    "\">text</option>" +
+                    Environment.NewLine +
+                    "</select>",
+                result);
+        }
+
         // DropDownListFor
 
         [Fact]

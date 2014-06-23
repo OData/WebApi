@@ -607,6 +607,364 @@ namespace System.Web.Mvc.Html.Test
             Assert.Null(html);
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessage_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+
+            // Act
+            var result = helper.ValidationMessage(modelName: "name", htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span attribute=\"" +
+                    encodedText +
+                    "\" class=\"field-validation-valid\" data-valmsg-for=\"name\" data-valmsg-replace=\"true\">" +
+                    "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessage_HtmlEncodes_Message(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+
+            // Act
+            var result = helper.ValidationMessage(modelName: "name", validationMessage: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-valid\" data-valmsg-for=\"name\" data-valmsg-replace=\"false\">" +
+                    encodedText +
+                    "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessage_HtmlEncodes_ModelStateAttemptedValue(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.ModelState.AddModelError(key: "name", errorMessage: null);
+            var valueProvider = new ValueProviderResult(rawValue: null, attemptedValue: text, culture: null);
+            viewData.ModelState.SetModelValue(key: "name", value: valueProvider);
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+
+            // Act
+            var result = helper.ValidationMessage(modelName: "name").ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-error\" data-valmsg-for=\"name\" data-valmsg-replace=\"true\">The value &#39;" +
+                    encodedText +
+                    "&#39; is invalid.</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessage_HtmlEncodes_ModelStateError(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.ModelState.AddModelError("name", text);
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+
+            // Act
+            var result = helper.ValidationMessage(modelName: "name").ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-error\" data-valmsg-for=\"name\" data-valmsg-replace=\"true\">" +
+                    encodedText +
+                    "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessage_AttributeEncodes_Name(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+
+            // Act
+            var result = helper.ValidationMessage(modelName: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-valid\" data-valmsg-for=\"" +
+                    encodedText +
+                    "\" data-valmsg-replace=\"true\"></span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessage_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+
+            // Act
+            var result = helper.ValidationMessage(modelName: String.Empty).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-valid\" data-valmsg-for=\"" +
+                    encodedText +
+                    "\" data-valmsg-replace=\"true\"></span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessage_DoesNotEncode_Tag(
+            string text,
+            bool htmlEncode,
+            string unusedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+
+            // Act
+            var result = helper.ValidationMessage(modelName: "name", validationMessage: null, tag: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<" +
+                    text +
+                    " class=\"field-validation-valid\" data-valmsg-for=\"name\" data-valmsg-replace=\"true\"></" +
+                    text +
+                    ">",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageNonUnobtrusive_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationMessage(modelName: "name", htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span attribute=\"" +
+                    encodedText +
+                    "\" class=\"field-validation-valid\" id=\"name_validationMessage\">" +
+                    "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageNonUnobtrusive_HtmlEncodes_Message(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationMessage(modelName: "name", validationMessage: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-valid\" id=\"name_validationMessage\">" + encodedText + "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageNonUnobtrusive_HtmlEncodes_ModelStateAttemptedValue(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.ModelState.AddModelError(key: "name", errorMessage: null);
+            var valueProvider = new ValueProviderResult(rawValue: null, attemptedValue: text, culture: null);
+            viewData.ModelState.SetModelValue(key: "name", value: valueProvider);
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationMessage(modelName: "name").ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-error\" id=\"name_validationMessage\">The value &#39;" +
+                    encodedText +
+                    "&#39; is invalid.</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageNonUnobtrusive_HtmlEncodes_ModelStateError(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.ModelState.AddModelError("name", text);
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationMessage(modelName: "name").ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-error\" id=\"name_validationMessage\">" + encodedText + "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("IdEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageNonUnobtrusive_IdEncodes_Name(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationMessage(modelName: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-valid\" id=\"" + encodedText + "_validationMessage\"></span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("IdEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageNonUnobtrusive_IdEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationMessage(modelName: String.Empty).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-valid\" id=\"" + encodedText + "_validationMessage\"></span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageNonUnobtrusive_DoesNotEncode_Tag(
+            string text,
+            bool htmlEncode,
+            string unusedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationMessage(modelName: "name", validationMessage: null, tag: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<" + text + " class=\"field-validation-valid\" id=\"name_validationMessage\"></" + text + ">",
+                result);
+        }
+
         // ValidationMessageFor
 
         [Fact]
@@ -871,6 +1229,336 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Null(html);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageFor_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+            string name = null;
+
+            // Act
+            var result =
+                helper.ValidationMessageFor(m => name, validationMessage: null, htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span attribute=\"" +
+                    encodedText +
+                    "\" class=\"field-validation-valid\" data-valmsg-for=\"name\" data-valmsg-replace=\"true\">" +
+                    "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageFor_HtmlEncodes_Message(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(m => name, validationMessage: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-valid\" data-valmsg-for=\"name\" data-valmsg-replace=\"false\">" +
+                    encodedText +
+                    "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageFor_HtmlEncodes_ModelStateAttemptedValue(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.ModelState.AddModelError(key: "name", errorMessage: null);
+            var valueProvider = new ValueProviderResult(rawValue: null, attemptedValue: text, culture: null);
+            viewData.ModelState.SetModelValue(key: "name", value: valueProvider);
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(m => name).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-error\" data-valmsg-for=\"name\" data-valmsg-replace=\"true\">The value &#39;" +
+                    encodedText +
+                    "&#39; is invalid.</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageFor_HtmlEncodes_ModelStateError(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.ModelState.AddModelError("name", text);
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(m => name).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-error\" data-valmsg-for=\"name\" data-valmsg-replace=\"true\">" +
+                    encodedText +
+                    "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageFor_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(m => name).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-valid\" data-valmsg-for=\"" +
+                    encodedText +
+                    ".name\" data-valmsg-replace=\"true\"></span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageFor_DoesNotEncode_Tag(
+            string text,
+            bool htmlEncode,
+            string unusedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript();
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(m => name, validationMessage: null, tag: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<" +
+                    text +
+                    " class=\"field-validation-valid\" data-valmsg-for=\"name\" data-valmsg-replace=\"true\"></" +
+                    text +
+                    ">",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageForNonUnobtrusive_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(
+                    m => name,
+                    validationMessage: null,
+                    htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span attribute=\"" +
+                    encodedText +
+                    "\" class=\"field-validation-valid\" id=\"name_validationMessage\">" +
+                    "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageForNonUnobtrusive_HtmlEncodes_Message(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(m => name, validationMessage: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-valid\" id=\"name_validationMessage\">" + encodedText + "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageForNonUnobtrusive_HtmlEncodes_ModelStateAttemptedValue(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.ModelState.AddModelError(key: "name", errorMessage: null);
+            var valueProvider = new ValueProviderResult(rawValue: null, attemptedValue: text, culture: null);
+            viewData.ModelState.SetModelValue(key: "name", value: valueProvider);
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(m => name).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-error\" id=\"name_validationMessage\">The value &#39;" +
+                    encodedText +
+                    "&#39; is invalid.</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageForNonUnobtrusive_HtmlEncodes_ModelStateError(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.ModelState.AddModelError("name", text);
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(m => name).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-error\" id=\"name_validationMessage\">" + encodedText + "</span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("IdEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageForNonUnobtrusive_IdEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(m => name).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<span class=\"field-validation-valid\" id=\"" + encodedText + "_name_validationMessage\"></span>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationMessageForNonUnobtrusive_DoesNotEncode_Tag(
+            string text,
+            bool htmlEncode,
+            string unusedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+            string name = null;
+
+            // Act
+            var result = helper.ValidationMessageFor(m => name, validationMessage: null, tag: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<" + text + " class=\"field-validation-valid\" id=\"name_validationMessage\"></" + text + ">",
+                result);
         }
 
         // ValidationSummary
@@ -1230,6 +1918,129 @@ namespace System.Web.Mvc.Html.Test
               + "</ul></div>",
                 html.ToHtmlString());
 
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationSummary_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationSummary(
+                    excludePropertyErrors: true,
+                    message: null,
+                    htmlAttributes: new { attribute = text, })
+                .ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<div attribute=\"" +
+                    encodedText +
+                    "\" class=\"validation-summary-valid\" id=\"validationSummary\"><ul><li style=\"display:none\"></li>" +
+                    Environment.NewLine +
+                    "</ul></div>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationSummary_HtmlEncodes_Message(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationSummary(message: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<div class=\"validation-summary-valid\" id=\"validationSummary\"><span>" +
+                    encodedText +
+                    "</span>" +
+                    Environment.NewLine +
+                    "<ul><li style=\"display:none\"></li>" +
+                    Environment.NewLine +
+                    "</ul></div>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationSummary_HtmlEncodes_ModelStateError(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.ModelState.AddModelError("", text);
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationSummary().ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\" id=\"validationSummary\"><ul><li>" +
+                    encodedText +
+                    "</li>" +
+                    Environment.NewLine +
+                    "</ul></div>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void ValidationSummary_DoesNotEncode_Tag(
+            string text,
+            bool htmlEncode,
+            string unusedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+            helper.EnableClientValidation();
+            helper.EnableUnobtrusiveJavaScript(enabled: false);
+
+            // Act
+            var result = helper.ValidationSummary(message: "message", headingTag: text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<div class=\"validation-summary-valid\" id=\"validationSummary\"><" +
+                    text +
+                    ">message</" +
+                    text +
+                    ">" +
+                    Environment.NewLine +
+                    "<ul><li style=\"display:none\"></li>" +
+                    Environment.NewLine +
+                    "</ul></div>",
+                result);
         }
 
         private class ValidationModel

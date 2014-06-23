@@ -118,6 +118,30 @@ window.mvcClientValidationMetadata.push({""Fields"":[],""FormId"":""form_id"",""
                 @"<form action=""" + MvcHelper.AppPathModifier + @"/foo/bar"" method=""post"">");
         }
 
+        [Theory]
+        [PropertyData("UrlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void BeginFormWithActionController_UrlEncodesAction(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            BeginFormHelper(
+                helper => helper.BeginForm(text, "controller"),
+                @"<form action=""" + MvcHelper.AppPathModifier + "/controller/" + expectedText + @""" method=""post"">");
+        }
+
+        [Theory]
+        [PropertyData("UrlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void BeginFormWithActionController_UrlEncodesController(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            BeginFormHelper(
+                helper => helper.BeginForm("action", text),
+                @"<form action=""" + MvcHelper.AppPathModifier + "/" + expectedText + @"/action"" method=""post"">");
+        }
+
         [Fact]
         public void BeginFormWithActionControllerFormMethodHtmlDictionary()
         {
@@ -132,6 +156,20 @@ window.mvcClientValidationMetadata.push({""Fields"":[],""FormId"":""form_id"",""
             BeginFormHelper(
                 htmlHelper => htmlHelper.BeginForm("bar", "foo", FormMethod.Get, new { baz = "baz" }),
                 @"<form action=""" + MvcHelper.AppPathModifier + @"/foo/bar"" baz=""baz"" method=""get"">");
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void BeginFormWithActionControllerFormMethodHtmlValues_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            BeginFormHelper(
+                helper => helper.BeginForm("action", "controller", FormMethod.Get, new { attribute = text }),
+                @"<form action=""" + MvcHelper.AppPathModifier + @"/controller/action"" attribute=""" +
+                    expectedText +
+                    @""" method=""get"">");
         }
 
         [Fact]
@@ -270,6 +308,20 @@ window.mvcClientValidationMetadata.push({""Fields"":[],""FormId"":""form_id"",""
                 @"<form action=""" + MvcHelper.AppPathModifier + @"/named/home/oldaction"" baz=""baz"" method=""get"">");
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void BeginRouteFormWithRouteNameFormMethodHtmlValues_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string expectedText)
+        {
+            BeginFormHelper(
+                helper => helper.BeginRouteForm("namedroute", FormMethod.Get, new { attribute = text }),
+                @"<form action=""" + MvcHelper.AppPathModifier + @"/named/home/oldaction"" attribute=""" +
+                    expectedText +
+                    @""" method=""get"">");
+        }
+
         [Fact]
         public void BeginRouteFormWithRouteNameFormMethodHtmlValuesWithUnderscores()
         {
@@ -403,6 +455,7 @@ window.mvcClientValidationMetadata.push({""Fields"":[],""FormId"":""form_id"",""
             mockViewContext.Setup(c => c.HttpContext.Request.ServerVariables).Returns((NameValueCollection)null);
             mockViewContext.Setup(c => c.HttpContext.Response.Write(It.IsAny<string>())).Throws(new Exception("Should not be called"));
             mockViewContext.Setup(c => c.HttpContext.Items).Returns(new Hashtable());
+            mockViewContext.Setup(c => c.HttpContext.GetService(It.IsAny<Type>())).Returns(null);
 
             writer = new StringWriter();
             mockViewContext.Setup(c => c.Writer).Returns(writer);

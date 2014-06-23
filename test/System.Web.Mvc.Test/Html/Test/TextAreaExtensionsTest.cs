@@ -148,6 +148,75 @@ namespace System.Web.Mvc.Html.Test
                 "The value must be greater than or equal to zero.");
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextArea_AttributeEncodes_Name(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.TextArea(name: text, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<textarea cols=\"20\" id=\"id\" name=\"" +
+                    encodedText +
+                    "\" rows=\"2\">" +
+                    Environment.NewLine +
+                    "</textarea>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextArea_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.TextArea(name: String.Empty, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<textarea cols=\"20\" id=\"id\" name=\"" +
+                    encodedText +
+                    "\" rows=\"2\">" +
+                    Environment.NewLine +
+                    "</textarea>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextArea_HtmlEncodes_Value(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(text);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = "Prefix";
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextArea("").ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<textarea cols=\"20\" id=\"Prefix\" name=\"Prefix\" rows=\"2\">" +
+                    Environment.NewLine +
+                    encodedText +
+                    "</textarea>",
+                result);
+        }
+
         [Fact]
         public void TextAreaWithExplicitValue()
         {
@@ -162,6 +231,27 @@ namespace System.Web.Mvc.Html.Test
                 "<textarea cols=\"20\" id=\"foo\" name=\"foo\" rows=\"2\">" + Environment.NewLine
               + "bar</textarea>",
                 html.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextAreaWithExplicitValue_HtmlEncodes_Value(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextArea("name", text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<textarea cols=\"20\" id=\"name\" name=\"name\" rows=\"2\">" +
+                    Environment.NewLine +
+                    encodedText +
+                    "</textarea>",
+                result);
         }
 
         [Fact]
@@ -226,6 +316,32 @@ namespace System.Web.Mvc.Html.Test
                 "<textarea cols=\"12\" id=\"foo\" name=\"foo\" rows=\"15\">" + Environment.NewLine
               + "ViewDataFoo</textarea>",
                 html.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextAreaWithObjectAttributes_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = "Prefix";
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextArea(name: "", htmlAttributes: new { attribute = text, }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<textarea attribute=\"" +
+                    encodedText +
+                    "\" cols=\"20\" id=\"Prefix\" name=\"Prefix\" rows=\"2\">" +
+                    Environment.NewLine +
+                    "</textarea>",
+                result);
         }
 
         [Fact]
@@ -523,6 +639,51 @@ namespace System.Web.Mvc.Html.Test
                 html.ToHtmlString());
         }
 
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextAreaFor_AttributeEncodes_Prefix(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = text;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            // htmlAttributes included only to avoid special-cased renaming done for id attribute.
+            var result = helper.TextAreaFor(m => m, htmlAttributes: new { id = "id", }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<textarea cols=\"20\" id=\"id\" name=\"" +
+                    encodedText +
+                    "\" rows=\"2\">" +
+                    Environment.NewLine +
+                    "</textarea>",
+                result);
+        }
+
+        [Theory]
+        [PropertyData("HtmlEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextAreaFor_HtmlEncodes_Value(string text, bool htmlEncode, string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(text);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextAreaFor(m => text).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<textarea cols=\"20\" id=\"text\" name=\"text\" rows=\"2\">" +
+                    Environment.NewLine +
+                    encodedText +
+                    "</textarea>",
+                result);
+        }
+
         [Fact]
         public void TextAreaForWithObjectAttributes()
         {
@@ -537,6 +698,32 @@ namespace System.Web.Mvc.Html.Test
                 "<textarea cols=\"12\" id=\"foo\" name=\"foo\" rows=\"15\">" + Environment.NewLine
               + "ViewItemFoo</textarea>",
                 html.ToHtmlString());
+        }
+
+        [Theory]
+        [PropertyData("AttributeEncodedData", PropertyType = typeof(EncodedDataSets))]
+        public void TextAreaForWithObjectAttributes_AttributeEncodes_AddedHtmlAttributes(
+            string text,
+            bool htmlEncode,
+            string encodedText)
+        {
+            // Arrange
+            var viewData = new ViewDataDictionary<string>(model: null);
+            viewData.ModelMetadata.HtmlEncode = htmlEncode;
+            viewData.TemplateInfo.HtmlFieldPrefix = "Prefix";
+            var helper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act
+            var result = helper.TextAreaFor(m => m, htmlAttributes: new { attribute = text, }).ToHtmlString();
+
+            // Assert
+            Assert.Equal(
+                "<textarea attribute=\"" +
+                    encodedText +
+                    "\" cols=\"20\" id=\"Prefix\" name=\"Prefix\" rows=\"2\">" +
+                    Environment.NewLine +
+                    "</textarea>",
+                result);
         }
 
         [Fact]

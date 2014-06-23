@@ -457,7 +457,7 @@ namespace System.Web.Mvc.Html.Test
         [Theory]
         [PropertyData("DisplayTextData", PropertyType = typeof(DisplayTextExtensionsTest))]
         public void ObjectTemplateDisplaysSimpleDisplayTextWhenTemplateDepthGreaterThanOne(
-            string simpleDisplayText,
+            string text,
             bool htmlEncode,
             string expectedResult)
         {
@@ -465,7 +465,7 @@ namespace System.Web.Mvc.Html.Test
             ObjectTemplateModel model = new ObjectTemplateModel();
             HtmlHelper html = MakeHtmlHelper<ObjectTemplateModel>(model);
             ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForType(() => model, typeof(ObjectTemplateModel));
-            metadata.SimpleDisplayText = simpleDisplayText;
+            metadata.SimpleDisplayText = text;
             metadata.HtmlEncode = htmlEncode;
 
             html.ViewData.ModelMetadata = metadata;

@@ -15,7 +15,7 @@ namespace System.Web.Mvc.Html.Test
         {
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => MvcHelper.GetHtmlHelper().Display(null),
+                () => MvcHelper.GetHtmlHelper().DisplayName(expression: null),
                 "expression");
         }
 

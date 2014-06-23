@@ -56,7 +56,9 @@
     <Compile Include="Html\Test\DisplayTextExtensionsTest.cs" />
     <Compile Include="Html\Test\EncodedDataSets.cs" />
     <Compile Include="Html\Test\EnumHelperTest.cs" />
+    <Compile Include="Html\Test\MetadataOverrideScope.cs" />
     <Compile Include="Html\Test\NameExtensionsTest.cs" />
+    <Compile Include="Html\Test\TemplateHelpersSafeScope.cs" />
     <Compile Include="Html\Test\ValueExtensionsTest.cs" />
     <Compile Include="Test\CopyOnWriteDictionaryTest.cs" />
     <Compile Include="Test\JQueryFormValueProviderFactoryTest.cs" />

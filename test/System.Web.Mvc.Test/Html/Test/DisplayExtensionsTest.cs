@@ -228,6 +228,103 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(expectedResult, displayForModelResult);
         }
 
+        [Fact]
+        public void Display_FindsViewDataMember()
+        {
+            // Arrange
+            var model = new ObjectTemplateModel { Property1 = "Model string" };
+            var viewData = new ViewDataDictionary<ObjectTemplateModel>(model);
+            viewData["Property1"] = "ViewData string";
+            var html = MvcHelper.GetHtmlHelper(viewData);
+
+            var viewContext = Mock.Get(html.ViewContext);
+            viewContext.Setup(c => c.TempData).Returns(new TempDataDictionary());
+            viewContext.Setup(c => c.View).Returns(new DummyView());
+            viewContext.Setup(c => c.Writer).Returns(TextWriter.Null);
+
+            MvcHtmlString result;
+            using (new TemplateHelpersSafeScope())
+            {
+                // Act
+                result = html.Display("Property1");
+            }
+
+            // Assert
+            Assert.Equal("ViewData string", result.ToString());
+        }
+
+        [Fact]
+        public void DisplayFor_FindsModel()
+        {
+            var model = new ObjectTemplateModel { Property1 = "Model string" };
+            var viewData = new ViewDataDictionary<ObjectTemplateModel>(model);
+            viewData["Property1"] = "ViewData string";
+            var html = MvcHelper.GetHtmlHelper(viewData);
+
+            var viewContext = Mock.Get(html.ViewContext);
+            viewContext.Setup(c => c.TempData).Returns(new TempDataDictionary());
+            viewContext.Setup(c => c.View).Returns(new DummyView());
+            viewContext.Setup(c => c.Writer).Returns(TextWriter.Null);
+
+            MvcHtmlString result;
+            using (new TemplateHelpersSafeScope())
+            {
+                // Act
+                result = html.DisplayFor(m => m.Property1);
+            }                           
+
+            // Assert
+            Assert.Equal("Model string", result.ToString());
+        }
+
+        [Fact]
+        public void Display_FindsModel_IfNoViewDataMember()
+        {
+            // Arrange
+            var model = new ObjectTemplateModel { Property1 = "Model string" };
+            var viewData = new ViewDataDictionary<ObjectTemplateModel>(model);
+            var html = MvcHelper.GetHtmlHelper(viewData);
+
+            var viewContext = Mock.Get(html.ViewContext);
+            viewContext.Setup(c => c.TempData).Returns(new TempDataDictionary());
+            viewContext.Setup(c => c.View).Returns(new DummyView());
+            viewContext.Setup(c => c.Writer).Returns(TextWriter.Null);
+
+            MvcHtmlString result;
+            using (new TemplateHelpersSafeScope())
+            {
+                // Act
+                result = html.Display("Property1");
+            }
+
+            // Assert
+            Assert.Equal("Model string", result.ToString());
+        }
+
+        [Fact]
+        public void DisplayFor_FindsModel_EvenIfNull()
+        {
+            var model = new ObjectTemplateModel();
+            var viewData = new ViewDataDictionary<ObjectTemplateModel>(model);
+            viewData["Property1"] = "ViewData string";
+            var html = MvcHelper.GetHtmlHelper(viewData);
+
+            var viewContext = Mock.Get(html.ViewContext);
+            viewContext.Setup(c => c.TempData).Returns(new TempDataDictionary());
+            viewContext.Setup(c => c.View).Returns(new DummyView());
+            viewContext.Setup(c => c.Writer).Returns(TextWriter.Null);
+
+            MvcHtmlString result;
+            using (new TemplateHelpersSafeScope())
+            {
+                // Act
+                result = html.DisplayFor(m => m.Property1);
+            }
+
+            // Assert
+            Assert.Empty(result.ToString());
+        }
+
         private class ObjectTemplateModel
         {
             public string Property1 { get; set; }

@@ -229,6 +229,111 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(expectedResult, editorForModelResult);
         }
 
+        [Fact]
+        public void Editor_FindsViewDataMember()
+        {
+            // Arrange
+            var model = new ObjectTemplateModel { Property1 = "Model string" };
+            var viewData = new ViewDataDictionary<ObjectTemplateModel>(model);
+            viewData["Property1"] = "ViewData string";
+            var html = MvcHelper.GetHtmlHelper(viewData);
+
+            var viewContext = Mock.Get(html.ViewContext);
+            viewContext.Setup(c => c.TempData).Returns(new TempDataDictionary());
+            viewContext.Setup(c => c.View).Returns(new DummyView());
+            viewContext.Setup(c => c.Writer).Returns(TextWriter.Null);
+
+            MvcHtmlString result;
+            using (new TemplateHelpersSafeScope())
+            {
+                // Act
+                result = html.Editor("Property1");
+            }
+
+            // Assert
+            Assert.Equal(
+                "<input class=\"text-box single-line\" id=\"Property1\" name=\"Property1\" type=\"text\" value=\"ViewData string\" />",
+                result.ToString());
+        }
+
+        [Fact]
+        public void EditorFor_FindsModel()
+        {
+            var model = new ObjectTemplateModel { Property1 = "Model string" };
+            var viewData = new ViewDataDictionary<ObjectTemplateModel>(model);
+            viewData["Property1"] = "ViewData string";
+            var html = MvcHelper.GetHtmlHelper(viewData);
+
+            var viewContext = Mock.Get(html.ViewContext);
+            viewContext.Setup(c => c.TempData).Returns(new TempDataDictionary());
+            viewContext.Setup(c => c.View).Returns(new DummyView());
+            viewContext.Setup(c => c.Writer).Returns(TextWriter.Null);
+
+            MvcHtmlString result;
+            using (new TemplateHelpersSafeScope())
+            {
+                // Act
+                result = html.EditorFor(m => m.Property1);
+            }
+
+            // Assert
+            Assert.Equal(
+                "<input class=\"text-box single-line\" id=\"Property1\" name=\"Property1\" type=\"text\" value=\"Model string\" />",
+                result.ToString());
+        }
+
+        [Fact]
+        public void Editor_FindsModel_IfNoViewDataMember()
+        {
+            // Arrange
+            var model = new ObjectTemplateModel { Property1 = "Model string" };
+            var viewData = new ViewDataDictionary<ObjectTemplateModel>(model);
+            var html = MvcHelper.GetHtmlHelper(viewData);
+
+            var viewContext = Mock.Get(html.ViewContext);
+            viewContext.Setup(c => c.TempData).Returns(new TempDataDictionary());
+            viewContext.Setup(c => c.View).Returns(new DummyView());
+            viewContext.Setup(c => c.Writer).Returns(TextWriter.Null);
+
+            MvcHtmlString result;
+            using (new TemplateHelpersSafeScope())
+            {
+                // Act
+                result = html.Editor("Property1");
+            }
+
+            // Assert
+            Assert.Equal(
+                "<input class=\"text-box single-line\" id=\"Property1\" name=\"Property1\" type=\"text\" value=\"Model string\" />",
+                result.ToString());
+        }
+
+        [Fact]
+        public void EditorFor_FindsModel_EvenIfNull()
+        {
+            var model = new ObjectTemplateModel();
+            var viewData = new ViewDataDictionary<ObjectTemplateModel>(model);
+            viewData["Property1"] = "ViewData string";
+            var html = MvcHelper.GetHtmlHelper(viewData);
+
+            var viewContext = Mock.Get(html.ViewContext);
+            viewContext.Setup(c => c.TempData).Returns(new TempDataDictionary());
+            viewContext.Setup(c => c.View).Returns(new DummyView());
+            viewContext.Setup(c => c.Writer).Returns(TextWriter.Null);
+
+            MvcHtmlString result;
+            using (new TemplateHelpersSafeScope())
+            {
+                // Act
+                result = html.EditorFor(m => m.Property1);
+            }
+
+            // Assert
+            Assert.Equal(
+                "<input class=\"text-box single-line\" id=\"Property1\" name=\"Property1\" type=\"text\" value=\"\" />",
+                result.ToString());
+        }
+
         private class ObjectTemplateModel
         {
             public string Property1 { get; set; }

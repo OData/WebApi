@@ -114,8 +114,9 @@ namespace System.Web.OData.Routing
             Assert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(_model, _serviceRoot, odataPath),
                 "The request URI is not valid. The segment '$metadata' must be the last segment in the URI because " +
-                "it is one of the following: $batch, $value, $metadata, a collection property, a named media resource, " +
-                "an action, a noncomposable function, an action import, or a noncomposable function import.");
+                "it is one of the following: $ref, $batch, $count, $value, $metadata, a named media resource, " +
+                "an action, a noncomposable function, an action import, a noncomposable function import, " +
+                "an operation with void return type, or an operation import with void return type.");
         }
 
         [Theory]
@@ -1315,8 +1316,9 @@ namespace System.Web.OData.Routing
             Assert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(_model, _serviceRoot, path),
                 "The request URI is not valid. The segment '$ref' must be the last segment in the URI because " +
-                "it is one of the following: $batch, $value, $metadata, a collection property, a named media resource, " +
-                "an action, a noncomposable function, an action import, or a noncomposable function import.");
+                "it is one of the following: $ref, $batch, $count, $value, $metadata, a named media resource, " +
+                "an action, a noncomposable function, an action import, a noncomposable function import, " +
+                "an operation with void return type, or an operation import with void return type.");
         }
 
         [Theory]
@@ -1332,8 +1334,9 @@ namespace System.Web.OData.Routing
             Assert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(_model, _serviceRoot, path),
                 "The request URI is not valid. The segment '$value' must be the last segment in the URI because " +
-                "it is one of the following: $batch, $value, $metadata, a collection property, a named media resource, " +
-                "an action, a noncomposable function, an action import, or a noncomposable function import.");
+                "it is one of the following: $ref, $batch, $count, $value, $metadata, a named media resource, " +
+                "an action, a noncomposable function, an action import, a noncomposable function import, " +
+                "an operation with void return type, or an operation import with void return type.");
         }
 
         private static IEdmModel GetModelWithFunctions()

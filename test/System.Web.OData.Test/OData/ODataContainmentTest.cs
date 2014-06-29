@@ -208,7 +208,7 @@ namespace System.Web.OData
             tag = orderLine["#ns.Tag"];
             Assert.Equal("ns.Tag", tag["title"]);
             Assert.Equal(
-                "http://localhost/odata/MyOrders(1)/OrderLines(22)/System.Web.OData.Builder.TestModels.SpecialOrderLine/ns.Tag",
+                "http://localhost/odata/MyOrders(1)/OrderLines(22)/System.Web.OData.Builder.TestModels.OrderLine/ns.Tag",
                 tag["target"]);
         }
 

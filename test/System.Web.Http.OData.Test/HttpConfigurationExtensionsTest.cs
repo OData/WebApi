@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http.Formatting;
+using System.Reflection;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.OData.Extensions;
@@ -101,16 +102,26 @@ namespace System.Web.Http.OData
             Assert.Same(myQueryFilter.Object, queryFilterProviders.First().QueryFilter);
         }
 
-        [Fact]
-        public void AddQuerySupport_ActionFilters_TakePrecedence()
+        [Theory]
+        [InlineData("GetQueryableWithFilterAttribute")]
+        [InlineData("GetQueryableWithQueryableFilterAttributeOnBase")]
+        public void AddQuerySupport_ActionFilters_TakePrecedence(string actionName)
         {
+            // Arrange
             HttpConfiguration config = new HttpConfiguration();
             config.AddODataQueryFilter();
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "FilterProviderTest", typeof(FilterProviderTestController));
-            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(FilterProviderTestController).GetMethod("GetQueryableWithFilterAttribute"));
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(
+                config, 
+                "FilterProviderTest", 
+                typeof(FilterProviderTestController));
 
+            MethodInfo method = typeof(FilterProviderTestController).GetMethod(actionName);
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, method);
+
+            // Act
             Collection<FilterInfo> filters = actionDescriptor.GetFilterPipeline();
 
+            // Assert
             Assert.Equal(1, filters.Count);
             Assert.Equal(100, ((EnableQueryAttribute)filters[0].Instance).PageSize);
         }

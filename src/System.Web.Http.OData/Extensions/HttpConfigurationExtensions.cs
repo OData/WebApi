@@ -22,7 +22,14 @@ namespace System.Web.Http.OData.Extensions
         /// <param name="configuration">The server configuration.</param>
         public static void AddODataQueryFilter(this HttpConfiguration configuration)
         {
-            AddODataQueryFilter(configuration, new EnableQueryAttribute());
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            configuration.Services.Add(
+                typeof(IFilterProvider),
+                new QueryFilterProvider(new EnableQueryAttribute(), skipQueryableAttribute: true));
         }
 
         /// <summary>

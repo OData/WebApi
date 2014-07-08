@@ -14,11 +14,18 @@ namespace System.Web.Http.OData.Query
     /// </summary>
     public class QueryFilterProvider : IFilterProvider
     {
+        private readonly bool _skipQueryableAttribute;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryFilterProvider" /> class.
         /// </summary>
         /// <param name="queryFilter">The action filter that executes the query.</param>
-        public QueryFilterProvider(IActionFilter queryFilter)
+        public QueryFilterProvider(IActionFilter queryFilter) :
+            this(queryFilter, skipQueryableAttribute: false)
+        {
+        }
+
+        internal QueryFilterProvider(IActionFilter queryFilter, bool skipQueryableAttribute)
         {
             if (queryFilter == null)
             {
@@ -26,6 +33,7 @@ namespace System.Web.Http.OData.Query
             }
 
             QueryFilter = queryFilter;
+            _skipQueryableAttribute = skipQueryableAttribute;
         }
 
         /// <summary>
@@ -45,7 +53,11 @@ namespace System.Web.Http.OData.Query
         {
             // Actions with a bound parameter of type ODataQueryOptions do not support the query filter
             // The assumption is that the action will handle the querying within the action implementation
+
+            // Skip actions that contain QueryableAttribute as it causes problems in some scenarios. See
+            // #2047 for details.
             if (actionDescriptor != null &&
+                !(_skipQueryableAttribute && HasQueryableAttribute(actionDescriptor)) &&
                 (IsIQueryable(actionDescriptor.ReturnType) || typeof(SingleResult).IsAssignableFrom(actionDescriptor.ReturnType)) &&
                 !actionDescriptor.GetParameters().Any(parameter => typeof(ODataQueryOptions).IsAssignableFrom(parameter.ParameterType)))
             {
@@ -53,6 +65,14 @@ namespace System.Web.Http.OData.Query
             }
 
             return Enumerable.Empty<FilterInfo>();
+        }
+
+        private static bool HasQueryableAttribute(HttpActionDescriptor actionDescriptor)
+        {
+            #pragma warning disable 0618 // Disable obsolete warning for QueryableAttribute.
+            return actionDescriptor.GetCustomAttributes<QueryableAttribute>(inherit: true).Any() ||
+                 actionDescriptor.ControllerDescriptor.GetCustomAttributes<QueryableAttribute>(inherit: true).Any();
+            #pragma warning restore 0618
         }
 
         internal static bool IsIQueryable(Type type)

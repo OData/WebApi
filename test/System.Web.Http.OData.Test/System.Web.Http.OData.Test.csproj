@@ -64,6 +64,7 @@
     <Compile Include="..\System.Web.Http.Test\Util\ContextUtil.cs">
       <Link>TestCommon\ContextUtil.cs</Link>
     </Compile>
+    <Compile Include="AddODataQueryFilterTests.cs" />
     <Compile Include="HttpRouteCollectionExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensions.cs" />
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />

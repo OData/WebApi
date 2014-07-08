@@ -17,6 +17,7 @@ namespace System.Web.Http.OData.Query
         [InlineData("GetGenericQueryable")]
         [InlineData("GetSingleResult")]
         [InlineData("GetSingleResultOfT")]
+        [InlineData("GetQueryableWithQueryableFilterInSubclass")]
         public void GetFilters_ReturnsQueryableFilter_ForQueryableActions(string actionName)
         {
             HttpConfiguration config = new HttpConfiguration();
@@ -47,6 +48,35 @@ namespace System.Web.Http.OData.Query
 
             FilterInfo[] filters = new QueryFilterProvider(new EnableQueryAttribute()).GetFilters(config, actionDescriptor).ToArray();
 
+            Assert.Empty(filters);
+        }
+
+        [Theory]
+        [InlineData("GetQueryableWithQueryableFilterAttributeOnBase",typeof(FilterProviderTestController))]
+        [InlineData("Get", typeof(ODataControllerWithQueryableFilterContainingQueryableActionController))]
+        [InlineData("GetQueryableWithQueryableFilterInSubclass", typeof(DerivedFilterProviderTestController))]
+        [InlineData("Get", typeof(DerivedApiControllerContainingQueryableActionControllerController))]
+        public void GetFilters_ReturnsEmptyCollections_ForActionsWithQueryableAttributeApplied(
+            string actionName, 
+            Type controllerType)
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            string controllerName = controllerType.Name.Replace("Controller","");
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(
+                config, 
+                controllerName,
+                controllerType);
+
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(
+                controllerDescriptor, 
+                controllerType.GetMethod(actionName));
+
+            // Act
+            FilterInfo[] filters = new QueryFilterProvider(new EnableQueryAttribute(), skipQueryableAttribute: true)
+                .GetFilters(config, actionDescriptor).ToArray();
+
+            // Assert
             Assert.Empty(filters);
         }
 
@@ -123,6 +153,20 @@ namespace System.Web.Http.OData.Query
             return null;
         }
 
+        // Disable obsolete warning for QueryableAttribute
+        #pragma warning disable 0618
+        [Queryable(PageSize = 100)]
+        #pragma warning restore 0618
+        public virtual IQueryable GetQueryableWithQueryableFilterAttributeOnBase()
+        {
+            return null;
+        }
+
+        public virtual IQueryable GetQueryableWithQueryableFilterInSubclass()
+        {
+            return null;
+        }
+
         public SingleResult GetSingleResult()
         {
             return null;
@@ -132,5 +176,51 @@ namespace System.Web.Http.OData.Query
         {
             return null;
         }
+    }
+
+    public class DerivedFilterProviderTestController : FilterProviderTestController
+    {
+        public override IQueryable GetQueryableWithQueryableFilterAttributeOnBase()
+        {
+            return null;
+        }
+
+        // Disable obsolete warning for QueryableAttribute
+        #pragma warning disable 0618
+        [Queryable]
+        #pragma warning restore 0618
+        public override IQueryable GetQueryableWithQueryableFilterInSubclass()
+        {
+            return null;
+        }
+    }
+
+    // Disable obsolete warning for QueryableAttribute
+    #pragma warning disable 0618
+    [Queryable]
+    #pragma warning restore 0618
+    public class ODataControllerWithQueryableFilterContainingQueryableActionController : ODataController
+    {
+        public IQueryable Get()
+        {
+            return null;
+        }
+    }
+
+    public class ApiControllerContainingQueryableActionController : ApiController
+    {
+        public virtual IQueryable Get()
+        {
+            return null;
+        }
+    }
+
+    // Disable obsolete warning for QueryableAttribute
+    #pragma warning disable 0618
+    [Queryable]
+    #pragma warning restore 0618
+    public class DerivedApiControllerContainingQueryableActionControllerController : 
+        ApiControllerContainingQueryableActionController
+    {
     }
 }

@@ -244,13 +244,19 @@ namespace System.Web.OData.Builder.Conventions
             var model = modelBuilder.GetEdmModel();
 
             var prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "Name");
-            Assert.False(prop.NonFilterable);
+            Assert.False(prop.NotFilterable);
+
+            prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "NotFilterableProperty");
+            Assert.True(prop.NotFilterable);
 
             prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "NonFilterableProperty");
-            Assert.True(prop.NonFilterable);
+            Assert.True(prop.NotFilterable);
+
+            prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "NotSortableProperty");
+            Assert.True(prop.NotSortable);
 
             prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "UnsortableProperty");
-            Assert.True(prop.Unsortable);
+            Assert.True(prop.NotSortable);
 
             prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "Category");
             Assert.True(prop.NotNavigable);
@@ -268,6 +274,8 @@ namespace System.Web.OData.Builder.Conventions
         {
             var modelBuilder = new ODataConventionModelBuilder();
             var entityTypeConf = modelBuilder.AddEntityType(typeof(ProductWithFilterSortable));
+            entityTypeConf.AddProperty(typeof(ProductWithFilterSortable).GetProperty("NotFilterableProperty"));
+            entityTypeConf.AddProperty(typeof(ProductWithFilterSortable).GetProperty("NotSortableProperty"));
             entityTypeConf.AddProperty(typeof(ProductWithFilterSortable).GetProperty("NonFilterableProperty"));
             entityTypeConf.AddProperty(typeof(ProductWithFilterSortable).GetProperty("UnsortableProperty"));
             entityTypeConf.AddNavigationProperty(typeof(ProductWithFilterSortable).GetProperty("Category"), EdmMultiplicity.One);
@@ -275,11 +283,17 @@ namespace System.Web.OData.Builder.Conventions
 
             var model = modelBuilder.GetEdmModel();
 
-            var prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "NonFilterableProperty");
-            Assert.False(prop.NonFilterable);
+            var prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "NotFilterableProperty");
+            Assert.False(prop.NotFilterable);
+
+            prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "NonFilterableProperty");
+            Assert.False(prop.NotFilterable);
+
+            prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "NotSortableProperty");
+            Assert.False(prop.NotSortable);
 
             prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "UnsortableProperty");
-            Assert.False(prop.Unsortable);
+            Assert.False(prop.NotSortable);
 
             prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "Category");
             Assert.False(prop.NotNavigable);
@@ -1624,7 +1638,7 @@ namespace System.Web.OData.Builder.Conventions
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<RequiredEmployee>("Employees");
-            
+
             // Act
             IEdmModel model = builder.GetEdmModel();
 
@@ -1648,8 +1662,8 @@ namespace System.Web.OData.Builder.Conventions
             IEdmEntityType entityType = model.AssertHasEntityType(typeof(QueryLimitEmployee));
             IEdmProperty property = Assert.Single(entityType.DeclaredProperties.Where(e => e.Name == "Address"));
 
-            Assert.True(EdmLibHelpers.IsNonFilterable(property, model));
-            Assert.True(EdmLibHelpers.IsUnsortable(property, model));
+            Assert.True(EdmLibHelpers.IsNotFilterable(property, model));
+            Assert.True(EdmLibHelpers.IsNotSortable(property, model));
         }
 
         [Fact]
@@ -1846,9 +1860,15 @@ namespace System.Web.OData.Builder.Conventions
 
         [NotCountable]
         public IEnumerable<DateTimeOffset> NotCountableProperty { get; set; }
-        
+
+        [NotFilterable]
+        public string NotFilterableProperty { get; set; }
+
         [NonFilterable]
         public string NonFilterableProperty { get; set; }
+
+        [NotSortable]
+        public string NotSortableProperty { get; set; }
 
         [Unsortable]
         public string UnsortableProperty { get; set; }

@@ -35,7 +35,9 @@ namespace System.Web.OData.Builder
             new EntityKeyConvention(),
             new ComplexTypeAttributeConvention(), // This has to run after Key conventions, basically overrules them if there is a ComplexTypeAttribute
             new IgnoreDataMemberAttributeEdmPropertyConvention(),
+            new NotFilterableAttributeEdmPropertyConvention(),
             new NonFilterableAttributeEdmPropertyConvention(),
+            new NotSortableAttributeEdmPropertyConvention(),
             new UnsortableAttributeEdmPropertyConvention(),
             new NotNavigableAttributeEdmPropertyConvention(),
             new NotExpandableAttributeEdmPropertyConvention(),

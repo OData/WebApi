@@ -109,6 +109,8 @@
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
     <Compile Include="OData\Query\NotCountableAttribute.cs" />
+    <Compile Include="OData\Query\NotFilterableAttribute.cs" />
+    <Compile Include="OData\Query\NotSortableAttribute.cs" />
     <Compile Include="OData\Query\ParameterAliasNodeTranslator.cs" />
     <Compile Include="OData\Query\Validators\CountQueryValidator.cs" />
     <Compile Include="OData\RequestPreferenceHelpers.cs" />
@@ -119,11 +121,13 @@
     <Compile Include="OData\Formatter\Serialization\ODataEnumSerializer.cs" />
     <Compile Include="OData\Query\NonFilterableAttribute.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NonFilterableAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\NotFilterableAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Query\NotExpandableAttribute.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotExpandableAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Query\NotNavigableAttribute.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotNavigableAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Query\UnsortableAttribute.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\NotSortableAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\UnsortableAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\FunctionLinkGenerationConvention.cs" />
     <Compile Include="OData\Builder\FunctionConfiguration.cs" />

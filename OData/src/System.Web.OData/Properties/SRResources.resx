@@ -658,10 +658,10 @@
   <data name="ETagNotWellFormed" xml:space="preserve">
     <value>The ETag is not well-formed.</value>
   </data>
-  <data name="NonFilterablePropertyUsedInFilter" xml:space="preserve">
+  <data name="NotFilterablePropertyUsedInFilter" xml:space="preserve">
     <value>The property '{0}' cannot be used in the $filter query option.</value>
   </data>
-  <data name="UnsortablePropertyUsedInOrderBy" xml:space="preserve">
+  <data name="NotSortablePropertyUsedInOrderBy" xml:space="preserve">
     <value>The property '{0}' cannot be used in the $orderby query option.</value>
   </data>
   <data name="NotExpandablePropertyUsedInExpand" xml:space="preserve">

@@ -162,28 +162,40 @@ namespace System.Web.OData.Query.Validators
             Assert.Equal(2, _validator.Times["ValidateParameterQueryNode"]); // $it, t
         }
 
-        [Fact]
-        public void ValidateThrowsIfNonFilterableProperty()
+        [Theory]
+        [InlineData("NotFilterableProperty")]
+        [InlineData("NonFilterableProperty")]
+        public void ValidateThrowsIfNotFilterableProperty(string property)
         {
             Assert.Throws<ODataException>(() =>
-                   _validator.Validate(new FilterQueryOption("NonFilterableProperty eq 'David'", _context), new ODataValidationSettings()),
-                "The property 'NonFilterableProperty' cannot be used in the $filter query option.");
+                _validator.Validate(
+                    new FilterQueryOption(String.Format("{0} eq 'David'", property), _context),
+                    new ODataValidationSettings()),
+                String.Format("The property '{0}' cannot be used in the $filter query option.", property));
         }
 
-        [Fact]
-        public void ValidateThrowsIfNonFilterableNavigationProperty()
+        [Theory]
+        [InlineData("NotFilterableNavigationProperty")]
+        [InlineData("NonFilterableNavigationProperty")]
+        public void ValidateThrowsIfNotFilterableNavigationProperty(string property)
         {
             Assert.Throws<ODataException>(() =>
-                   _validator.Validate(new FilterQueryOption("NonFilterableNavigationProperty/Name eq 'Seattle'", _context), new ODataValidationSettings()),
-                "The property 'NonFilterableNavigationProperty' cannot be used in the $filter query option.");
+                _validator.Validate(
+                    new FilterQueryOption(String.Format("{0}/Name eq 'Seattle'", property), _context),
+                    new ODataValidationSettings()),
+                String.Format("The property '{0}' cannot be used in the $filter query option.", property));
         }
 
-        [Fact]
-        public void ValidateThrowsIfNavigationHasNonFilterableProperty()
+        [Theory]
+        [InlineData("NotFilterableProperty")]
+        [InlineData("NonFilterableProperty")]
+        public void ValidateThrowsIfNavigationHasNotFilterableProperty(string property)
         {
             Assert.Throws<ODataException>(() =>
-                   _validator.Validate(new FilterQueryOption("NavigationWithNonFilterableProperty/NonFilterableProperty eq 'David'", _context), new ODataValidationSettings()),
-                "The property 'NonFilterableProperty' cannot be used in the $filter query option.");
+                _validator.Validate(
+                    new FilterQueryOption(String.Format("NavigationWithNotFilterableProperty/{0} eq 'David'", property), _context),
+                    new ODataValidationSettings()),
+                String.Format("The property '{0}' cannot be used in the $filter query option.", property));
         }
 
         [Theory]

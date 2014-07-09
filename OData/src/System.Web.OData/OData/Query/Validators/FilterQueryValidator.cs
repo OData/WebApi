@@ -306,10 +306,10 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // Check whether the property is NonFilterable
-            if (EdmLibHelpers.IsNonFilterable(navigationProperty, _model))
+            // Check whether the property is not filterable
+            if (EdmLibHelpers.IsNotFilterable(navigationProperty, _model))
             {
-                throw new ODataException(Error.Format(SRResources.NonFilterablePropertyUsedInFilter, navigationProperty.Name));
+                throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, navigationProperty.Name));
             }
 
             // no default validation logic here
@@ -366,11 +366,11 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // Check whether the property is NonFilterable
+            // Check whether the property is not filterable
             IEdmProperty property = propertyAccessNode.Property;
-            if (EdmLibHelpers.IsNonFilterable(property, _model))
+            if (EdmLibHelpers.IsNotFilterable(property, _model))
             {
-                throw new ODataException(Error.Format(SRResources.NonFilterablePropertyUsedInFilter, property.Name));
+                throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
             }
 
             // no default validation logic here 

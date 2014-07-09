@@ -35,7 +35,7 @@ namespace System.Web.OData
             EntitySetConfiguration<QueryLimitOrder> orders = builder.EntitySet<QueryLimitOrder>("QueryLimitOrders");
 
             // Can limit sorting and filtering primitive properties
-            customers.EntityType.Property(p => p.Name).IsNonFilterable().IsUnsortable();
+            customers.EntityType.Property(p => p.Name).IsNotFilterable().IsNotSortable();
             customers.EntityType.CollectionProperty(p => p.Addresses).IsNotCountable();
 
             // Can override the behavior specified by the attributes for primitive properties
@@ -49,7 +49,7 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void QueryableLimitation_UnsortableFromModelTest()
+        public void QueryableLimitation_NotSortableFromModelTest()
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$orderby=Name";
@@ -66,11 +66,13 @@ namespace System.Web.OData
                 responseString);
         }
 
-        [Fact]
-        public void QueryableLimitation_UnsortableFromAttributeTest()
+        [Theory]
+        [InlineData("NotFilterableNotSortableLastName")]
+        [InlineData("NonFilterableUnsortableLastName")]
+        public void QueryableLimitation_NotSortableFromAttributeTest(string property)
         {
             // Arrange
-            string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$orderby=LastName";
+            string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$orderby=" + property;
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
@@ -80,12 +82,13 @@ namespace System.Web.OData
             // Assert
             Assert.False(response.IsSuccessStatusCode);
             Assert.Equal(response.StatusCode, HttpStatusCode.BadRequest);
-            Assert.Contains("The query specified in the URI is not valid. The property 'LastName' cannot be used in the $orderby query option.",
+            Assert.Contains(
+                String.Format("The query specified in the URI is not valid. The property '{0}' cannot be used in the $orderby query option.", property),
                 responseString);
         }
 
         [Fact]
-        public void QueryableLimitation_NonFilterableFromModelTest()
+        public void QueryableLimitation_NotFilterableFromModelTest()
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$filter=Name eq 'FirstName 1'";
@@ -102,11 +105,14 @@ namespace System.Web.OData
                 responseString);
         }
 
-        [Fact]
-        public void QueryableLimitation_NonFilterableFromAttributeTest()
+        [Theory]
+        [InlineData("NotFilterableNotSortableLastName")]
+        [InlineData("NonFilterableUnsortableLastName")]
+        public void QueryableLimitation_NotFilterableFromAttributeTest(string property)
         {
             // Arrange
-            string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$filter=LastName eq 'LastName 1'";
+            string requestUri = BaseAddress +
+                String.Format("/odata/QueryLimitCustomers?$filter={0} eq 'LastName 1'", property);
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
@@ -116,12 +122,15 @@ namespace System.Web.OData
             // Assert
             Assert.False(response.IsSuccessStatusCode);
             Assert.Equal(response.StatusCode, HttpStatusCode.BadRequest);
-            Assert.Contains("The query specified in the URI is not valid. The property 'LastName' cannot be used in the $filter query option.",
+            Assert.Contains(
+                String.Format(
+                    "The query specified in the URI is not valid. The property '{0}' cannot be used in the $filter query option.",
+                    property),
                 responseString);
         }
 
         [Fact]
-        public void QueryableLimitation_NonFilterableAttributeOverrideByModelTest()
+        public void QueryableLimitation_NotFilterableAttributeOverrideByModelTest()
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$filter=Age eq 31";
@@ -269,7 +278,8 @@ namespace System.Web.OData
                     {
                         Id = i,
                         Name = "FirstName " + i,
-                        LastName = "LastName " + i,
+                        NotFilterableNotSortableLastName = "NotFilterableNotSortableLastName " + i,
+                        NonFilterableUnsortableLastName = "NonFilterableUnsortableLastName " + i,
                         Age = 30 + i,
                         Address = "Address " + i,
                         Addresses = new[] { "Address " + i },
@@ -329,12 +339,16 @@ namespace System.Web.OData
 
             public string Name { get; set; }
 
-            [NonFilterable]
-            [Unsortable]
-            public string LastName { get; set; }
+            [NotFilterable]
+            [NotSortable]
+            public string NotFilterableNotSortableLastName { get; set; }
 
             [NonFilterable]
             [Unsortable]
+            public string NonFilterableUnsortableLastName { get; set; }
+
+            [NotFilterable]
+            [NotSortable]
             public int Age { get; set; }
 
             [NotNavigable]

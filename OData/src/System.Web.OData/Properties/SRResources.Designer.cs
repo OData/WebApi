@@ -1168,15 +1168,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The property &apos;{0}&apos; cannot be used in the $filter query option..
-        /// </summary>
-        internal static string NonFilterablePropertyUsedInFilter {
-            get {
-                return ResourceManager.GetString("NonFilterablePropertyUsedInFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to A non-null request URI must be provided to determine if a &apos;{0}&apos; matches a given request or response message..
         /// </summary>
         internal static string NonNullUriRequiredForMediaTypeMapping {
@@ -1267,11 +1258,29 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; cannot be used in the $filter query option..
+        /// </summary>
+        internal static string NotFilterablePropertyUsedInFilter {
+            get {
+                return ResourceManager.GetString("NotFilterablePropertyUsedInFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property &apos;{0}&apos; cannot be used for navigation..
         /// </summary>
         internal static string NotNavigablePropertyUsedInNavigation {
             get {
                 return ResourceManager.GetString("NotNavigablePropertyUsedInNavigation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; cannot be used in the $orderby query option..
+        /// </summary>
+        internal static string NotSortablePropertyUsedInOrderBy {
+            get {
+                return ResourceManager.GetString("NotSortablePropertyUsedInOrderBy", resourceCulture);
             }
         }
         
@@ -1839,15 +1848,6 @@ namespace System.Web.OData.Properties {
         internal static string UnresolvedPathSegmentInTemplate {
             get {
                 return ResourceManager.GetString("UnresolvedPathSegmentInTemplate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The property &apos;{0}&apos; cannot be used in the $orderby query option..
-        /// </summary>
-        internal static string UnsortablePropertyUsedInOrderBy {
-            get {
-                return ResourceManager.GetString("UnsortablePropertyUsedInOrderBy", resourceCulture);
             }
         }
         

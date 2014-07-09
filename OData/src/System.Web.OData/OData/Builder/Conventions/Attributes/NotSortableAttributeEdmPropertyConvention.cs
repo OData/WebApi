@@ -5,10 +5,10 @@ using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
-    internal class NonFilterableAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration>
+    internal class NotSortableAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration>
     {
-        public NonFilterableAttributeEdmPropertyConvention()
-            : base(attribute => attribute.GetType() == typeof(NonFilterableAttribute), allowMultiple: false)
+        public NotSortableAttributeEdmPropertyConvention()
+            : base(attribute => attribute.GetType() == typeof(NotSortableAttribute), allowMultiple: false)
         {
         }
 
@@ -24,7 +24,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             if (!edmProperty.AddedExplicitly)
             {
-                edmProperty.IsNotFilterable();
+                edmProperty.IsNotSortable();
             }
         }
     }

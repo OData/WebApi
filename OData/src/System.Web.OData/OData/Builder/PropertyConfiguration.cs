@@ -11,7 +11,7 @@ namespace System.Web.OData.Builder
     public abstract class PropertyConfiguration
     {
         private string _name;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyConfiguration"/> class.
         /// </summary>
@@ -50,7 +50,7 @@ namespace System.Web.OData.Builder
                 {
                     throw Error.PropertyNull();
                 }
-                
+
                 _name = value;
             }
         }
@@ -82,23 +82,41 @@ namespace System.Web.OData.Builder
         public bool AddedExplicitly { get; set; }
 
         /// <summary>
-        /// Gets whether the property is restricted, i.e. nonfilterable, unsortable, not navigable,
+        /// Gets whether the property is restricted, i.e. not filterable, not sortable, not navigable,
         /// not expandable, or not countable.
         /// </summary>
         public bool IsRestricted
         {
-            get { return NonFilterable || Unsortable || NotNavigable || NotExpandable || NotCountable; }
+            get { return NotFilterable || NotSortable || NotNavigable || NotExpandable || NotCountable; }
         }
+
+        /// <summary>
+        /// Gets or sets whether the property is not filterable. default is false.
+        /// </summary>
+        public bool NotFilterable { get; set; }
 
         /// <summary>
         /// Gets or sets whether the property is nonfilterable. default is false.
         /// </summary>
-        public bool NonFilterable { get; set; }
+        public bool NonFilterable
+        {
+            get { return NotFilterable; }
+            set { NotFilterable = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets whether the property is not sortable. default is false.
+        /// </summary>
+        public bool NotSortable { get; set; }
 
         /// <summary>
         /// Gets or sets whether the property is unsortable. default is false.
         /// </summary>
-        public bool Unsortable { get; set; }
+        public bool Unsortable
+        {
+            get { return NotSortable; }
+            set { NotSortable = value; }
+        }
 
         /// <summary>
         /// Gets or sets whether the property is not navigable. default is false.
@@ -116,12 +134,20 @@ namespace System.Web.OData.Builder
         public bool NotCountable { get; set; }
 
         /// <summary>
+        /// Sets the property as not filterable.
+        /// </summary>
+        public PropertyConfiguration IsNotFilterable()
+        {
+            NotFilterable = true;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the property as nonfilterable.
         /// </summary>
         public PropertyConfiguration IsNonFilterable()
         {
-            NonFilterable = true;
-            return this;
+            return IsNotFilterable();
         }
 
         /// <summary>
@@ -129,7 +155,16 @@ namespace System.Web.OData.Builder
         /// </summary>
         public PropertyConfiguration IsFilterable()
         {
-            NonFilterable = false;
+            NotFilterable = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the property as not sortable.
+        /// </summary>
+        public PropertyConfiguration IsNotSortable()
+        {
+            NotSortable = true;
             return this;
         }
 
@@ -138,8 +173,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         public PropertyConfiguration IsUnsortable()
         {
-            Unsortable = true;
-            return this;
+            return IsNotSortable();
         }
 
         /// <summary>
@@ -147,7 +181,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         public PropertyConfiguration IsSortable()
         {
-            Unsortable = false;
+            NotSortable = false;
             return this;
         }
 
@@ -156,8 +190,8 @@ namespace System.Web.OData.Builder
         /// </summary>
         public PropertyConfiguration IsNotNavigable()
         {
-            IsUnsortable();
-            IsNonFilterable();
+            IsNotSortable();
+            IsNotFilterable();
             NotNavigable = true;
             return this;
         }

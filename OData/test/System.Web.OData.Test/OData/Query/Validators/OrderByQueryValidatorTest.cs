@@ -36,26 +36,32 @@ namespace System.Web.OData.Query.Validators
                 _validator.Validate(new OrderByQueryOption("Name eq 'abc'", _context), null));
         }
 
-        [Fact]
-        public void Validate_ThrowsUnsortableException_ForUnsortableProperty_OnEmptyAllowedPropertiesList()
+        [Theory]
+        [InlineData("NotSortableProperty")]
+        [InlineData("UnsortableProperty")]
+        public void Validate_ThrowsNotSortableException_ForNotSortableProperty_OnEmptyAllowedPropertiesList(string property)
         {
             // Arrange : empty allowed orderby list
             ODataValidationSettings settings = new ODataValidationSettings();
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(new OrderByQueryOption("UnsortableProperty asc", _context), settings),
-                "The property 'UnsortableProperty' cannot be used in the $orderby query option.");
+            Assert.Throws<ODataException>(() =>
+                _validator.Validate(
+                    new OrderByQueryOption(String.Format("{0} asc", property), _context), settings),
+                String.Format("The property '{0}' cannot be used in the $orderby query option.", property));
         }
 
-        [Fact]
-        public void Validate_DoesntThrowUnsortableException_ForUnsortableProperty_OnNonEmptyAllowedPropertiesList()
+        [Theory]
+        [InlineData("NotSortableProperty")]
+        [InlineData("UnsortableProperty")]
+        public void Validate_DoesntThrowNotSortableException_ForNotSortableProperty_OnNonEmptyAllowedPropertiesList(string property)
         {
             // Arrange : nonempty allowed orderby list
             ODataValidationSettings settings = new ODataValidationSettings();
-            settings.AllowedOrderByProperties.Add("UnsortableProperty");
+            settings.AllowedOrderByProperties.Add(property);
 
             // Act & Assert
-            _validator.Validate(new OrderByQueryOption("UnsortableProperty asc", _context), settings);
+            _validator.Validate(new OrderByQueryOption(String.Format("{0} asc", property), _context), settings);
         }
 
         [Fact]
@@ -79,16 +85,23 @@ namespace System.Web.OData.Query.Validators
             Assert.DoesNotThrow(() => _validator.Validate(new OrderByQueryOption("Name asc", _context), settings));
         }
 
-        [Fact]
-        public void Validate_ThrowsNotAllowedException_ForNotAllowedAndSortableLimitedProperty()
+        [Theory]
+        [InlineData("NotSortableProperty")]
+        [InlineData("UnsortableProperty")]
+        public void Validate_ThrowsNotAllowedException_ForNotAllowedAndSortableLimitedProperty(string property)
         {
             // Arrange
             ODataValidationSettings settings = new ODataValidationSettings();
             settings.AllowedOrderByProperties.Add("Name");
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(new OrderByQueryOption("UnsortableProperty asc", _context), settings),
-                "Order by 'UnsortableProperty' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on EnableQueryAttribute or QueryValidationSettings.");
+            Assert.Throws<ODataException>(
+                () => _validator.Validate(
+                    new OrderByQueryOption(String.Format("{0} asc", property), _context),
+                    settings),
+                String.Format(
+                    "Order by '{0}' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on EnableQueryAttribute or QueryValidationSettings.",
+                    property));
         }
 
         [Fact]
@@ -196,15 +209,24 @@ namespace System.Web.OData.Query.Validators
 
         [Theory]
         // Works with complex properties
-        [InlineData("ComplexProperty/Value", "LimitedEntity", "The property 'ComplexProperty' cannot be used in the $orderby query option.")]
+        [InlineData("ComplexProperty/Value", "LimitedEntity",
+            "The property 'ComplexProperty' cannot be used in the $orderby query option.")]
         // Works with simple properties
-        [InlineData("RelatedEntity/RelatedComplexProperty/UnsortableValue", "LimitedEntity", "The property 'UnsortableValue' cannot be used in the $orderby query option.")]
+        [InlineData("RelatedEntity/RelatedComplexProperty/NotSortableValue", "LimitedEntity",
+            "The property 'NotSortableValue' cannot be used in the $orderby query option.")]
+        [InlineData("RelatedEntity/RelatedComplexProperty/UnsortableValue", "LimitedEntity",
+            "The property 'UnsortableValue' cannot be used in the $orderby query option.")]
         // Works with navigation properties
-        [InlineData("RelatedEntity/BackReference/Id", "LimitedEntity", "The property 'BackReference' cannot be used in the $orderby query option.")]
+        [InlineData("RelatedEntity/BackReference/Id", "LimitedEntity",
+            "The property 'BackReference' cannot be used in the $orderby query option.")]
         // Works with inheritance
-        [InlineData("RelatedEntity/NS.LimitedSpecializedEntity/SpecializedComplexProperty/Value", "LimitedEntity", "The property 'SpecializedComplexProperty' cannot be used in the $orderby query option.")]
+        [InlineData("RelatedEntity/NS.LimitedSpecializedEntity/SpecializedComplexProperty/Value", "LimitedEntity",
+            "The property 'SpecializedComplexProperty' cannot be used in the $orderby query option.")]
         // Works with multiple clauses
-        [InlineData("Id, ComplexProperty/UnsortableValue", "LimitedEntity", "The property 'UnsortableValue' cannot be used in the $orderby query option.")]
+        [InlineData("Id, ComplexProperty/NotSortableValue", "LimitedEntity",
+            "The property 'NotSortableValue' cannot be used in the $orderby query option.")]
+        [InlineData("Id, ComplexProperty/UnsortableValue", "LimitedEntity",
+            "The property 'UnsortableValue' cannot be used in the $orderby query option.")]
         public void Validate_ThrowsIfTryingToValidateALimitedProperty(string query, string edmTypeName, string message)
         {
             // Arrange
@@ -244,7 +266,7 @@ namespace System.Web.OData.Query.Validators
             ODataQueryContext context = new ODataQueryContext(model, edmType);
             OrderByQueryOption option = new OrderByQueryOption("ComplexProperty/Value", context);
             ODataValidationSettings settings = new ODataValidationSettings();
-            settings.AllowedOrderByProperties.Add("UnsortableProperty");
+            settings.AllowedOrderByProperties.Add("NotSortableProperty");
 
             // Act & Assert
             OrderByQueryValidator validator = new OrderByQueryValidator();
@@ -284,7 +306,7 @@ namespace System.Web.OData.Query.Validators
             // Configure LimitedEntity
             EntitySetConfiguration<LimitedEntity> limitedEntities = builder.EntitySet<LimitedEntity>("LimitedEntities");
             limitedEntities.EntityType.HasKey(p => p.Id);
-            limitedEntities.EntityType.ComplexProperty(c => c.ComplexProperty).IsUnsortable();
+            limitedEntities.EntityType.ComplexProperty(c => c.ComplexProperty).IsNotSortable();
             limitedEntities.EntityType.HasOptional(l => l.RelatedEntity);
             limitedEntities.EntityType.CollectionProperty(cp => cp.Integers);
 
@@ -292,17 +314,18 @@ namespace System.Web.OData.Query.Validators
             EntitySetConfiguration<LimitedRelatedEntity> limitedRelatedEntities =
                 builder.EntitySet<LimitedRelatedEntity>("LimitedRelatedEntities");
             limitedRelatedEntities.EntityType.HasKey(p => p.Id);
-            limitedRelatedEntities.EntityType.HasOptional(p => p.BackReference).IsUnsortable();
-            limitedRelatedEntities.EntityType.ComplexProperty(p => p.RelatedComplexProperty).IsUnsortable();
+            limitedRelatedEntities.EntityType.HasOptional(p => p.BackReference).IsNotSortable();
+            limitedRelatedEntities.EntityType.ComplexProperty(p => p.RelatedComplexProperty).IsNotSortable();
 
             // Configure SpecializedEntity
             EntityTypeConfiguration<LimitedSpecializedEntity> specializedEntity =
                 builder.EntityType<LimitedSpecializedEntity>().DerivesFrom<LimitedRelatedEntity>();
             specializedEntity.Namespace = "NS";
-            specializedEntity.ComplexProperty(p => p.SpecializedComplexProperty).IsUnsortable();
+            specializedEntity.ComplexProperty(p => p.SpecializedComplexProperty).IsNotSortable();
 
             // Configure Complextype
             ComplexTypeConfiguration<LimitedComplexType> complexType = builder.ComplexType<LimitedComplexType>();
+            complexType.Property(p => p.NotSortableValue).IsNotSortable();
             complexType.Property(p => p.UnsortableValue).IsUnsortable();
             complexType.Property(p => p.Value);
 
@@ -320,6 +343,7 @@ namespace System.Web.OData.Query.Validators
         private class LimitedComplexType
         {
             public int Value { get; set; }
+            public int NotSortableValue { get; set; }
             public int UnsortableValue { get; set; }
         }
 

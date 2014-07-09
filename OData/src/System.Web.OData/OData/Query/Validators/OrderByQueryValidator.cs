@@ -103,7 +103,7 @@ namespace System.Web.OData.Query.Validators
                 _model = model;
             }
 
-            // Visits the expression to find the first node if any, that is unsortable and throws
+            // Visits the expression to find the first node if any, that is not sortable and throws
             // an exception only if no explicit properties have been defined in AllowedOrderByProperties
             // on the ODataValidationSettings instance associated with this OrderByValidator.
             public bool TryValidate(OrderByClause orderByClause, bool explicitPropertiesDefined)
@@ -111,7 +111,7 @@ namespace System.Web.OData.Query.Validators
                 SingleValueNode invalidNode = orderByClause.Expression.Accept(this);
                 if (invalidNode != null && !explicitPropertiesDefined)
                 {
-                    throw new ODataException(Error.Format(SRResources.UnsortablePropertyUsedInOrderBy,
+                    throw new ODataException(Error.Format(SRResources.NotSortablePropertyUsedInOrderBy,
                         GetPropertyName(invalidNode)));
                 }
                 return invalidNode == null;
@@ -119,7 +119,7 @@ namespace System.Web.OData.Query.Validators
 
             public override SingleValueNode Visit(SingleValuePropertyAccessNode nodeIn)
             {
-                if (EdmLibHelpers.IsUnsortable(nodeIn.Property, _model))
+                if (EdmLibHelpers.IsNotSortable(nodeIn.Property, _model))
                 {
                     return nodeIn;
                 }
@@ -132,7 +132,7 @@ namespace System.Web.OData.Query.Validators
 
             public override SingleValueNode Visit(SingleNavigationNode nodeIn)
             {
-                if (EdmLibHelpers.IsUnsortable(nodeIn.NavigationProperty, _model))
+                if (EdmLibHelpers.IsNotSortable(nodeIn.NavigationProperty, _model))
                 {
                     return nodeIn;
                 }

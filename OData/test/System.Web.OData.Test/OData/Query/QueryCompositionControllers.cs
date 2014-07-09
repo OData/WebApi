@@ -197,7 +197,13 @@ namespace System.Web.OData.Query
         public Color FavoriteColor { get; set; }
 
 
-        public QueryCompositionAddress NavigationWithNonFilterableProperty { get; set; }
+        public QueryCompositionAddress NavigationWithNotFilterableProperty { get; set; }
+        [NotFilterable]
+        public QueryCompositionCustomer NotFilterableNavigationProperty { get; set; }
+        [NotFilterable]
+        public string NotFilterableProperty { get; set; }
+        [NotSortable]
+        public string NotSortableProperty { get; set; }
         [NonFilterable]
         public QueryCompositionCustomer NonFilterableNavigationProperty { get; set; }
         [NonFilterable]
@@ -213,6 +219,8 @@ namespace System.Web.OData.Query
         public string State { get; set; }
         public string Zipcode { get; set; }
 
+        [NotFilterable]
+        public string NotFilterableProperty { get; set; }
         [NonFilterable]
         public string NonFilterableProperty { get; set; }
     }

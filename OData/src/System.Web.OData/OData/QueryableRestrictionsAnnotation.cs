@@ -5,8 +5,8 @@ using System.Web.Http;
 namespace System.Web.OData
 {
     /// <summary>
-    /// Represents an annotation to add the queryable restrictions on an EDM property, including nonfilterable, unsortable,
-    /// not navigable, not expandable, not countable.
+    /// Represents an annotation to add the queryable restrictions on an EDM property, including not filterable, 
+    /// not sortable, not navigable, not expandable, not countable.
     /// </summary>
     public class QueryableRestrictionsAnnotation
     {

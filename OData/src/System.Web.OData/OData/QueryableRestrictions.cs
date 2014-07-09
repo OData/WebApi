@@ -5,7 +5,7 @@ using System.Web.OData.Builder;
 namespace System.Web.OData
 {
     /// <summary>
-    /// Represents a queryable restriction on an EDM property, including nonfilterable, unsortable,
+    /// Represents a queryable restriction on an EDM property, including not filterable, not sortable,
     /// not navigable, not expandable, not countable.
     /// </summary>
     public class QueryableRestrictions
@@ -23,22 +23,40 @@ namespace System.Web.OData
         /// <param name="propertyConfiguration">The PropertyConfiguration containing queryable restrictions.</param>
         public QueryableRestrictions(PropertyConfiguration propertyConfiguration)
         {
-            NonFilterable = propertyConfiguration.NonFilterable;
-            Unsortable = propertyConfiguration.Unsortable;
+            NotFilterable = propertyConfiguration.NotFilterable;
+            NotSortable = propertyConfiguration.NotSortable;
             NotNavigable = propertyConfiguration.NotNavigable;
             NotExpandable = propertyConfiguration.NotExpandable;
             NotCountable = propertyConfiguration.NotCountable;
         }
 
         /// <summary>
+        /// Gets or sets whether the property is not filterable. default is false.
+        /// </summary>
+        public bool NotFilterable { get; set; }
+
+        /// <summary>
         /// Gets or sets whether the property is nonfilterable. default is false.
         /// </summary>
-        public bool NonFilterable { get; set; }
+        public bool NonFilterable
+        {
+            get { return NotFilterable; }
+            set { NotFilterable = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets whether the property is not sortable. default is false.
+        /// </summary>
+        public bool NotSortable { get; set; }
 
         /// <summary>
         /// Gets or sets whether the property is unsortable. default is false.
         /// </summary>
-        public bool Unsortable { get; set; }
+        public bool Unsortable
+        {
+            get { return NotSortable; }
+            set { NotSortable = value; }
+        }
 
         /// <summary>
         /// Gets or sets whether the property is not navigable. default is false.

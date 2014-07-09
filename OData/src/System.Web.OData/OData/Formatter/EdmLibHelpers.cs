@@ -263,16 +263,16 @@ namespace System.Web.OData.Formatter
             return matchingTypes.SingleOrDefault();
         }
 
-        public static bool IsNonFilterable(IEdmProperty edmProperty, IEdmModel edmModel)
+        public static bool IsNotFilterable(IEdmProperty edmProperty, IEdmModel edmModel)
         {
             QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
-            return annotation == null ? false : annotation.Restrictions.NonFilterable;
+            return annotation == null ? false : annotation.Restrictions.NotFilterable;
         }
 
-        public static bool IsUnsortable(IEdmProperty edmProperty, IEdmModel edmModel)
+        public static bool IsNotSortable(IEdmProperty edmProperty, IEdmModel edmModel)
         {
             QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
-            return annotation == null ? false : annotation.Restrictions.Unsortable;
+            return annotation == null ? false : annotation.Restrictions.NotSortable;
         }
 
         public static bool IsNotNavigable(IEdmProperty edmProperty, IEdmModel edmModel)
